@@ -193,6 +193,8 @@ export const next = (context: MigratorContext) => {
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states
+      context.stateStatus$?.next(state);
+      context.stateStatus$?.complete())
       return null;
     } else {
       // Otherwise return the delayed action
@@ -202,6 +204,7 @@ export const next = (context: MigratorContext) => {
       const nextAction = map[state.controlState] as (
         state: State
       ) => ReturnType<typeof map[AllActionStates]>;
+      context.stateStatus$?.next(state);
       return delay(nextAction(state));
     }
   };

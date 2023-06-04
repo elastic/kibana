@@ -295,7 +295,6 @@ export const next = (
         state: State
       ) => ReturnType<typeof map[AllActionStates]>;
       stateStatus$?.next(state);
-
       return delay(nextAction(state));
     }
   };

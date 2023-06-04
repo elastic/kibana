@@ -10,6 +10,9 @@ import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { BehaviorSubject } from 'rxjs';
+import type { State } from './state';
+
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
@@ -43,6 +46,8 @@ export interface RunZeroDowntimeMigrationOpts {
   elasticsearchClient: ElasticsearchClient;
   /** The node roles of the Kibana instance */
   nodeRoles: NodeRoles;
+  /** Subject that emits the current active step in the migrator state machine */
+  stateStatus$?: BehaviorSubject<State | null>;
 }
 
 export const runZeroDowntimeMigration = async (

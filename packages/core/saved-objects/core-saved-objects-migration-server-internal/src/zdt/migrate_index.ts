@@ -17,13 +17,14 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { BehaviorSubject } from 'rxjs';
 import { NodeRoles } from '@kbn/core-node-server';
 import { migrationStateActionMachine } from './migration_state_action_machine';
 import type { VersionedTransformer } from '../document_migrator';
 import { createContext } from './context';
 import { next } from './next';
 import { model } from './model';
-import { createInitialState } from './state';
+import { createInitialState, State } from './state';
 
 export interface MigrateIndexOptions {
   kibanaVersion: string;
@@ -45,6 +46,8 @@ export interface MigrateIndexOptions {
   elasticsearchClient: ElasticsearchClient;
   /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
+  /** Subject that emits the current active step in the migrator state machine */
+  stateStatus$?: BehaviorSubject<State | null>;
 }
 
 export const migrateIndex = async ({

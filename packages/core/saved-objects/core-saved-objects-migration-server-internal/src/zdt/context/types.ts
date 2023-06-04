@@ -18,6 +18,8 @@ import type {
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
 import { VersionedTransformer } from '../../document_migrator';
+import type { BehaviorSubject } from 'rxjs';
+import type { State } from '../state';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration
@@ -53,4 +55,6 @@ export interface MigratorContext {
   readonly discardCorruptObjects: boolean;
   /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
+  /** Subject that emits the current active step in the migrator state machine */
+  stateStatus$?: BehaviorSubject<State | null>;
 }

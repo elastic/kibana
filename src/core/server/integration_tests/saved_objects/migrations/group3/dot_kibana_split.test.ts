@@ -88,7 +88,6 @@ describe('split .kibana index into multiple system indices', () => {
         });
         await runMigrations();
       } catch (err) {
-        console.log('err::', err);
         firstRunFail = true;
       }
 
@@ -97,18 +96,15 @@ describe('split .kibana index into multiple system indices', () => {
       try {
         const { runMigrations } = await migratorTestKitFactory({});
         const results = await runMigrations();
-        console.log('DONE!!@#!@');
         expect(
           results
             .flat()
             .every((result) => result.status === 'migrated' || result.status === 'patched')
         ).toEqual(true);
       } catch (err) {
-        console.log('err BADDDDD::', err);
         secondRunFail = true;
       }
       expect(secondRunFail).toBe(false);
-      console.log('COMPLETE RUN!');
     });
 
     afterAll(async () => {
@@ -520,8 +516,3 @@ describe('split .kibana index into multiple system indices', () => {
     });
   });
 });
-
-// fail es at alias change (final step)
-// fail at the update target mappings (modifying operations, firs 2 ops)
-// fail at any step in the clone target mappings
-// update target mappings properties
