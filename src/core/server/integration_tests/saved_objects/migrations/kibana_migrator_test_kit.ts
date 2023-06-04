@@ -47,9 +47,9 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
+import { Client } from '@elastic/elasticsearch';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
-import { Client } from '@elastic/elasticsearch';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -126,7 +126,6 @@ export const getEsClient = async ({
   return await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
 };
 
-
 export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
@@ -139,7 +138,7 @@ export const getKibanaMigratorTestKit = async ({
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
   let hasComplete = false;
-  let reachedTargetFailureStep = false
+  let reachedTargetFailureStep = false;
   let controlState: string | undefined;
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
@@ -160,7 +159,7 @@ export const getKibanaMigratorTestKit = async ({
         if (reachedTargetFailureStep) {
           throw new Error('SIMULATING ERROR');
         }
-  
+
         console.log('prop::', prop);
         console.log('stateStatus::', controlState);
 
@@ -181,23 +180,23 @@ export const getKibanaMigratorTestKit = async ({
                 if (!hasRun || hasComplete) {
                   return Reflect.get(...arguments);
                 }
-    
+
                 if (prop === 'putMapping') {
                   console.log('putMapping called');
                   return Reflect.get(...arguments);
                 }
-    
+
                 return Reflect.get(...arguments);
-              }
-            })
+              },
+            });
           }
           default: {
             return Reflect.get(...arguments);
           }
-        }        
-      },  
-    })
-  }
+        }
+      },
+    });
+  };
 
   const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
   const client = proxyClient(rawClient);
@@ -217,7 +216,7 @@ export const getKibanaMigratorTestKit = async ({
     kibanaBranch,
     nodeRoles
   );
-  
+
   if (failAfterStep) {
     const stateStatus = migrator.getStateStatus$();
     stateStatus.subscribe((result) => {
@@ -226,7 +225,7 @@ export const getKibanaMigratorTestKit = async ({
         console.log(`>>>> reachedTargetFailureStep true at ${failAfterStep} <<<<`);
         reachedTargetFailureStep = true;
       }
-    })
+    });
   }
 
   const runMigrations = async () => {

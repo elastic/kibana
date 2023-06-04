@@ -83,7 +83,7 @@ export async function runResilientMigrator({
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
-  stateStatus$?: Rx.BehaviorSubject<State | null>,
+  stateStatus$?: Rx.BehaviorSubject<State | null>;
 }): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,

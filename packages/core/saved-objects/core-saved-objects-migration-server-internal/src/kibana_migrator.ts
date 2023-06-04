@@ -16,7 +16,6 @@ import Semver from 'semver';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { State } from './state';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   MAIN_SAVED_OBJECT_INDEX,
@@ -35,6 +34,7 @@ import {
   type MigrationResult,
   type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { State } from './state';
 import { getIndicesInvolvedInRelocation } from './kibana_migrator_utils';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';

@@ -76,7 +76,6 @@ export const nextActionMap = (
   readyToReindex: Defer<void>,
   doneReindexing: Defer<void>
 ) => {
-
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
@@ -242,7 +241,7 @@ export const nextActionMap = (
          */
         refresh: false,
       }),
-    MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) => 
+    MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
@@ -276,7 +275,7 @@ export const next = (
   transformRawDocs: TransformRawDocs,
   readyToReindex: Defer<void>,
   doneReindexing: Defer<void>,
-  stateStatus$?: Rx.BehaviorSubject<State | null>,
+  stateStatus$?: Rx.BehaviorSubject<State | null>
 ) => {
   const map = nextActionMap(client, transformRawDocs, readyToReindex, doneReindexing);
   return (state: State) => {
