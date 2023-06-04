@@ -283,6 +283,7 @@ export const next = (
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states
+      stateStatus$?.next(state);
       stateStatus$?.complete();
       return null;
     } else {

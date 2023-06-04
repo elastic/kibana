@@ -21,6 +21,7 @@ import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
 
 import './range_slider.scss';
+import { ControlError } from '../../control_group/component/control_error_component';
 
 const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
 
@@ -32,7 +33,9 @@ export const RangeSliderControl: FC = () => {
 
   const min = rangeSlider.select((state) => state.componentState.min);
   const max = rangeSlider.select((state) => state.componentState.max);
+  const error = rangeSlider.select((state) => state.componentState.error);
   const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
+
   const id = rangeSlider.select((state) => state.explicitInput.id);
   const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
   const isLoading = rangeSlider.select((state) => state.output.loading);
@@ -116,7 +119,9 @@ export const RangeSliderControl: FC = () => {
     </button>
   );
 
-  return (
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiInputPopover
       input={button}
       isOpen={isPopoverOpen}
