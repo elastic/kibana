@@ -7,6 +7,7 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
+import * as Rx from 'rxjs';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Defer } from './kibana_migrator_utils';
@@ -75,6 +76,7 @@ export const nextActionMap = (
   readyToReindex: Defer<void>,
   doneReindexing: Defer<void>
 ) => {
+
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
@@ -240,7 +242,7 @@ export const nextActionMap = (
          */
         refresh: false,
       }),
-    MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
+    MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) => 
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
@@ -273,7 +275,8 @@ export const next = (
   client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
   readyToReindex: Defer<void>,
-  doneReindexing: Defer<void>
+  doneReindexing: Defer<void>,
+  stateStatus$?: Rx.BehaviorSubject<State | null>,
 ) => {
   const map = nextActionMap(client, transformRawDocs, readyToReindex, doneReindexing);
   return (state: State) => {
@@ -281,6 +284,7 @@ export const next = (
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states
+      stateStatus$?.complete();
       return null;
     } else {
       // Otherwise return the delayed action
@@ -290,6 +294,8 @@ export const next = (
       const nextAction = map[state.controlState] as (
         state: State
       ) => ReturnType<typeof map[AllActionStates]>;
+      stateStatus$?.next(state);
+
       return delay(nextAction(state));
     }
   };

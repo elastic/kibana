@@ -18,6 +18,7 @@ import {
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
 
+
 /** @internal */
 export interface UpdateAndPickupMappingsResponse {
   taskId: string;

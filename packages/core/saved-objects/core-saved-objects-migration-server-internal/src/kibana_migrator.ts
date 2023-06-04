@@ -16,6 +16,7 @@ import Semver from 'semver';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { State } from './state';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   MAIN_SAVED_OBJECT_INDEX,
@@ -79,6 +80,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly defaultIndexTypesMap: IndexTypesMap;
   private readonly nodeRoles: NodeRoles;
   public readonly kibanaVersion: string;
+  public readonly stateStatus$: BehaviorSubject<State | null>;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -116,6 +118,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.activeMappings = buildActiveMappings(this.mappingProperties);
     this.docLinks = docLinks;
     this.defaultIndexTypesMap = defaultIndexTypesMap;
+    this.stateStatus$ = new BehaviorSubject<State | null>(null);
   }
 
   public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
@@ -143,6 +146,10 @@ export class KibanaMigrator implements IKibanaMigrator {
 
   public getStatus$() {
     return this.status$.asObservable();
+  }
+
+  public getStateStatus$() {
+    return this.stateStatus$.asObservable();
   }
 
   private async runMigrationsInternal(): Promise<MigrationResult[]> {
@@ -225,7 +232,6 @@ export class KibanaMigrator implements IKibanaMigrator {
           const doneReindexing = doneReindexingDefers[indexName];
           // check if this migrator's index is involved in some document redistribution
           const mustRelocateDocuments = !!readyToReindex;
-
           return runResilientMigrator({
             client: this.client,
             kibanaVersion: this.kibanaVersion,
@@ -255,6 +261,7 @@ export class KibanaMigrator implements IKibanaMigrator {
             migrationsConfig: this.soMigrationsConfig,
             typeRegistry: this.typeRegistry,
             docLinks: this.docLinks,
+            stateStatus$: this.stateStatus$,
           });
         },
       };

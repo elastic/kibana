@@ -54,6 +54,72 @@ describe('split .kibana index into multiple system indices', () => {
     await clearLog(logFilePath);
   });
 
+  describe('failure cases', () => {
+    it.only('successfully performs the migrations even if a migrator fails', async () => {
+      esServer = await startElasticsearch({
+        dataArchive: Path.join(__dirname, '..', 'archives', '7.7.2_xpack_100k_obj.zip'),
+      });
+  
+      const updatedTypeRegistry = overrideTypeRegistry(
+        typeRegistry,
+        (type: SavedObjectsType<any>) => {
+          return {
+            ...type,
+            indexPattern: RELOCATE_TYPES[type.name] ?? MAIN_SAVED_OBJECT_INDEX,
+          };
+        }
+      );
+  
+      const migratorTestKitFactory = ({ failAfterStep }: { failAfterStep?: string }) =>
+        getKibanaMigratorTestKit({
+          types: updatedTypeRegistry.getAllTypes(),
+          kibanaIndex: '.kibana',
+          logFilePath,
+          failAfterStep,
+        });
+  
+        
+      let firstRunFail = false;
+      let secondRunFail = false;
+
+      try {
+        const { runMigrations } = await migratorTestKitFactory({
+          failAfterStep: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+        });
+        await runMigrations();
+      } catch(err) {
+        console.log('err::', err);
+        firstRunFail = true;
+      }
+
+      expect(firstRunFail).toBe(true);
+
+      try {
+        const { runMigrations } = await migratorTestKitFactory({});
+        const results = await runMigrations();
+        console.log('DONE!!@#!@');
+        expect(
+          results
+            .flat()
+            .every((result) => result.status === 'migrated' || result.status === 'patched')
+        ).toEqual(true);
+
+      } catch(err) {
+        console.log('err BADDDDD::', err);
+        secondRunFail = true;
+      }
+      expect(secondRunFail).toBe(false);
+      console.log('COMPLETE RUN!');
+  
+    });
+
+    afterAll(async () => {
+      await esServer?.stop();
+      await delay(2);
+    });
+  })
+
+
   describe('when migrating from a legacy version', () => {
     let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
 
@@ -455,3 +521,9 @@ describe('split .kibana index into multiple system indices', () => {
     });
   });
 });
+
+
+// fail es at alias change (final step)
+// fail at the update target mappings (modifying operations, firs 2 ops)
+// fail at any step in the clone target mappings
+  // update target mappings properties

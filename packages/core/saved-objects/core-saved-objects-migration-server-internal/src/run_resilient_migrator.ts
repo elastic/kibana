@@ -8,6 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import * as Rx from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
@@ -63,6 +64,7 @@ export async function runResilientMigrator({
   migrationsConfig,
   typeRegistry,
   docLinks,
+  stateStatus$,
 }: {
   client: ElasticsearchClient;
   kibanaVersion: string;
@@ -81,6 +83,7 @@ export async function runResilientMigrator({
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
+  stateStatus$?: Rx.BehaviorSubject<State | null>,
 }): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
@@ -101,7 +104,7 @@ export async function runResilientMigrator({
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing),
+    next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing, stateStatus$),
     model,
     abort: async (state?: State) => {
       // At this point, we could reject this migrator's defers and unblock other migrators

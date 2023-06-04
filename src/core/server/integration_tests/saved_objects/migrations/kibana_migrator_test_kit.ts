@@ -49,6 +49,7 @@ import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
+import { Client } from '@elastic/elasticsearch';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -74,6 +75,8 @@ export interface KibanaMigratorTestKitParams {
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   logFilePath?: string;
+  esClientProxy?: (client: Client) => Client;
+  failAfterStep?: string;
 }
 
 export interface KibanaMigratorTestKit {
@@ -123,6 +126,7 @@ export const getEsClient = async ({
   return await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
 };
 
+
 export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
@@ -131,8 +135,12 @@ export const getKibanaMigratorTestKit = async ({
   types = [],
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
+  failAfterStep,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
+  let hasComplete = false;
+  let reachedTargetFailureStep = false
+  let controlState: string | undefined;
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -142,7 +150,57 @@ export const getKibanaMigratorTestKit = async ({
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
   loggingSystem.upgrade(loggingConf);
 
-  const client = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  console.log('creating ES client with failAfterStep: ', failAfterStep);
+  const proxyClient = (rawClient: Client): Client => {
+    return new Proxy(rawClient, {
+      get(target, prop, receiver) {
+        if (!failAfterStep || !hasRun || hasComplete) {
+          return Reflect.get(...arguments);
+        }
+        if (reachedTargetFailureStep) {
+          throw new Error('SIMULATING ERROR');
+        }
+  
+        console.log('prop::', prop);
+        console.log('stateStatus::', controlState);
+
+        switch (prop) {
+          case 'child': {
+            return new Proxy(Reflect.get(...arguments), {
+              apply(target, thisArg, argumentsList) {
+                const childClient = rawClient.child(argumentsList[0]);
+                console.log('reflected proxy child');
+                return proxyClient(childClient);
+              },
+            });
+          }
+          case 'indices': {
+            return new Proxy(Reflect.get(...arguments), {
+              get(target, prop, receiver) {
+                console.log('INSIDE CHILD!', hasComplete, prop);
+                if (!hasRun || hasComplete) {
+                  return Reflect.get(...arguments);
+                }
+    
+                if (prop === 'putMapping') {
+                  console.log('putMapping called');
+                  return Reflect.get(...arguments);
+                }
+    
+                return Reflect.get(...arguments);
+              }
+            })
+          }
+          default: {
+            return Reflect.get(...arguments);
+          }
+        }        
+      },  
+    })
+  }
+
+  const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  const client = proxyClient(rawClient);
 
   const typeRegistry = new SavedObjectTypeRegistry();
 
@@ -159,6 +217,17 @@ export const getKibanaMigratorTestKit = async ({
     kibanaBranch,
     nodeRoles
   );
+  
+  if (failAfterStep) {
+    const stateStatus = migrator.getStateStatus$();
+    stateStatus.subscribe((result) => {
+      controlState = result?.controlState;
+      if (controlState === failAfterStep) {
+        console.log(`>>>> reachedTargetFailureStep true at ${failAfterStep} <<<<`);
+        reachedTargetFailureStep = true;
+      }
+    })
+  }
 
   const runMigrations = async () => {
     if (hasRun) {
@@ -169,6 +238,7 @@ export const getKibanaMigratorTestKit = async ({
     try {
       return await migrator.runMigrations();
     } finally {
+      hasComplete = true;
       await loggingSystem.stop();
     }
   };
