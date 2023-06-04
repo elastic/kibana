@@ -30,7 +30,7 @@ export const cli = () => {
             configFile: path.resolve(argv.configFile) as string,
             parallel: true,
             record: true,
-            ciBuildId: process.env.BUILDKITE_BUILD_ID ?? `hello-currents19`,
+            ciBuildId: process.env.BUILDKITE_STEP_ID ?? `hello-currents19`,
           })
         )
       ).then((results) => {
