@@ -90,6 +90,9 @@ describe('fetchConnectors lib', () => {
       mockClient.asCurrentUser.search.mockImplementationOnce(() =>
         Promise.resolve({ hits: { hits: [{ _id: 'connectorId', _source: { source: 'source' } }] } })
       );
+      mockClient.asCurrentUser.get.mockImplementationOnce(() =>
+        Promise.resolve({ _id: 'connectorId', _source: { source: 'source' } })
+      );
       await expect(fetchConnectorByIndexName(mockClient as any, 'id')).resolves.toEqual({
         id: 'connectorId',
         source: 'source',
