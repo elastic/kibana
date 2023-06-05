@@ -13,12 +13,12 @@ export { DefaultNavigation } from './default_navigation';
 export { getPresets } from './nav_tree_presets';
 
 export type {
-  NavigationTreeDefinition,
-  ProjectNavigationDefinition,
-  NodeDefinition,
-  NavigationGroupPreset,
-  GroupDefinition,
-  RecentlyAccessedDefinition,
   CloudLinkDefinition,
+  GroupDefinition,
+  NavigationGroupPreset,
+  NavigationTreeDefinition,
+  NodeDefinition,
+  ProjectNavigationDefinition,
+  RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
 } from './types';

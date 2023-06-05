@@ -17,10 +17,8 @@ import React from 'react';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
-    {
-      type: 'cloudLink',
-      preset: 'projects',
-    },
+    { type: 'cloudLink', preset: 'projects' },
+    { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'observability_project_nav',

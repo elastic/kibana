@@ -20,10 +20,8 @@ const devTools = getPresets('devtools');
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
-    {
-      type: 'cloudLink',
-      preset: 'projects',
-    },
+    { type: 'cloudLink', preset: 'projects' },
+    { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'search_project_nav',
