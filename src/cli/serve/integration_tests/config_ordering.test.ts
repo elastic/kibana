@@ -155,6 +155,7 @@ describe('Server configuration ordering', () => {
     TestFiles.createEmptyConfigFiles([
       'serverless.yml',
       'serverless.security.yml',
+      'serverless.recent.yml',
       'kibana.yml',
       'kibana.dev.yml',
       'serverless.dev.yml',
