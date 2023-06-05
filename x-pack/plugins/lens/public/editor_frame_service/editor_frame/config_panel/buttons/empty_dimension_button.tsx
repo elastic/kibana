@@ -54,7 +54,6 @@ const defaultButtonLabels = {
 };
 
 const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
-  const { buttonAriaLabel, buttonLabel } = group.labels || {};
   return (
     <EuiButtonEmpty
       className="lnsLayerPanel__triggerText"
@@ -64,13 +63,13 @@ const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
       contentProps={{
         className: 'lnsLayerPanel__triggerTextContent',
       }}
-      aria-label={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
+      aria-label={defaultButtonLabels.ariaLabel(group.groupLabel)}
       data-test-subj="lns-empty-dimension"
       onClick={() => {
         onClick(columnId);
       }}
     >
-      {buttonLabel || defaultButtonLabels.label}
+      {defaultButtonLabels.label}
     </EuiButtonEmpty>
   );
 };
