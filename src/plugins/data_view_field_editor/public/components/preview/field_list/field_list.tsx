@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useMemo, useCallback } from 'react';
-import VirtualList from 'react-virtualized/dist/commonjs/List';
-import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
+import React, { useState, useMemo, useCallback, CSSProperties } from 'react';
+import { FixedSizeList as VirtualList, areEqual } from 'react-window';
+import memoize from 'memoize-one';
 import { i18n } from '@kbn/i18n';
 import { get, isEqual } from 'lodash';
 import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
@@ -19,6 +19,7 @@ import { PreviewListItem } from './field_list_item';
 import { useStateSelector } from '../../../state_utils';
 
 import './field_list.scss';
+import type { PreviewController } from '../preview_controller';
 
 const ITEM_HEIGHT = 40;
 const SHOW_MORE_HEIGHT = 40;
@@ -50,6 +51,29 @@ function fuzzyMatch(searchValue: string, text: string) {
 
 const pinnedFieldsSelector = (s: PreviewState) => s.pinnedFields;
 const currentDocumentSelector = (s: PreviewState) => s.documents[s.currentIdx];
+
+interface RowProps {
+  index: number;
+  style: CSSProperties;
+  data: { filteredFields: DocumentField[]; toggleIsPinned: PreviewController['togglePinnedField'] };
+}
+
+const Row = React.memo<RowProps>(({ data, index, style }) => {
+  // Data passed to List as "itemData" is available as props.data
+  const { filteredFields, toggleIsPinned } = data;
+  const field = filteredFields[index];
+
+  return (
+    <div key={field.key} style={style} data-test-subj="indexPatternFieldList">
+      <PreviewListItem key={field.key} field={field} toggleIsPinned={toggleIsPinned} />
+    </div>
+  );
+}, areEqual);
+
+const createItemData = memoize((filteredFields, toggleIsPinned) => ({
+  filteredFields,
+  toggleIsPinned,
+}));
 
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
   const { dataView } = useFieldEditorContext();
@@ -180,22 +204,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       </div>
     );
 
-  const rowRenderer = useCallback(
-    ({ index, style }) => {
-      const field = filteredFields[index];
-
-      return (
-        <div key={field.key} style={style} data-test-subj="indexPatternFieldList">
-          <PreviewListItem
-            key={field.key}
-            field={field}
-            toggleIsPinned={controller.togglePinnedField}
-          />
-        </div>
-      );
-    },
-    [controller.togglePinnedField, filteredFields]
-  );
+  const itemData = createItemData(filteredFields, controller.togglePinnedField);
 
   if (currentDocument === undefined || height === -1) {
     return null;
@@ -206,20 +215,17 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       {isEmptySearchResultVisible ? (
         renderEmptyResult()
       ) : (
-        <AutoSizer disableHeight>
-          {({ width }) => (
-            <VirtualList
-              className="eui-scrollBar"
-              style={{ overflowX: 'hidden' }}
-              width={width}
-              height={listHeight}
-              rowCount={filteredFields.length}
-              rowHeight={ITEM_HEIGHT}
-              overscanRowCount={4}
-              rowRenderer={rowRenderer}
-            />
-          )}
-        </AutoSizer>
+        <VirtualList
+          className="eui-scrollBar"
+          style={{ overflowX: 'hidden' }}
+          width={'100%'}
+          height={listHeight}
+          itemData={itemData}
+          itemCount={filteredFields.length}
+          itemSize={ITEM_HEIGHT}
+        >
+          {Row}
+        </VirtualList>
       )}
 
       {renderToggleFieldsButton()}
