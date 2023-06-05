@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect, useRef, MouseEvent, useCallback, useMemo } from 'react';
 import { useStyles } from './styles';
-import {
+import type {
   ProcessEventAlertCategory,
   DefaultAlertFilterType,
   ProcessEvent,
   ProcessEventAlert,
   AlertTypeCount,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { ProcessTreeAlert } from '../process_tree_alert';
 import { DEFAULT_ALERT_FILTER_VALUE, MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 import { ProcessTreeAlertsFilter } from '../process_tree_alerts_filter';
@@ -83,11 +83,7 @@ export function ProcessTreeAlerts({
   );
 
   const handleProcessEventAlertCategorySelected = useCallback((eventCategory) => {
-    if (ProcessEventAlertCategory.hasOwnProperty(eventCategory)) {
-      setSelectedProcessEventAlertCategory(eventCategory);
-    } else {
-      setSelectedProcessEventAlertCategory(ProcessEventAlertCategory.all);
-    }
+    setSelectedProcessEventAlertCategory(eventCategory);
   }, []);
 
   const filteredProcessEventAlerts = useMemo(() => {

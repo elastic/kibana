@@ -22,7 +22,7 @@ import {
   TIMESTAMP_PROPERTY,
   PROCESS_EVENT_FIELDS,
 } from '../../common/constants';
-import { ProcessEvent } from '../../common/types/process_tree';
+import { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
 

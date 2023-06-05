@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';

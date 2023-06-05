@@ -9,8 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { Aggregate } from '../../common/types/aggregate';
-import { EventAction, EventKind } from '../../common/types/process_tree';
+import type { Aggregate } from '../../common';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -152,8 +151,8 @@ export const searchProcessWithIOEvents = async (
     return buckets.map((bucket) => ({
       _source: {
         event: {
-          kind: EventKind.event,
-          action: EventAction.text_output,
+          kind: 'event',
+          action: 'text_output',
           id: bucket.key,
         },
         process: {

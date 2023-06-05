@@ -20,7 +20,7 @@ import {
   ProcessEvent,
   ProcessEventResults,
   ProcessEventsPage,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,

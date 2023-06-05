@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
-import {
+import type {
   ProcessEventAlertCategory,
   DefaultAlertFilterType,
   AlertTypeCount,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { useStyles } from './styles';
 import { FILTER_MENU_OPTIONS, SELECTED_PROCESS } from './translations';
 
@@ -42,7 +42,7 @@ export const ProcessTreeAlertsFilter = ({
   const { filterStatus, popover } = useStyles();
 
   const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] =
-    useState<ProcessEventAlertCategory>(ProcessEventAlertCategory.all);
+    useState<ProcessEventAlertCategory>('all');
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -114,7 +114,7 @@ export const ProcessTreeAlertsFilter = ({
         icon={getIconType(DEFAULT_ALERT_FILTER_VALUE)}
         onClick={onSelectedProcessEventAlertCategory}
       >
-        {FILTER_MENU_OPTIONS[ProcessEventAlertCategory.all]}
+        {FILTER_MENU_OPTIONS.all}
       </EuiContextMenuItem>,
       ...alertEventFilterMenuItems,
     ];

@@ -21,12 +21,8 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import byteSize from 'byte-size';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import {
-  AlertStatusEventEntityIdMap,
-  Process,
-  ProcessEvent,
-} from '../../../common/types/process_tree';
-import { DisplayOptionsState } from '../../../common/types/session_view';
+import { AlertStatusEventEntityIdMap, Process, ProcessEvent } from '../../../common';
+import { DisplayOptionsState } from '../session_view_display_options';
 import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
