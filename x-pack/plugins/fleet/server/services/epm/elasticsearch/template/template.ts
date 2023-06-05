@@ -6,7 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -101,10 +104,6 @@ export function getTemplate({
   return template;
 }
 
-interface GenerateMappingsOptions {
-  isIndexModeTimeSeries?: boolean;
-}
-
 /**
  * Generate mapping takes the given nested fields array and creates the Elasticsearch
  * mapping properties out of it.
@@ -113,44 +112,37 @@ interface GenerateMappingsOptions {
  *
  * @param fields
  */
-export function generateMappings(
-  fields: Field[],
-  options?: GenerateMappingsOptions
-): IndexTemplateMappings {
+export function generateMappings(fields: Field[]): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
 
-  const { properties } = _generateMappings(
-    fields,
-    {
-      addDynamicMapping: (dynamicMapping: {
-        path: string;
-        matchingType: string;
-        pathMatch: string;
-        properties: string;
-      }) => {
-        const name = dynamicMapping.path;
-        if (dynamicTemplateNames.has(name)) {
-          return;
-        }
+  const { properties } = _generateMappings(fields, {
+    addDynamicMapping: (dynamicMapping: {
+      path: string;
+      matchingType: string;
+      pathMatch: string;
+      properties: string;
+    }) => {
+      const name = dynamicMapping.path;
+      if (dynamicTemplateNames.has(name)) {
+        return;
+      }
 
-        const dynamicTemplate: Properties = {
-          mapping: dynamicMapping.properties,
-        };
+      const dynamicTemplate: Properties = {
+        mapping: dynamicMapping.properties,
+      };
 
-        if (dynamicMapping.matchingType) {
-          dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
-        }
+      if (dynamicMapping.matchingType) {
+        dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
+      }
 
-        if (dynamicMapping.pathMatch) {
-          dynamicTemplate.path_match = dynamicMapping.pathMatch;
-        }
-        dynamicTemplateNames.add(name);
-        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
-      },
+      if (dynamicMapping.pathMatch) {
+        dynamicTemplate.path_match = dynamicMapping.pathMatch;
+      }
+      dynamicTemplateNames.add(name);
+      dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
     },
-    options
-  );
+  });
 
   return dynamicTemplates.length
     ? {
@@ -173,8 +165,7 @@ function _generateMappings(
   ctx: {
     addDynamicMapping: any;
     groupFieldName?: string;
-  },
-  options?: GenerateMappingsOptions
+  }
 ): {
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
@@ -234,16 +225,12 @@ function _generateMappings(
 
         switch (type) {
           case 'group':
-            const mappings = _generateMappings(
-              field.fields!,
-              {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              },
-              options
-            );
+            const mappings = _generateMappings(field.fields!, {
+              ...ctx,
+              groupFieldName: ctx.groupFieldName
+                ? `${ctx.groupFieldName}.${field.name}`
+                : field.name,
+            });
             if (!mappings.hasNonDynamicTemplateMappings) {
               return;
             }
@@ -255,16 +242,12 @@ function _generateMappings(
             break;
           case 'group-nested':
             fieldProps = {
-              properties: _generateMappings(
-                field.fields!,
-                {
-                  ...ctx,
-                  groupFieldName: ctx.groupFieldName
-                    ? `${ctx.groupFieldName}.${field.name}`
-                    : field.name,
-                },
-                options
-              ).properties,
+              properties: _generateMappings(field.fields!, {
+                ...ctx,
+                groupFieldName: ctx.groupFieldName
+                  ? `${ctx.groupFieldName}.${field.name}`
+                  : field.name,
+              }).properties,
               ...generateNestedProps(field),
               type: 'nested',
             };
@@ -352,10 +335,10 @@ function _generateMappings(
           }
         }
 
-        if (options?.isIndexModeTimeSeries && 'metric_type' in field) {
+        if ('metric_type' in field) {
           fieldProps.time_series_metric = field.metric_type;
         }
-        if (options?.isIndexModeTimeSeries && field.dimension) {
+        if (field.dimension) {
           fieldProps.time_series_dimension = field.dimension;
         }
 
@@ -617,6 +600,7 @@ const getDataStreams = async (
 
   const body = await esClient.indices.getDataStream({
     name: indexTemplate.index_patterns.join(','),
+    expand_wildcards: ['open', 'hidden'],
   });
 
   const dataStreams = body.data_streams;
@@ -662,7 +646,20 @@ const updateExistingDataStream = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) => {
+  const existingDs = await esClient.indices.get({
+    index: dataStreamName,
+  });
+
+  const existingDsConfig = Object.values(existingDs);
+  const currentBackingIndexConfig = existingDsConfig.at(-1);
+
+  const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
+  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
+  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
+
   let settings: IndicesIndexSettings;
+  let mappings: MappingTypeMapping;
+
   try {
     const simulateResult = await retryTransientEsErrors(() =>
       esClient.indices.simulateTemplate({
@@ -671,7 +668,8 @@ const updateExistingDataStream = async ({
     );
 
     settings = simulateResult.template.settings;
-    const mappings = simulateResult.template.mappings;
+    mappings = simulateResult.template.mappings;
+
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
     // to skip updating and assume the value in the index mapping is correct
@@ -679,6 +677,8 @@ const updateExistingDataStream = async ({
       delete mappings.properties.stream;
       delete mappings.properties.data_stream;
     }
+
+    logger.debug(`Updating mappings for ${dataStreamName}`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -688,16 +688,38 @@ const updateExistingDataStream = async ({
         }),
       { logger }
     );
-    // if update fails, rollover data stream
+
+    // if update fails, rollover data stream and bail out
   } catch (err) {
+    logger.error(`Mappings update for ${dataStreamName} failed`);
+    logger.error(err);
+
     await rolloverDataStream(dataStreamName, esClient);
     return;
   }
+
+  // Trigger a rollover if the index mode or source type has changed
+  if (
+    currentIndexMode !== settings?.index?.mode ||
+    // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
+    currentSourceType !== mappings?._source?.mode
+  ) {
+    logger.info(
+      `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+    );
+    await rolloverDataStream(dataStreamName, esClient);
+  }
+
   // update settings after mappings was successful to ensure
   // pointing to the new pipeline is safe
   // for now, only update the pipeline
-  if (!settings?.index?.default_pipeline) return;
+  if (!settings?.index?.default_pipeline) {
+    return;
+  }
+
   try {
+    logger.debug(`Updating settings for ${dataStreamName}`);
+
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({

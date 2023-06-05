@@ -18,6 +18,7 @@ export default function updateSpaceTestSuite({ getService }: FtrProviderContext)
     updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   // FLAKY: https://github.com/elastic/kibana/issues/156151
+  // FLAKY: https://github.com/elastic/kibana/issues/156130
   describe.skip('update', () => {
     [
       {

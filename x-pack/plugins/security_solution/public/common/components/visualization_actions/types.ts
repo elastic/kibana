@@ -7,6 +7,7 @@
 
 import type {
   DatatableVisualizationState,
+  FieldBasedIndexPatternColumn,
   FormBasedPersistedState,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
@@ -180,4 +181,9 @@ export interface LensDataTableEmbeddable {
   attributes: LensDataTableAttributes<'lnsDatatable', DatatableVisualizationState>;
   id: string;
   timeRange: { from: string; to: string; fromStr: string; toStr: string };
+}
+
+export interface LensEmbeddableDataTableColumn extends FieldBasedIndexPatternColumn {
+  operationType: string;
+  params?: unknown;
 }

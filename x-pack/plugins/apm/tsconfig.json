@@ -85,6 +85,7 @@
     "@kbn/chart-icons",
     "@kbn/observability-shared-plugin",
     "@kbn/shared-ux-prompt-not-found",
+    "@kbn/ui-actions-plugin",
   ],
   "exclude": [
     "target/**/*",

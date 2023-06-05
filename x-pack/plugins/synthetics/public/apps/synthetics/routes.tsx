@@ -106,7 +106,7 @@ const getRoutes = (
                 <EuiLink
                   data-test-subj="syntheticsGetRoutesDocumentationLink"
                   target="_blank"
-                  href="#"
+                  href="https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html"
                 >
                   <FormattedMessage
                     id="xpack.synthetics.addMonitor.pageHeader.docsLink"

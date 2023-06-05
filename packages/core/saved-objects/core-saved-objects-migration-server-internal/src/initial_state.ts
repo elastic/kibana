@@ -89,10 +89,8 @@ export const createInitialState = ({
     dynamic: false,
     properties: {
       type: { type: 'keyword' },
-      migrationVersion: {
-        // @ts-expect-error we don't allow plugins to set `dynamic`
-        dynamic: 'true',
-        type: 'object',
+      typeMigrationVersion: {
+        type: 'version',
       },
     },
   };
@@ -144,6 +142,7 @@ export const createInitialState = ({
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
     tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
+    tempIndexAlias: getTempIndexName(indexPrefix, kibanaVersion) + '_alias',
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings,
@@ -153,7 +152,9 @@ export const createInitialState = ({
     retryDelay: 0,
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
+    maxBatchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
+    maxReadBatchSizeBytes: migrationsConfig.maxReadBatchSizeBytes.getValueInBytes(),
     discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
     discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],

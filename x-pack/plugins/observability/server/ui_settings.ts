@@ -28,6 +28,7 @@ import {
   enableCriticalPath,
   enableInfrastructureHostsView,
   profilingElasticsearchPlugin,
+  syntheticsThrottlingEnabled,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -354,4 +355,32 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
+  [syntheticsThrottlingEnabled]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
+      defaultMessage: 'Enable Synthetics throttling (Experimental)',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.syntheticsThrottlingEnabledExperimentDescription',
+      {
+        defaultMessage:
+          'Enable the throttling setting in Synthetics monitor configurations. Note that throttling may still not be available for your monitors even if the setting is active. Intended for internal use only. {link}',
+        values: {
+          link: throttlingDocsLink({
+            href: 'https://github.com/elastic/synthetics/blob/main/docs/throttling.md',
+          }),
+        },
+      }
+    ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
 };
+
+function throttlingDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.throttlingDocsLinkText',
+    { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}

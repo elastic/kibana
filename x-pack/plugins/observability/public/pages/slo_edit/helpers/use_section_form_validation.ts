@@ -57,7 +57,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.transactionName',
           ] as const
         ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
-        (['indicator.params.index', 'indicator.params.goodStatusCodes'] as const).every(
+        (['indicator.params.index'] as const).every(
           (field) => !getFieldState(field, formState).invalid
         );
       break;

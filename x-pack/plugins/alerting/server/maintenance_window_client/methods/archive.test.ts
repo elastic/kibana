@@ -85,7 +85,8 @@ describe('MaintenanceWindowClient - archive', () => {
           { gte: '2023-03-05T00:00:00.000Z', lte: '2023-03-05T01:00:00.000Z' },
         ],
         expirationDate: new Date().toISOString(),
-        ...updatedMetadata,
+        updatedAt: updatedMetadata.updatedAt,
+        updatedBy: updatedMetadata.updatedBy,
       },
       { version: '123' }
     );
@@ -132,7 +133,8 @@ describe('MaintenanceWindowClient - archive', () => {
           { gte: '2023-03-05T00:00:00.000Z', lte: '2023-03-05T01:00:00.000Z' },
         ],
         expirationDate: moment.utc().add(1, 'year').toISOString(),
-        ...updatedMetadata,
+        updatedAt: updatedMetadata.updatedAt,
+        updatedBy: updatedMetadata.updatedBy,
       },
       { version: '123' }
     );
@@ -182,7 +184,8 @@ describe('MaintenanceWindowClient - archive', () => {
         ...mockMaintenanceWindow,
         events: modifiedEvents.slice(0, 4),
         expirationDate: new Date().toISOString(),
-        ...updatedMetadata,
+        updatedAt: updatedMetadata.updatedAt,
+        updatedBy: updatedMetadata.updatedBy,
       },
       { version: '123' }
     );

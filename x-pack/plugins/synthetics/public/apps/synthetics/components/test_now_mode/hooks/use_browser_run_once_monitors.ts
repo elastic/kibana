@@ -63,6 +63,8 @@ export const useBrowserEsResults = ({
   );
 };
 
+const MAX_RETRIES = 25;
+
 export const useBrowserRunOnceMonitors = ({
   testRunId,
   skipDetails = false,
@@ -72,7 +74,9 @@ export const useBrowserRunOnceMonitors = ({
   skipDetails?: boolean;
   expectSummaryDocs: number;
 }) => {
-  const { refreshTimer, lastRefresh } = useTickTick(5 * 1000);
+  const { refreshTimer, lastRefresh, clearTicks } = useTickTick(5 * 1000);
+
+  const [numberOfRetries, setNumberOfRetries] = useState(0);
 
   const [checkGroupResults, setCheckGroupResults] = useState<CheckGroupResult[]>(() => {
     return new Array(expectSummaryDocs)
@@ -139,6 +143,14 @@ export const useBrowserRunOnceMonitors = ({
       }
 
       replaceCheckGroupResults(checkGroups);
+    } else {
+      setNumberOfRetries((prevState) => {
+        const attempts = prevState + 1;
+        if (attempts > MAX_RETRIES) {
+          clearTicks();
+        }
+        return attempts;
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expectSummaryDocs, data, refreshTimer]);
@@ -230,6 +242,7 @@ export const useBrowserRunOnceMonitors = ({
 
   return {
     data,
+    retriesExceeded: numberOfRetries > MAX_RETRIES,
     summariesLoading,
     stepLoadingInProgress,
     expectedSummariesLoaded:

@@ -17,6 +17,7 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
+import { OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
 
 /** @internal */
 export type Aliases = Partial<Record<string, string>>;
@@ -90,6 +91,22 @@ export function versionMigrationCompleted(
 export function indexBelongsToLaterVersion(kibanaVersion: string, indexName?: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
+}
+
+export function hasLaterVersionAlias(
+  kibanaVersion: string,
+  aliases?: Partial<Record<string, string>>
+): string | undefined {
+  const mostRecentAlias = Object.keys(aliases ?? {})
+    .filter(aliasVersion)
+    .sort()
+    .pop();
+
+  const mostRecentAliasVersion = valid(aliasVersion(mostRecentAlias));
+
+  return mostRecentAliasVersion != null && gt(mostRecentAliasVersion, kibanaVersion)
+    ? mostRecentAlias
+    : undefined;
 }
 
 /**
@@ -169,6 +186,14 @@ export function indexVersion(indexName?: string): string | undefined {
   return (indexName?.match(/.+_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
 
+/**
+ * Extracts the version number from a >= 7.11 index alias
+ * @param indexName A >= v7.11 index alias
+ */
+export function aliasVersion(alias?: string): string | undefined {
+  return (alias?.match(/.+_(\d+\.\d+\.\d+)/) || [])[1];
+}
+
 /** @internal */
 export interface MultipleIndicesPerAlias {
   type: 'multiple_indices_per_alias';
@@ -227,7 +252,9 @@ export const createBulkIndexOperationTuple = (
     {
       index: {
         _id: doc._id,
-        ...(typeIndexMap[doc._source.type] && { _index: typeIndexMap[doc._source.type] }),
+        ...(typeIndexMap[doc._source.type] && {
+          _index: typeIndexMap[doc._source.type],
+        }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
         ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
@@ -285,3 +312,11 @@ export function getMigrationType({
  */
 export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
   `${indexPrefix}_${kibanaVersion}_reindex_temp`;
+
+/** Increase batchSize by 20% until a maximum of maxBatchSize */
+export const increaseBatchSize = (
+  stateP: OutdatedDocumentsSearchRead | ReindexSourceToTempRead
+) => {
+  const increasedBatchSize = Math.floor(stateP.batchSize * 1.2);
+  return increasedBatchSize > stateP.maxBatchSize ? stateP.maxBatchSize : increasedBatchSize;
+};

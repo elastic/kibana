@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badRequest, forbidden, failedDependency } from '@hapi/boom';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -48,7 +48,8 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
 };
 
 const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {
-  return (await context.licensing).license.hasAtLeast('platinum');
+  const licensing = await context.licensing;
+  return licensing.license.hasAtLeast('platinum');
 };
 
 const createSLORoute = createObservabilityServerRoute({
@@ -58,7 +59,9 @@ const createSLORoute = createObservabilityServerRoute({
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
@@ -83,7 +86,9 @@ const updateSLORoute = createObservabilityServerRoute({
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
@@ -113,7 +118,9 @@ const deleteSLORoute = createObservabilityServerRoute({
     logger,
     dependencies: { getRulesClientWithRequest },
   }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
@@ -137,7 +144,9 @@ const getSLORoute = createObservabilityServerRoute({
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
@@ -160,7 +169,9 @@ const enableSLORoute = createObservabilityServerRoute({
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
@@ -184,7 +195,9 @@ const disableSLORoute = createObservabilityServerRoute({
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
@@ -208,7 +221,9 @@ const findSLORoute = createObservabilityServerRoute({
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
@@ -231,9 +246,12 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params }) => {
-    if (!isLicenseAtLeastPlatinum(context)) {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
+
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
@@ -257,7 +275,15 @@ const getDiagnosisRoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const licensing = await context.licensing;
 
-    return getGlobalDiagnosis(esClient, licensing);
+    try {
+      const response = await getGlobalDiagnosis(esClient, licensing);
+      return response;
+    } catch (error) {
+      if (error.cause.statusCode === 403) {
+        throw forbidden('Insufficient Elasticsearch cluster permissions to access feature.');
+      }
+      throw failedDependency(error);
+    }
   },
 });
 

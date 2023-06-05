@@ -20,6 +20,7 @@ export const ENGINE_TAB_PATH = `${ENGINE_PATH}/:tabId`;
 export const SEARCH_APPLICATION_CONNECT_PATH = `${ENGINE_PATH}/${EngineViewTabs.CONNECT}/:connectTabId`;
 export enum SearchApplicationConnectTabs {
   API = 'api',
+  DOCUMENTATION = 'documentation',
 }
 export const SEARCH_APPLICATION_CONTENT_PATH = `${ENGINE_PATH}/${EngineViewTabs.CONTENT}/:contentTabId`;
 export enum SearchApplicationContentTabs {

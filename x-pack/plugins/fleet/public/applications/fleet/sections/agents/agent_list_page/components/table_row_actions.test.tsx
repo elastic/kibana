@@ -79,7 +79,7 @@ describe('TableRowActions', () => {
         diagnosticFileUploadEnabled: false,
       } as any);
       const res = renderAndGetDiagnosticsButton({
-        agent: {} as Agent,
+        agent: { active: true } as Agent,
         agentPolicy: {} as AgentPolicy,
       });
       expect(res).toBe(null);
@@ -88,6 +88,7 @@ describe('TableRowActions', () => {
     it('should render an active action button if agent version >= 8.7', async () => {
       const res = renderAndGetDiagnosticsButton({
         agent: {
+          active: true,
           status: 'online',
           local_metadata: { elastic: { agent: { version: '8.8.0' } } },
         } as any,
@@ -101,6 +102,7 @@ describe('TableRowActions', () => {
     it('should render an active action button if agent version >= 8.7 and policy is_managed', async () => {
       const res = renderAndGetDiagnosticsButton({
         agent: {
+          active: true,
           status: 'online',
           local_metadata: { elastic: { agent: { version: '8.8.0' } } },
         } as any,
@@ -116,6 +118,7 @@ describe('TableRowActions', () => {
     it('should render a disabled action button if agent version < 8.7', async () => {
       const res = renderAndGetDiagnosticsButton({
         agent: {
+          active: true,
           status: 'online',
           local_metadata: { elastic: { agent: { version: '8.6.0' } } },
         } as any,
