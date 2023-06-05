@@ -153,7 +153,6 @@ export const EditorMenu: FC<Props> = ({
         <EuiContextMenu
           initialPanelId={0}
           panels={editorMenuPanels}
-          className={`canvasSolutionToolbar__editorContextMenu`}
           data-test-subj="canvasEditorContextMenu"
         />
       )}
