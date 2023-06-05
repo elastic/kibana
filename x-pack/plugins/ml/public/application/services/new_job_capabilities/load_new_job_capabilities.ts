@@ -20,7 +20,7 @@ export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 export function loadNewJobCapabilities(
   dataViewId: string,
   savedSearchId: string,
-  dataViewContract: DataViewsContract,
+  dataViewsContract: DataViewsContract,
   savedSearchService: SavedSearchPublicPluginStart,
   jobType: JobType
 ) {
@@ -31,7 +31,7 @@ export function loadNewJobCapabilities(
 
       if (dataViewId !== undefined) {
         // index pattern is being used
-        const dataView: DataView = await dataViewContract.get(dataViewId);
+        const dataView: DataView = await dataViewsContract.get(dataViewId);
         await serviceToUse.initializeFromDataVIew(dataView);
         resolve(serviceToUse.newJobCaps);
       } else if (savedSearchId !== undefined) {
@@ -39,7 +39,7 @@ export function loadNewJobCapabilities(
         // load the data view from the saved search
         const { dataView } = await getDataViewAndSavedSearch({
           savedSearchService,
-          dataViews: dataViewContract,
+          dataViewsContract,
           savedSearchId,
         });
 

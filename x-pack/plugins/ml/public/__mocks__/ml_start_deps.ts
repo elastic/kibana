@@ -35,23 +35,3 @@ export const createMlPageDepsMock = () => ({
   setBreadcrumbs: jest.fn(),
   redirectToMlAccessDeniedPage: jest.fn(),
 });
-
-// const pageDeps = {
-//   savedSearchService: deps.savedSearch,
-//   history: appMountParams.history,
-//   setHeaderActionMenu: appMountParams.setHeaderActionMenu,
-//   dataViewsContract: deps.data.dataViews,
-//   config: coreStart.uiSettings!,
-//   setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
-//   redirectToMlAccessDeniedPage,
-// };
-
-// const deps: PageDependencies =  {
-//   savedSearchService: SavedSearchPublicPluginStart;
-//   config: IUiSettingsClient;
-//   history: AppMountParameters['history'];
-//   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-//   dataViewsContract: DataViewsContract;
-//   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-//   redirectToMlAccessDeniedPage: jest.fn();
-// }

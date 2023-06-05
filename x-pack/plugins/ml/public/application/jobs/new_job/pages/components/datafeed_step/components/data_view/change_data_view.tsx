@@ -70,14 +70,14 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const [validating, setValidating] = useState(false);
   const [step, setStep] = useState(STEP.PICK_DATA_VIEW);
 
-  const [currentDataViewTitle, setCurrentDataViewTitle] = useState<string>('');
+  const [selectedDataViewTitle, setselectedDataViewTitle] = useState<string>('');
   const [newDataViewTitle, setNewDataViewTitle] = useState<string>('');
   const [validationResponse, setValidationResponse] = useState<DatafeedValidationResponse | null>(
     null
   );
 
   useEffect(function initialPageLoad() {
-    setCurrentDataViewTitle(jobCreator.indexPatternTitle);
+    setselectedDataViewTitle(jobCreator.indexPatternTitle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -185,7 +185,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.title"
                 defaultMessage="Changing {dv1} for {dv2}"
-                values={{ dv1: currentDataViewTitle, dv2: newDataViewTitle }}
+                values={{ dv1: selectedDataViewTitle, dv2: newDataViewTitle }}
               />
 
               <EuiSpacer size="s" />

@@ -49,7 +49,7 @@ export function getDefaultQuery() {
 
 export function createSearchItems(
   kibanaConfig: IUiSettingsClient,
-  indexPattern: DataViewBase | undefined,
+  dataView: DataViewBase | undefined,
   savedSearch: SavedSearch | null
 ) {
   // query is only used by the data visualizer as it needs
@@ -64,7 +64,7 @@ export function createSearchItems(
   }
 
   const data = getQueryFromSavedSearchObject(savedSearch);
-  return createQueries(data, indexPattern, kibanaConfig);
+  return createQueries(data, dataView, kibanaConfig);
 }
 
 export function createQueries(

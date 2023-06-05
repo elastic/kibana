@@ -53,7 +53,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
 }) => {
   const timefilter = useTimefilter();
   const { from, to } = getTimeFilterRange(timefilter);
-  const { currentDataView: dataView } = useMlContext();
+  const { selectedDataView: dataView } = useMlContext();
 
   const jobPrefixValidator = useMemo(
     () =>

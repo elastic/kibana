@@ -8,18 +8,15 @@
 import React from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;
-  currentDataView: DataView; // TODO this should be DataView or null
-  // @deprecated currentSavedSearch is of SavedSearchSavedObject type, change to selectedSavedSearch
-  deprecatedSavedSearchObj: SavedSearchSavedObject | null;
+  selectedDataView: DataView; // // TODO this should be DataView or null
   selectedSavedSearch: SavedSearch | null;
   dataViewsContract: DataViewsContract;
-  kibanaConfig: any; // IUiSettingsClient;
-  kibanaVersion: string;
+  kibanaConfig: IUiSettingsClient;
 }
 
 export type SavedSearchQuery = object;
@@ -29,6 +26,5 @@ export type SavedSearchQuery = object;
 // to be used. This guarantees that we have both properly set up
 // TypeScript support and runtime checks for these dependencies.
 // Multiple custom hooks can be created to access subsets of
-// the overall context value if necessary too,
-// see useCurrentIndexPattern() for example.
+// the overall context value if necessary too.
 export const MlContext = React.createContext<Partial<MlContextValue & MlServicesContext>>({});

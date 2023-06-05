@@ -34,7 +34,7 @@ export function useSavedSearch() {
   const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<SavedSearchQueryStr>(undefined);
 
   const mlContext = useMlContext();
-  const { currentDataView, kibanaConfig, selectedSavedSearch } = mlContext;
+  const { selectedDataView, kibanaConfig, selectedSavedSearch } = mlContext;
 
   const getQueryData = () => {
     let qry: any = {};
@@ -49,8 +49,8 @@ export function useSavedSearch() {
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
         const ast = fromKueryExpression(qryString);
-        qry = toElasticsearchQuery(ast, currentDataView);
-        const filterQuery = buildQueryFromFilters(filter, currentDataView);
+        qry = toElasticsearchQuery(ast, selectedDataView);
+        const filterQuery = buildQueryFromFilters(filter, selectedDataView);
         if (qry.bool === undefined) {
           qry.bool = {};
           // toElasticsearchQuery may add a single match_all item to the
@@ -74,7 +74,7 @@ export function useSavedSearch() {
         qry.bool.filter = [...qry.bool.filter, ...filterQuery.filter];
         qry.bool.must_not = [...qry.bool.must_not, ...filterQuery.must_not];
       } else {
-        qry = buildEsQuery(currentDataView, [query], filter);
+        qry = buildEsQuery(selectedDataView, [query], filter);
         decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
       }
 
