@@ -15,7 +15,17 @@ export const assetTypeRT = rt.union([
 
 export type AssetType = rt.TypeOf<typeof assetTypeRT>;
 
-export type AssetKind = 'cluster' | 'host' | 'pod' | 'container' | 'service';
+export const assetKindRT = rt.union([
+  rt.literal('cluster'),
+  rt.literal('host'),
+  rt.literal('pod'),
+  rt.literal('container'),
+  rt.literal('service'),
+  rt.literal('alert'),
+]);
+
+export type AssetKind = rt.TypeOf<typeof assetKindRT>;
+
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
