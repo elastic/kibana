@@ -16,6 +16,7 @@ export type {
   NavigationGroupPreset,
   NavigationTreeDefinition,
   NodeDefinition,
+  NodeDefinitionWithChildren,
   ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
@@ -23,8 +24,8 @@ export type {
 
 export type {
   ChromeNavigation,
-  ChromeNavigationViewModel,
-  NavigationServices,
   ChromeNavigationNode,
   ChromeNavigationNodeViewModel,
+  ChromeNavigationViewModel,
+  NavigationServices,
 } from './types';
