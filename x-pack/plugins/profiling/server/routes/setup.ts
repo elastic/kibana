@@ -105,6 +105,7 @@ export function registerSetupRoute({
       validate: {},
     },
     async (context, request, response) => {
+      console.log('#### dep', dependencies.config);
       try {
         const esClient = await getClient(context);
         logger.info('Applying initial setup of Elasticsearch resources');

@@ -11,6 +11,11 @@ import { ProfilingPlugin } from './plugin';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  config: schema.maybe(
+    schema.object({
+      tls: schema.string(),
+    })
+  ),
   elasticsearch: schema.maybe(
     schema.object({
       hosts: schema.string(),
