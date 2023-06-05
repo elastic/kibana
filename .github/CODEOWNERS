@@ -931,8 +931,9 @@ x-pack/test/observability_functional @elastic/actionable-observability
 # Core
 /config/kibana.yml @elastic/kibana-core
 /typings/ @elastic/kibana-core
-/x-pack/test/saved_objects_field_count/ @elastic/kibana-core
+/src/cli/serve/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
+/x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
