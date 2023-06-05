@@ -13,3 +13,10 @@ export const REMOVED_VISUALIZATION = i18n.translate(
     defaultMessage: 'removed visualization',
   }
 );
+
+export const OPEN_IN_VISUALIZATION = i18n.translate(
+  'xpack.cases.caseView.visualizations.openVisualizationButtonLabel',
+  {
+    defaultMessage: 'Open visualization',
+  }
+);

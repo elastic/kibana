@@ -20,12 +20,12 @@ export enum AttachmentActionType {
 
 interface BaseAttachmentAction {
   type: AttachmentActionType;
-  label: string;
   isPrimary?: boolean;
   disabled?: boolean;
 }
 
 interface ButtonAttachmentAction extends BaseAttachmentAction {
+  label: string;
   type: AttachmentActionType.BUTTON;
   onClick: () => void;
   iconType: string;
@@ -48,6 +48,7 @@ export interface AttachmentViewObject<Props = {}> {
 }
 
 export interface CommonAttachmentViewProps {
+  attachmentId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
 }
 

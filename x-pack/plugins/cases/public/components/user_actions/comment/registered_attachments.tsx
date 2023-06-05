@@ -19,6 +19,7 @@ import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } fr
 import type {
   AttachmentType,
   AttachmentViewObject,
+  CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
@@ -56,7 +57,10 @@ type BuilderArgs<C, R> = Pick<
 const getAttachmentRenderer = memoize((cachingKey: string) => {
   let AttachmentElement: React.ReactElement;
 
-  const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
+  const renderCallback = (
+    attachmentViewObject: AttachmentViewObject<CommonAttachmentViewProps>,
+    props: CommonAttachmentViewProps
+  ) => {
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
@@ -73,8 +77,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
 
 export const createRegisteredAttachmentUserActionBuilder = <
   C extends Comment,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  R extends AttachmentTypeRegistry<AttachmentType<any>>
+  R extends AttachmentTypeRegistry<AttachmentType<CommonAttachmentViewProps>>
 >({
   userAction,
   userProfiles,
@@ -118,6 +121,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
+      attachmentId: userAction.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 

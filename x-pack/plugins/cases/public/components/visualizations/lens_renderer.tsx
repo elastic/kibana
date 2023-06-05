@@ -9,8 +9,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
+import type { LensProps } from './types';
 
 const LENS_VISUALIZATION_HEIGHT = 200;
 
@@ -25,12 +25,7 @@ const LensChartTooltipFix = createGlobalStyle`
   }
 `;
 
-interface LensMarkDownRendererProps {
-  attributes: TypedLensByValueInput['attributes'] | null;
-  timeRange?: TypedLensByValueInput['timeRange'];
-}
-
-const LensRendererComponent: React.FC<LensMarkDownRendererProps> = ({ attributes, timeRange }) => {
+const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange }) => {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
