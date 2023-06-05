@@ -17,15 +17,8 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { ApplicationStart } from '@kbn/core/public';
-import type {
-  GlobalSearchFindParams,
-  GlobalSearchPluginStart,
-  GlobalSearchResult,
-} from '@kbn/global-search-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
@@ -34,27 +27,31 @@ import { Subscription } from 'rxjs';
 import { blurEvent, CLICK_METRIC, COUNT_METRIC, getClickMetric, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
+import { i18nStrings } from '../strings';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
+import { SearchBarProps } from './types';
 
-interface SearchBarProps {
-  globalSearch: GlobalSearchPluginStart;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  taggingApi?: SavedObjectTaggingPluginStart;
-  basePathUrl: string;
-  darkMode: boolean;
-}
+const NoMatchesMessage = (props: { basePathUrl: string; darkMode: boolean }) => (
+  <PopoverPlaceholder darkMode={props.darkMode} basePath={props.basePathUrl} />
+);
+
+const EmptyMessage = () => (
+  <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const SearchBar: FC<SearchBarProps> = ({
   globalSearch,
   taggingApi,
   navigateToUrl,
   trackUiMetric,
-  basePathUrl,
-  darkMode,
+  ...props
 }) => {
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
@@ -241,34 +238,8 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   const clearField = () => setSearchValue('');
 
-  const noMatchesMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
-  const emptyMessage = (
-    <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Find apps, content, and more.',
-  });
-  const keyboardShortcutTooltip = `${i18n.translate(
-    'xpack.globalSearchBar.searchBar.shortcutTooltip.description',
-    {
-      defaultMessage: 'Keyboard shortcut',
-    }
-  )}: ${
-    isMac
-      ? i18n.translate('xpack.globalSearchBar.searchBar.shortcutTooltip.macCommandDescription', {
-          defaultMessage: 'Command + /',
-        })
-      : i18n.translate(
-          'xpack.globalSearchBar.searchBar.shortcutTooltip.windowsCommandDescription',
-          {
-            defaultMessage: 'Control + /',
-          }
-        )
+  const keyboardShortcutTooltip = `${i18nStrings.keyboardShortcutTooltip.prefix}: ${
+    isMac ? i18nStrings.keyboardShortcutTooltip.onMac : i18nStrings.keyboardShortcutTooltip.onNotMac
   }`;
 
   useEvent('keydown', onKeyDown);
@@ -288,8 +259,8 @@ export const SearchBar: FC<SearchBarProps> = ({
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
-        'aria-label': placeholderText,
-        placeholder: placeholderText,
+        'aria-label': i18nStrings.placeholderText,
+        placeholder: i18nStrings.placeholderText,
         onFocus: () => {
           trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_FOCUS);
           setInitialLoad(true);
@@ -308,8 +279,8 @@ export const SearchBar: FC<SearchBarProps> = ({
           </EuiFormLabel>
         ) : undefined,
       }}
-      emptyMessage={emptyMessage}
-      noMatchesMessage={noMatchesMessage}
+      emptyMessage={<EmptyMessage />}
+      noMatchesMessage={<NoMatchesMessage {...props} />}
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
@@ -318,12 +289,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         panelStyle: { marginTop: '6px' },
       }}
       popoverButton={
-        <EuiHeaderSectionItemButton
-          aria-label={i18n.translate(
-            'xpack.globalSearchBar.searchBar.mobileSearchButtonAriaLabel',
-            { defaultMessage: 'Site-wide search' }
-          )}
-        >
+        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
           <EuiIcon type="search" size="m" />
         </EuiHeaderSectionItemButton>
       }

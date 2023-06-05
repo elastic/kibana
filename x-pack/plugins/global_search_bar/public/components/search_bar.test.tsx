@@ -47,6 +47,8 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 describe('SearchBar', () => {
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let trackUiMetric: TrackUiMetricFn;
+
   const basePathUrl = '/plugins/globalSearchBar/assets/';
   const darkMode = false;
 
@@ -100,7 +102,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
-          trackUiMetric={jest.fn()}
+          trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
     );
@@ -128,7 +130,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
-          trackUiMetric={jest.fn()}
+          trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
     );
@@ -160,7 +162,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
-          trackUiMetric={jest.fn()}
+          trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
     );
