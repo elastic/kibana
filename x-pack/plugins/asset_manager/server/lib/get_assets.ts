@@ -46,7 +46,7 @@ export async function getAssets({
 
     if (filters.kind) {
       must.push({
-        term: {
+        terms: {
           ['asset.kind']: Array.isArray(filters.kind) ? filters.kind : [filters.kind],
         },
       });

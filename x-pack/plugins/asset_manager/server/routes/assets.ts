@@ -104,12 +104,17 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
 
       const esClient = await getEsClientFromContext(context);
 
+      console.log('IN ASSETS ENDPOINT', JSON.stringify({ filters, size }));
+
       try {
         const results = await getAssets({ esClient, size, filters });
         return res.ok({ body: { results } });
       } catch (error: unknown) {
         debug('error looking up asset records', error);
-        return res.customError({ statusCode: 500 });
+        return res.customError({
+          statusCode: 500,
+          body: { message: 'Error while looking up asset records - ' + `${error}` },
+        });
       }
     }
   );

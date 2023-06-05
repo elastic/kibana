@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
           '[request query]: Failed to validate: \n  in /0/bTo: undefined does not match expected type Date\n  in /0/bTo: undefined does not match expected type datemath'
         );
 
-        await supertest
+        return await supertest
           .get(DIFF_ENDPOINT)
           .query({ aFrom: timestamp, aTo: timestamp, bFrom: timestamp, bTo: timestamp })
           .expect(200);
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           `Time range cannot move backwards in time. "bTo" (${oneHourAgo}) is before "bFrom" (${isoNow}).`
         );
 
-        await supertest
+        return await supertest
           .get(DIFF_ENDPOINT)
           .query({
             aFrom: oneHourAgo,

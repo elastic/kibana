@@ -34,7 +34,11 @@ export async function createSampleAssets(
 }
 
 export async function deleteSampleAssets(supertest: KibanaSupertest) {
-  return await supertest.delete(SAMPLE_ASSETS_ENDPOINT).set('kbn-xsrf', 'xxx').expect(200);
+  const result = await supertest.delete(SAMPLE_ASSETS_ENDPOINT).set('kbn-xsrf', 'xxx');
+  // console.log('DELETE RESULT STATUS', result.status);
+  // console.log('DELETE RESULT BODY', JSON.stringify(result.body));
+  expect(result.status).to.be(200);
+  return result;
 }
 
 export async function viewSampleAssetDocs(supertest: KibanaSupertest) {
