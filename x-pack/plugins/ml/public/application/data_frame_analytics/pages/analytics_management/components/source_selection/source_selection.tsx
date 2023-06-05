@@ -27,7 +27,13 @@ const fixedPageSize: number = 20;
 
 export const SourceSelection: FC = () => {
   const {
-    services: { http, uiSettings, savedObjectsManagement },
+    services: {
+      http,
+      uiSettings,
+      savedObjectsManagement,
+      data: { dataViews: dataViewsContract },
+      savedSearch: savedSearchService,
+    },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
@@ -51,7 +57,11 @@ export const SourceSelection: FC = () => {
       dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
       try {
-        const dataViewAndSavedSearch = await getDataViewAndSavedSearch(id);
+        const dataViewAndSavedSearch = await getDataViewAndSavedSearch({
+          savedSearchService,
+          dataViewsContract,
+          savedSearchId: id,
+        });
         dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';
       } catch (error) {
         // an unexpected error has occurred. This could be caused by a saved search for which the data view no longer exists.

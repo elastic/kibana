@@ -30,7 +30,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     }
   );
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+  const { context } = useResolver(deps, undefined, undefined, {
     redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
   });
   return (

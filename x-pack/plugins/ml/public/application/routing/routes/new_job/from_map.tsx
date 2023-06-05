@@ -36,7 +36,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+  const { context } = useResolver(deps, undefined, undefined, {
     redirect: () =>
       resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
   });

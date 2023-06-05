@@ -9,7 +9,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { useKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { useKibana, type KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -26,6 +26,7 @@ import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -49,6 +50,7 @@ interface StartPlugins {
   appName: string;
   lens: LensPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

@@ -35,7 +35,7 @@ export const selectorRouteFactory = (
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+  const { context } = useResolver(deps, undefined, undefined, {
     checkBasicLicense,
     checkFindFileStructurePrivilege: () =>
       checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),

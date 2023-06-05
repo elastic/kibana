@@ -6,6 +6,7 @@
  */
 
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { getDataViewAndSavedSearch } from '../../util/index_utils';
 import { JobType } from '../../../../common/types/saved_objects';
 import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
@@ -20,6 +21,7 @@ export function loadNewJobCapabilities(
   dataViewId: string,
   savedSearchId: string,
   dataViewContract: DataViewsContract,
+  savedSearchService: SavedSearchPublicPluginStart,
   jobType: JobType
 ) {
   return new Promise(async (resolve, reject) => {
@@ -35,7 +37,11 @@ export function loadNewJobCapabilities(
       } else if (savedSearchId !== undefined) {
         // saved search is being used
         // load the data view from the saved search
-        const { dataView } = await getDataViewAndSavedSearch(savedSearchId);
+        const { dataView } = await getDataViewAndSavedSearch({
+          savedSearchService,
+          dataViews: dataViewContract,
+          savedSearchId,
+        });
 
         if (dataView === null) {
           // eslint-disable-next-line no-console

@@ -6,7 +6,8 @@
  */
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { cacheDataViewsContract, loadSavedSearches } from '../util/index_utils';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import { cacheDataViewsContract } from '../util/index_utils';
 import { checkFullLicense } from '../license';
 import { checkGetJobsCapabilitiesResolver } from '../capabilities/check_capabilities';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
@@ -20,6 +21,7 @@ export interface ResolverResults {
 }
 
 interface BasicResolverDependencies {
+  savedSearchService: SavedSearchPublicPluginStart;
   dataViewsContract: DataViewsContract;
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
@@ -27,11 +29,12 @@ interface BasicResolverDependencies {
 export const basicResolvers = ({
   dataViewsContract,
   redirectToMlAccessDeniedPage,
+  savedSearchService,
 }: BasicResolverDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
   cacheDataViewsContract: () => cacheDataViewsContract(dataViewsContract),
   checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-  loadSavedSearches,
+  loadSavedSearches: () => savedSearchService.getAll(),
 });

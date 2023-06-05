@@ -85,7 +85,7 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
   }
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+  const { context } = useResolver(deps, undefined, undefined, {
     checkFullLicense,
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     getMlNodeCount,

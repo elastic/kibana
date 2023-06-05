@@ -6,10 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { getSavedSearch } from '../util/dependency_cache';
+import { PageDependencies } from './router';
 import {
   getDataViewById,
   getDataViewAndSavedSearch,
@@ -31,10 +29,9 @@ import { ML_PAGES } from '../../../common/constants/locator';
  * @return { context, results } returns the ML context and resolver results
  */
 export const useResolver = (
+  { config, savedSearchService, dataViewsContract }: PageDependencies,
   dataViewId: string | undefined,
   savedSearchId: string | undefined,
-  config: IUiSettingsClient,
-  dataViewsContract: DataViewsContract,
   resolvers: Resolvers
 ): { context: MlContextValue; results: ResolverResults } => {
   const notifications = useNotifications();
@@ -77,11 +74,14 @@ export const useResolver = (
           savedSearch: null,
           dataView: null,
         };
-        let savedSearch = null;
+        const savedSearch = null;
 
         if (savedSearchId !== undefined) {
-          savedSearch = await getSavedSearch().get(savedSearchId);
-          dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
+          dataViewAndSavedSearch = await getDataViewAndSavedSearch({
+            savedSearchService,
+            dataViewsContract,
+            savedSearchId,
+          });
         } else if (dataViewId !== undefined) {
           dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }

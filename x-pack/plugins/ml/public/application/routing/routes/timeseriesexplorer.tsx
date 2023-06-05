@@ -75,10 +75,10 @@ export const timeSeriesExplorerRouteFactory = (
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context, results } = useResolver(
+    deps,
     undefined,
     undefined,
-    deps.config,
-    deps.dataViewsContract,
+
     {
       ...basicResolvers(deps),
       jobs: mlJobService.loadJobsWrapper,

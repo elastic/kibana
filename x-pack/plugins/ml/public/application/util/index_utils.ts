@@ -9,20 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { Query, Filter } from '@kbn/es-query';
-import { getToastNotifications, getSavedSearch } from './dependency_cache';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import { getToastNotifications } from './dependency_cache';
 
 let dataViewsContract: DataViewsContract | null = null;
 
 export async function cacheDataViewsContract(dvc: DataViewsContract) {
   dataViewsContract = dvc;
-}
-
-export function loadSavedSearches() {
-  return getSavedSearch().getAll();
-}
-
-export async function loadSavedSearchById(id: string) {
-  return getSavedSearch().get(id);
 }
 
 export async function getDataViewNames() {
@@ -61,7 +54,15 @@ export interface DataViewAndSavedSearch {
   dataView: DataView | null;
 }
 
-export async function getDataViewAndSavedSearch(savedSearchId: string) {
+export async function getDataViewAndSavedSearch({
+  savedSearchService,
+  dataViewsContract: dataViews,
+  savedSearchId,
+}: {
+  savedSearchService: SavedSearchPublicPluginStart;
+  dataViewsContract: DataViewsContract;
+  savedSearchId: string;
+}) {
   const resp: DataViewAndSavedSearch = {
     savedSearch: null,
     dataView: null,
@@ -71,12 +72,12 @@ export async function getDataViewAndSavedSearch(savedSearchId: string) {
     return resp;
   }
 
-  const ss = await loadSavedSearchById(savedSearchId);
+  const ss = await savedSearchService.get(savedSearchId);
   if (ss === null) {
     return resp;
   }
   const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
-  resp.dataView = await getDataViewById(dataViewId!);
+  resp.dataView = await dataViews.get(dataViewId!);
   resp.savedSearch = ss;
   return resp;
 }
@@ -86,10 +87,6 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
     query: savedSearch.searchSource.getField('query')! as Query,
     filter: savedSearch.searchSource.getField('filter') as Filter[],
   };
-}
-
-export function getSavedSearchById(id: string): Promise<SavedSearch> {
-  return getSavedSearch().get(id);
 }
 
 /**

@@ -37,10 +37,10 @@ export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(
+    deps,
     index,
     savedSearchId,
-    deps.config,
-    deps.dataViewsContract,
+
     basicResolvers(deps)
   );
   return (

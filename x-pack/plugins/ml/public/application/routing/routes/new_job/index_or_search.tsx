@@ -202,10 +202,10 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   };
 
   const { context } = useResolver(
+    deps,
     undefined,
     undefined,
-    deps.config,
-    deps.dataViewsContract,
+
     mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
   );
   return (

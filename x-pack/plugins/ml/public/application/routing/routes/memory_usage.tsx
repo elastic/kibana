@@ -37,10 +37,10 @@ export const nodesListRouteFactory = (
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { context } = useResolver(
+    deps,
     undefined,
     undefined,
-    deps.config,
-    deps.dataViewsContract,
+
     basicResolvers(deps)
   );
 

@@ -14,6 +14,8 @@ import { useNotifications } from '../contexts/kibana';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { useResolver } from './use_resolver';
+import { PageDependencies } from './router';
+import { createMlPageDepsMock } from '../../__mocks__/ml_start_deps';
 
 jest.mock('../contexts/kibana/use_create_url', () => {
   return {
@@ -36,6 +38,9 @@ const addError = jest.fn();
 const redirectToJobsManagementPage = jest.fn(() => Promise.resolve());
 (useCreateAndNavigateToMlLink as jest.Mock).mockImplementation(() => redirectToJobsManagementPage);
 
+// @todo: create new mock
+const deps: PageDependencies = createMlPageDepsMock() as PageDependencies;
+
 describe('useResolver', () => {
   afterEach(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -47,7 +52,7 @@ describe('useResolver', () => {
 
   it('should accept undefined as dataViewId and savedSearchId.', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+      useResolver(deps, undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
     );
 
     await act(async () => {
@@ -79,7 +84,7 @@ describe('useResolver', () => {
 
   it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
     const { result } = renderHook(() =>
-      useResolver('', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+      useResolver(deps, '', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
     );
 
     await act(async () => {});

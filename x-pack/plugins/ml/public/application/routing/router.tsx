@@ -19,6 +19,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlContext, MlContextValue } from '../contexts/ml';
 
@@ -59,6 +60,7 @@ export interface PageProps {
 }
 
 export interface PageDependencies {
+  savedSearchService: SavedSearchPublicPluginStart;
   config: IUiSettingsClient;
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];

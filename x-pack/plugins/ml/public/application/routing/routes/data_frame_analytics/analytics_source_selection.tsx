@@ -40,10 +40,10 @@ export const analyticsSourceSelectionRouteFactory = (
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(
+    deps,
     undefined,
     undefined,
-    deps.config,
-    deps.dataViewsContract,
+
     basicResolvers(deps)
   );
 

@@ -50,7 +50,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
+  const { context } = useResolver(deps, index, savedSearchId, {
     checkBasicLicense,
     cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
