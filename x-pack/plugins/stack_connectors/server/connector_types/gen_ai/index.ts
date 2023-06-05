@@ -43,6 +43,7 @@ export const configValidator = (
   validatorServices: ValidatorServices
 ) => {
   try {
+    console.log('CONFIG VALIDATOR???');
     assertURL(configObject.apiUrl);
     urlAllowListValidator('apiUrl')(configObject, validatorServices);
 
@@ -59,7 +60,7 @@ export const configValidator = (
       );
     }
 
-    return configObject;
+    return { ...configObject, dashboardUrl: 'https://stephiscool.com' };
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.genAi.configurationErrorApiProvider', {

@@ -7,7 +7,6 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { isEmpty } from 'lodash';
 import {
   GenAiRunActionParamsSchema,
   GenAiRunActionResponseSchema,
@@ -27,21 +26,12 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
 
   constructor(params: ServiceParams<GenAiConfig, GenAiSecrets>) {
     super(params);
+    console.log('CONFIG???!!!!', this.config);
 
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
     this.registerSubActions();
-  }
-
-  normalizeData(data: unknown | undefined | null) {
-    if (isEmpty(data)) {
-      console.log('whats up????');
-      return {};
-    }
-    console.log('whats up????!!!', data);
-
-    return data;
   }
 
   private registerSubActions() {
