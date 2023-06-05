@@ -33078,7 +33078,6 @@
     "xpack.securitySolution.policy.list.subtitle": "使用策略定制终端和云工作负载防护及其他配置",
     "xpack.securitySolution.policy.list.title": "策略",
     "xpack.securitySolution.policy.list.updatedAt": "上次更新时间",
-    "xpack.securitySolution.policyDetails.backToEndpointList": "查看所有终端",
     "xpack.securitySolution.policyDetails.backToPolicyButton": "返回到策略列表",
     "xpack.securitySolution.policyDetails.missingArtifactAccess": "您没有所需 Kibana 权限，无法使用给定项目。",
     "xpack.securitySolution.policyList.packageVersionError": "检索终端软件包版本时出错",
