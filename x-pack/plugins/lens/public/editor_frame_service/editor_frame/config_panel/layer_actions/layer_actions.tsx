@@ -188,7 +188,7 @@ export const LayerActions = (props: LayerActionsProps) => {
         <EuiFlexItem grow={false}>
           <EuiToolTip content={outsideListAction.displayName}>
             <EuiButtonIcon
-              size="xs"
+              size="s"
               iconType={outsideListAction.icon}
               color={outsideListAction.color ?? 'text'}
               data-test-subj={outsideListAction['data-test-subj']}
