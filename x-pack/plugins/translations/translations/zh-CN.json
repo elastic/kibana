@@ -32083,8 +32083,6 @@
     "xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationSuccessful": "终端收到释放主机请求",
     "xpack.securitySolution.endpointDetails.overview": "概览",
     "xpack.securitySolution.endpointDetails.responseActionsHistory": "响应操作历史记录",
-    "xpack.securitySolution.endpointManagement.noPermissionsSubText": "您必须具有超级用户角色才能使用此功能。如果您不具有超级用户角色，且无权编辑用户角色，请与 Kibana 管理员联系。",
-    "xpack.securitySolution.endpointManagemnet.noPermissionsText": "您没有所需的 Kibana 权限，无法使用 Elastic Security 管理",
     "xpack.securitySolution.endpointPolicyStatus.tooltipTitleLabel": "已应用策略",
     "xpack.securitySolution.endpointResponseActions.actionSubmitter.apiErrorDetails": "遇到以下错误：",
     "xpack.securitySolution.endpointResponseActions.executeAction.successTitle": "命令执行成功。",

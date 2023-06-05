@@ -14,7 +14,10 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
 export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
+
+  // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
+
   kubernetesEnabled: true,
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
