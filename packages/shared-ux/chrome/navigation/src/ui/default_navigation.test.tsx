@@ -20,7 +20,7 @@ import {
   defaultDevtoolsNavGroup,
   defaultManagementNavGroup,
   defaultMlNavGroup,
-} from './default_navigation.test.helpers';
+} from '../../mocks/src/default_navigation.test.helpers';
 
 const defaultProps = {
   homeRef: 'https://elastic.co',

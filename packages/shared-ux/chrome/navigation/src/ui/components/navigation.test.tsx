@@ -11,15 +11,15 @@ import { render } from '@testing-library/react';
 import { type Observable, of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
-import { getServicesMock } from '../../../mocks/src/jest';
-import { NavigationProvider } from '../../services';
-import { Navigation } from './navigation';
 import {
   defaultAnalyticsNavGroup,
   defaultDevtoolsNavGroup,
   defaultManagementNavGroup,
   defaultMlNavGroup,
-} from '../default_navigation.test.helpers';
+} from '../../../mocks/src/default_navigation.test.helpers';
+import { getServicesMock } from '../../../mocks/src/jest';
+import { NavigationProvider } from '../../services';
+import { Navigation } from './navigation';
 
 describe('<Navigation />', () => {
   const services = getServicesMock();
