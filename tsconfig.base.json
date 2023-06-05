@@ -606,6 +606,8 @@
       "@kbn/data-visualizer-plugin/*": ["x-pack/plugins/data_visualizer/*"],
       "@kbn/datemath": ["packages/kbn-datemath"],
       "@kbn/datemath/*": ["packages/kbn-datemath/*"],
+      "@kbn/deeplinks-analytics": ["packages/deeplinks/analytics"],
+      "@kbn/deeplinks-analytics/*": ["packages/deeplinks/analytics/*"],
       "@kbn/deeplinks-devtools": ["packages/deeplinks/devtools"],
       "@kbn/deeplinks-devtools/*": ["packages/deeplinks/devtools/*"],
       "@kbn/dev-cli-errors": ["packages/kbn-dev-cli-errors"],

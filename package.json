@@ -351,6 +351,8 @@
     "@kbn/data-views-plugin": "link:src/plugins/data_views",
     "@kbn/data-visualizer-plugin": "link:x-pack/plugins/data_visualizer",
     "@kbn/datemath": "link:packages/kbn-datemath",
+    "@kbn/deeplinks-analytics": "link:packages/deeplinks/analytics",
+    "@kbn/deeplinks-devtools": "link:packages/deeplinks/devtools",
     "@kbn/dev-tools-plugin": "link:src/plugins/dev_tools",
     "@kbn/developer-examples-plugin": "link:examples/developer_examples",
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
