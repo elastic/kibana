@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import progress from './images/progress.svg';
@@ -40,10 +40,12 @@ const headerCards: Section[] = [
 ];
 
 const WelcomePanelComponent = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       css={css`
-        gap: 32px;
+        gap: ${euiTheme.size.xl};
       `}
     >
       {headerCards.map((item, index) => {
@@ -65,7 +67,7 @@ const WelcomePanelComponent = () => {
               description={
                 <span
                   css={css`
-                    color: #98a2b3;
+                    color: ${euiTheme.colors.mediumShade};
                   `}
                 >
                   {item.description}

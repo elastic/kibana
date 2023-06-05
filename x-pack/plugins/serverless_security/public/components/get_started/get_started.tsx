@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -18,39 +18,43 @@ import {
   GET_STARTED_PAGE_TITLE,
 } from './translations';
 
-export const GetStartedComponent: React.FC = () => (
-  <KibanaPageTemplate restrictWidth={false} contentBorder={false}>
-    <KibanaPageTemplate.Header
-      css={css`
-        padding: 0 36px;
-      `}
-      pageTitle={
-        <EuiTitle
-          size="l"
-          css={css`
-            padding-left: 4px;
-          `}
-        >
-          <span>{GET_STARTED_PAGE_TITLE}</span>
-        </EuiTitle>
-      }
-      description={
-        <>
-          <strong className="eui-displayBlock">{GET_STARTED_PAGE_SUBTITLE}</strong>
-          <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
-        </>
-      }
-    >
-      <WelcomePanel />
-    </KibanaPageTemplate.Header>
-    <KibanaPageTemplate.Section
-      bottomBorder="extended"
-      grow={true}
-      restrictWidth={false}
-      paddingSize="none"
-    >
-      <TogglePanel />
-    </KibanaPageTemplate.Section>
-  </KibanaPageTemplate>
-);
+export const GetStartedComponent: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <KibanaPageTemplate restrictWidth={false} contentBorder={false}>
+      <KibanaPageTemplate.Header
+        css={css`
+          padding: 0 ${euiTheme.base * 2.25}px;
+        `}
+        pageTitle={
+          <EuiTitle
+            size="l"
+            css={css`
+              padding-left: ${euiTheme.size.xs};
+            `}
+          >
+            <span>{GET_STARTED_PAGE_TITLE}</span>
+          </EuiTitle>
+        }
+        description={
+          <>
+            <strong className="eui-displayBlock">{GET_STARTED_PAGE_SUBTITLE}</strong>
+            <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
+          </>
+        }
+      >
+        <WelcomePanel />
+      </KibanaPageTemplate.Header>
+      <KibanaPageTemplate.Section
+        bottomBorder="extended"
+        grow={true}
+        restrictWidth={false}
+        paddingSize="none"
+      >
+        <TogglePanel />
+      </KibanaPageTemplate.Section>
+    </KibanaPageTemplate>
+  );
+};
 export const GetStarted = React.memo(GetStartedComponent);

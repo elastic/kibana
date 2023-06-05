@@ -16,6 +16,8 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useEuiShadow,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -129,7 +131,9 @@ const reducer = (state: TogglePanelReducer, action: TogglePanelAction) => {
 const initialState: TogglePanelReducer = { activeSections: new Set<TogglePanelId>() };
 
 const TogglePanelComponent = ({}) => {
+  const { euiTheme } = useEuiTheme();
   const [state, dispatch] = useReducer(reducer, initialState);
+  const shadowS = useEuiShadow('s');
 
   const switchNodes = () => {
     return switches.map((item) => (
@@ -158,15 +162,14 @@ const TogglePanelComponent = ({}) => {
                 hasBorder
                 paddingSize="m"
                 css={css`
-                  box-shadow: 0px 0.7px 1.4px rgba(0, 0, 0, 0.07), 0px 1.9px 4px rgba(0, 0, 0, 0.05),
-                    0px 4.5px 10px rgba(0, 0, 0, 0.05);
+                  ${shadowS};
                 `}
               >
                 <EuiFlexGroup
                   gutterSize="m"
                   css={css`
                     gap: 14px;
-                    padding: 2px 10px;
+                    padding: ${euiTheme.size.xxs} 10px;
                   `}
                 >
                   <EuiFlexItem grow={false}>
@@ -176,7 +179,7 @@ const TogglePanelComponent = ({}) => {
                     <EuiTitle
                       size="xxs"
                       css={css`
-                        line-height: 32px;
+                        line-height: ${euiTheme.base * 2}px;
                       `}
                     >
                       <h4>{item.title}</h4>
@@ -189,7 +192,7 @@ const TogglePanelComponent = ({}) => {
         }
         return acc;
       }, []),
-    []
+    [euiTheme.base, euiTheme.size.xxs, shadowS]
   );
 
   return (
@@ -202,16 +205,15 @@ const TogglePanelComponent = ({}) => {
           paddingSize="none"
           hasShadow={false}
           css={css`
-            padding: 20px 36px;
-            box-shadow: 0px 0.7px 1.4px rgba(0, 0, 0, 0.07), 0px 1.9px 4px rgba(0, 0, 0, 0.05),
-              0px 4.5px 10px rgba(0, 0, 0, 0.05);
+            padding: ${euiTheme.base * 1.25}px ${euiTheme.base * 2.25}px;
+            ${shadowS};
           `}
           borderRadius="none"
         >
           <EuiTitle
             size="xxs"
             css={css`
-              padding-right: 4px;
+              padding-right: ${euiTheme.size.xs};
             `}
           >
             <strong>{i18n.TOGGLE_PANEL_TITLE}</strong>
@@ -223,7 +225,7 @@ const TogglePanelComponent = ({}) => {
       </EuiFlexItem>
       <EuiFlexItem
         css={css`
-          padding: 4px 36px;
+          padding: ${euiTheme.size.xs} ${euiTheme.base * 2.25}px;
         `}
         grow={1}
       >
@@ -240,7 +242,7 @@ const TogglePanelComponent = ({}) => {
                   hasShadow={false}
                   borderRadius="none"
                   css={css`
-                    margin: 24px 0;
+                    margin: ${euiTheme.size.l} 0;
                   `}
                   key={section.id}
                 >
@@ -248,7 +250,13 @@ const TogglePanelComponent = ({}) => {
                     <span>{section.title}</span>
                   </EuiTitle>
                   <EuiSpacer size="m" />
-                  <EuiFlexGroup gutterSize="m" direction="column" css={css`16px`}>
+                  <EuiFlexGroup
+                    gutterSize="m"
+                    direction="column"
+                    css={css`
+                      ${euiTheme.size.base}
+                    `}
+                  >
                     {nodes}
                   </EuiFlexGroup>
                 </EuiPanel>
@@ -262,8 +270,10 @@ const TogglePanelComponent = ({}) => {
             title={<h2>{i18n.TOGGLE_PANEL_EMPTY_TITLE}</h2>}
             body={<p>{i18n.TOGGLE_PANEL_EMPTY_DESCRIPTION}</p>}
             css={css`
-              padding: 80px 0;
-              max-width: none;
+              padding: ${euiTheme.base * 5}px 0;
+              .euiEmptyPrompt__contentInner {
+                max-width: none;
+              }
             `}
           />
         )}
