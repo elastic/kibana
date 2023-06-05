@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import {
@@ -20,10 +19,10 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import type { ExperimentalFeatures } from '../../../common';
+import { SecuritySubFeatureId } from './security_kibana_sub_features';
 import { APP_ID, LEGACY_NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../common/constants';
 import { savedObjectTypes } from '../../saved_objects';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { SecuritySubFeatureId } from './security_kibana_sub_features';
 import type { AppFeaturesSecurityConfig, BaseKibanaFeatureConfig } from './types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 
@@ -124,35 +123,21 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 });
 
 export const getSecurityBaseKibanaSubFeatureIds = (
-  experimentalFeatures: ExperimentalFeatures
+  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => {
-  const subFeatureIds: SecuritySubFeatureId[] = [];
-
-  if (experimentalFeatures.endpointRbacEnabled) {
-    subFeatureIds.push(
-      SecuritySubFeatureId.endpointList,
-      SecuritySubFeatureId.trustedApplications,
-      SecuritySubFeatureId.hostIsolationExceptions,
-      SecuritySubFeatureId.blocklist,
-      SecuritySubFeatureId.eventFilters,
-      SecuritySubFeatureId.policyManagement
-    );
-  }
-
-  if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {
-    subFeatureIds.push(
-      SecuritySubFeatureId.responseActionsHistory,
-      SecuritySubFeatureId.hostIsolation,
-      SecuritySubFeatureId.processOperations
-    );
-  }
-  if (experimentalFeatures.responseActionGetFileEnabled) {
-    subFeatureIds.push(SecuritySubFeatureId.fileOperations);
-  }
-  // planned for 8.8
-  if (experimentalFeatures.responseActionExecuteEnabled) {
-    subFeatureIds.push(SecuritySubFeatureId.executeAction);
-  }
+  const subFeatureIds: SecuritySubFeatureId[] = [
+    SecuritySubFeatureId.endpointList,
+    SecuritySubFeatureId.trustedApplications,
+    SecuritySubFeatureId.hostIsolationExceptions,
+    SecuritySubFeatureId.blocklist,
+    SecuritySubFeatureId.eventFilters,
+    SecuritySubFeatureId.policyManagement,
+    SecuritySubFeatureId.responseActionsHistory,
+    SecuritySubFeatureId.hostIsolation,
+    SecuritySubFeatureId.processOperations,
+    SecuritySubFeatureId.fileOperations,
+    SecuritySubFeatureId.executeAction,
+  ];
 
   return subFeatureIds;
 };
