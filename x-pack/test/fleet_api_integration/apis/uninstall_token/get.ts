@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Uninstall Token API', () => {
-    let policyIds: string[];
+    let generatedPolicyIds: Set<string>;
 
     before(async () => {
       await cleanSavedObjects();
@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('pagination', () => {
       before(async () => {
-        policyIds = await generatePolicies(20);
+        generatedPolicyIds = new Set(await generatePolicies(20));
       });
 
       after(async () => {
@@ -47,47 +47,48 @@ export default function (providerContext: FtrProviderContext) {
         const response = await supertest.get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN).expect(200);
 
         const body: GetUninstallTokensResponse = response.body;
-        expect(body.total).to.equal(policyIds.length);
+        expect(body.total).to.equal(generatedPolicyIds.size);
         expect(body.page).to.equal(1);
         expect(body.perPage).to.equal(20);
 
-        const receivedPolicyIds = Object.keys(body.items);
-        expect(receivedPolicyIds.length).to.equal(policyIds.length);
-        policyIds.forEach((policyId) => expect(receivedPolicyIds).to.contain(policyId));
+        expect(body.items.length).to.equal(generatedPolicyIds.size);
+        body.items.forEach(({ policy_id: policyId }) =>
+          expect(generatedPolicyIds.has(policyId)).to.be(true)
+        );
       });
 
       it('should return token with creation date', async () => {
         const response = await supertest.get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN).expect(200);
 
         const body: GetUninstallTokensResponse = response.body;
-        expect(body.items[policyIds[0]]).to.have.property('token');
-        expect(body.items[policyIds[0]]).to.have.property('created_at');
+        expect(body.items[0]).to.have.property('token');
+        expect(body.items[0]).to.have.property('created_at');
 
-        const createdAt = new Date(body.items[policyIds[0]].created_at!).getTime();
+        const createdAt = new Date(body.items[0].created_at!).getTime();
         const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).getTime();
 
         expect(createdAt).to.lessThan(Date.now()).greaterThan(thirtyMinutesAgo);
       });
 
       it('should return default perPage number of tokens if total is above default perPage', async () => {
-        policyIds = [...policyIds, ...(await generatePolicies(1))];
+        generatedPolicyIds.add((await generatePolicies(1))[0]);
 
         const response1 = await supertest.get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN).expect(200);
         const body1: GetUninstallTokensResponse = response1.body;
-        expect(body1.total).to.equal(policyIds.length);
+        expect(body1.total).to.equal(generatedPolicyIds.size);
         expect(body1.page).to.equal(1);
         expect(body1.perPage).to.equal(20);
-        expect(Object.keys(body1.items).length).to.equal(20);
+        expect(body1.items.length).to.equal(20);
 
         const response2 = await supertest
           .get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN)
           .query({ page: 2 })
           .expect(200);
         const body2: GetUninstallTokensResponse = response2.body;
-        expect(body2.total).to.equal(policyIds.length);
+        expect(body2.total).to.equal(generatedPolicyIds.size);
         expect(body2.page).to.equal(2);
         expect(body2.perPage).to.equal(20);
-        expect(Object.keys(body2.items).length).to.equal(1);
+        expect(body2.items.length).to.equal(1);
       });
 
       it('should return all tokens via pagination', async () => {
@@ -103,22 +104,24 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           const body: GetUninstallTokensResponse = response.body;
-          expect(body.total).to.equal(policyIds.length);
+          expect(body.total).to.equal(generatedPolicyIds.size);
           expect(body.perPage).to.equal(8);
           expect(body.page).to.equal(i);
 
-          const receivedIds = Object.keys(body.items);
+          const receivedIds = body.items.map(({ policy_id: policyId }) => policyId);
           receivedPolicyIds.push(...receivedIds);
         }
 
-        expect(receivedPolicyIds.length).to.equal(policyIds.length);
-        policyIds.forEach((policyId) => expect(receivedPolicyIds).to.contain(policyId));
+        expect(receivedPolicyIds.length).to.equal(generatedPolicyIds.size);
+        receivedPolicyIds.forEach((policyId) =>
+          expect(generatedPolicyIds.has(policyId)).to.be(true)
+        );
       });
     });
 
     describe('when `policyId` query param is used', () => {
       before(async () => {
-        policyIds = await generatePolicies(5);
+        generatedPolicyIds = new Set(await generatePolicies(5));
       });
 
       after(async () => {
@@ -126,10 +129,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return token for full policyID if found', async () => {
+        const selectedPolicyId = [...generatedPolicyIds][3];
+
         const response = await supertest
           .get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN)
           .query({
-            policyId: policyIds[3],
+            policyId: selectedPolicyId,
           })
           .expect(200);
 
@@ -137,14 +142,16 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.total).to.equal(1);
         expect(body.page).to.equal(1);
         expect(body.perPage).to.equal(20);
-        expect(Object.keys(body.items)).to.eql([policyIds[3]]);
+        expect(body.items[0].policy_id).to.equal(selectedPolicyId);
       });
 
       it('should return token for partial policyID if found', async () => {
+        const selectedPolicyId = [...generatedPolicyIds][2];
+
         const response = await supertest
           .get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN)
           .query({
-            policyId: policyIds[3].slice(4, 11),
+            policyId: selectedPolicyId.slice(4, 11),
           })
           .expect(200);
 
@@ -152,7 +159,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.total).to.equal(1);
         expect(body.page).to.equal(1);
         expect(body.perPage).to.equal(20);
-        expect(Object.keys(body.items)).to.eql([policyIds[3]]);
+        expect(body.items[0].policy_id).to.equal(selectedPolicyId);
       });
 
       it('should return nothing if policy is not found', async () => {
@@ -167,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.total).to.equal(0);
         expect(body.page).to.equal(1);
         expect(body.perPage).to.equal(20);
-        expect(body.items).to.eql({});
+        expect(body.items).to.eql([]);
       });
     });
 

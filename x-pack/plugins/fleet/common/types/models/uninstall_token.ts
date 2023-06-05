@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export interface PolicyUninstallTokenMap {
-  [policyId: string]: UninstallToken;
-}
-
 export interface UninstallToken {
+  policy_id: string;
   token: string;
   created_at?: string;
 }

@@ -12,10 +12,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
-import type {
-  PolicyUninstallTokenMap,
-  UninstallToken,
-} from '../../../../common/types/models/uninstall_token';
+import type { UninstallToken } from '../../../../common/types/models/uninstall_token';
 
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../../../constants';
 import { createAppContextStartContractMock, type MockedFleetAppContext } from '../../../mocks';
@@ -176,6 +173,7 @@ describe('UninstallTokenService', () => {
         const so = getDefaultSO();
         const token = await uninstallTokenService.getTokenForPolicyId(so.attributes.policy_id);
         expect(token).toEqual({
+          policy_id: so.attributes.policy_id,
           token: so.attributes.token,
           created_at: 'yesterday',
         } as UninstallToken);
@@ -189,10 +187,14 @@ describe('UninstallTokenService', () => {
           so.attributes.policy_id,
           so2.attributes.policy_id,
         ]);
-        expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: { token: so.attributes.token, created_at: 'yesterday' },
-          [so2.attributes.policy_id]: { token: so2.attributes.token },
-        } as PolicyUninstallTokenMap);
+        expect(tokensMap).toEqual([
+          {
+            policy_id: so.attributes.policy_id,
+            token: so.attributes.token,
+            created_at: 'yesterday',
+          },
+          { policy_id: so2.attributes.policy_id, token: so2.attributes.token },
+        ] as UninstallToken[]);
       });
 
       it('can correctly getAllTokens', async () => {
@@ -200,10 +202,14 @@ describe('UninstallTokenService', () => {
         const so2 = getDefaultSO2();
 
         const tokensMap = (await uninstallTokenService.getAllTokens()).items;
-        expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: { token: so.attributes.token, created_at: 'yesterday' },
-          [so2.attributes.policy_id]: { token: so2.attributes.token },
-        } as PolicyUninstallTokenMap);
+        expect(tokensMap).toEqual([
+          {
+            policy_id: so.attributes.policy_id,
+            token: so.attributes.token,
+            created_at: 'yesterday',
+          },
+          { policy_id: so2.attributes.policy_id, token: so2.attributes.token },
+        ] as UninstallToken[]);
       });
     });
 
@@ -423,6 +429,7 @@ describe('UninstallTokenService', () => {
         const so = getDefaultSO(false);
         const token = await uninstallTokenService.getTokenForPolicyId(so.attributes.policy_id);
         expect(token).toEqual({
+          policy_id: so.attributes.policy_id,
           token: so.attributes.token_plain,
           created_at: 'yesterday',
         } as UninstallToken);
@@ -436,10 +443,14 @@ describe('UninstallTokenService', () => {
           so.attributes.policy_id,
           so2.attributes.policy_id,
         ]);
-        expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: { token: so.attributes.token_plain, created_at: 'yesterday' },
-          [so2.attributes.policy_id]: { token: so2.attributes.token_plain },
-        } as PolicyUninstallTokenMap);
+        expect(tokensMap).toEqual([
+          {
+            policy_id: so.attributes.policy_id,
+            token: so.attributes.token_plain,
+            created_at: 'yesterday',
+          },
+          { policy_id: so2.attributes.policy_id, token: so2.attributes.token_plain },
+        ] as UninstallToken[]);
       });
 
       it('can correctly getAllTokens', async () => {
@@ -447,10 +458,14 @@ describe('UninstallTokenService', () => {
         const so2 = getDefaultSO2(false);
 
         const tokensMap = (await uninstallTokenService.getAllTokens()).items;
-        expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: { token: so.attributes.token_plain, created_at: 'yesterday' },
-          [so2.attributes.policy_id]: { token: so2.attributes.token_plain },
-        });
+        expect(tokensMap).toEqual([
+          {
+            policy_id: so.attributes.policy_id,
+            token: so.attributes.token_plain,
+            created_at: 'yesterday',
+          },
+          { policy_id: so2.attributes.policy_id, token: so2.attributes.token_plain },
+        ] as UninstallToken[]);
       });
     });
 

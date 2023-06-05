@@ -12,8 +12,9 @@ import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
+import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
+
 import type { FleetRequestHandlerContext } from '../..';
-import type { PolicyUninstallTokenMap } from '../../../common/types/models/uninstall_token';
 
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
@@ -31,10 +32,15 @@ describe('getUninstallTokensHandler', () => {
   let appContextStartContractMock: MockedFleetAppContext;
   let getAllTokensMock: jest.Mock;
 
-  const uninstallTokensFixture: PolicyUninstallTokenMap = {
-    'policy-id-1': { token: '123456' },
-    'policy-id-2': { token: 'abcdef' },
-    'policy-id-3': { token: '9876543210' },
+  const uninstallTokensResponseFixture: GetUninstallTokensResponse = {
+    items: [
+      { policy_id: 'policy-id-1', token: '123456' },
+      { policy_id: 'policy-id-2', token: 'abcdef' },
+      { policy_id: 'policy-id-3', token: '9876543210' },
+    ],
+    total: 3,
+    page: 1,
+    perPage: 20,
   };
 
   beforeEach(async () => {
@@ -54,17 +60,12 @@ describe('getUninstallTokensHandler', () => {
   });
 
   it('should return uninstall tokens for all policies', async () => {
-    getAllTokensMock.mockResolvedValue(uninstallTokensFixture);
+    getAllTokensMock.mockResolvedValue(uninstallTokensResponseFixture);
 
     await getUninstallTokensHandler(context, request, response);
 
     expect(response.ok).toHaveBeenCalledWith({
-      body: {
-        items: { ...uninstallTokensFixture },
-        total: 3,
-        page: 1,
-        perPage: 20,
-      },
+      body: uninstallTokensResponseFixture,
     });
   });
 

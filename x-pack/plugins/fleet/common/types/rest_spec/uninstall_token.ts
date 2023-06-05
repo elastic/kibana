@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { PolicyUninstallTokenMap } from '../models/uninstall_token';
+import type { UninstallToken } from '../models/uninstall_token';
 
-export interface GetUninstallTokensResponse {
-  items: PolicyUninstallTokenMap;
-  total: number;
-  page: number;
-  perPage: number;
-}
+import type { ListResult } from './common';
+
+export type GetUninstallTokensResponse = ListResult<UninstallToken>;
