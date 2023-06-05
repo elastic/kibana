@@ -23,5 +23,6 @@ export function getFieldCaps({
     filter_path: ['fields'],
     filters: '-parent',
     include_unmapped: true,
+    ignore_unavailable: true,
   });
 }
