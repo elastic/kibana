@@ -83,6 +83,113 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
       });
+
+      it('with specific monitor fields', async () => {
+        await Promise.all(monitors.map(saveMonitor));
+
+        const respAllFields = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10`)
+          .expect(200);
+
+        const respSpecificFieldsOnly = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&fields=id&fields=name`)
+          .expect(200);
+
+        const monitorsWithAllFields = respAllFields.body.monitors.map(
+          ({ attributes }: { attributes: MonitorFields }) => attributes
+        );
+        const idsAndNames = monitorsWithAllFields.map(
+          ({ id, name }: { attributes: Partial<MonitorFields> }) => ({
+            id,
+            name,
+          })
+        );
+        const monitorsAttribsWithSpecificFields = respSpecificFieldsOnly.body.monitors.map(
+          ({ attributes }: { attributes: Partial<MonitorFields> }) => attributes
+        );
+
+        expect(monitorsAttribsWithSpecificFields).eql(idsAndNames); // Should have `id` and `name`
+        expect(Object.keys(monitorsAttribsWithSpecificFields[0]).length).eql(2); // Should only have `id` and `name`
+        expect(Object.keys(monitorsWithAllFields[0]).length).greaterThan(2); // Should have all fields
+      });
+
+      it('with specific single monitor field', async () => {
+        await Promise.all(monitors.map(saveMonitor));
+
+        const resp = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=1&fields=name`)
+          .expect(200);
+
+        const resultMonitors = resp.body.monitors.map(
+          ({ attributes }: { attributes: Partial<MonitorFields> }) => attributes
+        );
+        expect(resultMonitors[0]).property('name', resultMonitors[0].name); // Should include `name`
+        expect(resultMonitors[0]).not.key('id'); // Should not include `id`
+      });
+
+      it('with single monitorQueryId filter', async () => {
+        const [_, { id: id2 }] = await Promise.all(monitors.map(saveMonitor));
+
+        const resp = await supertest
+          .get(
+            `${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&fields=name&fields=id&monitorQueryIds=${id2}`
+          )
+          .expect(200);
+
+        const resultMonitorIds = resp.body.monitors.map(
+          ({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id
+        );
+        expect(resultMonitorIds.length).eql(1);
+        expect(resultMonitorIds).eql([id2]);
+      });
+
+      it('with multiple monitorQueryId filter', async () => {
+        const [_, { id: id2 }, { id: id3 }] = await Promise.all(monitors.map(saveMonitor));
+
+        const resp = await supertest
+          .get(
+            `${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&fields=name&fields=id&monitorQueryIds=${id2}&monitorQueryIds=${id3}`
+          )
+          .expect(200);
+
+        const resultMonitorIds = resp.body.monitors.map(
+          ({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id
+        );
+
+        expect(resultMonitorIds.length).eql(2);
+        expect(resultMonitorIds).eql([id2, id3]);
+      });
+
+      it('monitorQueryId respects custom_heartbeat_id while filtering', async () => {
+        const customHeartbeatId0 = 'custom-heartbeat-id-test-01';
+        const customHeartbeatId1 = 'custom-heartbeat-id-test-02';
+        await Promise.all(
+          [
+            {
+              ...monitors[0],
+              [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId0,
+              [ConfigKey.NAME]: `NAME-${customHeartbeatId0}`,
+            },
+            {
+              ...monitors[1],
+              [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId1,
+              [ConfigKey.NAME]: `NAME-${customHeartbeatId1}`,
+            },
+          ].map(saveMonitor)
+        );
+
+        const resp = await supertest
+          .get(
+            `${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&fields=name&fields=id&monitorQueryIds=${customHeartbeatId0}&monitorQueryIds=${customHeartbeatId1}`
+          )
+          .expect(200);
+
+        const resultMonitorIds = resp.body.monitors
+          .map(({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id)
+          .filter((id, index, arr) => arr.indexOf(id) === index); // Filter only unique
+        expect(resultMonitorIds.length).eql(2);
+        expect(resultMonitorIds).eql([customHeartbeatId0, customHeartbeatId1]);
+      });
     });
 
     describe('get one monitor', () => {

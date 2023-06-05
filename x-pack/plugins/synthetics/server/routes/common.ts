@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
+import { MonitorQueryableFieldsSchema } from '../../common/runtime_types/monitor_management/query_fields';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
@@ -24,6 +25,7 @@ export const QuerySchema = schema.object({
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
+  fields: MonitorQueryableFieldsSchema,
   tags: StringOrArraySchema,
   monitorTypes: StringOrArraySchema,
   locations: StringOrArraySchema,
@@ -31,6 +33,7 @@ export const QuerySchema = schema.object({
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
+  monitorQueryIds: StringOrArraySchema,
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
@@ -60,8 +63,7 @@ export const SEARCH_FIELDS = [
 ];
 
 export const getMonitors = async (
-  context: RouteContext<MonitorsQuery>,
-  { fields }: { fields?: string[] } = {}
+  context: RouteContext<MonitorsQuery>
 ): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
   const {
     perPage = 50,
@@ -73,9 +75,11 @@ export const getMonitors = async (
     monitorTypes,
     locations,
     filter = '',
+    fields,
     searchAfter,
     projects,
     schedules,
+    monitorQueryIds,
   } = context.request.query;
 
   const filterStr = await getMonitorFilters({
@@ -85,10 +89,12 @@ export const getMonitors = async (
     locations,
     projects,
     schedules,
+    monitorQueryIds,
     context,
   });
+  const fieldsArray = fields && !Array.isArray(fields) ? [fields] : fields;
 
-  return context.savedObjectsClient.find({
+  const findParams = {
     type: syntheticsMonitorType,
     perPage,
     page,
@@ -98,8 +104,10 @@ export const getMonitors = async (
     search: query ? `${query}*` : undefined,
     filter: filterStr,
     searchAfter,
-    fields,
-  });
+    fields: fieldsArray,
+  };
+
+  return context.savedObjectsClient.find(findParams);
 };
 
 export const getMonitorFilters = async ({
@@ -109,6 +117,7 @@ export const getMonitorFilters = async ({
   projects,
   monitorTypes,
   schedules,
+  monitorQueryIds,
   context,
 }: {
   filter?: string;
@@ -117,6 +126,7 @@ export const getMonitorFilters = async ({
   locations?: string | string[];
   projects?: string | string[];
   schedules?: string | string[];
+  monitorQueryIds?: string | string[];
   context: RouteContext;
 }) => {
   const locationFilter = await parseLocationFilter(context, locations);
@@ -128,6 +138,7 @@ export const getMonitorFilters = async ({
     getKqlFilter({ field: 'type', values: monitorTypes }),
     getKqlFilter({ field: 'locations.id', values: locationFilter }),
     getKqlFilter({ field: 'schedule.number', values: schedules }),
+    getKqlFilter({ field: 'id', values: monitorQueryIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -187,8 +198,17 @@ export const findLocationItem = (query: string, locations: ServiceLocations) => 
  * @param monitorQuery { MonitorsQuery }
  */
 export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
-  const { query, tags, monitorTypes, locations, status, filter, projects, schedules } =
-    monitorQuery;
+  const {
+    query,
+    tags,
+    monitorTypes,
+    locations,
+    status,
+    filter,
+    projects,
+    schedules,
+    monitorQueryIds,
+  } = monitorQuery;
 
   return (
     !!query ||
@@ -198,7 +218,8 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!tags?.length ||
     !!status?.length ||
     !!projects?.length ||
-    !!schedules?.length
+    !!schedules?.length ||
+    !!monitorQueryIds?.length
   );
 };
 

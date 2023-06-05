@@ -406,6 +406,22 @@ export const MonitorManagementListResultCodec = t.type({
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 
+export const ManagementListPartialMonitorsResultCodec = t.type({
+  ...MonitorManagementListResultCodec.props,
+  monitors: t.array(
+    t.intersection([
+      t.interface({
+        id: t.string,
+        attributes: t.partial({}),
+      }),
+      t.partial({
+        updated_at: t.string,
+        created_at: t.string,
+      }),
+    ])
+  ),
+});
+
 export const MonitorOverviewItemCodec = t.intersection([
   t.interface({
     name: t.string,
