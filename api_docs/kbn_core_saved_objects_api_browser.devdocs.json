@@ -979,22 +979,6 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
           },
           {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/plugin.ts"
           },
@@ -1067,30 +1051,6 @@
             "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/reference_editor.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/reference_editor.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/dimension_panel.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/dimension_panel.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/index.ts"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
           },
@@ -1100,31 +1060,11 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
-          },
-          {
-            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
           },
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
           },
           {
             "plugin": "canvas",
@@ -1259,10 +1199,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-              },
-              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
               },
@@ -1337,10 +1273,6 @@
               {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1852,10 +1784,6 @@
                 "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-              },
-              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/find_dashboard_saved_objects.ts"
               },
@@ -1874,10 +1802,6 @@
               {
                 "plugin": "eventAnnotation",
                 "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
               {
                 "plugin": "ml",
@@ -1906,14 +1830,6 @@
               {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -2006,10 +1922,6 @@
               {
                 "plugin": "eventAnnotation",
                 "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
               {
                 "plugin": "ml",
@@ -2269,40 +2181,8 @@
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts"
-              },
-              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.test.ts"
               },
               {
                 "plugin": "discover",
@@ -2531,10 +2411,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-              },
-              {
                 "plugin": "eventAnnotation",
                 "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
               },
@@ -2545,14 +2421,6 @@
               {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
