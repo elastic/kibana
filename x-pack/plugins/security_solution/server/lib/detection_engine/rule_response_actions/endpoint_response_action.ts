@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, map, reduce, uniq } from 'lodash';
+import { each, map, uniq } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
@@ -26,14 +26,12 @@ export const endpointResponseAction = (
   const agentIds = uniq(map(filteredAlerts, 'agent.id'));
   const alertIds = map(filteredAlerts, '_id');
 
-  const hosts = reduce(
-    filteredAlerts,
-    (acc: Record<string, string>, alert) => ({
-      ...acc,
-      ...(alert.agent?.name ? { [alert.agent.id]: alert.agent?.name || '' } : {}),
-    }),
-    {}
-  );
+  const hosts = filteredAlerts.reduce((acc: Record<string, string>, alert) => {
+    if (alert.agent?.name && !acc[alert.agent.id]) {
+      acc[alert.agent.id] = alert.agent.name;
+    }
+    return acc;
+  }, {});
 
   return Promise.all(
     each(agentIds, async (agent) =>
