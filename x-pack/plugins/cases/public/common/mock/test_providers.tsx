@@ -99,22 +99,22 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <QueryClientProvider client={queryClient}>
-            <MemoryRouter>
-              <CasesProvider
-                value={{
-                  externalReferenceAttachmentTypeRegistry,
-                  persistableStateAttachmentTypeRegistry,
-                  features,
-                  owner,
-                  permissions,
-                  getFilesClient,
-                }}
-              >
+          <MemoryRouter>
+            <CasesProvider
+              value={{
+                externalReferenceAttachmentTypeRegistry,
+                persistableStateAttachmentTypeRegistry,
+                features,
+                owner,
+                permissions,
+                getFilesClient,
+              }}
+            >
+              <QueryClientProvider client={queryClient}>
                 <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
-              </CasesProvider>
-            </MemoryRouter>
-          </QueryClientProvider>
+              </QueryClientProvider>
+            </CasesProvider>
+          </MemoryRouter>
         </ThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
@@ -181,23 +181,21 @@ export const createAppMockRenderer = ({
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <QueryClientProvider client={queryClient}>
-            <MemoryRouter>
-              <CasesProvider
-                value={{
-                  externalReferenceAttachmentTypeRegistry,
-                  persistableStateAttachmentTypeRegistry,
-                  features,
-                  owner,
-                  permissions,
-                  releasePhase,
-                  getFilesClient,
-                }}
-              >
-                {children}
-              </CasesProvider>
-            </MemoryRouter>
-          </QueryClientProvider>
+          <MemoryRouter>
+            <CasesProvider
+              value={{
+                externalReferenceAttachmentTypeRegistry,
+                persistableStateAttachmentTypeRegistry,
+                features,
+                owner,
+                permissions,
+                releasePhase,
+                getFilesClient,
+              }}
+            >
+              <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+            </CasesProvider>
+          </MemoryRouter>
         </ThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>

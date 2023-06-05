@@ -5,7 +5,7 @@ Fine tune your explorations by customizing *Discover* to bring out the the best 
 Adjust the chart height, modify the document table, and look inside a document.
 
 [role="screenshot"]
-image:images/discover.png[A view of the Discover app]
+image::images/hello-field.png[A view of the Discover app]
 
 
 [float]

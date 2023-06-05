@@ -13,10 +13,10 @@ import type { GroupingAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
-import { combineQueries, getFieldEsTypes } from '../../../common/lib/kuery';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
+import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
@@ -53,7 +53,7 @@ interface OwnProps {
   pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
@@ -141,16 +141,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
-  const selectedGroupEsTypes = useMemo(
-    () => getFieldEsTypes(selectedGroup, browserFields),
-    [selectedGroup, browserFields]
-  );
+  // create a unique, but stable (across re-renders) value
+  const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
-      selectedGroupEsTypes,
+      uniqueValue,
       from,
       runtimeMappings,
       to,
@@ -164,8 +162,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     pageSize,
     runtimeMappings,
     selectedGroup,
-    selectedGroupEsTypes,
     to,
+    uniqueValue,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
@@ -201,14 +199,16 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       parseGroupingQuery(
         // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
         queriedGroup.current === null ? selectedGroup : queriedGroup.current,
+        uniqueValue,
         alertsGroupsData?.aggregations
       ),
-    [alertsGroupsData?.aggregations, selectedGroup]
+    [alertsGroupsData?.aggregations, selectedGroup, uniqueValue]
   );
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
-      queriedGroup.current = queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '';
+      queriedGroup.current =
+        queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup ?? '';
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
@@ -255,37 +255,33 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     () =>
       getGrouping({
         activePage: pageIndex,
-        data: {
-          ...alertsGroupsData?.aggregations,
-          ...aggs,
-        },
+        data: aggs,
         groupingLevel,
         inspectButton: inspect,
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
         onChangeGroupsPage: (index) => setPageIndex(index),
-        renderChildComponent,
         onGroupClose,
+        renderChildComponent,
         selectedGroup,
         takeActionItems: getTakeActionItems,
       }),
     [
-      getGrouping,
-      pageIndex,
-      alertsGroupsData,
       aggs,
+      getGrouping,
+      getTakeActionItems,
       groupingLevel,
       inspect,
-      loading,
       isLoadingGroups,
+      loading,
+      onGroupClose,
+      pageIndex,
       pageSize,
       renderChildComponent,
-      onGroupClose,
       selectedGroup,
-      getTakeActionItems,
-      setPageSize,
       setPageIndex,
+      setPageSize,
     ]
   );
 };

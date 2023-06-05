@@ -19,24 +19,28 @@ import { parseBadgeStatus, StatusBadge } from './status_badge';
 import { useStepPrevMetrics } from '../../step_details_page/hooks/use_step_prev_metrics';
 
 export const ResultDetails = ({
+  testNowMode,
   pingStatus,
   isExpanded,
   step,
 }: {
   pingStatus: string;
   isExpanded: boolean;
+  testNowMode: boolean;
   step: JourneyStep;
 }) => {
   return (
     <div>
       <EuiText className="eui-textNoWrap" size="s">
         <StatusBadge status={parseBadgeStatus(pingStatus)} />{' '}
-        {i18n.translate('xpack.synthetics.step.duration.label', {
-          defaultMessage: 'after {value}',
-          values: {
-            value: formatMillisecond((step.synthetics?.step?.duration.us ?? 0) / 1000, {}),
-          },
-        })}
+        {!testNowMode
+          ? i18n.translate('xpack.synthetics.step.duration.label', {
+              defaultMessage: 'after {value}',
+              values: {
+                value: formatMillisecond((step.synthetics?.step?.duration.us ?? 0) / 1000, {}),
+              },
+            })
+          : ''}
       </EuiText>
 
       {isExpanded && (

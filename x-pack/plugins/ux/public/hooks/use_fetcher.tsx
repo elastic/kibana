@@ -16,7 +16,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useInspectorContext,
   FETCH_STATUS,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/observability-shared-plugin/public';
 import {
   AutoAbortedAPMClient,
   callApmApi,

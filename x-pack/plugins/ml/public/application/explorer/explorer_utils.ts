@@ -141,7 +141,7 @@ export interface SourceIndicesWithGeoFields {
 // create new job objects based on standard job config objects
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
-    const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+    const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
     return {
       id: job.job_id,
       selected: false,

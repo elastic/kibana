@@ -65,12 +65,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getHostsLandingPageEnableButton() {
-      const container = await testSubjects.find('hostsView-enable-feature-button');
-      return container;
+      return testSubjects.find('hostsView-enable-feature-button');
     },
 
     async clickEnableHostViewButton() {
-      return await testSubjects.click('hostsView-enable-feature-button');
+      return testSubjects.click('hostsView-enable-feature-button');
     },
 
     async getHostsTable() {
@@ -103,22 +102,22 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return cellContent.getVisibleText();
     },
 
-    async getKPIContainer() {
-      return testSubjects.find('hostsView-metricsTrend');
+    async getMetricsTrendContainer() {
+      return testSubjects.find('hostsViewKPIGrid');
     },
 
     async getChartsContainer() {
       return testSubjects.find('hostsView-metricChart');
     },
 
-    // MetricsTtab
+    // Metrics Tab
     async getMetricsTab() {
       return testSubjects.find('hostsView-tabs-metrics');
     },
 
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
-      await metricsTab.click();
+      return metricsTab.click();
     },
 
     async getAllMetricsCharts() {
@@ -144,14 +143,15 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getAllKPITiles() {
-      const container = await this.getKPIContainer();
-      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
+      const container = await this.getMetricsTrendContainer();
+      return container.findAllByCssSelector('[data-test-subj*="hostsViewKPI-"]');
     },
 
     async getKPITileValue(type: string) {
-      const element = await testSubjects.find(`hostsView-metricsTrend-${type}`);
+      const container = await this.getMetricsTrendContainer();
+      const element = await container.findByTestSubject(`hostsViewKPI-${type}`);
       const div = await element.findByClassName('echMetricText__value');
-      return await div.getAttribute('title');
+      return div.getAttribute('title');
     },
 
     // Flyout Tabs

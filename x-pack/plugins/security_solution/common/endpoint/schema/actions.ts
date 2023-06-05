@@ -245,11 +245,20 @@ export const UploadActionRequestSchema = {
     ...BaseActionRequestSchema,
 
     parameters: schema.object({
-      overwrite: schema.maybe(schema.boolean()),
+      overwrite: schema.maybe(schema.boolean({ defaultValue: false })),
     }),
 
     file: schema.stream(),
   }),
 };
 
-export type UploadActionRequestBody = TypeOf<typeof UploadActionRequestSchema.body>;
+/** Type used by the server's API for `upload` action */
+export type UploadActionApiRequestBody = TypeOf<typeof UploadActionRequestSchema.body>;
+
+/**
+ * Type used on the UI side. The `file` definition is different on the UI side, thus the
+ * need for a separate type.
+ */
+export type UploadActionUIRequestBody = Omit<UploadActionApiRequestBody, 'file'> & {
+  file: File;
+};

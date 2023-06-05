@@ -13,12 +13,20 @@ import {
   apmRouter as apmRouterBase,
   ApmRouter,
 } from '../../routing/apm_route_config';
+import { infraLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 const apmRouter = {
   ...apmRouterBase,
   link: (...args: [any]) =>
     `some-basepath/app/apm${apmRouterBase.link(...args)}`,
 } as ApmRouter;
+
+const infraLocators = infraLocatorsMock;
+
+const expectInfraLocatorsToBeCalled = () => {
+  expect(infraLocators.nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
+  expect(infraLocators.logsLocator.getRedirectUrl).toBeCalledTimes(1);
+};
 
 describe('Transaction action menu', () => {
   const basePath = {
@@ -35,6 +43,10 @@ describe('Transaction action menu', () => {
   );
   const location = history.location;
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('shows required sections only', () => {
     const transaction = {
       timestamp,
@@ -48,6 +60,8 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
+        infraLocators,
+        infraLinksAvailable: false,
       })
     ).toEqual([
       [
@@ -59,7 +73,6 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
@@ -92,6 +105,7 @@ describe('Transaction action menu', () => {
         },
       ],
     ]);
+    expectInfraLocatorsToBeCalled();
   });
 
   it('shows pod and required sections only', () => {
@@ -108,6 +122,8 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
+        infraLocators,
+        infraLinksAvailable: true,
       })
     ).toEqual([
       [
@@ -120,7 +136,6 @@ describe('Transaction action menu', () => {
             {
               key: 'podLogs',
               label: 'Pod logs',
-              href: 'some-basepath/app/logs/link-to/pod-logs/123?time=1580986800',
               condition: true,
             },
             {
@@ -139,7 +154,6 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
@@ -172,6 +186,7 @@ describe('Transaction action menu', () => {
         },
       ],
     ]);
+    expectInfraLocatorsToBeCalled();
   });
 
   it('shows host and required sections only', () => {
@@ -188,6 +203,8 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
+        infraLocators,
+        infraLinksAvailable: true,
       })
     ).toEqual([
       [
@@ -199,7 +216,6 @@ describe('Transaction action menu', () => {
             {
               key: 'hostLogs',
               label: 'Host logs',
-              href: 'some-basepath/app/logs/link-to/host-logs/foo?time=1580986800',
               condition: true,
             },
             {
@@ -218,7 +234,6 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
@@ -251,5 +266,6 @@ describe('Transaction action menu', () => {
         },
       ],
     ]);
+    expectInfraLocatorsToBeCalled();
   });
 });

@@ -11,7 +11,7 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiText,
   EuiPopover,
 } from '@elastic/eui';
@@ -77,7 +77,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
   }
 
   if (!startedAt) {
-    startedAt = <EuiLoadingContent lines={1} />;
+    startedAt = <EuiSkeletonText lines={1} />;
   }
 
   return (

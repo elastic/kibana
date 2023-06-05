@@ -139,7 +139,12 @@ export const requestIndexFieldSearch = async (
 
     const patternList = dataView.title.split(',');
     indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
-      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      (acc: string[], doesIndexExist, i) => {
+        if (doesIndexExist) {
+          acc.push(patternList[i]);
+        }
+        return acc;
+      },
       []
     );
 
@@ -152,7 +157,12 @@ export const requestIndexFieldSearch = async (
   } else if ('indices' in request) {
     const patternList = dedupeIndexName(request.indices);
     indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
-      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      (acc: string[], doesIndexExist, i) => {
+        if (doesIndexExist) {
+          acc.push(patternList[i]);
+        }
+        return acc;
+      },
       []
     );
     if (!request.onlyCheckIfIndicesExist) {

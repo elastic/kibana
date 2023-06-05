@@ -40,6 +40,7 @@ export interface EngineViewValues {
   fetchEngineApiStatus: typeof FetchEngineApiLogic.values.status;
   fetchEngineSchemaApiError?: typeof FetchEngineFieldCapabilitiesApiLogic.values.error;
   fetchEngineSchemaApiStatus: typeof FetchEngineFieldCapabilitiesApiLogic.values.status;
+  hasSchemaConflicts: boolean;
   isDeleteModalVisible: boolean;
   isLoadingEngine: boolean;
   isLoadingEngineSchema: boolean;
@@ -78,6 +79,9 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       actions.closeDeleteEngineModal();
       KibanaLogic.values.navigateToUrl(ENGINES_PATH);
     },
+    fetchEngine: ({ engineName }) => {
+      actions.fetchEngineSchema({ engineName });
+    },
   }),
   path: ['enterprise_search', 'content', 'engine_view_logic'],
   reducers: () => ({
@@ -90,6 +94,10 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
     ],
   }),
   selectors: ({ selectors }) => ({
+    hasSchemaConflicts: [
+      () => [selectors.schemaFields],
+      (data: EngineViewValues['schemaFields']) => data.some((f) => f.type === 'conflict'),
+    ],
     isLoadingEngine: [
       () => [selectors.fetchEngineApiStatus, selectors.engineData],
       (status: EngineViewValues['fetchEngineApiStatus'], data: EngineViewValues['engineData']) => {

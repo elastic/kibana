@@ -85,11 +85,13 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/ecs-data-quality-dashboard",
+    "@kbn/elastic-assistant",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
     "@kbn/securitysolution-list-api",
     "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-exception-list-components",
     "@kbn/rison",
@@ -157,6 +159,7 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
-    "@kbn/shared-ux-file-types"
+    "@kbn/field-formats-plugin",
+    "@kbn/dev-proc-runner"
   ]
 }
