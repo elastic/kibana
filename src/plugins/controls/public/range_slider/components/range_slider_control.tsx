@@ -8,14 +8,7 @@
 
 import React, { FC, useState, useRef } from 'react';
 
-import {
-  EuiFieldNumber,
-  EuiText,
-  EuiInputPopover,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiInputPopover, EuiFormControlLayoutDelimited } from '@elastic/eui';
 
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
@@ -23,7 +16,7 @@ import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
 import './range_slider.scss';
 import { ControlError } from '../../control_group/component/control_error_component';
 
-const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
+const RangeSliderInput = () => {};
 
 export const RangeSliderControl: FC = () => {
   const rangeRef = useRef<EuiDualRangeRef>(null);
@@ -55,68 +48,53 @@ export const RangeSliderControl: FC = () => {
   const roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
 
   const button = (
-    <button
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+    <EuiFormControlLayoutDelimited
+      fullWidth
+      isLoading={isLoading}
       className="rangeSliderAnchor__button"
-      data-test-subj={`range-slider-control-${id}`}
-    >
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            controlOnly
-            fullWidth
-            className={`rangeSliderAnchor__fieldNumber ${
-              hasLowerBoundSelection && isInvalid ? INVALID_CLASS : ''
-            }`}
-            value={hasLowerBoundSelection ? lowerBoundValue : ''}
-            onChange={(event) => {
-              rangeSlider.dispatch.setSelectedRange([
-                event.target.value,
-                isNaN(upperBoundValue) ? '' : String(upperBoundValue),
-              ]);
-            }}
-            disabled={isLoading}
-            placeholder={`${hasAvailableRange ? roundedMin : ''}`}
-            isInvalid={isInvalid}
-            data-test-subj="rangeSlider__lowerBoundFieldNumber"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText className="rangeSliderAnchor__delimiter" size="s" color="subdued">
-            →
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            controlOnly
-            fullWidth
-            className={`rangeSliderAnchor__fieldNumber ${
-              hasUpperBoundSelection && isInvalid ? INVALID_CLASS : ''
-            }`}
-            value={hasUpperBoundSelection ? upperBoundValue : ''}
-            onChange={(event) => {
-              rangeSlider.dispatch.setSelectedRange([
-                isNaN(lowerBoundValue) ? '' : String(lowerBoundValue),
-                event.target.value,
-              ]);
-            }}
-            disabled={isLoading}
-            placeholder={`${hasAvailableRange ? roundedMax : ''}`}
-            isInvalid={isInvalid}
-            data-test-subj="rangeSlider__upperBoundFieldNumber"
-          />
-        </EuiFlexItem>
-        {isLoading ? (
-          <EuiFlexItem
-            grow={false}
-            className="rangeSliderAnchor__spinner"
-            data-test-subj="range-slider-loading-spinner"
-          >
-            <EuiLoadingSpinner />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </button>
+      onClick={(event) => {
+        // the popover should remain open if the click target is one of the number inputs
+        if (isPopoverOpen && event.target instanceof HTMLInputElement) {
+          return;
+        }
+        setIsPopoverOpen(!isPopoverOpen);
+      }}
+      startControl={
+        <EuiFieldNumber
+          controlOnly
+          fullWidth
+          className={`rangeSliderAnchor__fieldNumber ${hasLowerBoundSelection}`}
+          value={hasLowerBoundSelection ? lowerBoundValue : ''}
+          onChange={(event) => {
+            rangeSlider.dispatch.setSelectedRange([
+              event.target.value,
+              isNaN(upperBoundValue) ? '' : String(upperBoundValue),
+            ]);
+          }}
+          disabled={isLoading}
+          placeholder={`${hasAvailableRange ? roundedMin : ''}`}
+          isInvalid={isInvalid}
+          data-test-subj="rangeSlider__lowerBoundFieldNumber"
+        />
+      }
+      endControl={
+        <EuiFieldNumber
+          controlOnly
+          fullWidth
+          className={`rangeSliderAnchor__fieldNumber ${hasUpperBoundSelection}`}
+          value={hasUpperBoundSelection ? upperBoundValue : ''}
+          onChange={(event) => {
+            rangeSlider.dispatch.setSelectedRange([
+              isNaN(lowerBoundValue) ? '' : String(lowerBoundValue),
+              event.target.value,
+            ]);
+          }}
+          placeholder={`${hasAvailableRange ? roundedMax : ''}`}
+          isInvalid={isInvalid}
+          data-test-subj="rangeSlider__upperBoundFieldNumber"
+        />
+      }
+    />
   );
 
   return error ? (
