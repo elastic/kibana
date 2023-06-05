@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { pick, sortBy } from 'lodash';
-
-import { Asset, AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
+import { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
-
-const ASSETS_ENDPOINT = '/api/asset-manager/assets';
-const DIFF_ENDPOINT = `${ASSETS_ENDPOINT}/diff`;
-const RELATED_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/related`;
+import { ASSETS_ENDPOINT } from '../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -182,380 +177,32 @@ export default function ({ getService }: FtrProviderContext) {
         // The order of the expected assets is fixed
         expect(getResponse.body.results).to.eql(targetAssets);
       });
-    });
 
-    describe('GET /assets/diff', () => {
-      it('should reject requests that do not include the two time ranges to compare', async () => {
-        const timestamp = new Date().toISOString();
+      it('should reject requests with negative size parameter', async () => {
+        const getResponse = await supertest.get(ASSETS_ENDPOINT).query({ size: -1 }).expect(400);
 
-        let getResponse = await supertest.get(DIFF_ENDPOINT).expect(400);
         expect(getResponse.body.message).to.equal(
-          '[request query.aFrom]: expected value of type [string] but got [undefined]'
+          '[request query]: Failed to validate: \n  in /size: -1 does not match expected type pipe(ToNumber, InRange)\n  in /size: "-1" does not match expected type pipe(undefined, BooleanFromString)'
         );
-
-        getResponse = await supertest.get(DIFF_ENDPOINT).query({ aFrom: timestamp }).expect(400);
-        expect(getResponse.body.message).to.equal(
-          '[request query.aTo]: expected value of type [string] but got [undefined]'
-        );
-
-        getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({ aFrom: timestamp, aTo: timestamp })
-          .expect(400);
-        expect(getResponse.body.message).to.equal(
-          '[request query.bFrom]: expected value of type [string] but got [undefined]'
-        );
-
-        getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({ aFrom: timestamp, aTo: timestamp, bFrom: timestamp })
-          .expect(400);
-        expect(getResponse.body.message).to.equal(
-          '[request query.bTo]: expected value of type [string] but got [undefined]'
-        );
-
-        await supertest
-          .get(DIFF_ENDPOINT)
-          .query({ aFrom: timestamp, aTo: timestamp, bFrom: timestamp, bTo: timestamp })
-          .expect(200);
       });
 
-      it('should reject requests where either time range is moving backwards in time', async () => {
-        const now = new Date();
-        const isoNow = now.toISOString();
-        const oneHourAgo = new Date(now.getTime() - 1000 * 60 * 60 * 1).toISOString();
+      it('should reject requests with size parameter greater than 100', async () => {
+        const getResponse = await supertest.get(ASSETS_ENDPOINT).query({ size: 101 }).expect(400);
 
-        let getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: isoNow,
-            aTo: oneHourAgo,
-            bFrom: isoNow,
-            bTo: isoNow,
-          })
-          .expect(400);
         expect(getResponse.body.message).to.equal(
-          `Time range cannot move backwards in time. "aTo" (${oneHourAgo}) is before "aFrom" (${isoNow}).`
+          '[request query]: Failed to validate: \n  in /size: 101 does not match expected type pipe(ToNumber, InRange)\n  in /size: "101" does not match expected type pipe(undefined, BooleanFromString)'
         );
-
-        getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: isoNow,
-            aTo: isoNow,
-            bFrom: isoNow,
-            bTo: oneHourAgo,
-          })
-          .expect(400);
-        expect(getResponse.body.message).to.equal(
-          `Time range cannot move backwards in time. "bTo" (${oneHourAgo}) is before "bFrom" (${isoNow}).`
-        );
-
-        await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: oneHourAgo,
-            aTo: isoNow,
-            bFrom: oneHourAgo,
-            bTo: isoNow,
-          })
-          .expect(200);
       });
 
-      it('should return the difference in assets present between two time ranges', async () => {
-        const onlyInA = sampleAssetDocs.slice(0, 2);
-        const onlyInB = sampleAssetDocs.slice(sampleAssetDocs.length - 2);
-        const inBoth = sampleAssetDocs.slice(2, sampleAssetDocs.length - 2);
-        const now = new Date();
-        const oneHourAgo = new Date(now.getTime() - 1000 * 60 * 60 * 1);
-        const twoHoursAgo = new Date(now.getTime() - 1000 * 60 * 60 * 2);
-        await createSampleAssets(supertest, {
-          baseDateTime: twoHoursAgo.toISOString(),
-          excludeEans: inBoth.concat(onlyInB).map((asset) => asset['asset.ean']),
-        });
-        await createSampleAssets(supertest, {
-          baseDateTime: oneHourAgo.toISOString(),
-          excludeEans: onlyInA.concat(onlyInB).map((asset) => asset['asset.ean']),
-        });
-        await createSampleAssets(supertest, {
-          excludeEans: inBoth.concat(onlyInA).map((asset) => asset['asset.ean']),
-        });
-
-        const twoHoursAndTenMinuesAgo = new Date(now.getTime() - 1000 * 60 * 130 * 1);
-        const fiftyMinuesAgo = new Date(now.getTime() - 1000 * 60 * 50 * 1);
-        const seventyMinuesAgo = new Date(now.getTime() - 1000 * 60 * 70 * 1);
-        const tenMinutesAfterNow = new Date(now.getTime() + 1000 * 60 * 10);
-
+      it('should reject requests with invalid from and to parameters', async () => {
         const getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: twoHoursAndTenMinuesAgo,
-            aTo: fiftyMinuesAgo,
-            bFrom: seventyMinuesAgo,
-            bTo: tenMinutesAfterNow,
-          })
-          .expect(200);
+          .get(ASSETS_ENDPOINT)
+          .query({ from: 'now_1p', to: 'now_1p' })
+          .expect(400);
 
-        expect(getResponse.body).to.have.property('onlyInA');
-        expect(getResponse.body).to.have.property('onlyInB');
-        expect(getResponse.body).to.have.property('inBoth');
-
-        getResponse.body.onlyInA.forEach((asset: any) => {
-          delete asset['@timestamp'];
-        });
-        getResponse.body.onlyInB.forEach((asset: any) => {
-          delete asset['@timestamp'];
-        });
-        getResponse.body.inBoth.forEach((asset: any) => {
-          delete asset['@timestamp'];
-        });
-
-        const sortByEan = (assets: any[]) => sortBy(assets, (asset) => asset['asset.ean']);
-        expect(sortByEan(getResponse.body.onlyInA)).to.eql(sortByEan(onlyInA));
-        expect(sortByEan(getResponse.body.onlyInB)).to.eql(sortByEan(onlyInB));
-        expect(sortByEan(getResponse.body.inBoth)).to.eql(sortByEan(inBoth));
-      });
-    });
-
-    describe('GET /assets/related', () => {
-      describe('basic validation of all relations', () => {
-        const relations = [
-          {
-            name: 'ancestors',
-            ean: 'k8s.node:node-101',
-            expectedRelatedEans: ['k8s.cluster:cluster-001'],
-          },
-          {
-            name: 'descendants',
-            ean: 'k8s.cluster:cluster-001',
-            expectedRelatedEans: ['k8s.node:node-101', 'k8s.node:node-102', 'k8s.node:node-103'],
-          },
-          {
-            name: 'references',
-            ean: 'k8s.pod:pod-200xrg1',
-            expectedRelatedEans: ['k8s.cluster:cluster-001'],
-          },
-        ];
-
-        relations.forEach((relation) => {
-          it(`should return the ${relation.name} assets`, async () => {
-            await createSampleAssets(supertest);
-
-            const getResponse = await supertest
-              .get(RELATED_ASSETS_ENDPOINT)
-              .query({
-                relation: relation.name,
-                size: sampleAssetDocs.length,
-                from: 'now-1d',
-                ean: relation.ean,
-                maxDistance: 1,
-              })
-              .expect(200);
-
-            const relatedEans = getResponse.body.results[relation.name].map(
-              (asset: Asset) => asset['asset.ean']
-            );
-            expect(relatedEans).to.eql(relation.expectedRelatedEans);
-          });
-        });
-      });
-
-      describe('response validation', () => {
-        it('should return 404 if primary asset not found', async () => {
-          await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'descendants',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: 'non-existing-ean',
-              maxDistance: 5,
-            })
-            .expect(404);
-        });
-
-        it('should return the primary asset', async () => {
-          await createSampleAssets(supertest);
-
-          const sampleCluster = sampleAssetDocs.find(
-            (asset) => asset['asset.id'] === 'cluster-002'
-          );
-
-          const getResponse = await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'descendants',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: sampleCluster!['asset.ean'],
-              maxDistance: 5,
-            })
-            .expect(200);
-
-          const {
-            body: { results },
-          } = getResponse;
-          delete results.primary['@timestamp'];
-          expect(results.primary).to.eql(sampleCluster);
-        });
-
-        it('should return empty assets when none matching', async () => {
-          await createSampleAssets(supertest);
-
-          const sampleCluster = sampleAssetDocs.find(
-            (asset) => asset['asset.id'] === 'cluster-002'
-          );
-
-          const getResponse = await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'descendants',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: sampleCluster!['asset.ean'],
-              maxDistance: 5,
-            })
-            .expect(200);
-
-          const {
-            body: { results },
-          } = getResponse;
-          expect(results).to.have.property('descendants');
-          expect(results.descendants).to.have.length(0);
-        });
-
-        it('breaks circular dependency', async () => {
-          await createSampleAssets(supertest);
-
-          // pods reference a node that references the pods
-          const sampleNode = sampleAssetDocs.find((asset) => asset['asset.id'] === 'pod-203ugg5');
-
-          const getResponse = await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'references',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: sampleNode!['asset.ean'],
-              maxDistance: 5,
-            })
-            .expect(200);
-
-          const {
-            body: { results },
-          } = getResponse;
-          expect(
-            results.references.map((asset: Asset) => pick(asset, ['asset.ean', 'distance']))
-          ).to.eql([
-            { 'asset.ean': 'k8s.node:node-203', distance: 1 },
-            { 'asset.ean': 'k8s.pod:pod-203ugg9', distance: 2 },
-          ]);
-        });
-      });
-
-      describe('no asset.type filters', () => {
-        it('should return all descendants of a provided ean at maxDistance 1', async () => {
-          await createSampleAssets(supertest);
-
-          const sampleCluster = sampleAssetDocs.find(
-            (asset) => asset['asset.id'] === 'cluster-001'
-          );
-
-          const getResponse = await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'descendants',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: sampleCluster!['asset.ean'],
-              maxDistance: 1,
-            })
-            .expect(200);
-
-          const {
-            body: { results },
-          } = getResponse;
-          expect(results.descendants).to.have.length(3);
-          expect(results.descendants.every((asset: { distance: number }) => asset.distance === 1));
-        });
-
-        it('should return all descendants of a provided ean at maxDistance 2', async () => {
-          await createSampleAssets(supertest);
-
-          const sampleCluster = sampleAssetDocs.find(
-            (asset) => asset['asset.id'] === 'cluster-001'
-          );
-
-          const getResponse = await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'descendants',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: sampleCluster!['asset.ean'],
-              maxDistance: 2,
-            })
-            .expect(200);
-
-          const {
-            body: { results },
-          } = getResponse;
-          expect(results.descendants).to.have.length(12);
-        });
-      });
-
-      describe('with asset.type filters', () => {
-        it('should filter by the provided asset type', async () => {
-          await createSampleAssets(supertest);
-
-          const sampleCluster = sampleAssetDocs.find(
-            (asset) => asset['asset.id'] === 'cluster-001'
-          );
-
-          const getResponse = await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'descendants',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: sampleCluster!['asset.ean'],
-              maxDistance: 1,
-              type: ['k8s.pod'],
-            })
-            .expect(200);
-
-          const {
-            body: { results },
-          } = getResponse;
-          expect(results.descendants).to.have.length(0);
-        });
-
-        it('should return all descendants of a provided ean at maxDistance 2', async () => {
-          await createSampleAssets(supertest);
-
-          const sampleCluster = sampleAssetDocs.find(
-            (asset) => asset['asset.id'] === 'cluster-001'
-          );
-
-          const getResponse = await supertest
-            .get(RELATED_ASSETS_ENDPOINT)
-            .query({
-              relation: 'descendants',
-              size: sampleAssetDocs.length,
-              from: 'now-1d',
-              ean: sampleCluster!['asset.ean'],
-              maxDistance: 2,
-              type: ['k8s.pod'],
-            })
-            .expect(200);
-
-          const {
-            body: { results },
-          } = getResponse;
-          expect(results.descendants).to.have.length(9);
-          expect(results.descendants.every((asset: { distance: number }) => asset.distance === 2));
-          expect(results.descendants.every((asset: Asset) => asset['asset.type'] === 'k8s.pod'));
-        });
+        expect(getResponse.body.message).to.equal(
+          '[request query]: Failed to validate: \n  in /from: "now_1p" does not match expected type Date\n  in /from: "now_1p" does not match expected type datemath\n  in /to: "now_1p" does not match expected type Date\n  in /to: "now_1p" does not match expected type datemath'
+        );
       });
     });
   });

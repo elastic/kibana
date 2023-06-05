@@ -11,7 +11,7 @@ import { Router } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { Users } from './users';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -100,6 +100,6 @@ describe('Users - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(TabNavigationWithBreadcrumbs).exists()).toBe(true);
+    expect(wrapper.find(TabNavigation).exists()).toBe(true);
   });
 });

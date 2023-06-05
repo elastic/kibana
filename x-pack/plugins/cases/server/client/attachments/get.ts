@@ -20,7 +20,7 @@ import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } 
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
-  FindCommentsArgsRt,
+  FindCommentsQueryParamsRt,
   CommentType,
   CommentsRt,
   CommentRt,
@@ -112,7 +112,7 @@ export const getAllAlertsAttachToCase = async (
  * Retrieves the attachments for a case entity. This support pagination.
  */
 export async function find(
-  data: FindCommentsArgs,
+  { caseID, findQueryParams }: FindCommentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsFindResponse> {
   const {
@@ -121,11 +121,11 @@ export async function find(
     authorization,
   } = clientArgs;
 
-  const { caseID, queryParams } = decodeWithExcessOrThrow(FindCommentsArgsRt)(data);
-
-  validateFindCommentsPagination(queryParams);
-
   try {
+    const queryParams = decodeWithExcessOrThrow(FindCommentsQueryParamsRt)(findQueryParams);
+
+    validateFindCommentsPagination(queryParams);
+
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findComments);
 

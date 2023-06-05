@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import * as rt from 'io-ts';
 
-export const assetTypeRT = schema.oneOf([
-  schema.literal('k8s.pod'),
-  schema.literal('k8s.cluster'),
-  schema.literal('k8s.node'),
+export const assetTypeRT = rt.union([
+  rt.literal('k8s.pod'),
+  rt.literal('k8s.cluster'),
+  rt.literal('k8s.node'),
 ]);
-export type AssetType = typeof assetTypeRT.type;
+
+export type AssetType = rt.TypeOf<typeof assetTypeRT>;
 
 export type AssetKind = 'cluster' | 'host' | 'pod' | 'container' | 'service';
 export type AssetStatus =
@@ -133,13 +134,13 @@ export interface AssetFilters {
   to?: string;
 }
 
-export const relationRT = schema.oneOf([
-  schema.literal('ancestors'),
-  schema.literal('descendants'),
-  schema.literal('references'),
+export const relationRT = rt.union([
+  rt.literal('ancestors'),
+  rt.literal('descendants'),
+  rt.literal('references'),
 ]);
 
-export type Relation = typeof relationRT.type;
+export type Relation = rt.TypeOf<typeof relationRT>;
 export type RelationField = keyof Pick<
   Asset,
   'asset.children' | 'asset.parents' | 'asset.references'
