@@ -13,7 +13,7 @@ export default defineCypressConfig({
   pageLoadTimeout: 12000,
 
   retries: {
-    runMode: 3,
+    runMode: 1,
     openMode: 0,
   },
 
