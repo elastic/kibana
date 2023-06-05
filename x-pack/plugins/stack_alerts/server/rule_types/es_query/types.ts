@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import { ActionContext } from './action_context';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
@@ -25,6 +24,5 @@ export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   EsQueryRuleState,
   {},
   ActionContext,
-  typeof ActionGroupId,
-  StackAlert
+  typeof ActionGroupId
 >;
