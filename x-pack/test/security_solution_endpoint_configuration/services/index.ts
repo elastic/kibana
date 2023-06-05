@@ -6,16 +6,18 @@
  */
 
 import { services as xPackFunctionalServices } from '../../functional/services';
+import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
-import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
-import { EndpointTestResources } from './endpoint';
+import { EndpointTestResources } from '../../security_solution_endpoint/services/endpoint';
+import { EndpointArtifactsTestResources } from './endpoint_artifacts';
 import { TimelineTestService } from '../../security_solution_ftr/services/timeline';
 import { DetectionsTestService } from '../../security_solution_ftr/services/detections';
 
 export const services = {
   ...xPackFunctionalServices,
   endpointTestResources: EndpointTestResources,
-  telemetryTestResources: EndpointTelemetryTestResourcesProvider,
+  endpointArtifactTestResources: EndpointArtifactsTestResources,
+  policyTestResources: EndpointPolicyTestResourcesProvider,
   ingestManager: IngestManagerProvider,
   timeline: TimelineTestService,
   detections: DetectionsTestService,

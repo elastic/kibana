@@ -6,21 +6,27 @@
  */
 
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
-import { EndpointPageProvider } from './endpoint_page';
+import { EndpointPageProvider } from '../../security_solution_endpoint/page_objects/endpoint_page';
+import { EndpointPolicyPageProvider } from './policy_page';
+import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
+import { FleetIntegrations } from './fleet_integrations_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { HostsPageObject } from '../../security_solution_ftr/page_objects/hosts';
-import { EndpointResponderPageObjects } from './endpoint_responder';
+import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
 import { TimelinePageObject } from '../../security_solution_ftr/page_objects/timeline';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   endpoint: EndpointPageProvider,
+  policy: EndpointPolicyPageProvider,
+  trustedApps: TrustedAppsPageProvider,
+  artifactEntriesList: ArtifactEntriesListPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
+  fleetIntegrations: FleetIntegrations,
   detections: DetectionsPageObject,
   timeline: TimelinePageObject,
   hosts: HostsPageObject,
-  responder: EndpointResponderPageObjects,
 };
