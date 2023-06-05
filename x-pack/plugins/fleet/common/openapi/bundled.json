@@ -5372,10 +5372,13 @@
                   "type": "object",
                   "properties": {
                     "items": {
-                      "type": "object",
-                      "additionalProperties": {
+                      "type": "array",
+                      "items": {
                         "type": "object",
                         "properties": {
+                          "policy_id": {
+                            "type": "string"
+                          },
                           "token": {
                             "type": "string"
                           },
@@ -5384,6 +5387,7 @@
                           }
                         },
                         "required": [
+                          "policy_id",
                           "token"
                         ]
                       }

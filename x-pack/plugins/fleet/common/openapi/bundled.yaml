@@ -3348,15 +3348,18 @@ paths:
                 type: object
                 properties:
                   items:
-                    type: object
-                    additionalProperties:
+                    type: array
+                    items:
                       type: object
                       properties:
+                        policy_id:
+                          type: string
                         token:
                           type: string
                         created_at:
                           type: string
                       required:
+                        - policy_id
                         - token
                   total:
                     type: number
