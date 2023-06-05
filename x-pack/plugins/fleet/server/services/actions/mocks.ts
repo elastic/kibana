@@ -5,11 +5,59 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import { merge } from 'lodash';
+import type { DeepPartial } from 'utility-types';
 import { v4 as uuidV4 } from 'uuid';
 
-import type { FleetAction, FleetActionResponse } from './types';
+import type { FleetActionRequest, FleetActionResult } from './types';
 
-export const generateFleetActionsESResponse = (actions: Array<Partial<FleetAction>>) => {
+export const generateFleetAction = (
+  overrides: DeepPartial<FleetActionRequest> = {}
+): FleetActionRequest => {
+  return merge(
+    {
+      '@timestamp': moment().toISOString(),
+      action_id: uuidV4(),
+      agents: [uuidV4()],
+      expiration: moment().add(1, 'day').toISOString(),
+      data: {},
+      input_type: Math.random().toString(36).slice(2),
+      timeout: 2000,
+      type: 'INPUT_ACTION',
+      user_id: 'elastic',
+    },
+    overrides as FleetActionRequest
+  );
+};
+
+export const generateFleetActionResult = (
+  overrides: DeepPartial<FleetActionResult> = {}
+): FleetActionResult => {
+  return merge(
+    {
+      '@timestamp': moment().toISOString(),
+      action_id: uuidV4(),
+      action_data: {},
+      action_input_type: Math.random().toString(36).slice(2),
+      action_response:
+        overrides.action_input_type === 'endpoint'
+          ? {
+              endpoint: {
+                ack: true,
+              },
+            }
+          : undefined,
+      agent_id: uuidV4(),
+      completed_at: moment().add(1, 'minute').toISOString(),
+      error: undefined,
+      started_at: moment().add(10, 'second').toISOString(),
+    },
+    overrides as FleetActionResult
+  );
+};
+
+export const generateFleetActionsESResponse = (actions: Array<Partial<FleetActionRequest>>) => {
   const hits = actions.map((action) => ({
     _index: '.fleet-actions-7',
     _id: action.action_id || uuidV4(),
@@ -37,7 +85,7 @@ export const generateFleetActionsESResponse = (actions: Array<Partial<FleetActio
 };
 
 export const generateFleetActionsResultsESResponse = (
-  results: Array<Partial<FleetActionResponse>>
+  results: Array<Partial<FleetActionResult>>
 ) => {
   const hits = results.map((result) => ({
     _index: '.ds-.fleet-actions-results-2023.05.29-000001',
@@ -66,8 +114,8 @@ export const generateFleetActionsResultsESResponse = (
 };
 
 export const generateFleetActionsBulkCreateESResponse = (
-  successActions: Array<Partial<FleetAction>>,
-  failedActions: Array<Partial<FleetAction>> = [],
+  successActions: Array<Partial<FleetActionRequest>>,
+  failedActions: Array<Partial<FleetActionRequest>> = [],
   hasErrors = false
 ) => {
   const items = [];

@@ -22,7 +22,7 @@ export interface FleetActionsClientInterface {
    * @throws {FleetActionsError}
    * creates a new action document
    */
-  createAction(action: FleetAction): Promise<ReturnType<typeof createAction>>;
+  create(action: FleetActionRequest): Promise<ReturnType<typeof createAction>>;
 
   /**
    *
@@ -33,7 +33,7 @@ export interface FleetActionsClientInterface {
    * return successfully created actions
    * logs failed actions documents
    */
-  bulkCreateActions(actions: FleetAction[]): Promise<ReturnType<typeof bulkCreateActions>>;
+  bulkCreate(actions: FleetActionRequest[]): Promise<ReturnType<typeof bulkCreateActions>>;
 
   /**
    *
@@ -56,48 +56,54 @@ export interface FleetActionsClientInterface {
   /**
    *
    * @param actionIds
-   * @returns {FleetActionResponse[]}
+   * @returns {FleetActionResult[]}
    * @throws {FleetActionsError}
    * returns action results by action ids
    */
-  getActionResultsByIds(actionIds: string[]): Promise<ReturnType<typeof getActionResultsByIds>>;
+  getResultsByIds(actionIds: string[]): Promise<ReturnType<typeof getActionResultsByIds>>;
 
   /**
    *
    * @param kuery
-   * @returns {FleetActionResponse[]}
+   * @returns {FleetActionResult[]}
    */
-  getActionResultsWithKuery(kuery: string): Promise<ReturnType<typeof getActionResultsWithKuery>>;
+  getResultsWithKuery(kuery: string): Promise<ReturnType<typeof getActionResultsWithKuery>>;
 }
 
-interface CommonFleetActionResponseDocFields {
+interface CommonFleetActionResultDocFields {
   '@timestamp': string;
   action_id: string;
-  data: object;
+  //
+  data?: {
+    [k: string]: unknown;
+  };
 }
 
-export interface FleetAction extends CommonFleetActionResponseDocFields {
+export interface FleetActionRequest extends CommonFleetActionResultDocFields {
   agents: string[];
   expiration: string;
   input_type: string;
-  minimum_execution_duration: number;
-  rollout_duration_seconds: number;
-  signed: {
+  minimum_execution_duration?: number;
+  rollout_duration_seconds?: number;
+  // only endpoint uses this for now
+  signed?: {
     data: string;
     signature: string;
   };
-  start_time: string;
+  start_time?: string;
   timeout: number;
   type: string;
   user_id: string;
+  // allow other fields that are not mapped
+  [k: string]: unknown;
 }
 
-export interface FleetActionResponse extends CommonFleetActionResponseDocFields {
+export interface FleetActionResult extends CommonFleetActionResultDocFields {
   '@timestamp': string;
   action_data: object;
   action_id: string;
   action_input_type: string;
-  action_response: {
+  action_response?: {
     endpoint: {
       ack: boolean;
     };

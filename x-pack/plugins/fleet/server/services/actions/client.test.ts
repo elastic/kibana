@@ -14,6 +14,8 @@ import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
 
 import {
+  generateFleetAction,
+  generateFleetActionResult,
   generateFleetActionsBulkCreateESResponse,
   generateFleetActionsESResponse,
   generateFleetActionsResultsESResponse,
@@ -38,26 +40,23 @@ describe('actions', () => {
     appContextService.stop();
   });
 
-  describe('createAction()', () => {
+  describe('create()', () => {
     it('should create an action', async () => {
-      const action = { action_id: '1', input_type: 'foo' };
-      expect(await fleetActionsClient.createAction(action)).toEqual({
-        ...action,
-        '@timestamp': expect.any(String),
-      });
+      const action = generateFleetAction({ action_id: '1', input_type: 'foo' });
+      expect(await fleetActionsClient.create(action)).toEqual(action);
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `User created Fleet action [id=1]`,
+        message: `User ${action.user_ud} created Fleet action [id=1] with input_type [foo]`,
       });
     });
     it('should throw error when action does not match package name', async () => {
-      const action = { action_id: '1', input_type: 'bar' };
-      expect(async () => await fleetActionsClient.createAction(action)).rejects.toBeInstanceOf(
+      const action = generateFleetAction({ action_id: '1', input_type: 'bar' });
+      expect(async () => await fleetActionsClient.create(action)).rejects.toBeInstanceOf(
         FleetActionsClientError
       );
     });
   });
 
-  describe('bulkCreateActions()', () => {
+  describe('bulkCreate()', () => {
     it('should bulk create actions', async () => {
       const actions = [
         {
@@ -68,22 +67,23 @@ describe('actions', () => {
           action_id: uuidV4(),
           input_type: 'foo',
         },
-      ];
+      ].map(generateFleetAction);
       esClientMock.bulk.mockResolvedValue(generateFleetActionsBulkCreateESResponse(actions));
 
-      expect(await fleetActionsClient.bulkCreateActions(actions)).toEqual(
-        actions.map((action) => ({
-          action: { ...action, '@timestamp': expect.any(String) },
+      expect(await fleetActionsClient.bulkCreate(actions)).toEqual({
+        status: 'success',
+        items: actions.map((action) => ({
           id: action.action_id,
-        }))
-      );
+          status: 'success',
+        })),
+      });
 
       // expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
       //   message: `User created Fleet action [id=${expect.any(String)}]`,
       // });
     });
 
-    it('should bulk create actions and filter out errored documents', async () => {
+    it('should report errored documents', async () => {
       const successActions = [
         {
           action_id: uuidV4(),
@@ -93,26 +93,40 @@ describe('actions', () => {
           action_id: uuidV4(),
           input_type: 'foo',
         },
-      ];
+      ].map(generateFleetAction);
+      const failedActions = [
+        {
+          action_id: uuidV4(),
+          input_type: 'foo',
+        },
+        {
+          action_id: uuidV4(),
+          input_type: 'foo',
+        },
+        {
+          action_id: uuidV4(),
+          input_type: 'foo',
+        },
+      ].map(generateFleetAction);
+
       esClientMock.bulk.mockResolvedValue(
-        generateFleetActionsBulkCreateESResponse(
-          successActions,
-          [
-            {
-              action_id: uuidV4(),
-              input_type: 'foo',
-            },
-          ],
-          true
-        )
+        generateFleetActionsBulkCreateESResponse(successActions, failedActions, true)
       );
 
-      expect(await fleetActionsClient.bulkCreateActions(successActions)).toEqual(
-        successActions.map((action) => ({
-          action: { ...action, '@timestamp': expect.any(String) },
-          id: action.action_id,
-        }))
-      );
+      expect(await fleetActionsClient.bulkCreate([...successActions, ...failedActions])).toEqual({
+        status: 'mixed',
+        items: successActions
+          .map((action) => ({
+            id: action.action_id,
+            status: 'success',
+          }))
+          .concat(
+            failedActions.map((action) => ({
+              id: action.action_id,
+              status: 'error',
+            }))
+          ),
+      });
 
       // expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
       //   message: `User created Fleet action [id=${expect.any(String)}]`,
@@ -128,25 +142,28 @@ describe('actions', () => {
           action_id: '2',
           input_type: 'bar',
         },
-      ];
+      ].map(generateFleetAction);
 
-      expect(
-        async () => await fleetActionsClient.bulkCreateActions(actions)
-      ).rejects.toBeInstanceOf(FleetActionsClientError);
+      expect(async () => await fleetActionsClient.bulkCreate(actions)).rejects.toBeInstanceOf(
+        FleetActionsClientError
+      );
     });
   });
 
   describe('getActionsByIds()', () => {
     it('should get an action by id', async () => {
-      const actions = [{ action_id: '1', input_type: 'foo' }];
+      const actions = [generateFleetAction({ action_id: '1', input_type: 'foo' })];
       esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
 
-      expect(await fleetActionsClient.getActionsByIds(['1'])).toEqual(actions);
+      expect(await fleetActionsClient.getActionsByIds(['1'])).toEqual({
+        items: actions,
+        total: actions.length,
+      });
     });
 
     it('should reject when trying to get an action from a different package', async () => {
       esClientMock.search.mockResponse(
-        generateFleetActionsESResponse([{ action_id: '3', input_type: 'bar' }])
+        generateFleetActionsESResponse([generateFleetAction({ action_id: '3', input_type: 'bar' })])
       );
 
       expect(async () => await fleetActionsClient.getActionsByIds(['3'])).rejects.toBeInstanceOf(
@@ -160,19 +177,19 @@ describe('actions', () => {
       const actions = [
         { action_id: '1', agents: ['agent-1'], input_type: 'foo' },
         { action_id: '2', agents: ['agent-2'], input_type: 'foo' },
-      ];
+      ].map(generateFleetAction);
       esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
 
       expect(
         await fleetActionsClient.getActionsWithKuery('action_id: "1" or action_id: "2"')
-      ).toEqual({ actions, total: actions.length });
+      ).toEqual({ items: actions, total: actions.length });
     });
 
     it('should reject when given kuery results do not match package name', async () => {
       const actions = [
         { action_id: '1', agents: ['agent-1'], input_type: 'foo' },
         { action_id: '2', agents: ['agent-2'], input_type: 'bar' },
-      ];
+      ].map(generateFleetAction);
       esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
 
       expect(
@@ -181,79 +198,56 @@ describe('actions', () => {
     });
   });
 
-  describe('getActionResultsByIds()', () => {
+  describe('getResultsByIds()', () => {
     it('should get action results by action ids', async () => {
-      const actions = [
-        { action_id: 'action-id-1', agents: ['agent-1'], input_type: 'foo' },
-        { action_id: 'action-id-2', agents: ['agent-2'], input_type: 'foo' },
-      ];
-      esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
-
       const results = [
-        { action_id: 'action-id-1', agent_id: 'agent-1', input_type: 'foo' },
-        { action_id: 'action-id-2', agent_id: 'agent-2', input_type: 'foo' },
-      ];
+        { action_id: 'action-id-1', agent_id: 'agent-1', action_input_type: 'foo' },
+        { action_id: 'action-id-2', agent_id: 'agent-2', action_input_type: 'foo' },
+      ].map(generateFleetActionResult);
       esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
 
-      expect(
-        await fleetActionsClient.getActionResultsByIds(['action-id-1', 'action-id-2'])
-      ).toEqual({ actionsResults: results, total: 2 });
+      expect(await fleetActionsClient.getResultsByIds(['action-id-1', 'action-id-2'])).toEqual({
+        items: results,
+        total: 2,
+      });
     });
 
     it('should reject when given package name does not match result', async () => {
-      const actions = [
-        { action_id: 'action-id-21', agents: ['agent-1'], input_type: 'foo' },
-        { action_id: 'action-id-23', agents: ['agent-2'], input_type: 'foo' },
-      ];
-      esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
-
       const results = [
-        { action_id: 'action-id-21', agent_id: 'agent-1', input_type: 'foo' },
-        { action_id: 'action-id-23', agent_id: 'agent-2', input_type: 'bar' },
-      ];
+        { action_id: 'action-id-21', agent_id: 'agent-1', action_input_type: 'foo' },
+        { action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'bar' },
+      ].map(generateFleetActionResult);
       esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
       expect(
-        async () => await fleetActionsClient.getActionResultsByIds(['action-id-1', 'action-id-2'])
+        async () => await fleetActionsClient.getResultsByIds(['action-id-1', 'action-id-2'])
       ).rejects.toBeInstanceOf(FleetActionsClientError);
     });
   });
 
-  describe('getActionResultsWithKuery()', () => {
+  describe('getResultsWithKuery()', () => {
     it('should get action results with kuery', async () => {
-      const actions = [
-        { action_id: 'action-id-21', agents: ['agent-1'], input_type: 'foo' },
-        { action_id: 'action-id-23', agents: ['agent-2'], input_type: 'foo' },
-      ];
-      esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
-
       const results = [
-        { action_id: 'action-id-21', agent_id: 'agent-1', input_type: 'foo' },
-        { action_id: 'action-id-23', agent_id: 'agent-2', input_type: 'foo' },
-      ];
+        { action_id: 'action-id-21', agent_id: 'agent-1', action_input_type: 'foo' },
+        { action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'foo' },
+      ].map(generateFleetActionResult);
       esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
 
       expect(
-        await fleetActionsClient.getActionResultsWithKuery(
+        await fleetActionsClient.getResultsWithKuery(
           'action_id: "action-id-21" or action_id: "action-id-23"'
         )
-      ).toEqual({ actionsResults: results, total: results.length });
+      ).toEqual({ items: results, total: results.length });
     });
 
     it('should reject when given package name does not match result', async () => {
-      const actions = [
-        { action_id: 'action-id-21', agents: ['agent-1'], input_type: 'foo' },
-        { action_id: 'action-id-23', agents: ['agent-2'], input_type: 'foo' },
-      ];
-      esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
-
       const results = [
-        { action_id: 'action-id-21', agent_id: 'agent-1', input_type: 'foo' },
-        { action_id: 'action-id-23', agent_id: 'agent-2', input_type: 'bar' },
-      ];
+        { action_id: 'action-id-21', agent_id: 'agent-1', action_input_type: 'foo' },
+        { action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'bar' },
+      ].map(generateFleetActionResult);
       esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
       expect(
         async () =>
-          await fleetActionsClient.getActionResultsWithKuery(
+          await fleetActionsClient.getResultsWithKuery(
             'action_id: "action-id-21" or action_id: "action-id-23"'
           )
       ).rejects.toBeInstanceOf(FleetActionsClientError);

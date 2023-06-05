@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { FleetActionsClientError } from '../../../common/errors';
 
-import type { FleetActionsClientInterface, FleetAction } from './types';
+import type { FleetActionsClientInterface, FleetActionRequest, FleetActionResult } from './types';
 import {
   createAction,
   bulkCreateActions,
@@ -26,84 +26,62 @@ export class FleetActionsClient implements FleetActionsClientInterface {
     }
   }
 
-  private _verifyPackageName(action: Partial<FleetAction>) {
+  private _verifyAction(action: FleetActionRequest) {
     if (action.input_type !== this.packageName) {
       throw new FleetActionsClientError(
-        `Action package name mismatch. Expected "${this.packageName}" got "${action.input_type}"`
+        `Action package name mismatch. Expected "${this.packageName}" got "${action.input_type}. Action: ${action.action_id}."`
       );
     }
 
     return action;
   }
 
-  async createAction(action: Partial<FleetAction>): Promise<ReturnType<typeof createAction>> {
-    try {
-      const verifiedAction = this._verifyPackageName(action);
-
-      return createAction(this.esClient, verifiedAction);
-    } catch (error) {
-      throw error;
+  private _verifyResult(result: FleetActionResult) {
+    if (result.action_input_type !== this.packageName) {
+      throw new FleetActionsClientError(
+        `Action result package name mismatch. Expected "${this.packageName}" got "${result.action_input_type}". Result: ${result.action_id}`
+      );
     }
+
+    return result;
   }
 
-  async bulkCreateActions(
-    actions: Array<Partial<FleetAction>>
-  ): Promise<ReturnType<typeof bulkCreateActions>> {
-    try {
-      actions.map((action) => this._verifyPackageName(action));
+  async create(action: FleetActionRequest): Promise<ReturnType<typeof createAction>> {
+    const verifiedAction = this._verifyAction(action);
+    return createAction(this.esClient, verifiedAction);
+  }
 
-      return bulkCreateActions(this.esClient, actions);
-    } catch (error) {
-      throw error;
-    }
+  async bulkCreate(actions: FleetActionRequest[]): Promise<ReturnType<typeof bulkCreateActions>> {
+    actions.map((action) => this._verifyAction(action));
+
+    return bulkCreateActions(this.esClient, actions);
   }
 
   async getActionsByIds(ids: string[]): Promise<ReturnType<typeof getActionsByIds>> {
-    try {
-      const actions = await getActionsByIds(this.esClient, ids);
-      actions.every((action) => this._verifyPackageName(action));
+    const actions = await getActionsByIds(this.esClient, ids);
+    actions.items.every((action) => this._verifyAction(action));
 
-      return actions;
-    } catch (error) {
-      throw error;
-    }
+    return actions;
   }
 
   async getActionsWithKuery(kuery: string): Promise<ReturnType<typeof getActionsWithKuery>> {
-    try {
-      const actions = await getActionsWithKuery(this.esClient, kuery);
-      actions.actions.every((action) => this._verifyPackageName(action));
+    const actions = await getActionsWithKuery(this.esClient, kuery);
+    actions.items.every((action) => this._verifyAction(action));
 
-      return actions;
-    } catch (error) {
-      throw error;
-    }
+    return actions;
   }
 
-  async getActionResultsByIds(ids: string[]): Promise<ReturnType<typeof getActionResultsByIds>> {
-    try {
-      const actions = await this.getActionsByIds(ids);
-      actions.map((action) => action.action_id);
-      return getActionResultsByIds(
-        this.esClient,
-        actions.map((action) => action.action_id)
-      );
-    } catch (error) {
-      throw error;
-    }
+  async getResultsByIds(ids: string[]): Promise<ReturnType<typeof getActionResultsByIds>> {
+    const results = await getActionResultsByIds(this.esClient, ids);
+    results.items.every((result) => this._verifyResult(result));
+
+    return results;
   }
 
-  async getActionResultsWithKuery(
-    kuery: string
-  ): Promise<ReturnType<typeof getActionResultsWithKuery>> {
-    try {
-      const results = await getActionResultsWithKuery(this.esClient, kuery);
-      const resultActionIds = results.actionsResults.map((result) => result.action_id);
-      await this.getActionsByIds(resultActionIds);
+  async getResultsWithKuery(kuery: string): Promise<ReturnType<typeof getActionResultsWithKuery>> {
+    const results = await getActionResultsWithKuery(this.esClient, kuery);
+    results.items.every((result) => this._verifyResult(result));
 
-      return results;
-    } catch (error) {
-      throw error;
-    }
+    return results;
   }
 }
