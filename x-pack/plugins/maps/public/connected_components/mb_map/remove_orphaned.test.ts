@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { Map as MbMap, LayerSpecification, SourceSpecification, StyleSpecification } from '@kbn/mapbox-gl';
 import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
@@ -20,21 +22,6 @@ class MockMbMap {
 
   getStyle() {
     return _.cloneDeep(this._style);
-  }
-
-  moveLayer(mbLayerId: string, nextMbLayerId: string) {
-    const indexOfLayerToMove = this._style.layers.findIndex((layer) => {
-      return layer.id === mbLayerId;
-    });
-
-    const layerToMove = this._style.layers[indexOfLayerToMove];
-    this._style.layers.splice(indexOfLayerToMove, 1);
-
-    const indexOfNextLayer = this._style.layers.findIndex((layer) => {
-      return layer.id === nextMbLayerId;
-    });
-
-    this._style.layers.splice(indexOfNextLayer, 0, layerToMove);
   }
 
   removeSource(sourceId: string) {
