@@ -657,7 +657,15 @@
                 "section": "def-server.DataViewsServerPluginStart",
                 "text": "DataViewsServerPluginStart"
               },
-              ">; }; actions?: { setup: ",
+              ">; }; share: { setup: ",
+              {
+                "pluginId": "share",
+                "scope": "server",
+                "docId": "kibSharePluginApi",
+                "section": "def-server.SharePluginSetup",
+                "text": "SharePluginSetup"
+              },
+              "; start: () => Promise<undefined>; }; actions?: { setup: ",
               {
                 "pluginId": "actions",
                 "scope": "server",

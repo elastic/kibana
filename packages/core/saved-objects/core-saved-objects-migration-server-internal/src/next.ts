@@ -140,6 +140,7 @@ export const nextActionMap = (
       Actions.createIndex({
         client,
         indexName: state.tempIndex,
+        aliases: [state.tempIndexAlias],
         mappings: state.tempIndexMappings,
       }),
     READY_TO_REINDEX_SYNC: () =>
@@ -167,7 +168,13 @@ export const nextActionMap = (
     REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
       Actions.bulkOverwriteTransformedDocuments({
         client,
-        index: state.tempIndex,
+        /*
+         * Since other nodes can delete the temp index while we're busy writing
+         * to it, we use the alias to prevent the auto-creation of the index if
+         * it doesn't exist.
+         */
+        index: state.tempIndexAlias,
+        useAliasToPreventAutoCreate: true,
         operations: state.bulkOperationBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up

@@ -7,7 +7,6 @@
 
 import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import expect from '@kbn/expect';
 
@@ -37,7 +36,6 @@ export default ({ getService }: FtrProviderContext) => {
       await supertest
         .post(`/internal/aiops/explain_log_rate_spikes`)
         .set('kbn-xsrf', 'kibana')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send(requestBody)
         .expect(403);
     });
@@ -48,7 +46,6 @@ export default ({ getService }: FtrProviderContext) => {
         headers: {
           'Content-Type': 'application/json',
           'kbn-xsrf': 'stream',
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         body: JSON.stringify(requestBody),
       });

@@ -102,6 +102,7 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
+    tempIndexAlias: '.kibana_7.11.0_reindex_temp_alias',
     excludeOnUpgradeQuery: {
       bool: {
         must_not: [
