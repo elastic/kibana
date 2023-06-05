@@ -12,7 +12,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import type { AcknowledgeResponse } from '.';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -46,6 +45,9 @@ export interface CreateIndexParams {
   aliases?: string[];
   timeout?: string;
 }
+
+export type CreateIndexSuccessResponse = 'create_index_succeeded' | 'index_already_exists';
+
 /**
  * Creates an index with the given mappings
  *
@@ -64,11 +66,11 @@ export const createIndex = ({
   timeout = DEFAULT_TIMEOUT,
 }: CreateIndexParams): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
-  'create_index_succeeded'
+  CreateIndexSuccessResponse
 > => {
   const createIndexTask: TaskEither.TaskEither<
     RetryableEsClientError | ClusterShardLimitExceeded,
-    AcknowledgeResponse
+    CreateIndexSuccessResponse
   > = () => {
     const aliasesObject = aliasArrayToRecord(aliases);
 
@@ -103,31 +105,12 @@ export const createIndex = ({
           },
         },
       })
-      .then((res) => {
-        /**
-         * - acknowledged=false, we timed out before the cluster state was
-         *   updated on all nodes with the newly created index, but it
-         *   probably will be created sometime soon.
-         * - shards_acknowledged=false, we timed out before all shards were
-         *   started
-         * - acknowledged=true, shards_acknowledged=true, index creation complete
-         */
-        return Either.right({
-          acknowledged: Boolean(res.acknowledged),
-          shardsAcknowledged: res.shards_acknowledged,
-        });
+      .then(() => {
+        return Either.right('create_index_succeeded' as const);
       })
       .catch((error) => {
         if (error?.body?.error?.type === 'resource_already_exists_exception') {
-          /**
-           * If the target index already exists it means a previous create
-           * operation had already been started. However, we can't be sure
-           * that all shards were started so return shardsAcknowledged: false
-           */
-          return Either.right({
-            acknowledged: true,
-            shardsAcknowledged: false,
-          });
+          return Either.right('index_already_exists' as const);
         } else if (isClusterShardLimitExceeded(error?.body?.error)) {
           return Either.left({
             type: 'cluster_shard_limit_exceeded' as const,
@@ -143,11 +126,12 @@ export const createIndex = ({
     createIndexTask,
     TaskEither.chain<
       RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
-      AcknowledgeResponse,
-      'create_index_succeeded'
+      CreateIndexSuccessResponse,
+      CreateIndexSuccessResponse
     >((res) => {
       // Systematicaly wait until the target index has a 'green' status meaning
       // the primary (and on multi node clusters) the replica has been started
+      // When the index status is 'green' we know that all shards were started
       // see https://github.com/elastic/kibana/issues/157968
       return pipe(
         waitForIndexStatus({
@@ -156,10 +140,7 @@ export const createIndex = ({
           timeout: DEFAULT_TIMEOUT,
           status: 'green',
         }),
-        TaskEither.map(() => {
-          /** When the index status is 'green' we know that all shards were started */
-          return 'create_index_succeeded';
-        })
+        TaskEither.map(() => res)
       );
     })
   );
