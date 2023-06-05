@@ -53,9 +53,11 @@ async function endTransactionWithFailure(transaction: Transaction | null) {
 export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
-      if (flags.link) {
+      if (flags.link || flags['link-only']) {
         await docLinker({ sourceDir: './x-pack/plugins' }, { log });
-        return;
+        if (flags['link-only']) {
+          return;
+        }
       }
 
       const transaction = apm.startTransaction('build-api-docs', 'kibana-cli');
@@ -438,10 +440,11 @@ export function runBuildApiDocsCli() {
       },
       flags: {
         string: ['plugin', 'stats'],
-        boolean: ['references', 'link'],
+        boolean: ['references', 'link', 'link-only'],
         help: `
           --link             Optionally, search and replace for missing definition in yaml files that
                              have '@kbn-doc-linker partial' as top comment.
+          --link-only        Optionally, only run the link step. This is useful for testing the link
           --plugin           Optionally, run for only a specific plugin
           --stats            Optionally print API stats. Must be one or more of: any, comments or exports.
                              In combination with a single plugin filter this option will skip writing any
