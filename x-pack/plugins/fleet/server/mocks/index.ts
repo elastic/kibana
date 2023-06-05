@@ -121,6 +121,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
+    inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
     getByIDs: jest.fn(),
