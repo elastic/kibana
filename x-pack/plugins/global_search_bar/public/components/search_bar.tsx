@@ -211,7 +211,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       // errors in tracking should not prevent selection behavior
       try {
         if (type === 'application') {
-          const key = selected.keys ?? 'unknown';
+          const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
           trackUiMetric(
             METRIC_TYPE.CLICK,
