@@ -10,8 +10,11 @@
 import { Client } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
 import axios, { AxiosInstance } from 'axios';
+import { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
 import { ApmIndicesConfig } from '../../server/routes/settings/apm_indices/get_apm_indices';
+
+type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export async function initDiagnosticsBundle({
   esHost,
@@ -38,8 +41,10 @@ export async function initDiagnosticsBundle({
   await saveReportToFile({ ...bundle, fleetPackageInfo, kibanaVersion });
 }
 
-async function saveReportToFile(combinedReport: Record<string, any>) {
-  const filename = 'diagnostics-report.json';
+async function saveReportToFile(combinedReport: DiagnosticsBundle) {
+  const filename = `apm-diagnostics-${
+    combinedReport.kibanaVersion
+  }-${Date.now()}.json`;
   await fs.writeFile(filename, JSON.stringify(combinedReport, null, 2), {
     encoding: 'utf8',
     flag: 'w',
