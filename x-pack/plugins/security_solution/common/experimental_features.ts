@@ -16,10 +16,6 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
   kubernetesEnabled: true,
-
-  // TODO:PT remove
-  policyResponseInFleetEnabled: true,
-
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
   alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
