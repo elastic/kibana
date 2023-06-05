@@ -11,7 +11,7 @@ import { pick } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
