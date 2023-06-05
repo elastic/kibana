@@ -81,10 +81,10 @@ describe('ZDT upgrades - basic document migration', () => {
     typeA.modelVersions = {
       ...typeA.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: (doc) => {
               return {
                 document: {
                   ...doc,
@@ -95,12 +95,14 @@ describe('ZDT upgrades - basic document migration', () => {
                 },
               };
             },
-            down: jest.fn(),
           },
-          addedMappings: {
-            someAddedField: { type: 'keyword' },
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              someAddedField: { type: 'keyword' },
+            },
           },
-        },
+        ],
       },
     };
 
@@ -109,10 +111,10 @@ describe('ZDT upgrades - basic document migration', () => {
     typeB.modelVersions = {
       ...typeB.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: (doc) => {
               return {
                 document: {
                   ...doc,
@@ -123,15 +125,14 @@ describe('ZDT upgrades - basic document migration', () => {
                 },
               };
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
       '3': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: (doc) => {
               return {
                 document: {
                   ...doc,
@@ -142,9 +143,8 @@ describe('ZDT upgrades - basic document migration', () => {
                 },
               };
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
     };
 

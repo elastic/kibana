@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
@@ -112,14 +113,16 @@ class InternalEngineTransporter implements Transporter {
 
 interface ConfigurationPopOverProps {
   engineName: string;
+  hasSchemaConflicts: boolean;
   setCloseConfiguration: () => void;
   showConfiguration: boolean;
 }
 
 const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   engineName,
-  showConfiguration,
+  hasSchemaConflicts,
   setCloseConfiguration,
+  showConfiguration,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { engineData } = useValues(EngineViewLogic);
@@ -133,19 +136,22 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
         panelPaddingSize="none"
         closePopover={setCloseConfiguration}
         button={
-          <EuiButtonEmpty
-            color="primary"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={setCloseConfiguration}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
-              {
-                defaultMessage: 'Configuration',
-              }
-            )}
-          </EuiButtonEmpty>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            {hasSchemaConflicts && <EuiIcon type="alert" color="danger" />}
+            <EuiButtonEmpty
+              color="primary"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={setCloseConfiguration}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
+                {
+                  defaultMessage: 'Configuration',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexGroup>
         }
       >
         <EuiContextMenuPanel style={{ width: 300 }}>
@@ -184,7 +190,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           </EuiContextMenuItem>
           <EuiContextMenuItem
             key="Schema"
-            icon="kqlField"
+            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'kqlField'}
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -194,12 +200,20 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               )
             }
           >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema',
-              {
-                defaultMessage: 'Schema',
-              }
-            )}
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.schema"
+                defaultMessage="Schema"
+              />
+              {hasSchemaConflicts && (
+                <EuiText size="s" color="danger">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.schemaConflict"
+                    defaultMessage="Conflict"
+                  />
+                </EuiText>
+              )}
+            </EuiFlexGroup>
           </EuiContextMenuItem>
 
           <EuiPanel color="transparent" paddingSize="s">
@@ -282,8 +296,8 @@ export const EngineSearchPreview: React.FC = () => {
   // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
   // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { resultFields, searchableFields, sortableFields } = useValues(EngineSearchPreviewLogic);
+  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { resultFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
@@ -296,10 +310,9 @@ export const EngineSearchPreview: React.FC = () => {
       hasA11yNotifications: true,
       searchQuery: {
         result_fields: resultFields,
-        search_fields: searchableFields,
       },
     };
-  }, [http, engineName, resultFields, searchableFields]);
+  }, [http, engineName, resultFields]);
 
   if (!engineData) return null;
 
@@ -327,6 +340,7 @@ export const EngineSearchPreview: React.FC = () => {
           <>
             <ConfigurationPopover
               engineName={engineName}
+              hasSchemaConflicts={hasSchemaConflicts}
               showConfiguration={showConfigurationPopover}
               setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
             />
@@ -334,6 +348,7 @@ export const EngineSearchPreview: React.FC = () => {
         ],
       }}
       engineName={engineName}
+      hasSchemaConflicts={hasSchemaConflicts}
     >
       <DocumentProvider>
         <SearchProvider config={config}>
@@ -349,7 +364,7 @@ export const EngineSearchPreview: React.FC = () => {
               <EuiSpacer size="m" />
               <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
-              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+              <EuiLink href={docLinks.searchTemplates} target="_blank">
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
                   defaultMessage="Improve these results"

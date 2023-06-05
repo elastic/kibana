@@ -107,7 +107,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="s">
-                    {formatDate(event.gte, 'MM/DD/YY HH:mm A')}
+                    {formatDate(event.gte, 'MM/DD/YY hh:mm A')}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>

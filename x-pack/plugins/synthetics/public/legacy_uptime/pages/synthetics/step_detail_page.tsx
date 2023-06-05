@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useInitApp } from '../../hooks/use_init_app';
 import { StepDetailContainer } from '../../components/monitor/synthetics/step_detail/step_detail_container';

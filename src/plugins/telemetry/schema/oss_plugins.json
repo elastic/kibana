@@ -8581,12 +8581,6 @@
             "description": "Default value of the setting was changed."
           }
         },
-        "visualize:enableLabs": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "visualization:heatmap:maxBuckets": {
           "type": "long",
           "_meta": {
@@ -9136,6 +9130,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:syntheticsThrottlingEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
@@ -9186,12 +9186,6 @@
         },
         "observability:apmAWSLambdaRequestCostPerMillion": {
           "type": "integer",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:profilingElasticsearchPlugin": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }

@@ -20,20 +20,16 @@ describe('Alerts table APIs', () => {
 
   describe('bulkGetCases', () => {
     it('fetch cases correctly', async () => {
-      const res = await bulkGetCases(
-        http,
-        { ids: ['test-id'], fields: ['title'] },
-        abortCtrl.signal
-      );
+      const res = await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
 
       expect(res).toEqual({ cases: [], errors: [] });
     });
 
     it('should call http with correct arguments', async () => {
-      await bulkGetCases(http, { ids: ['test-id'], fields: ['title'] }, abortCtrl.signal);
+      await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
 
       expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
-        body: '{"ids":["test-id"],"fields":["title"]}',
+        body: '{"ids":["test-id"]}',
         signal: abortCtrl.signal,
       });
     });

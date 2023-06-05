@@ -31,14 +31,16 @@ import {
   ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON,
   actionFormSelector,
   ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON,
+  INDEX_CONNECTOR_COMBO_BOX_INPUT,
 } from '../../screens/common/rule_actions';
-import { COMBO_BOX_INPUT, COMBO_BOX_SELECTION } from '../../screens/common/controls';
+import { COMBO_BOX_SELECTION } from '../../screens/common/controls';
 import type { EmailConnector, IndexConnector } from '../../objects/connector';
 import { getEmailConnector, getIndexConnector } from '../../objects/connector';
 
 export const addSlackRuleAction = (message: string) => {
   cy.get(SLACK_ACTION_BTN).click();
-  cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).clear().type(message);
+  cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).clear();
+  cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).type(message);
 };
 
 export const assertSlackRuleAction = (message: string, position: number = 0) => {
@@ -81,7 +83,7 @@ export const assertEmailRuleAction = (email: string, subject: string) => {
 
 export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(COMBO_BOX_INPUT).type(connector.index);
+  cy.get(INDEX_CONNECTOR_COMBO_BOX_INPUT).type(connector.index);
 
   cy.get(COMBO_BOX_SELECTION).click({ force: true });
 
@@ -100,17 +102,11 @@ export interface RuleActionCustomFrequency {
 }
 
 export const pickSummaryOfAlertsOption = (index = 0) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
-    cy.get(ACTIONS_SUMMARY_BUTTON).click();
-  });
+  cy.get(actionFormSelector(index)).find(ACTIONS_SUMMARY_BUTTON).click();
   cy.get(ACTIONS_SUMMARY_ALERT_BUTTON).click();
 };
 export const pickForEachAlertOption = (index = 0) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
-    cy.get(ACTIONS_SUMMARY_BUTTON).click();
-  });
+  cy.get(actionFormSelector(index)).find(ACTIONS_SUMMARY_BUTTON).click();
   cy.get(ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON).click();
 };
 
@@ -118,45 +114,36 @@ export const pickCustomFrequencyOption = (
   { throttle = 1, throttleUnit = 'h' }: RuleActionCustomFrequency,
   index = 0
 ) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
-    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).click();
-  });
+  cy.get(actionFormSelector(index)).find(ACTIONS_NOTIFY_WHEN_BUTTON).click();
   cy.get(ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON).click();
-  form.within(() => {
+  cy.get(actionFormSelector(index)).within(() => {
     cy.get(ACTIONS_THROTTLE_INPUT).type(`{selectAll}${throttle}`);
     cy.get(ACTIONS_THROTTLE_UNIT_INPUT).select(throttleUnit);
   });
 };
 
 export const pickPerRuleRunFrequencyOption = (index = 0) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
-    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).click();
-  });
+  cy.get(actionFormSelector(index)).find(ACTIONS_NOTIFY_WHEN_BUTTON).click();
   cy.get(ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON).click();
 };
 
 export const assertSelectedSummaryOfAlertsOption = (index = 0) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
-    cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
-  });
+  cy.get(actionFormSelector(index))
+    .find(ACTIONS_SUMMARY_BUTTON)
+    .should('have.text', 'Summary of alerts');
 };
 
 export const assertSelectedForEachAlertOption = (index = 0) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
-    cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'For each alert');
-  });
+  cy.get(actionFormSelector(index))
+    .find(ACTIONS_SUMMARY_BUTTON)
+    .should('have.text', 'For each alert');
 };
 
 export const assertSelectedCustomFrequencyOption = (
   { throttle = 1, throttleUnit = 'h' }: RuleActionCustomFrequency,
   index = 0
 ) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
+  cy.get(actionFormSelector(index)).within(() => {
     cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Custom frequency');
     cy.get(ACTIONS_THROTTLE_INPUT).should('have.value', throttle);
     cy.get(ACTIONS_THROTTLE_UNIT_INPUT).should('have.value', throttleUnit);
@@ -164,8 +151,7 @@ export const assertSelectedCustomFrequencyOption = (
 };
 
 export const assertSelectedPerRuleRunFrequencyOption = (index = 0) => {
-  const form = cy.get(actionFormSelector(index));
-  form.within(() => {
-    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
-  });
+  cy.get(actionFormSelector(index))
+    .find(ACTIONS_NOTIFY_WHEN_BUTTON)
+    .should('have.text', 'Per rule run');
 };

@@ -17,6 +17,7 @@ import {
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';
+import { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -59,7 +60,7 @@ export type RuleEventLogListKPIProps = {
   dateEnd: string;
   outcomeFilter?: string[];
   message?: string;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   namespaces?: Array<string | undefined>;
 } & Pick<RuleApis, 'loadExecutionKPIAggregations' | 'loadGlobalExecutionKPIAggregations'>;
 

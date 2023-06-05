@@ -15,8 +15,7 @@ type RunTaskFnType = RunTaskFn<TaskPayloadCsvFromSavedObject>;
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _logger) => {
   const config = reporting.getConfig();
-  const encryptionKey = config.get('encryptionKey');
-  const csvConfig = config.get('csv');
+  const { encryptionKey, csv: csvConfig } = config;
 
   return async function runTask(jobId, job, cancellationToken, stream) {
     const logger = _logger.get(`execute:${jobId}`);

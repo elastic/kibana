@@ -25,7 +25,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
-  RuleSnoozeSettings,
+  RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -39,11 +39,11 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
-interface RulesSnoozeSettings {
+interface RulesSnoozeSettingsState {
   /**
    * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
    */
-  data: Record<string, RuleSnoozeSettings>;
+  data: RulesSnoozeSettingsMap;
   /**
    * Sets to true during the first data loading
    */
@@ -127,7 +127,7 @@ export interface RulesTableState {
   /**
    * Rules snooze settings for the current rules
    */
-  rulesSnoozeSettings: RulesSnoozeSettings;
+  rulesSnoozeSettings: RulesSnoozeSettingsState;
 }
 
 export type LoadingRuleAction =
@@ -298,7 +298,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules snooze settings
   const {
-    data: rulesSnoozeSettings,
+    data: rulesSnoozeSettingsMap,
     isLoading: isSnoozeSettingsLoading,
     isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
@@ -346,19 +346,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
-  const providerValue = useMemo(() => {
-    const rulesSnoozeSettingsMap =
-      rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
-        map[snoozeSettings.id] = snoozeSettings;
-
-        return map;
-      }, {} as Record<string, RuleSnoozeSettings>) ?? {};
-
-    return {
+  const providerValue = useMemo(
+    () => ({
       state: {
         rules,
         rulesSnoozeSettings: {
-          data: rulesSnoozeSettingsMap,
+          data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
           isFetching: isSnoozeSettingsFetching,
           isError: isSnoozeSettingsFetchError,
@@ -389,32 +382,33 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         }),
       },
       actions,
-    };
-  }, [
-    rules,
-    rulesSnoozeSettings,
-    isSnoozeSettingsLoading,
-    isSnoozeSettingsFetching,
-    isSnoozeSettingsFetchError,
-    page,
-    perPage,
-    total,
-    filterOptions,
-    isPreflightInProgress,
-    isActionInProgress,
-    isAllSelected,
-    isFetched,
-    isFetching,
-    isLoading,
-    isRefetching,
-    isRefreshOn,
-    dataUpdatedAt,
-    loadingRules.ids,
-    loadingRules.action,
-    selectedRuleIds,
-    sortingOptions,
-    actions,
-  ]);
+    }),
+    [
+      rules,
+      rulesSnoozeSettingsMap,
+      isSnoozeSettingsLoading,
+      isSnoozeSettingsFetching,
+      isSnoozeSettingsFetchError,
+      page,
+      perPage,
+      total,
+      filterOptions,
+      isPreflightInProgress,
+      isActionInProgress,
+      isAllSelected,
+      isFetched,
+      isFetching,
+      isLoading,
+      isRefetching,
+      isRefreshOn,
+      dataUpdatedAt,
+      loadingRules.ids,
+      loadingRules.action,
+      selectedRuleIds,
+      sortingOptions,
+      actions,
+    ]
+  );
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;
 };

@@ -50,12 +50,15 @@ describe('links', () => {
 
   const getPlugins = (
     roles: string[],
-    fleetAuthzOverrides: DeepPartial<FleetAuthz> = {}
+    fleetAuthzOverrides: DeepPartial<FleetAuthz> = {},
+    noUserAuthz: boolean = false
   ): StartPlugins => {
     return {
       security: {
         authc: {
-          getCurrentUser: jest.fn().mockReturnValue({ roles }),
+          getCurrentUser: noUserAuthz
+            ? jest.fn().mockReturnValue('')
+            : jest.fn().mockReturnValue({ roles }),
         },
       },
       fleet: {
@@ -85,6 +88,24 @@ describe('links', () => {
 
     const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
     expect(filteredLinks).toEqual(links);
+  });
+
+  it('should not return any endpoint management link for user with all sub-feature privileges when no user authz', async () => {
+    const filteredLinks = await getManagementFilteredLinks(
+      coreMockStarted,
+      getPlugins([], {}, true)
+    );
+    expect(filteredLinks).toEqual(
+      getLinksWithout(
+        SecurityPageName.blocklist,
+        SecurityPageName.endpoints,
+        SecurityPageName.eventFilters,
+        SecurityPageName.hostIsolationExceptions,
+        SecurityPageName.policies,
+        SecurityPageName.responseActionsHistory,
+        SecurityPageName.trustedApps
+      )
+    );
   });
 
   describe('Action Logs', () => {

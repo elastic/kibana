@@ -9,7 +9,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   ConfigKey,
   HeartbeatConfig,
@@ -18,6 +18,7 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -37,14 +38,18 @@ export class SyntheticsPrivateLocation {
     this.server = _server;
   }
 
-  async buildNewPolicy(
-    savedObjectsClient: SavedObjectsClientContract
-  ): Promise<NewPackagePolicy | undefined> {
-    return await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
+  async buildNewPolicy(savedObjectsClient: SavedObjectsClientContract): Promise<NewPackagePolicy> {
+    const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
       savedObjectsClient,
       'synthetics',
       this.server.logger
     );
+
+    if (!newPolicy) {
+      throw new Error(`Unable to create Synthetics package policy template for private location`);
+    }
+
+    return newPolicy;
   }
 
   getPolicyId(config: HeartbeatConfig, locId: string, spaceId: string) {
@@ -86,9 +91,10 @@ export class SyntheticsPrivateLocation {
         {
           ...(config as Partial<MonitorFields>),
           config_id: config.fields?.config_id,
-          location_name: privateLocation.label,
-          'monitor.project.id': config.fields?.['monitor.project.name'],
-          'monitor.project.name': config.fields?.['monitor.project.name'],
+          location_name: stringifyString(privateLocation.label),
+          location_id: privateLocation.id,
+          'monitor.project.id': stringifyString(config.fields?.['monitor.project.name']),
+          'monitor.project.name': stringifyString(config.fields?.['monitor.project.name']),
         },
         globalParams
       );
@@ -128,10 +134,6 @@ export class SyntheticsPrivateLocation {
     const newPolicies: NewPackagePolicyWithId[] = [];
 
     const newPolicyTemplate = await this.buildNewPolicy(savedObjectsClient);
-
-    if (!newPolicyTemplate) {
-      throw new Error(`Unable to create Synthetics package policy for private location`);
-    }
 
     for (const { config, globalParams } of configs) {
       try {
@@ -186,6 +188,51 @@ export class SyntheticsPrivateLocation {
     }
   }
 
+  async inspectPackagePolicy({
+    privateConfig,
+    savedObjectsClient,
+    spaceId,
+    allPrivateLocations,
+  }: {
+    privateConfig?: PrivateConfig;
+    savedObjectsClient: SavedObjectsClientContract;
+    allPrivateLocations: PrivateLocation[];
+    spaceId: string;
+  }) {
+    if (!privateConfig) {
+      return null;
+    }
+    const newPolicyTemplate = await this.buildNewPolicy(savedObjectsClient);
+
+    const { config, globalParams } = privateConfig;
+    try {
+      const { locations } = config;
+
+      const privateLocation = locations.find((loc) => !loc.isServiceManaged);
+
+      const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
+
+      const newPolicy = this.generateNewPolicy(
+        config,
+        location,
+        savedObjectsClient,
+        newPolicyTemplate,
+        spaceId,
+        globalParams
+      );
+
+      const pkgPolicy = {
+        ...newPolicy,
+        id: this.getPolicyId(config, location.id, spaceId),
+      } as NewPackagePolicyWithId;
+
+      return await this.server.fleet.packagePolicyService.inspect(savedObjectsClient, pkgPolicy);
+    } catch (e) {
+      this.server.logger.error(e);
+      return null;
+    }
+  }
+
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     request: KibanaRequest,
@@ -203,10 +250,6 @@ export class SyntheticsPrivateLocation {
     );
 
     const newPolicyTemplate = await this.buildNewPolicy(savedObjectsClient);
-
-    if (!newPolicyTemplate) {
-      throw new Error(`Unable to create Synthetics package policy for private location`);
-    }
 
     const policiesToUpdate: NewPackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];

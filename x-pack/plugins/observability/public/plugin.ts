@@ -49,15 +49,15 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
-import { registerDataHandler } from './data_handler';
+import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
-import { createCallObservabilityApi } from './services/call_observability_api';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
@@ -186,15 +186,19 @@ export class Plugin
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
-    createCallObservabilityApi(coreSetup.http);
-
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    const locator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
 
-    pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
+    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
+      new RuleDetailsLocatorDefinition()
+    );
+
+    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
+      new SloDetailsLocatorDefinition()
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -314,7 +318,9 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      rulesLocator: locator,
+      rulesLocator,
+      ruleDetailsLocator,
+      sloDetailsLocator,
     };
   }
 

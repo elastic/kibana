@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleSnoozeSettings } from '../../logic';
+import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useFetchRulesSnoozeSettings } from '../../api/hooks/use_fetch_rules_snooze_settings';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
@@ -26,7 +26,7 @@ export function useRuleSnoozeSettings(id: string): UseRuleSnoozeSettingsResult {
   } = useFetchRulesSnoozeSettings([id], {
     enabled: !rulesTableSnoozeSettings?.data[id] && !rulesTableSnoozeSettings?.isFetching,
   });
-  const snoozeSettings = rulesTableSnoozeSettings?.data[id] ?? rulesSnoozeSettings?.[0];
+  const snoozeSettings = rulesTableSnoozeSettings?.data[id] ?? rulesSnoozeSettings?.[id];
   const isFetching = rulesTableSnoozeSettings?.isFetching || isSingleSnoozeSettingsFetching;
   const isError = rulesTableSnoozeSettings?.isError || isSingleSnoozeSettingsError;
 

@@ -12,8 +12,8 @@ import type { ChromeNavigationNodeViewModel, PlatformSectionConfig } from '../..
  * Navigation node parser. It filers out the nodes disabled through config and
  * sets the `path` of each of the nodes.
  *
- * @param items Navigation nodes
- * @param platformConfig Configuration with flags to disable nodes in the navigation tree
+ * @param navItems Navigation nodes
+ * @param platformSectionConfig Configuration with flags to disable nodes in the navigation tree
  *
  * @returns The navigation tree filtered
  */

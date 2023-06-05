@@ -8,12 +8,21 @@
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
+import { BehaviorSubject } from 'rxjs';
 import { ChromeNavigationViewModel, NavigationServices } from '../../types';
 
 type Arguments = ChromeNavigationViewModel & NavigationServices;
 export type Params = Pick<
   Arguments,
-  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'navigationTree'
+  | 'activeNavItemId'
+  | 'loadingCount$'
+  | 'navIsOpen'
+  | 'navigationTree'
+  | 'platformConfig'
+  | 'recentlyAccessed$'
+  | 'navLinks$'
+  | 'recentlyAccessedFilter'
+  | 'onProjectNavigationChange'
 >;
 
 export class StorybookMock extends AbstractStorybookMock<
@@ -27,17 +36,11 @@ export class StorybookMock extends AbstractStorybookMock<
       control: 'boolean',
       defaultValue: true,
     },
-    loadingCount: {
-      control: 'number',
-      defaultValue: 0,
-    },
   };
 
   dependencies = [];
 
   getServices(params: Params): NavigationServices {
-    const { navIsOpen } = params;
-
     const navAction = action('Navigate to');
     const navigateToUrl = (url: string) => {
       navAction(url);
@@ -48,7 +51,10 @@ export class StorybookMock extends AbstractStorybookMock<
       ...params,
       basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
       navigateToUrl,
-      navIsOpen,
+      loadingCount$: params.loadingCount$ ?? new BehaviorSubject(0),
+      recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
+      navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
+      onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
     };
   }
 
@@ -57,6 +63,7 @@ export class StorybookMock extends AbstractStorybookMock<
       ...params,
       homeHref: '#',
       linkToCloud: 'projects',
+      recentlyAccessedFilter: params.recentlyAccessedFilter,
     };
   }
 }
