@@ -277,7 +277,8 @@ max(system.network.in.bytes, reducedTimeRange="30m")
         defaultMessage: 'Kibana context',
       }),
       i18n.translate('xpack.lens.formulaDocumentation.constantsSectionDescription', {
-        defaultMessage: 'Functions used to retrieve Kibana context variables.',
+        defaultMessage:
+          'These functions are used to retrieve Kibana context variables, which are the date histogram `interval`, the current `now` and the selected `time_range` and help you to compute date math operations.',
       }),
       constantsOperations,
       operationDefinitionMap

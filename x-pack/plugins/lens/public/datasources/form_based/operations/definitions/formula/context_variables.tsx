@@ -91,7 +91,7 @@ export const timeRangeOperation = createContextValueBasedOperation<TimeRangeInde
   label: 'Time range',
   description: i18n.translate('xpack.lens.indexPattern.timeRange.documentation.markdown', {
     defaultMessage: `
-The current time range expressed in milliseconds (ms).
+The specified time range, in milliseconds (ms).
     `,
   }),
   getContextValue: getTimeRangeFromContext,
@@ -176,7 +176,7 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
   label: 'Date histogram interval',
   description: i18n.translate('xpack.lens.indexPattern.interval.documentation.markdown', {
     defaultMessage: `
-  The current date histogram interval bucket expressed in milliseconds (ms).
+The specified minimum interval for the date histogram, in milliseconds (ms).
       `,
   }),
   getContextValue: getIntervalFromContext,
