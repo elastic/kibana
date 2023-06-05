@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { merge, omit } from 'lodash';
+import { ConfigType } from '../../..';
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
 import { getApmPolicy } from './get_apm_policy';
 
@@ -38,11 +39,43 @@ async function createIngestAPIKey(esClient: ElasticsearchClient) {
   return atob(apiKeyResponse.encoded);
 }
 
+export function generateSecretToken() {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < 16; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters.charAt(randomIndex);
+  }
+
+  return result;
+}
+
+export function getVarsFor(config: ConfigType) {
+  const configKeys = Object.keys(config) as Array<keyof ConfigType>;
+  const hasSecretToken = configKeys.some((key) => key === 'secret_token');
+  if (!hasSecretToken) {
+    configKeys.push('secret_token');
+  }
+
+  return configKeys.reduce<
+    Partial<Record<keyof ConfigType, { type: 'text' | 'bool'; value: any }>>
+  >((acc, currKey) => {
+    const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
+    const type = typeof value === 'boolean' ? 'bool' : 'text';
+    return {
+      ...acc,
+      [currKey]: { type, value },
+    };
+  }, {});
+}
+
 export function getFleetPolicyStep({
   client,
   soClient,
   logger,
   packagePolicyClient,
+  config,
 }: ProfilingSetupStepFactoryOptions): ProfilingSetupStep {
   const esClient = client.getEsClient();
   return {
@@ -125,6 +158,7 @@ export function getFleetPolicyStep({
               enabled: true,
               streams: [],
               type: 'pf-elastic-symbolizer',
+              vars: config?.simbolizer ? getVarsFor(config.simbolizer) : {},
             },
           ],
         },
@@ -149,6 +183,7 @@ export function getFleetPolicyStep({
               enabled: true,
               streams: [],
               type: 'pf-elastic-collector',
+              vars: config?.collector ? getVarsFor(config.collector) : {},
             },
           ],
         },

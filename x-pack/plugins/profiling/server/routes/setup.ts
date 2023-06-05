@@ -58,6 +58,7 @@ export function registerSetupRoute({
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+          config: dependencies.config.config,
         });
 
         const hasDataPromise = hasProfilingData({
@@ -105,7 +106,6 @@ export function registerSetupRoute({
       validate: {},
     },
     async (context, request, response) => {
-      console.log('#### dep', dependencies.config);
       try {
         const esClient = await getClient(context);
         logger.info('Applying initial setup of Elasticsearch resources');
@@ -116,6 +116,7 @@ export function registerSetupRoute({
           soClient: (await context.core).savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+          config: dependencies.config.config,
         });
 
         await eachSeries(steps, (step, cb) => {
