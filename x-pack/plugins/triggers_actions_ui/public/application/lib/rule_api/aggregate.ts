@@ -17,7 +17,6 @@ import { LoadRuleAggregationsProps, LoadRuleTagsProps, rewriteBodyRes, rewriteTa
 // TODO: https://github.com/elastic/kibana/issues/131682
 export async function loadRuleTags({
   http,
-  searchText,
   filter,
   after,
 }: LoadRuleTagsProps): Promise<RuleTagsAggregationFormattedResult> {
@@ -28,10 +27,9 @@ export async function loadRuleTags({
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_tags`,
     {
       query: {
-        search: searchText,
         after: after ? JSON.stringify(after) : undefined,
         ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
-        max_tags: 100,
+        max_tags: 10,
       }
     }
   );

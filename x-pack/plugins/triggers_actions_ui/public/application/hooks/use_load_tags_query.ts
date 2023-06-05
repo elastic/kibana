@@ -16,13 +16,14 @@ interface UseLoadTagsQueryProps {
   enabled: boolean;
   refresh?: Date;
   filter?: LoadRuleTagsProps['filter'];
-  searchText?: LoadRuleTagsProps['searchText'];
 }
 
 const EMPTY_TAGS: string[] = [];
 
+// React query will refetch all prev pages:
+// https://github.com/TanStack/query/discussions/3576
 export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
-  const { enabled, refresh, searchText, filter } = props;
+  const { enabled, refresh, filter } = props;
 
   const {
     http,
@@ -32,7 +33,6 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
   const queryFn = ({ pageParam: after }: { pageParam?: LoadRuleTagsProps['after'] }) => {
     return loadRuleTags({
       http,
-      searchText,
       filter,
       ...(after ? { after } : {}),
     });
@@ -49,7 +49,6 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
   const { refetch, data, fetchNextPage, isLoading, isFetching } = useInfiniteQuery({
     queryKey: [
       'loadRuleTags',
-      searchText,
       filter,
       {
         refresh: refresh?.toISOString(),
@@ -69,8 +68,6 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
       }, []) || EMPTY_TAGS
     );
   }, [data]);
-
-  console.info('data', data);
 
   return {
     tags,
