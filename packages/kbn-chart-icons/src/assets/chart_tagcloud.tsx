@@ -15,7 +15,7 @@ export const IconChartTagcloud: FunctionComponent = ({
   titleId,
   ...props
 }: Omit<EuiIconProps, 'type'>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="22" viewBox="0 0 30 22">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="22" viewBox="0 0 30 22" {...props}>
     {title ? <title id={titleId} /> : null}
     <path
       d="M19 5a2 2 0 0 1 2-2h4a2 2 0 1 1 0 4h-4a2 2 0 0 1-2-2ZM2 11a2 2 0 0 1 2-2h8a2 2 0 1 1 0 4H4a2 2 0 0 1-2-2Zm15 4a2 2 0 1 0 0 4h6a2 2 0 1 0 0-4h-6Z"
