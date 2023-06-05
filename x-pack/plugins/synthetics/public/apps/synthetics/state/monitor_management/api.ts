@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitor,
@@ -21,6 +22,23 @@ export const createMonitorAPI = async ({
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+};
+
+export interface MonitorInspectResponse {
+  publicConfigs: any[];
+  privateConfig: PackagePolicy | null;
+}
+
+export const inspectMonitorAPI = async ({
+  monitor,
+  hideParams,
+}: {
+  hideParams?: boolean;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+}): Promise<{ result: MonitorInspectResponse; decodedCode: string }> => {
+  return await apiService.post(API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, undefined, {
+    hideParams,
+  });
 };
 
 export const updateMonitorAPI = async ({

@@ -52,6 +52,28 @@ export default function ({ getService }: FtrProviderContext) {
       modelTypes: ['regression', 'tree_ensemble'],
     };
 
+    describe('for ML user with read-only access', () => {
+      before(async () => {
+        await ml.securityUI.loginAsMlViewer();
+        await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
+      });
+
+      after(async () => {
+        await ml.securityUI.logout();
+      });
+
+      it('renders expanded row content correctly for model with pipelines', async () => {
+        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineData.modelId);
+        await ml.trainedModelsTable.assertDetailsTabContent();
+        await ml.trainedModelsTable.assertInferenceConfigTabContent();
+        await ml.trainedModelsTable.assertStatsTabContent();
+        await ml.trainedModelsTable.assertPipelinesTabContent(true, [
+          { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
+        ]);
+      });
+    });
+
     describe('for ML power user', () => {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
@@ -138,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('displays a model with an ingest pipeline and delete action is disabled', async () => {
+      it('displays a model with an ingest pipeline and model can be deleted with associated ingest pipelines', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithPipelineData.modelId, 1);
 
@@ -152,10 +174,20 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await ml.testExecution.logTestStep(
-          'should show disabled delete action for the model in the table'
+          'should show enabled delete action for the model in the table'
         );
 
         await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(
+          modelWithPipelineData.modelId,
+          true
+        );
+
+        await ml.testExecution.logTestStep('should show the delete modal');
+        await ml.trainedModelsTable.clickDeleteAction(modelWithPipelineData.modelId);
+
+        await ml.testExecution.logTestStep('should delete the model with pipelines');
+        await ml.trainedModelsTable.confirmDeleteModel(true);
+        await ml.trainedModelsTable.assertModelDisplayedInTable(
           modelWithPipelineData.modelId,
           false
         );
@@ -222,28 +254,6 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.trainedModelsTable.deleteModel(model.id);
           });
         }
-      });
-    });
-
-    describe('for ML user with read-only access', () => {
-      before(async () => {
-        await ml.securityUI.loginAsMlViewer();
-        await ml.navigation.navigateToTrainedModels();
-        await ml.commonUI.waitForRefreshButtonEnabled();
-      });
-
-      after(async () => {
-        await ml.securityUI.logout();
-      });
-
-      it('renders expanded row content correctly for model with pipelines', async () => {
-        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineData.modelId);
-        await ml.trainedModelsTable.assertDetailsTabContent();
-        await ml.trainedModelsTable.assertInferenceConfigTabContent();
-        await ml.trainedModelsTable.assertStatsTabContent();
-        await ml.trainedModelsTable.assertPipelinesTabContent(true, [
-          { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
-        ]);
       });
     });
   });
