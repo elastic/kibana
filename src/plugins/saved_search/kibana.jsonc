@@ -8,10 +8,14 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "data"
+      "data",
+      "contentManagement"
+    ],
+    "optionalPlugins": [
+      "spaces",
+      "savedObjectsTaggingOss"
     ],
     "requiredBundles": [
-      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common"
