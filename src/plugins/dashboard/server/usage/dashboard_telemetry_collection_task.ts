@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Logger, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/server';
 import moment from 'moment';
+
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
 
 import {
   controlsCollectorFactory,
@@ -23,7 +24,7 @@ import {
 } from './dashboard_telemetry';
 import { injectReferences } from '../../common';
 import { DashboardAttributesAndReferences } from '../../common/types';
-import { SavedDashboardPanel } from '../../common/content_management';
+import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
@@ -131,7 +132,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           const esClient = await getEsClient();
 
           let result = await esClient.search<{
-            dashboard: SavedObjectAttributes;
+            dashboard: DashboardAttributes;
             references: SavedObjectReference[];
           }>(searchParams);
 

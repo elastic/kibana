@@ -8,17 +8,12 @@
 
 import { isEmpty } from 'lodash';
 
-import {
-  type ControlGroupTelemetry,
-  CONTROL_GROUP_TYPE,
-  RawControlGroupAttributes,
-} from '@kbn/controls-plugin/common';
-import { SavedObjectAttributes } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import { type ControlGroupTelemetry, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 
-import { SavedDashboardPanel } from '../../common/content_management';
+import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 import { TASK_ID, DashboardTelemetryTaskState } from './dashboard_telemetry_collection_task';
 export interface DashboardCollectorData {
   panels: {
@@ -92,13 +87,11 @@ export const collectPanelsByType = (
 
 export const controlsCollectorFactory =
   (embeddableService: EmbeddablePersistableStateService) =>
-  (attributes: SavedObjectAttributes, collectorData: DashboardCollectorData) => {
-    const controlGroupAttributes: RawControlGroupAttributes | undefined =
-      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
-    if (!isEmpty(controlGroupAttributes)) {
+  (attributes: DashboardAttributes, collectorData: DashboardCollectorData) => {
+    if (!isEmpty(attributes.controlGroupInput)) {
       collectorData.controls = embeddableService.telemetry(
         {
-          ...controlGroupAttributes,
+          ...attributes.controlGroupInput,
           type: CONTROL_GROUP_TYPE,
           id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
         },
