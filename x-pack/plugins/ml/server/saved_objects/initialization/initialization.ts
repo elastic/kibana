@@ -113,13 +113,13 @@ export function jobSavedObjectsInitializationFactory(
       const adJobs = await client.asInternalUser.ml.getJobs();
       adJobsCount = adJobs.count;
     } catch (error) {
-      // ignore errors as anomaly detection may not be enabled
+      mlLog.debug(`Error fetching ML anomaly detection jobs ${JSON.stringify(error)}`);
     }
     try {
       const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
       dfaJobsCount = dfaJobs.count;
     } catch (error) {
-      // ignore errors as data frame analytics may not be enabled
+      mlLog.debug(`Error fetching ML data frame analytics jobs ${JSON.stringify(error)}`);
     }
     return adJobsCount > 0 || dfaJobsCount > 0;
   }
