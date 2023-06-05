@@ -74,6 +74,9 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
+    thresholdRule: {
+      enabled: boolean;
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;

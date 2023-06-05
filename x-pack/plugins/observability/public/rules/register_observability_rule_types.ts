@@ -53,31 +53,36 @@ export const registerObservabilityRuleTypes = (
       }
     ),
   });
-  observabilityRuleTypeRegistry.register({
-    id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-    description: i18n.translate('xpack.observability.threshold.rule.alertFlyout.alertDescription', {
-      defaultMessage: '[NEW OBSERVABILITY] - Alert when threshold breached.',
-    }),
-    iconClass: 'bell',
-    documentationUrl(docLinks) {
-      return `${docLinks.links.observability.metricsThreshold}`;
-    },
-    ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
-    validate: validateMetricThreshold,
-    defaultActionMessage: i18n.translate(
-      'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+  if (config.unsafe.thresholdRule.enabled) {
+    observabilityRuleTypeRegistry.register({
+      id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+      description: i18n.translate(
+        'xpack.observability.threshold.rule.alertFlyout.alertDescription',
+        {
+          defaultMessage: '[NEW OBSERVABILITY] - Alert when threshold breached.',
+        }
+      ),
+      iconClass: 'bell',
+      documentationUrl(docLinks) {
+        return `${docLinks.links.observability.metricsThreshold}`;
+      },
+      ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
+      validate: validateMetricThreshold,
+      defaultActionMessage: i18n.translate(
+        'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
+        {
+          defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
   
   Reason:
   \\{\\{context.reason\\}\\}
   `,
-      }
-    ),
-    requiresAppContext: false,
-    format: formatReason,
-    alertDetailsAppSection: lazy(
-      () => import('../pages/threshold/components/alert_details_app_section')
-    ),
-  });
+        }
+      ),
+      requiresAppContext: false,
+      format: formatReason,
+      alertDetailsAppSection: lazy(
+        () => import('../pages/threshold/components/alert_details_app_section')
+      ),
+    });
+  }
 };

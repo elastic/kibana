@@ -57,25 +57,27 @@ export function registerRuleTypes(
   );
 
   // Threshold RULE
-  const ruleDataClientThreshold = ruleDataService.initializeIndex({
-    feature: thresholdFeatureId,
-    registrationContext: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-    dataset: Dataset.alerts,
-    componentTemplateRefs: [],
-    componentTemplates: [
-      {
-        name: 'mappings',
-        mappings: mappingFromFieldMap({ ...legacyExperimentalFieldMap }, 'strict'),
-      },
-    ],
-  });
+  if (config.unsafe.thresholdRule.enabled) {
+    const ruleDataClientThreshold = ruleDataService.initializeIndex({
+      feature: thresholdFeatureId,
+      registrationContext: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap({ ...legacyExperimentalFieldMap }, 'strict'),
+        },
+      ],
+    });
 
-  const createLifecycleRuleExecutorThreshold = createLifecycleExecutor(
-    logger.get('rules'),
-    ruleDataClientThreshold
-  );
+    const createLifecycleRuleExecutorThreshold = createLifecycleExecutor(
+      logger.get('rules'),
+      ruleDataClientThreshold
+    );
 
-  alertingPlugin.registerType(
-    thresholdRuleType(createLifecycleRuleExecutorThreshold, basePath, config, logger)
-  );
+    alertingPlugin.registerType(
+      thresholdRuleType(createLifecycleRuleExecutorThreshold, basePath, config, logger)
+    );
+  }
 }
