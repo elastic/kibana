@@ -242,9 +242,8 @@ export const getManagementFilteredLinks = async (
   const currentUser = await plugins.security.authc.getCurrentUser();
   const {
     canReadActionsLogManagement,
-    canWriteHostIsolationExceptions,
+    canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
-    canDeleteHostIsolationExceptions,
     canReadEndpointList,
     canReadTrustedApplications,
     canReadEventFilters,
@@ -256,11 +255,10 @@ export const getManagementFilteredLinks = async (
       : getEndpointAuthzInitialState();
 
   const showHostIsolationExceptions =
-    canWriteHostIsolationExceptions || // full host isolation exceptions payment feature, always show the link.
-    // read and delete host isolation exceptions are not part of the payment feature to allow releasing hosts after a downgrade scenario.
-    // however, in this scenario we only allow access when there is data, otherwise the link won't exist.
+    canAccessHostIsolationExceptions || // access host isolation exceptions payment feature, always show the link.
+    // read host isolation exceptions is not a payment feature, to allow deleting exceptions after a downgrade scenario.
+    // however, in this situation we allow to read only when there is data, otherwise the link won't be accessible.
     (canReadHostIsolationExceptions &&
-      canDeleteHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
   const linksToExclude: SecurityPageName[] = [];

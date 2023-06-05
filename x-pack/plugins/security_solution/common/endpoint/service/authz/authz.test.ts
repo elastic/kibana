@@ -78,12 +78,13 @@ describe('Endpoint Authz service', () => {
       );
     });
 
-    it(`should allow Host Isolation Exception read/delete when license is not Platinum+, but entries exist`, () => {
+    it(`should allow Host Isolation Exception read/delete when license is not Platinum+`, () => {
       licenseService.isPlatinumPlus.mockReturnValue(false);
 
       expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)).toEqual(
         expect.objectContaining({
           canWriteHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
           canReadHostIsolationExceptions: true,
           canDeleteHostIsolationExceptions: true,
         })
@@ -137,6 +138,7 @@ describe('Endpoint Authz service', () => {
       ['canWriteTrustedApplications', 'writeTrustedApplications'],
       ['canReadTrustedApplications', 'readTrustedApplications'],
       ['canWriteHostIsolationExceptions', 'writeHostIsolationExceptions'],
+      ['canAccessHostIsolationExceptions', 'accessHostIsolationExceptions'],
       ['canReadHostIsolationExceptions', 'readHostIsolationExceptions'],
       ['canDeleteHostIsolationExceptions', 'deleteHostIsolationExceptions'],
       ['canWriteBlocklist', 'writeBlocklist'],
@@ -166,6 +168,7 @@ describe('Endpoint Authz service', () => {
       ['canWriteTrustedApplications', ['writeTrustedApplications']],
       ['canReadTrustedApplications', ['readTrustedApplications']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
+      ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
       ['canDeleteHostIsolationExceptions', ['deleteHostIsolationExceptions']],
       ['canWriteBlocklist', ['writeBlocklist']],
@@ -200,6 +203,7 @@ describe('Endpoint Authz service', () => {
       ['canWriteTrustedApplications', ['writeTrustedApplications']],
       ['canReadTrustedApplications', ['readTrustedApplications']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
+      ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
       ['canWriteBlocklist', ['writeBlocklist']],
       ['canReadBlocklist', ['readBlocklist']],
@@ -263,6 +267,7 @@ describe('Endpoint Authz service', () => {
         canWriteTrustedApplications: false,
         canReadTrustedApplications: false,
         canWriteHostIsolationExceptions: false,
+        canAccessHostIsolationExceptions: false,
         canReadHostIsolationExceptions: false,
         canWriteBlocklist: false,
         canReadBlocklist: false,

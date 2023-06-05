@@ -66,6 +66,10 @@ export const calculateEndpointAuthz = (
     fleetAuthz,
     'readHostIsolationExceptions'
   );
+  const canAccessHostIsolationExceptions = hasKibanaPrivilege(
+    fleetAuthz,
+    'accessHostIsolationExceptions'
+  );
   const canDeleteHostIsolationExceptions = hasKibanaPrivilege(
     fleetAuthz,
     'deleteHostIsolationExceptions'
@@ -110,6 +114,7 @@ export const calculateEndpointAuthz = (
     canWriteTrustedApplications,
     canReadTrustedApplications,
     canWriteHostIsolationExceptions: canWriteHostIsolationExceptions && isPlatinumPlusLicense,
+    canAccessHostIsolationExceptions: canAccessHostIsolationExceptions && isPlatinumPlusLicense,
     canReadHostIsolationExceptions,
     canDeleteHostIsolationExceptions,
     canWriteBlocklist,
@@ -144,6 +149,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteTrustedApplications: false,
     canReadTrustedApplications: false,
     canWriteHostIsolationExceptions: false,
+    canAccessHostIsolationExceptions: false,
     canReadHostIsolationExceptions: false,
     canDeleteHostIsolationExceptions: false,
     canWriteBlocklist: false,

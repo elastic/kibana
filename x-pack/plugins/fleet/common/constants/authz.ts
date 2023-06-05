@@ -72,6 +72,12 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readHostIsolationExceptions',
   },
+  accessHostIsolationExceptions: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'accessHostIsolationExceptions',
+  },
   deleteHostIsolationExceptions: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',
