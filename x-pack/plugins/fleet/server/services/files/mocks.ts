@@ -9,11 +9,32 @@ import { Readable } from 'stream';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { FleetFileClientInterface, HapiReadableStream } from './types';
+import type {
+  FleetFromHostFileClientInterface,
+  FleetToHostFileClientInterface,
+  HapiReadableStream,
+} from './types';
 import type { FleetFile } from './types';
 import type { HostUploadedFileMetadata } from './types';
 
-export const createFleetFilesClientMock = (): jest.Mocked<FleetFileClientInterface> => {
+export const createFleetFromHostFilesClientMock =
+  (): jest.Mocked<FleetFromHostFileClientInterface> => {
+    const fleetFile = createFleetFileMock();
+
+    return {
+      get: jest.fn(async (_) => fleetFile),
+      doesFileHaveData: jest.fn().mockReturnValue(Promise.resolve(true)),
+      download: jest.fn(async (_) => {
+        return {
+          stream: Readable.from(['test']),
+          fileName: 'foo.txt',
+          mimeType: 'text/plain',
+        };
+      }),
+    };
+  };
+
+export const createFleetToHostFilesClientMock = (): jest.Mocked<FleetToHostFileClientInterface> => {
   const fleetFile = createFleetFileMock();
 
   return {

@@ -52,11 +52,11 @@ const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 describe('Entity Analytics Dashboard', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   describe('Without data', () => {
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -76,6 +76,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -100,6 +101,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -123,6 +125,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -167,6 +170,7 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -209,6 +213,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -253,6 +258,7 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -300,6 +306,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 

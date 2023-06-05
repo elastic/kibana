@@ -14,13 +14,29 @@ import { IBasePath } from '@kbn/core/server';
 import { sloFeatureId } from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
-import { ALERT_ACTION, getRuleExecutor } from './executor';
+import {
+  ALERT_ACTION,
+  HIGH_PRIORITY_ACTION,
+  LOW_PRIORITY_ACTION,
+  MEDIUM_PRIORITY_ACTION,
+  SLO_BURN_RATE_RULE_ID,
+} from '../../../../common/constants';
+
+import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
 
 const durationSchema = schema.object({
   value: schema.number(),
   unit: schema.string(),
+});
+
+const windowSchema = schema.object({
+  id: schema.string(),
+  burnRateThreshold: schema.number(),
+  maxBurnRateThreshold: schema.number(),
+  longWindow: durationSchema,
+  shortWindow: durationSchema,
+  actionGroup: schema.string(),
 });
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
@@ -37,14 +53,11 @@ export function sloBurnRateRuleType(
     validate: {
       params: schema.object({
         sloId: schema.string(),
-        burnRateThreshold: schema.number(),
-        maxBurnRateThreshold: schema.number(),
-        longWindow: durationSchema,
-        shortWindow: durationSchema,
+        windows: schema.arrayOf(windowSchema),
       }),
     },
     defaultActionGroupId: ALERT_ACTION.id,
-    actionGroups: [ALERT_ACTION],
+    actionGroups: [ALERT_ACTION, HIGH_PRIORITY_ACTION, MEDIUM_PRIORITY_ACTION, LOW_PRIORITY_ACTION],
     producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
