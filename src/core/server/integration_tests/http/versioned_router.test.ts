@@ -80,7 +80,6 @@ describe('Routing versioned requests', () => {
   });
 
   it('handles missing version header (defaults to oldest)', async () => {
-    await setupServer({ dev: false });
     router.versioned
       .get({ path: '/my-path', access: 'public' })
       .addVersion({ validate: false, version: '2020-02-02' }, async (ctx, req, res) => {
@@ -223,56 +222,6 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual('1');
   });
 
-  it('requires version headers to be set for internal HTTP APIs', async () => {
-    await setupServer({ dev: false });
-
-    router.versioned
-      .get({ path: '/my-path', access: 'internal' })
-      .addVersion(
-        { version: '1', validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      )
-      .addVersion(
-        { version: '2', validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      );
-    await server.start();
-
-    await expect(
-      supertest
-        .get('/my-path')
-        .unset('Elastic-Api-Version')
-        .expect(400)
-        .then(({ body }) => body.message)
-    ).resolves.toMatch(/Please specify.+version/);
-  });
-
-  it.each([
-    ['public', '2022-02-02', '2022-02-03'],
-    ['internal', '1', '2'],
-  ])('requires version headers to be set %p when in dev', async (access, v1, v2) => {
-    await setupServer({ dev: true });
-    router.versioned
-      .get({ path: '/my-path', access: access as 'internal' | 'public' })
-      .addVersion(
-        { version: v1, validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      )
-      .addVersion(
-        { version: v2, validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      );
-    await server.start();
-
-    await expect(
-      supertest
-        .get('/my-path')
-        .unset('Elastic-Api-Version')
-        .expect(400)
-        .then(({ body }) => body.message)
-    ).resolves.toMatch(/Please specify.+version/);
-  });
-
   it('errors when no handler could be found', async () => {
     router.versioned.get({ path: '/my-path', access: 'public' });
 
@@ -290,7 +239,7 @@ describe('Routing versioned requests', () => {
   });
 
   it('resolves the newest handler on serverless', async () => {
-    await setupServer({ serverless: true, dev: false });
+    await setupServer({ serverless: true });
 
     router.versioned
       .get({ path: '/my-path', access: 'public' })
@@ -312,7 +261,7 @@ describe('Routing versioned requests', () => {
   });
 
   it('resolves the oldest handler on anything other than serverless', async () => {
-    await setupServer({ serverless: false, dev: false });
+    await setupServer({ serverless: false });
 
     router.versioned
       .get({ path: '/my-path', access: 'public' })
