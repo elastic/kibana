@@ -223,11 +223,9 @@ export class ActionsClient {
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const configurationUtilities = this.actionTypeRegistry.getUtils();
-    console.log('Before config validation', config);
     const validatedActionTypeConfig = validateConfig(actionType, config, {
       configurationUtilities,
     });
-    console.log('After config validation', validatedActionTypeConfig);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
       configurationUtilities,
     });
