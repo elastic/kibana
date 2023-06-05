@@ -67,6 +67,7 @@ import { legacyAlertsClientMock } from '../alerts_client/legacy_alerts_client.mo
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { AlertsService } from '../alerts_service';
 import { ReplaySubject } from 'rxjs';
+import { IAlertsClient } from '../alerts_client/types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -215,7 +216,7 @@ describe('Task Runner', () => {
     ruleType.executor.mockResolvedValue({ state: {} });
   });
 
-  test('should not use legacy alerts client', async () => {
+  test('should not use legacy alerts client if alerts client created', async () => {
     const spy1 = jest
       .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
       .mockImplementation(() => mockLegacyAlertsClient);
@@ -277,48 +278,12 @@ describe('Task Runner', () => {
     });
     expect(LegacyAlertsClientModule.LegacyAlertsClient).not.toHaveBeenCalled();
 
-    expect(mockLegacyAlertsClient.initializeExecution).not.toHaveBeenCalled();
-    expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith({
-      activeAlertsFromState: {},
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      maxAlerts: 1000,
-      recoveredAlertsFromState: {},
-      ruleLabel: "test:1: 'rule-name'",
+    testCorrectAlertsClientUsed({
+      alertsClientToUse: mockAlertsClient,
+      alertsClientNotToUse: mockLegacyAlertsClient,
     });
 
     expect(ruleType.executor).toHaveBeenCalledTimes(1);
-
-    expect(mockAlertsClient.checkLimitUsage).toHaveBeenCalled();
-    expect(mockLegacyAlertsClient.checkLimitUsage).not.toHaveBeenCalled();
-
-    expect(mockAlertsClient.processAndLogAlerts).toHaveBeenCalledWith({
-      eventLogger: alertingEventLogger,
-      ruleRunMetricsStore,
-      shouldLogAlerts: true,
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      notifyWhen: RuleNotifyWhen.ACTIVE,
-      maintenanceWindowIds: [],
-    });
-    expect(mockLegacyAlertsClient.processAndLogAlerts).not.toHaveBeenCalled();
-
-    expect(mockAlertsClient.persistAlerts).toHaveBeenCalled();
-    expect(mockLegacyAlertsClient.persistAlerts).not.toHaveBeenCalled();
-
-    expect(mockAlertsClient.getProcessedAlerts).toHaveBeenCalledWith('activeCurrent');
-    expect(mockAlertsClient.getProcessedAlerts).toHaveBeenCalledWith('recoveredCurrent');
-    expect(mockLegacyAlertsClient.getProcessedAlerts).not.toHaveBeenCalled();
-
-    expect(mockAlertsClient.getAlertsToSerialize).toHaveBeenCalled();
-    expect(mockLegacyAlertsClient.getAlertsToSerialize).not.toHaveBeenCalled();
-
     expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
@@ -356,7 +321,7 @@ describe('Task Runner', () => {
     spy2.mockRestore();
   });
 
-  test('should successfully execute task', async () => {
+  test('should successfully execute task with alerts client', async () => {
     const alertsService = new AlertsService({
       logger,
       pluginStop$: new ReplaySubject(1),
@@ -548,4 +513,237 @@ describe('Task Runner', () => {
     });
     spy.mockRestore();
   });
+
+  test('should default to legacy alerts client if error creating alerts client', async () => {
+    const spy1 = jest
+      .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+      .mockImplementation(() => mockLegacyAlertsClient);
+    const spy2 = jest
+      .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
+      .mockImplementation(() => ruleRunMetricsStore);
+    mockAlertsService.createAlertsClient.mockImplementation(() => {
+      throw new Error('Could not initialize!');
+    });
+    mockLegacyAlertsClient.getAlertsToSerialize.mockResolvedValue({
+      alertsToReturn: {},
+      recoveredAlertsToReturn: {},
+    });
+    ruleRunMetricsStore.getMetrics.mockReturnValue({
+      numSearches: 3,
+      totalSearchDurationMs: 23423,
+      esSearchDurationMs: 33,
+      numberOfTriggeredActions: 0,
+      numberOfGeneratedActions: 0,
+      numberOfActiveAlerts: 0,
+      numberOfRecoveredAlerts: 0,
+      numberOfNewAlerts: 0,
+      hasReachedAlertLimit: false,
+      triggeredActionsStatus: 'complete',
+    });
+    const taskRunner = new TaskRunner(
+      ruleTypeWithAlerts,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+
+    await taskRunner.run();
+
+    expect(mockAlertsService.createAlertsClient).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error initializing AlertsClient for context test. Using legacy alerts client instead. - Could not initialize!`
+    );
+    expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+      logger,
+      ruleType: ruleTypeWithAlerts,
+    });
+
+    testCorrectAlertsClientUsed({
+      alertsClientToUse: mockLegacyAlertsClient,
+      alertsClientNotToUse: mockAlertsClient,
+    });
+
+    expect(ruleType.executor).toHaveBeenCalledTimes(1);
+
+    expect(logger.debug).toHaveBeenCalledTimes(5);
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
+      {
+        id: '1',
+        name: 'execute test',
+        type: 'alert',
+        description: 'execute [test] with name [rule-name] in [default] namespace',
+      },
+      expect.any(Function)
+    );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(
+      jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
+    ).toHaveBeenCalled();
+    spy1.mockRestore();
+    spy2.mockRestore();
+  });
+
+  test('should default to legacy alerts client if alert service is not defined', async () => {
+    const spy1 = jest
+      .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+      .mockImplementation(() => mockLegacyAlertsClient);
+    const spy2 = jest
+      .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
+      .mockImplementation(() => ruleRunMetricsStore);
+    mockLegacyAlertsClient.getAlertsToSerialize.mockResolvedValue({
+      alertsToReturn: {},
+      recoveredAlertsToReturn: {},
+    });
+    ruleRunMetricsStore.getMetrics.mockReturnValue({
+      numSearches: 3,
+      totalSearchDurationMs: 23423,
+      esSearchDurationMs: 33,
+      numberOfTriggeredActions: 0,
+      numberOfGeneratedActions: 0,
+      numberOfActiveAlerts: 0,
+      numberOfRecoveredAlerts: 0,
+      numberOfNewAlerts: 0,
+      hasReachedAlertLimit: false,
+      triggeredActionsStatus: 'complete',
+    });
+    const taskRunner = new TaskRunner(
+      ruleTypeWithAlerts,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      { ...taskRunnerFactoryInitializerParams, alertsService: null },
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+
+    await taskRunner.run();
+
+    expect(mockAlertsService.createAlertsClient).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+      logger,
+      ruleType: ruleTypeWithAlerts,
+    });
+
+    testCorrectAlertsClientUsed({
+      alertsClientToUse: mockLegacyAlertsClient,
+      alertsClientNotToUse: mockAlertsClient,
+    });
+
+    expect(ruleType.executor).toHaveBeenCalledTimes(1);
+
+    expect(logger.debug).toHaveBeenCalledTimes(5);
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
+      {
+        id: '1',
+        name: 'execute test',
+        type: 'alert',
+        description: 'execute [test] with name [rule-name] in [default] namespace',
+      },
+      expect.any(Function)
+    );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(
+      jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
+    ).toHaveBeenCalled();
+    spy1.mockRestore();
+    spy2.mockRestore();
+  });
+
+  function testCorrectAlertsClientUsed<
+    AlertData extends RuleAlertData = never,
+    State extends AlertInstanceState = never,
+    Context extends AlertInstanceContext = never,
+    ActionGroupIds extends string = 'default',
+    RecoveryActionGroupId extends string = 'recovered'
+  >({
+    alertsClientToUse,
+    alertsClientNotToUse,
+  }: {
+    alertsClientToUse: IAlertsClient<
+      AlertData,
+      State,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >;
+    alertsClientNotToUse: IAlertsClient<
+      AlertData,
+      State,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >;
+  }) {
+    expect(alertsClientToUse.initializeExecution).toHaveBeenCalledWith({
+      activeAlertsFromState: {},
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      },
+      maxAlerts: 1000,
+      recoveredAlertsFromState: {},
+      ruleLabel: "test:1: 'rule-name'",
+    });
+    expect(alertsClientNotToUse.initializeExecution).not.toHaveBeenCalled();
+
+    expect(alertsClientToUse.checkLimitUsage).toHaveBeenCalled();
+    expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
+
+    expect(alertsClientToUse.processAndLogAlerts).toHaveBeenCalledWith({
+      eventLogger: alertingEventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts: true,
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      },
+      notifyWhen: RuleNotifyWhen.ACTIVE,
+      maintenanceWindowIds: [],
+    });
+    expect(alertsClientNotToUse.processAndLogAlerts).not.toHaveBeenCalled();
+
+    expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();
+    expect(alertsClientNotToUse.persistAlerts).not.toHaveBeenCalled();
+
+    expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('activeCurrent');
+    expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('recoveredCurrent');
+    expect(alertsClientNotToUse.getProcessedAlerts).not.toHaveBeenCalled();
+
+    expect(alertsClientToUse.getAlertsToSerialize).toHaveBeenCalled();
+    expect(alertsClientNotToUse.getAlertsToSerialize).not.toHaveBeenCalled();
+  }
 });
