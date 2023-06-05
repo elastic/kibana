@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import { AppFeatureKey } from '@kbn/security-solution-plugin/common';
-import type { SecurityProductLineId } from '../config';
+import { AppFeatureKey, type AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import type { SecurityProductLine, SecurityProductTier } from '../config';
 
-export type PliAppFeatures = Record<SecurityProductLineId, Readonly<AppFeatureKey[]>>;
-
-const securityEssentials: AppFeatureKey[] = [];
-const securityComplete: AppFeatureKey[] = [
-  ...securityEssentials,
-  AppFeatureKey.advancedInsights,
-  AppFeatureKey.casesConnectors,
-];
-
-const endpointEssentials: AppFeatureKey[] = [AppFeatureKey.endpointExceptions];
-const endpointComplete: AppFeatureKey[] = [
-  ...endpointEssentials,
-  AppFeatureKey.endpointResponseActions,
-];
+type PliAppFeatures = Readonly<
+  Record<SecurityProductLine, Readonly<Record<SecurityProductTier, Readonly<AppFeatureKeys>>>>
+>;
 
 export const PLI_APP_FEATURES: PliAppFeatures = {
-  securityEssentials,
-  securityComplete,
-  endpointEssentials,
-  endpointComplete,
+  security: {
+    essentials: [],
+    complete: [AppFeatureKey.advancedInsights, AppFeatureKey.casesConnectors],
+  },
+  endpoint: {
+    essentials: [AppFeatureKey.endpointExceptions],
+    complete: [AppFeatureKey.endpointResponseActions],
+  },
+  cloud: {
+    essentials: [],
+    complete: [],
+  },
 } as const;

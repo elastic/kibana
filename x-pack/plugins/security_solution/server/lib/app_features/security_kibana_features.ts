@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
@@ -23,20 +22,8 @@ import {
 import { APP_ID, LEGACY_NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../common/constants';
 import { savedObjectTypes } from '../../saved_objects';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import {
-  blocklistSubFeature,
-  endpointListSubFeature,
-  eventFiltersSubFeature,
-  executeActionSubFeature,
-  fileOperationsSubFeature,
-  hostIsolationExceptionsSubFeature,
-  hostIsolationSubFeature,
-  policyManagementSubFeature,
-  processOperationsSubFeature,
-  responseActionsHistorySubFeature,
-  trustedApplicationsSubFeature,
-} from './security_kibana_sub_features';
-import type { AppFeaturesSecurityConfig } from './types';
+import { SecuritySubFeatureId } from './security_kibana_sub_features';
+import type { AppFeaturesSecurityConfig, BaseKibanaFeatureConfig } from './types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 
 // Same as the plugin id defined by Cloud Security Posture
@@ -55,9 +42,7 @@ const SECURITY_RULE_TYPES = [
   NEW_TERMS_RULE_TYPE_ID,
 ];
 
-export const getSecurityBaseKibanaFeature = (
-  experimentalFeatures: ExperimentalFeatures
-): KibanaFeatureConfig => ({
+export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: SERVER_APP_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
     defaultMessage: 'Security',
@@ -135,16 +120,17 @@ export const getSecurityBaseKibanaFeature = (
       ui: ['show'],
     },
   },
-  subFeatures: getBaseSubFeatures(experimentalFeatures),
 });
 
-const getBaseSubFeatures = (_experimentalFeatures: ExperimentalFeatures): SubFeatureConfig[] => [
-  endpointListSubFeature,
-  hostIsolationExceptionsSubFeature,
-  eventFiltersSubFeature,
-  policyManagementSubFeature,
-  responseActionsHistorySubFeature,
-  hostIsolationSubFeature,
+export const getSecurityBaseKibanaSubFeatureIds = (
+  _experimentalFeatures: ExperimentalFeatures
+): SecuritySubFeatureId[] => [
+  SecuritySubFeatureId.endpointList,
+  SecuritySubFeatureId.hostIsolationExceptions,
+  SecuritySubFeatureId.eventFilters,
+  SecuritySubFeatureId.policyManagement,
+  SecuritySubFeatureId.responseActionsHistory,
+  SecuritySubFeatureId.hostIsolation,
 ];
 
 /**
@@ -153,12 +139,20 @@ const getBaseSubFeatures = (_experimentalFeatures: ExperimentalFeatures): SubFea
  *
  * Privileges can be added in different ways:
  * - `privileges`: the privileges that will be added directly into the main Security feature.
- * - `subFeatures`: the entire sub-feature configs that will be added into the Security subFeatures entry.
- * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the `id` specified.
+ * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
+ * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
 export const getSecurityAppFeaturesConfig = (
   experimentalFeatures: ExperimentalFeatures
 ): AppFeaturesSecurityConfig => {
+  const endpointResponseActionsSubFeatureIds = [];
+  if (experimentalFeatures.responseActionGetFileEnabled) {
+    endpointResponseActionsSubFeatureIds.push(SecuritySubFeatureId.fileOperations);
+  }
+  if (experimentalFeatures.responseActionExecuteEnabled) {
+    endpointResponseActionsSubFeatureIds.push(SecuritySubFeatureId.executeAction);
+  }
+
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
@@ -174,11 +168,7 @@ export const getSecurityAppFeaturesConfig = (
     },
 
     [AppFeatureSecurityKey.endpointResponseActions]: {
-      subFeatures: [
-        processOperationsSubFeature,
-        ...(experimentalFeatures.responseActionGetFileEnabled ? [fileOperationsSubFeature] : []),
-        ...(experimentalFeatures.responseActionExecuteEnabled ? [executeActionSubFeature] : []), // planned for 8.8
-      ],
+      subFeatureIds: endpointResponseActionsSubFeatureIds,
       subFeaturesPrivileges: [
         {
           id: 'host_isolation_all',
@@ -189,7 +179,7 @@ export const getSecurityAppFeaturesConfig = (
     },
 
     [AppFeatureSecurityKey.endpointExceptions]: {
-      subFeatures: [trustedApplicationsSubFeature, blocklistSubFeature],
+      subFeatureIds: [SecuritySubFeatureId.trustedApplications, SecuritySubFeatureId.blocklist],
       subFeaturesPrivileges: [
         {
           id: 'host_isolation_exceptions_all',

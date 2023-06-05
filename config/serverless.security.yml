@@ -8,7 +8,11 @@ xpack.uptime.enabled: false
 
 ## Enable the Serverless Security plugin
 xpack.serverless.security.enabled: true
-xpack.serverless.security.productLineIds: ['securityComplete', 'endpointComplete']
+xpack.serverless.security.productTypes:
+  [
+    { product_line: 'security', product_tier: 'complete' },
+    { product_line: 'endpoint', product_tier: 'complete' },
+  ]
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started

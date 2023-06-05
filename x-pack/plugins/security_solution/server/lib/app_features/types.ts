@@ -10,10 +10,22 @@ import type { AppFeatureKey } from '../../../common';
 import type { AppFeatureSecurityKey, AppFeatureCasesKey } from '../../../common/types/app_features';
 import type { RecursivePartial } from '../../../common/utility_types';
 
-export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig> & { id: string };
-export type AppFeatureKibanaConfig = RecursivePartial<KibanaFeatureConfig> & {
-  subFeaturesPrivileges?: SubFeaturesPrivileges[];
-};
-export type AppFeaturesConfig = Record<AppFeatureKey, AppFeatureKibanaConfig>;
-export type AppFeaturesSecurityConfig = Record<AppFeatureSecurityKey, AppFeatureKibanaConfig>;
-export type AppFeaturesCasesConfig = Record<AppFeatureCasesKey, AppFeatureKibanaConfig>;
+export type BaseKibanaFeatureConfig = Omit<KibanaFeatureConfig, 'subFeatures'>;
+export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig>;
+export type AppFeatureKibanaConfig<T extends string = string> =
+  RecursivePartial<BaseKibanaFeatureConfig> & {
+    subFeatureIds?: T[];
+    subFeaturesPrivileges?: SubFeaturesPrivileges[];
+  };
+export type AppFeaturesConfig<T extends string = string> = Record<
+  AppFeatureKey,
+  AppFeatureKibanaConfig<T>
+>;
+export type AppFeaturesSecurityConfig<T extends string = string> = Record<
+  AppFeatureSecurityKey,
+  AppFeatureKibanaConfig<T>
+>;
+export type AppFeaturesCasesConfig<T extends string = string> = Record<
+  AppFeatureCasesKey,
+  AppFeatureKibanaConfig<T>
+>;
