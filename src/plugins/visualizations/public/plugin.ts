@@ -58,6 +58,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -105,6 +106,7 @@ import {
   setUsageCollection,
   setSavedObjectsManagement,
   setContentManagement,
+  setSavedSearch,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
@@ -151,6 +153,7 @@ export interface VisualizationsStartDeps {
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
@@ -317,6 +320,7 @@ export class VisualizationsPlugin
           restorePreviousUrl,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
+          savedSearch: pluginsStart.savedSearch,
           presentationUtil: pluginsStart.presentationUtil,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
@@ -407,6 +411,7 @@ export class VisualizationsPlugin
       usageCollection,
       savedObjectsManagement,
       contentManagement,
+      savedSearch,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -429,6 +434,7 @@ export class VisualizationsPlugin
     setUsageCollection(usageCollection);
     setSavedObjectsManagement(savedObjectsManagement);
     setContentManagement(contentManagement);
+    setSavedSearch(savedSearch);
 
     if (spaces) {
       setSpaces(spaces);
