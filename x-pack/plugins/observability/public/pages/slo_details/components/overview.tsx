@@ -8,7 +8,11 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { occurrencesBudgetingMethodSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import {
+  occurrencesBudgetingMethodSchema,
+  rollingTimeWindowTypeSchema,
+  SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -150,7 +154,7 @@ export function Overview({ slo }: Props) {
 }
 
 function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
-  if ('isRolling' in timeWindow) {
+  if (rollingTimeWindowTypeSchema.is(timeWindow.type)) {
     return i18n.translate('xpack.observability.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
       values: {

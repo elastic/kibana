@@ -9,16 +9,24 @@
 import * as t from 'io-ts';
 import { durationType } from './duration';
 
+const rollingTimeWindowTypeSchema = t.literal('rolling');
 const rollingTimeWindowSchema = t.type({
   duration: durationType,
-  isRolling: t.boolean,
+  type: rollingTimeWindowTypeSchema,
 });
 
+const calendarAlignedTimeWindowTypeSchema = t.literal('calendarAligned');
 const calendarAlignedTimeWindowSchema = t.type({
   duration: durationType,
-  isCalendar: t.boolean,
+  type: calendarAlignedTimeWindowTypeSchema,
 });
 
 const timeWindowSchema = t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]);
 
-export { rollingTimeWindowSchema, calendarAlignedTimeWindowSchema, timeWindowSchema };
+export {
+  rollingTimeWindowSchema,
+  rollingTimeWindowTypeSchema,
+  calendarAlignedTimeWindowSchema,
+  calendarAlignedTimeWindowTypeSchema,
+  timeWindowSchema,
+};

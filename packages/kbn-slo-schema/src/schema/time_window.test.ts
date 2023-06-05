@@ -13,12 +13,12 @@ import { rollingTimeWindowSchema } from './time_window';
 describe('time window schema', () => {
   it('type guards correctly', () => {
     expect(
-      rollingTimeWindowSchema.is({ duration: new Duration(1, DurationUnit.Month), isRolling: true })
+      rollingTimeWindowSchema.is({ duration: new Duration(1, DurationUnit.Month), type: 'rolling' })
     ).toBe(true);
     expect(
       rollingTimeWindowSchema.is({
         duration: new Duration(1, DurationUnit.Month),
-        isCalendar: true,
+        type: 'calendarAligned',
       })
     ).toBe(false);
   });

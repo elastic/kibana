@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { ChartData } from '../../../typings/slo';
@@ -43,7 +43,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {'isRolling' in slo.timeWindow
+              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
                 ? i18n.translate(
                     'xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration',
                     {
