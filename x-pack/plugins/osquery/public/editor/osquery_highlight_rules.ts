@@ -128,7 +128,9 @@ const theme = {
     { token: 'constant.numeric', foreground: 'F5871F' },
     { token: 'keyword.operator', foreground: '3E999F' },
   ],
-  colors: {},
+  colors: {
+    'editorGutter.background': '#F6F6F6',
+  },
 };
 
 export const initializeOsqueryEditor = () => {
