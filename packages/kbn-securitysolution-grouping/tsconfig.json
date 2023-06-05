@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
@@ -24,6 +25,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/shared-svg",
     "@kbn/ui-theme",
-    "@kbn/analytics"
+    "@kbn/analytics",
   ]
 }

@@ -45,18 +45,18 @@ When starting Kibana with `yarn start --run-examples` the `guided_onboarding_exa
 The guided onboarding plugin exposes an API service from its start contract that is intended to be used by other plugins. The API service allows consumers to access the current state of the guided onboarding process and manipulate it. 
 
 To use the API service in your plugin, declare the guided onboarding plugin as a dependency in the file `kibana.json` of your plugin. Add the API service to your plugin's start dependencies to rely on the provided TypeScript interface:
-```
+```js
 export interface AppPluginStartDependencies {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 ```
 The API service is now available to your plugin in the setup lifecycle function of your plugin
-```
+```js
 // startDependencies is of type AppPluginStartDependencies
 const [coreStart, startDependencies] = await core.getStartServices();
 ```
 or in the start lifecycle function of your plugin.
-```
+```js
 public start(core: CoreStart, startDependencies: AppPluginStartDependencies) {
   ...
 }
@@ -67,7 +67,7 @@ public start(core: CoreStart, startDependencies: AppPluginStartDependencies) {
 
 The API service exposes an Observable that contains a boolean value for the state of a specific guide step. For example, if your plugin needs to check if the "Add data" step of the SIEM guide is currently active, you could use the following code snippet. 
 
-```
+```js
 const { guidedOnboardingApi } = guidedOnboarding;
 const isDataStepActive = useObservable(guidedOnboardingApi!.isGuideStepActive$('siem', 'add_data'));
 useEffect(() => {
@@ -76,7 +76,7 @@ useEffect(() => {
 ```
 
 Alternatively, you can subscribe to the Observable directly. 
-```
+```js
 useEffect(() => {
     const subscription = guidedOnboardingApi?.isGuideStepActive$('siem', 'add_data').subscribe((isDataStepACtive) => {
       // do some logic depending on the step state 
@@ -89,7 +89,7 @@ useEffect(() => {
 Similar to `isGuideStepActive$`, the observable `isGuideStepReadyToComplete$` can be used to track the state of a step that is configured for manual completion. The observable broadcasts `true` when the manual completion popover is displayed and the user can mark the step "done". In this state the step is not in progress anymore but is not yet fully completed. 
 
 
-### completeGuideStep(guideId: GuideId, stepId: GuideStepIds): Promise\<{ pluginState: PluginState } | undefined\>
+### completeGuideStep(guideId: GuideId, stepId: GuideStepIds, params?: GuideParams): Promise\<{ pluginState: PluginState } | undefined\>
 The API service exposes an async function to mark a guide step as completed. 
 If the specified guide step is not currently active, the function is a noop. In that case the return value is `undefined`, 
 otherwise an updated `PluginState` is returned.
@@ -98,8 +98,20 @@ otherwise an updated `PluginState` is returned.
 await guidedOnboardingApi?.completeGuideStep('siem', 'add_data');
 ```
 
+The function also accepts an optional argument `params` that will be saved in the state and later used for step URLs with dynamic parameters. For example, step 2 of the guide has a dynamic parameter `indexID` in its location path:
+```js
+const step2Config = {
+    id: 'step2',
+    description: 'Step with dynamic url',
+    location: {
+        appID: 'test', path: 'testPath/{indexID}'
+    }
+};
+```
+The value of the parameter `indexID` needs to be passed to the API service when completing step 1: `completeGuideStep('testGuide', 'step1', { indexID: 'testIndex' })` 
+
 ## Guides config
-To use the API service, you need to know a guide ID (currently one of `search`, `kubernetes`, `siem`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). The consumers of guided onboarding register their guide configs themselves and have therefore full control over the guide ID and step IDs used for their guide. For more details on registering a guide config, see below. 
+To use the API service, you need to know a guide ID (currently one of `appSearch`, `websiteSearch`, `databaseSearch`, `kubernetes`, `siem`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). The consumers of guided onboarding register their guide configs themselves and have therefore full control over the guide ID and step IDs used for their guide. For more details on registering a guide config, see below. 
 
 ## Server side: register a guide config
 The guided onboarding exposes a function `registerGuideConfig(guideId: GuideId, guideConfig: GuideConfig)` function in its setup contract. This function allows consumers to register a guide config for a specified guide ID. The function throws an error if a config already exists for the guide ID. See code examples in following plugins: 

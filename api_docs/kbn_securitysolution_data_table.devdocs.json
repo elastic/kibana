@@ -47,7 +47,7 @@
           "EuiDataGridSetCellProps",
           ") => void, defaultStyles?: React.CSSProperties | undefined) => void"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,7 +67,7 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -88,7 +88,7 @@
                 "text": "EuiTheme"
               }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -105,7 +105,7 @@
               "EuiDataGridSetCellProps",
               ") => void"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -120,7 +120,7 @@
             "signature": [
               "React.CSSProperties | undefined"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -141,7 +141,7 @@
           "DataTableProps",
           ">"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/index.tsx",
+        "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -190,7 +190,7 @@
             "text": "TableState"
           }
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/reducer.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/reducer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -238,19 +238,19 @@
         "signature": [
           "(headers: ",
           "ColumnHeaderOptions",
-          "[], browserFields: Readonly<Record<string, Partial<",
+          "[], browserFields: ",
           {
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.BrowserField",
-            "text": "BrowserField"
+            "section": "def-common.BrowserFields",
+            "text": "BrowserFields"
           },
-          ">>>, isEventRenderedView?: boolean | undefined) => ",
+          ", isEventRenderedView?: boolean | undefined) => ",
           "ColumnHeaderOptions",
           "[]"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx",
+        "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -265,7 +265,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -278,17 +278,15 @@
             "label": "browserFields",
             "description": [],
             "signature": [
-              "Readonly<Record<string, Partial<",
               {
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.BrowserField",
-                "text": "BrowserField"
-              },
-              ">>>"
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -303,7 +301,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -340,7 +338,7 @@
           },
           "[]>"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -361,7 +359,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -376,7 +374,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -391,7 +389,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -406,7 +404,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -427,7 +425,7 @@
         "signature": [
           "(rowIndex: number, itemsPerPage: number) => number"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/pagination.ts",
+        "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -441,7 +439,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/pagination.ts",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -456,7 +454,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/pagination.ts",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -509,7 +507,7 @@
           },
           " & { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/selectors.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/selectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -534,7 +532,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -554,7 +552,7 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/helpers.tsx",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -583,7 +581,7 @@
           " extends ",
           "DataTableModelSettings"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,7 +611,7 @@
               },
               " | undefined; type?: string | undefined; })[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -629,7 +627,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -645,7 +643,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -663,7 +661,7 @@
               "ExpandedDetailType",
               " | undefined; }"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -684,7 +682,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -700,7 +698,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -713,7 +711,7 @@
             "description": [
               "Uniquely identifies the data table"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,7 +725,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -738,7 +736,7 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -751,7 +749,7 @@
             "description": [
               "If selectAll checkbox in header is checked"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -764,7 +762,7 @@
             "description": [
               "The number of items to show in a single page of results"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -780,7 +778,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -796,7 +794,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -820,7 +818,7 @@
               },
               "[]; }"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -834,7 +832,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -849,7 +847,7 @@
               "SessionViewConfig",
               " | null"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -865,7 +863,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -878,7 +876,7 @@
             "description": [
               "Total number of fetched events/alerts"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -892,7 +890,7 @@
             "signature": [
               "\"gridView\" | \"eventRenderedView\""
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -906,7 +904,7 @@
             "signature": [
               "{ showOnlyThreatIndicatorAlerts: boolean; showBuildingBlockAlerts: boolean; }"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -922,7 +920,7 @@
         "description": [
           "The state of all timelines is stored here"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/types.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -942,7 +940,7 @@
                 "text": "TableState"
               }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/types.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -956,7 +954,7 @@
         "tags": [],
         "label": "SortColumnTable",
         "description": [],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -967,7 +965,7 @@
             "tags": [],
             "label": "columnId",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -978,7 +976,7 @@
             "tags": [],
             "label": "columnType",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -992,7 +990,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1013,7 +1011,7 @@
                 "text": "Direction"
               }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1029,7 +1027,7 @@
         "description": [
           "A map of id to data table"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/types.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1050,7 +1048,7 @@
                 "text": "DataTableModel"
               }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/types.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1066,7 +1064,7 @@
         "description": [
           "The state of all data tables is stored here"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/types.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1086,7 +1084,7 @@
                 "text": "TableById"
               }
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/types.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1114,7 +1112,7 @@
         "tags": [],
         "label": "TableEntityType",
         "description": [],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1126,7 +1124,7 @@
         "tags": [],
         "label": "TableId",
         "description": [],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1138,7 +1136,7 @@
         "tags": [],
         "label": "TimelineTabs",
         "description": [],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/detail_panel.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/detail_panel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1155,7 +1153,7 @@
         "signature": [
           "\"not-filtered\" | \"text-filter\""
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1171,7 +1169,7 @@
           "ColumnHeaderOptions",
           "[]"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1186,7 +1184,7 @@
         "signature": [
           "\"open\""
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1208,7 +1206,7 @@
             "text": "Direction"
           }
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1229,7 +1227,7 @@
             "section": "def-common.SortColumnTable",
             "text": "SortColumnTable"
           },
-          "[]; readonly title: string; readonly filters?: ",
+          "[]; readonly title: string; readonly isLoading: boolean; readonly filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1251,7 +1249,7 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly isLoading: boolean; readonly viewMode: ",
+          " | undefined; type?: string | undefined; })[]; readonly viewMode: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",
@@ -1289,7 +1287,7 @@
           "AlertPageFilterType",
           ", boolean>; }"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/model.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1383,7 +1381,7 @@
           },
           ".alertsOnCasePage"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1398,7 +1396,7 @@
         "signature": [
           "\"gridView\" | \"eventRenderedView\""
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1412,7 +1410,7 @@
         "tags": [],
         "label": "tableDefaults",
         "description": [],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1427,7 +1425,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1441,7 +1439,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1455,7 +1453,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1466,7 +1464,7 @@
             "tags": [],
             "label": "expandedDetail",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -1481,7 +1479,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1495,7 +1493,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1509,7 +1507,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1523,7 +1521,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1534,7 +1532,7 @@
             "tags": [],
             "label": "itemsPerPage",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1548,7 +1546,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1562,7 +1560,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1573,7 +1571,7 @@
             "tags": [],
             "label": "selectedEventIds",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -1588,7 +1586,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1602,7 +1600,7 @@
             "signature": [
               "{ columnId: string; columnType: string; esTypes: string[]; sortDirection: \"desc\"; }[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1616,7 +1614,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1627,7 +1625,7 @@
             "tags": [],
             "label": "graphEventId",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1641,7 +1639,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1656,7 +1654,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1670,7 +1668,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1681,7 +1679,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1692,7 +1690,7 @@
             "tags": [],
             "label": "totalCount",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1706,7 +1704,7 @@
             "signature": [
               "\"gridView\""
             ],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1717,7 +1715,7 @@
             "tags": [],
             "label": "additionalFilters",
             "description": [],
-            "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1731,7 +1729,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+                "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1745,7 +1743,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/packages/kbn-securitysolution-data-table/store/data_table/defaults.ts",
+                "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1852,7 +1850,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/kbn-securitysolution-data-table/common/types/data_table/index.ts",
+        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

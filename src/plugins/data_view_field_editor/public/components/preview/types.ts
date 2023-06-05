@@ -55,6 +55,19 @@ export interface PreviewState {
     isValid: boolean;
     message: string | null;
   };
+  /** Response from the Painless _execute API */
+  previewResponse: {
+    fields: FieldPreview[];
+    error: PreviewError | null;
+  };
+  isFetchingDocument: boolean;
+  fetchDocError: FetchDocError | null;
+  customDocIdToLoad: string | null;
+  /** Flag to indicate if we are calling the _execute API */
+  isLoadingPreview: boolean;
+  initialPreviewComplete: boolean;
+  isPreviewAvailable: boolean;
+  isPanelVisible: boolean;
 }
 
 export interface FetchDocError {
@@ -108,31 +121,12 @@ export type ChangeSet = Record<string, Change>;
 
 export interface Context {
   controller: PreviewController;
-  fields: FieldPreview[];
   fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
-  error: PreviewError | null;
   fieldTypeInfo?: FieldTypeInfo[];
-  initialPreviewComplete: boolean;
   params: {
     value: Params;
     update: (updated: Partial<Params>) => void;
   };
-  isPreviewAvailable: boolean;
-  isLoadingPreview: boolean;
-  documents: {
-    loadSingle: (id: string) => void;
-    loadFromCluster: () => Promise<void>;
-    fetchDocError: FetchDocError | null;
-  };
-  panel: {
-    isVisible: boolean;
-    setIsVisible: (isVisible: boolean) => void;
-  };
-  navigation: {
-    isFirstDoc: boolean;
-    isLastDoc: boolean;
-  };
-  reset: () => void;
   validation: {
     setScriptEditorValidation: React.Dispatch<
       React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>

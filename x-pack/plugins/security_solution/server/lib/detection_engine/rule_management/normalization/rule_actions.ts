@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import type { RuleActionFrequency, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -13,6 +13,38 @@ import {
 } from '../../../../../common/constants';
 
 import type { RuleAlertType } from '../../rule_schema';
+
+export const transformToFrequency = (throttle: string | null | undefined): RuleActionFrequency => {
+  return {
+    summary: true,
+    notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
+    throttle: transformToAlertThrottle(throttle),
+  };
+};
+
+interface ActionWithFrequency {
+  frequency?: RuleActionFrequency;
+}
+
+/**
+ * The action level `frequency` attribute should always take precedence over the rule level `throttle`
+ * Frequency's default value is `{ summary: true, throttle: null, notifyWhen: 'onActiveAlert' }`
+ *
+ * The transformation follows the next rules:
+ * - Both rule level `throttle` and all actions have `frequency` are set: we will ignore rule level `throttle`
+ * - Rule level `throttle` set and actions don't have `frequency` set: we will transform rule level `throttle` in action level `frequency`
+ * - All actions have `frequency` set: do nothing
+ * - Neither of them is set: we will set action level `frequency` to default value
+ * - Rule level `throttle` and some of the actions have `frequency` set: we will transform rule level `throttle` and set it to actions without the frequency attribute
+ * - Only some actions have `frequency` set and there is no rule level `throttle`: we will set default `frequency` to actions without frequency attribute
+ */
+export const transformToActionFrequency = <T extends ActionWithFrequency>(
+  actions: T[],
+  throttle: string | null | undefined
+): T[] => {
+  const defaultFrequency = transformToFrequency(throttle);
+  return actions.map((action) => ({ ...action, frequency: action.frequency ?? defaultFrequency }));
+};
 
 /**
  * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen
@@ -52,26 +84,22 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
 
 /**
  * Given a throttle from an "alerting" Saved Object (SO) this will transform it into a "security_solution"
- * throttle type. If given the "legacyRuleActions" but we detect that the rule for an unknown reason has actions
- * on it to which should not be typical but possible due to the split nature of the API's, this will prefer the
- * usage of the non-legacy version. Eventually the "legacyRuleActions" should be removed.
- * @param throttle The throttle from a  "alerting" Saved Object (SO)
+ * throttle type.
+ * @param throttle The throttle from an "alerting" Saved Object (SO)
  * @returns The "security_solution" throttle
  */
-export const transformFromAlertThrottle = (rule: RuleAlertType): string => {
-  if (rule.muteAll || rule.actions.length === 0) {
-    return NOTIFICATION_THROTTLE_NO_ACTIONS;
-  } else if (rule.notifyWhen == null) {
+export const transformFromAlertThrottle = (rule: RuleAlertType): string | undefined => {
+  if (rule.notifyWhen == null) {
     return transformFromFirstActionThrottle(rule);
   } else if (rule.notifyWhen === 'onActiveAlert') {
     return NOTIFICATION_THROTTLE_RULE;
   }
 
-  return rule.throttle ?? NOTIFICATION_THROTTLE_NO_ACTIONS;
+  return rule.throttle ?? undefined;
 };
 
 function transformFromFirstActionThrottle(rule: RuleAlertType) {
-  const frequency = rule.actions[0].frequency ?? null;
+  const frequency = rule.actions[0]?.frequency ?? null;
   if (!frequency || frequency.notifyWhen !== 'onThrottleInterval' || frequency.throttle == null)
     return NOTIFICATION_THROTTLE_RULE;
   return frequency.throttle;

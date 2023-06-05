@@ -32,7 +32,7 @@ import {
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -246,7 +246,16 @@ const InsightEditorComponent = ({
       ui: { FiltersBuilderLazy },
     },
     uiSettings,
+    fieldFormats,
   } = useKibana().services;
+  const dataView = useMemo(() => {
+    if (sourcererDataView != null) {
+      return new DataView({ spec: sourcererDataView, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [sourcererDataView, fieldFormats]);
+
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
     const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
@@ -263,12 +272,6 @@ const InsightEditorComponent = ({
       }),
     ];
   }, [uiSettings]);
-  const kibanaDataProvider = useMemo(() => {
-    return {
-      ...sourcererDataView,
-      fields: sourcererDataView?.indexFields,
-    } as DataView;
-  }, [sourcererDataView]);
   const formMethods = useForm<{
     label: string;
     description: string;
@@ -426,12 +429,16 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
-              <FiltersBuilderLazy
-                filters={filtersStub}
-                onChange={onChange}
-                dataView={kibanaDataProvider}
-                maxDepth={2}
-              />
+              {dataView ? (
+                <FiltersBuilderLazy
+                  filters={filtersStub}
+                  onChange={onChange}
+                  dataView={dataView}
+                  maxDepth={2}
+                />
+              ) : (
+                <></>
+              )}
             </EuiFormRow>
             <EuiFormRow
               label={i18n.RELATIVE_TIMERANGE}
@@ -469,7 +476,7 @@ const InsightEditorComponent = ({
 };
 
 const InsightEditor = React.memo(InsightEditorComponent);
-const exampleInsight = `${insightPrefix}
+const exampleInsight = `${insightPrefix}{
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [

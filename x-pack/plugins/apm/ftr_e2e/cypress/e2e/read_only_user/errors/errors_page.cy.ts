@@ -30,6 +30,8 @@ describe('Errors page', () => {
 
   describe('when data is loaded', () => {
     before(() => {
+      synthtrace.clean();
+
       synthtrace.index(
         generateData({
           from: new Date(start).getTime(),
@@ -79,16 +81,16 @@ describe('Errors page', () => {
         cy.contains('div', 'Error 1');
       });
 
-      it('clicking on type adds a filter in the kuerybar', () => {
+      it('clicking on type adds a filter in the searchbar', () => {
         cy.visitKibana(javaServiceErrorsPageHref);
-        cy.getByTestSubj('headerFilterKuerybar')
+        cy.getByTestSubj('apmUnifiedSearchBar')
           .invoke('val')
           .should('be.empty');
         // `force: true` because Cypress says the element is 0x0
         cy.contains('exception 0').click({
           force: true,
         });
-        cy.getByTestSubj('headerFilterKuerybar')
+        cy.getByTestSubj('apmUnifiedSearchBar')
           .its('length')
           .should('be.gt', 0);
         cy.get('table')
@@ -142,38 +144,28 @@ describe('Check detailed statistics API with multiple errors', () => {
     cy.visitKibana(`${javaServiceErrorsPageHref}&pageSize=10`);
     cy.wait('@errorsMainStatistics');
     cy.get('.euiPagination__list').children().should('have.length', 5);
+
+    let requestedGroupIdsPage1: string[];
+
     cy.wait('@errorsDetailedStatistics').then((payload) => {
-      expect(payload.request.body.groupIds).eql(
-        JSON.stringify([
-          '0000000000000000000000000Error 0',
-          '0000000000000000000000000Error 1',
-          '0000000000000000000000000Error 2',
-          '0000000000000000000000000Error 3',
-          '0000000000000000000000000Error 4',
-          '0000000000000000000000000Error 5',
-          '0000000000000000000000000Error 6',
-          '0000000000000000000000000Error 7',
-          '0000000000000000000000000Error 8',
-          '0000000000000000000000000Error 9',
-        ])
-      );
+      cy.get('[data-test-subj="errorGroupId"]').each(($el, index) => {
+        const displayedGroupId = $el.text();
+        requestedGroupIdsPage1 = JSON.parse(payload.request.body.groupIds);
+
+        const requestedGroupId = requestedGroupIdsPage1[index].slice(0, 5);
+        expect(displayedGroupId).eq(requestedGroupId);
+
+        expect(requestedGroupIdsPage1).to.have.length(10);
+      });
     });
     cy.getByTestSubj('pagination-button-1').click();
+
+    // expect that the requested groupIds on page 2 are different from page 1
     cy.wait('@errorsDetailedStatistics').then((payload) => {
-      expect(payload.request.body.groupIds).eql(
-        JSON.stringify([
-          '000000000000000000000000Error 10',
-          '000000000000000000000000Error 11',
-          '000000000000000000000000Error 12',
-          '000000000000000000000000Error 13',
-          '000000000000000000000000Error 14',
-          '000000000000000000000000Error 15',
-          '000000000000000000000000Error 16',
-          '000000000000000000000000Error 17',
-          '000000000000000000000000Error 18',
-          '000000000000000000000000Error 19',
-        ])
-      );
+      const requestedGroupIdsPage2 = JSON.parse(payload.request.body.groupIds);
+
+      expect(requestedGroupIdsPage1[0]).not.eq(requestedGroupIdsPage2[0]);
+      expect(requestedGroupIdsPage2).to.have.length(10);
     });
   });
 });

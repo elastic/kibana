@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
 import { isEqual, cloneDeep } from 'lodash';
 import {
@@ -21,10 +20,13 @@ import {
   skipWhile,
 } from 'rxjs/operators';
 import { useEffect, useMemo } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import { MLHttpFetchError, extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { JobCreator } from '../job_creator';
 

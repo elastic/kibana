@@ -173,8 +173,10 @@ export class SpacesPlugin
     setupCapabilities(core, getSpacesService, this.log);
 
     if (plugins.usageCollection) {
+      const getIndexForType = (type: string) =>
+        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
       registerSpacesUsageCollector(plugins.usageCollection, {
-        kibanaIndex: core.savedObjects.getKibanaIndex(),
+        getIndexForType,
         features: plugins.features,
         licensing: plugins.licensing,
         usageStatsServicePromise,

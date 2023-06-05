@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { CaseResponse, CommentRequest } from '../../../common/api';
-import { BulkCreateCommentRequestRt, throwErrors } from '../../../common/api';
+import type { Case, CommentRequest } from '../../../common/api';
+import { BulkCreateCommentRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -25,21 +20,11 @@ import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 
-/**
- * Create an attachment to a case.
- *
- * @ignore
- */
 export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+): Promise<Case> => {
   const { attachments, caseId } = args;
-
-  pipe(
-    BulkCreateCommentRequestRt.decode(attachments),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
 
   const {
     logger,
@@ -48,16 +33,18 @@ export const bulkCreate = async (
     persistableStateAttachmentTypeRegistry,
   } = clientArgs;
 
-  attachments.forEach((attachment) => {
-    decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
-    validateRegisteredAttachments({
-      query: attachment,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
-    });
-  });
-
   try {
+    decodeWithExcessOrThrow(BulkCreateCommentRequestRt)(attachments);
+
+    attachments.forEach((attachment) => {
+      decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+      validateRegisteredAttachments({
+        query: attachment,
+        persistableStateAttachmentTypeRegistry,
+        externalReferenceAttachmentTypeRegistry,
+      });
+    });
+
     const [attachmentsWithIds, entities]: [Array<{ id: string } & CommentRequest>, OwnerEntity[]] =
       attachments.reduce<[Array<{ id: string } & CommentRequest>, OwnerEntity[]]>(
         ([a, e], attachment) => {

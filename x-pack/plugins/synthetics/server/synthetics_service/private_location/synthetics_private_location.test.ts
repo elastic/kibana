@@ -7,7 +7,6 @@
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import {
   DataStream,
   MonitorFields,
@@ -18,6 +17,7 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocation = {
@@ -31,7 +31,7 @@ describe('SyntheticsPrivateLocation', () => {
     type: 'http',
     enabled: true,
     schedule: '@every 3m',
-    'service.name': '',
+    'service.name': 'test service',
     locations: [mockPrivateLocation],
     tags: [],
     timeout: '16',
@@ -90,7 +90,7 @@ describe('SyntheticsPrivateLocation', () => {
   } as unknown as UptimeServerSetup;
 
   it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
+    [true, 'Unable to create Synthetics package policy template for private location'],
     [
       false,
       'Unable to create Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
@@ -107,7 +107,7 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitors(
+      await syntheticsPrivateLocation.createPackagePolicies(
         [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
@@ -120,7 +120,7 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
+    [true, 'Unable to create Synthetics package policy template for private location'],
     [
       false,
       'Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
@@ -226,7 +226,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         name: {
           type: 'text',
-          value: 'Browser monitor',
+          value: '"Browser monitor"',
         },
         params: {
           type: 'yaml',
@@ -246,7 +246,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'service.name': {
           type: 'text',
-          value: '',
+          value: '"test service"',
         },
         'source.inline.script': {
           type: 'yaml',
@@ -263,7 +263,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'throttling.config': {
           type: 'text',
-          value: '5d/3u/20l',
+          value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
         },
         timeout: {
           type: 'text',
@@ -286,7 +286,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   type: DataStream.BROWSER,
   enabled: true,
   schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
-  'service.name': '',
+  'service.name': 'test service',
   tags: [],
   timeout: null,
   name: 'Browser monitor',

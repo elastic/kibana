@@ -17,36 +17,27 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
-import { DependencyLookup, DisplayType } from '../../../../../../common/types/connectors';
+import { DisplayType } from '../../../../../../common/types/connectors';
+import { KibanaLogic } from '../../../../shared/kibana';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
 import { ConnectorConfigurationField } from './connector_configuration_field';
-import {
-  ConfigEntry,
-  ConnectorConfigurationLogic,
-  dependenciesSatisfied,
-} from './connector_configuration_logic';
+import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 export const ConnectorConfigurationForm = () => {
+  const { productFeatures } = useValues(KibanaLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
 
   const { localConfigView } = useValues(ConnectorConfigurationLogic);
   const { saveConfig, setIsEditing } = useActions(ConnectorConfigurationLogic);
-
-  const dependencyLookup: DependencyLookup = localConfigView.reduce(
-    (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
-      ...prev,
-      [configEntry.key]: configEntry.value,
-    }),
-    {}
-  );
 
   return (
     <EuiForm
@@ -56,17 +47,22 @@ export const ConnectorConfigurationForm = () => {
       }}
       component="form"
     >
-      {localConfigView.map((configEntry) => {
+      {localConfigView.map((configEntry, index) => {
         const {
           default_value: defaultValue,
           depends_on: dependencies,
           key,
           display,
+          is_valid: isValid,
           label,
+          sensitive,
           tooltip,
+          validation_errors: validationErrors,
         } = configEntry;
-        // toggle label goes next to the element, not in the row
-        const hasDependencies = dependencies.length > 0;
+
+        if (key === 'document_level_security' && !productFeatures.hasDocumentLevelSecurityEnabled) {
+          return null;
+        }
         const helpText = defaultValue
           ? i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.config.defaultValue',
@@ -76,27 +72,56 @@ export const ConnectorConfigurationForm = () => {
               }
             )
           : '';
+        // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel =
-          display !== DisplayType.TOGGLE ? (
+          display === DisplayType.TOGGLE || (display === DisplayType.TEXTAREA && sensitive) ? (
+            <></>
+          ) : (
             <EuiToolTip content={tooltip}>
               <p>{label}</p>
             </EuiToolTip>
-          ) : (
-            <></>
           );
 
-        return hasDependencies ? (
-          dependenciesSatisfied(dependencies, dependencyLookup) ? (
-            <EuiPanel color="subdued" borderRadius="none">
-              <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
-                <ConnectorConfigurationField configEntry={configEntry} />
-              </EuiFormRow>
-            </EuiPanel>
-          ) : (
-            <></>
-          )
-        ) : (
-          <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
+        if (dependencies?.length > 0) {
+          // dynamic spacing without CSS
+          const previousField = localConfigView[index - 1];
+          const nextField = localConfigView[index + 1];
+
+          const topSpacing =
+            !previousField || previousField.depends_on.length <= 0 ? <EuiSpacer size="m" /> : <></>;
+
+          const bottomSpacing =
+            !nextField || nextField.depends_on.length <= 0 ? <EuiSpacer size="m" /> : <></>;
+
+          return (
+            <>
+              {topSpacing}
+              <EuiPanel color="subdued" borderRadius="none">
+                <EuiFormRow
+                  label={rowLabel}
+                  key={key}
+                  helpText={helpText}
+                  error={validationErrors}
+                  isInvalid={!isValid}
+                  data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+                >
+                  <ConnectorConfigurationField configEntry={configEntry} />
+                </EuiFormRow>
+              </EuiPanel>
+              {bottomSpacing}
+            </>
+          );
+        }
+
+        return (
+          <EuiFormRow
+            label={rowLabel}
+            key={key}
+            helpText={helpText}
+            error={validationErrors}
+            isInvalid={!isValid}
+            data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+          >
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
         );
@@ -105,6 +130,7 @@ export const ConnectorConfigurationForm = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
               data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
               type="submit"
               isLoading={status === Status.LOADING}

@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+
 import type {
   ObservabilityPageTemplateDependencies,
   WrappedPageTemplateProps,
@@ -15,12 +17,19 @@ export const LazyObservabilityPageTemplate = React.lazy(() => import('./page_tem
 
 export type LazyObservabilityPageTemplateProps = WrappedPageTemplateProps;
 
-export function createLazyObservabilityPageTemplate(
-  injectedDeps: ObservabilityPageTemplateDependencies
-) {
-  return (pageTemplateProps: LazyObservabilityPageTemplateProps) => (
-    <React.Suspense fallback={null}>
-      <LazyObservabilityPageTemplate {...pageTemplateProps} {...injectedDeps} />
-    </React.Suspense>
-  );
+export function createLazyObservabilityPageTemplate({
+  isSidebarEnabled$,
+  ...injectedDeps
+}: ObservabilityPageTemplateDependencies) {
+  return (pageTemplateProps: LazyObservabilityPageTemplateProps) => {
+    const isSidebarEnabled = useObservable(isSidebarEnabled$);
+    const { showSolutionNav: showSolutionNavProp, ...props } = pageTemplateProps;
+    const showSolutionNav = !!showSolutionNavProp || isSidebarEnabled;
+
+    return (
+      <React.Suspense fallback={null}>
+        <LazyObservabilityPageTemplate {...{ ...props, showSolutionNav }} {...injectedDeps} />
+      </React.Suspense>
+    );
+  };
 }

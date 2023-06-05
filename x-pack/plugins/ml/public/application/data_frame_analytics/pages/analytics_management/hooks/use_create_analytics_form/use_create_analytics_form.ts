@@ -10,12 +10,14 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
-import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
+import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
@@ -176,6 +178,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           await mlContext.dataViewsContract.createAndSave(
             {
               title: dataViewName,
+              ...(form.timeFieldName ? { timeFieldName: form.timeFieldName } : {}),
             },
             false,
             true

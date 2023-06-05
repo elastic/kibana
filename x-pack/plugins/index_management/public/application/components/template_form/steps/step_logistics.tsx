@@ -195,7 +195,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle>
-              <h2>
+              <h2 data-test-subj="stepTitle">
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
                   defaultMessage="Logistics"
@@ -316,7 +316,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   path="_meta"
                   component={JsonEditorField}
                   componentProps={{
-                    euiCodeEditorProps: {
+                    codeEditorProps: {
                       height: '280px',
                       'aria-label': i18n.translate(
                         'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',

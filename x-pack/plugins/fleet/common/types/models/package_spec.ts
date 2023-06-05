@@ -36,6 +36,7 @@ export interface PackageSpecManifest {
 export type PackageSpecPackageType = 'integration' | 'input';
 
 export type PackageSpecCategory =
+  | 'advanced_analytics_ueba'
   | 'analytics_engine'
   | 'application_observability'
   | 'app_search'

@@ -136,7 +136,7 @@ export function Chart({
     !chart.hidden &&
     dataView.id &&
     dataView.type !== DataViewType.ROLLUP &&
-    dataView.isTimeBased()
+    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
   );
 
   const input$ = useMemo(
@@ -192,7 +192,7 @@ export function Chart({
     chartToolButtonCss,
   } = useChartStyles(chartVisible);
 
-  const lensAttributes = useMemo(
+  const lensAttributesContext = useMemo(
     () =>
       getLensAttributes({
         title: chart?.title,
@@ -218,7 +218,8 @@ export function Chart({
     services,
     dataView,
     relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
-    lensAttributes,
+    lensAttributes: lensAttributesContext.attributes,
+    isPlainRecord,
   });
 
   return (
@@ -340,7 +341,7 @@ export function Chart({
               chart={chart}
               getTimeRange={getTimeRange}
               refetch$={refetch$}
-              lensAttributes={lensAttributes}
+              lensAttributesContext={lensAttributesContext}
               isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}

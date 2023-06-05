@@ -18,7 +18,7 @@ import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import type { CaseSeverity } from '../../../../common/api';
 import type { CaseUsers, UseFetchAlertData } from '../../../../common/ui/types';
-import type { Case, CaseStatuses } from '../../../../common';
+import type { CaseUI, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
@@ -37,7 +37,7 @@ import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_conve
 import type { UserActivityParams } from '../../user_actions_activity_bar/types';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
-import { DescriptionWrapper } from '../../description/description_wrapper';
+import { Description } from '../../description';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -81,7 +81,7 @@ export const CaseViewActivity = ({
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
-  caseData: Case;
+  caseData: CaseUI;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
@@ -165,12 +165,10 @@ export const CaseViewActivity = ({
     useGetSupportedActionConnectors();
 
   const onSubmitConnector = useCallback(
-    (connector, onError, onSuccess) => {
+    (connector) => {
       onUpdateField({
         key: 'connector',
         value: connector,
-        onSuccess,
-        onError,
       });
     },
     [onUpdateField]
@@ -210,10 +208,9 @@ export const CaseViewActivity = ({
     <>
       <EuiFlexItem grow={6}>
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
-        <DescriptionWrapper
+        <Description
           isLoadingDescription={isLoadingDescription}
-          data={caseData}
-          userProfiles={userProfiles}
+          caseData={caseData}
           onUpdateField={onUpdateField}
         />
         <EuiSpacer size="l" />
@@ -274,7 +271,7 @@ export const CaseViewActivity = ({
           ) : null}
           <SeveritySidebarSelector
             isDisabled={!permissions.update}
-            isLoading={isLoading}
+            isLoading={isLoading && loadingKey === 'severity'}
             selectedSeverity={caseData.severity}
             onSeverityChange={onUpdateSeverity}
           />

@@ -27,6 +27,7 @@ export enum ConfigKey {
   JOURNEY_ID = 'journey_id',
   MAX_REDIRECTS = 'max_redirects',
   METADATA = '__ui',
+  MODE = 'mode',
   MONITOR_TYPE = 'type',
   NAME = 'name',
   NAMESPACE = 'namespace',
@@ -37,12 +38,15 @@ export enum ConfigKey {
   ORIGINAL_SPACE = 'original_space', // the original space the montior was saved in. Used by push monitors to ensure uniqueness of monitor id sent to heartbeat and prevent data collisions
   PORT = 'url.port',
   PROXY_URL = 'proxy_url',
+  PROXY_HEADERS = 'proxy_headers',
   PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',
   RESPONSE_BODY_CHECK_NEGATIVE = 'check.response.body.negative',
   RESPONSE_BODY_CHECK_POSITIVE = 'check.response.body.positive',
+  RESPONSE_JSON_CHECK = 'check.response.json',
   RESPONSE_BODY_INDEX = 'response.include_body',
   RESPONSE_HEADERS_CHECK = 'check.response.headers',
   RESPONSE_HEADERS_INDEX = 'response.include_headers',
+  RESPONSE_BODY_MAX_BYTES = 'response.include_body_max_bytes',
   RESPONSE_RECEIVE_CHECK = 'check.receive',
   RESPONSE_STATUS_CHECK = 'check.response.status',
   REQUEST_BODY_CHECK = 'check.request.body',
@@ -54,6 +58,8 @@ export enum ConfigKey {
   SCREENSHOTS = 'screenshots',
   SOURCE_PROJECT_CONTENT = 'source.project.content',
   SOURCE_INLINE = 'source.inline.script',
+  IPV4 = 'ipv4',
+  IPV6 = 'ipv6',
   PROJECT_ID = 'project_id',
   SYNTHETICS_ARGS = 'synthetics_args',
   TEXT_ASSERTION = 'playwright_text_assertion',
@@ -73,6 +79,7 @@ export enum ConfigKey {
 }
 
 export const secretKeys = [
+  ConfigKey.PROXY_HEADERS,
   ConfigKey.PARAMS,
   ConfigKey.PASSWORD,
   ConfigKey.REQUEST_BODY_CHECK,
@@ -80,6 +87,7 @@ export const secretKeys = [
   ConfigKey.REQUEST_SEND_CHECK,
   ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
   ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
+  ConfigKey.RESPONSE_JSON_CHECK,
   ConfigKey.RESPONSE_HEADERS_CHECK,
   ConfigKey.RESPONSE_RECEIVE_CHECK,
   ConfigKey.SOURCE_INLINE,

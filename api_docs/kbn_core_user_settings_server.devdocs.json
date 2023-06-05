@@ -1,0 +1,149 @@
+{
+  "id": "@kbn/core-user-settings-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-settings-server",
+        "id": "def-common.UserProfileSettingsClientContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileSettingsClientContract",
+        "description": [],
+        "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-settings-server",
+            "id": "def-common.UserProfileSettingsClientContract.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => Promise<Record<string, string>>"
+            ],
+            "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-settings-server",
+                "id": "def-common.UserProfileSettingsClientContract.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-settings-server",
+        "id": "def-common.UserSettingsServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserSettingsServiceSetup",
+        "description": [],
+        "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-settings-server",
+            "id": "def-common.UserSettingsServiceSetup.setUserProfileSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "setUserProfileSettings",
+            "description": [],
+            "signature": [
+              "(client: ",
+              {
+                "pluginId": "@kbn/core-user-settings-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserSettingsServerPluginApi",
+                "section": "def-common.UserProfileSettingsClientContract",
+                "text": "UserProfileSettingsClientContract"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-settings-server",
+                "id": "def-common.UserSettingsServiceSetup.setUserProfileSettings.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-user-settings-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUserSettingsServerPluginApi",
+                    "section": "def-common.UserProfileSettingsClientContract",
+                    "text": "UserProfileSettingsClientContract"
+                  }
+                ],
+                "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

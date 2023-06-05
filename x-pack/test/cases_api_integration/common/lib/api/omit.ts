@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseResponse, CommentResponse } from '@kbn/cases-plugin/common/api';
+import { Case, Comment } from '@kbn/cases-plugin/common/api';
 import { omit } from 'lodash';
 
 interface CommonSavedObjectAttributes {
@@ -36,16 +36,14 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
   ]);
 };
 
-export const removeServerGeneratedPropertiesFromCase = (
-  theCase: CaseResponse
-): Partial<CaseResponse> => {
-  return removeServerGeneratedPropertiesFromSavedObject<CaseResponse>(theCase, ['closed_at']);
+export const removeServerGeneratedPropertiesFromCase = (theCase: Case): Partial<Case> => {
+  return removeServerGeneratedPropertiesFromSavedObject<Case>(theCase, ['closed_at']);
 };
 
 export const removeServerGeneratedPropertiesFromComments = (
-  comments: CommentResponse[] | undefined
-): Array<Partial<CommentResponse>> | undefined => {
+  comments: Comment[] | undefined
+): Array<Partial<Comment>> | undefined => {
   return comments?.map((comment) => {
-    return removeServerGeneratedPropertiesFromSavedObject<CommentResponse>(comment, []);
+    return removeServerGeneratedPropertiesFromSavedObject<Comment>(comment, []);
   });
 };

@@ -240,22 +240,13 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
   handler: async (resources): Promise<ServiceMetadataDetails> => {
     const apmEventClient = await getApmEventClient(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
-    const { params, config } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
-
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery: '',
-    });
 
     const serviceMetadataDetails = await getServiceMetadataDetails({
       serviceName,
       apmEventClient,
-      searchAggregatedTransactions,
       start,
       end,
     });
@@ -391,7 +382,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
 });
 
 const serviceAnnotationsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+  endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-05-22',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -442,7 +433,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
 });
 
 const serviceAnnotationsCreateRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/services/{serviceName}/annotation',
+  endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-05-22',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },

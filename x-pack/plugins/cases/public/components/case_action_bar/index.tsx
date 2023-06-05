@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import type { Case } from '../../../common/ui/types';
+import type { CaseUI } from '../../../common/ui/types';
 import type { CaseStatuses } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
@@ -44,7 +44,7 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 `;
 
 export interface CaseActionBarProps {
-  caseData: Case;
+  caseData: CaseUI;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
 }

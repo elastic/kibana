@@ -32,9 +32,6 @@ export function RefreshButton() {
   );
 }
 
-export const REFRESH_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.refresh',
-  {
-    defaultMessage: 'Refresh',
-  }
-);
+export const REFRESH_LABEL = i18n.translate('xpack.exploratoryView.refresh', {
+  defaultMessage: 'Refresh',
+});

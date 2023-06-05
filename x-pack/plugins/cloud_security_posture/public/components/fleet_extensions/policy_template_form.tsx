@@ -20,7 +20,9 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
+import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
+import { assert } from '../../../common/utils/helpers';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import {
   CLOUDBEAT_AWS,
@@ -32,9 +34,11 @@ import {
 import {
   getPosturePolicy,
   getPostureInputHiddenVars,
+  getVulnMgmtCloudFormationDefaultValue,
   POSTURE_NAMESPACE,
   type NewPackagePolicyPostureInput,
   isPostureInput,
+  getMaxPackageName,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -42,7 +46,7 @@ import {
   PolicyTemplateSelector,
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
-import { assert } from '../../../common/utils/helpers';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -85,18 +89,18 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 );
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
-  ({ newPolicy, onChange, validationResults, isEditPage }) => {
+  ({ newPolicy, onChange, validationResults, isEditPage, packageInfo }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
+
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => onChange({ isValid: true, updatedPolicy }),
       [onChange]
     );
-
     /**
      * - Updates policy inputs by user selection
      * - Updates hidden policy vars
@@ -129,6 +133,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
+    const { data: packagePolicyList } = usePackagePolicyList(packageInfo.name);
+
     useEffect(() => {
       if (isEditPage) return;
       if (isLoading) return;
@@ -140,9 +146,22 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
 
-    usePolicyTemplateInitialName({ isEditPage, isLoading, integration, newPolicy, updatePolicy });
-
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+
+    useCloudFormationTemplate({
+      packageInfo,
+      updatePolicy,
+      newPolicy,
+    });
+
+    usePolicyTemplateInitialName({
+      packagePolicyList: packagePolicyList?.items,
+      isEditPage,
+      isLoading,
+      integration,
+      newPolicy,
+      updatePolicy,
+    });
 
     if (isLoading) {
       return (
@@ -180,9 +199,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     ];
 
     return (
-      <div>
+      <>
         {isEditPage && <EditScreenStepTitle />}
-
         {/* Defines the enabled policy template */}
         {!integration && (
           <>
@@ -195,11 +213,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             <EuiSpacer size="l" />
           </>
         )}
-
         {/* Shows info on the active policy template */}
         <PolicyTemplateInfo postureType={input.policy_template} />
         <EuiSpacer size="l" />
-
         {/* Defines the single enabled input of the active policy template */}
         <PolicyTemplateInputSelector
           input={input}
@@ -207,7 +223,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
-
         {/* Defines the name/description */}
         <IntegrationSettings
           fields={integrationFields}
@@ -216,7 +231,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {/* Defines the vars of the enabled input of the active policy template */}
         <PolicyTemplateVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
         <EuiSpacer />
-      </div>
+      </>
     );
   }
 );
@@ -225,37 +240,6 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
-
-const usePolicyTemplateInitialName = ({
-  isEditPage,
-  isLoading,
-  integration,
-  newPolicy,
-  updatePolicy,
-}: {
-  isEditPage: boolean;
-  isLoading: boolean;
-  integration: CloudSecurityPolicyTemplate | undefined;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
-}) => {
-  useEffect(() => {
-    if (!integration) return;
-    if (isEditPage) return;
-    if (isLoading) return;
-    const sequenceNumber = newPolicy.name.replace(/\D/g, '');
-    const sequenceSuffix = sequenceNumber ? `-${sequenceNumber}` : '';
-    const currentIntegrationName = `${integration}${sequenceSuffix}`;
-    if (newPolicy.name === currentIntegrationName) {
-      return;
-    }
-    updatePolicy({
-      ...newPolicy,
-      name: currentIntegrationName,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, integration, isEditPage]);
-};
 
 const useEnsureDefaultNamespace = ({
   newPolicy,
@@ -272,6 +256,41 @@ const useEnsureDefaultNamespace = ({
     const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
     updatePolicy(policy);
   }, [newPolicy, input, updatePolicy]);
+};
+const usePolicyTemplateInitialName = ({
+  isEditPage,
+  isLoading,
+  integration,
+  newPolicy,
+  packagePolicyList,
+  updatePolicy,
+}: {
+  isEditPage: boolean;
+  isLoading: boolean;
+  integration: CloudSecurityPolicyTemplate | undefined;
+  newPolicy: NewPackagePolicy;
+  packagePolicyList: PackagePolicy[] | undefined;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
+  useEffect(() => {
+    if (!integration) return;
+    if (isEditPage) return;
+    if (isLoading) return;
+
+    const packagePolicyListByIntegration = packagePolicyList?.filter(
+      (policy) => policy?.vars?.posture?.value === integration
+    );
+
+    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
+
+    if (newPolicy.name === currentIntegrationName) {
+      return;
+    }
+    updatePolicy({
+      ...newPolicy,
+      name: currentIntegrationName,
+    });
+  }, [isLoading, integration, isEditPage, packagePolicyList, newPolicy, updatePolicy]);
 };
 
 const getSelectedOption = (
@@ -290,4 +309,46 @@ const getSelectedOption = (
   assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
 
   return selectedOption;
+};
+
+/**
+ * Update CloudFormation template and stack name in the Agent Policy
+ * based on the selected policy template
+ */
+const useCloudFormationTemplate = ({
+  packageInfo,
+  newPolicy,
+  updatePolicy,
+}: {
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
+  useEffect(() => {
+    const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
+
+    // If the template is not available, do not update the policy
+    if (templateUrl === '') return;
+
+    const checkCurrentTemplate = newPolicy?.inputs?.find(
+      (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
+    )?.config?.cloud_formation_template_url?.value;
+
+    // If the template is already set, do not update the policy
+    if (checkCurrentTemplate === templateUrl) return;
+
+    updatePolicy?.({
+      ...newPolicy,
+      inputs: newPolicy.inputs.map((input) => {
+        if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
+          return {
+            ...input,
+            config: { cloud_formation_template_url: { value: templateUrl } },
+          };
+        }
+        return input;
+      }),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
 };

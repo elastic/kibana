@@ -31,7 +31,7 @@ import {
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { merge, Subscription } from 'rxjs';
-import { toExpression, Ast } from '@kbn/interpreter';
+import { toExpression } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
@@ -125,7 +125,9 @@ import {
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
+import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
+import { getDatasourceLayers } from '../state_management/utils';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -190,11 +192,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (doc: Document) => Promise<{
-    ast: Ast | null;
-    indexPatterns: IndexPatternMap;
-    indexPatternRefs: IndexPatternRef[];
-  }>;
+  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -207,6 +205,7 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: {
     canSaveVisualizations: boolean;
+    canOpenVisualizations: boolean;
     canSaveDashboards: boolean;
     navLinks: Capabilities['navLinks'];
     discover: Capabilities['discover'];
@@ -276,8 +275,14 @@ const getExpressionFromDocument = async (
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
-  const { ast, indexPatterns, indexPatternRefs } = await documentToExpression(document);
-  return { ast: ast ? toExpression(ast) : null, indexPatterns, indexPatternRefs };
+  const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
+    await documentToExpression(document);
+  return {
+    ast: ast ? toExpression(ast) : null,
+    indexPatterns,
+    indexPatternRefs,
+    activeVisualizationState,
+  };
 };
 
 function getViewUnderlyingDataArgs({
@@ -430,6 +435,8 @@ export class Embeddable
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
+  private activeVisualizationState?: unknown;
+
   constructor(
     private deps: LensEmbeddableDeps,
     initialInput: LensEmbeddableInput,
@@ -558,20 +565,12 @@ export class Embeddable
     return this.deps.visualizationMap[this.activeVisualizationId];
   }
 
-  private get activeVisualizationState() {
-    if (!this.activeVisualization) return;
-    return this.activeVisualization.initialize(
-      () => '',
-      this.savedVis?.state.visualization,
-      undefined,
-      this.savedVis?.references
-    );
-  }
-
   private indexPatterns: IndexPatternMap = {};
 
   private indexPatternRefs: IndexPatternRef[] = [];
 
+  // TODO - consider getting this from the persistedStateToExpression function
+  // where it is already computed
   private get activeDatasourceState(): undefined | unknown {
     if (!this.activeDatasourceId || !this.activeDatasource) return;
 
@@ -610,7 +609,7 @@ export class Embeddable
         visualizationMap: this.deps.visualizationMap,
         activeDatasource: this.activeDatasource,
         activeDatasourceState: {
-          isLoading: Boolean(this.activeDatasourceState),
+          isLoading: !this.activeDatasourceState,
           state: this.activeDatasourceState,
         },
         dataViews: {
@@ -631,7 +630,16 @@ export class Embeddable
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
       },
-      datasourceLayers: {}, // TODO
+      datasourceLayers: getDatasourceLayers(
+        {
+          [this.activeDatasourceId!]: {
+            isLoading: !this.activeDatasourceState,
+            state: this.activeDatasourceState,
+          },
+        },
+        this.deps.datasourceMap,
+        this.indexPatterns
+      ),
       query: this.savedVis.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
@@ -646,7 +654,8 @@ export class Embeddable
         setState: () => {},
         frame: frameDatasourceAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
-          this.activeVisualizationState
+          this.activeVisualizationState,
+          frameDatasourceAPI
         ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
@@ -721,14 +730,13 @@ export class Embeddable
     };
 
     try {
-      const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
-        this.savedVis,
-        this.deps.documentToExpression
-      );
+      const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
+        await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
 
       this.expression = ast;
       this.indexPatterns = indexPatterns;
       this.indexPatternRefs = indexPatternRefs;
+      this.activeVisualizationState = activeVisualizationState;
     } catch {
       // nothing, errors should be reported via getUserMessages
     }
@@ -802,6 +810,13 @@ export class Embeddable
     );
 
     this.activeData = newActiveData;
+
+    // Refresh messanges if info type is found as with active data
+    // these messages can be enriched
+    if (this._userMessages.some(({ severity }) => severity === 'info')) {
+      this.loadUserMessages();
+      this.renderUserMessages();
+    }
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -1335,7 +1350,9 @@ export class Embeddable
   private getIsEditable() {
     return (
       this.deps.capabilities.canSaveVisualizations ||
-      (!this.inputIsRefType(this.getInput()) && this.deps.capabilities.canSaveDashboards)
+      (!this.inputIsRefType(this.getInput()) &&
+        this.deps.capabilities.canSaveDashboards &&
+        this.deps.capabilities.canOpenVisualizations)
     );
   }
 

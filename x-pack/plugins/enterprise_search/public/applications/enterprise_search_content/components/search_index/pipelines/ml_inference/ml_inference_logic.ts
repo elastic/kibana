@@ -40,6 +40,10 @@ import {
   TrainedModelsApiLogic,
 } from '../../../../api/ml_models/ml_trained_models_logic';
 import {
+  StartTextExpansionModelApiLogic,
+  StartTextExpansionModelApiLogicActions,
+} from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import {
   AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
@@ -66,6 +70,7 @@ import {
   sortModels,
   sortSourceFields,
 } from '../../../shared/ml_inference/utils';
+import { PipelinesLogic } from '../pipelines_logic';
 
 import {
   AddInferencePipelineFormErrors,
@@ -155,6 +160,7 @@ interface MLInferenceProcessorsActions {
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
   };
+  startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
 export interface AddInferencePipelineModal {
@@ -227,6 +233,10 @@ export const MLInferenceLogic = kea<
         'apiSuccess as attachApiSuccess',
         'makeRequest as makeAttachPipelineRequest',
       ],
+      PipelinesLogic,
+      ['closeAddMlInferencePipelineModal as closeAddMlInferencePipelineModal'],
+      StartTextExpansionModelApiLogic,
+      ['apiSuccess as startTextExpansionModelSuccess'],
     ],
     values: [
       CachedFetchIndexApiLogic,
@@ -313,6 +323,10 @@ export const MLInferenceLogic = kea<
         });
       }
     },
+    startTextExpansionModelSuccess: () => {
+      // Refresh ML models list when the text expansion model is started
+      actions.makeMLModelsRequest(undefined);
+    },
   }),
   path: ['enterprise_search', 'content', 'pipelines_add_ml_inference_pipeline'],
   reducers: {
@@ -348,6 +362,20 @@ export const MLInferenceLogic = kea<
             selectedSourceFields: [],
           };
         },
+        closeAddMlInferencePipelineModal: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
+        createApiSuccess: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
         removeFieldFromMapping: (modal, { fieldName }) => {
           const {
             configuration: { fieldMappings },

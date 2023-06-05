@@ -10,6 +10,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
+import { RUNTIME_FIELD_TYPES } from '@kbn/data-plugin/common';
+
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
 import {
@@ -26,12 +28,6 @@ import {
   PivotConfigDefinition,
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
-import { RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
-
-export interface ErrorMessage {
-  query: string;
-  message: string;
-}
 
 export interface Field {
   name: EsFieldName;

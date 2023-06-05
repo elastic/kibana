@@ -75,6 +75,9 @@
   &.kbnBody--chromeHidden {
     @include kbnAffordForHeader(0);
   }
+  &.kbnBody--projectLayout {
+    @include kbnAffordForHeader($euiHeaderHeightCompensation);
+  }
   &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
     @include kbnAffordForHeader($kbnHeaderBannerHeight);
   }

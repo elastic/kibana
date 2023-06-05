@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { severitySchemaConfig } from './utils/custom_sort_script';
 
 export const vulnerabilitiesColumns = {
   actions: 'actions',
@@ -14,7 +15,8 @@ export const vulnerabilitiesColumns = {
   cvss: 'vulnerability.score.base',
   resource: 'resource.name',
   severity: 'vulnerability.severity',
-  package_version: 'vulnerability.package.name',
+  package: 'vulnerability.package.name',
+  version: 'vulnerability.package.version',
   fix_version: 'vulnerability.package.fixed_version',
 };
 
@@ -27,7 +29,9 @@ const defaultColumnProps = () => ({
   },
 });
 
-export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => [
+export const getVulnerabilitiesColumnsGrid = (
+  cellActions: EuiDataGridColumnCellAction[]
+): EuiDataGridColumn[] => [
   {
     ...defaultColumnProps(),
     id: vulnerabilitiesColumns.actions,
@@ -36,6 +40,7 @@ export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => [
     actions: false,
     isSortable: false,
     isResizable: false,
+    cellActions: [],
   },
   {
     ...defaultColumnProps(),
@@ -43,15 +48,16 @@ export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => [
     displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.vulnerability', {
       defaultMessage: 'Vulnerability',
     }),
-    initialWidth: 150,
-    isResizable: false,
+    initialWidth: 130,
+    cellActions,
   },
   {
     ...defaultColumnProps(),
     id: vulnerabilitiesColumns.cvss,
     displayAsText: 'CVSS',
-    initialWidth: 84,
+    initialWidth: 80,
     isResizable: false,
+    cellActions,
   },
   {
     ...defaultColumnProps(),
@@ -59,6 +65,7 @@ export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => [
     displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resource', {
       defaultMessage: 'Resource',
     }),
+    cellActions,
   },
   {
     ...defaultColumnProps(),
@@ -67,13 +74,24 @@ export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => [
       defaultMessage: 'Severity',
     }),
     initialWidth: 100,
+    cellActions,
+    schema: severitySchemaConfig.type,
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.package_version,
-    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.packageAndVersion', {
-      defaultMessage: 'Package and Version',
+    id: vulnerabilitiesColumns.package,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.package', {
+      defaultMessage: 'Package',
     }),
+    cellActions,
+  },
+  {
+    ...defaultColumnProps(),
+    id: vulnerabilitiesColumns.version,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.version', {
+      defaultMessage: 'Version',
+    }),
+    cellActions,
   },
   {
     ...defaultColumnProps(),
@@ -81,5 +99,6 @@ export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => [
     displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.fixVersion', {
       defaultMessage: 'Fix Version',
     }),
+    cellActions,
   },
 ];

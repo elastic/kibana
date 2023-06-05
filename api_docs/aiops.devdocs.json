@@ -111,6 +111,47 @@
       },
       {
         "parentPluginId": "aiops",
+        "id": "def-public.ExplainLogRateSpikesContent",
+        "type": "Function",
+        "tags": [],
+        "label": "ExplainLogRateSpikesContent",
+        "description": [
+          "\nLazy-wrapped ExplainLogRateSpikesContentWrapperReact component"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          "ExplainLogRateSpikesContentWrapperProps",
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ExplainLogRateSpikesContent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
+            "signature": [
+              "React.PropsWithChildren<",
+              "ExplainLogRateSpikesContentWrapperProps",
+              ">"
+            ],
+            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
         "id": "def-public.LogCategorization",
         "type": "Function",
         "tags": [],
@@ -464,6 +505,46 @@
                 "section": "def-public.LensPublicStart",
                 "text": "LensPublicStart"
               }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.fieldStats",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldStats",
+            "description": [],
+            "signature": [
+              "{ useFieldStatsTrigger: () => { renderOption: ((option: ",
+              "EuiComboBoxOptionOption",
+              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<{ dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "; fieldStatsServices: ",
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldStatsServices",
+                "text": "FieldStatsServices"
+              },
+              "; timeRangeMs?: ",
+              {
+                "pluginId": "@kbn/ml-date-picker",
+                "scope": "common",
+                "docId": "kibKbnMlDatePickerPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined; dslQuery?: object | undefined; }>; } | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,

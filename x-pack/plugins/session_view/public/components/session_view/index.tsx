@@ -46,7 +46,9 @@ import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations
  * The main wrapper component for the session view.
  */
 export const SessionView = ({
+  processIndex,
   sessionEntityId,
+  sessionStartTime,
   height,
   isFullScreen = false,
   jumpToEntityId,
@@ -129,7 +131,12 @@ export const SessionView = ({
     fetchPreviousPage,
     hasPreviousPage,
     refetch,
-  } = useFetchSessionViewProcessEvents(sessionEntityId, currentJumpToCursor);
+  } = useFetchSessionViewProcessEvents(
+    processIndex,
+    sessionEntityId,
+    sessionStartTime,
+    currentJumpToCursor
+  );
 
   const {
     data: alertsData,
@@ -138,10 +145,13 @@ export const SessionView = ({
     hasNextPage: hasNextPageAlerts,
     error: alertsError,
     refetch: refetchAlerts,
-  } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
+  } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
-  const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } =
-    useFetchGetTotalIOBytes(sessionEntityId);
+  const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } = useFetchGetTotalIOBytes(
+    processIndex,
+    sessionEntityId,
+    sessionStartTime
+  );
   const hasTTYOutput = !!totalTTYOutputBytes?.total;
   const bytesOfOutput = useMemo(() => {
     const { unit, value } = byteSize(totalTTYOutputBytes?.total || 0);
@@ -421,8 +431,10 @@ export const SessionView = ({
         }}
       </EuiResizableContainer>
       <TTYPlayer
+        index={processIndex}
         show={showTTY}
         sessionEntityId={sessionEntityId}
+        sessionStartTime={sessionStartTime}
         onClose={onToggleTTY}
         isFullscreen={isFullScreen}
         onJumpToEvent={onJumpToEvent}

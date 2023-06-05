@@ -22,7 +22,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
@@ -168,7 +168,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const uiSettings = core.uiSettings;
+  const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
 
@@ -535,6 +535,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -564,6 +565,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -576,7 +578,6 @@ export function getFormBasedDatasource({
                 uiSettings={uiSettings}
                 storage={storage}
                 fieldFormats={fieldFormats}
-                savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
@@ -599,18 +600,32 @@ export function getFormBasedDatasource({
       const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <LayerPanel
-            onChangeIndexPattern={(indexPatternId) => {
-              triggerActionOnIndexPatternChange({
-                indexPatternId,
-                state: props.state,
-                layerId: props.layerId,
-                uiActions,
-              });
-              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
-            }}
-            {...otherProps}
-          />
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                share,
+              }}
+            >
+              <LayerPanel
+                onChangeIndexPattern={(indexPatternId) => {
+                  triggerActionOnIndexPatternChange({
+                    indexPatternId,
+                    state: props.state,
+                    layerId: props.layerId,
+                    uiActions,
+                  });
+                  onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
+                }}
+                {...otherProps}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
         </KibanaThemeProvider>,
         domElement
       );

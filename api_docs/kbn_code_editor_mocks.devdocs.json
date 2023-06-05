@@ -534,7 +534,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ value: any; \"aria-label\": any; placeholder: any; allowFullScreen: any; languageId: any; useDarkTheme: any; transparentBackground: any; }"
+          "{ value: any; placeholder: any; \"aria-label\": any; allowFullScreen: any; languageId: any; useDarkTheme: any; transparentBackground: any; }"
         ],
         "path": "packages/shared-ux/code_editor/mocks/storybook.ts",
         "deprecated": false,

@@ -481,6 +481,7 @@ function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
     throttle: '',
     enabled: true,
     errorMessages: [],
+    revision: 0,
     statusStartDate: fake2MinutesAgo.toISOString(),
     statusEndDate: fakeNow.toISOString(),
     alerts: {

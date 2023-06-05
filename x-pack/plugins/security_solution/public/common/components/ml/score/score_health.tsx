@@ -22,7 +22,7 @@ export const ScoreHealth = React.memo<Props>(({ score }) => {
 
 ScoreHealth.displayName = 'ScoreHealth';
 
-// ಠ_ಠ A hard-fork of the `ml` ml/common/util/anomaly_utils.js#getSeverityColor ಠ_ಠ
+// ಠ_ಠ A hard-fork of the @kbn/ml-anomaly-utils;#getSeverityColor ಠ_ಠ
 //
 // Returns a severity label (one of critical, major, minor, warning, low or unknown)
 // for the supplied normalized anomaly score (a value between 0 and 100), where scores

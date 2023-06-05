@@ -25,7 +25,7 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
 
   const pageBaseUrl = 'http://localhost:5620/app/synthetics/monitors';
   const searchBarInput = page.locator(
-    '[placeholder="Search by name, url, host, tag, project or location"]'
+    '[placeholder="Search by name, URL, host, tag, project or location"]'
   );
 
   page.setDefaultTimeout(60 * 1000);
@@ -72,12 +72,12 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
     await page.click('span >> text="Journey / Page"');
     await page.click('[aria-label="Apply the selected filters for Type"]');
     expect(page.url()).toBe(`${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D`);
-    await page.click('[placeholder="Search by name, url, host, tag, project or location"]');
+    await page.click('[placeholder="Search by name, URL, host, tag, project or location"]');
     await Promise.all([
       page.waitForNavigation({
         url: `${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D&query=3`,
       }),
-      page.fill('[placeholder="Search by name, url, host, tag, project or location"]', '3'),
+      page.fill('[placeholder="Search by name, URL, host, tag, project or location"]', '3'),
     ]);
     await page.click('text=1-1');
     await page.waitForSelector('text=Showing 1-1 of 1 Configuration');

@@ -19,6 +19,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
+import { schema } from '@kbn/config-schema';
 import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
 import { formatLegacyActions } from '../lib';
 
@@ -370,6 +371,9 @@ describe('find()', () => {
         return { state: {} };
       },
       producer: 'myApp',
+      validate: {
+        params: schema.any(),
+      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -386,6 +390,9 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: schema.any(),
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
@@ -570,6 +577,9 @@ describe('find()', () => {
         return { state: {} };
       },
       producer: 'myApp',
+      validate: {
+        params: schema.any(),
+      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -586,6 +596,9 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: schema.any(),
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({

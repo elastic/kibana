@@ -48,11 +48,15 @@ export const importMonitors = async ({
     'filter_journeys.match': '',
     'filter_journeys.tags': [],
     ignore_https_errors: false,
-    'throttling.is_enabled': true,
-    'throttling.download_speed': '5',
-    'throttling.upload_speed': '3',
-    'throttling.latency': '20',
-    'throttling.config': '5d/3u/20l',
+    throttling: {
+      id: 'custom',
+      label: 'Custom',
+      value: {
+        download: '5',
+        upload: '3',
+        latency: '20',
+      },
+    },
   };
 
   const id = '1c215bd0-f580-11ec-89e5-694db461b7a5';

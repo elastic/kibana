@@ -136,5 +136,9 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     return <>{value ? 'true' : 'false'}</>;
   }
 
+  if (columnId === 'maintenance_window_ids') {
+    return <>{Array.isArray(value) ? value.join(', ') : ''}</>;
+  }
+
   return <>{value}</>;
 };

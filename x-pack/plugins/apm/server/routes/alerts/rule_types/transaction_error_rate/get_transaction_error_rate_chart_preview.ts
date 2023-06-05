@@ -9,6 +9,7 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { AlertParams } from '../../route';
@@ -39,8 +40,15 @@ export async function getTransactionErrorRateChartPreview({
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
 }): Promise<TransactionErrorRateChartPreviewResponse> {
-  const { serviceName, environment, transactionType, interval, start, end } =
-    alertParams;
+  const {
+    serviceName,
+    environment,
+    transactionType,
+    interval,
+    start,
+    end,
+    transactionName,
+  } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -62,6 +70,7 @@ export async function getTransactionErrorRateChartPreview({
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...getDocumentTypeFilterForTransactions(

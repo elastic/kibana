@@ -8,14 +8,16 @@
 export enum ExploreTables {
   SearchTerms,
   WorsePerformers,
-  TopClicked,
-  TopReferrers,
+  Clicked,
+  Referrers,
+  Locations,
 }
 
 export enum ExploreTableColumns {
   count = 'count',
   searchTerms = 'searchTerms',
   query = 'query',
+  location = 'location',
   page = 'page',
   sessions = 'sessions',
 }
@@ -30,18 +32,25 @@ export interface WorsePerformersTable {
   [ExploreTableColumns.query]: string;
 }
 
-export interface TopClickedTable {
+export interface ClickedTable {
   [ExploreTableColumns.count]: number;
   [ExploreTableColumns.page]: string;
 }
 
-export interface TopReferrersTable {
+export interface ReferrersTable {
   [ExploreTableColumns.page]: string;
   [ExploreTableColumns.sessions]: number;
+}
+
+export interface LocationsTable {
+  [ExploreTableColumns.location]: string;
+  [ExploreTableColumns.sessions]: number;
+  countryISOCode: string;
 }
 
 export type ExploreTableItem =
   | SearchTermsTable
   | WorsePerformersTable
-  | TopClickedTable
-  | TopReferrersTable;
+  | ClickedTable
+  | ReferrersTable
+  | LocationsTable;

@@ -34,11 +34,12 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   previewRule,
   getOpenSignals,
   getPreviewAlerts,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
   createRule,
 } from '../../utils';
@@ -144,7 +145,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('Threat match type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/155304
+  describe.skip('Threat match type rules', () => {
     before(async () => {
       // await deleteSignalsIndex(supertest, log);
       // await deleteAllAlerts(supertest, log);
@@ -153,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -499,6 +501,12 @@ export default ({ getService }: FtrProviderContext) => {
           version: 1,
         }),
       });
+    });
+
+    it('generates max signals warning when circuit breaker is hit', async () => {
+      const rule: ThreatMatchRuleCreateProps = { ...createThreatMatchRule(), max_signals: 87 }; // Query generates 88 alerts with current esArchive
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
     });
 
     it('terms and match should have the same alerts with pagination', async () => {
@@ -1015,6 +1023,32 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ]);
       });
+
+      // https://github.com/elastic/kibana/issues/149920
+      // generates same number of alerts similarly to "enriches signals with the single indicator that matches" test
+      it('generates alerts with single match if queries contain field path wildcards', async () => {
+        const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
+          // still matches all documents as default *:*
+          query: 'agent.ty*:auditbeat',
+          threat_mapping: [
+            {
+              entries: [
+                {
+                  value: 'threat.indicator.domain',
+                  field: 'destination.ip',
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+          threat_query: 'threat.indicator.dom*: 159.89.119.67', // still matches only domain field, which is enough to ensure wildcard in path works correctly
+          threat_index: ['filebeat-*'],
+        });
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).equal(2);
+      });
     });
 
     describe('indicator enrichment: event-first search', () => {
@@ -1490,6 +1524,46 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         ]);
+      });
+
+      // https://github.com/elastic/kibana/issues/149920
+      // creates same number of alerts similarly to "generates multiple signals with multiple matches" test
+      it('generates alerts with multiple matches if queries contain field path wildcards', async () => {
+        const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
+          // source.po* matches port source.port field
+          query: '(source.po*:57324 and source.ip:45.115.45.3) or destination.ip:159.89.119.67', // narrow our query to a single record that matches two indicators
+          threat_query: 'agent.t*:filebeat', // still matches all documents
+          threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+          threat_mapping: [
+            {
+              entries: [
+                {
+                  value: 'threat.indicator.port',
+                  field: 'source.port',
+                  type: 'mapping',
+                },
+                {
+                  value: 'threat.indicator.ip',
+                  field: 'source.ip',
+                  type: 'mapping',
+                },
+              ],
+            },
+            {
+              entries: [
+                {
+                  value: 'threat.indicator.domain',
+                  field: 'destination.ip',
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+        });
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).equal(2);
       });
     });
 

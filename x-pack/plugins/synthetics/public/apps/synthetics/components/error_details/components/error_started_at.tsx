@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { ReactElement } from 'react';
-import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
+import { EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useErrorFailedTests } from '../hooks/use_last_error_state';
@@ -19,7 +19,7 @@ export const ErrorStartedAt: React.FC = () => {
   let startedAt: string | ReactElement = useFormatTestRunAt(state?.started_at);
 
   if (!startedAt) {
-    startedAt = <EuiLoadingContent lines={1} />;
+    startedAt = <EuiSkeletonText lines={1} />;
   }
 
   return <EuiDescriptionList listItems={[{ title: ERROR_DURATION, description: startedAt }]} />;

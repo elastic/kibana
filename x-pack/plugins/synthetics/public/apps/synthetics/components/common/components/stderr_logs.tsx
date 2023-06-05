@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { Ping } from '../../../../../../common/runtime_types';
@@ -52,6 +52,11 @@ export const StdErrorLogs = ({
       name: TIMESTAMP_LABEL,
       sortable: true,
       render: (date: string) => formatDate(date, 'dateTime'),
+    },
+    {
+      field: 'synthetics.type',
+      name: TYPE_LABEL,
+      sortable: true,
     },
     {
       field: 'synthetics.payload.message',
@@ -144,6 +149,10 @@ export const StdErrorLogs = ({
 
 export const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.monitorList.timestamp', {
   defaultMessage: 'Timestamp',
+});
+
+export const TYPE_LABEL = i18n.translate('xpack.synthetics.monitorList.type', {
+  defaultMessage: 'Type',
 });
 
 export const ERROR_SUMMARY_LABEL = i18n.translate('xpack.synthetics.monitorList.errorSummary', {

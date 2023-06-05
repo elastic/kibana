@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiButtonProps } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -27,7 +27,7 @@ export interface FieldVisualizeButtonProps {
   contextualFields?: string[]; // names of fields which were also selected (like columns in Discover grid)
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   buttonProps?: Partial<EuiButtonProps>;
-  wrapInContainer?: (element: React.ReactElement) => React.ReactElement;
+  visualizeInfo?: VisualizeInformation;
 }
 
 export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.memo(
@@ -40,20 +40,11 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
     originatingApp,
     uiActions,
     buttonProps,
-    wrapInContainer,
+    visualizeInfo,
   }) => {
-    const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
-
-    useEffect(() => {
-      getVisualizeInformation(uiActions, field, dataView, contextualFields, multiFields).then(
-        setVisualizeInfo
-      );
-    }, [contextualFields, field, dataView, multiFields, uiActions]);
-
     if (!visualizeInfo) {
       return null;
     }
-
     const handleVisualizeLinkClick = async (
       event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {
@@ -73,7 +64,7 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
       triggerVisualization(dataView);
     };
 
-    const element = (
+    return (
       <FieldVisualizeButtonInner
         field={field}
         visualizeInfo={visualizeInfo}
@@ -81,7 +72,16 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
         buttonProps={buttonProps}
       />
     );
-
-    return wrapInContainer?.(element) || element;
   }
 );
+
+export async function getFieldVisualizeButton(props: FieldVisualizeButtonProps) {
+  const visualizeInfo = await getVisualizeInformation(
+    props.uiActions,
+    props.field,
+    props.dataView,
+    props.contextualFields,
+    props.multiFields
+  );
+  return visualizeInfo ? <FieldVisualizeButton {...props} visualizeInfo={visualizeInfo} /> : null;
+}

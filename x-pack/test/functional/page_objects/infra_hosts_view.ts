@@ -65,16 +65,23 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getHostsLandingPageEnableButton() {
-      const container = await testSubjects.find('hostsView-enable-feature-button');
-      return container;
+      return testSubjects.find('hostsView-enable-feature-button');
     },
 
     async clickEnableHostViewButton() {
-      return await testSubjects.click('hostsView-enable-feature-button');
+      return testSubjects.click('hostsView-enable-feature-button');
+    },
+
+    async getHostsTable() {
+      return testSubjects.find('hostsView-table');
+    },
+
+    async isHostTableLoading() {
+      return !(await testSubjects.exists('tbody[class*=euiBasicTableBodyLoading]'));
     },
 
     async getHostsTableData() {
-      const table = await testSubjects.find('hostsView-table');
+      const table = await this.getHostsTable();
       return table.findAllByTestSubject('hostsView-tableRow');
     },
 
@@ -96,32 +103,21 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getMetricsTrendContainer() {
-      return testSubjects.find('hostsView-metricsTrend');
+      return testSubjects.find('hostsViewKPIGrid');
     },
 
     async getChartsContainer() {
       return testSubjects.find('hostsView-metricChart');
     },
 
-    getMetricsTab() {
+    // Metrics Tab
+    async getMetricsTab() {
       return testSubjects.find('hostsView-tabs-metrics');
     },
 
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
-      metricsTab.click();
-    },
-
-    async getAllMetricsTrendTiles() {
-      const container = await this.getMetricsTrendContainer();
-      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
-    },
-
-    async getMetricsTrendTileValue(type: string) {
-      const container = await this.getMetricsTrendContainer();
-      const element = await container.findByTestSubject(`hostsView-metricsTrend-${type}`);
-      const div = await element.findByClassName('echMetricText__value');
-      return await div.getAttribute('title');
+      return metricsTab.click();
     },
 
     async getAllMetricsCharts() {
@@ -129,14 +125,33 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
     },
 
-    async getOpenInLensOption() {
-      const metricCharts = await this.getAllMetricsCharts();
-      const chart = metricCharts.at(-1)!;
-      await chart.moveMouseTo();
-      const button = await testSubjects.findDescendant('embeddablePanelToggleMenuIcon', chart);
+    async clickAndValidateMetriChartActionOptions() {
+      const element = await testSubjects.find('hostsView-metricChart-diskIOWrite');
+      await element.moveMouseTo();
+      const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
-      await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
-      return testSubjects.existOrFail('embeddablePanelAction-openInLens');
+      await testSubjects.existOrFail('embeddablePanelAction-openInLens');
+      // forces the modal to close
+      await element.click();
+    },
+
+    // KPIs
+    async isKPIChartsLoaded() {
+      return !(await testSubjects.exists(
+        '[data-test-subj=hostsView-metricsTrend] .echChartStatus[data-ech-render-complete=true]'
+      ));
+    },
+
+    async getAllKPITiles() {
+      const container = await this.getMetricsTrendContainer();
+      return container.findAllByCssSelector('[data-test-subj*="hostsViewKPI-"]');
+    },
+
+    async getKPITileValue(type: string) {
+      const container = await this.getMetricsTrendContainer();
+      const element = await container.findByTestSubject(`hostsViewKPI-${type}`);
+      const div = await element.findByClassName('echMetricText__value');
+      return div.getAttribute('title');
     },
 
     // Flyout Tabs
@@ -187,7 +202,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitLogsTab() {
       const logsTab = await this.getLogsTab();
-      logsTab.click();
+      await logsTab.click();
     },
 
     async getLogEntries() {
@@ -212,7 +227,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitAlertTab() {
       const alertsTab = await this.getAlertsTab();
-      alertsTab.click();
+      await alertsTab.click();
     },
 
     setAlertStatusFilter(alertStatus?: AlertStatus) {
@@ -232,22 +247,61 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('queryInput');
     },
 
-    async clearQueryBar() {
-      const queryBar = await this.getQueryBar();
-
-      return queryBar.clearValueWithKeyboard();
-    },
-
     async typeInQueryBar(query: string) {
       const queryBar = await this.getQueryBar();
-
+      await queryBar.clearValueWithKeyboard();
       return queryBar.type(query);
     },
 
     async submitQuery(query: string) {
       await this.typeInQueryBar(query);
-
       await testSubjects.click('querySubmitButton');
+    },
+
+    // Pagination
+    getPageNumberButton(pageNumber: number) {
+      return testSubjects.find(`pagination-button-${pageNumber - 1}`);
+    },
+
+    getPageSizeSelector() {
+      return testSubjects.find('tablePaginationPopoverButton');
+    },
+
+    getPageSizeOption(pageSize: number) {
+      return testSubjects.find(`tablePagination-${pageSize}-rows`);
+    },
+
+    async changePageSize(pageSize: number) {
+      const pageSizeSelector = await this.getPageSizeSelector();
+      await pageSizeSelector.click();
+      const pageSizeOption = await this.getPageSizeOption(pageSize);
+      await pageSizeOption.click();
+    },
+
+    async paginateTo(pageNumber: number) {
+      const paginationButton = await this.getPageNumberButton(pageNumber);
+      await paginationButton.click();
+    },
+
+    // Sorting
+    getDiskLatencyHeader() {
+      return testSubjects.find('tableHeaderCell_diskLatency_4');
+    },
+
+    getTitleHeader() {
+      return testSubjects.find('tableHeaderCell_title_1');
+    },
+
+    async sortByDiskLatency() {
+      const diskLatency = await this.getDiskLatencyHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+      await button.click();
+    },
+
+    async sortByTitle() {
+      const titleHeader = await this.getTitleHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', titleHeader);
+      await button.click();
     },
   };
 }

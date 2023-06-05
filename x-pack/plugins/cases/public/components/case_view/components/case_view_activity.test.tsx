@@ -21,7 +21,7 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseViewProps } from '../types';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
@@ -36,6 +36,7 @@ import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } 
 import { ActionTypes } from '../../../../common/api';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
+import { useOnUpdateField } from '../use_on_update_field';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -51,10 +52,11 @@ jest.mock('../../../containers/use_get_tags');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../containers/use_get_case_connectors');
 jest.mock('../../../containers/use_get_case_users');
+jest.mock('../use_on_update_field');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
-const caseData: Case = {
+const caseData: CaseUI = {
   ...basicCase,
   comments: [...basicCase.comments, alertComment],
   connector: {
@@ -118,11 +120,12 @@ const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
+const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 
 // FLAKY: https://github.com/elastic/kibana/issues/151979
 // FLAKY: https://github.com/elastic/kibana/issues/151980
 // FLAKY: https://github.com/elastic/kibana/issues/151981
-describe.skip('Case View Page activity tab', () => {
+describe('Case View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeAll(() => {
@@ -130,10 +133,17 @@ describe.skip('Case View Page activity tab', () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
     useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
-    usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
+    usePostPushToServiceMock.mockReturnValue({
+      isLoading: false,
+      mutateAsync: pushCaseToExternalService,
+    });
     useGetCaseConnectorsMock.mockReturnValue({
       isLoading: false,
       data: caseConnectors,
+    });
+    useOnUpdateFieldMock.mockReturnValue({
+      isLoading: false,
+      useOnUpdateField: jest.fn,
     });
   });
   let appMockRender: AppMockRenderer;
@@ -223,6 +233,30 @@ describe.skip('Case View Page activity tab', () => {
     expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
     expect(result.queryByTestId('case-view-activity')).not.toBeInTheDocument();
     expect(result.queryByTestId('user-actions-list')).not.toBeInTheDocument();
+  });
+
+  it('should show a loading when updating severity ', async () => {
+    useOnUpdateFieldMock.mockReturnValue({ isLoading: true, loadingKey: 'severity' });
+
+    const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+    expect(
+      result
+        .getByTestId('case-severity-selection')
+        .classList.contains('euiSuperSelectControl-isLoading')
+    ).toBeTruthy();
+  });
+
+  it('should not show a loading for severity when updating tags', async () => {
+    useOnUpdateFieldMock.mockReturnValue({ isLoading: true, loadingKey: 'tags' });
+
+    const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+    expect(
+      result
+        .getByTestId('case-severity-selection')
+        .classList.contains('euiSuperSelectControl-isLoading')
+    ).not.toBeTruthy();
   });
 
   it('should not render the assignees on basic license', () => {
@@ -493,15 +527,36 @@ describe.skip('Case View Page activity tab', () => {
     });
 
     describe('User actions', () => {
-      it('renders the descriptions user correctly', async () => {
+      it('renders the description correctly', async () => {
         appMockRender = createAppMockRenderer();
         const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-        const description = within(result.getByTestId('description-action'));
+        const description = within(result.getByTestId('description'));
 
         await waitFor(() => {
-          expect(description.getByText('Leslie Knope')).toBeInTheDocument();
+          expect(description.getByText(caseData.description)).toBeInTheDocument();
         });
+      });
+
+      it('renders edit description user action correctly', async () => {
+        useFindCaseUserActionsMock.mockReturnValue({
+          ...defaultUseFindCaseUserActions,
+          data: {
+            userActions: [
+              getUserAction('description', 'create'),
+              getUserAction('description', 'update'),
+            ],
+          },
+        });
+
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+        const userActions = within(result.getAllByTestId('user-actions-list')[1]);
+
+        expect(
+          userActions.getByTestId('description-update-action-description-update')
+        ).toBeInTheDocument();
       });
 
       it('renders the unassigned users correctly', async () => {

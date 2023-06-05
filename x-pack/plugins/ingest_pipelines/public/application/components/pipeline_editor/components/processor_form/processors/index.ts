@@ -8,6 +8,7 @@
 // please try to keep this list sorted by module name (e.g. './bar' before './foo')
 
 export { Append } from './append';
+export { Attachment } from './attachment';
 export { Bytes } from './bytes';
 export { Circle } from './circle';
 export { CommunityId } from './community_id';

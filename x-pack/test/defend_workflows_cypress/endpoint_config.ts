@@ -8,6 +8,7 @@
 import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
+import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
 import { DefendWorkflowsCypressEndpointTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -15,8 +16,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const config = defendWorkflowsCypressConfig.getAll();
   const hostIp = getLocalhostRealIp();
 
+  const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = ['responseActionExecuteEnabled'];
+
   return {
     ...config,
+
+    servers: {
+      ...config.servers,
+      fleetserver: {
+        protocol: 'https',
+        hostname: hostIp,
+        port: 8220,
+      },
+    },
+
     kbnTestServer: {
       ...config.kbnTestServer,
       serverArgs: [
@@ -27,6 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         )}`,
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,
       ],
     },
     testRunner: DefendWorkflowsCypressEndpointTestRunner,

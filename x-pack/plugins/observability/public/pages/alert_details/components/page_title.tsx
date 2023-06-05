@@ -34,6 +34,16 @@ export interface PageTitleProps {
   alert: TopAlert | null;
 }
 
+export function pageTitleContent(ruleCategory: string) {
+  return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
+    defaultMessage:
+      '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
+    values: {
+      ruleCategory,
+    },
+  });
+}
+
 export function PageTitle({ alert }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -41,13 +51,7 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   return (
     <div data-test-subj="page-title-container">
-      <FormattedMessage
-        id="xpack.observability.pages.alertDetails.pageTitle.title"
-        values={{
-          ruleCategory: alert.fields[ALERT_RULE_CATEGORY],
-        }}
-        defaultMessage="{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}"
-      />
+      {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>

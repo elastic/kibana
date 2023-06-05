@@ -18,6 +18,7 @@ import {
   REASON_ID_TYPES,
   validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
+import { nonNullable } from '../../../../../utils';
 import { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
@@ -27,7 +28,6 @@ import {
   getValueOrName,
   groupArgsByType,
   isMathNode,
-  nonNullable,
   tinymathFunctions,
 } from './util';
 

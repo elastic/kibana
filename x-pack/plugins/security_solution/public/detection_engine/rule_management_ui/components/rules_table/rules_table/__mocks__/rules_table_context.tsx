@@ -15,6 +15,7 @@ export const useRulesTableContextMock = {
       rulesSnoozeSettings: {
         data: {},
         isLoading: false,
+        isFetching: false,
         isError: false,
       },
       pagination: {

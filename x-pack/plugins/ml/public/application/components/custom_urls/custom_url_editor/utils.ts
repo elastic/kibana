@@ -6,21 +6,23 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Moment } from 'moment';
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
+import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
-import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
+  DEFAULT_RESULTS_FIELD,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -38,7 +40,6 @@ import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
-import { UrlConfig } from '../../../../../common/types/custom_urls';
 import {
   CombinedJob,
   Job,
@@ -57,6 +58,7 @@ export interface CustomUrlSettings {
   // Note timeRange is only editable in new URLs for Dashboard and Discover URLs,
   // as for other URLs we have no way of knowing how the field will be used in the URL.
   timeRange: TimeRange;
+  customTimeRange?: { start: Moment; end: Moment };
   kibanaSettings?: {
     dashboardId?: string;
     queryFieldNames?: string[];
@@ -92,7 +94,10 @@ export function getNewCustomUrlDefaults(
   // which matches the indices configured in the job datafeed.
   let query: estypes.QueryDslQueryContainer = {};
   let indicesName: string | undefined;
+  let backupIndicesName: string | undefined;
+  let backupDataViewId: string | undefined;
   let jobId;
+
   if (
     isAnomalyDetectionJob(job) &&
     dataViews !== undefined &&
@@ -106,12 +111,16 @@ export function getNewCustomUrlDefaults(
     jobId = job.job_id;
   } else if (isDataFrameAnalyticsConfigs(job) && dataViews !== undefined && dataViews.length > 0) {
     indicesName = job.dest.index;
+    backupIndicesName = job.source.index[0];
     query = job.source?.query ?? {};
     jobId = job.id;
   }
 
   const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
-  kibanaSettings.discoverIndexPatternId = defaultDataViewId;
+  if (defaultDataViewId === undefined && backupIndicesName !== undefined) {
+    backupDataViewId = dataViews.find((dv) => dv.title === backupIndicesName)?.id;
+  }
+  kibanaSettings.discoverIndexPatternId = defaultDataViewId ?? backupDataViewId ?? '';
   kibanaSettings.filters =
     defaultDataViewId === null ? [] : getFiltersForDSLQuery(query, defaultDataViewId, jobId);
 
@@ -134,17 +143,23 @@ export function getNewCustomUrlDefaults(
 // Returns the list of supported field names that can be used
 // to add to the query used when linking to a Kibana dashboard or Discover.
 export function getSupportedFieldNames(
-  job: DataFrameAnalyticsConfig,
+  job: DataFrameAnalyticsConfig | Job,
   dataView: DataView
 ): string[] {
-  const resultsField = job.dest.results_field;
   const sortedFields = dataView.fields.getAll().sort((a, b) => a.name.localeCompare(b.name)) ?? [];
-  const categoryFields = sortedFields.filter(
-    (f) =>
+  let filterFunction: (field: DataViewField) => boolean = (field: DataViewField) =>
+    categoryFieldTypes.some((type) => {
+      return field.esTypes?.includes(type);
+    });
+
+  if (isDataFrameAnalyticsConfigs(job)) {
+    const resultsField = job.dest.results_field;
+    filterFunction = (f) =>
       categoryFieldTypes.some((type) => {
         return f.esTypes?.includes(type);
-      }) && !f.name.startsWith(resultsField ?? DEFAULT_RESULTS_FIELD)
-  );
+      }) && !f.name.startsWith(resultsField ?? DEFAULT_RESULTS_FIELD);
+  }
+  const categoryFields = sortedFields.filter(filterFunction);
   return categoryFields.map((field) => field.name);
 }
 
@@ -182,7 +197,7 @@ export function isValidCustomUrlSettingsTimeRange(timeRangeSettings: TimeRange):
 
 export function isValidCustomUrlSettings(
   settings: CustomUrlSettings,
-  savedCustomUrls: UrlConfig[]
+  savedCustomUrls: MlUrlConfig[]
 ): boolean {
   let isValid = isValidLabel(settings.label, savedCustomUrls);
   if (isValid === true) {
@@ -191,7 +206,7 @@ export function isValidCustomUrlSettings(
   return isValid;
 }
 
-export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig> {
+export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
@@ -208,7 +223,21 @@ export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise
   }
 }
 
-async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig> {
+function getUrlRangeFromSettings(settings: CustomUrlSettings) {
+  let customStart;
+  let customEnd;
+
+  if (settings.customTimeRange && settings.customTimeRange.start && settings.customTimeRange.end) {
+    customStart = settings.customTimeRange.start.toISOString();
+    customEnd = settings.customTimeRange.end.toISOString();
+  }
+  return {
+    from: customStart ?? '$earliest$',
+    to: customEnd ?? '$latest$',
+  };
+}
+
+async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
   // Get the complete list of attributes for the selected dashboard (query, filters).
   const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
 
@@ -240,11 +269,13 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
 
   const dashboard = getDashboard();
 
+  const { from, to } = getUrlRangeFromSettings(settings);
+
   const location = await dashboard?.locator?.getLocation({
     dashboardId,
     timeRange: {
-      from: '$earliest$',
-      to: '$latest$',
+      from,
+      to,
       mode: 'absolute',
     },
     filters,
@@ -286,10 +317,12 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
   // Add time settings to the global state URL parameter with $earliest$ and
   // $latest$ tokens which get substituted for times around the time of the
   // anomaly on which the URL will be run against.
+  const { from, to } = getUrlRangeFromSettings(settings);
+
   const _g = rison.encode({
     time: {
-      from: '$earliest$',
-      to: '$latest$',
+      from,
+      to,
       mode: 'absolute',
     },
   });
@@ -319,7 +352,7 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
 
   const urlValue = `discover#/?_g=${_g}&_a=${_a}`;
 
-  const urlToAdd: KibanaUrlConfig = {
+  const urlToAdd: MlKibanaUrlConfig = {
     url_name: settings.label,
     url_value: urlValue,
     time_range: TIME_RANGE_TYPE.AUTO,
@@ -356,8 +389,8 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Promise<string> {
-  const interval = parseInterval(job.analysis_config.bucket_span);
+async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): Promise<string> {
+  const interval = parseInterval(job.analysis_config.bucket_span!);
   const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -430,6 +463,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
       undefined,
       jobConfig,
       datafeedConfig
+      // @ts-expect-error TODO: fix after elasticsearch-js bump
     )) as unknown as estypes.MlPreviewDatafeedResponse<Record<string, unknown>>['data'];
 
     const docTimeFieldName = job.data_description.time_field;
@@ -446,7 +480,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
 
 async function getDataFrameAnalyticsTestUrl(
   job: DataFrameAnalyticsConfig,
-  customUrl: UrlConfig,
+  customUrl: MlUrlConfig,
   currentTimeFilter?: EsQueryTimeRange
 ): Promise<string> {
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -489,7 +523,7 @@ async function getDataFrameAnalyticsTestUrl(
 
 export function getTestUrl(
   job: Job | DataFrameAnalyticsConfig,
-  customUrl: UrlConfig,
+  customUrl: MlUrlConfig,
   currentTimeFilter?: EsQueryTimeRange
 ) {
   if (isDataFrameAnalyticsConfigs(job)) {

@@ -94,6 +94,9 @@ const ALERT_RULE_TAGS = `${ALERT_RULE_NAMESPACE}.tags` as const;
 // kibana.alert.rule_type_id - rule type id for rule that generated this alert
 const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
 
+// kibana.alert.url - url which will redirect users to a page related to the given alert
+const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
+
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 
@@ -127,6 +130,7 @@ const fields = {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
@@ -164,6 +168,7 @@ export {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,

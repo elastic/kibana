@@ -105,3 +105,7 @@ export const FILTER_FIELDS = {
 };
 
 export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';
+
+export const LICENSE_NOT_ACTIVE_ERROR = 'License not active';
+export const LICENSE_MISSING_ERROR = 'Missing license information';
+export const LICENSE_NOT_SUPPORTED_ERROR = 'License not supported';

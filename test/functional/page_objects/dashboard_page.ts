@@ -309,6 +309,18 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
+  public async clickDiscardChanges(accept = true) {
+    await this.retry.try(async () => {
+      await this.expectDiscardChangesButtonEnabled();
+      this.log.debug('clickDiscardChanges');
+      await this.testSubjects.click('dashboardDiscardChangesMenuItem');
+    });
+    await this.common.expectConfirmModalOpenState(true);
+    if (accept) {
+      await this.common.clickConfirmOnModal();
+    }
+  }
+
   public async clickQuickSave() {
     await this.retry.try(async () => {
       await this.expectQuickSaveButtonEnabled();
@@ -652,6 +664,7 @@ export class DashboardPageObject extends FtrService {
 
   public async addVisualizations(visualizations: string[]) {
     await this.dashboardAddPanel.addVisualizations(visualizations);
+    await this.waitForRenderComplete();
   }
 
   public async setSaveAsNewCheckBox(checked: boolean) {
@@ -732,6 +745,15 @@ export class DashboardPageObject extends FtrService {
   }
   public async expectExistsQuickSaveOption() {
     await this.testSubjects.existOrFail('dashboardQuickSaveMenuItem');
+  }
+
+  public async expectDiscardChangesButtonEnabled() {
+    this.log.debug('expectDiscardChangesButtonEnabled');
+    const quickSaveButton = await this.testSubjects.find('dashboardDiscardChangesMenuItem');
+    const isDisabled = await quickSaveButton.getAttribute('disabled');
+    if (isDisabled) {
+      throw new Error('Discard changes button disabled');
+    }
   }
 
   public async expectQuickSaveButtonEnabled() {

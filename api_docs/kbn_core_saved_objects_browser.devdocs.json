@@ -58,14 +58,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/services.ts"
           },
@@ -80,14 +72,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
           },
           {
             "plugin": "exploratoryView",
@@ -120,22 +104,6 @@
           {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",

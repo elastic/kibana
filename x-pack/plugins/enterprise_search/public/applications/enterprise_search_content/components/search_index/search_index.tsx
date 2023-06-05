@@ -98,6 +98,7 @@ export const SearchIndex: React.FC = () => {
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
       content: <SearchIndexOverview />,
+      'data-test-subj': 'entSearchContent-index-overview-tab',
       id: SearchIndexTabId.OVERVIEW,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
         defaultMessage: 'Overview',
@@ -167,6 +168,7 @@ export const SearchIndex: React.FC = () => {
     },
     {
       content: <AutomaticCrawlScheduler />,
+      'data-test-subj': 'entSearchContent-index-crawler-scheduler-tab',
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',

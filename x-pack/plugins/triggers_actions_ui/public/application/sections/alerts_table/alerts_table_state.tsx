@@ -16,6 +16,7 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
@@ -68,8 +69,13 @@ export type AlertsTableStateProps = {
   showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
+  runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+  /**
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
+   */
+  shouldHighlightRow?: (alert: Alert) => boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -136,8 +142,10 @@ const AlertsTableStateWithQueryProvider = ({
   gridStyle,
   browserFields: propBrowserFields,
   onUpdate,
+  runtimeMappings,
   showAlertStatusWithFlapping,
   toolbarVisibility,
+  shouldHighlightRow,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
@@ -211,6 +219,10 @@ const AlertsTableStateWithQueryProvider = ({
     initialBrowserFields: propBrowserFields,
   });
 
+  const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
+    setPagination(_pagination);
+  }, []);
+
   const [
     isLoading,
     {
@@ -228,6 +240,8 @@ const AlertsTableStateWithQueryProvider = ({
     featureIds,
     query,
     pagination,
+    onPageChange,
+    runtimeMappings,
     sort,
     skip: false,
   });
@@ -251,10 +265,6 @@ const AlertsTableStateWithQueryProvider = ({
     Array.from(caseIds.values()),
     fetchCases
   );
-
-  const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
-    setPagination(_pagination);
-  }, []);
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {
     rowSelection: new Map<number, RowSelectionState>(),
@@ -309,7 +319,7 @@ const AlertsTableStateWithQueryProvider = ({
     oldAlertsData,
     onPageChange,
     onSortChange,
-    pagination.pageIndex,
+    pagination,
     refresh,
     sort,
     updatedAt,
@@ -318,13 +328,18 @@ const AlertsTableStateWithQueryProvider = ({
   const CasesContext = casesService?.ui.getCasesContext();
   const isCasesContextAvailable = casesService && CasesContext;
 
+  const memoizedCases = useMemo(
+    () => ({
+      data: cases ?? new Map(),
+      isLoading: isLoadingCases,
+    }),
+    [cases, isLoadingCases]
+  );
+
   const tableProps: AlertsTableProps = useMemo(
     () => ({
       alertsTableConfiguration,
-      cases: {
-        data: cases ?? new Map(),
-        isLoading: isLoadingCases,
-      },
+      cases: memoizedCases,
       columns,
       bulkActions: [],
       deletedEventIds: [],
@@ -353,14 +368,14 @@ const AlertsTableStateWithQueryProvider = ({
       controls: persistentControls,
       showInspectButton,
       toolbarVisibility,
+      shouldHighlightRow,
     }),
     [
       alertsTableConfiguration,
-      cases,
-      isLoadingCases,
+      memoizedCases,
       columns,
       flyoutSize,
-      pagination.pageSize,
+      pagination,
       id,
       leadingControlColumns,
       showExpandToDetails,
@@ -380,6 +395,7 @@ const AlertsTableStateWithQueryProvider = ({
       persistentControls,
       showInspectButton,
       toolbarVisibility,
+      shouldHighlightRow,
     ]
   );
 

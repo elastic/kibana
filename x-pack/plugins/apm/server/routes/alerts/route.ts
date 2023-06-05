@@ -28,6 +28,7 @@ const alertParamsRt = t.intersection([
       t.literal(AggregationType.P99),
     ]),
     serviceName: t.string,
+    errorGroupingKey: t.string,
     transactionType: t.string,
     transactionName: t.string,
   }),

@@ -100,8 +100,8 @@ export const ToggleAlertFlyoutButton = () => {
 };
 
 const noWritePermissionsTooltipContent = i18n.translate(
-  'xpack.synthetics.alertDropdown.noWritePermissions',
+  'xpack.synthetics.alertDropdown.noPermissions',
   {
-    defaultMessage: 'You need read-write access to Uptime to create alerts in this app.',
+    defaultMessage: 'You do not have sufficient permissions to perform this action.',
   }
 );

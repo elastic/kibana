@@ -129,6 +129,14 @@ export const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
+    settings: {
+      client: {
+        ...defaultCore.settings.client,
+        get: getSetting,
+        get$: setSetting$,
+      },
+      globalClient: defaultCore.settings.globalClient,
+    },
     usageCollection: {
       reportUiCounter: () => {},
     },

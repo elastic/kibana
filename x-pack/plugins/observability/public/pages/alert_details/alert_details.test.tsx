@@ -6,18 +6,19 @@
  */
 
 import React, { Fragment } from 'react';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { useParams } from 'react-router-dom';
 import { Chance } from 'chance';
 import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { Subset } from '../../typings';
 import { render } from '../../utils/test_helper';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { AlertDetails } from './alert_details';
 import { ConfigSchema } from '../../plugin';
 import { alert, alertWithNoData } from './mock/alert';
@@ -73,7 +74,7 @@ jest.mock('../../hooks/use_fetch_rule', () => {
     }),
   };
 });
-jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_get_user_cases_permissions', () => ({
   useGetUserCasesPermissions: () => ({
     all: true,
@@ -120,10 +121,18 @@ describe('Alert details', () => {
     mockKibana();
   });
 
+  const renderComponent = () =>
+    render(
+      <IntlProvider locale="en">
+        <AlertDetails />
+      </IntlProvider>,
+      config
+    );
+
   it('should show the alert detail page with all necessary components', async () => {
     useFetchAlertDetailMock.mockReturnValue([false, alert]);
 
-    const alertDetails = render(<AlertDetails />, config);
+    const alertDetails = renderComponent();
 
     await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
 
@@ -136,7 +145,7 @@ describe('Alert details', () => {
   it('should show error loading the alert details', async () => {
     useFetchAlertDetailMock.mockReturnValue([false, alertWithNoData]);
 
-    const alertDetails = render(<AlertDetails />, config);
+    const alertDetails = renderComponent();
 
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeTruthy();
     expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy();
@@ -146,7 +155,7 @@ describe('Alert details', () => {
   it('should show loading spinner', async () => {
     useFetchAlertDetailMock.mockReturnValue([true, alertWithNoData]);
 
-    const alertDetails = render(<AlertDetails />, config);
+    const alertDetails = renderComponent();
 
     expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();

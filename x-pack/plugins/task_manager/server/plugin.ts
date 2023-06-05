@@ -127,7 +127,7 @@ export class TaskManagerPlugin
       config: this.config!,
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
-      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
@@ -141,7 +141,7 @@ export class TaskManagerPlugin
       config: this.config!,
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
-      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
@@ -180,14 +180,16 @@ export class TaskManagerPlugin
       );
     }
 
+    if (this.config.unsafe.authenticate_background_task_utilization === false) {
+      this.logger.warn(`Disabling authentication for background task utilization API`);
+    }
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
-        this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
-        this.assertStillInSetup('register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
     };
@@ -285,18 +287,6 @@ export class TaskManagerPlugin
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
-  }
-
-  /**
-   * Ensures task manager hasn't started
-   *
-   * @param {string} the name of the operation being executed
-   * @returns void
-   */
-  private assertStillInSetup(operation: string) {
-    if (this.taskPollingLifecycle?.isStarted) {
-      throw new Error(`Cannot ${operation} after the task manager has started`);
-    }
   }
 }
 

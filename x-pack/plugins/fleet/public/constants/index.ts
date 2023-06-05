@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { INGEST_SAVED_OBJECT_INDEX } from '../../common/constants';
+
 export {
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
@@ -27,7 +29,7 @@ export {
 
 export * from './page_paths';
 
-export const INDEX_NAME = '.kibana';
+export const INDEX_NAME = INGEST_SAVED_OBJECT_INDEX;
 
 export const CUSTOM_LOGS_INTEGRATION_NAME = 'log';
 

@@ -51,11 +51,12 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       },
     }),
     parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.suggestions.buckets').reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+      suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       ),
     }),
   },
@@ -75,13 +76,11 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
     }),
     parse: (rawEsResult) => ({
       suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          return {
-            ...suggestions,
-            [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
-          };
+        (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
+          acc.push({ value: suggestion.key_as_string, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       ),
     }),
   },
@@ -134,7 +133,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
-        return { suggestions: {} };
+        return { suggestions: [] };
       }
 
       const buckets: EsBucket[] = [];
@@ -153,9 +152,10 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       return {
         suggestions: sortedSuggestions
           .slice(0, 10) // only return top 10 results
-          .reduce((suggestions, suggestion: EsBucket) => {
-            return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-          }, {}),
+          .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+            acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+            return acc;
+          }, []),
       };
     },
   },
@@ -190,11 +190,12 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       };
     },
     parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.nestedSuggestions.suggestions.buckets').reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+      suggestions: get(rawEsResult, 'aggregations.nestedSuggestions.suggestions.buckets')?.reduce(
+        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       ),
     }),
   },

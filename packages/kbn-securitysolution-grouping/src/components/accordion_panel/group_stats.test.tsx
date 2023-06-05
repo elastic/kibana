@@ -13,6 +13,8 @@ import { GroupStats } from './group_stats';
 const onTakeActionsOpen = jest.fn();
 const testProps = {
   bucketKey: '9nk5mo2fby',
+  groupFilter: [],
+  groupNumber: 0,
   onTakeActionsOpen,
   statRenderers: [
     {
@@ -23,7 +25,7 @@ const testProps = {
     { title: 'Rules:', badge: { value: 2 } },
     { title: 'Alerts:', badge: { value: 2, width: 50, color: '#a83632' } },
   ],
-  takeActionItems: [
+  takeActionItems: () => [
     <p data-test-subj="takeActionItem-1" key={1} />,
     <p data-test-subj="takeActionItem-2" key={2} />,
   ],

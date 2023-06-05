@@ -13,7 +13,7 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
@@ -63,7 +63,6 @@ export interface BaseState extends ControlState {
    * max_retry_time = 11.7 minutes
    */
   readonly retryAttempts: number;
-
   /**
    * The number of documents to process in each batch. This determines the
    * maximum number of documents that will be read and written in a single
@@ -83,6 +82,12 @@ export interface BaseState extends ControlState {
    * When writing batches, we limit the number of documents in a batch
    * (batchSize) as well as the size of the batch in bytes (maxBatchSizeBytes).
    */
+  readonly maxBatchSize: number;
+  /**
+   * The number of documents to process in each batch. Under most circumstances
+   * batchSize == maxBatchSize. But if we fail to read a batch because of a
+   * Nodejs `RangeError` we'll temporarily half `batchSize` and retry.
+   */
   readonly batchSize: number;
   /**
    * When writing batches, limits the batch size in bytes to ensure that we
@@ -90,6 +95,12 @@ export interface BaseState extends ControlState {
    * http.max_content_length which defaults to 100mb.
    */
   readonly maxBatchSizeBytes: number;
+  /**
+   * If a read batch exceeds this limit we half the batchSize and retry. By
+   * not JSON.parsing and transforming large batches we can avoid RangeErrors
+   * or Kibana OOMing.
+   */
+  readonly maxReadBatchSizeBytes: number;
   readonly logs: MigrationLog[];
   /**
    * If saved objects exist which have an unknown type they will cause
@@ -121,10 +132,16 @@ export interface BaseState extends ControlState {
    */
   readonly versionIndex: string;
   /**
-   * An alias on the target index used as part of an "reindex block" that
+   * A temporary index used as part of an "reindex block" that
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
+  /**
+   * An alias to the tempIndex used to prevent ES from auto-creating the temp
+   * index if one node deletes it while another writes to it
+   * e.g. `.kibana_7.11.0_reindex_temp_alias`.
+   */
+  readonly tempIndexAlias: string;
   /**
    * When upgrading to a more recent kibana version, some saved object types
    * might be conflicting or no longer used.
@@ -152,6 +169,23 @@ export interface BaseState extends ControlState {
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   readonly waitForMigrationCompletion: boolean;
+
+  /**
+   * This flag tells the migrator that SO documents must be redistributed,
+   * i.e. stored in different system indices, compared to where they are currently stored.
+   * This requires reindexing documents.
+   */
+  readonly mustRelocateDocuments: boolean;
+
+  /**
+   * This object holds a relation of all the types that are stored in each index, e.g.:
+   * {
+   *  '.kibana': [ 'type_1', 'type_2', ... 'type_N' ],
+   *  '.kibana_cases': [ 'type_N+1', 'type_N+2', ... 'type_N+M' ],
+   *  ...
+   * }
+   */
+  readonly indexTypesMap: IndexTypesMap;
 }
 
 export interface InitState extends BaseState {
@@ -231,6 +265,8 @@ export interface FatalState extends BaseState {
   readonly controlState: 'FATAL';
   /** The reason the migration was terminated */
   readonly reason: string;
+  /** The delay in milliseconds before throwing the FATAL exception */
+  readonly throwDelayMillis?: number;
 }
 
 export interface WaitForYellowSourceState extends SourceExistsState {
@@ -263,12 +299,17 @@ export interface CreateNewTargetState extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
-export interface CreateReindexTempState extends SourceExistsState {
+export interface CreateReindexTempState extends PostInitState {
   /**
    * Create a target index with mappings from the source index and registered
    * plugins
    */
   readonly controlState: 'CREATE_REINDEX_TEMP';
+}
+
+export interface ReadyToReindexSyncState extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'READY_TO_REINDEX_SYNC';
 }
 
 export interface ReindexSourceToTempOpenPit extends SourceExistsState {
@@ -304,11 +345,16 @@ export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
   readonly currentBatch: number;
 }
 
+export interface DoneReindexingSyncState extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'DONE_REINDEXING_SYNC';
+}
+
 export interface SetTempWriteBlock extends PostInitState {
   readonly controlState: 'SET_TEMP_WRITE_BLOCK';
 }
 
-export interface CloneTempToSource extends PostInitState {
+export interface CloneTempToTarget extends PostInitState {
   /**
    * Clone the temporary reindex index into
    */
@@ -413,6 +459,14 @@ export interface MarkVersionIndexReady extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
+export interface MarkVersionIndexReadySync extends PostInitState {
+  /** Single "client.indices.updateAliases" operation
+   * to update multiple indices' aliases simultaneously
+   * */
+  readonly controlState: 'MARK_VERSION_INDEX_READY_SYNC';
+  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
+}
+
 export interface MarkVersionIndexReadyConflict extends PostInitState {
   /**
    * If the MARK_VERSION_INDEX_READY step fails another instance was
@@ -482,9 +536,10 @@ export type State = Readonly<
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
-  | CloneTempToSource
+  | CloneTempToTarget
   | CreateNewTargetState
   | CreateReindexTempState
+  | DoneReindexingSyncState
   | DoneState
   | FatalState
   | InitState
@@ -494,6 +549,7 @@ export type State = Readonly<
   | LegacyReindexWaitForTaskState
   | LegacySetWriteBlockState
   | MarkVersionIndexReady
+  | MarkVersionIndexReadySync
   | MarkVersionIndexReadyConflict
   | OutdatedDocumentsRefresh
   | OutdatedDocumentsSearchClosePit
@@ -501,6 +557,7 @@ export type State = Readonly<
   | OutdatedDocumentsSearchRead
   | OutdatedDocumentsTransform
   | PrepareCompatibleMigration
+  | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
   | ReindexSourceToTempClosePit

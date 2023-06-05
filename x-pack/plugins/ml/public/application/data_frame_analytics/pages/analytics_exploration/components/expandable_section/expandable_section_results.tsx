@@ -24,13 +24,16 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import type { KibanaUrlConfig } from '../../../../../../../common/types/custom_urls';
-import type { DataGridItem } from '../../../../../components/data_grid';
+import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
+  getAnalysisType,
   isClassificationAnalysis,
   isRegressionAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
+  type DataFrameAnalyticsConfig,
+  INDEX_STATUS,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import type { DataGridItem } from '../../../../../components/data_grid';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 
@@ -44,13 +47,7 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import {
-  defaultSearchQuery,
-  DataFrameAnalyticsConfig,
-  INDEX_STATUS,
-  SEARCH_SIZE,
-  getAnalysisType,
-} from '../../../../common';
+import { defaultSearchQuery, SEARCH_SIZE } from '../../../../common';
 
 import {
   replaceTokensInDFAUrlValue,
@@ -229,7 +226,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems, data]
   );
 
-  const openCustomUrl = (item: DataGridItem, customUrl: KibanaUrlConfig) => {
+  const openCustomUrl = (item: DataGridItem, customUrl: MlKibanaUrlConfig) => {
     // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
     const urlPath = replaceTokensInDFAUrlValue(
       customUrl,

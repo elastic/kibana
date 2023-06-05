@@ -138,7 +138,7 @@ export interface EndpointAgentStatusByIdProps {
    * If set to `true` (Default), then the endpoint status and isolation/action counts will
    * be kept up to date by querying the API periodically
    */
-  autoFresh?: boolean;
+  autoRefresh?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -150,9 +150,9 @@ export interface EndpointAgentStatusByIdProps {
  * instead in order to avoid duplicate API calls.
  */
 export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
-  ({ endpointAgentId, autoFresh, 'data-test-subj': dataTestSubj }) => {
+  ({ endpointAgentId, autoRefresh, 'data-test-subj': dataTestSubj }) => {
     const { data } = useGetEndpointDetails(endpointAgentId, {
-      refetchInterval: autoFresh ? DEFAULT_POLL_INTERVAL : false,
+      refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
     });
 
     const emptyValue = (
@@ -169,7 +169,7 @@ export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
       <EndpointAgentStatus
         endpointHostInfo={data}
         data-test-subj={dataTestSubj}
-        autoRefresh={autoFresh}
+        autoRefresh={autoRefresh}
       />
     );
   }

@@ -15,8 +15,11 @@
             "name": {
               "type": "keyword"
             },
+            "version": {
+              "type": "keyword"
+            },
             "type": {
-              "type": "long"
+              "type": "keyword"
             }
           }
         },

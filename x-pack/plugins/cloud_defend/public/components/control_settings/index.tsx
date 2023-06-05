@@ -40,13 +40,11 @@ export const ControlSettings = ({ policy, onChange }: SettingsDeps) => {
 
   const onYamlChanges = useCallback(
     (opts: OnChangeDeps) => {
-      if (isYamlViewSelected) {
-        opts.updatedPolicy = policy;
-        onChange(opts);
-        setIsValid(opts.isValid);
-      }
+      opts.updatedPolicy = policy;
+      onChange(opts);
+      setIsValid(opts.isValid);
     },
-    [isYamlViewSelected, onChange, policy]
+    [onChange, policy]
   );
 
   return (
@@ -81,9 +79,7 @@ export const ControlSettings = ({ policy, onChange }: SettingsDeps) => {
             onChange={onGeneralChanges}
           />
         )}
-        {isYamlViewSelected && (
-          <ControlYamlView show={isYamlViewSelected} policy={policy} onChange={onYamlChanges} />
-        )}
+        <ControlYamlView show={isYamlViewSelected} policy={policy} onChange={onYamlChanges} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

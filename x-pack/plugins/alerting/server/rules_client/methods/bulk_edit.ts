@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
@@ -25,6 +25,7 @@ import {
   RuleWithLegacyId,
   RuleTypeRegistry,
   RawRuleAction,
+  RuleNotifyWhen,
 } from '../../types';
 import {
   validateRuleTypeParams,
@@ -503,11 +504,11 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     }
 
     // validate rule params
-    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate?.params);
+    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate.params);
     const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
       validatedAlertTypeParams,
       rule.attributes.params,
-      ruleType.validate?.params
+      ruleType.validate.params
     );
 
     const {
@@ -638,19 +639,6 @@ async function getUpdatedAttributesFromOperations(
           isAttributesUpdateSkipped = false;
         }
 
-        // TODO https://github.com/elastic/kibana/issues/148414
-        // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = updatedOperation.value.find(
-          (action) => action?.frequency
-        )?.frequency;
-        if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
-          ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
-          if (!attributes.notifyWhen) {
-            attributes.notifyWhen = firstFrequency.notifyWhen;
-            attributes.throttle = firstFrequency.throttle;
-          }
-        }
-
         break;
       }
       case 'snoozeSchedule': {
@@ -698,6 +686,9 @@ async function getUpdatedAttributesFromOperations(
         break;
       }
       default: {
+        if (operation.field === 'schedule') {
+          validateScheduleOperation(operation.value, attributes.actions, rule.id);
+        }
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
           operation,
           rule.attributes
@@ -738,8 +729,7 @@ function validateScheduleInterval(
   if (!scheduleInterval) {
     return;
   }
-  const isIntervalInvalid =
-    parseDuration(scheduleInterval as string) < context.minimumScheduleIntervalInMs;
+  const isIntervalInvalid = parseDuration(scheduleInterval) < context.minimumScheduleIntervalInMs;
   if (isIntervalInvalid && context.minimumScheduleInterval.enforce) {
     throw Error(
       `Error updating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
@@ -747,6 +737,36 @@ function validateScheduleInterval(
   } else if (isIntervalInvalid && !context.minimumScheduleInterval.enforce) {
     context.logger.warn(
       `Rule schedule interval (${scheduleInterval}) for "${ruleTypeId}" rule type with ID "${ruleId}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+    );
+  }
+}
+
+/**
+ * Validate that updated schedule interval is not longer than any of the existing action frequencies
+ * @param schedule Schedule interval that user tries to set
+ * @param actions Rule actions
+ */
+function validateScheduleOperation(
+  schedule: RawRule['schedule'],
+  actions: RawRule['actions'],
+  ruleId: string
+): void {
+  const scheduleInterval = parseDuration(schedule.interval);
+  const actionsWithInvalidThrottles = [];
+
+  for (const action of actions) {
+    // check for actions throttled shorter than the rule schedule
+    if (
+      action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
+      parseDuration(action.frequency.throttle!) < scheduleInterval
+    ) {
+      actionsWithInvalidThrottles.push(action);
+    }
+  }
+
+  if (actionsWithInvalidThrottles.length > 0) {
+    throw Error(
+      `Error updating rule with ID "${ruleId}": the interval ${schedule.interval} is longer than the action frequencies`
     );
   }
 }

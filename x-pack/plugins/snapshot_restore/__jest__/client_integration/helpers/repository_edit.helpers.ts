@@ -88,4 +88,5 @@ type TestSubjects =
   | 'stepTwo.submitButton'
   | 'stepTwo.title'
   | 'submitButton'
+  | 'codeEditor'
   | 'title';

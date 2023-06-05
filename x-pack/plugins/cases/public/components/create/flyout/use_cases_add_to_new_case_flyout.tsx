@@ -9,7 +9,7 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { Case } from '../../../containers/types';
+import type { CaseUI } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { CreateCaseFlyoutProps } from './create_case_flyout';
@@ -46,7 +46,7 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
               return props.onClose();
             }
           },
-          onSuccess: async (theCase: Case) => {
+          onSuccess: async (theCase: CaseUI) => {
             if (theCase) {
               casesToasts.showSuccessAttach({
                 theCase,

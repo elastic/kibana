@@ -4,32 +4,30 @@
 <titleabbrev>Telemetry settings</titleabbrev>
 ++++
 
-By default, Usage Collection (also known as Telemetry) is enabled. This
-helps us learn about the {kib} features that our users are most interested in, so we
-can focus our efforts on making them even better.
+Usage Collection (also known as Telemetry) is enabled by default. This allows us to learn what our users are most interested in, so we can improve our products and services.
+
+Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Statement] to learn more.
 
 You can control whether this data is sent from the {kib} servers, or if it should be sent
-from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can decide to completely disable this feature either in the config file or in {kib} via *Management > Kibana > Advanced Settings > Usage Data*.
-
-See our https://www.elastic.co/legal/privacy-statement[Privacy Statement] to learn more.
+from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can disable this feature either in *Stack Management > {kib} > Advanced Settings > Global Settings > Usage collection* or the config file with the following settings.
 
 [float]
 [[telemetry-general-settings]]
 ==== General telemetry settings
 
+[[telemetry-optIn]] `telemetry.optIn`::
+  Set to `false` to stop sending any telemetry data to Elastic. Reporting your
+cluster statistics helps us improve your user experience. *Default: `true`.* +
++
+This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
+To prevent users from changing it,
+set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false`.
+
+`telemetry.allowChangingOptInStatus`::
+  Set to `false` to disallow overwriting the <<telemetry-optIn, `telemetry.optIn`>> setting via the <<advanced-options, Advanced Settings>> in {kib}. *Default: `true`.*
+
 `telemetry.sendUsageFrom`::
   Set to `'server'` to report the cluster statistics from the {kib} server.
   If the server fails to connect to our endpoint at https://telemetry.elastic.co/, it assumes
   it is behind a firewall and falls back to `'browser'` to send it from users' browsers
-  when they are navigating through {kib}. Defaults to `'server'`.
-
-[[telemetry-optIn]] `telemetry.optIn`::
-  Set to `true` to send cluster statistics to Elastic. Reporting your
-  cluster statistics helps us improve your user experience. Set to `false` to stop sending any telemetry data to Elastic. +
-+
-This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
-To prevent users from changing it,
-set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false`. Defaults to `true`.
-
-`telemetry.allowChangingOptInStatus`::
-  Set to `true` to allow overwriting the <<telemetry-optIn, `telemetry.optIn`>> setting via the <<advanced-options, Advanced Settings>> in {kib}. Defaults to `true`.
+  when they are navigating through {kib}. *Default: `'server'`.*

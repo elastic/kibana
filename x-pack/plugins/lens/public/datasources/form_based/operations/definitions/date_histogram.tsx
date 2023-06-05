@@ -29,12 +29,12 @@ import {
 } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { FormBasedLayer } from '../../types';
-import { TooltipWrapper } from '../../../../shared_components';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';

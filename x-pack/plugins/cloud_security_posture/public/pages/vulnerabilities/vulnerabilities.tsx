@@ -9,13 +9,15 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumnCellAction,
   EuiProgress,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { cx } from '@emotion/css';
 import { DataView } from '@kbn/data-views-plugin/common';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
@@ -37,11 +39,22 @@ import {
   vulnerabilitiesColumns,
 } from './vulnerabilities_table_columns';
 import { defaultLoadingRenderer, defaultNoDataRenderer } from '../../components/cloud_posture_page';
+import { getFilters } from './utils/get_filters';
+import { FILTER_IN, FILTER_OUT, SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from './translations';
+import {
+  severitySchemaConfig,
+  severitySortScript,
+  getCaseInsensitiveSortScript,
+} from './utils/custom_sort_script';
+import { useStyles } from './hooks/use_styles';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
   filters,
-  sort: [{ id: vulnerabilitiesColumns.cvss, direction: 'desc' }],
+  sort: [
+    { id: vulnerabilitiesColumns.severity, direction: 'desc' },
+    { id: vulnerabilitiesColumns.cvss, direction: 'desc' },
+  ],
   pageIndex: 0,
 });
 
@@ -49,7 +62,7 @@ export const Vulnerabilities = () => {
   const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
   const getSetupStatus = useCspSetupStatusApi();
 
-  if (getSetupStatus?.data?.vuln_mgmt.status !== 'indexed') return <NoVulnerabilitiesStates />;
+  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
@@ -75,6 +88,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     onChangeItemsPerPage,
     onChangePage,
     onSort,
+    urlQuery,
     setUrlQuery,
     onResetFilters,
   } = useCloudPostureTable({
@@ -83,33 +97,75 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
   });
   const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
+
+  const [showHighlight, setHighlight] = useState(false);
+
+  const onSortHandler = useCallback(
+    (newSort: any) => {
+      onSort(newSort);
+      if (newSort.length !== sort.length) {
+        setHighlight(true);
+        setTimeout(() => {
+          setHighlight(false);
+        }, 2000);
+      }
+    },
+    [onSort, sort]
+  );
 
   const multiFieldsSort = useMemo(() => {
-    return sort.map(({ id, direction }: { id: string; direction: string }) => ({
-      [id]: direction,
-    }));
+    return sort.map(({ id, direction }: { id: string; direction: string }) => {
+      if (id === vulnerabilitiesColumns.severity) {
+        return severitySortScript(direction);
+      }
+      if (id === vulnerabilitiesColumns.package) {
+        return getCaseInsensitiveSortScript(id, direction);
+      }
+
+      return {
+        [id]: direction,
+      };
+    });
   }, [sort]);
 
   const { data, isLoading, isFetching } = useLatestVulnerabilities({
     query,
     sort: multiFieldsSort,
     enabled: !queryError,
+    pageIndex,
+    pageSize,
   });
 
-  const [isVulnerabilityDetailFlyoutVisible, setIsVulnerabilityDetailFlyoutVisible] =
-    useState(false);
+  const invalidIndex = -1;
 
-  const [vulnerability, setVulnerability] = useState<VulnerabilityRecord>();
+  const selectedVulnerability = useMemo(() => {
+    return data?.page[urlQuery.vulnerabilityIndex];
+  }, [data?.page, urlQuery.vulnerabilityIndex]);
 
-  const showFlyout = (vulnerabilityRecord: VulnerabilityRecord) => {
-    setIsVulnerabilityDetailFlyoutVisible(true);
-    setVulnerability(vulnerabilityRecord);
+  const onCloseFlyout = () => {
+    setUrlQuery({
+      vulnerabilityIndex: invalidIndex,
+    });
   };
 
-  const hideFlyout = () => {
-    setIsVulnerabilityDetailFlyoutVisible(false);
-    setVulnerability(undefined);
-  };
+  const onOpenFlyout = useCallback(
+    (vulnerabilityRow: VulnerabilityRecord) => {
+      const vulnerabilityIndex = data?.page.findIndex(
+        (vulnerabilityRecord: VulnerabilityRecord) =>
+          vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
+          vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
+          vulnerabilityRecord.vulnerability.package.name ===
+            vulnerabilityRow.vulnerability.package.name &&
+          vulnerabilityRecord.vulnerability.package.version ===
+            vulnerabilityRow.vulnerability.package.version
+      );
+      setUrlQuery({
+        vulnerabilityIndex,
+      });
+    },
+    [setUrlQuery, data?.page]
+  );
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
     total: data?.total,
@@ -118,13 +174,158 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   });
 
   const columns = useMemo(() => {
-    return getVulnerabilitiesColumnsGrid();
-  }, []);
+    const getColumnIdValue = (rowIndex: number, columnId: string) => {
+      const vulnerabilityRow = data?.page[rowIndex] as VulnerabilityRecord;
+      if (!vulnerabilityRow) return null;
+
+      if (columnId === vulnerabilitiesColumns.vulnerability) {
+        return vulnerabilityRow.vulnerability.id;
+      }
+      if (columnId === vulnerabilitiesColumns.cvss) {
+        return vulnerabilityRow.vulnerability.score.base;
+      }
+      if (columnId === vulnerabilitiesColumns.resource) {
+        return vulnerabilityRow.resource?.name;
+      }
+      if (columnId === vulnerabilitiesColumns.severity) {
+        return vulnerabilityRow.vulnerability.severity;
+      }
+      if (columnId === vulnerabilitiesColumns.package) {
+        return vulnerabilityRow.vulnerability?.package?.name;
+      }
+      if (columnId === vulnerabilitiesColumns.version) {
+        return vulnerabilityRow.vulnerability?.package?.version;
+      }
+      if (columnId === vulnerabilitiesColumns.fix_version) {
+        return vulnerabilityRow.vulnerability.package?.fixed_version;
+      }
+    };
+
+    const cellActions: EuiDataGridColumnCellAction[] = [
+      ({ Component, rowIndex, columnId }) => {
+        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
+
+        const value = getColumnIdValue(rowIndexFromPage, columnId);
+
+        if (!value) return null;
+        return (
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButtonTooltip',
+              {
+                defaultMessage: 'Add {columnId} filter',
+                values: { columnId },
+              }
+            )}
+          >
+            <Component
+              iconType="plusInCircle"
+              aria-label={i18n.translate(
+                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButton',
+                {
+                  defaultMessage: 'Add {columnId} negated filter',
+                  values: { columnId },
+                }
+              )}
+              onClick={() => {
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: getFilters({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field: columnId,
+                    value,
+                    negate: false,
+                  }),
+                });
+              }}
+            >
+              {FILTER_IN}
+            </Component>
+          </EuiToolTip>
+        );
+      },
+      ({ Component, rowIndex, columnId }) => {
+        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
+
+        const value = getColumnIdValue(rowIndexFromPage, columnId);
+
+        if (!value) return null;
+        return (
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegatedFilterButtonTooltip',
+              {
+                defaultMessage: 'Add {columnId} negated filter',
+                values: { columnId },
+              }
+            )}
+          >
+            <Component
+              iconType="minusInCircle"
+              aria-label={i18n.translate(
+                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegateFilterButton',
+                {
+                  defaultMessage: 'Add {columnId} negated filter',
+                  values: { columnId },
+                }
+              )}
+              onClick={() => {
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: getFilters({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field: columnId,
+                    value,
+                    negate: true,
+                  }),
+                });
+              }}
+            >
+              {FILTER_OUT}
+            </Component>
+          </EuiToolTip>
+        );
+      },
+    ];
+
+    return getVulnerabilitiesColumnsGrid(cellActions);
+  }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
+
+  const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
+
+  const selectedVulnerabilityIndex = flyoutVulnerabilityIndex + pageIndex * pageSize;
 
   const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      const vulnerabilityRow = data?.page[rowIndex] as VulnerabilityRecord;
+    const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
+      columnId,
+      rowIndex,
+      setCellProps,
+    }): React.ReactElement | null => {
+      const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
 
+      const vulnerabilityRow = data?.page[rowIndexFromPage] as VulnerabilityRecord;
+
+      useEffect(() => {
+        if (selectedVulnerabilityIndex === rowIndex) {
+          setCellProps({
+            style: {
+              backgroundColor: euiTheme.colors.highlight,
+            },
+          });
+        } else {
+          setCellProps({
+            style: {
+              backgroundColor: 'inherit',
+            },
+          });
+        }
+      }, [rowIndex, setCellProps]);
+
+      if (isFetching) return null;
       if (!vulnerabilityRow) return null;
       if (!vulnerabilityRow.vulnerability?.id) return null;
 
@@ -134,16 +335,19 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             iconType="expand"
             aria-label="View"
             onClick={() => {
-              showFlyout(vulnerabilityRow);
+              onOpenFlyout(vulnerabilityRow);
             }}
           />
         );
       }
       if (columnId === vulnerabilitiesColumns.vulnerability) {
-        return vulnerabilityRow.vulnerability.id || '';
+        return <>{vulnerabilityRow.vulnerability?.id}</>;
       }
       if (columnId === vulnerabilitiesColumns.cvss) {
-        if (!vulnerabilityRow.vulnerability.score?.base) {
+        if (
+          !vulnerabilityRow.vulnerability.score?.base ||
+          !vulnerabilityRow.vulnerability.score?.version
+        ) {
           return null;
         }
         return (
@@ -154,37 +358,53 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         );
       }
       if (columnId === vulnerabilitiesColumns.resource) {
-        return vulnerabilityRow.resource?.name || null;
+        return <>{vulnerabilityRow.resource?.name}</>;
       }
       if (columnId === vulnerabilitiesColumns.severity) {
         if (!vulnerabilityRow.vulnerability.severity) {
           return null;
         }
-        return (
-          <SeverityStatusBadge
-            score={vulnerabilityRow.vulnerability.score?.base}
-            status={vulnerabilityRow.vulnerability.severity}
-          />
-        );
+        return <SeverityStatusBadge status={vulnerabilityRow.vulnerability.severity} />;
       }
-      if (columnId === vulnerabilitiesColumns.package_version) {
-        return (
-          <>
-            {vulnerabilityRow.vulnerability?.package?.name}{' '}
-            {vulnerabilityRow.vulnerability?.package?.version}
-          </>
-        );
+
+      if (columnId === vulnerabilitiesColumns.package) {
+        return <>{vulnerabilityRow.vulnerability?.package?.name}</>;
+      }
+      if (columnId === vulnerabilitiesColumns.version) {
+        return <>{vulnerabilityRow.vulnerability?.package?.version}</>;
       }
       if (columnId === vulnerabilitiesColumns.fix_version) {
-        return (
-          <>
-            {vulnerabilityRow.vulnerability.package?.name}{' '}
-            {vulnerabilityRow.vulnerability.package?.fixed_version}
-          </>
-        );
+        return <>{vulnerabilityRow.vulnerability?.package?.fixed_version}</>;
       }
+
+      return null;
     };
-  }, [data?.page]);
+
+    return Cell;
+  }, [
+    data?.page,
+    euiTheme.colors.highlight,
+    onOpenFlyout,
+    pageSize,
+    selectedVulnerabilityIndex,
+    isFetching,
+  ]);
+
+  const onPaginateFlyout = useCallback(
+    (nextVulnerabilityIndex: number) => {
+      // the index of the vulnerability in the current page
+      const newVulnerabilityIndex = nextVulnerabilityIndex % pageSize;
+
+      // if the vulnerability is not in the current page, we need to change the page
+      const flyoutPageIndex = Math.floor(nextVulnerabilityIndex / pageSize);
+
+      setUrlQuery({
+        pageIndex: flyoutPageIndex,
+        vulnerabilityIndex: newVulnerabilityIndex,
+      });
+    },
+    [pageSize, setUrlQuery]
+  );
 
   const error = queryError || null;
 
@@ -199,6 +419,8 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     return defaultNoDataRenderer();
   }
 
+  const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
+
   return (
     <>
       <FindingsSearchBar
@@ -207,42 +429,29 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
           setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
         loading={isLoading}
+        placeholder={SEARCH_BAR_PLACEHOLDER}
       />
       <EuiSpacer size="l" />
       {!isLoading && data.page.length === 0 ? (
         <EmptyState onResetFilters={onResetFilters} />
       ) : (
         <>
-          {isFetching ? (
-            <EuiProgress size="xs" color="accent" />
-          ) : (
-            <EuiSpacer
-              css={css`
-                height: 2px;
-              `}
-            />
-          )}
+          <EuiProgress
+            size="xs"
+            color="accent"
+            style={{
+              opacity: isFetching ? 1 : 0,
+            }}
+          />
           <EuiDataGrid
-            css={css`
-              & .euiDataGridHeaderCell__icon {
-                display: none;
-              }
-              & .euiDataGrid__controls {
-                border-bottom: none;
-              }
-              & .euiButtonIcon {
-                color: ${euiTheme.colors.primary};
-              }
-              & .euiDataGridRowCell {
-                font-size: ${euiTheme.size.m};
-              }
-            `}
-            aria-label="Data grid styling demo"
+            className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
+            aria-label={VULNERABILITIES}
             columns={columns}
             columnVisibility={{
               visibleColumns: columns.map(({ id }) => id),
               setVisibleColumns: () => {},
             }}
+            schemaDetectors={[severitySchemaConfig]}
             rowCount={limitedTotalItemCount}
             toolbarVisibility={{
               showColumnSelector: false,
@@ -251,13 +460,15 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               additionalControls: {
                 left: {
                   prepend: (
-                    <EuiButtonEmpty size="xs" color="text">
-                      {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
-                        defaultMessage:
-                          '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
-                        values: { total: data?.total },
-                      })}
-                    </EuiButtonEmpty>
+                    <>
+                      <EuiButtonEmpty size="xs" color="text">
+                        {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
+                          defaultMessage:
+                            '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                          values: { total: data?.total },
+                        })}
+                      </EuiButtonEmpty>
+                    </>
                   ),
                 },
               },
@@ -270,8 +481,8 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               header: 'underline',
             }}
             renderCellValue={renderCellValue}
-            inMemory={{ level: 'pagination' }}
-            sorting={{ columns: sort, onSort }}
+            inMemory={{ level: 'enhancements' }}
+            sorting={{ columns: sort, onSort: onSortHandler }}
             pagination={{
               pageIndex,
               pageSize,
@@ -281,11 +492,14 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             }}
           />
           {isLastLimitedPage && <LimitedResultsBar />}
-          {/* Todo: Add Pagination */}
-          {isVulnerabilityDetailFlyoutVisible && !!vulnerability && (
+          {showVulnerabilityFlyout && (
             <VulnerabilityFindingFlyout
-              vulnerabilityRecord={vulnerability}
-              closeFlyout={hideFlyout}
+              flyoutIndex={selectedVulnerabilityIndex}
+              vulnerabilityRecord={selectedVulnerability}
+              totalVulnerabilitiesCount={limitedTotalItemCount}
+              onPaginate={onPaginateFlyout}
+              closeFlyout={onCloseFlyout}
+              isLoading={isFetching}
             />
           )}
         </>

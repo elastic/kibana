@@ -6,9 +6,7 @@
  */
 
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlyout,
@@ -29,7 +27,11 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-import type { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { type ErrorType, extractErrorProperties } from '@kbn/ml-error-utils';
+
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { JobType } from '../../../../../common/types/saved_objects';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { CannotImportJobsCallout } from './cannot_import_jobs_callout';
@@ -38,7 +40,6 @@ import { toastNotificationServiceProvider } from '../../../services/toast_notifi
 import { JobImportService } from './jobs_import_service';
 import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
-import { ErrorType, extractErrorProperties } from '../../../../../common/util/errors';
 
 interface Props {
   isDisabled: boolean;

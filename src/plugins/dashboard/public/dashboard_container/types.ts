@@ -26,6 +26,7 @@ export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & Das
 
 export interface DashboardPublicState {
   lastSavedInput: DashboardContainerInput;
+  animatePanelTransforms?: boolean;
   isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
   hasOverlays?: boolean;
@@ -33,6 +34,8 @@ export interface DashboardPublicState {
   fullScreenMode?: boolean;
   savedQueryId?: string;
   lastSavedId?: string;
+  scrollToPanelId?: string;
+  highlightPanelId?: string;
 }
 
 export interface DashboardRenderPerformanceStats {

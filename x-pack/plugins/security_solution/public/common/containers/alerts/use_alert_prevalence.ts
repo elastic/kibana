@@ -44,7 +44,7 @@ export const useAlertPrevalence = ({
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
-  const globalTime = useGlobalTime(false);
+  const globalTime = useGlobalTime();
   let to: string | undefined;
   let from: string | undefined;
   if (ignoreTimerange === false) {

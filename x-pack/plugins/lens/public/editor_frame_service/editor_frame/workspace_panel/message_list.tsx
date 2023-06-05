@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, SerializedStyles } from '@emotion/react';
-import { IconError, IconWarning } from '../custom_icons';
 import { UserMessage } from '../../../types';
 
 export const MessageList = ({
@@ -85,14 +84,14 @@ export const MessageList = ({
           >
             {errorCount > 0 && (
               <>
-                <EuiIcon type={IconError} />
+                <EuiIcon type="error" />
                 {errorCount}
               </>
             )}
             {warningCount > 0 && (
               <>
                 <EuiIcon
-                  type={IconWarning}
+                  type="alert"
                   css={css`
                     margin-left: 4px;
                   `}
@@ -116,9 +115,9 @@ export const MessageList = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 {message.severity === 'error' ? (
-                  <EuiIcon type={IconError} color="danger" />
+                  <EuiIcon type="error" color="danger" />
                 ) : (
-                  <EuiIcon type={IconWarning} color="warning" />
+                  <EuiIcon type="alert" color="warning" />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">

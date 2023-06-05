@@ -15,7 +15,8 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -30,7 +31,6 @@ import {
 import {
   createScopedLogger,
   AdditionalContext,
-  getAlertDetailsUrl,
   getContextForRecoveredAlerts,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
@@ -110,7 +110,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       executionId,
     });
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
+    const {
+      alertWithLifecycle,
+      savedObjectsClient,
+      getAlertUuid,
+      getAlertStartedDate,
+      getAlertByAlertUuid,
+    } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (
       id,
@@ -150,9 +156,17 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
+        const indexedStartedAt =
+          getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          alertDetailsUrl: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            libs.alertsLocator,
+            libs.basePath.publicBaseUrl
+          ),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -269,7 +283,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         // check to see if a No Data state has occurred
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
-            .filter((result) => result[group].isNoData)
+            .filter((result) => result[group]?.isNoData)
             .map((result) => buildNoDataAlertReason({ ...result[group], group }))
             .join('\n');
         }
@@ -309,24 +323,44 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           evaluationValues
         );
         const alertUuid = getAlertUuid(group);
+        const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          alertDetailsUrl: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            libs.alertsLocator,
+            libs.basePath.publicBaseUrl
+          ),
           alertState: stateToAlertMessage[nextState],
           group,
           groupByKeys: groupByKeysObjectMapping[group],
-          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+          metric: mapToConditionsLookup(criteria, (c) => {
+            if (c.aggType === 'count') {
+              return 'count';
+            }
+            return c.metric;
+          }),
           reason,
-          threshold: mapToConditionsLookup(
-            alertResults,
-            (result) => formatAlertResult(result[group]).threshold
-          ),
+          threshold: mapToConditionsLookup(alertResults, (result, index) => {
+            const evaluation = result[group];
+            if (!evaluation) {
+              return criteria[index].threshold;
+            }
+            return formatAlertResult(evaluation).threshold;
+          }),
           timestamp,
-          value: mapToConditionsLookup(
-            alertResults,
-            (result) => formatAlertResult(result[group]).currentValue
-          ),
+          value: mapToConditionsLookup(alertResults, (result, index) => {
+            const evaluation = result[group];
+            if (!evaluation && criteria[index].aggType === 'count') {
+              return 0;
+            } else if (!evaluation) {
+              return null;
+            }
+            return formatAlertResult(evaluation).currentValue;
+          }),
           viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
           ...additionalContext,
         });
@@ -344,18 +378,31 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
+      const timestamp = startedAt.toISOString();
+      const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       alert.setContext({
-        alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+        alertDetailsUrl: await getAlertUrl(
+          alertUuid,
+          spaceId,
+          indexedStartedAt,
+          libs.alertsLocator,
+          libs.basePath.publicBaseUrl
+        ),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
-        metric: mapToConditionsLookup(criteria, (c) => c.metric),
-        timestamp: startedAt.toISOString(),
+        metric: mapToConditionsLookup(criteria, (c) => {
+          if (criteria.aggType === 'count') {
+            return 'count';
+          }
+          return c.metric;
+        }),
+        timestamp,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
 
@@ -419,12 +466,10 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list
-    .map(mapFn)
-    .reduce(
-      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
-      {}
-    );
+  list.map(mapFn).reduce((result: Record<string, any>, value, i) => {
+    result[`condition${i}`] = value;
+    return result;
+  }, {} as Record<string, unknown>);
 
 const formatAlertResult = <AlertResult>(
   alertResult: {

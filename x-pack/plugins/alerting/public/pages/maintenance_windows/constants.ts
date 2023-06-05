@@ -7,7 +7,7 @@
 import { invert, mapValues } from 'lodash';
 import moment from 'moment';
 import * as i18n from './translations';
-import { MaintenanceWindowStatus } from '../../../common';
+import { ISO_WEEKDAYS, MaintenanceWindowStatus } from '../../../common';
 
 // TODO - consolidate enum with backend
 export enum Frequency {
@@ -86,8 +86,6 @@ export const CREATE_FORM_CUSTOM_FREQUENCY = (interval: number = 1) => [
   },
 ];
 
-export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
-
 export const WEEKDAY_OPTIONS = ISO_WEEKDAYS.map((n) => ({
   id: String(n),
   label: moment().isoWeekday(n).format('ddd'),
@@ -107,14 +105,12 @@ export const RRULE_WEEKDAYS_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_R
   Number(v)
 );
 
-export const STATUS_DISPLAY: Record<string, { color: string; label: string }> = {
-  [MaintenanceWindowStatus.Running]: { color: 'warning', label: i18n.TABLE_STATUS_RUNNING },
+export const STATUS_DISPLAY = {
+  [MaintenanceWindowStatus.Running]: { color: 'primary', label: i18n.TABLE_STATUS_RUNNING },
   [MaintenanceWindowStatus.Upcoming]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
   [MaintenanceWindowStatus.Finished]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
-  [MaintenanceWindowStatus.Archived]: { color: 'text', label: i18n.TABLE_STATUS_ARCHIVED },
+  [MaintenanceWindowStatus.Archived]: { color: 'default', label: i18n.TABLE_STATUS_ARCHIVED },
 };
-
-export type StatusColor = 'warning' | 'success' | 'text';
 
 export const STATUS_SORT = {
   [MaintenanceWindowStatus.Running]: 0,

@@ -191,22 +191,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
-        const operationSelector = opts.isPreviousIncompatible
-          ? `lns-indexPatternDimension-${opts.operation} incompatible`
-          : `lns-indexPatternDimension-${opts.operation}`;
-        async function getAriaPressed() {
-          const operationSelectorContainer = await testSubjects.find(operationSelector);
-          await testSubjects.click(operationSelector);
-          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-          return ariaPressed;
-        }
-
-        // adding retry here as it seems that there is a flakiness of the operation click
-        // it seems that the aria-pressed attribute is updated to true when the button is clicked
-        await retry.waitFor('aria pressed to be true', async () => {
-          const ariaPressedStatus = await getAriaPressed();
-          return ariaPressedStatus === 'true';
-        });
+        await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
@@ -562,6 +547,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    /**
+     * Perform the specified layer action
+     */
+    async performLayerAction(testSubject: string, layerIndex = 0) {
+      await retry.try(async () => {
+        await testSubjects.click(`lnsLayerSplitButton--${layerIndex}`);
+        await testSubjects.click(testSubject);
+      });
+    },
+
     async isDimensionEditorOpen() {
       return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
     },
@@ -571,6 +566,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lns-indexPattern-dimensionContainerClose');
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+    },
+
+    async selectOperation(operation: string, isPreviousIncompatible: boolean = false) {
+      const operationSelector = isPreviousIncompatible
+        ? `lns-indexPatternDimension-${operation} incompatible`
+        : `lns-indexPatternDimension-${operation}`;
+      async function getAriaPressed() {
+        const operationSelectorContainer = await testSubjects.find(operationSelector);
+        await testSubjects.click(operationSelector);
+        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+        return ariaPressed;
+      }
+
+      // adding retry here as it seems that there is a flakiness of the operation click
+      // it seems that the aria-pressed attribute is updated to true when the button is clicked
+      await retry.waitFor('aria pressed to be true', async () => {
+        const ariaPressedStatus = await getAriaPressed();
+        return ariaPressedStatus === 'true';
       });
     },
 
@@ -911,7 +925,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer(layerType: 'data' | 'referenceLine' | 'annotations' = 'data') {
+    async createLayer(
+      layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
+      annotationFromLibraryTitle?: string
+    ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
 
@@ -922,8 +939,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ]);
         return fasterChecks.filter(Boolean).length > 0;
       });
+
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+        if (layerType === 'annotations') {
+          if (!annotationFromLibraryTitle) {
+            await testSubjects.click('lnsAnnotationLayer_new');
+          } else {
+            await testSubjects.click('lnsAnnotationLayer_addFromLibrary');
+            await testSubjects.click(
+              `savedObjectTitle${annotationFromLibraryTitle.split(' ').join('-')}`
+            );
+          }
+        }
       }
     },
 
@@ -1035,6 +1063,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
+    async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
+      const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');

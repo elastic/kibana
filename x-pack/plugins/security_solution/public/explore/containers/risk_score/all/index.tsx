@@ -175,6 +175,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
                 : undefined,
             sort,
             timerange: onlyLatest ? undefined : requestTimerange,
+            alertsTimerange: includeAlertsCount ? requestTimerange : undefined,
           }
         : null,
     [

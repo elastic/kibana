@@ -50,6 +50,7 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
@@ -318,6 +319,7 @@ export const sampleAlertDocAADNoSortId = (
         },
       ],
     },
+    [ALERT_URL]: 'http://example.com/docID',
   },
   fields: {
     someKey: ['someValue'],

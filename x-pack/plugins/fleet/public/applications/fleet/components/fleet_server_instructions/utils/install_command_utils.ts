@@ -115,6 +115,7 @@ export function getInstallCommandForPlatform(
     deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     kubernetes: '',
+    cloudFormation: '',
   };
 
   return commands[platform];

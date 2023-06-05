@@ -17,10 +17,10 @@ import {
   EuiIconAxisRight,
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,
-  useDebouncedValue,
   AxisTitleSettings,
   AxisBoundsControl,
   AxisTicksSettings,

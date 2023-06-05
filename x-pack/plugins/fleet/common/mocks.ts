@@ -94,6 +94,14 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       endpoint: {
         actions: endpointActions,
       },
+      transform: {
+        actions: {
+          canCreateTransform: { executePackageAction: true },
+          canDeleteTransform: { executePackageAction: true },
+          canGetTransform: { executePackageAction: true },
+          canStartStopTransform: { executePackageAction: true },
+        },
+      },
     },
   };
 };

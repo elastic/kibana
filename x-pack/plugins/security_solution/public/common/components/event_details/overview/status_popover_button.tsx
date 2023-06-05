@@ -16,6 +16,9 @@ import {
 } from '../../../../detections/components/alerts_table/translations';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import type { EnrichedFieldInfoWithValues } from '../types';
+import type { inputsModel } from '../../../store';
+import { inputsSelectors } from '../../../store';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
 interface StatusPopoverButtonProps {
   eventId: string;
@@ -36,12 +39,21 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       handleOnEventClosed();
     }, [closePopover, handleOnEventClosed]);
 
+    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
+
+    const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
+
+    const refetchGlobalQuery = useCallback(() => {
+      globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    }, [globalQueries]);
+
     const { actionItems } = useAlertsActions({
       closePopover: closeAfterAction,
       eventId,
       scopeId,
       indexName,
       alertStatus: enrichedFieldInfo.values[0] as Status,
+      refetch: refetchGlobalQuery,
     });
 
     // statusPopoverVisible includes the logic for the visibility of the popover in
@@ -82,7 +94,10 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
         data-test-subj="alertStatus"
       >
         <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
-        <EuiContextMenuPanel items={actionItems} />
+        <EuiContextMenuPanel
+          data-test-subj="event-details-alertStatusPopover"
+          items={actionItems}
+        />
       </EuiPopover>
     );
   }

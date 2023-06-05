@@ -131,7 +131,21 @@ function getTest(
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
         spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
-        spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
+        spyArgs: [
+          {
+            installablePackage: pkg,
+            paths,
+            esClient: mocks.esClient,
+            savedObjectsClient: mocks.soClient,
+            logger: mocks.logger,
+            // package reinstall means we need to force transforms to reinstall
+            force: true,
+            // Undefined es references
+            esReferences: undefined,
+            // Undefined secondary authorization
+            authorizationHeader: undefined,
+          },
+        ],
         spyResponse: {
           installedTransforms: [
             {

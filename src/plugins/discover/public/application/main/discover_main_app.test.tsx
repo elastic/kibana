@@ -12,7 +12,6 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
-import { savedSearchMock } from '../../__mocks__/saved_search';
 import { setHeaderActionMenuMounter, setUrlTracker } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -36,9 +35,9 @@ describe('DiscoverMainApp', () => {
     }) as unknown as DataViewListItem[];
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
     const props = {
-      dataViewList,
-      savedSearch: savedSearchMock,
+      stateContainer,
     };
     const history = createMemoryHistory({
       initialEntries: ['/'],
@@ -60,7 +59,6 @@ describe('DiscoverMainApp', () => {
       await component.update();
 
       expect(component.find(DiscoverTopNav).exists()).toBe(true);
-      expect(component.find(DiscoverTopNav).prop('savedSearch')).toEqual(savedSearchMock);
     });
   });
 });

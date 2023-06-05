@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 // Formatted item result
 export interface RuleAlertsItem {
@@ -48,13 +49,22 @@ export interface SeverityRuleAlertsAggsResponse {
   };
 }
 
-const getSeverityRuleAlertsQuery = ({ from, to }: { from: string; to: string }) => ({
+const getSeverityRuleAlertsQuery = ({
+  from,
+  to,
+  filterQuery,
+}: {
+  from: string;
+  to: string;
+  filterQuery?: ESBoolQuery;
+}) => ({
   size: 0,
   query: {
     bool: {
       filter: [
         { term: { 'kibana.alert.workflow_status': 'open' } },
         { range: { '@timestamp': { gte: from, lte: to } } },
+        ...(filterQuery ? [filterQuery] : []),
       ],
     },
   },
@@ -107,6 +117,7 @@ export interface UseRuleAlertsItemsProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
+  filterQuery?: ESBoolQuery;
 }
 export type UseRuleAlertsItems = (props: UseRuleAlertsItemsProps) => {
   items: RuleAlertsItem[];
@@ -118,10 +129,21 @@ export const useRuleAlertsItems: UseRuleAlertsItems = ({
   queryId,
   signalIndexName,
   skip = false,
+  filterQuery,
 }) => {
   const [items, setItems] = useState<RuleAlertsItem[]>([]);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
+
+  const query = useMemo(
+    () =>
+      getSeverityRuleAlertsQuery({
+        from,
+        to,
+        filterQuery,
+      }),
+    [filterQuery, from, to]
+  );
 
   const {
     loading: isLoading,
@@ -131,23 +153,15 @@ export const useRuleAlertsItems: UseRuleAlertsItems = ({
     request,
     refetch: refetchQuery,
   } = useQueryAlerts<{}, SeverityRuleAlertsAggsResponse>({
-    query: getSeverityRuleAlertsQuery({
-      from,
-      to,
-    }),
+    query,
     indexName: signalIndexName,
     skip,
     queryName: ALERTS_QUERY_NAMES.BY_SEVERITY,
   });
 
   useEffect(() => {
-    setAlertsQuery(
-      getSeverityRuleAlertsQuery({
-        from,
-        to,
-      })
-    );
-  }, [setAlertsQuery, from, to]);
+    setAlertsQuery(query);
+  }, [setAlertsQuery, query]);
 
   useEffect(() => {
     if (data == null) {

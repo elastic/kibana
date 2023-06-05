@@ -9,7 +9,7 @@
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
-import type { ContentStorage, ContentTypeDefinition } from './types';
+import type { ContentStorage, ContentTypeDefinition, MSearchConfig } from './types';
 import type { ContentCrud } from './crud';
 
 export class ContentRegistry {
@@ -23,7 +23,9 @@ export class ContentRegistry {
    * @param contentType The content type to register
    * @param config The content configuration
    */
-  register<S extends ContentStorage<any> = ContentStorage>(definition: ContentTypeDefinition<S>) {
+  register<S extends ContentStorage<any, any, MSearchConfig<any, any>> = ContentStorage>(
+    definition: ContentTypeDefinition<S>
+  ) {
     if (this.types.has(definition.id)) {
       throw new Error(`Content [${definition.id}] is already registered`);
     }

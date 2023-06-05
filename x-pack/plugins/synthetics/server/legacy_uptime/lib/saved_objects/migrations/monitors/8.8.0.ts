@@ -105,7 +105,7 @@ const getNearestSupportedSchedule = (currentSchedule: string): string => {
 
     return closest;
   } catch {
-    return ALLOWED_SCHEDULES_IN_MINUTES[0];
+    return '10';
   }
 };
 

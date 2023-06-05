@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
+import { setupTestUsers } from '../test_users';
+
+export default function loadTests({ loadTestFile, getService }) {
   describe('EPM Endpoints', () => {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./setup'));
@@ -23,6 +28,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./install_remove_kbn_assets_in_space'));
     loadTestFile(require.resolve('./install_remove_multiple'));
     loadTestFile(require.resolve('./install_update'));
+    loadTestFile(require.resolve('./install_tsds_disable'));
     loadTestFile(require.resolve('./install_tag_assets'));
     loadTestFile(require.resolve('./bulk_upgrade'));
     loadTestFile(require.resolve('./update_assets'));
@@ -33,5 +39,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./final_pipeline'));
     loadTestFile(require.resolve('./custom_ingest_pipeline'));
     loadTestFile(require.resolve('./verification_key_id'));
+    loadTestFile(require.resolve('./install_integration_in_multiple_spaces.ts'));
+    loadTestFile(require.resolve('./install_hidden_datastreams'));
   });
 }

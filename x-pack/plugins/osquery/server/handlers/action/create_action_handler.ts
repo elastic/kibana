@@ -20,7 +20,8 @@ import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/r
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
+import { CustomHttpRequestError } from '../../common/error';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -30,6 +31,7 @@ interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields;
+  error?: string;
 }
 
 export const createActionHandler = async (
@@ -42,7 +44,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
-  const { soClient, metadata, alertData } = options;
+  const { soClient, metadata, alertData, error } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -55,16 +57,13 @@ export const createActionHandler = async (
   });
 
   if (!selectedAgents.length) {
-    throw new Error('No agents found for selection');
+    throw new CustomHttpRequestError('No agents found for selection', 400);
   }
 
   let packSO;
 
   if (params.pack_id) {
-    packSO = await savedObjectsClient.get<PackSavedObjectAttributes>(
-      packSavedObjectType,
-      params.pack_id
-    );
+    packSO = await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, params.pack_id);
   }
 
   const osqueryAction = {
@@ -97,6 +96,7 @@ export const createActionHandler = async (
               action_id: uuidv4(),
               id: packQueryId,
               ...replacedQuery,
+              ...(error ? { error } : {}),
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
@@ -105,22 +105,31 @@ export const createActionHandler = async (
             (value) => !isEmpty(value)
           );
         })
-      : await createDynamicQueries({ params, alertData, agents: selectedAgents, osqueryContext }),
+      : await createDynamicQueries({
+          params,
+          alertData,
+          agents: selectedAgents,
+          osqueryContext,
+          error,
+        }),
   };
 
-  const fleetActions = map(
-    filter(osqueryAction.queries, (query) => !query.error),
-    (query) => ({
-      action_id: query.action_id,
-      '@timestamp': moment().toISOString(),
-      expiration: moment().add(5, 'minutes').toISOString(),
-      type: 'INPUT_ACTION',
-      input_type: 'osquery',
-      agents: query.agents,
-      user_id: metadata?.currentUser,
-      data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
-    })
-  );
+  const fleetActions = !error
+    ? map(
+        filter(osqueryAction.queries, (query) => !query.error),
+        (query) => ({
+          action_id: query.action_id,
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(5, 'minutes').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'osquery',
+          agents: query.agents,
+          user_id: metadata?.currentUser,
+          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+        })
+      )
+    : [];
+
   if (fleetActions.length) {
     await esClientInternal.bulk({
       refresh: 'wait_for',
@@ -128,23 +137,23 @@ export const createActionHandler = async (
         fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
       ),
     });
+  }
 
-    const actionsComponentTemplateExists = await esClientInternal.indices.exists({
-      index: `${ACTIONS_INDEX}*`,
-    });
+  const actionsComponentTemplateExists = await esClientInternal.indices.exists({
+    index: `${ACTIONS_INDEX}*`,
+  });
 
-    if (actionsComponentTemplateExists) {
-      await esClientInternal.bulk({
-        refresh: 'wait_for',
-        body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
-      });
-    }
-
-    osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-      ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
-      agents: osqueryAction.agents.length,
+  if (actionsComponentTemplateExists) {
+    await esClientInternal.bulk({
+      refresh: 'wait_for',
+      body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
     });
   }
+
+  osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
+    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
+    agents: osqueryAction.agents.length,
+  });
 
   return {
     response: osqueryAction,

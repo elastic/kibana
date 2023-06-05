@@ -103,4 +103,5 @@ export const getFileType = (): ExternalReferenceAttachmentType => ({
   icon: 'document',
   displayName: 'File Attachment Type',
   getAttachmentViewObject: getFileAttachmentViewObject,
+  getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
 });

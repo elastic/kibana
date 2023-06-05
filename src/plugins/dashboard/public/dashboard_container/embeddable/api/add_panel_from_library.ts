@@ -41,6 +41,10 @@ export function addFromLibrary(this: DashboardContainer) {
       notifications,
       overlays,
       theme,
+      onAddPanel: (id: string) => {
+        this.setScrollToPanelId(id);
+        this.setHighlightPanelId(id);
+      },
     })
   );
 }

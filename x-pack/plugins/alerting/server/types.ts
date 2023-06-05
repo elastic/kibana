@@ -22,7 +22,8 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { type FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
+import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -53,6 +54,7 @@ import {
   SanitizedRule,
   AlertsFilter,
   AlertsFilterTimeframe,
+  RuleAlertData,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -85,7 +87,8 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 export interface RuleExecutorServices<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = RuleAlertData
 > {
   searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
@@ -105,14 +108,15 @@ export interface RuleExecutorOptions<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = never
 > {
   executionId: string;
   logger: Logger;
   params: Params;
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
   spaceId: string;
   startedAt: Date;
   state: State;
@@ -131,13 +135,21 @@ export type ExecutorType<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = never
 > = (
-  options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
+  options: RuleExecutorOptions<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    AlertData
+  >
 ) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
-  validate: (object: unknown) => Params;
+  validate: (object: Partial<Params>) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
@@ -151,12 +163,13 @@ export interface GetSummarizedAlertsFnOpts {
   alertsFilter?: AlertsFilter | null;
 }
 
-// TODO - add type for these alerts when we determine which alerts-as-data
-// fields will be made available in https://github.com/elastic/kibana/issues/143741
-
-interface SummarizedAlertsChunk {
+export type AlertHit = Alert & {
+  _id: string;
+  _index: string;
+};
+export interface SummarizedAlertsChunk {
   count: number;
-  data: unknown[];
+  data: AlertHit[];
 }
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
@@ -168,7 +181,8 @@ export interface CombinedSummarizedAlerts extends SummarizedAlerts {
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
-  rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
+  rule: Pick<SanitizedRule<Params>, 'id'> &
+    Omit<Partial<SanitizedRule<Params>>, 'viewInAppRelativeUrl'>;
   // Optional time bounds
   start?: number;
   end?: number;
@@ -198,6 +212,15 @@ export interface IRuleTypeAlerts {
    * and used in the index template for the index.
    */
   mappings: ComponentTemplateSpec;
+
+  /**
+   * Optional flag to opt into writing alerts as data. When not specified
+   * defaults to false. We need this because we needed all previous rule
+   * registry rules to register with the framework in order to install
+   * Elasticsearch assets but we don't want to migrate them to using
+   * the framework for writing alerts as data until all the pieces are ready
+   */
+  shouldWrite?: boolean;
 
   /**
    * Optional flag to include a reference to the ECS component template.
@@ -231,12 +254,13 @@ export interface RuleType<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  RecoveryActionGroupId extends string = never
+  RecoveryActionGroupId extends string = never,
+  AlertData extends RuleAlertData = never
 > {
   id: string;
   name: string;
-  validate?: {
-    params?: RuleTypeParamsValidator<Params>;
+  validate: {
+    params: RuleTypeParamsValidator<Params>;
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
@@ -250,7 +274,8 @@ export interface RuleType<
      * Ensure that the reserved ActionGroups (such as `Recovered`) are not
      * available for scheduling in the Executor
      */
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
+    AlertData
   >;
   producer: string;
   actionVariables?: {
@@ -285,11 +310,12 @@ export type UntypedRuleType = RuleType<
 >;
 
 export interface RawAlertsFilter extends AlertsFilter {
-  query: null | {
+  query?: {
     kql: string;
+    filters: Filter[];
     dsl: string;
   };
-  timeframe: null | AlertsFilterTimeframe;
+  timeframe?: AlertsFilterTimeframe;
 }
 
 export interface RawRuleAction extends SavedObjectAttributes {

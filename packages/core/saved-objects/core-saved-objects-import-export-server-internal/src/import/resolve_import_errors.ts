@@ -60,6 +60,10 @@ export interface ResolveSavedObjectsImportErrorsOptions {
    * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
    */
   compatibilityMode?: boolean;
+  /** If true, will create objects as managed.
+   * This property allows plugin authors to implement read-only UI's
+   */
+  managed?: boolean;
 }
 
 /**
@@ -78,6 +82,7 @@ export async function resolveSavedObjectsImportErrors({
   namespace,
   createNewCopies,
   compatibilityMode,
+  managed,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -93,6 +98,7 @@ export async function resolveSavedObjectsImportErrors({
     objectLimit,
     filter,
     supportedTypes,
+    managed,
   });
   // Map of all IDs for objects that we are attempting to import, and any references that are not included in the read stream;
   // each value is empty by default
@@ -112,6 +118,7 @@ export async function resolveSavedObjectsImportErrors({
 
   // Replace references
   for (const savedObject of collectSavedObjectsResult.collectedObjects) {
+    // collectedObjects already have managed flag set
     const refMap = retriesReferencesMap.get(`${savedObject.type}:${savedObject.id}`);
     if (!refMap) {
       continue;
@@ -205,13 +212,14 @@ export async function resolveSavedObjectsImportErrors({
     overwrite?: boolean
   ) => {
     const createSavedObjectsParams = {
-      objects,
+      objects, // these objects only have a title, no other properties
       accumulatedErrors,
       savedObjectsClient,
       importStateMap,
       namespace,
       overwrite,
       compatibilityMode,
+      managed,
     };
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams
@@ -235,6 +243,7 @@ export async function resolveSavedObjectsImportErrors({
           ...(overwrite && { overwrite }),
           ...(destinationId && { destinationId }),
           ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
+          ...{ managed: createdObject.managed ?? managed ?? false }, // double sure that this already exists but doing a check just in case
         };
       }),
     ];

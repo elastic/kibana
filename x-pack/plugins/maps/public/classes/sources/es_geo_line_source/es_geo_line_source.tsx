@@ -89,9 +89,16 @@ export class ESGeoLineSource extends AbstractESAggSource {
     this._descriptor = sourceDescriptor;
   }
 
+  getBucketsName() {
+    return i18n.translate('xpack.maps.source.esGeoLine.bucketsName', {
+      defaultMessage: 'tracks',
+    });
+  }
+
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor
+        bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
@@ -157,7 +164,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return false;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return false;
   }
 
@@ -207,7 +214,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
-        defaultMessage: '{layerName} entities',
+        defaultMessage: '{layerName} entities request',
         values: {
           layerName,
         },
@@ -215,7 +222,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
       searchSource: entitySearchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.entityRequestDescription', {
-        defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
+        defaultMessage:
+          'Get entities within map buffer from data view: {dataViewName}, entities: {splitFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          splitFieldName: this._descriptor.splitField,
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
@@ -282,7 +294,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const tracksResp = await this._runEsQuery({
       requestId: `${this.getId()}_tracks`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.trackRequestName', {
-        defaultMessage: '{layerName} tracks',
+        defaultMessage: '{layerName} tracks request',
         values: {
           layerName,
         },
@@ -291,7 +303,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.trackRequestDescription', {
         defaultMessage:
-          'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
+          'Get tracks for {numEntities} entities from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          geoFieldName: this._descriptor.geoField,
+          numEntities: entityBuckets.length,
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(

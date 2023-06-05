@@ -20,6 +20,7 @@ describe('server config', () => {
           "valueInBytes": 1048576,
         },
         "port": 3000,
+        "restrictInternalApis": false,
         "shutdownTimeout": "PT30S",
         "socketTimeout": 120000,
         "ssl": Object {
@@ -186,6 +187,36 @@ describe('server config', () => {
           "enabled": false,
         }
       `);
+    });
+  });
+
+  describe('restrictInternalApis', () => {
+    test('is false by default', () => {
+      const configSchema = config.schema;
+      const obj = {};
+      expect(new ServerConfig(configSchema.validate(obj)).restrictInternalApis).toBe(false);
+    });
+
+    test('can specify retriction on access to internal APIs', () => {
+      const configSchema = config.schema;
+      expect(
+        new ServerConfig(configSchema.validate({ restrictInternalApis: true })).restrictInternalApis
+      ).toBe(true);
+
+      expect(
+        new ServerConfig(configSchema.validate({ restrictInternalApis: false }))
+          .restrictInternalApis
+      ).toBe(false);
+    });
+
+    test('throws if not boolean', () => {
+      const configSchema = config.schema;
+      expect(() => configSchema.validate({ restrictInternalApis: 100 })).toThrowError(
+        'restrictInternalApis]: expected value of type [boolean] but got [number]'
+      );
+      expect(() => configSchema.validate({ restrictInternalApis: 'something' })).toThrowError(
+        'restrictInternalApis]: expected value of type [boolean] but got [string]'
+      );
     });
   });
 });

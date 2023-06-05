@@ -12,6 +12,8 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 describe('makeKQLUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
 
+  const getIndexForType = () => Promise.resolve('.kibana');
+
   beforeEach(() => {
     usageCollectionMock = {
       makeUsageCollector: jest.fn(),
@@ -20,12 +22,12 @@ describe('makeKQLUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.kibana');
+    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, getIndexForType);
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = kql', () => {
-    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.kibana');
+    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, getIndexForType);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('kql');
   });

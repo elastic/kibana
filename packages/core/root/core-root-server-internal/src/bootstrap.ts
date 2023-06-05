@@ -7,9 +7,14 @@
  */
 
 import chalk from 'chalk';
+import { firstValueFrom } from 'rxjs';
 import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
+import { resolve } from 'path';
+import { getConfigDirectory } from '@kbn/utils';
+import { statSync } from 'fs';
+import { VALID_SERVERLESS_PROJECT_TYPES } from './root/serverless_config';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -38,16 +43,44 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { REPO_ROOT } = require('@kbn/repo-info');
 
-  const env = Env.createDefault(REPO_ROOT, {
+  let env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
     repoPackages: getPackages(REPO_ROOT),
   });
 
-  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
+  let rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
+  // Hack to load the extra serverless config files if `serverless: {projectType}` is found in it.
+  const rawConfig = await firstValueFrom(rawConfigService.getConfig$());
+  const serverlessProjectType = rawConfig?.serverless;
+  if (
+    typeof serverlessProjectType === 'string' &&
+    VALID_SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType)
+  ) {
+    const extendedConfigs = [
+      ...['serverless.yml', `serverless.${serverlessProjectType}.yml`]
+        .map((name) => resolve(getConfigDirectory(), name))
+        .filter(configFileExists),
+      ...configs,
+    ];
+
+    env = Env.createDefault(REPO_ROOT, {
+      configs: extendedConfigs,
+      cliArgs: { ...cliArgs, serverless: true },
+      repoPackages: getPackages(REPO_ROOT),
+    });
+
+    rawConfigService.stop();
+    rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
+    rawConfigService.loadConfig();
+  }
+
   const root = new Root(rawConfigService, env, onRootShutdown);
+  const cliLogger = root.logger.get('cli');
+
+  cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
   process.on('SIGHUP', () => reloadConfiguration());
 
@@ -63,7 +96,6 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   });
 
   function reloadConfiguration(reason = 'SIGHUP signal received') {
-    const cliLogger = root.logger.get('cli');
     cliLogger.info(`Reloading Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
 
     try {
@@ -127,4 +159,16 @@ function onRootShutdown(reason?: any) {
   }
 
   process.exit(0);
+}
+
+function configFileExists(path: string) {
+  try {
+    return statSync(path).isFile();
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false;
+    }
+
+    throw err;
+  }
 }

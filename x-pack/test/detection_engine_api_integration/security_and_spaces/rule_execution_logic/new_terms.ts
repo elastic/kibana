@@ -15,10 +15,11 @@ import {
   getNewTermsRuntimeMappings,
   AGG_FIELD_NAME,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/new_terms/utils';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getOpenSignals,
   getPreviewAlerts,
   previewRule,
@@ -85,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -230,6 +231,32 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.original_event.outcome': 'success',
         'kibana.alert.original_event.type': 'authentication_success',
       });
+    });
+
+    it('generates max signals warning when circuit breaker is exceeded', async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        new_terms_fields: ['process.pid'],
+        from: '2018-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2018-02-19T20:41:59.000Z',
+      };
+      const { logs } = await previewRule({ supertest, rule });
+
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+    });
+
+    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        new_terms_fields: ['host.ip'],
+        from: '2019-02-19T20:42:00.000Z',
+        history_window_start: '2019-01-19T20:42:00.000Z',
+        max_signals: 3,
+      };
+      const { logs } = await previewRule({ supertest, rule });
+
+      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
     });
 
     it('should generate 3 alerts when 1 document has 3 new values', async () => {
@@ -466,6 +493,49 @@ export default ({ getService }: FtrProviderContext) => {
       expect(hostNames[4]).eql(['zeek-sensor-san-francisco']);
     });
 
+    // github.com/elastic/kibana/issues/149920
+    it('should generate 1 alert for new terms if query has wildcard in field path', async () => {
+      // historical window documents
+      const historicalDocuments = [
+        {
+          host: { name: 'host-0', ip: '127.0.0.1' },
+        },
+        {
+          host: { name: 'host-1', ip: '127.0.0.2' },
+        },
+      ];
+
+      // rule execution documents
+      const ruleExecutionDocuments = [
+        {
+          host: { name: 'host-0', ip: '127.0.0.2' },
+        },
+        {
+          host: { name: 'host-1', ip: '127.0.0.1' },
+        },
+      ];
+
+      const testId = await newTermsTestExecutionSetup({
+        historicalDocuments,
+        ruleExecutionDocuments,
+      });
+
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['host.name', 'host.ip'],
+        from: ruleExecutionStart,
+        history_window_start: historicalWindowStart,
+        query: `id: "${testId}" and host.n*: host-0`,
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(1);
+
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['host-0', '127.0.0.2']);
+    });
     describe('null values', () => {
       it('should not generate alerts with null values for single field', async () => {
         const rule: NewTermsRuleCreateProps = {

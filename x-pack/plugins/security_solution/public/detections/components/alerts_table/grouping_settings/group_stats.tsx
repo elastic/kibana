@@ -136,7 +136,7 @@ export const getStats = (
       return [
         ...severityStat,
         {
-          title: i18n.STATS_GROUP_IPS,
+          title: i18n.STATS_GROUP_HOSTS,
           badge: {
             value: bucket.hostsCountAggregation?.value ?? 0,
           },
@@ -153,7 +153,7 @@ export const getStats = (
       return [
         ...severityStat,
         {
-          title: i18n.STATS_GROUP_IPS,
+          title: i18n.STATS_GROUP_HOSTS,
           badge: {
             value: bucket.hostsCountAggregation?.value ?? 0,
           },

@@ -6,14 +6,12 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import type React from 'react';
+import type { TableId } from '@kbn/securitysolution-data-table';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/groups');
 
-export const updateGroupSelector = actionCreator<{
-  groupSelector: React.ReactElement;
-}>('UPDATE_GROUP_SELECTOR');
-
-export const updateSelectedGroup = actionCreator<{
-  selectedGroup: string;
-}>('UPDATE_SELECTED_GROUP');
+export const updateGroups = actionCreator<{
+  activeGroups?: string[];
+  tableId: TableId;
+  options?: Array<{ key: string; label: string }>;
+}>('UPDATE_GROUPS');

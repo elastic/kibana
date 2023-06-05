@@ -6,16 +6,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { extractErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { type DataFrameAnalyticsConfig, INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
-import { isKeywordAndTextType } from './fields';
 import { SavedSearchQuery } from '../../contexts/ml';
-
-import { INDEX_STATUS } from './analytics';
-import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
@@ -40,7 +38,7 @@ export const getIndexData = async (
       const sort: EsSorting = sortingColumns
         .map((column) => {
           const { id } = column;
-          column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
+          column.id = newJobCapsServiceAnalytics.isKeywordAndTextType(id) ? `${id}.keyword` : id;
           return column;
         })
         .reduce((s, column) => {

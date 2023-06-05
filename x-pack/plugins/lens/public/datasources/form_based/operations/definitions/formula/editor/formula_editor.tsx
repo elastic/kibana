@@ -53,9 +53,10 @@ import { LANGUAGE_ID } from './math_tokenization';
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
-import { filterByVisibleOperation, nonNullable } from '../util';
+import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 import { getDocumentationSections } from './formula_help';
+import { nonNullable } from '../../../../../../utils';
 
 function tableHasData(
   activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],
@@ -861,7 +862,7 @@ export function FormulaEditor({
                       buttonProps={{
                         color: 'text',
                         className: 'lnsFormula__editorHelp lnsFormula__editorHelp--overlay',
-                        'data-test-subj': 'unifiedTextLangEditor-documentation',
+                        'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'xpack.lens.formula.editorHelpInlineShowToolTip',
                           {
@@ -907,18 +908,24 @@ export function FormulaEditor({
                         </EuiButtonEmpty>
                       }
                     >
-                      {warnings.map(({ message, severity }, index) => (
-                        <div key={index} className="lnsFormula__warningText">
-                          <EuiText
-                            size="s"
-                            color={
-                              severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
-                            }
-                          >
-                            {message}
-                          </EuiText>
-                        </div>
-                      ))}
+                      <div
+                        css={css`
+                          max-width: 400px;
+                        `}
+                      >
+                        {warnings.map(({ message, severity }, index) => (
+                          <div key={index} className="lnsFormula__warningText">
+                            <EuiText
+                              size="s"
+                              color={
+                                severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
+                              }
+                            >
+                              {message}
+                            </EuiText>
+                          </div>
+                        ))}
+                      </div>
                     </EuiPopover>
                   </EuiFlexItem>
                 ) : null}

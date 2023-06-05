@@ -204,7 +204,7 @@ export class ReportingPageObject extends FtrService {
   getBaselineReportPath(fileName: string, reportExt: string, folder: string) {
     const baselineFolder = path.resolve(folder, 'baseline');
     const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
-    this.log.debug(`getBaselineReportPath (${fullPath})`);
+    this.log.debug(`baselineReportPath (${fullPath})`);
     return fullPath;
   }
 }

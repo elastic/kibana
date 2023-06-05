@@ -9,14 +9,14 @@ import { useCallback, useState } from 'react';
 import { difference, isEqual } from 'lodash';
 import type { CaseUpdateRequest } from '../../../common/ui';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
-import type { Case } from '../../../common';
+import type { CasesUI, CaseUI } from '../../../common';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { UseActionProps, ItemsSelectionState } from './types';
 
 type UseItemsActionProps<T> = UseActionProps & {
   fieldKey: 'tags' | 'assignees';
   successToasterTitle: (totalCases: number) => string;
-  fieldSelector: (theCase: Case) => string[];
+  fieldSelector: (theCase: CaseUI) => string[];
   itemsTransformer: (items: string[]) => T;
 };
 
@@ -32,13 +32,13 @@ export const useItemsAction = <T,>({
   const { mutate: updateCases } = useUpdateCases();
   const { permissions } = useCasesContext();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const [selectedCasesToEdit, setSelectedCasesToEdit] = useState<Case[]>([]);
+  const [selectedCasesToEdit, setSelectedCasesToEdit] = useState<CasesUI>([]);
   const canUpdateStatus = permissions.update;
   const isActionDisabled = isDisabled || !canUpdateStatus;
 
   const onFlyoutClosed = useCallback(() => setIsFlyoutOpen(false), []);
   const openFlyout = useCallback(
-    (selectedCases: Case[]) => {
+    (selectedCases: CasesUI) => {
       onAction();
       setIsFlyoutOpen(true);
       setSelectedCasesToEdit(selectedCases);

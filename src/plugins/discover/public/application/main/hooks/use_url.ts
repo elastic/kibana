@@ -9,10 +9,12 @@ import { useEffect } from 'react';
 import { History } from 'history';
 export function useUrl({
   history,
-  resetSavedSearch,
+  savedSearchId,
+  onNewUrl,
 }: {
   history: History;
-  resetSavedSearch: (val?: string) => void;
+  savedSearchId: string | undefined;
+  onNewUrl: () => void;
 }) {
   /**
    * Url / Routing logic
@@ -22,10 +24,10 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/') {
-        resetSavedSearch();
+      if (!search && !hash && pathname === '/' && !savedSearchId) {
+        onNewUrl();
       }
     });
     return () => unlistenHistoryBasePath();
-  }, [history, resetSavedSearch]);
+  }, [history, savedSearchId, onNewUrl]);
 }

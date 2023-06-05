@@ -10,6 +10,7 @@ import {
   rowsPerPageSelector,
   tablePageSelector,
   TABLE_PER_PAGE_POPOVER_BTN,
+  TABLE_SEARCH_BAR,
   TABLE_SORT_COLUMN_BTN,
 } from '../screens/table_pagination';
 
@@ -28,9 +29,17 @@ export const expectTablePage = (pageNumber: number) => {
 
 export const setRowsPerPageTo = (rowsCount: number) => {
   cy.get(TABLE_PER_PAGE_POPOVER_BTN).click({ force: true });
-  cy.get(rowsPerPageSelector(rowsCount))
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.exist');
+  cy.get(rowsPerPageSelector(rowsCount)).click();
+  cy.get(rowsPerPageSelector(rowsCount)).should('not.exist');
+};
+
+export const searchByTitle = (title: string) => {
+  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(TABLE_PER_PAGE_POPOVER_BTN).should('exist');
+  cy.get(TABLE_SEARCH_BAR).click({ force: true });
+  // EuiSearchBox needs the "search" event to be triggered, {enter} doesn't work
+  cy.get(TABLE_SEARCH_BAR).type(`"${title}"`);
+  cy.get(TABLE_SEARCH_BAR).trigger('search');
 };
 
 export const expectRowsPerPage = (rowsCount: number) => {
@@ -46,10 +55,8 @@ export const sortByTableColumn = (columnName: string, direction: 'asc' | 'desc' 
 };
 
 export const expectTableSorting = (columnName: string, direction: 'asc' | 'desc') => {
-  const tableSortButton = cy.get(`${TABLE_SORT_COLUMN_BTN}.euiTableHeaderButton-isSorted`);
-
-  tableSortButton.contains(columnName);
-  tableSortButton
+  cy.get(`${TABLE_SORT_COLUMN_BTN}.euiTableHeaderButton-isSorted`)
+    .contains(columnName)
     .parents('.euiTableHeaderCell')
     .should('have.attr', 'aria-sort', direction === 'asc' ? 'ascending' : 'descending');
 };

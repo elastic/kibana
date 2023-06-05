@@ -6,21 +6,13 @@
  */
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { isEmpty } from 'lodash/fp';
 import type { RouteSpyState } from '../../common/utils/route/types';
 
 export const getTrailingBreadcrumbs = (params: RouteSpyState): ChromeBreadcrumb[] => {
-  let breadcrumb: ChromeBreadcrumb[] = [];
-
-  const dashboardTitle = params?.state?.dashboardTitle?.trim();
-  if (params?.state?.dashboardTitle || params.detailName) {
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: !isEmpty(dashboardTitle) ? dashboardTitle : params.detailName,
-      },
-    ];
+  const breadcrumbName = params?.state?.dashboardName;
+  if (breadcrumbName) {
+    return [{ text: breadcrumbName }];
   }
 
-  return breadcrumb;
+  return [];
 };

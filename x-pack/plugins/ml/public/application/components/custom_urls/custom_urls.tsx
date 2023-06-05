@@ -22,17 +22,16 @@ import {
   EuiModalFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import { isDataFrameAnalyticsConfigs } from '@kbn/ml-data-frame-analytics-utils';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {
   getNewCustomUrlDefaults,
-  getQueryEntityFieldNames,
-  getSupportedFieldNames,
   isValidCustomUrlSettings,
   buildCustomUrlFromSettings,
   getTestUrl,
@@ -43,37 +42,21 @@ import {
   loadDataViewListItems,
 } from '../../jobs/jobs_list/components/edit_job_flyout/edit_utils';
 import { openCustomUrlWindow } from '../../util/custom_url_utils';
-import { Job, isAnomalyDetectionJob } from '../../../../common/types/anomaly_detection_jobs';
-import { UrlConfig } from '../../../../common/types/custom_urls';
 import type { CustomUrlsWrapperProps } from './custom_urls_wrapper';
-import {
-  isDataFrameAnalyticsConfigs,
-  type DataFrameAnalyticsConfig,
-} from '../../../../common/types/data_frame_analytics';
-
-function getDropDownOptions(job: Job | DataFrameAnalyticsConfig, dataView?: DataView) {
-  if (isAnomalyDetectionJob(job)) {
-    return getQueryEntityFieldNames(job);
-  } else if (isDataFrameAnalyticsConfigs(job) && dataView !== undefined) {
-    return getSupportedFieldNames(job, dataView);
-  }
-  return [];
-}
+import { isAnomalyDetectionJob } from '../../../../common/types/anomaly_detection_jobs';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
 
 interface CustomUrlsState {
-  customUrls: UrlConfig[];
+  customUrls: MlUrlConfig[];
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
-  queryEntityFieldNames: string[];
   editorOpen: boolean;
   editorSettings?: CustomUrlSettings;
   supportedFilterFields: string[];
 }
 interface CustomUrlsProps extends CustomUrlsWrapperProps {
   kibana: MlKibanaReactContextValue;
-  dataView?: DataView;
   currentTimeFilter?: EsQueryTimeRange;
 }
 
@@ -85,7 +68,6 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       customUrls: [],
       dashboards: [],
       dataViewListItems: [],
-      queryEntityFieldNames: [],
       editorOpen: false,
       supportedFilterFields: [],
     };
@@ -95,8 +77,6 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     return {
       job: props.job,
       customUrls: props.jobCustomUrls,
-      // For DFA uses the destination index Data View to get the query entities and falls back to source index Data View.
-      queryEntityFieldNames: getDropDownOptions(props.job, props.dataView),
     };
   }
 
@@ -223,25 +203,19 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   };
 
   renderEditor() {
-    const {
-      customUrls,
-      editorOpen,
-      editorSettings,
-      dashboards,
-      dataViewListItems,
-      queryEntityFieldNames,
-    } = this.state;
+    const { customUrls, editorOpen, editorSettings, dashboards, dataViewListItems } = this.state;
 
     const editMode = this.props.editMode ?? 'inline';
     const editor = (
       <CustomUrlEditor
         showTimeRangeSelector={isAnomalyDetectionJob(this.props.job)}
+        showCustomTimeRangeSelector={isDataFrameAnalyticsConfigs(this.props.job)}
         customUrl={editorSettings}
         setEditCustomUrl={this.setEditCustomUrl}
         savedCustomUrls={customUrls}
         dashboards={dashboards}
         dataViewListItems={dataViewListItems}
-        queryEntityFieldNames={queryEntityFieldNames}
+        job={this.props.job}
       />
     );
 

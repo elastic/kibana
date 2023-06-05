@@ -133,7 +133,10 @@ describe('Perform bulk action request schema', () => {
       const payload: PerformBulkActionRequestBody = {
         query: 'name: test',
         action: BulkActionType.duplicate,
-        [BulkActionType.duplicate]: { include_exceptions: false },
+        [BulkActionType.duplicate]: {
+          include_exceptions: false,
+          include_expired_exceptions: false,
+        },
       };
       const message = retrieveValidationMessage(payload);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -508,28 +511,6 @@ describe('Perform bulk action request schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual(
           expect.arrayContaining(['Invalid value "[]" supplied to "edit,value"'])
-        );
-        expect(message.schema).toEqual({});
-      });
-
-      test('invalid request: missing throttle in payload', () => {
-        const payload = {
-          query: 'name: test',
-          action: BulkActionType.edit,
-          [BulkActionType.edit]: [
-            {
-              type: BulkActionEditType.add_rule_actions,
-              value: {
-                actions: [],
-              },
-            },
-          ],
-        };
-
-        const message = retrieveValidationMessage(payload);
-
-        expect(getPaths(left(message.errors))).toEqual(
-          expect.arrayContaining(['Invalid value "undefined" supplied to "edit,value,throttle"'])
         );
         expect(message.schema).toEqual({});
       });

@@ -147,4 +147,18 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
+  test('renders properly for wildcard search', () => {
+    const component = shallow(
+      <FieldItemButton
+        field={scriptedField}
+        fieldSearchHighlight="sc*te"
+        isEmpty={false}
+        isSelected={false}
+        isActive={false}
+        onClick={undefined}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });

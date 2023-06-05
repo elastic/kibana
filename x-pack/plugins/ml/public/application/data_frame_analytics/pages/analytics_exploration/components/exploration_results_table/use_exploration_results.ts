@@ -10,13 +10,25 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from '@kbn/core/public';
-
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getPredictionFieldName,
+  getDefaultPredictionFieldName,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  sortExplorationResultsFields,
+  DEFAULT_RESULTS_FIELD,
+  FEATURE_IMPORTANCE,
+  ML__ID_COPY,
+  TOP_CLASSES,
+  type DataFrameAnalyticsConfig,
+  type FeatureImportanceBaseline,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { MlApiServices } from '../../../../../services/ml_api_service';
-
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
 import {
   getDataGridSchemasFromFieldTypes,
   getFieldType,
@@ -25,19 +37,9 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import {
-  getPredictionFieldName,
-  getDefaultPredictionFieldName,
-  isClassificationAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
-import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
-import { isRegressionAnalysis } from '../../../../common/analytics';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+
+import { getIndexData, getIndexFields } from '../../../../common';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
-import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (

@@ -20,6 +20,7 @@ export interface GetCustomEndpointMetadataGeneratorOptions {
   version: string;
   /** OS type for the generated endpoint hosts */
   os: 'macOS' | 'windows' | 'linux';
+  isolation: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
   static custom({
     version,
     os,
+    isolation,
   }: Partial<GetCustomEndpointMetadataGeneratorOptions> = {}): typeof EndpointMetadataGenerator {
     return class extends EndpointMetadataGenerator {
       generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
@@ -53,6 +55,9 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
             default:
               set(overrides, 'host.os', EndpointMetadataGenerator.windowsOSFields);
           }
+        }
+        if (isolation !== undefined) {
+          set(overrides, 'Endpoint.state.isolation', isolation);
         }
 
         return super.generate(overrides);
@@ -104,10 +109,10 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
   /** Generate an Endpoint host metadata document */
   generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
     const ts = overrides['@timestamp'] ?? new Date().getTime();
-    const hostName = this.randomHostname();
+    const hostName = overrides?.host?.hostname ?? this.randomHostname();
     const agentVersion = overrides?.agent?.version ?? this.randomVersion();
     const agentId = this.seededUUIDv4();
-    const isIsolated = this.randomBoolean(0.3);
+    const isIsolated = overrides?.Endpoint?.state?.isolation ?? this.randomBoolean(0.3);
     const capabilities: EndpointCapabilities[] = ['isolation'];
 
     // v8.4 introduced additional endpoint capabilities
@@ -122,6 +127,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     // v8.8 introduced execute capability
     if (gte(agentVersion, '8.8.0')) {
       capabilities.push('execute');
+    }
+
+    // v8.9 introduced `upload` capability
+    if (gte(agentVersion, '8.9.0')) {
+      capabilities.push('upload_file');
     }
 
     const hostMetadataDoc: HostMetadataInterface = {

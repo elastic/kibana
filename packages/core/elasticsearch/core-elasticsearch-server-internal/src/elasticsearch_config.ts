@@ -154,7 +154,8 @@ export const configSchema = schema.object({
           return '"ignoreVersionMismatch" can only be set to true in development mode';
         }
       },
-      defaultValue: false,
+      // When running in serverless mode, default to `true`
+      defaultValue: schema.contextRef('serverless'),
     }),
     schema.boolean({ defaultValue: false })
   ),

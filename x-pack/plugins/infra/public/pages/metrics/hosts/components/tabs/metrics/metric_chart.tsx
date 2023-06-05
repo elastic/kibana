@@ -4,20 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiI18n } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPanel,
+  EuiI18n,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { createHostsFilter } from '../../../utils';
+import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { LensWrapper } from '../../chart/lens_wrapper';
+import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
 export interface MetricChartProps {
   title: string;
@@ -29,9 +37,18 @@ export interface MetricChartProps {
 const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
+  const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest } = useHostsViewContext();
+  const { requestTs, loading } = useHostsViewContext();
+  const { currentPage } = useHostsTableContext();
+
+  // prevents updates on requestTs and serchCriteria states from relaoding the chart
+  // we want it to reload only once the table has finished loading
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    lastReloadRequestTime: requestTs,
+    ...searchCriteria,
+  });
 
   const { attributes, getExtraActions, error } = useLensAttributes({
     type,
@@ -43,11 +60,18 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     visualizationType: 'lineChart',
   });
 
-  const filters = [...searchCriteria.filters, ...searchCriteria.panelFilters];
+  const filters = useMemo(() => {
+    return [
+      createHostsFilter(
+        currentPage.map((p) => p.name),
+        dataView
+      ),
+    ];
+  }, [currentPage, dataView]);
+
   const extraActionOptions = getExtraActions({
-    timeRange: searchCriteria.dateRange,
+    timeRange: afterLoadedState.dateRange,
     filters,
-    query: searchCriteria.query,
   });
 
   const extraActions: Action[] = [extraActionOptions.openInLens];
@@ -69,12 +93,15 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasShadow={false}
       hasBorder
       paddingSize={error ? 'm' : 'none'}
-      style={{ minHeight: MIN_HEIGHT }}
+      css={css`
+        min-height: calc(${MIN_HEIGHT} + ${euiTheme.size.l});
+        position: 'relative';
+      `}
       data-test-subj={`hostsView-metricChart-${type}`}
     >
       {error ? (
         <EuiFlexGroup
-          style={{ minHeight: MIN_HEIGHT, alignContent: 'center' }}
+          style={{ minHeight: '100%', alignContent: 'center' }}
           gutterSize="xs"
           justifyContent="center"
           alignItems="center"
@@ -98,11 +125,12 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           attributes={attributes}
           style={{ height: MIN_HEIGHT }}
           extraActions={extraActions}
-          lastReloadRequestTime={baseRequest.requestTs}
-          dateRange={searchCriteria.dateRange}
+          lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+          dateRange={afterLoadedState.dateRange}
           filters={filters}
-          query={searchCriteria.query}
           onBrushEnd={handleBrushEnd}
+          loading={loading}
+          hasTitle
         />
       )}
     </EuiPanel>

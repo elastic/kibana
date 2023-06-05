@@ -12,6 +12,7 @@
       "data",
       "lens",
       "licensing",
+      "uiActions",
       "unifiedFieldList",
     ],
     "requiredBundles": [

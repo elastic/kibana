@@ -136,7 +136,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Apply query');
+    ).toBe('Load query');
 
     const newProps = {
       ...props,

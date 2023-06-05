@@ -14,8 +14,8 @@ import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../..
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
-  deleteExceptionListWithRuleReference,
-  deleteExceptionListWithoutRuleReference,
+  deleteExceptionListWithRuleReferenceByListId,
+  deleteExceptionListWithoutRuleReferenceByListId,
   exportExceptionList,
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
@@ -44,7 +44,6 @@ const getExceptionList2 = () => ({
 describe('Exceptions Table', () => {
   before(() => {
     esArchiverResetKibana();
-    login();
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
@@ -67,6 +66,7 @@ describe('Exceptions Table', () => {
       'exceptionListResponse'
     );
 
+    login();
     visitWithoutDateRange(EXCEPTIONS_URL);
 
     // Using cy.contains because we do not care about the exact text,
@@ -74,12 +74,17 @@ describe('Exceptions Table', () => {
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
   });
 
+  beforeEach(() => {
+    login();
+    visitWithoutDateRange(EXCEPTIONS_URL);
+  });
+
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
-    exportExceptionList();
+    exportExceptionList(getExceptionList1().list_id);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.body).should(
@@ -153,7 +158,7 @@ describe('Exceptions Table', () => {
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
 
-    deleteExceptionListWithoutRuleReference();
+    deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
@@ -168,7 +173,7 @@ describe('Exceptions Table', () => {
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
 
-    deleteExceptionListWithRuleReference();
+    deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown

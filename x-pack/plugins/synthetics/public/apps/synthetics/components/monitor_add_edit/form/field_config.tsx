@@ -6,16 +6,17 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import {
+  EuiIcon,
   EuiCode,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiTextArea,
   EuiSelectProps,
   EuiFieldTextProps,
   EuiSwitchProps,
@@ -54,26 +55,32 @@ import {
   ResponseBodyIndexField,
   ResponseBodyIndexFieldProps,
   ControlledFieldProp,
+  KeyValuePairsField,
+  TextArea,
   ThrottlingWrapper,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
-import { useMonitorName } from '../hooks/use_monitor_name';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   HTTPMethod,
   ScreenshotOption,
+  Mode,
   MonitorFields,
   TLSVersion,
   VerificationMode,
   FieldMap,
   FormLocation,
+  ResponseBodyIndexPolicy,
+  ResponseCheckJSON,
   ThrottlingConfig,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
+import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
 const getScheduleContent = (value: number) => {
   if (value > 60) {
@@ -116,9 +123,9 @@ export const MONITOR_TYPE_CONFIG = {
           'Navigate through multiple steps or pages to test key user flows from a real browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
-    beta: true,
+    beta: false,
   },
   [FormMonitorType.SINGLE]: {
     id: 'syntheticsMonitorTypeSingle',
@@ -140,9 +147,9 @@ export const MONITOR_TYPE_CONFIG = {
           'Test a single page load including all objects on the page from a real web browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
-    beta: true,
+    beta: false,
   },
   [FormMonitorType.HTTP]: {
     id: 'syntheticsMonitorTypeHTTP',
@@ -158,7 +165,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -176,7 +183,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -194,7 +201,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -414,7 +421,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
         onChange: (updatedValues: FormLocation[]) => {
-          setValue(ConfigKey.LOCATIONS, updatedValues, {
+          const valuesToSave = updatedValues.map(({ id, label, isServiceManaged }) => ({
+            id,
+            label,
+            isServiceManaged,
+          }));
+          setValue(ConfigKey.LOCATIONS, valuesToSave, {
             shouldValidate: Boolean(formState.submitCount > 0),
           });
         },
@@ -571,7 +583,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink data-test-subj="syntheticsFIELDLearnMoreLink" href="#" target="_blank">
+        <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
+          href="https://www.elastic.co/guide/en/fleet/current/data-streams.html"
+          target="_blank"
+        >
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}
@@ -765,7 +781,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_STATUS_CHECK,
     component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.label', {
-      defaultMessage: 'Check response status equals',
+      defaultMessage: 'Response status equals',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.helpText', {
       defaultMessage:
@@ -794,7 +810,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_HEADERS_CHECK,
     component: HeaderField,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.label', {
-      defaultMessage: 'Check response headers contain',
+      defaultMessage: 'Response headers contain',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.helpText', {
       defaultMessage: 'A list of expected response headers.',
@@ -814,7 +830,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
     component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.label', {
-      defaultMessage: 'Check response body contains',
+      defaultMessage: 'Response body contains',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.helpText', {
       defaultMessage:
@@ -830,7 +846,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
     component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.label', {
-      defaultMessage: 'Check response body does not contain',
+      defaultMessage: 'Response body does not contain',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.helpText', {
       defaultMessage:
@@ -846,7 +862,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_RECEIVE_CHECK,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.label', {
-      defaultMessage: 'Check response contains',
+      defaultMessage: 'Response contains',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.helpText', {
       defaultMessage: 'The expected remote host response.',
@@ -986,7 +1002,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return !Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiSelectProps => ({
       options: Object.values(VerificationMode).map((method) => ({
         value: method,
@@ -1002,7 +1022,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Supported TLS protocols',
     }),
     controlled: true,
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return !Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: ({ field, setValue }): EuiComboBoxProps<TLSVersion> => {
       return {
         options: Object.values(TLSVersion).map((version) => ({
@@ -1023,42 +1047,54 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: {
     fieldKey: ConfigKey.TLS_CERTIFICATE_AUTHORITIES,
-    component: EuiTextArea,
+    component: TextArea,
     label: i18n.translate('xpack.synthetics.monitorConfig.certificateAuthorities.label', {
       defaultMessage: 'Certificate authorities',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.certificateAuthorities.helpText', {
       defaultMessage: 'PEM-formatted custom certificate authorities.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return !Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
       readOnly,
     }),
   },
   [ConfigKey.TLS_CERTIFICATE]: {
     fieldKey: ConfigKey.TLS_CERTIFICATE,
-    component: EuiTextArea,
+    component: TextArea,
     label: i18n.translate('xpack.synthetics.monitorConfig.clientCertificate.label', {
       defaultMessage: 'Client certificate',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.clientCertificate.helpText', {
       defaultMessage: 'PEM-formatted certificate for TLS client authentication.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return !Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
       readOnly,
     }),
   },
   [ConfigKey.TLS_KEY]: {
     fieldKey: ConfigKey.TLS_KEY,
-    component: EuiTextArea,
+    component: TextArea,
     label: i18n.translate('xpack.synthetics.monitorConfig.clientKey.label', {
       defaultMessage: 'Client key',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKey.helpText', {
       defaultMessage: 'PEM-formatted certificate key for TLS client authentication.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return !Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
       readOnly,
     }),
@@ -1072,7 +1108,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKeyPassphrase.helpText', {
       defaultMessage: 'Certificate key passphrase for TLS client authentication.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return !Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiFieldPasswordProps => ({
       readOnly,
     }),
@@ -1123,9 +1163,26 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
     component: ThrottlingWrapper,
-    label: i18n.translate('xpack.synthetics.monitorConfig.throttling.label', {
-      defaultMessage: 'Connection profile',
-    }),
+    label: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
+        defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
+        values={{
+          icon: <EuiIcon type="alert" color="warning" size="s" />,
+          link: (
+            <EuiLink
+              data-test-subj="syntheticsFIELDNoticeLink"
+              href={'https://github.com/elastic/synthetics/blob/main/docs/throttling.md'}
+              target="_blank"
+            >
+              {i18n.translate('xpack.synthetics.monitorConfig.throttlingDisabled.link', {
+                defaultMessage: 'notice',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
     required: true,
     controlled: true,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.throttling.helpText', {
@@ -1251,5 +1308,166 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
       isDisabled: readOnly,
     }),
+  },
+  [ConfigKey.MODE]: {
+    fieldKey: ConfigKey.MODE,
+    component: Select,
+    label: i18n.translate('xpack.synthetics.monitorConfig.mode.label', {
+      defaultMessage: 'Mode',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.syntheticsArgs.mode.helpText"
+        defaultMessage="If {any}, the monitor pings only one IP address for a hostname. If {all}, the monitor pings all resolvable IPs for a hostname. {all} is useful if you are using a DNS-load balancer and want to ping every IP address for the specified hostname."
+        values={{
+          all: <EuiCode>all</EuiCode>,
+          any: <EuiCode>any</EuiCode>,
+        }}
+      />
+    ),
+    props: (): EuiSelectProps => ({
+      options: Object.values(Mode).map((value) => ({
+        value,
+        text: value,
+      })),
+      disabled: readOnly,
+    }),
+  },
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: {
+    fieldKey: ConfigKey.RESPONSE_BODY_MAX_BYTES,
+    component: FieldNumber,
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyMaxBytes.label', {
+      defaultMessage: 'Response body max bytes',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyMaxBytes.helpText', {
+      defaultMessage: 'Controls the maximum size of the stored body contents.',
+    }),
+    hidden: (dependencies) => {
+      const [responseBodyIndex] = dependencies || [];
+      return responseBodyIndex === ResponseBodyIndexPolicy.NEVER;
+    },
+    props: (): EuiFieldNumberProps => ({ min: 1, step: 'any', readOnly }),
+    dependencies: [ConfigKey.RESPONSE_BODY_INDEX],
+  },
+  [ConfigKey.IPV4]: {
+    fieldKey: ConfigKey.IPV4, // also controls ipv6
+    component: ComboBox,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ipv4.label', {
+      defaultMessage: 'IP protocols',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ipv4.helpText', {
+      defaultMessage: 'IP protocols to use when pinging the remote host.',
+    }),
+    controlled: true,
+    dependencies: [ConfigKey.IPV6],
+    props: ({ field, setValue, dependencies }): EuiComboBoxProps<string> => {
+      const [ipv6] = dependencies;
+      const ipv4 = field?.value;
+      const values: string[] = [];
+      if (ipv4) {
+        values.push('IPv4');
+      }
+      if (ipv6) {
+        values.push('IPv6');
+      }
+      return {
+        options: [
+          {
+            label: 'IPv4',
+          },
+          {
+            label: 'IPv6',
+          },
+        ],
+        selectedOptions: values.map((version) => ({
+          label: version,
+        })),
+        onChange: (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
+          setValue(
+            ConfigKey.IPV4,
+            updatedValues.some((value) => value.label === 'IPv4')
+          );
+          setValue(
+            ConfigKey.IPV6,
+            updatedValues.some((value) => value.label === 'IPv6')
+          );
+        },
+        isDisabled: readOnly,
+      };
+    },
+  },
+  [ConfigKey.PROXY_HEADERS]: {
+    fieldKey: ConfigKey.PROXY_HEADERS,
+    component: HeaderField,
+    label: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.label', {
+      defaultMessage: 'Proxy headers',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.helpText', {
+      defaultMessage: 'Additional headers to send to proxies for CONNECT requests.',
+    }),
+    controlled: true,
+    validation: () => ({
+      validate: (headers) => !validateHeaders(headers),
+    }),
+    error: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.error', {
+      defaultMessage: 'The header key must be a valid HTTP token.',
+    }),
+    props: (): HeaderFieldProps => ({
+      readOnly,
+    }),
+  },
+  ['check.response.json']: {
+    fieldKey: ConfigKey.RESPONSE_JSON_CHECK,
+    component: KeyValuePairsField,
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.label', {
+      defaultMessage: 'Response body contains JSON',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.helpText', {
+      defaultMessage:
+        'A list of expressions executed against the body when parsed as JSON. The body size must be less than or equal to 100 MiB.',
+    }),
+    controlled: true,
+    props: ({ field, setValue }): KeyValuePairsFieldProps => ({
+      readOnly,
+      keyLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.key.label', {
+        defaultMessage: 'Description',
+      }),
+      valueLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.value.label', {
+        defaultMessage: 'Expression',
+      }),
+      addPairControlLabel: i18n.translate(
+        'xpack.synthetics.monitorConfig.responseJSON.addPair.label',
+        {
+          defaultMessage: 'Add expression',
+        }
+      ),
+      onChange: (pairs) => {
+        const value: ResponseCheckJSON[] = pairs
+          .map((pair) => {
+            const [description, expression] = pair;
+            return {
+              description,
+              expression,
+            };
+          })
+          .filter((pair) => pair.description || pair.expression);
+        if (!isEqual(value, field?.value)) {
+          setValue(ConfigKey.RESPONSE_JSON_CHECK, value);
+        }
+      },
+      defaultPairs: field?.value.map((check) => [check.description, check.expression]) || [],
+    }),
+    validation: () => {
+      return {
+        validate: (value: ResponseCheckJSON[]) => {
+          if (value.some((check) => !check.expression || !check.description)) {
+            return i18n.translate('xpack.synthetics.monitorConfig.responseJSON.error', {
+              defaultMessage:
+                "This JSON expression isn't valid. Make sure that both the label and expression are defined.",
+            });
+          }
+        },
+      };
+    },
   },
 });

@@ -51,7 +51,8 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        })
+        }),
+        { throwOnConflict: true }
       );
       expect(mockTransformManager.install).toHaveBeenCalledWith(
         expect.objectContaining({ ...sloParams, id: expect.any(String) })
@@ -86,7 +87,8 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        })
+        }),
+        { throwOnConflict: true }
       );
     });
   });

@@ -6,6 +6,7 @@
  */
 
 export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
+export { INGEST_SAVED_OBJECT_INDEX } from './saved_objects';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';
@@ -21,6 +22,8 @@ export * from './authz';
 export * from './file_storage';
 export * from './message_signing_keys';
 export * from './locators';
+export * from './secrets';
+export * from './uninstall_tokens';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EMPTY_VALUE } from '../../../common/constants';
+import { EMPTY_VALUE } from '../../../constants/common';
 import { unwrapValue } from './unwrap_value';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 

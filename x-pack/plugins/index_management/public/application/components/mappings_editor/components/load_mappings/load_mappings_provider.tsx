@@ -242,7 +242,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
                 label={i18nTexts.editor.label}
                 onUpdate={onJsonUpdate}
                 defaultValue={state.json?.unparsed}
-                euiCodeEditorProps={{
+                codeEditorProps={{
                   height: '450px',
                 }}
               />

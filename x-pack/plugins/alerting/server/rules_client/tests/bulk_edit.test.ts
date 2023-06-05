@@ -210,6 +210,9 @@ describe('bulkEdit()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
 
     (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
@@ -686,6 +689,9 @@ describe('bulkEdit()', () => {
         },
         producer: 'alerts',
         getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       const existingAction = {
         frequency: {
@@ -700,7 +706,8 @@ describe('bulkEdit()', () => {
         alertsFilter: {
           query: {
             kql: 'name:test',
-            dsl: '{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}',
+            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+            filters: [],
           },
           timeframe: {
             days: [1],
@@ -719,7 +726,7 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
         uuid: '222',
-        alertsFilter: { query: { kql: 'test:1', dsl: 'test' } },
+        alertsFilter: { query: { kql: 'test:1', dsl: 'test', filters: [] } },
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -738,8 +745,7 @@ describe('bulkEdit()', () => {
                   actionRef: 'action_1',
                   uuid: '222',
                   alertsFilter: {
-                    query: { kql: 'test:1', dsl: 'test' },
-                    timeframe: null,
+                    query: { kql: 'test:1', dsl: 'test', filters: [] },
                   },
                 },
               ],
@@ -796,10 +802,10 @@ describe('bulkEdit()', () => {
                   uuid: '222',
                   alertsFilter: {
                     query: {
-                      dsl: '{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}',
+                      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
                       kql: 'test:1',
+                      filters: [],
                     },
-                    timeframe: null,
                   },
                 },
               ],
@@ -829,8 +835,8 @@ describe('bulkEdit()', () => {
               query: {
                 dsl: 'test',
                 kql: 'test:1',
+                filters: [],
               },
-              timeframe: null,
             },
           },
         ],
@@ -2351,6 +2357,67 @@ describe('bulkEdit()', () => {
       expect(result.rules).toHaveLength(0);
       expect(result.errors[0].message).toBe(
         'Error updating rule: the interval is less than the allowed minimum interval of 3m'
+      );
+    });
+
+    test('should not update saved object and return error if schedule interval is shorter than any action frequency in the rule', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  frequency: { notifyWhen: 'onThrottleInterval', summary: false, throttle: '5m' },
+                  group: 'default',
+                  params: {},
+                  uuid: '111',
+                },
+                {
+                  actionRef: 'action_1',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onThrottleInterval', summary: true, throttle: '10s' },
+                  group: 'default',
+                  params: {},
+                  uuid: '100',
+                },
+              ],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'action_1',
+                type: 'action',
+                id: '2',
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ] as any,
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '10m' },
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.rules).toHaveLength(0);
+      expect(result.errors[0].message).toBe(
+        `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
       );
     });
   });

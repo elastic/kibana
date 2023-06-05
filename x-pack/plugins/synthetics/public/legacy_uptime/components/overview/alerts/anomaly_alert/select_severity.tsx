@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { getSeverityColor } from '@kbn/ml-plugin/public';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 
 const warningLabel = i18n.translate('xpack.synthetics.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',

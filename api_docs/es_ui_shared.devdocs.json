@@ -363,7 +363,7 @@
         "label": "JsonEditor",
         "description": [],
         "signature": [
-          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, euiCodeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,
@@ -568,7 +568,7 @@
             "section": "def-common.HttpSetup",
             "text": "HttpSetup"
           },
-          ", { path, method, body, query, asSystemRequest }: ",
+          ", { path, method, body, query, version, asSystemRequest }: ",
           {
             "pluginId": "esUiShared",
             "scope": "public",
@@ -616,7 +616,7 @@
             "id": "def-public.sendRequest.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ path, method, body, query, asSystemRequest }",
+            "label": "{ path, method, body, query, version, asSystemRequest }",
             "description": [],
             "signature": [
               {
@@ -670,7 +670,7 @@
             "section": "def-common.HttpSetup",
             "text": "HttpSetup"
           },
-          ", { path, method, query, body, pollIntervalMs, initialData, deserializer }: ",
+          ", { path, method, query, body, pollIntervalMs, initialData, deserializer, version, }: ",
           {
             "pluginId": "esUiShared",
             "scope": "public",
@@ -718,7 +718,7 @@
             "id": "def-public.useRequest.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
+            "label": "{\n    path,\n    method,\n    query,\n    body,\n    pollIntervalMs,\n    initialData,\n    deserializer,\n    version,\n  }",
             "description": [],
             "signature": [
               {
@@ -1366,6 +1366,20 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.SendRequestConfig.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,

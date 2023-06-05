@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, FC } from 'react';
+import React, { ChangeEvent, useState, useRef, useEffect, FC } from 'react';
+import { type Moment } from 'moment';
 
 import {
   EuiComboBox,
@@ -25,11 +26,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
+import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
-import { UrlConfig } from '../../../../../common/types/custom_urls';
+import { CustomTimeRangePicker } from './custom_time_range_picker';
+import { useMlKibana } from '../../../contexts/kibana';
+import { getDropDownOptions } from './get_dropdown_options';
 
 function getLinkToOptions() {
   return [
@@ -57,11 +64,12 @@ function getLinkToOptions() {
 interface CustomUrlEditorProps {
   customUrl: CustomUrlSettings | undefined;
   setEditCustomUrl: (url: CustomUrlSettings) => void;
-  savedCustomUrls: UrlConfig[];
+  savedCustomUrls: MlUrlConfig[];
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
-  queryEntityFieldNames: string[];
   showTimeRangeSelector?: boolean;
+  showCustomTimeRangeSelector: boolean;
+  job: Job | DataFrameAnalyticsConfig;
 }
 
 /*
@@ -73,9 +81,47 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   savedCustomUrls,
   dashboards,
   dataViewListItems,
-  queryEntityFieldNames,
-  showTimeRangeSelector = true,
+  showTimeRangeSelector,
+  showCustomTimeRangeSelector,
+  job,
 }) => {
+  const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
+  const [hasTimefield, setHasTimefield] = useState<boolean>(false);
+
+  const {
+    services: {
+      data: { dataViews },
+    },
+  } = useMlKibana();
+
+  const isFirst = useRef(true);
+
+  useEffect(() => {
+    async function getQueryEntityDropdownOptions() {
+      let dataViewToUse: DataView | undefined;
+      const dataViewId = customUrl?.kibanaSettings?.discoverIndexPatternId;
+
+      try {
+        dataViewToUse = await dataViews.get(dataViewId ?? '');
+      } catch (e) {
+        dataViewToUse = undefined;
+      }
+      if (dataViewToUse && dataViewToUse.timeFieldName) {
+        setHasTimefield(true);
+      }
+      const dropDownOptions = await getDropDownOptions(isFirst.current, job, dataViewToUse);
+      setQueryEntityFieldNames(dropDownOptions);
+
+      if (isFirst.current) {
+        isFirst.current = false;
+      }
+    }
+
+    if (job !== undefined) {
+      getQueryEntityDropdownOptions();
+    }
+  }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId]);
+
   if (customUrl === undefined) {
     return null;
   }
@@ -91,6 +137,13 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     setEditCustomUrl({
       ...customUrl,
       type: linkType,
+    });
+  };
+
+  const onCustomTimeRangeChange = (timeRange?: { start: Moment; end: Moment }) => {
+    setEditCustomUrl({
+      ...customUrl,
+      customTimeRange: timeRange,
     });
   };
 
@@ -112,6 +165,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       kibanaSettings: {
         ...kibanaSettings,
         discoverIndexPatternId: e.target.value,
+        queryFieldNames: [],
       },
     });
   };
@@ -306,6 +360,13 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
               />
             </EuiFormRow>
           )}
+        {type === URL_TYPE.KIBANA_DASHBOARD ||
+        (type === URL_TYPE.KIBANA_DISCOVER && showCustomTimeRangeSelector && hasTimefield) ? (
+          <CustomTimeRangePicker
+            onCustomTimeRangeChange={onCustomTimeRangeChange}
+            customTimeRange={customUrl?.customTimeRange}
+          />
+        ) : null}
 
         {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
           showTimeRangeSelector && (

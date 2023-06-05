@@ -51,6 +51,7 @@ import type { MapExtentState } from '../../reducers/map/types';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
+import { transformRequest } from './transform_request';
 
 export interface Props {
   isMapReady: boolean;
@@ -171,6 +172,7 @@ export class MbMap extends Component<Props, State> {
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
+        transformRequest,
       };
       if (initialView) {
         options.zoom = initialView.zoom;
@@ -283,11 +285,10 @@ export class MbMap extends Component<Props, State> {
   }
 
   _initResizerChecker() {
+    this.state.mbMap?.resize(); // ensure map is sized for container prior to monitoring
     this._checker = new ResizeChecker(this._containerRef!);
     this._checker.on('resize', () => {
-      if (this.state.mbMap) {
-        this.state.mbMap.resize();
-      }
+      this.state.mbMap?.resize();
     });
   }
 

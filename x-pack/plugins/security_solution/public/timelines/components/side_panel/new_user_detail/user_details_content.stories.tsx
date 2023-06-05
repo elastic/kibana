@@ -6,21 +6,20 @@
  */
 
 import React from 'react';
-import { storiesOf, addDecorator } from '@storybook/react';
+import { storiesOf } from '@storybook/react';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { UserDetailsContentComponent } from './user_details_content';
 import { StorybookProviders } from '../../../../common/mock/storybook_providers';
 import { mockManagedUser, mockObservedUser, mockRiskScoreState } from './__mocks__';
 
-addDecorator((storyFn) => (
-  <StorybookProviders>
-    <EuiFlyout size="m" onClose={() => {}}>
-      <EuiFlyoutBody>{storyFn()}</EuiFlyoutBody>
-    </EuiFlyout>
-  </StorybookProviders>
-));
-
 storiesOf('UserDetailsContent', module)
+  .addDecorator((storyFn) => (
+    <StorybookProviders>
+      <EuiFlyout size="m" onClose={() => {}}>
+        <EuiFlyoutBody>{storyFn()}</EuiFlyoutBody>
+      </EuiFlyout>
+    </StorybookProviders>
+  ))
   .add('default', () => (
     <UserDetailsContentComponent
       userName="test"

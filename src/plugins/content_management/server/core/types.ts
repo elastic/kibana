@@ -41,7 +41,11 @@ export interface StorageContext {
   };
 }
 
-export interface ContentStorage<T = unknown, U = T> {
+export interface ContentStorage<
+  T = unknown,
+  U = T,
+  TMSearchConfig extends MSearchConfig<T, any> = MSearchConfig<T, unknown>
+> {
   /** Get a single item */
   get(ctx: StorageContext, id: string, options?: object): Promise<GetResult<T, any>>;
 
@@ -69,7 +73,7 @@ export interface ContentStorage<T = unknown, U = T> {
    * Opt-in to multi-type search.
    * Can only be supported if the content type is backed by a saved object since `mSearch` is using the `savedObjects.find` API.
    **/
-  mSearch?: MSearchConfig<T>;
+  mSearch?: TMSearchConfig;
 }
 
 export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage> {
@@ -87,7 +91,7 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
  * By configuring a content type with a `MSearchConfig`, it can be searched in the multi-type search.
  * Underneath content management is using the `savedObjects.find` API to search the saved objects.
  */
-export interface MSearchConfig<T = unknown, SavedObjectAttributes = unknown> {
+export interface MSearchConfig<T = unknown, TSavedObjectAttributes = unknown> {
   /**
    * The saved object type that corresponds to this content type.
    */
@@ -98,7 +102,7 @@ export interface MSearchConfig<T = unknown, SavedObjectAttributes = unknown> {
    */
   toItemResult: (
     ctx: StorageContext,
-    savedObject: SavedObjectsFindResult<SavedObjectAttributes>
+    savedObject: SavedObjectsFindResult<TSavedObjectAttributes>
   ) => T;
 
   /**

@@ -8,8 +8,9 @@
 import { mapValues } from 'lodash';
 import type { CoreSetup, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { SavedObjectMigrationMap } from '@kbn/core/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { APP_ICON, getFullPath } from '../../common/constants';
 import { CONTENT_ID } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
@@ -24,6 +25,7 @@ export function setupSavedObjects(
 ) {
   core.savedObjects.registerType<MapAttributes>({
     name: CONTENT_ID,
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',

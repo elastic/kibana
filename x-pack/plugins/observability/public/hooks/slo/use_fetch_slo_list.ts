@@ -13,9 +13,11 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 interface SLOListParams {
   name?: string;
@@ -28,6 +30,7 @@ interface SLOListParams {
 export interface UseFetchSloListResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
+  isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
   sloList: FindSLOResponse | undefined;
@@ -46,14 +49,19 @@ export function useFetchSloList({
   indicatorTypes = [],
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const [stateRefetchInterval, setStateRefetchInterval] = useState(SHORT_REFETCH_INTERVAL);
+  const [stateRefetchInterval, setStateRefetchInterval] = useState<number | undefined>(
+    SHORT_REFETCH_INTERVAL
+  );
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchSloList', { name, page, sortBy, indicatorTypes }],
+      queryKey: sloKeys.list({ name, page, sortBy, indicatorTypes }),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
@@ -71,30 +79,39 @@ export function useFetchSloList({
 
           return response;
         } catch (error) {
-          // ignore error
+          throw error;
         }
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       refetchInterval: shouldRefetch ? stateRefetchInterval : undefined,
       staleTime: 1000,
+      retry: (failureCount, error) => {
+        if (String(error) === 'Error: Forbidden') {
+          return false;
+        }
+        return failureCount < 4;
+      },
       onSuccess: ({ results }: FindSLOResponse) => {
         if (!shouldRefetch) {
           return;
         }
 
-        if (results.find((slo) => slo.summary.status === 'NO_DATA')) {
+        if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
           setStateRefetchInterval(SHORT_REFETCH_INTERVAL);
         } else {
           setStateRefetchInterval(LONG_REFETCH_INTERVAL);
         }
 
-        queryClient.invalidateQueries(['fetchHistoricalSummary'], {
-          exact: false,
-        });
-
-        queryClient.invalidateQueries(['fetchActiveAlerts'], {
-          exact: false,
+        queryClient.invalidateQueries(sloKeys.historicalSummaries());
+        queryClient.invalidateQueries(sloKeys.activeAlerts());
+        queryClient.invalidateQueries(sloKeys.rules());
+      },
+      onError: (error: Error) => {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.observability.slo.list.errorNotification', {
+            defaultMessage: 'Something went wrong while fetching SLOs',
+          }),
         });
       },
     }
@@ -102,8 +119,9 @@ export function useFetchSloList({
 
   return {
     sloList: data,
-    isLoading: isLoading || isRefetching,
     isInitialLoading,
+    isLoading,
+    isRefetching,
     isSuccess,
     isError,
     refetch,

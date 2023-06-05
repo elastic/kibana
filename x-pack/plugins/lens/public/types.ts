@@ -39,12 +39,14 @@ import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import type {
   DraggingIdentifier,
   DragDropIdentifier,
   DragContextState,
   DropType,
 } from '@kbn/dom-drag-drop';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -132,8 +134,10 @@ export interface EditorFrameSetup {
   registerDatasource: <T, P>(
     datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
   ) => void;
-  registerVisualization: <T, P>(
-    visualization: Visualization<T, P> | (() => Promise<Visualization<T, P>>)
+  registerVisualization: <T, P, ExtraAppendLayerArg>(
+    visualization:
+      | Visualization<T, P, ExtraAppendLayerArg>
+      | (() => Promise<Visualization<T, P, ExtraAppendLayerArg>>)
   ) => void;
 }
 
@@ -164,6 +168,7 @@ export interface VisualizationInfo {
     icon?: IconType;
     label?: string;
     dimensions: Array<{ name: string; id: string; dimensionType: string }>;
+    palette?: string[];
   }>;
 }
 
@@ -245,6 +250,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchFilters?: Filter[];
   title?: string;
   description?: string;
+  panelTimeRange?: TimeRange;
   visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
@@ -601,17 +607,17 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 /** @internal **/
 export interface LayerAction {
-  id: string;
   displayName: string;
   description?: string;
-  execute: () => void | Promise<void>;
+  execute: (mountingPoint: HTMLDivElement | null | undefined) => void | Promise<void>;
   icon: IconType;
   color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
+  disabled?: boolean;
   'data-test-subj'?: string;
+  order: number;
+  showOutsideList?: boolean;
 }
-
-export type LayerActionFromVisualization = Omit<LayerAction, 'execute'>;
 
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
@@ -802,21 +808,6 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
-export interface AccessorConfig {
-  columnId: string;
-  triggerIconType?:
-    | 'color'
-    | 'disabled'
-    | 'colorBy'
-    | 'none'
-    | 'invisible'
-    | 'aggregate'
-    | 'custom';
-  customIcon?: IconType;
-  color?: string;
-  palette?: string[] | Array<{ color: string; stop: number }>;
-}
-
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
   dimensionEditorGroupLabel?: string;
@@ -909,6 +900,7 @@ export interface SuggestionRequest<T = unknown> {
    */
   subVisualizationId?: string;
   activeData?: Record<string, Datatable>;
+  allowMixed?: boolean;
 }
 
 /**
@@ -1013,7 +1005,29 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
-export interface Visualization<T = unknown, P = T> {
+export type AddLayerFunction<T = unknown> = (
+  layerType: LayerType,
+  extraArg?: T,
+  ignoreInitialValues?: boolean
+) => void;
+
+export type AnnotationGroups = Record<string, EventAnnotationGroupConfig>;
+
+export interface VisualizationLayerDescription {
+  type: LayerType;
+  label: string;
+  icon?: IconType;
+  noDatasource?: boolean;
+  disabled?: boolean;
+  toolTipContent?: string;
+  initialDimensions?: Array<{
+    columnId: string;
+    groupId: string;
+    staticValue?: unknown;
+    autoTimeField?: boolean;
+  }>;
+}
+export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 
@@ -1023,13 +1037,16 @@ export interface Visualization<T = unknown, P = T> {
    * - Loading from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (
-    addNewLayer: () => string,
-    state?: T | P,
-    mainPalette?: PaletteOutput,
-    references?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext
-  ) => T;
+  initialize: {
+    (addNewLayer: () => string, nonPersistedState?: T, mainPalette?: PaletteOutput): T;
+    (
+      addNewLayer: () => string,
+      persistedState: P,
+      mainPalette?: PaletteOutput,
+      annotationGroups?: AnnotationGroups,
+      references?: SavedObjectReference[]
+    ): T;
+  };
 
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
@@ -1076,37 +1093,29 @@ export interface Visualization<T = unknown, P = T> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId: string) => T;
+  appendLayer?: (
+    state: T,
+    layerId: string,
+    type: LayerType,
+    indexPatternId: string,
+    extraArg?: ExtraAppendLayerArg
+  ) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
     state?: T,
     frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
-  ) => Array<{
-    type: LayerType;
-    label: string;
-    icon?: IconType;
-    noDatasource?: boolean;
-    disabled?: boolean;
-    toolTipContent?: string;
-    initialDimensions?: Array<{
-      columnId: string;
-      groupId: string;
-      staticValue?: unknown;
-      autoTimeField?: boolean;
-    }>;
-    canAddViaMenu?: boolean;
-  }>;
+  ) => VisualizationLayerDescription[];
   /**
    * returns a list of custom actions supported by the visualization layer.
    * Default actions like delete/clear are not included in this list and are managed by the editor frame
    * */
-  getSupportedActionsForLayer?: (layerId: string, state: T) => LayerActionFromVisualization[];
-
-  /**
-   * Perform state mutations in response to a layer action
-   */
-  onLayerAction?: (layerId: string, actionId: string, state: T) => T;
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>,
+    isSaveable?: boolean
+  ) => LayerAction[];
 
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -1228,6 +1237,15 @@ export interface Visualization<T = unknown, P = T> {
     label: string;
     hideTooltip?: boolean;
   }) => JSX.Element | null;
+  getAddLayerButtonComponent?: (props: {
+    supportedLayers: VisualizationLayerDescription[];
+    addLayer: AddLayerFunction;
+    ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
+    registerLibraryAnnotationGroup: (groupInfo: {
+      id: string;
+      group: EventAnnotationGroupConfig;
+    }) => void;
+  }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
    */
@@ -1291,7 +1309,15 @@ export interface Visualization<T = unknown, P = T> {
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion<T> | undefined;
 
-  getVisualizationInfo?: (state: T) => VisualizationInfo;
+  isEqual?: (
+    state1: P,
+    references1: SavedObjectReference[],
+    state2: P,
+    references2: SavedObjectReference[],
+    annotationGroups: AnnotationGroups
+  ) => boolean;
+
+  getVisualizationInfo?: (state: T, frame?: FramePublicAPI) => VisualizationInfo;
   /**
    * A visualization can return custom dimensions for the reporting tool
    */

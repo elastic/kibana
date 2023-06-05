@@ -20,7 +20,7 @@ describe('useLensProps', () => {
     const getTimeRange = jest.fn();
     const refetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
-    const attributes = getLensAttributes({
+    const attributesContext = getLensAttributes({
       title: 'test',
       filters: [],
       query: {
@@ -40,15 +40,15 @@ describe('useLensProps', () => {
         },
         getTimeRange,
         refetch$,
-        attributes,
+        attributesContext,
         onLoad,
       });
     });
-    expect(lensProps.result.current).toEqual(
+    expect(lensProps.result.current.lensProps).toEqual(
       getLensProps({
         searchSessionId: 'id',
         getTimeRange,
-        attributes,
+        attributes: attributesContext.attributes,
         onLoad,
       })
     );
@@ -58,7 +58,7 @@ describe('useLensProps', () => {
     const getTimeRange = jest.fn();
     const refetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
-    const attributes = getLensAttributes({
+    const attributesContext = getLensAttributes({
       title: 'test',
       filters: [],
       query: {
@@ -78,15 +78,15 @@ describe('useLensProps', () => {
         },
         getTimeRange,
         refetch$,
-        attributes,
+        attributesContext,
         onLoad,
       });
     });
-    expect(lensProps.result.current).toEqual(
+    expect(lensProps.result.current.lensProps).toEqual(
       getLensProps({
         searchSessionId: 'id',
         getTimeRange,
-        attributes,
+        attributes: attributesContext.attributes,
         onLoad,
       })
     );
@@ -103,7 +103,7 @@ describe('useLensProps', () => {
       },
       getTimeRange,
       refetch$,
-      attributes: getLensAttributes({
+      attributesContext: getLensAttributes({
         title: 'test',
         filters: [],
         query: {

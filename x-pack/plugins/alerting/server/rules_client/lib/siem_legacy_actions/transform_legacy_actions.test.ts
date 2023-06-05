@@ -67,7 +67,7 @@ describe('transformFromLegacyActions', () => {
     (transformToNotifyWhen as jest.Mock).mockReturnValueOnce(null);
     const actions = transformFromLegacyActions(legacyActionsAttr, references);
 
-    expect(actions[0].frequency?.notifyWhen).toBe('onThrottleInterval');
+    expect(actions[0].frequency?.notifyWhen).toBe('onActiveAlert');
   });
 
   it('should return transformed legacy actions', () => {

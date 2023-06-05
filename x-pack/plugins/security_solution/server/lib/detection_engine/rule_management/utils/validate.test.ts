@@ -43,7 +43,7 @@ export const ruleOutput = (): RuleResponse => ({
   tags: [],
   to: 'now',
   type: 'query',
-  throttle: 'no_actions',
+  throttle: undefined,
   threat: getThreatMock(),
   version: 1,
   revision: 0,

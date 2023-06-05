@@ -24,6 +24,9 @@ interface NodeSettingsResponse {
 }
 
 interface XPackUsageResponse {
+  remote_clusters?: {
+    size: number;
+  };
   security: {
     realms: {
       [realmName: string]: {
@@ -128,6 +131,7 @@ async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, log
     hasCompatibleRealms,
     canUseStoredScripts,
     canUseInlineScripts,
+    canUseRemoteIndices: !!xpackUsage.remote_clusters,
   };
 }
 

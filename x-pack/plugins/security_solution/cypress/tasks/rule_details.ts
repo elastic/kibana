@@ -29,6 +29,8 @@ import {
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
   BACK_TO_RULES_TABLE,
+  EXCEPTIONS_TAB_EXPIRED_FILTER,
+  EXCEPTIONS_TAB_ACTIVE_FILTER,
 } from '../screens/rule_details';
 import {
   addExceptionConditions,
@@ -56,30 +58,18 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
 };
 
 export const openExceptionFlyoutFromEmptyViewerPrompt = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
-      return $el.find(FIELD_INPUT);
-    })
-    .should('be.visible');
+  cy.get(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).click();
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const searchForExceptionItem = (query: string) => {
-  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}`).trigger('keydown', {
-    key: 'Enter',
-    keyCode: 13,
-    code: 'Enter',
-    type: 'keydown',
-  });
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).clear();
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}{enter}`);
 };
 
 export const addExceptionFlyoutFromViewerHeader = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).trigger('click');
-      return $el.find(FIELD_INPUT);
-    })
-    .should('be.visible');
+  cy.get(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).click();
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const addExceptionFromRuleDetails = (exception: Exception) => {
@@ -101,12 +91,15 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).should('exist');
   cy.get(EXCEPTIONS_TAB).click();
 };
 
+export const viewExpiredExceptionItems = () => {
+  cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
+  cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
+};
+
 export const goToEndpointExceptionsTab = () => {
-  cy.get(ENDPOINT_EXCEPTIONS_TAB).should('exist');
   cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
 };
 

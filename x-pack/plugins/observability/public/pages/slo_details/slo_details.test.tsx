@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useParams } from 'react-router-dom';
 import { useLicense } from '../../hooks/use_license';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
+import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
+import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
+import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config/paths';
-import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
@@ -31,33 +33,53 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
-jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
+jest.mock('../../hooks/slo/use_capabilities');
 jest.mock('../../hooks/slo/use_fetch_active_alerts');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
-jest.mock('../../hooks/slo/use_capabilities');
+jest.mock('../../hooks/slo/use_clone_slo');
+jest.mock('../../hooks/slo/use_delete_slo');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
+const useCapabilitiesMock = useCapabilities as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const useCloneSloMock = useCloneSlo as jest.Mock;
+const useDeleteSloMock = useDeleteSlo as jest.Mock;
 
 const mockNavigate = jest.fn();
-const mockBasePathPrepend = jest.fn();
+const mockLocator = jest.fn();
+const mockClone = jest.fn();
+const mockDelete = jest.fn();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       application: { navigateToUrl: mockNavigate },
-      charts: chartPluginMock.createSetupContract(),
+      charts: chartPluginMock.createStartContract(),
       http: {
         basePath: {
-          prepend: mockBasePathPrepend,
+          prepend: (url: string) => url,
+        },
+      },
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addDanger: jest.fn(),
+          addError: jest.fn(),
+        },
+      },
+      share: {
+        url: {
+          locators: {
+            get: mockLocator,
+          },
         },
       },
       triggersActionsUi: {
@@ -86,6 +108,8 @@ describe('SLO Details Page', () => {
       sloHistoricalSummaryResponse: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
+    useCloneSloMock.mockReturnValue({ mutate: mockClone });
+    useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
   });
 
   describe('when the incorrect license is found', () => {
@@ -97,7 +121,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
     });
   });
 
@@ -158,21 +182,6 @@ describe('SLO Details Page', () => {
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(0);
   });
 
-  it('renders the active alerts badge', async () => {
-    const slo = buildSlo();
-    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-    useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
-    useFetchActiveAlertsMock.mockReturnValue({
-      isLoading: false,
-      data: { [slo.id]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } },
-    });
-
-    render(<SloDetailsPage />);
-
-    expect(screen.getByTestId('o11ySloActiveAlertsBadge')).toBeTruthy();
-  });
-
   it("renders a 'Edit' button under actions menu", async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
@@ -195,6 +204,97 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
     expect(screen.queryByTestId('sloDetailsHeaderControlPopoverCreateRule')).toBeTruthy();
+  });
+
+  it("renders a 'Manage rules' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverManageRules')).toBeTruthy();
+  });
+
+  it("renders a 'Clone' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+
+    const button = screen.queryByTestId('sloDetailsHeaderControlPopoverClone');
+
+    expect(button).toBeTruthy();
+
+    fireEvent.click(button!);
+
+    const { id, createdAt, enabled, revision, summary, updatedAt, ...newSlo } = slo;
+
+    expect(mockClone).toBeCalledWith({
+      idToCopyFrom: slo.id,
+      slo: {
+        ...newSlo,
+        name: `[Copy] ${newSlo.name}`,
+      },
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+    });
+  });
+
+  it("renders a 'Delete' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+
+    const button = screen.queryByTestId('sloDetailsHeaderControlPopoverDelete');
+
+    expect(button).toBeTruthy();
+
+    fireEvent.click(button!);
+
+    const deleteModalConfirmButton = screen.queryByTestId('confirmModalConfirmButton');
+
+    fireEvent.click(deleteModalConfirmButton!);
+
+    expect(mockDelete).toBeCalledWith({
+      id: slo.id,
+      name: slo.name,
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+    });
+  });
+
+  it('renders the Overview tab by default', async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+    useFetchActiveAlertsMock.mockReturnValue({
+      isLoading: false,
+      data: { [slo.id]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } },
+    });
+
+    render(<SloDetailsPage />);
+
+    expect(screen.queryByTestId('overviewTab')).toBeTruthy();
+    expect(screen.queryByTestId('overviewTab')?.getAttribute('aria-selected')).toBe('true');
+    expect(screen.queryByTestId('alertsTab')).toBeTruthy();
+    expect(screen.queryByTestId('alertsTab')?.getAttribute('aria-selected')).toBe('false');
   });
 
   describe('when an APM SLO is loaded', () => {

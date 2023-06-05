@@ -21,6 +21,8 @@ export const FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreTitle';
 export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
+export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
+  'securitySolutionAlertDetailsFlyoutHeaderShareButton';
 
 /* Description section */
 
@@ -52,6 +54,8 @@ export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
 export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHighlightedFields';
 export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
 export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
 
 /* Insights section*/
 
@@ -59,14 +63,20 @@ export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
 export const INSIGHTS_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsHeader';
 export const ENTITIES_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesHeader';
 export const ENTITIES_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesContent';
+export const ENTITIES_USER_CONTENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserContent';
+export const ENTITIES_HOST_CONTENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
 export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
-export const ENTITY_PANEL_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanel';
 export const ENTITY_PANEL_ICON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelTypeIcon';
 export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
-export const ENTITY_PANEL_HEADER_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderTitle';
+export const ENTITY_PANEL_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelHeader';
+export const ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderLeftSection';
+export const ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderRightSection';
 export const ENTITY_PANEL_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelContent';
 export const TECHNICAL_PREVIEW_ICON_TEST_ID =
@@ -84,7 +94,37 @@ export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID =
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewRiskLevel';
 
-/* Visualizations section*/
+/* Insights Threat Intelligence */
+
+export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsThreatIntelligence';
+export const INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Title`;
+export const INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Content`;
+export const INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ViewAllButton`;
+export const INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Loading`;
+export const INSIGHTS_THREAT_INTELLIGENCE_VALUE_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Value`;
+
+/* Insights Correlations */
+
+export const INSIGHTS_CORRELATIONS_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelations';
+export const INSIGHTS_CORRELATIONS_TITLE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Title`;
+export const INSIGHTS_CORRELATIONS_CONTENT_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Content`;
+export const INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}ViewAllButton`;
+export const INSIGHTS_CORRELATIONS_LOADING_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Loading`;
+export const INSIGHTS_CORRELATIONS_VALUE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Value`;
+
+/* Insights Prevalence */
+
+export const INSIGHTS_PREVALENCE_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
+export const INSIGHTS_PREVALENCE_TITLE_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Title`;
+export const INSIGHTS_PREVALENCE_CONTENT_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Content`;
+export const INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}ViewAllButton`;
+export const INSIGHTS_PREVALENCE_VALUE_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Value`;
+
+/* Visualizations section */
+
 export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';

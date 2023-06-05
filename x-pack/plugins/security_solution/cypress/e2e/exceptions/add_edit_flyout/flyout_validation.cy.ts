@@ -67,7 +67,7 @@ import { getExceptionList } from '../../../objects/exception';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe('Exceptions flyout', { testIsolation: false }, () => {
+describe('Exceptions flyout', () => {
   before(() => {
     esArchiverResetKibana();
     // this is a made-up index that has just the necessary
@@ -76,7 +76,6 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     esArchiverLoad('exceptions');
     esArchiverLoad('conflicts_1');
     esArchiverLoad('conflicts_2');
-    login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createRule(
         getNewRule({
@@ -93,17 +92,16 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
         })
       )
     );
+    login();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
     goToExceptionsTab();
-  });
-
-  afterEach(() => {
-    closeExceptionBuilderFlyout();
   });
 
   after(() => {
@@ -238,12 +236,13 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     cy.get(ADD_OR_BTN).click();
     addExceptionEntryFieldValueOfItemX('agent.name', 1, 0);
     cy.get(ADD_NESTED_BTN).click();
-    addExceptionEntryFieldValueOfItemX('user.id{downarrow}{enter}', 1, 1);
+    addExceptionEntryFieldValueOfItemX('process.elf.sections.name{enter}', 1, 1);
     cy.get(ADD_AND_BTN).click();
-    addExceptionEntryFieldValueOfItemX('last{downarrow}{enter}', 1, 3);
+    addExceptionEntryFieldValueOfItemX('name{enter}', 1, 3);
     // This button will now read `Add non-nested button`
     cy.get(ADD_NESTED_BTN).scrollIntoView();
-    cy.get(ADD_NESTED_BTN).focus().click();
+    cy.get(ADD_NESTED_BTN).focus();
+    cy.get(ADD_NESTED_BTN).click();
     addExceptionEntryFieldValueOfItemX('@timestamp', 1, 4);
 
     // should have only deleted `user.id`
@@ -263,12 +262,12 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
       .eq(1)
       .find(FIELD_INPUT_PARENT)
       .eq(1)
-      .should('have.text', 'user');
+      .should('have.text', 'process.elf.sections');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
       .find(FIELD_INPUT_PARENT)
       .eq(2)
-      .should('have.text', 'last');
+      .should('have.text', 'name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
       .find(FIELD_INPUT_PARENT)

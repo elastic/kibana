@@ -16,6 +16,10 @@ import {
   buildRemoveAliasActions,
   versionMigrationCompleted,
   MigrationType,
+  getTempIndexName,
+  createBulkIndexOperationTuple,
+  hasLaterVersionAlias,
+  aliasVersion,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -181,6 +185,24 @@ describe('addMustNotClausesToBoolQuery', () => {
   });
 });
 
+describe('aliasVersion', () => {
+  test('empty', () => {
+    expect(aliasVersion(undefined)).toEqual(undefined);
+  });
+
+  test('not a version alias', () => {
+    expect(aliasVersion('.kibana')).toEqual(undefined);
+  });
+
+  test('supports arbitrary names and versions', () => {
+    expect(aliasVersion('.kibana_task_manager_7.17.0')).toEqual('7.17.0');
+  });
+
+  test('supports index names too', () => {
+    expect(aliasVersion('.kibana_8.8.0_001')).toEqual('8.8.0');
+  });
+});
+
 describe('getAliases', () => {
   it('returns a right record of alias to index name pairs', () => {
     const indices: FetchIndexResponse = {
@@ -271,6 +293,76 @@ describe('versionMigrationCompleted', () => {
   });
 });
 
+describe('hasLaterVersionAlias', () => {
+  test('undefined', () => {
+    expect(hasLaterVersionAlias('8.8.0', undefined)).toEqual(undefined);
+  });
+
+  test('empty', () => {
+    expect(hasLaterVersionAlias('8.8.0', {})).toEqual(undefined);
+  });
+
+  test('only previous version alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.0', {
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+      })
+    ).toEqual(undefined);
+  });
+
+  test('current version alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.0', {
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+      })
+    ).toEqual(undefined);
+  });
+
+  test('next build alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.0', {
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+        '.kibana_8.8.1': '.kibana_8.8.0_001',
+      })
+    ).toEqual('.kibana_8.8.1');
+  });
+
+  test('next minor alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.1', {
+        '.kibana_8.9.0': '.kibana_8.9.0_001',
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+        '.kibana_8.8.1': '.kibana_8.8.0_001',
+      })
+    ).toEqual('.kibana_8.9.0');
+  });
+
+  test('multiple future versions, return most recent alias', () => {
+    expect(
+      hasLaterVersionAlias('7.17.0', {
+        '.kibana_8.9.0': '.kibana_8.9.0_001',
+        '.kibana_8.9.1': '.kibana_8.9.0_001',
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+        '.kibana_8.8.1': '.kibana_8.8.0_001',
+      })
+    ).toEqual('.kibana_8.9.1');
+  });
+});
+
 describe('buildRemoveAliasActions', () => {
   test('empty', () => {
     expect(buildRemoveAliasActions('.kibana_test_123', [], [])).toEqual([]);
@@ -290,6 +382,46 @@ describe('buildRemoveAliasActions', () => {
   });
 });
 
+describe('createBulkIndexOperationTuple', () => {
+  it('creates the proper request body to bulk index a document', () => {
+    const document = { _id: '', _source: { type: 'cases', title: 'a case' } };
+    const typeIndexMap = {
+      cases: '.kibana_cases_8.8.0_reindex_temp',
+    };
+    expect(createBulkIndexOperationTuple(document, typeIndexMap)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "index": Object {
+            "_id": "",
+            "_index": ".kibana_cases_8.8.0_reindex_temp",
+          },
+        },
+        Object {
+          "title": "a case",
+          "type": "cases",
+        },
+      ]
+    `);
+  });
+
+  it('does not include the index property if it is not specified in the typeIndexMap', () => {
+    const document = { _id: '', _source: { type: 'cases', title: 'a case' } };
+    expect(createBulkIndexOperationTuple(document)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "index": Object {
+            "_id": "",
+          },
+        },
+        Object {
+          "title": "a case",
+          "type": "cases",
+        },
+      ]
+    `);
+  });
+});
+
 describe('getMigrationType', () => {
   it.each`
     isMappingsCompatible | isVersionMigrationCompleted | expected
@@ -305,4 +437,10 @@ describe('getMigrationType', () => {
       );
     }
   );
+});
+
+describe('getTempIndexName', () => {
+  it('composes a temporary index name for reindexing', () => {
+    expect(getTempIndexName('.kibana_cases', '8.8.0')).toEqual('.kibana_cases_8.8.0_reindex_temp');
+  });
 });

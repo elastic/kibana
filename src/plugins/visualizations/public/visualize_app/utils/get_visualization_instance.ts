@@ -9,11 +9,7 @@ import { cloneDeep } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
-import {
-  getSavedSearch,
-  SavedSearch,
-  throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import {
@@ -37,25 +33,17 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { data, createVisEmbeddableFromObject, savedObjects, spaces, savedObjectsTagging } =
-    visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedSearch: savedSearchApi } = visualizeServices;
 
   let savedSearch: SavedSearch | undefined;
 
   if (vis.data.savedSearchId) {
     try {
-      savedSearch = await getSavedSearch(vis.data.savedSearchId, {
-        search: data.search,
-        savedObjectsClient: savedObjects.client,
-        spaces,
-        savedObjectsTagging,
-      });
+      savedSearch = vis.data.savedSearchId
+        ? await savedSearchApi.get(vis.data.savedSearchId)
+        : await savedSearchApi.getNew();
     } catch (e) {
       // skip this catch block
-    }
-
-    if (savedSearch) {
-      await throwErrorOnSavedSearchUrlConflict(savedSearch);
     }
   }
 
@@ -82,7 +70,7 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
+  const { data, spaces, savedObjectsTagging } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
@@ -91,7 +79,6 @@ export const getVisualizationInstanceFromInput = async (
    */
   const savedVis: VisSavedObject = await getSavedVisualization({
     search: data.search,
-    savedObjectsClient: savedObjects.client,
     dataViews: data.dataViews,
     spaces,
     savedObjectsTagging,
@@ -121,6 +108,7 @@ export const getVisualizationInstanceFromInput = async (
     savedSearch,
     panelTitle: input?.title ?? '',
     panelDescription: input?.description ?? '',
+    panelTimeRange: input?.timeRange ?? undefined,
   };
 };
 
@@ -133,12 +121,11 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
+  const { data, spaces, savedObjectsTagging } = visualizeServices;
 
   const savedVis: VisSavedObject = await getSavedVisualization(
     {
       search: data.search,
-      savedObjectsClient: savedObjects.client,
       dataViews: data.dataViews,
       spaces,
       savedObjectsTagging,

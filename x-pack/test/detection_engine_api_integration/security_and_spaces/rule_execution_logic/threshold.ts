@@ -21,6 +21,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   getOpenSignals,
@@ -91,6 +92,32 @@ export default ({ getService }: FtrProviderContext) => {
           from: '2019-02-19T07:12:05.332Z',
         },
       });
+    });
+
+    it('generates max signals warning when circuit breaker is exceeded', async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        threshold: {
+          field: 'host.id',
+          value: 1, // This value generates 7 alerts with the current esArchive
+        },
+        max_signals: 5,
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+    });
+
+    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        threshold: {
+          field: 'host.id',
+          value: 1, // This value generates 7 alerts with the current esArchive
+        },
+        max_signals: 7,
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
     });
 
     it('generates 2 signals from Threshold rules when threshold is met', async () => {
@@ -283,6 +310,21 @@ export default ({ getService }: FtrProviderContext) => {
           from: '2019-02-19T20:22:03.561Z',
         },
       });
+    });
+
+    // https://github.com/elastic/kibana/issues/149920
+    it('generates 1 alert when threshold is met and rule query has wildcard in field name', async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        query: 'agent.ty*:auditbeat', // this query should match all documents from index and we will receive 1 alert, similarly to "generates 1 signal from Threshold rules when threshold is met" test case
+        threshold: {
+          field: ['host.id'],
+          value: 700,
+        },
+      };
+      const createdRule = await createRule(supertest, log, rule);
+      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      expect(alerts.hits.hits.length).eql(1);
     });
 
     describe('Timestamp override and fallback', async () => {

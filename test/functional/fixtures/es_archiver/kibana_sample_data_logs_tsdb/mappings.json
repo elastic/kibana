@@ -1,0 +1,174 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "kibana_sample_data_logstsdb",
+    "mappings": {
+      "_data_stream_timestamp": {
+        "enabled": true
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "bytes": {
+          "type": "long"
+        },
+        "bytes_counter": {
+          "time_series_metric": "counter",
+          "type": "long"
+        },
+        "bytes_gauge": {
+          "time_series_metric": "gauge",
+          "type": "long"
+        },
+        "clientip": {
+          "type": "ip"
+        },
+        "event": {
+          "properties": {
+            "dataset": {
+              "type": "keyword"
+            }
+          }
+        },
+        "extension": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            },
+            "dest": {
+              "type": "keyword"
+            },
+            "src": {
+              "type": "keyword"
+            },
+            "srcdest": {
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "index": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "ip": {
+          "type": "ip"
+        },
+        "machine": {
+          "properties": {
+            "os": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "ram": {
+              "type": "long"
+            }
+          }
+        },
+        "memory": {
+          "type": "double"
+        },
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "phpmemory": {
+          "type": "long"
+        },
+        "referer": {
+          "type": "keyword"
+        },
+        "request": {
+          "time_series_dimension": true,
+          "type": "keyword"
+        },
+        "response": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "tags": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "timestamp": {
+          "path": "@timestamp",
+          "type": "alias"
+        },
+        "url": {
+          "time_series_dimension": true,
+          "type": "keyword"
+        },
+        "utc_time": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "mode": "time_series",
+        "number_of_replicas": "0",
+        "number_of_shards": "1",
+        "routing_path": "request",
+        "time_series": {
+          "end_time": "2023-06-28T09:17:00.283Z",
+          "start_time": "2023-03-28T09:17:00.283Z"
+        }
+      }
+    }
+  }
+}

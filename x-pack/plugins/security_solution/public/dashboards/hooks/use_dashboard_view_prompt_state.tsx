@@ -11,7 +11,6 @@ import * as i18n from '../pages/details/translations';
 
 export enum DashboardViewPromptState {
   NoReadPermission = 'NoReadPermission',
-  IndicesNotFound = 'IndicesNotFound',
 }
 
 const dashboardViewPromptState: Record<DashboardViewPromptState, Partial<EuiEmptyPromptProps>> = {
@@ -20,11 +19,6 @@ const dashboardViewPromptState: Record<DashboardViewPromptState, Partial<EuiEmpt
     iconType: 'error',
     title: <h2>{i18n.DASHBOARD_NO_READ_PERMISSION_TITLE}</h2>,
     body: <p>{i18n.DASHBOARD_NO_READ_PERMISSION_DESCRIPTION}</p>,
-  },
-  [DashboardViewPromptState.IndicesNotFound]: {
-    color: 'danger',
-    iconType: 'error',
-    title: <h2>{i18n.DASHBOARD_INDICES_NOT_FOUND_TITLE}</h2>,
   },
 };
 

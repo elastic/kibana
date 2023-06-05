@@ -12,33 +12,26 @@ import { useMemo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import { CoreSetup } from '@kbn/core/public';
-
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNestedProperty } from '@kbn/ml-nested-property';
-
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
-import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import { extractErrorMessage } from '../../../../common/util/errors';
-import {
-  FeatureImportance,
-  FeatureImportanceClassName,
-  TopClasses,
-} from '../../../../common/types/feature_importance';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import {
+  type FeatureImportance,
+  type FeatureImportanceClassName,
+  type TopClasses,
   BASIC_NUMERICAL_TYPES,
+  DEFAULT_RESULTS_FIELD,
   EXTENDED_NUMERICAL_TYPES,
-} from '../../data_frame_analytics/common/fields';
-
-import {
   FEATURE_IMPORTANCE,
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
-} from '../../data_frame_analytics/common/constants';
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 

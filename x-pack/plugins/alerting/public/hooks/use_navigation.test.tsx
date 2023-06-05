@@ -9,6 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import {
   useCreateMaintenanceWindowNavigation,
+  useEditMaintenanceWindowsNavigation,
   useMaintenanceWindowsNavigation,
 } from './use_navigation';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
@@ -87,6 +88,23 @@ describe('useNavigation', () => {
       expect(mockNavigateTo).toHaveBeenCalledWith(APP_ID, {
         deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
         path: '/create',
+      });
+    });
+  });
+
+  describe('useEditMaintenanceWindowNavigation', () => {
+    it('it calls navigateToEditMaintenanceWindow with correct arguments', () => {
+      const { result } = renderHook(() => useEditMaintenanceWindowsNavigation(), {
+        wrapper: appMockRenderer.AppWrapper,
+      });
+
+      act(() => {
+        result.current.navigateToEditMaintenanceWindows('1234');
+      });
+
+      expect(mockNavigateTo).toHaveBeenCalledWith(APP_ID, {
+        deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
+        path: '/edit/1234',
       });
     });
   });

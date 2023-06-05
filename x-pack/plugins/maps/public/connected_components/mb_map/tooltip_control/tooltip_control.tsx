@@ -184,6 +184,15 @@ export class TooltipControl extends Component<Props, {}> {
         continue;
       }
 
+      // masking must use paint property "opacity" to hide features in order to support feature state
+      // therefore, there is no way to remove masked features with queryRenderedFeatures
+      // masked features must be removed via manual filtering
+      const masks = layer.getMasks();
+      const maskHiddingFeature = masks.find((mask) => mask.isFeatureMasked(mbFeature));
+      if (maskHiddingFeature) {
+        continue;
+      }
+
       const featureId = layer.getFeatureId(mbFeature);
       if (featureId === undefined) {
         continue;

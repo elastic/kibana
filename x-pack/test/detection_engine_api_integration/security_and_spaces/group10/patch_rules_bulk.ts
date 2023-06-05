@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -207,9 +207,9 @@ export default ({ getService }: FtrProviderContext) => {
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               uuid: bodyToCompare.actions[0].uuid,
+              frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
             },
           ];
-          outputRule.throttle = '1h';
           outputRule.revision = 1;
           expect(bodyToCompare).to.eql(outputRule);
         });

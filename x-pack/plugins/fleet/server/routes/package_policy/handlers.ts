@@ -13,6 +13,8 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
 import {
@@ -219,6 +221,8 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, package: pkg, ...newPolicy } = request.body;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
   if ('output_id' in newPolicy) {
     // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
     delete newPolicy.output_id;
@@ -248,6 +252,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     }
 
     // Create package policy
+
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
       esClient,
@@ -256,6 +261,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         user,
         force,
         spaceId,
+        authorizationHeader,
       },
       context,
       request

@@ -41,20 +41,12 @@
     "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/utility-types",
-    "@kbn/es-types",
-    "@kbn/rison",
-    "@kbn/analytics",
     "@kbn/datemath",
     "@kbn/core-ui-settings-browser",
     "@kbn/es-query",
     "@kbn/server-route-repository",
-    "@kbn/field-formats-plugin",
     "@kbn/ui-theme",
-    "@kbn/coloring",
-    "@kbn/shared-ux-page-kibana-template-mocks",
     "@kbn/test-jest-helpers",
-    "@kbn/ui-actions-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/core-http-browser",
     "@kbn/config-schema",
     "@kbn/features-plugin",
@@ -76,7 +68,9 @@
     "@kbn/core-theme-browser",
     "@kbn/core-elasticsearch-server",
     "@kbn/observability-shared-plugin",
-    "@kbn/exploratory-view-plugin"
+    "@kbn/exploratory-view-plugin",
+    "@kbn/rison",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }

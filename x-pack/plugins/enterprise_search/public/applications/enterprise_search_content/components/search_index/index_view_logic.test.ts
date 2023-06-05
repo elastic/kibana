@@ -51,14 +51,15 @@ const DEFAULT_VALUES = {
   ingestionStatus: IngestionStatus.CONNECTED,
   isCanceling: false,
   isConnectorIndex: false,
+  isHiddenIndex: false,
   isInitialLoading: false,
   isSyncing: false,
   isWaitingForSync: false,
   lastUpdated: null,
-  localSyncNowValue: false,
   pipelineData: undefined,
   recheckIndexLoading: false,
   syncStatus: null,
+  syncTriggeredLocally: false,
 };
 
 const CONNECTOR_VALUES = {
@@ -99,32 +100,7 @@ describe('IndexViewLogic', () => {
       it('should update values', () => {
         CachedFetchIndexApiLogic.actions.apiSuccess({
           ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector!, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.connector).toEqual({
-          ...connectorIndex.connector,
-          sync_now: true,
-        });
-
-        expect(IndexViewLogic.values.fetchIndexApiData).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.fetchIndexApiData).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.index).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.indexData).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
+          has_pending_syncs: true,
         });
 
         expect(IndexViewLogic.values).toEqual(
@@ -135,7 +111,6 @@ describe('IndexViewLogic', () => {
             isConnectorIndex: true,
             isWaitingForSync: true,
             lastUpdated: CONNECTOR_VALUES.lastUpdated,
-            localSyncNowValue: true,
             pipelineData: undefined,
             syncStatus: SyncStatus.COMPLETED,
           })
@@ -199,12 +174,14 @@ describe('IndexViewLogic', () => {
 
     describe('StartSyncApiLogic.apiSuccess', () => {
       it('should set localSyncNow to true', async () => {
-        mount({
-          localSyncNowValue: false,
-        });
         StartSyncApiLogic.actions.apiSuccess({});
-
-        expect(IndexViewLogic.values.localSyncNowValue).toEqual(true);
+        expect(IndexViewLogic.values).toEqual(
+          expect.objectContaining({
+            ...DEFAULT_VALUES,
+            isWaitingForSync: true,
+            syncTriggeredLocally: true,
+          })
+        );
       });
     });
   });
