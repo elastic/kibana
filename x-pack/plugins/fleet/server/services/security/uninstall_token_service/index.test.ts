@@ -153,6 +153,10 @@ describe('UninstallTokenService', () => {
     mockCreatePointInTimeFinderAsInternalUser();
   }
 
+  function getToken(so: any, canEncrypt: boolean) {
+    return canEncrypt ? so.attributes.token : so.attributes.token_plain;
+  }
+
   function hashToken(token?: string): string {
     if (!token) return '';
     return createHash('sha256').update(token).digest('base64');
@@ -163,25 +167,32 @@ describe('UninstallTokenService', () => {
     jest.resetAllMocks();
   });
 
-  describe('with encryption key configured', () => {
+  describe.each([
+    ['with encryption key configured', true],
+    ['with encryption key NOT configured', false],
+  ])('%s', (_, canEncrypt) => {
+    const expectAnyToken = canEncrypt
+      ? { token: expect.any(String) }
+      : { token_plain: expect.any(String) };
+
     beforeEach(() => {
-      setupMocks();
+      setupMocks(canEncrypt);
     });
 
     describe('get uninstall tokens', () => {
       it('can correctly getTokenForPolicyId', async () => {
-        const so = getDefaultSO();
+        const so = getDefaultSO(canEncrypt);
         const token = await uninstallTokenService.getTokenForPolicyId(so.attributes.policy_id);
         expect(token).toEqual({
           policy_id: so.attributes.policy_id,
-          token: so.attributes.token,
+          token: getToken(so, canEncrypt),
           created_at: 'yesterday',
         } as UninstallToken);
       });
 
       it('can correctly getTokensForPolicyIds', async () => {
-        const so = getDefaultSO();
-        const so2 = getDefaultSO2();
+        const so = getDefaultSO(canEncrypt);
+        const so2 = getDefaultSO2(canEncrypt);
 
         const tokensMap = await uninstallTokenService.getTokensForPolicyIds([
           so.attributes.policy_id,
@@ -190,61 +201,67 @@ describe('UninstallTokenService', () => {
         expect(tokensMap).toEqual([
           {
             policy_id: so.attributes.policy_id,
-            token: so.attributes.token,
+            token: getToken(so, canEncrypt),
             created_at: 'yesterday',
           },
-          { policy_id: so2.attributes.policy_id, token: so2.attributes.token },
+          {
+            policy_id: so2.attributes.policy_id,
+            token: getToken(so2, canEncrypt),
+          },
         ] as UninstallToken[]);
       });
 
       it('can correctly getAllTokens', async () => {
-        const so = getDefaultSO();
-        const so2 = getDefaultSO2();
+        const so = getDefaultSO(canEncrypt);
+        const so2 = getDefaultSO2(canEncrypt);
 
         const tokensMap = (await uninstallTokenService.getAllTokens()).items;
         expect(tokensMap).toEqual([
           {
             policy_id: so.attributes.policy_id,
-            token: so.attributes.token,
+            token: getToken(so, canEncrypt),
             created_at: 'yesterday',
           },
-          { policy_id: so2.attributes.policy_id, token: so2.attributes.token },
+          {
+            policy_id: so2.attributes.policy_id,
+            token: getToken(so2, canEncrypt),
+          },
         ] as UninstallToken[]);
       });
     });
 
     describe('get hashed uninstall tokens', () => {
       it('can correctly getHashedTokenForPolicyId', async () => {
-        const so = getDefaultSO();
+        const so = getDefaultSO(canEncrypt);
 
         const token = await uninstallTokenService.getHashedTokenForPolicyId(
           so.attributes.policy_id
         );
-        expect(token).toBe(hashToken(so.attributes.token));
+        expect(token).toBe(hashToken(getToken(so, canEncrypt)));
       });
 
       it('can correctly getHashedTokensForPolicyIds', async () => {
-        const so = getDefaultSO();
-        const so2 = getDefaultSO2();
+        const so = getDefaultSO(canEncrypt);
+        const so2 = getDefaultSO2(canEncrypt);
 
         const tokensMap = await uninstallTokenService.getHashedTokensForPolicyIds([
           so.attributes.policy_id,
           so2.attributes.policy_id,
         ]);
         expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: hashToken(so.attributes.token),
-          [so2.attributes.policy_id]: hashToken(so2.attributes.token),
+          [so.attributes.policy_id]: hashToken(getToken(so, canEncrypt)),
+          [so2.attributes.policy_id]: hashToken(getToken(so2, canEncrypt)),
         });
       });
 
       it('can correctly getAllHashedTokens', async () => {
-        const so = getDefaultSO();
-        const so2 = getDefaultSO2();
+        const so = getDefaultSO(canEncrypt);
+        const so2 = getDefaultSO2(canEncrypt);
 
         const tokensMap = await uninstallTokenService.getAllHashedTokens();
         expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: hashToken(so.attributes.token),
-          [so2.attributes.policy_id]: hashToken(so2.attributes.token),
+          [so.attributes.policy_id]: hashToken(getToken(so, canEncrypt)),
+          [so2.attributes.policy_id]: hashToken(getToken(so2, canEncrypt)),
         });
       });
     });
@@ -253,13 +270,13 @@ describe('UninstallTokenService', () => {
       describe('existing token', () => {
         describe('force = false', () => {
           it('does not create new token when calling generateTokenForPolicyId', async () => {
-            const so = getDefaultSO();
+            const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
             expect(soClientMock.bulkCreate).not.toBeCalled();
           });
 
           it('does not create new token when calling generateTokensForPolicyIds', async () => {
-            const so = getDefaultSO();
+            const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
             expect(soClientMock.bulkCreate).not.toBeCalled();
           });
@@ -272,14 +289,15 @@ describe('UninstallTokenService', () => {
 
         describe('force = true', () => {
           it('creates a new token when calling generateTokenForPolicyId', async () => {
-            const so = getDefaultSO();
+            const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id, true);
+
             expect(soClientMock.bulkCreate).toBeCalledWith([
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
                   policy_id: so.attributes.policy_id,
-                  token: expect.any(String),
+                  ...expectAnyToken,
                 },
               },
             ]);
@@ -289,8 +307,8 @@ describe('UninstallTokenService', () => {
           });
 
           it('creates a new token when calling generateTokensForPolicyIds', async () => {
-            const so = getDefaultSO();
-            const so2 = getDefaultSO2();
+            const so = getDefaultSO(canEncrypt);
+            const so2 = getDefaultSO2(canEncrypt);
 
             await uninstallTokenService.generateTokensForPolicyIds(
               [so.attributes.policy_id, so2.attributes.policy_id],
@@ -301,14 +319,14 @@ describe('UninstallTokenService', () => {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
                   policy_id: so.attributes.policy_id,
-                  token: expect.any(String),
+                  ...expectAnyToken,
                 },
               },
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
                   policy_id: so2.attributes.policy_id,
-                  token: expect.any(String),
+                  ...expectAnyToken,
                 },
               },
             ]);
@@ -319,8 +337,8 @@ describe('UninstallTokenService', () => {
           });
 
           it('creates a new token when calling generateTokensForAllPolicies', async () => {
-            const so = getDefaultSO();
-            const so2 = getDefaultSO2();
+            const so = getDefaultSO(canEncrypt);
+            const so2 = getDefaultSO2(canEncrypt);
 
             await uninstallTokenService.generateTokensForAllPolicies(true);
             expect(soClientMock.bulkCreate).toBeCalledWith([
@@ -328,14 +346,14 @@ describe('UninstallTokenService', () => {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
                   policy_id: so.attributes.policy_id,
-                  token: expect.any(String),
+                  ...expectAnyToken,
                 },
               },
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
                   policy_id: so2.attributes.policy_id,
-                  token: expect.any(String),
+                  ...expectAnyToken,
                 },
               },
             ]);
@@ -354,22 +372,22 @@ describe('UninstallTokenService', () => {
         });
 
         it('creates a new token when calling generateTokenForPolicyId', async () => {
-          const so = getDefaultSO();
+          const so = getDefaultSO(canEncrypt);
           await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
           expect(soClientMock.bulkCreate).toBeCalledWith([
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
                 policy_id: so.attributes.policy_id,
-                token: expect.any(String),
+                ...expectAnyToken,
               },
             },
           ]);
         });
 
         it('creates a new token when calling generateTokensForPolicyIds', async () => {
-          const so = getDefaultSO();
-          const so2 = getDefaultSO2();
+          const so = getDefaultSO(canEncrypt);
+          const so2 = getDefaultSO2(canEncrypt);
 
           await uninstallTokenService.generateTokensForPolicyIds([
             so.attributes.policy_id,
@@ -380,22 +398,22 @@ describe('UninstallTokenService', () => {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
                 policy_id: so.attributes.policy_id,
-                token: expect.any(String),
+                ...expectAnyToken,
               },
             },
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
                 policy_id: so2.attributes.policy_id,
-                token: expect.any(String),
+                ...expectAnyToken,
               },
             },
           ]);
         });
 
         it('creates a new token when calling generateTokensForAllPolicies', async () => {
-          const so = getDefaultSO();
-          const so2 = getDefaultSO2();
+          const so = getDefaultSO(canEncrypt);
+          const so2 = getDefaultSO2(canEncrypt);
 
           await uninstallTokenService.generateTokensForAllPolicies();
           expect(soClientMock.bulkCreate).toBeCalledWith([
@@ -403,304 +421,19 @@ describe('UninstallTokenService', () => {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
                 policy_id: so.attributes.policy_id,
-                token: expect.any(String),
+                ...expectAnyToken,
               },
             },
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
                 policy_id: so2.attributes.policy_id,
-                token: expect.any(String),
+                ...expectAnyToken,
               },
             },
           ]);
         });
       });
-    });
-  });
-
-  describe('with encryption key NOT configured', () => {
-    beforeEach(() => {
-      setupMocks(false);
-    });
-
-    describe('get uninstall tokens', () => {
-      it('can correctly getTokenForPolicyId', async () => {
-        const so = getDefaultSO(false);
-        const token = await uninstallTokenService.getTokenForPolicyId(so.attributes.policy_id);
-        expect(token).toEqual({
-          policy_id: so.attributes.policy_id,
-          token: so.attributes.token_plain,
-          created_at: 'yesterday',
-        } as UninstallToken);
-      });
-
-      it('can correctly getTokensForPolicyIds', async () => {
-        const so = getDefaultSO(false);
-        const so2 = getDefaultSO2(false);
-
-        const tokensMap = await uninstallTokenService.getTokensForPolicyIds([
-          so.attributes.policy_id,
-          so2.attributes.policy_id,
-        ]);
-        expect(tokensMap).toEqual([
-          {
-            policy_id: so.attributes.policy_id,
-            token: so.attributes.token_plain,
-            created_at: 'yesterday',
-          },
-          { policy_id: so2.attributes.policy_id, token: so2.attributes.token_plain },
-        ] as UninstallToken[]);
-      });
-
-      it('can correctly getAllTokens', async () => {
-        const so = getDefaultSO(false);
-        const so2 = getDefaultSO2(false);
-
-        const tokensMap = (await uninstallTokenService.getAllTokens()).items;
-        expect(tokensMap).toEqual([
-          {
-            policy_id: so.attributes.policy_id,
-            token: so.attributes.token_plain,
-            created_at: 'yesterday',
-          },
-          { policy_id: so2.attributes.policy_id, token: so2.attributes.token_plain },
-        ] as UninstallToken[]);
-      });
-    });
-
-    describe('get hashed uninstall tokens', () => {
-      it('can correctly getHashedTokenForPolicyId', async () => {
-        const so = getDefaultSO(false);
-
-        const token = await uninstallTokenService.getHashedTokenForPolicyId(
-          so.attributes.policy_id
-        );
-        expect(token).toBe(hashToken(so.attributes.token_plain));
-      });
-
-      it('can correctly getHashedTokensForPolicyIds', async () => {
-        const so = getDefaultSO(false);
-        const so2 = getDefaultSO2(false);
-
-        const tokensMap = await uninstallTokenService.getHashedTokensForPolicyIds([
-          so.attributes.policy_id,
-          so2.attributes.policy_id,
-        ]);
-        expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: hashToken(so.attributes.token_plain),
-          [so2.attributes.policy_id]: hashToken(so2.attributes.token_plain),
-        });
-      });
-
-      it('can correctly getAllHashedTokens', async () => {
-        const so = getDefaultSO(false);
-        const so2 = getDefaultSO2(false);
-
-        const tokensMap = await uninstallTokenService.getAllHashedTokens();
-        expect(tokensMap).toEqual({
-          [so.attributes.policy_id]: hashToken(so.attributes.token_plain),
-          [so2.attributes.policy_id]: hashToken(so2.attributes.token_plain),
-        });
-      });
-    });
-
-    describe('token generation', () => {
-      describe('existing token', () => {
-        describe('force = false', () => {
-          it('does not create new token when calling generateTokenForPolicyId', async () => {
-            const so = getDefaultSO();
-            await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-            expect(soClientMock.bulkCreate).not.toBeCalled();
-          });
-
-          it('does not create new token when calling generateTokensForPolicyIds', async () => {
-            const so = getDefaultSO();
-            await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
-            expect(soClientMock.bulkCreate).not.toBeCalled();
-          });
-
-          it('does not create new token when calling generateTokensForAllPolicies', async () => {
-            await uninstallTokenService.generateTokensForAllPolicies();
-            expect(soClientMock.bulkCreate).not.toBeCalled();
-          });
-        });
-
-        describe('force = true', () => {
-          it('creates a new token when calling generateTokenForPolicyId', async () => {
-            const so = getDefaultSO();
-            await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id, true);
-            expect(soClientMock.bulkCreate).toBeCalledWith([
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so.attributes.policy_id,
-                  token_plain: expect.any(String),
-                },
-              },
-            ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
-              so.attributes.policy_id,
-            ]);
-          });
-
-          it('creates a new token when calling generateTokensForPolicyIds', async () => {
-            const so = getDefaultSO();
-            const so2 = getDefaultSO2();
-
-            await uninstallTokenService.generateTokensForPolicyIds(
-              [so.attributes.policy_id, so2.attributes.policy_id],
-              true
-            );
-            expect(soClientMock.bulkCreate).toBeCalledWith([
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so.attributes.policy_id,
-                  token_plain: expect.any(String),
-                },
-              },
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so2.attributes.policy_id,
-                  token_plain: expect.any(String),
-                },
-              },
-            ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
-              so.attributes.policy_id,
-              so2.attributes.policy_id,
-            ]);
-          });
-
-          it('creates a new token when calling generateTokensForAllPolicies', async () => {
-            const so = getDefaultSO();
-            const so2 = getDefaultSO2();
-
-            await uninstallTokenService.generateTokensForAllPolicies(true);
-            expect(soClientMock.bulkCreate).toBeCalledWith([
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so.attributes.policy_id,
-                  token_plain: expect.any(String),
-                },
-              },
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so2.attributes.policy_id,
-                  token_plain: expect.any(String),
-                },
-              },
-            ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
-              so.attributes.policy_id,
-              so2.attributes.policy_id,
-            ]);
-          });
-        });
-      });
-
-      describe('no existing token', () => {
-        beforeEach(() => {
-          mockCreatePointInTimeFinder(false, []);
-          mockCreatePointInTimeFinderAsInternalUser([]);
-        });
-
-        it('creates a new token when calling generateTokenForPolicyId', async () => {
-          const so = getDefaultSO();
-          await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so.attributes.policy_id,
-                token_plain: expect.any(String),
-              },
-            },
-          ]);
-        });
-
-        it('creates a new token when calling generateTokensForPolicyIds', async () => {
-          const so = getDefaultSO();
-          const so2 = getDefaultSO2();
-
-          await uninstallTokenService.generateTokensForPolicyIds([
-            so.attributes.policy_id,
-            so2.attributes.policy_id,
-          ]);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so.attributes.policy_id,
-                token_plain: expect.any(String),
-              },
-            },
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so2.attributes.policy_id,
-                token_plain: expect.any(String),
-              },
-            },
-          ]);
-        });
-
-        it('creates a new token when calling generateTokensForAllPolicies', async () => {
-          const so = getDefaultSO();
-          const so2 = getDefaultSO2();
-
-          await uninstallTokenService.generateTokensForAllPolicies();
-          expect(soClientMock.bulkCreate).toBeCalledWith([
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so.attributes.policy_id,
-                token_plain: expect.any(String),
-              },
-            },
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so2.attributes.policy_id,
-                token_plain: expect.any(String),
-              },
-            },
-          ]);
-        });
-      });
-    });
-
-    it('can encryptTokens', async () => {
-      const so = getDefaultSO(false);
-      const so2 = getDefaultSO2(false);
-
-      mockContext!.encryptedSavedObjectsSetup!.canEncrypt = true;
-      mockFind(false, [so, so2]);
-      await uninstallTokenService.encryptTokens();
-
-      expect(soClientMock.bulkUpdate).toBeCalledWith([
-        {
-          id: so.id,
-          attributes: {
-            policy_id: so.attributes.policy_id,
-            token: so.attributes.token_plain,
-            token_plain: '',
-          },
-          created_at: 'yesterday',
-        },
-        {
-          id: so2.id,
-          attributes: {
-            policy_id: so2.attributes.policy_id,
-            token: so2.attributes.token_plain,
-            token_plain: '',
-          },
-        },
-      ]);
     });
   });
 });
