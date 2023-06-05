@@ -50,8 +50,6 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const root = new Root(rawConfigService, env, onRootShutdown);
   const cliLogger = root.logger.get('cli');
 
-  cliLogger.info('Configurations parsed in this order: ' + env.configs.join(', '));
-
   process.on('SIGHUP', () => reloadConfiguration());
 
   // This is only used by the LogRotator service
