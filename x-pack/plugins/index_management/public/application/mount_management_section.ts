@@ -51,6 +51,7 @@ export async function mountManagementSection(
   usageCollection: UsageCollectionSetup,
   params: ManagementAppMountParams,
   extensionsService: ExtensionsService,
+  isServerlessEnabled: boolean,
   isFleetEnabled: boolean,
   kibanaVersion: SemVer
 ) {
@@ -87,6 +88,7 @@ export async function mountManagementSection(
     plugins: {
       usageCollection,
       isFleetEnabled,
+      isServerlessEnabled,
     },
     services: {
       httpService,

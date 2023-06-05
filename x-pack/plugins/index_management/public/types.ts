@@ -16,6 +16,7 @@ export interface IndexManagementPluginSetup {
 
 export interface SetupDependencies {
   fleet?: unknown;
+  serverless?: unknown;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
 }

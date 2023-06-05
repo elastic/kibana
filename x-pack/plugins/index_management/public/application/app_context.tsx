@@ -25,7 +25,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
 
-const AppContext = createContext<AppDependencies | undefined>(undefined);
+export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
   core: {
@@ -37,6 +37,7 @@ export interface AppDependencies {
   plugins: {
     usageCollection: UsageCollectionSetup;
     isFleetEnabled: boolean;
+    isServerlessEnabled: boolean;
   };
   services: {
     uiMetricService: UiMetricService;

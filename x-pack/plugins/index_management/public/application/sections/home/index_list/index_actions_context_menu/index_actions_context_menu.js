@@ -25,9 +25,11 @@ import {
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
-import { AppContextConsumer } from '../../../../app_context';
+import { AppContextConsumer, AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
+  static contextType = AppContext;
+
   constructor(props) {
     super(props);
 
@@ -47,6 +49,7 @@ export class IndexActionsContextMenu extends Component {
     this.setState({ isActionConfirmed });
   };
   panels({ services: { extensionsService }, core: { getUrlForApp } }) {
+    const { isServerlessEnabled } = this.context.plugins;
     const {
       closeIndices,
       openIndices,
@@ -94,7 +97,7 @@ export class IndexActionsContextMenu extends Component {
           this.closePopoverAndExecute(showMapping);
         },
       });
-      if (allOpen) {
+      if (allOpen && !isServerlessEnabled) {
         items.push({
           'data-test-subj': 'showStatsIndexMenuButton',
           name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel', {
@@ -118,7 +121,7 @@ export class IndexActionsContextMenu extends Component {
         },
       });
     }
-    if (allOpen) {
+    if (allOpen && !isServerlessEnabled) {
       items.push({
         'data-test-subj': 'closeIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndexLabel', {
@@ -134,58 +137,70 @@ export class IndexActionsContextMenu extends Component {
           this.closePopoverAndExecute(closeIndices);
         },
       });
-      items.push({
-        'data-test-subj': 'forcemergeIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel', {
-          defaultMessage: 'Force merge {selectedIndexCount, plural, one {index} other {indices} }',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopover();
-          this.setState({ renderConfirmModal: this.renderForcemergeSegmentsModal });
-        },
-      });
-      items.push({
-        'data-test-subj': 'refreshIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.refreshIndexLabel', {
-          defaultMessage: 'Refresh {selectedIndexCount, plural, one {index} other {indices} }',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(refreshIndices);
-        },
-      });
-      items.push({
-        'data-test-subj': 'clearCacheIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel', {
-          defaultMessage: 'Clear {selectedIndexCount, plural, one {index} other {indices} } cache',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(clearCacheIndices);
-        },
-      });
-      items.push({
-        'data-test-subj': 'flushIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.flushIndexLabel', {
-          defaultMessage: 'Flush {selectedIndexCount, plural, one {index} other {indices} }',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(flushIndices);
-        },
-      });
-      if (allFrozen) {
+      if (!isServerlessEnabled) {
         items.push({
-          'data-test-subj': 'unfreezeIndexMenuButton',
-          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel', {
-            defaultMessage: 'Unfreeze {selectedIndexCount, plural, one {index} other {indices} }',
+          'data-test-subj': 'forcemergeIndexMenuButton',
+          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel', {
+            defaultMessage:
+              'Force merge {selectedIndexCount, plural, one {index} other {indices} }',
             values: { selectedIndexCount },
           }),
           onClick: () => {
-            this.closePopoverAndExecute(unfreezeIndices);
+            this.closePopover();
+            this.setState({ renderConfirmModal: this.renderForcemergeSegmentsModal });
           },
         });
+      }
+      if (!isServerlessEnabled) {
+        items.push({
+          'data-test-subj': 'refreshIndexMenuButton',
+          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.refreshIndexLabel', {
+            defaultMessage: 'Refresh {selectedIndexCount, plural, one {index} other {indices} }',
+            values: { selectedIndexCount },
+          }),
+          onClick: () => {
+            this.closePopoverAndExecute(refreshIndices);
+          },
+        });
+      }
+      if (!isServerlessEnabled) {
+        items.push({
+          'data-test-subj': 'clearCacheIndexMenuButton',
+          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel', {
+            defaultMessage:
+              'Clear {selectedIndexCount, plural, one {index} other {indices} } cache',
+            values: { selectedIndexCount },
+          }),
+          onClick: () => {
+            this.closePopoverAndExecute(clearCacheIndices);
+          },
+        });
+      }
+      if (!isServerlessEnabled) {
+        items.push({
+          'data-test-subj': 'flushIndexMenuButton',
+          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.flushIndexLabel', {
+            defaultMessage: 'Flush {selectedIndexCount, plural, one {index} other {indices} }',
+            values: { selectedIndexCount },
+          }),
+          onClick: () => {
+            this.closePopoverAndExecute(flushIndices);
+          },
+        });
+      }
+      if (allFrozen) {
+        if (!isServerlessEnabled) {
+          items.push({
+            'data-test-subj': 'unfreezeIndexMenuButton',
+            name: i18n.translate('xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel', {
+              defaultMessage: 'Unfreeze {selectedIndexCount, plural, one {index} other {indices} }',
+              values: { selectedIndexCount },
+            }),
+            onClick: () => {
+              this.closePopoverAndExecute(unfreezeIndices);
+            },
+          });
+        }
       }
     } else {
       items.push({

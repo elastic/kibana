@@ -144,8 +144,7 @@ const getActionMenuButtons = (rendered) => {
 describe('index table', () => {
   const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
 
-  beforeEach(() => {
-    // Mock initialization of services
+  const setupMockComponent = (extraDependencies) => {
     const services = {
       extensionsService: new ExtensionsService(),
       uiMetricService: new UiMetricService('index_management'),
@@ -173,7 +172,7 @@ describe('index table', () => {
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <AppContextProvider value={appDependencies}>
+          <AppContextProvider value={{ ...appDependencies, ...extraDependencies }}>
             <AppWithoutRouter />
           </AppContextProvider>
         </MemoryRouter>
@@ -181,6 +180,11 @@ describe('index table', () => {
     );
 
     store.dispatch(loadIndicesSuccess({ indices }));
+  };
+
+  beforeEach(() => {
+    // Mock initialization of services
+    setupMockComponent();
 
     httpRequestsMockHelpers.setLoadIndicesResponse(indices);
     httpRequestsMockHelpers.setReloadIndicesResponse(indices);
@@ -505,5 +509,26 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
     testEditor(rendered, 'editIndexMenuButton');
+  });
+
+  describe('Serverless actions', () => {
+    beforeEach(() => {
+      // Mock initialization of services
+      setupMockComponent({ isServerlessEnabled: true });
+    });
+
+    test('Certain actions shouldnt be shown for serverless', async () => {
+      const rendered = mountWithIntl(component);
+      await runAllPromises();
+      rendered.update();
+
+      expect(findTestSubject(rendered, 'showStatsIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'closeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'forcemergeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'refreshIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'clearCacheIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'flushIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'unfreezeIndexMenuButton').length).toBe(0);
+    });
   });
 });

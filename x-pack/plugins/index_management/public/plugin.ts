@@ -41,7 +41,7 @@ export class IndexMgmtUIPlugin {
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
-      const { fleet, usageCollection, management } = plugins;
+      const { fleet, serverless, usageCollection, management } = plugins;
       const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
       management.sections.section.data.registerApp({
         id: PLUGIN.id,
@@ -54,6 +54,7 @@ export class IndexMgmtUIPlugin {
             usageCollection,
             params,
             this.extensionsService,
+            Boolean(serverless),
             Boolean(fleet),
             kibanaVersion
           );
