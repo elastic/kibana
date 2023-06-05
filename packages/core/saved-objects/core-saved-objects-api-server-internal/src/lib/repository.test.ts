@@ -1474,7 +1474,7 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
-  describe('#bulkUpdate', () => {
+  describe.only('#bulkUpdate', () => {
     const obj1: SavedObjectsBulkUpdateObject = {
       type: 'config',
       id: '6.0.0-alpha1',
@@ -4819,7 +4819,7 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
-  describe('#update', () => {
+  describe.only('#update', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
     const attributes = { title: 'Testing' };
@@ -4843,7 +4843,7 @@ describe('SavedObjectsRepository', () => {
     describe('client calls', () => {
       it(`should use the ES update action when type is not multi-namespace`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes);
-        expect(client.get).not.toHaveBeenCalled();
+        expect(client.get).not.toHaveBeenCalled(); // will change, we fetch all documents, regardless of namespace type to do updates in the repo itself
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.update).toHaveBeenCalledTimes(1);
       });

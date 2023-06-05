@@ -120,7 +120,7 @@ export function getSavedObjectFromSource<T>(
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
     namespaces = doc._source.namespaces ?? [
-      SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
+      SavedObjectsUtils.namespaceIdToString(doc._source.namespace), // note: may include '*' as a namespace
     ];
   }
 

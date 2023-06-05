@@ -24,7 +24,6 @@ export {
   type PreflightCheckNamespacesParams,
   type PreflightCheckNamespacesResult,
 } from './preflight_check';
-
 export interface RepositoryHelpers {
   common: ICommonHelper;
   encryption: IEncryptionHelper;

@@ -106,6 +106,32 @@ export class PreflightCheckHelper {
   }
 
   /**
+   *
+   * Internal implementation of preflightCheckNamespace
+   * @notes simple helper to construct the required namespaces check result
+   */
+  // TODO: make sure we're handling the '*' namespace declaration in  getting the saved object from source.
+  // TODO: attach the doc to found case
+  public internalPreflightCheckNamespaces({
+    type,
+    initialNamespaces, // used for checking migrated doc, not used for update get
+    docExists,
+  }: InternalPreflightCheckNamespacesParams): InternalPreflightCheckNamespacesResult {
+    if (!docExists) {
+      return {
+        checkResult: 'not_found',
+        savedObjectNamespaces: initialNamespaces,
+      };
+    }
+    if (!this.registry.isMultiNamespace(type)) {
+      return { checkResult: 'found_outside_namespace' };
+    }
+    return {
+      checkResult: 'found_in_namespace',
+      savedObjectNamespaces: initialNamespaces, // we would already have added the original namespaces as the only entry to namespaces if found on the migrated doc from the initial get request and this will include '*' if used
+    };
+  }
+  /**
    * Pre-flight check to ensure that a multi-namespace object exists in the current namespace.
    */
   public async preflightCheckNamespaces({
@@ -202,4 +228,26 @@ export interface PreflightCheckNamespacesResult {
   savedObjectNamespaces?: string[];
   /** The source of the raw document, if the object already exists */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+}
+
+/**
+ * @internal
+ */
+export interface InternalPreflightCheckNamespacesParams {
+  /** The object type to fetch */
+  type: string;
+  /** namespaces on the migrated doc, defaults to namespace if not multi-namespace type  */
+  initialNamespaces?: string[];
+  docExists: boolean;
+}
+
+export interface InternalPreflightCheckNamespacesResult {
+  /** If the object exists, and whether or not it exists in the current space */
+  checkResult: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
+  /**
+   * What namespace(s) the object should exist in, if it needs to be created; practically speaking, this will never be undefined if
+   * checkResult == not_found or checkResult == found_in_namespace
+   */
+  savedObjectNamespaces?: string[];
+  /** The source of the raw document, if the object already exists */
 }

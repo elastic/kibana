@@ -397,6 +397,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
   /**
    * {@inheritDoc ISavedObjectsRepository.update}
+   * WIP: Downward compat update does update in repo itself
    */
   async update<T = unknown>(
     type: string,

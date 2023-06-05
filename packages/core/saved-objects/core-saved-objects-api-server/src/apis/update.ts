@@ -31,6 +31,8 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
    * Defaults to `0` when `version` is provided, `3` otherwise.
    */
   retryOnConflict?: number;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 
 /**
