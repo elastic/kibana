@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
-import { List } from 'react-virtualized';
-import { EuiEmptyPrompt, EuiButton, useResizeObserver } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import VirtualList from 'react-virtualized/dist/commonjs/List';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { SearchResult as SearchResultType, State } from '../../../types';
 import { useDispatch } from '../../../mappings_state_context';
@@ -24,8 +25,7 @@ const ITEM_HEIGHT = 64;
 
 export const SearchResult = React.memo(
   ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
-    const ref = useRef<HTMLDivElement>(null);
-    const { width = 300 } = useResizeObserver(ref.current);
+    const { ref, width = 300 } = useResizeObserver<HTMLDivElement>();
     const dispatch = useDispatch();
     const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
@@ -74,7 +74,7 @@ export const SearchResult = React.memo(
       />
     ) : (
       <div ref={ref}>
-        <List
+        <VirtualList
           data-test-subj="mappingsEditorSearchResult"
           style={{ overflowX: 'hidden', ...virtualListStyle }}
           width={width}

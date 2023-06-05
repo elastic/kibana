@@ -88,6 +88,7 @@ describe('Field editor Preview panel', () => {
 
     await toggleFormRow('value');
     await fields.updateName('myRuntimeField');
+    await fields.updateName('myRuntimeField');
 
     expect(getRenderedIndexPatternFields()).toEqual([
       {
