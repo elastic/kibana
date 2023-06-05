@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiText, EuiAvatar } from '@elastic/eui';
-import { capitalize, omit } from 'lodash';
+import { capitalize, get, omit } from 'lodash';
 import type { Moment } from 'moment';
 import moment from 'moment';
 
@@ -24,6 +24,7 @@ import type {
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   ExceptionListSchema,
+  EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { comment, osType } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -36,6 +37,8 @@ import type { DataViewBase } from '@kbn/es-query';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
+import type { EventSummaryField } from '../../../common/components/event_details/types';
+import { getEventFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
@@ -45,6 +48,13 @@ import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.js
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
+import {
+  EVENT_CODE,
+  EVENT_CATEGORY,
+  getKibanaAlertIdField,
+  highlightedFieldsPrefixToExclude,
+  KIBANA_ALERT_RULE_TYPE,
+} from './highlighted_fields_config';
 
 export const filterIndexPatterns = (
   patterns: DataViewBase,
@@ -765,6 +775,7 @@ export const defaultEndpointExceptionItems = (
 ): ExceptionsBuilderExceptionItem[] => {
   const eventCode = alertEcsData['event.code'] ?? alertEcsData.event?.code;
 
+  // TODO EventCode can be used from '@kbn/securitysolution-ecs';
   switch (eventCode) {
     case 'behavior':
       return [
@@ -869,4 +880,103 @@ export const enrichSharedExceptions = (
       };
     });
   });
+};
+
+/**
+ * Creates new Rule exception item, fills it with
+ * new condition ANDED together from the alert highlighted fields
+ */
+export const buildRuleExceptionWithConditions = ({
+  name,
+  exceptionEntries,
+}: {
+  name: string;
+  exceptionEntries: EntriesArray;
+}): ExceptionsBuilderExceptionItem => {
+  return {
+    ...getNewExceptionItem({ listId: undefined, namespaceType: 'single', name }),
+    entries: addIdToEntries(exceptionEntries),
+  };
+};
+
+/**
+ Generate exception conditions based on the highlighted fields of the alert that 
+ have corresponding values in the alert data.
+ */
+export const buildExceptionEntriesFromAlertFields = ({
+  highlightedFields,
+  alertData,
+}: {
+  highlightedFields: EventSummaryField[];
+  alertData: AlertData;
+}): EntriesArray => {
+  return Object.values(highlightedFields).reduce((acc: EntriesArray, field) => {
+    const fieldKey = field.id;
+    const fieldValue = get(alertData, fieldKey) || get(alertData, getKibanaAlertIdField(fieldKey));
+
+    if (fieldValue)
+      acc.push({
+        field: fieldKey,
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: fieldValue,
+      });
+    return acc;
+  }, []);
+};
+/**
+ * Prepopulate the Rule Exception with the highlighted fields from the Alert's Summary.
+ * @param alertData The Alert data object
+ * @param exceptionItemName The name of the Exception Item
+ * @returns A new Rule Exception Item with the highlighted fields as entries,
+ */
+export const getPrepopulatedRuleExceptionWithHighlightFields = (
+  alertData: AlertData,
+  exceptionItemName: string
+) => {
+  const highlightedFields = getAlertHighlightedFields(alertData);
+  const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
+
+  return buildRuleExceptionWithConditions({
+    name: exceptionItemName,
+    exceptionEntries,
+  });
+};
+
+/**
+  Filters out the irrelevant highlighted fields for Rule exceptions using 
+  the "highlightedFieldsPrefixToExclude" array.
+*/
+export const filterHighlightedFields = (
+  fields: EventSummaryField[],
+  prefixesToExclude: string[]
+): EventSummaryField[] => {
+  return fields.filter(({ id }) => {
+    return !prefixesToExclude.some((field: string) => id.startsWith(field));
+  });
+};
+
+/**
+ * Retrieve the highlighted fields from the Alert Summary based on the following Alert properties:
+ * * event.category
+ * * event.code
+ * * kibana.alert.rule.type
+ * @param alertData The Alert data object
+ */
+export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryField[] => {
+  const eventCategory = get(alertData, EVENT_CATEGORY);
+  const eventCode = get(alertData, EVENT_CODE);
+  const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
+
+  const eventCategories = {
+    primaryEventCategory: eventCategory,
+    allEventCategories: [eventCategory],
+  };
+
+  const fieldsToDisplay = getEventFieldsToDisplay({
+    eventCategories,
+    eventCode,
+    eventRuleType,
+  });
+  return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude);
 };

@@ -216,9 +216,14 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+  This function is exported because it is used in the Exception Component to
+  populate the conditions with the Highlighted Fields. Additionally, the new 
+  Alert Summary Flyout also requires access to these fields.
+ */
+/**
  * Assembles a list of fields to display based on the event
  */
-function getEventFieldsToDisplay({
+export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,

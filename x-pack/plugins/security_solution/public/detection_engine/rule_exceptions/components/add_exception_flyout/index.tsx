@@ -41,6 +41,7 @@ import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
   filterIndexPatterns,
+  getPrepopulatedRuleExceptionWithHighlightFields,
 } from '../../utils/helpers';
 import type { AlertData } from '../../utils/types';
 import { initialState, createExceptionItemsReducer } from './reducer';
@@ -335,12 +336,24 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   );
 
   useEffect((): void => {
-    if (listType === ExceptionListTypeEnum.ENDPOINT && alertData != null) {
-      setInitialExceptionItems(
-        defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
-      );
+    if (alertData) {
+      switch (listType) {
+        case ExceptionListTypeEnum.ENDPOINT:
+          setInitialExceptionItems(
+            defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
+          );
+        case ExceptionListTypeEnum.RULE_DEFAULT: {
+          const populatedException = getPrepopulatedRuleExceptionWithHighlightFields(
+            alertData,
+            exceptionItemName
+          );
+
+          setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
+          setInitialExceptionItems([populatedException]);
+        }
+      }
     }
-  }, [listType, exceptionItemName, alertData, setInitialExceptionItems]);
+  }, [listType, exceptionItemName, alertData, setInitialExceptionItems, setComment]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
@@ -520,9 +533,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <ExceptionItemComments
             accordionTitle={
               <SectionHeader size="xs">
-                <h3>{i18n.COMMENTS_SECTION_TITLE(0)}</h3>
+                <h3>{i18n.COMMENTS_SECTION_TITLE(newComment ? 1 : 0)}</h3>
               </SectionHeader>
             }
+            initialIsOpen={!!newComment} // TODO: Ask yara if this the expected behavior
             newCommentValue={newComment}
             newCommentOnChange={setComment}
           />
