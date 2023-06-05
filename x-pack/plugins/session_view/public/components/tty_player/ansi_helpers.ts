@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Teletype } from '../../../common';
+import type { Teletype } from '../../../common';
 import {
   PROCESS_DATA_LIMIT_EXCEEDED_START,
   PROCESS_DATA_LIMIT_EXCEEDED_END,

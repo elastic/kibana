@@ -14,7 +14,7 @@ import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
 import { renderTruncatedMsg } from './ansi_helpers';
 
-import {
+import type {
   IOLine,
   ProcessStartMarker,
   ProcessEvent,

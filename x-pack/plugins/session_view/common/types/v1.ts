@@ -20,8 +20,6 @@ export interface AlertTypeCount {
   category: ProcessEventAlertCategory;
   count: number;
 }
-export type DefaultAlertFilterType = 'all';
-
 export type EventKind = 'event' | 'signal';
 export type EventCategory = 'process' | 'file' | 'network';
 export type EventAction = 'fork' | 'exec' | 'end' | 'text_output';

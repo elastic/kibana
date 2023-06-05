@@ -9,7 +9,6 @@ import React, { useState, useEffect, useRef, MouseEvent, useCallback, useMemo } 
 import { useStyles } from './styles';
 import type {
   ProcessEventAlertCategory,
-  DefaultAlertFilterType,
   ProcessEvent,
   ProcessEventAlert,
   AlertTypeCount,
@@ -36,9 +35,8 @@ export function ProcessTreeAlerts({
   onShowAlertDetails,
 }: ProcessTreeAlertsDeps) {
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
-  const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] = useState<
-    ProcessEventAlertCategory | DefaultAlertFilterType
-  >(DEFAULT_ALERT_FILTER_VALUE);
+  const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] =
+    useState<ProcessEventAlertCategory>(DEFAULT_ALERT_FILTER_VALUE);
   const styles = useStyles();
 
   useEffect(() => {

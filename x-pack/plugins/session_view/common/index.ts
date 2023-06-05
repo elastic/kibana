@@ -10,7 +10,6 @@ export type {
   Aggregate,
   AlertStatusEventEntityIdMap,
   AlertTypeCount,
-  DefaultAlertFilterType,
   EventAction,
   EventKind,
   IOLine,

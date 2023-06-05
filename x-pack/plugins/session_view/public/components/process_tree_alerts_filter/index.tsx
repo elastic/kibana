@@ -18,11 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
-import type {
-  ProcessEventAlertCategory,
-  DefaultAlertFilterType,
-  AlertTypeCount,
-} from '../../../common';
+import type { ProcessEventAlertCategory, AlertTypeCount } from '../../../common';
 import { useStyles } from './styles';
 import { FILTER_MENU_OPTIONS, SELECTED_PROCESS } from './translations';
 
@@ -30,7 +26,7 @@ export interface ProcessTreeAlertsFilterDeps {
   totalAlertsCount: number;
   alertTypeCounts: AlertTypeCount[];
   filteredAlertsCount: number;
-  onAlertEventCategorySelected: (value: ProcessEventAlertCategory | DefaultAlertFilterType) => void;
+  onAlertEventCategorySelected: (value: ProcessEventAlertCategory) => void;
 }
 
 export const ProcessTreeAlertsFilter = ({
@@ -88,7 +84,7 @@ export const ProcessTreeAlertsFilter = ({
   );
 
   const alertEventCategoryFilterMenuItems = useMemo(() => {
-    const getIconType = (eventCategory: ProcessEventAlertCategory | DefaultAlertFilterType) => {
+    const getIconType = (eventCategory: ProcessEventAlertCategory) => {
       return eventCategory === selectedProcessEventAlertCategory ? 'check' : 'empty';
     };
 

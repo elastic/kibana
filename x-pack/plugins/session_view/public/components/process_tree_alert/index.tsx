@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_ICONS } from '../../../common/constants';
-import { ProcessEvent, ProcessEventAlert, ProcessEventAlertCategory } from '../../../common';
+import type { ProcessEvent, ProcessEventAlert, ProcessEventAlertCategory } from '../../../common';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';

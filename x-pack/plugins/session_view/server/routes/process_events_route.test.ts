@@ -13,7 +13,7 @@ import {
   mockAlerts,
 } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
-import { ProcessEvent } from '../../common';
+import type { ProcessEvent } from '../../common';
 
 const getEmptyResponse = async () => {
   return {

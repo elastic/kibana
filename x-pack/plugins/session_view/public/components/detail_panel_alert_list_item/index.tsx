@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
 import { ALERT_ICONS } from '../../../common/constants';
-import { ProcessEvent, ProcessEventAlertCategory } from '../../../common';
+import type { ProcessEvent, ProcessEventAlertCategory } from '../../../common';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
 import { dataOrDash } from '../../utils/data_or_dash';

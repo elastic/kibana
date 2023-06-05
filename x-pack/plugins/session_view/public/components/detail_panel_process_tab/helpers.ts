@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Process, ProcessFields } from '../../../common';
+import type { Process, ProcessFields } from '../../../common';
 import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
 import { DASH } from '../../constants';
 import { dataOrDash } from '../../utils/data_or_dash';
