@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DeepLinkId as MlDeepLink } from '@kbn/deeplinks-ml';
+import type { NodeDefinitionWithChildren } from '@kbn/shared-ux-chrome-navigation';
 
-import type { NodeDefinitionWithChildren } from './types';
+import type { DeepLinkId } from './deep_links';
 
-export type ID =
+export type NavigationID =
   | 'sharedux:ml'
   | 'root'
   | 'anomaly_detection'
@@ -19,7 +19,9 @@ export type ID =
   | 'data_visualizer'
   | 'aiops_labs';
 
-export const ml: NodeDefinitionWithChildren<MlDeepLink, ID> = {
+export type MlNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, NavigationID>;
+
+export const defaultNavigation: MlNodeDefinition = {
   id: 'sharedux:ml',
   title: 'Machine learning',
   icon: 'indexMapping',

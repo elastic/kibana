@@ -7,7 +7,7 @@
  */
 import type { DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 
-import type { NodeDefinitionWithChildren } from './types';
+import type { NodeDefinitionWithChildren } from '../types';
 
 export type ID = 'sharedux:devtools' | 'root';
 

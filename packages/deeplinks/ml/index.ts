@@ -7,3 +7,5 @@
  */
 
 export type { LinkId, AppId, DeepLinkId } from './deep_links';
+
+export { defaultNavigation, type NavigationID, type MlNodeDefinition } from './default_navigation';

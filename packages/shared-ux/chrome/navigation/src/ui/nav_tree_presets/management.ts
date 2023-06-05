@@ -7,7 +7,7 @@
  */
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 
-import type { NodeDefinitionWithChildren } from './types';
+import type { NodeDefinitionWithChildren } from '../types';
 
 export type ID =
   | 'sharedux:management'

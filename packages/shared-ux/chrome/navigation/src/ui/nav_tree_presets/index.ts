@@ -8,17 +8,17 @@
 
 import { cloneDeep } from 'lodash';
 
+import { defaultNavigation as ml, type MlNodeDefinition } from '@kbn/deeplinks-ml';
+
 import type { NavigationGroupPreset } from '../types';
 import type {
   AnalyticsNodeDefinition,
   DevToolsNodeDefinition,
   ManagementNodeDefinition,
-  MlNodeDefinition,
 } from './types';
 import { analytics } from './analytics';
 import { devtools } from './devtools';
 import { management } from './management';
-import { ml } from './ml';
 
 export function getPresets(preset: 'devtools'): DevToolsNodeDefinition;
 export function getPresets(preset: 'management'): ManagementNodeDefinition;

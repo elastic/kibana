@@ -11,6 +11,8 @@ import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrom
 
 import type { CloudLinkProps, RecentlyAccessedProps } from './components';
 
+export type NonEmptyArray<T> = [T, ...T[]];
+
 /**
  * @public
  *
@@ -31,7 +33,7 @@ export interface NodeDefinition<
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
   /** Optional children of the navigation node */
-  children?: Array<NodeDefinition<LinkId, ChildrenId>>;
+  children?: NonEmptyArray<NodeDefinition<LinkId, ChildrenId>>;
   /**
    * Temporarilly we allow href to be passed.
    * Once all the deeplinks will be exposed in packages we will not allow href anymore
@@ -39,6 +41,20 @@ export interface NodeDefinition<
    */
   href?: string;
 }
+
+/**
+ * @public
+ *
+ * A navigation node definition with its unique id, title, path in the tree and optional
+ * deep link and children.
+ */
+export type NodeDefinitionWithChildren<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenID extends string = Id
+> = NodeDefinition<LinkId, Id, ChildrenID> & {
+  children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
+};
 
 /**
  * @public
@@ -108,7 +124,7 @@ export interface GroupDefinition extends NodeDefinition<any> {
   type: 'navGroup';
   /** Flag to indicate if the group is initially collapsed or not. */
   defaultIsCollapsed?: boolean;
-  children?: Array<NodeDefinition<any>>;
+  children?: NonEmptyArray<NodeDefinition<any>>;
   preset?: NavigationGroupPreset;
 }
 

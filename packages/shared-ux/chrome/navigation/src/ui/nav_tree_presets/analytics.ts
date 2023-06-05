@@ -8,7 +8,7 @@
 
 import type { DeepLinkId as AnalyticsDeepLink } from '@kbn/deeplinks-analytics';
 
-import type { NodeDefinitionWithChildren } from './types';
+import type { NodeDefinitionWithChildren } from '../types';
 
 export type ID = 'sharedux:analytics' | 'root';
 
