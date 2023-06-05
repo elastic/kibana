@@ -20,7 +20,7 @@ const data = [
   { s: 'b', n: 4 },
 ];
 
-describe('Data Frame Analytics: Data Grid Common', () => {
+describe('Data Grid Common', () => {
   describe('multiColumnSortFactory', () => {
     it('returns desc sorted by one column', () => {
       const sortingColumns1: MultiColumnSorter[] = [{ id: 's', direction: 'desc', type: 'number' }];
