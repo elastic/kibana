@@ -25,8 +25,8 @@ export const createAction = async (
   try {
     const body = {
       ...action,
-      action_id: action.action_id ?? uuidV4(),
-      '@timestamp': action['@timestamp'] ?? new Date().toISOString(),
+      action_id: action.action_id || uuidV4(),
+      '@timestamp': action['@timestamp'] || new Date().toISOString(),
     };
     await esClient.create(
       {
@@ -69,12 +69,12 @@ export const bulkCreateActions = async (
   const actions: FleetActionRequest[] = [];
   const bulkCreateActionsBody = _actions.reduce<BulkCreate>((acc, action) => {
     // doc id is same as action_id
-    const actionId = action.action_id ?? uuidV4();
+    const actionId = action.action_id || uuidV4();
     acc.push({ create: { _index: AGENT_ACTIONS_INDEX, _id: actionId } });
     const actionDoc = {
       ...action,
       action_id: actionId,
-      '@timestamp': action['@timestamp'] ?? new Date().toISOString(),
+      '@timestamp': action['@timestamp'] || new Date().toISOString(),
     };
     acc.push(actionDoc);
     actions.push(actionDoc);
