@@ -203,7 +203,7 @@ export const onSave = async ({
         <p>
           <FormattedMessage
             id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
-            defaultMessage="View or manage in the {link}"
+            defaultMessage="View or manage in the {link}."
             values={{
               link: <a href="#">annotation library</a>,
             }}
@@ -236,7 +236,7 @@ export const getSaveLayerAction = ({
   const displayName = i18n.translate(
     'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary',
     {
-      defaultMessage: 'Save annotation group',
+      defaultMessage: 'Save to library',
     }
   );
 
