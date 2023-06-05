@@ -14,52 +14,6 @@ export const serializedFieldFormatSchema = schema.object({
   params: schema.maybe(schema.any()),
 });
 
-export const fieldSpecSchemaFields = {
-  name: schema.string({
-    maxLength: 1000,
-  }),
-  type: schema.string({
-    defaultValue: 'string',
-    maxLength: 1000,
-  }),
-  count: schema.maybe(
-    schema.number({
-      min: 0,
-    })
-  ),
-  script: schema.maybe(
-    schema.string({
-      maxLength: 1000000,
-    })
-  ),
-  format: schema.maybe(serializedFieldFormatSchema),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
-  scripted: schema.maybe(schema.boolean()),
-  subType: schema.maybe(
-    schema.object({
-      multi: schema.maybe(
-        schema.object({
-          parent: schema.string(),
-        })
-      ),
-      nested: schema.maybe(
-        schema.object({
-          path: schema.string(),
-        })
-      ),
-    })
-  ),
-  customLabel: schema.maybe(schema.string()),
-  shortDotsEnable: schema.maybe(schema.boolean()),
-};
-
-export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
-  // Allow and ignore unknowns to make fields transient.
-  // Because `fields` have a bunch of calculated fields
-  // this allows to retrieve an index pattern and then to re-create by using the retrieved payload
-  unknowns: 'ignore',
-});
-
 export const RUNTIME_FIELD_TYPES2 = [
   'keyword',
   'long',
@@ -120,3 +74,53 @@ export const runtimeFieldSchema = schema.oneOf([
   primitiveRuntimeFieldSchema,
   compositeRuntimeFieldSchema,
 ]);
+
+export const fieldSpecSchemaFields = {
+  name: schema.string({
+    maxLength: 1000,
+  }),
+  type: schema.string({
+    defaultValue: 'string',
+    maxLength: 1000,
+  }),
+  count: schema.maybe(
+    schema.number({
+      min: 0,
+    })
+  ),
+  script: schema.maybe(
+    schema.string({
+      maxLength: 1000000,
+    })
+  ),
+  format: schema.maybe(serializedFieldFormatSchema),
+  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+  scripted: schema.maybe(schema.boolean()),
+  subType: schema.maybe(
+    schema.object({
+      multi: schema.maybe(
+        schema.object({
+          parent: schema.string(),
+        })
+      ),
+      nested: schema.maybe(
+        schema.object({
+          path: schema.string(),
+        })
+      ),
+    })
+  ),
+  customLabel: schema.maybe(schema.string()),
+  shortDotsEnable: schema.maybe(schema.boolean()),
+  searchable: schema.maybe(schema.boolean()),
+  aggregatable: schema.maybe(schema.boolean()),
+  readFromDocValues: schema.maybe(schema.boolean()),
+  runtimeField: schema.maybe(runtimeFieldSchema),
+};
+
+export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
+  // Allow and ignore unknowns to make fields transient.
+  // Because `fields` have a bunch of calculated fields
+  // this allows to retrieve an index pattern and then to re-create by using the retrieved payload
+  unknowns: 'ignore',
+});

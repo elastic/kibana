@@ -13,6 +13,7 @@ import {
   fieldSpecSchema,
   runtimeFieldSchema,
   serializedFieldFormatSchema,
+  fieldSpecSchemaFields,
 } from '../../common/schemas';
 
 export const dataViewSpecSchema = schema.object({
@@ -46,14 +47,14 @@ export const dataViewSpecSchema = schema.object({
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-const dataViewsRuntimeResponseSchema = schema.object({
+export const dataViewsRuntimeResponseSchema = schema.object({
   [SERVICE_KEY]: dataViewSpecSchema,
-  fields: schema.arrayOf(serializedFieldFormatSchema),
+  fields: schema.arrayOf(schema.object(fieldSpecSchemaFields)),
 });
 
 export const indexPatternsRuntimeResponseSchema = schema.object({
   [SERVICE_KEY_LEGACY]: dataViewSpecSchema,
-  field: serializedFieldFormatSchema,
+  field: schema.object(fieldSpecSchemaFields),
 });
 
 export const runtimeResponseSchema = schema.oneOf([
