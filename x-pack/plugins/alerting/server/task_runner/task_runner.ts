@@ -405,7 +405,8 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: alertsClient.getExecutorServices(),
+                alertFactory: alertsClient.factory(),
+                alertsClient: alertsClient.client(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
@@ -493,6 +494,10 @@ export class TaskRunner<
       });
     });
 
+    await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
+      await alertsClient.persistAlerts();
+    });
+
     const executionHandler = new ExecutionHandler({
       rule,
       ruleType: this.ruleType,
@@ -532,12 +537,12 @@ export class TaskRunner<
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
-    const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-      await alertsClient.getAlertsToSerialize();
 
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
+      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
+        alertsClient.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }
