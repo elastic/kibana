@@ -33,7 +33,6 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getFieldFormatFromIndexPattern } from './get_field_format_from_index_pattern';
 
 import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
@@ -361,10 +360,11 @@ export const useRenderCellValue = (
         return null;
       }
 
-      let format: FieldFormat | undefined;
+      const field = dataView.fields.getByName(columnId);
+      let fieldFormat: FieldFormat | undefined;
 
-      if (dataView !== undefined) {
-        format = getFieldFormatFromIndexPattern(dataView, columnId, '');
+      if (field !== undefined) {
+        fieldFormat = dataView.getFormatterForField(field);
       }
 
       function getCellValue(cId: string) {
@@ -406,15 +406,14 @@ export const useRenderCellValue = (
         return null;
       }
 
-      if (format !== undefined) {
-        return format.convert(cellValue, 'text');
+      if (fieldFormat !== undefined) {
+        return fieldFormat.convert(cellValue, 'text');
       }
 
       if (typeof cellValue === 'string' || cellValue === null) {
         return cellValue;
       }
 
-      const field = dataView.fields.getByName(columnId);
       if (field?.type === KBN_FIELD_TYPES.DATE) {
         return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
