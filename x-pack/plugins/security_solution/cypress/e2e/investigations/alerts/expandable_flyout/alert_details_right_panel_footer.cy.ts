@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/unsafe-to-chain-command */
+
 import {
   CASE_ACTION_WRAPPER,
   CASE_ELLIPSE_BUTTON,
@@ -70,7 +72,7 @@ const deleteCase = () => {
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
 describe.skip(
   'Alert details expandable flyout right panel footer',
-  { testIsolation: false },
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     before(() => {
       cleanKibana();
@@ -171,7 +173,7 @@ describe.skip(
 
     // TODO figure out why isolate host isn't showing up in the dropdown
     //  https://github.com/elastic/security-team/issues/6302
-    it.skip('should isolate host', () => {});
+    // it.skip('should isolate host', () => {});
 
     // TODO this will change when respond is improved
     //  https://github.com/elastic/security-team/issues/6303
