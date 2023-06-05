@@ -18,8 +18,8 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { EventAnnotationGroupTableList } from './components/table_list';
 import { EventAnnotationServiceType } from './event_annotation_service/types';
+import { EventAnnotationGroupTableList } from './components/table_list';
 
 export interface EventAnnotationListingPageServices {
   core: CoreStart;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './annotation_editor_controls';
+export { AnnotationEditorControls, annotationsIconSet } from './annotation_editor_controls';
 
 export * from './group_editor_controls';
 

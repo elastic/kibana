@@ -9,11 +9,11 @@
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EventAnnotationService } from './event_annotation_service';
@@ -24,7 +24,7 @@ import {
   eventAnnotationGroup,
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
-import { EventAnnotationListingPageServices, getTableList } from './get_table_list';
+import type { EventAnnotationListingPageServices } from './get_table_list';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
 
 export interface EventAnnotationStartDependencies {
@@ -94,6 +94,7 @@ export class EventAnnotationPlugin
           },
         };
 
+        const { getTableList } = await import('./get_table_list');
         return getTableList(props, services);
       },
     });
