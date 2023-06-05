@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
@@ -20,7 +20,9 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { styles } from './connector.styles';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';
 import * as i18n from './translations';
 import { DEFAULT_URL, DEFAULT_URL_AZURE } from './constants';
@@ -146,9 +148,32 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   isEdit,
 }) => {
   const { getFieldDefaultValue } = useFormContext();
-  const [{ config }] = useFormData({
-    watch: ['config.apiProvider'],
+  const [{ config, id, name }] = useFormData({
+    watch: ['config.apiProvider', 'config.dashboardId'],
   });
+  console.log('name', name);
+  const { services } = useKibana();
+  const { application, dashboard } = services;
+  const { navigateToUrl } = application;
+
+  const onClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (config != null && config.dashboardId != null) {
+        const url = dashboard?.locator?.getRedirectUrl({
+          query: {
+            language: 'kuery',
+            query: `kibana.saved_objects: { id  : ${id} }`,
+          },
+          dashboardId: config.dashboardId,
+        });
+        if (url) {
+          navigateToUrl(url);
+        }
+      }
+    },
+    [config, dashboard?.locator, id, navigateToUrl]
+  );
 
   const selectedProviderDefaultValue = useMemo(
     () =>
@@ -198,6 +223,19 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           configFormSchema={azureAiConfig}
           secretsFormSchema={azureAiSecrets}
         />
+      )}
+      <UseField
+        path="config.dashboardId"
+        css={styles.hideInput}
+        componentProps={{
+          disabled: true,
+          readOnly: true,
+        }}
+      />
+      {isEdit && (
+        <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
+          {i18n.USAGE_DASHBOARD_LINK(selectedProviderDefaultValue, name)}
+        </EuiLink>
       )}
     </>
   );

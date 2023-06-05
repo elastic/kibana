@@ -18,13 +18,6 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
   defaultMessage: 'API Key',
 });
 
-export const API_PROVIDER_HEADING = i18n.translate(
-  'xpack.stackConnectors.components.genAi.providerHeading',
-  {
-    defaultMessage: 'OpenAI provider',
-  }
-);
-
 export const API_PROVIDER_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.apiProviderLabel',
   {
@@ -87,3 +80,9 @@ export const API_PROVIDER_REQUIRED = i18n.translate(
     defaultMessage: 'API provider is required.',
   }
 );
+
+export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string) =>
+  i18n.translate('xpack.stackConnectors.components.genAi.dashboardLink', {
+    values: { apiProvider, connectorName },
+    defaultMessage: 'Open {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
+  });

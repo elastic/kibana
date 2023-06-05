@@ -26,6 +26,7 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
+import { getGenAiDashboard } from './saved_objects/dashboard/create_saved_objects';
 import {
   ActionType,
   GetGlobalExecutionKPIParams,
@@ -222,9 +223,11 @@ export class ActionsClient {
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const configurationUtilities = this.actionTypeRegistry.getUtils();
+    console.log('Before config validation', config);
     const validatedActionTypeConfig = validateConfig(actionType, config, {
       configurationUtilities,
     });
+    console.log('After config validation', validatedActionTypeConfig);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
       configurationUtilities,
     });
@@ -241,13 +244,28 @@ export class ActionsClient {
       })
     );
 
+    const additionalConfig: { [key: string]: string } = {};
+
+    // start gen_ai extension
+    // add usage dashboard id to gen-ai action
+    if (actionTypeId === '.gen-ai') {
+      const dashboardSavedObject = await getGenAiDashboard(
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
+      if (dashboardSavedObject.success) {
+        additionalConfig.dashboardId = dashboardSavedObject.body?.id ?? '';
+      }
+    }
+    // end gen_ai extension
+
     const result = await this.unsecuredSavedObjectsClient.create(
       'action',
       {
         actionTypeId,
         name,
         isMissingSecrets: false,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
+        config: { ...validatedActionTypeConfig, ...additionalConfig } as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
       { id }
