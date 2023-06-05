@@ -255,11 +255,11 @@ export class ChromeService {
         // }
 
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-        const projectNavigation$ = projectNavigation.getProjectNavigation$();
+        // const projectNavigation$ = projectNavigation.getProjectNavigation$();
 
         const ProjectHeaderWithNavigation = () => {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
-          const projectNavigationConfig = useObservable(projectNavigation$, undefined);
+          // const projectNavigationConfig = useObservable(projectNavigation$, undefined);
 
           let SideNavComponent: ISideNavComponent = () => null;
 
