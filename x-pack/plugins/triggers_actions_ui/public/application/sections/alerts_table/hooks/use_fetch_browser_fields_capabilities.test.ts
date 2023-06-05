@@ -13,6 +13,21 @@ import { AlertsField } from '../../../../types';
 
 jest.mock('../../../../common/lib/kibana');
 
+const fields = [
+  {
+    category: 'kibana',
+    name: AlertsField.uuid,
+  },
+  {
+    category: 'kibana',
+    name: AlertsField.name,
+  },
+  {
+    category: 'kibana',
+    name: AlertsField.reason,
+  },
+];
+
 const browserFields: BrowserFields = {
   kibana: {
     fields: {
@@ -37,7 +52,14 @@ describe('useFetchBrowserFieldCapabilities', () => {
 
   beforeEach(() => {
     httpMock = useKibana().services.http.get as jest.Mock;
-    httpMock.mockReturnValue({ fakeCategory: {} });
+    httpMock.mockReturnValue({
+      browserFields: { fakeCategory: {} },
+      fields: [
+        {
+          name: 'fakeCategory',
+        },
+      ],
+    });
   });
 
   afterEach(() => {
@@ -48,7 +70,7 @@ describe('useFetchBrowserFieldCapabilities', () => {
     const { result } = renderHook(() => useFetchBrowserFieldCapabilities({ featureIds: ['siem'] }));
 
     expect(httpMock).toHaveBeenCalledTimes(0);
-    expect(result.current).toEqual([undefined, {}]);
+    expect(result.current).toEqual([undefined, {}, []]);
   });
 
   it('should call the api only once', async () => {
@@ -59,12 +81,28 @@ describe('useFetchBrowserFieldCapabilities', () => {
     await waitForNextUpdate();
 
     expect(httpMock).toHaveBeenCalledTimes(1);
-    expect(result.current).toEqual([false, { fakeCategory: {} }]);
+    expect(result.current).toEqual([
+      false,
+      { fakeCategory: {} },
+      [
+        {
+          name: 'fakeCategory',
+        },
+      ],
+    ]);
 
     rerender();
 
     expect(httpMock).toHaveBeenCalledTimes(1);
-    expect(result.current).toEqual([false, { fakeCategory: {} }]);
+    expect(result.current).toEqual([
+      false,
+      { fakeCategory: {} },
+      [
+        {
+          name: 'fakeCategory',
+        },
+      ],
+    ]);
   });
 
   it('should not fetch if browserFields have been provided', async () => {
@@ -73,6 +111,6 @@ describe('useFetchBrowserFieldCapabilities', () => {
     );
 
     expect(httpMock).toHaveBeenCalledTimes(0);
-    expect(result.current).toEqual([undefined, browserFields]);
+    expect(result.current).toEqual([undefined, browserFields, []]);
   });
 });

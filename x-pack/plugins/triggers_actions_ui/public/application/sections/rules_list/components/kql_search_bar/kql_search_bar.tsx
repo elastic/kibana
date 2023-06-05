@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fromKueryExpression, KueryNode, Query } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
@@ -14,6 +13,7 @@ import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeah
 import useAsync from 'react-use/lib/useAsync';
 import { isEmpty } from 'lodash';
 import { TriggersAndActionsUiServices } from '../../../../..';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { NO_INDEX_PATTERNS } from '../../../alerts_search_bar/constants';
 import { validateFieldsKueryNode } from './validate_kuery_node';
 
@@ -141,8 +141,6 @@ export const KqlSearchBar = React.memo<KqlSearchBarProps>(({ onQuerySubmit }) =>
         return;
       }
     }
-
-    console.log('kueryNode', JSON.stringify(kueryNode, null, 2));
     onQuerySubmit(kueryNode);
   };
 

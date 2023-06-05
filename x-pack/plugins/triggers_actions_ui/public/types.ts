@@ -713,7 +713,7 @@ export interface RulesListFilters {
   searchText: string;
   tags: string[];
   types: string[];
-  kueryNode: KueryNode;
+  kueryNode: KueryNode | {};
 }
 
 export type UpdateFiltersProps =

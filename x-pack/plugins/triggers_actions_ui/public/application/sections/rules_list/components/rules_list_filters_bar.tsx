@@ -149,6 +149,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     }
   };
 
+  const isRuleKqlBarActive = getIsExperimentalFeatureEnabled('ruleKqlBar');
   return (
     <>
       <RulesListErrorBanner
@@ -160,9 +161,11 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           updateFilters({ filter: 'ruleLastRunOutcomes', value })
         }
       />
-      <KqlSearchBar
-        onQuerySubmit={(kueryNode) => updateFilters({ filter: 'kueryNode', value: kueryNode })}
-      />
+      {isRuleKqlBarActive && (
+        <KqlSearchBar
+          onQuerySubmit={(kueryNode) => updateFilters({ filter: 'kueryNode', value: kueryNode })}
+        />
+      )}
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldSearch
