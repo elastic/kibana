@@ -12,7 +12,8 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import { useKibana } from '../services';
 import { useGetLinkProps } from './use_link_props';
-import { useNavLinks } from './use_nav_links';
+import { useNavTreeStructure } from './use_nav_tree_structure';
+import { useFindNavLink } from './use_nav_links';
 
 const isFooterNavItem = (id: string) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -43,13 +44,27 @@ const findItemsByPath = (
  * Returns all the formatted SideNavItems, including external links
  */
 export const useSideNavItems = (): SolutionSideNavItem[] => {
-  const navLinks = useNavLinks();
+  const { getUrlForApp } = useKibana().services.application;
+
+  const navTreeStructure = useNavTreeStructure();
   const getLinkProps = useGetLinkProps();
+  const findNavLink = useFindNavLink();
 
   const securitySideNavItems = useMemo(
     () =>
-      navLinks.reduce<SolutionSideNavItem[]>((items, navLink) => {
-        if (navLink.disabled) {
+      navTreeStructure.reduce<SolutionSideNavItem[]>((items, { id, appId, links, label }) => {
+        const navLink = id ? findNavLink(id) : undefined;
+
+        if (appId) {
+          items.push({
+            id: appId,
+            label,
+            href: getUrlForApp(appId),
+          });
+          return items;
+        }
+
+        if (!navLink || navLink.disabled) {
           return items;
         }
         if (isGetStartedNavItem(navLink.id)) {
@@ -62,22 +77,23 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
             appendSeparator: true,
           });
         } else {
-          // default sideNavItem formatting
           items.push({
             id: navLink.id,
             label: navLink.title,
             ...getLinkProps({ deepLinkId: navLink.id }),
             ...(navLink.categories?.length && { categories: navLink.categories }),
-            ...(navLink.links?.length && {
-              items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-                if (!current.disabled) {
+            ...(links?.length && {
+              items: links.reduce<SolutionSideNavItem[]>((acc, current) => {
+                const navLinkChild = id ? findNavLink(id) : undefined;
+
+                if (navLinkChild && !navLinkChild.disabled) {
                   acc.push({
-                    id: current.id,
-                    label: current.title,
-                    description: current.description,
-                    isBeta: current.isBeta,
-                    betaOptions: current.betaOptions,
-                    ...getLinkProps({ deepLinkId: current.id }),
+                    id: navLinkChild.id,
+                    label: navLinkChild.title,
+                    description: navLinkChild.description,
+                    isBeta: navLinkChild.isBeta,
+                    betaOptions: navLinkChild.betaOptions,
+                    ...getLinkProps({ deepLinkId: navLinkChild.id }),
                   });
                 }
                 return acc;
@@ -87,7 +103,7 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
         }
         return items;
       }, []),
-    [getLinkProps, navLinks]
+    [findNavLink, getLinkProps, getUrlForApp, navTreeStructure]
   );
 
   const sideNavItems = useAddExternalSideNavItems(securitySideNavItems);
