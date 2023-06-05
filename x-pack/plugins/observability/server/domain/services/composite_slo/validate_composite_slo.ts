@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rollingTimeWindowSchema } from '@kbn/slo-schema';
+import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../../errors';
 import { SLO } from '../../models';
 import { CompositeSLO } from '../../models/composite_slo';
@@ -14,7 +14,7 @@ export function validateCompositeSLO(compositeSlo: CompositeSLO, sloList: SLO[])
   assertNumberOfSourceSlo(compositeSlo);
   assertMatchingSloList(compositeSlo, sloList);
   assertSameBudgetingMethod(compositeSlo, sloList);
-  assertSameRollingTimeWindow(compositeSlo, sloList);
+  assertSameTimeWindow(compositeSlo, sloList);
 }
 
 function assertNumberOfSourceSlo(compositeSlo: CompositeSLO) {
@@ -63,12 +63,24 @@ function assertSameBudgetingMethod(compositeSlo: CompositeSLO, sloList: SLO[]) {
   }
 }
 
-function assertSameRollingTimeWindow(compositeSlo: CompositeSLO, sloList: SLO[]) {
-  const haveSameTimeWindow = sloList.every(
-    (slo) =>
-      rollingTimeWindowSchema.is(slo.timeWindow) &&
-      slo.timeWindow.duration.isEqual(compositeSlo.timeWindow.duration)
-  );
+function assertSameTimeWindow(compositeSlo: CompositeSLO, sloList: SLO[]) {
+  let haveSameTimeWindow = false;
+  if (rollingTimeWindowSchema.is(compositeSlo.timeWindow)) {
+    haveSameTimeWindow = sloList.every(
+      (slo) =>
+        slo.timeWindow.duration.isEqual(compositeSlo.timeWindow.duration) &&
+        rollingTimeWindowSchema.is(slo.timeWindow)
+    );
+  }
+
+  if (calendarAlignedTimeWindowSchema.is(compositeSlo.timeWindow)) {
+    haveSameTimeWindow = sloList.every(
+      (slo) =>
+        slo.timeWindow.duration.isEqual(compositeSlo.timeWindow.duration) &&
+        calendarAlignedTimeWindowSchema.is(slo.timeWindow)
+    );
+  }
+
   if (!haveSameTimeWindow) {
     throw new IllegalArgumentError(
       'Invalid time window. Every source SLO must use the same time window as the composite.'

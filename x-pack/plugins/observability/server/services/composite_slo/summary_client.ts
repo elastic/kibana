@@ -11,7 +11,6 @@ import {
   calendarAlignedTimeWindowSchema,
   Duration,
   occurrencesBudgetingMethodSchema,
-  rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
   toMomentUnitOfTime,
 } from '@kbn/slo-schema';
@@ -133,10 +132,6 @@ function generateSearchQuery(
   compositeSlo: CompositeSLO,
   dateRange: DateRange
 ): MsearchMultisearchBody {
-  if (!rollingTimeWindowSchema.is(compositeSlo.timeWindow)) {
-    throw new Error('Composite SLO time window not supported');
-  }
-
   return {
     size: 0,
     query: {

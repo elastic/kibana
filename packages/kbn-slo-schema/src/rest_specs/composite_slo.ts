@@ -12,9 +12,9 @@ import {
   compositeSloIdSchema,
   dateType,
   objectiveSchema,
-  rollingTimeWindowSchema,
   summarySchema,
   tagsSchema,
+  timeWindowSchema,
   weightedAverageCompositeMethodSchema,
   weightedAverageSourceSchema,
 } from '../schema';
@@ -23,7 +23,7 @@ const createCompositeSLOParamsSchema = t.type({
   body: t.intersection([
     t.type({
       name: t.string,
-      timeWindow: rollingTimeWindowSchema,
+      timeWindow: timeWindowSchema,
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
       compositeMethod: weightedAverageCompositeMethodSchema,
@@ -40,7 +40,7 @@ const createCompositeSLOResponseSchema = t.type({
 const compositeSLOResponseSchema = t.type({
   id: compositeSloIdSchema,
   name: t.string,
-  timeWindow: rollingTimeWindowSchema,
+  timeWindow: timeWindowSchema,
   budgetingMethod: budgetingMethodSchema,
   objective: objectiveSchema,
   compositeMethod: weightedAverageCompositeMethodSchema,
@@ -63,7 +63,7 @@ const updateCompositeSLOParamsSchema = t.type({
     name: t.string,
     compositeMethod: weightedAverageCompositeMethodSchema,
     sources: t.array(weightedAverageSourceSchema),
-    timeWindow: rollingTimeWindowSchema,
+    timeWindow: timeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
     tags: tagsSchema,
