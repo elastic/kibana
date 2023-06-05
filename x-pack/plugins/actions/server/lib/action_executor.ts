@@ -253,9 +253,12 @@ export class ActionExecutor {
 
         event.event = event.event || {};
 
+        // start gen_ai extension
         // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
         if (result.status === 'ok' && actionTypeId === '.gen-ai') {
-          const data = result.data as unknown as { usage: {} };
+          const data = result.data as unknown as {
+            usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+          };
           event.kibana = event.kibana || {};
           event.kibana.action = event.kibana.action || {};
           event.kibana = {
@@ -265,13 +268,20 @@ export class ActionExecutor {
               execution: {
                 ...event.kibana.action.execution,
                 gen_ai: {
-                  usage: data.usage,
+                  usage: {
+                    total_tokens: data.usage.total_tokens,
+                    prompt_tokens: data.usage.prompt_tokens,
+                    completion_tokens: data.usage.completion_tokens,
+                  },
                 },
               },
             },
           };
         }
-        const currentUser = await security?.authc.getCurrentUser(request);
+        // end gen_ai extension
+
+        const currentUser = security?.authc.getCurrentUser(request);
+
         event.user = event.user || {};
         event.user.name = currentUser?.username;
         event.user.id = currentUser?.profile_uid;
