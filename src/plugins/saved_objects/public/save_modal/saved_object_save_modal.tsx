@@ -30,7 +30,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -167,20 +166,19 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           </EuiForm>
         </EuiModalBody>
 
-        <EuiModalFooter
-          css={css`
-            align-items: center;
-          `}
-        >
-          <EuiFlexItem grow>{this.renderCopyOnSave()}</EuiFlexItem>
-          <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
-            <FormattedMessage
-              id="savedObjects.saveModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-
-          {this.renderConfirmButton()}
+        <EuiModalFooter>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            {this.props.showCopyOnSave && <EuiFlexItem grow>{this.renderCopyOnSave()}</EuiFlexItem>}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+                <FormattedMessage
+                  id="savedObjects.saveModal.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{this.renderConfirmButton()}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalFooter>
       </EuiModal>
     );
@@ -351,10 +349,6 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   };
 
   private renderCopyOnSave = () => {
-    if (!this.props.showCopyOnSave) {
-      return;
-    }
-
     return (
       <EuiSwitch
         data-test-subj="saveAsNewCheckbox"
