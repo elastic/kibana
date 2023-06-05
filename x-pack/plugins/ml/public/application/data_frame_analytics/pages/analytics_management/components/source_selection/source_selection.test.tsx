@@ -13,6 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../../util/index_utils';
 
 import { SourceSelection } from './source_selection';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   const SavedObjectFinder = ({
@@ -67,6 +68,7 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   };
 });
 
+const dataMock = dataPluginMock.createStartContract();
 const mockNavigateToPath = jest.fn();
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
@@ -74,6 +76,7 @@ jest.mock('../../../../../contexts/kibana', () => ({
       uiSettings: {},
       http: {},
       savedObjectsManagement: {},
+      data: dataMock,
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,

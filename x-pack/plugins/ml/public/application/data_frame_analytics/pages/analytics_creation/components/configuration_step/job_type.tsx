@@ -14,7 +14,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 interface Props {
   type: AnalyticsJobType;

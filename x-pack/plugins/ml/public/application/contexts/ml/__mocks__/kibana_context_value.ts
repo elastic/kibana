@@ -7,9 +7,8 @@
 
 import { dataViewMock } from './data_view';
 import { dataViewsContractMock } from './data_view_contract';
-import { kibanaConfigMock } from './kibana_config';
-import { deprecatedSavedSearchSimpleObjMock } from './saved_search';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
 
@@ -18,9 +17,8 @@ export const kibanaContextValueMock = {
     query: 'the-query-string',
     language: 'the-query-language',
   },
-  currentDataView: dataViewMock,
-  deprecatedSavedSearchObj: deprecatedSavedSearchSimpleObjMock,
+  selectedDataView: dataViewMock,
   selectedSavedSearch: mockSavedSearch,
   dataViewsContract: dataViewsContractMock,
-  kibanaConfig: kibanaConfigMock,
+  kibanaConfig: uiSettingsServiceMock.createStartContract(),
 };

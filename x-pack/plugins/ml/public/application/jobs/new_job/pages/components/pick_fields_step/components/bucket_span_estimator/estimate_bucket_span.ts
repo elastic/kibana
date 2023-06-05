@@ -38,10 +38,10 @@ export function useEstimateBucketSpan() {
       end: jobCreator.end,
     },
     fields: jobCreator.fields.map((f) => (f.id === EVENT_RATE_FIELD_ID ? null : f.id)),
-    index: mlContext.currentDataView.title,
+    index: mlContext.selectedDataView?.title,
     query: mlContext.combinedQuery,
     splitField: undefined,
-    timeField: mlContext.currentDataView.timeFieldName,
+    timeField: mlContext.selectedDataView?.timeFieldName,
     runtimeMappings: jobCreator.runtimeMappings ?? undefined,
     indicesOptions: jobCreator.datafeedConfig.indices_options,
   };

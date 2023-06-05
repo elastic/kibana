@@ -63,7 +63,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
-        mlContext.currentDataView,
+        mlContext.selectedDataView,
         mlContext.selectedSavedSearch,
         mlContext.combinedQuery
       ),
@@ -202,13 +202,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
-    [mlContext.currentDataView, jobCreator.query]
+    () => new ChartLoader(mlContext.selectedDataView, jobCreator.query),
+    [mlContext.selectedDataView, jobCreator.query]
   );
 
   const mapLoader = useMemo(
-    () => new MapLoader(mlContext.currentDataView, jobCreator.query, mapsPlugin),
-    [mlContext.currentDataView, jobCreator.query, mapsPlugin]
+    () => new MapLoader(mlContext.selectedDataView, jobCreator.query, mapsPlugin),
+    [mlContext.selectedDataView, jobCreator.query, mapsPlugin]
   );
 
   const resultsLoader = useMemo(

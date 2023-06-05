@@ -7,11 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { useNotifications } from '../contexts/kibana';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { useResolver } from './use_resolver';
 import { PageDependencies } from './router';
@@ -38,7 +35,6 @@ const addError = jest.fn();
 const redirectToJobsManagementPage = jest.fn(() => Promise.resolve());
 (useCreateAndNavigateToMlLink as jest.Mock).mockImplementation(() => redirectToJobsManagementPage);
 
-// @todo: create new mock
 const deps: PageDependencies = createMlPageDepsMock() as PageDependencies;
 
 describe('useResolver', () => {
@@ -52,7 +48,7 @@ describe('useResolver', () => {
 
   it('should accept undefined as dataViewId and savedSearchId.', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useResolver(deps, undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+      useResolver(deps, undefined, undefined, {})
     );
 
     await act(async () => {
@@ -70,8 +66,7 @@ describe('useResolver', () => {
             ],
           },
         },
-        currentDataView: null,
-        deprecatedSavedSearchObj: null,
+        selectedDataView: null,
         dataViewsContract: {},
         kibanaConfig: {},
         selectedSavedSearch: null,
@@ -83,9 +78,7 @@ describe('useResolver', () => {
   });
 
   it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
-    const { result } = renderHook(() =>
-      useResolver(deps, '', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
-    );
+    const { result } = renderHook(() => useResolver(deps, '', undefined, {}));
 
     await act(async () => {});
 

@@ -29,7 +29,7 @@ import { ML_PAGES } from '../../../common/constants/locator';
  * @return { context, results } returns the ML context and resolver results
  */
 export const useResolver = (
-  { config, savedSearchService, dataViewsContract }: PageDependencies,
+  { config: kibanaConfig, savedSearchService, dataViewsContract }: PageDependencies,
   dataViewId: string | undefined,
   savedSearchId: string | undefined,
   resolvers: Resolvers
@@ -74,7 +74,6 @@ export const useResolver = (
           savedSearch: null,
           dataView: null,
         };
-        const savedSearch = null;
 
         if (savedSearchId !== undefined) {
           dataViewAndSavedSearch = await getDataViewAndSavedSearch({
@@ -86,21 +85,20 @@ export const useResolver = (
           dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }
 
-        const { savedSearch: deprecatedSavedSearchObj, dataView } = dataViewAndSavedSearch;
+        const { savedSearch, dataView } = dataViewAndSavedSearch;
 
         const { combinedQuery } = createSearchItems(
-          config,
+          kibanaConfig,
           dataView !== null ? dataView : undefined,
-          deprecatedSavedSearchObj
+          savedSearch
         );
 
         setContext({
           combinedQuery,
-          currentDataView: dataView,
-          deprecatedSavedSearchObj,
+          selectedDataView: dataView,
           selectedSavedSearch: savedSearch,
           dataViewsContract,
-          kibanaConfig: config,
+          kibanaConfig,
         });
       } catch (error) {
         // an unexpected error has occurred. This could be caused by an incorrect index pattern or saved search ID

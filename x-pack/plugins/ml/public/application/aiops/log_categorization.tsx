@@ -24,7 +24,7 @@ export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
 
   const context = useMlContext();
-  const dataView = context.currentDataView;
+  const dataView = context.selectedDataView;
   const savedSearch = context.selectedSavedSearch;
 
   return (
