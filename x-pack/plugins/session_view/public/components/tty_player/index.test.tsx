@@ -34,7 +34,7 @@ describe('TTYPlayer component', () => {
       })),
     });
 
-    global.ResizeObserver = require('resize-observer-polyfill');
+    global.ResizeObserver = require('@juggle/resize-observer');
   });
 
   let render: () => ReturnType<AppContextTestRender['render']>;

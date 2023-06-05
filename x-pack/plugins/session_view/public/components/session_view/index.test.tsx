@@ -45,7 +45,7 @@ describe('SessionView component', () => {
       })),
     });
 
-    global.ResizeObserver = require('resize-observer-polyfill');
+    global.ResizeObserver = require('@juggle/resize-observer');
   });
 
   beforeEach(() => {
