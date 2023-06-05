@@ -37,6 +37,14 @@ const startSync = (appState: DiscoverAppStateContainer) => {
 async function getState(url: string = '/', savedSearch?: SavedSearch) {
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
+
+  discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
+    ...dataViewMock,
+    isPersisted: () => false,
+    id: 'ad-hoc-id',
+    title: 'test',
+  });
+
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
@@ -635,12 +643,6 @@ describe('Test discover state actions', () => {
   });
 
   test('onCreateDefaultAdHocDataView', async () => {
-    discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
-      ...dataViewMock,
-      isPersisted: () => false,
-      id: 'ad-hoc-id',
-      title: 'test',
-    });
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
