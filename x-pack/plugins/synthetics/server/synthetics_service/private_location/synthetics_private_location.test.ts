@@ -90,7 +90,7 @@ describe('SyntheticsPrivateLocation', () => {
   } as unknown as UptimeServerSetup;
 
   it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
+    [true, 'Unable to create Synthetics package policy template for private location'],
     [
       false,
       'Unable to create Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
@@ -120,7 +120,7 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
+    [true, 'Unable to create Synthetics package policy template for private location'],
     [
       false,
       'Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
