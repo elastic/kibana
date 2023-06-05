@@ -49,7 +49,7 @@ export const GetStartedComponent: React.FC<Props> = ({ productTypes }) => {
             <EuiTitle size="xs">
               <h3>
                 {i18n.translate('xpack.serverlessSecurity.getStarted.subTitle', {
-                  defaultMessage: `Let’s  get started`,
+                  defaultMessage: `Let’s  get started with {productType}`,
                   values: {
                     productType: productTypes
                       .map((product) => `${product.product_line} ${product.product_tier}`)
