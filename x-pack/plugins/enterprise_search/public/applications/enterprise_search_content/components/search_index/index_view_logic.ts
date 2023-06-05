@@ -216,8 +216,6 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       {
         fetchIndexApiSuccess: (_, index) =>
           isConnectorIndex(index) ? index.connector.sync_now : false,
-        startAccessControlSyncApiSuccess: () => true, // TODO Efe- check if multiple syncs change have an effect on this
-        startIncrementalSyncApiSuccess: () => true,
         startSyncApiSuccess: () => true,
       },
     ],
