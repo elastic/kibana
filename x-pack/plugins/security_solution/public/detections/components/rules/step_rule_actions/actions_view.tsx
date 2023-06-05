@@ -54,28 +54,28 @@ export const FrequencyDescription: React.FC<{ frequency?: RuleActionFrequency }>
   const messagesByUnit: { [unit: string]: JSX.Element } = {
     s: (
       <FormattedMessage
-        id="kbn.securitySolution.rules.onceInEverySecondsLabel"
+        id="xpack.securitySolution.detectionEngine.ruleDetails.onceInEverySecondsLabel"
         defaultMessage="Once {secondsCount, plural, one {a} other {in every}} {secondsCount, plural, one {second} other {# seconds}}"
         values={{ secondsCount: value }}
       />
     ),
     m: (
       <FormattedMessage
-        id="kbn.securitySolution.rules.onceInEveryMinutesLabel"
+        id="xpack.securitySolution.detectionEngine.ruleDetails.onceInEveryMinutesLabel"
         defaultMessage="Once {minutesCount, plural, one {a} other {in every}} {minutesCount, plural, one {minute} other {# minutes}}"
         values={{ minutesCount: value }}
       />
     ),
     h: (
       <FormattedMessage
-        id="kbn.securitySolution.rules.onceInEveryHoursLabel"
+        id="xpack.securitySolution.detectionEngine.ruleDetails.onceInEveryHoursLabel"
         defaultMessage="Once {hoursCount, plural, one {an} other {in every}} {hoursCount, plural, one {hour} other {# hours}}"
         values={{ hoursCount: value }}
       />
     ),
     d: (
       <FormattedMessage
-        id="kbn.securitySolution.rules.onceInEveryDaysLabel"
+        id="xpack.securitySolution.detectionEngine.ruleDetails.onceInEveryDaysLabel"
         defaultMessage="Once {daysCount, plural, one {a} other {in every}} {daysCount, plural, one {day} other {# days}}"
         values={{ daysCount: value }}
       />
@@ -119,14 +119,15 @@ export const StepActionsRule: React.FC<{ ruleActionsData: ActionsStepRule }> = (
           connectorTypes={connectorTypes}
           connectors={connectors}
           actionTypeRegistry={actionTypeRegistry}
+          key={action.id}
         />
       ))}
       <EuiSpacer size="m" />
 
       {hasBothNotificationAndResponseActions && <EuiText size="m">{i18n.RESPONSE_ACTIONS}</EuiText>}
       <EuiSpacer size="s" />
-      {responseActions.map((action) => (
-        <ResponseAction action={action} />
+      {responseActions.map((action, index) => (
+        <ResponseAction action={action} key={`${action.actionTypeId}-${index}`} />
       ))}
     </div>
   );
@@ -155,7 +156,7 @@ function NotificationAction({
 
   return (
     <EuiFlexItem>
-      <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
+      <EuiFlexGroup alignItems="center" gutterSize="s" component="span" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={connectorTypeName} anchorClassName="eui-textTruncate">
             <EuiIcon size="m" type={iconType} />
@@ -163,7 +164,7 @@ function NotificationAction({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">{connectorName}</EuiText>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" component="span">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" component="span" responsive={false}>
             <EuiSpacer size="xs" />
             <EuiFlexItem grow={false}>
               <EuiIcon size="s" type="bell" color="subdued" />
@@ -187,7 +188,7 @@ function ResponseAction({ action }: ResponseActionProps) {
 
   return (
     <EuiFlexItem>
-      <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
+      <EuiFlexGroup alignItems="center" gutterSize="s" component="span" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
             <EuiIcon size="m" type={logo} />
