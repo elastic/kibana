@@ -18,7 +18,7 @@ import {
   BrushEndListener,
 } from '@elastic/charts';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -45,7 +45,7 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useIsDarkMode();
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [

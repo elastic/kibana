@@ -461,6 +461,7 @@ x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
+x-pack/packages/ml/data_frame_analytics_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/error_utils @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
@@ -520,6 +521,7 @@ packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
+x-pack/plugins/reporting_export_types @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 examples/response_stream @elastic/ml-ui
@@ -698,6 +700,7 @@ test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
+examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_field_list @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
