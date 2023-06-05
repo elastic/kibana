@@ -26,11 +26,11 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
 
   constructor(params: ServiceParams<GenAiConfig, GenAiSecrets>) {
     super(params);
-    console.log('CONFIG???!!!!', this.config);
 
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
+
     this.registerSubActions();
   }
 

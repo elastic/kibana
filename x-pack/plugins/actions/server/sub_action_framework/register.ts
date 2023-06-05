@@ -38,11 +38,8 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
   connector: SubActionConnectorType<Config, Secrets>;
   logger: Logger;
 }) => {
-  console.log('schema???', connector.schema);
-  console.log('Service???', connector.Service);
   validateService(connector.Service);
 
-  console.log('prevalid???');
   const validators = buildValidators<Config, Secrets>({ connector, configurationUtilities });
   const executor = buildExecutor({
     connector,

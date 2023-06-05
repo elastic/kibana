@@ -151,15 +151,18 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   const [{ config, id, name }] = useFormData({
     watch: ['config.apiProvider', 'config.dashboardId'],
   });
-  console.log('name', name);
   const { services } = useKibana();
   const { application, dashboard } = services;
   const { navigateToUrl } = application;
 
+  const doesHaveDashboardId = useMemo(() => {
+    return config != null && config.dashboardId != null;
+  }, [config]);
+
   const onClick = useCallback(
     (e) => {
       e.preventDefault();
-      if (config != null && config.dashboardId != null) {
+      if (doesHaveDashboardId) {
         const url = dashboard?.locator?.getRedirectUrl({
           query: {
             language: 'kuery',
@@ -172,7 +175,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         }
       }
     },
-    [config, dashboard?.locator, id, navigateToUrl]
+    [config.dashboardId, dashboard?.locator, doesHaveDashboardId, id, navigateToUrl]
   );
 
   const selectedProviderDefaultValue = useMemo(
@@ -232,7 +235,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           readOnly: true,
         }}
       />
-      {isEdit && (
+      {isEdit && doesHaveDashboardId && (
         <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
           {i18n.USAGE_DASHBOARD_LINK(selectedProviderDefaultValue, name)}
         </EuiLink>

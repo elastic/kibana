@@ -36,7 +36,6 @@ export abstract class SubActionConnector<Config, Secrets> {
     this.connector = params.connector;
     this.logger = params.logger;
     this.config = params.config;
-    console.log('CONFIG???', params.config);
     this.secrets = params.secrets;
     this.configurationUtilities = params.configurationUtilities;
     this.axiosInstance = axios.create();
