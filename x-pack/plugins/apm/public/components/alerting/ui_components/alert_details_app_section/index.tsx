@@ -19,7 +19,6 @@ import {
 import moment from 'moment';
 import React, { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { toMicroseconds as toMicrosecondsUtil } from '../../../../../common/utils/formatters';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
@@ -35,9 +34,6 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from './types';
-
-const toMicroseconds = (value?: number) =>
-  value ? toMicrosecondsUtil(value, 'milliseconds') : value;
 
 export function AlertDetailsAppSection({
   rule,
@@ -68,7 +64,7 @@ export function AlertDetailsAppSection({
         ),
         value: formatAlertEvaluationValue(
           alert?.fields[ALERT_RULE_TYPE_ID],
-          toMicroseconds(alert?.fields[ALERT_EVALUATION_THRESHOLD])
+          alert?.fields[ALERT_EVALUATION_THRESHOLD]
         ),
       },
       {
