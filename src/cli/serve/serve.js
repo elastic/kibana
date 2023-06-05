@@ -8,53 +8,16 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync, existsSync, writeFileSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { isKibanaDistributable } from '@kbn/repo-info';
-import { getConfigFromFiles } from '@kbn/config';
 import { readKeystore } from '../keystore/read_keystore';
+import { compileConfigStack } from './compile_config_stack';
+import { getConfigFromFiles } from '@kbn/config';
 
-/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
-/** @type {ServerlessProjectMode[]} */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
-
-const isNotEmpty = _.negate(_.isEmpty);
-
-/**
- * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | null}
- */
-function getServerlessModeFromOpts(opts) {
-  if (!opts.serverless) {
-    return null;
-  }
-
-  if (opts.serverless === true) {
-    // Defaulting to read the project-switcher's settings in `serverless.recent.dev.yml`
-    return null;
-  }
-
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
-    return opts.serverless;
-  }
-
-  throw new Error(
-    `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
-  );
-}
-
-/**
- * @param {string[]} configs List of configuration file paths
- * @returns {ServerlessProjectMode|undefined} The serverless mode in the summed configs
- */
-function getServerlessModeFromCfg(configs) {
-  const config = getConfigFromFiles(configs);
-
-  return config.serverless;
-}
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 function canRequire(path) {
   try {
@@ -69,9 +32,6 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = '@kbn/cli-dev-mode';
-const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
-
 const getBootstrapScript = (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
     // need dynamic require to exclude it from production build
@@ -84,80 +44,16 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
-const pathCollector = function () {
+function pathCollector() {
   const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
-};
+}
 
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
-
-/**
- * @param {string} filePath Path to the config file
- * @returns {boolean} Whether the file exists
- */
-function fileExists(filePath) {
-  try {
-    return statSync(filePath).isFile();
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return false;
-    }
-
-    throw err;
-  }
-}
-
-/**
- * @param {string} fileName Name of the config within the config directory
- * @returns {string | null} The resolved path to the config, if it exists, null otherwise
- */
-function resolveConfig(fileName) {
-  const filePath = resolve(getConfigDirectory(), fileName);
-  if (fileExists(filePath)) {
-    return filePath;
-  } else {
-    return null;
-  }
-}
-
-/**
- * @param {string} fileName
- * @param {object} opts
- */
-function writeProjectSwitcherConfig(fileName, opts) {
-  const path = resolve(getConfigDirectory(), fileName);
-  const configAlreadyExists = existsSync(path);
-
-  const preserveExistingConfig = opts.serverless === true;
-  const serverlessMode = getServerlessModeFromOpts(opts) || 'es';
-
-  if (configAlreadyExists && preserveExistingConfig) {
-    return;
-  } else {
-    const content = `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\nserverless: ${serverlessMode}\n`;
-    if (!configAlreadyExists || readFileSync(path).toString() !== content) {
-      writeFileSync(path, content);
-    }
-  }
-}
-
-/**
- * @returns {string[]}
- */
-function getEnvConfigs() {
-  const val = process.env.KBN_CONFIG_PATHS;
-  if (typeof val === 'string') {
-    return val
-      .split(',')
-      .filter((v) => !!v)
-      .map((p) => resolve(p.trim()));
-  }
-  return [];
-}
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
@@ -309,36 +205,15 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
-    const cliConfigs = opts.config || [];
-    const envConfigs = getEnvConfigs();
-    const defaultConfig = getConfigPath();
+    const configs = compileConfigStack({
+      configOverride: opts.config,
+      devConfig: opts.devConfig,
+      dev: opts.dev,
+      serverless: opts.serverless,
+    });
 
-    let configs = [cliConfigs, envConfigs, [defaultConfig]].find(isNotEmpty);
-
-    if (opts.dev && opts.devConfig !== false) {
-      configs.push(resolveConfig('kibana.dev.yml'));
-    }
-
-    if (opts.dev && opts.serverless) {
-      writeProjectSwitcherConfig('serverless.recent.dev.yml', opts);
-      configs.push(resolveConfig('serverless.recent.dev.yml'));
-    }
-
-    // Filtering out all config paths that didn't exist
-    configs = configs.filter(Boolean);
-
-    const serverlessMode = getServerlessModeFromOpts(opts) || getServerlessModeFromCfg(configs);
-    if (serverlessMode) {
-      configs.unshift(resolveConfig(`serverless.${serverlessMode}.yml`));
-      configs.unshift(resolveConfig('serverless.yml'));
-
-      if (opts.dev && opts.devConfig !== false) {
-        configs.push(resolveConfig('serverless.dev.yml'));
-        configs.push(resolveConfig(`serverless.${serverlessMode}.dev.yml`));
-      }
-    }
-
-    configs = configs.filter(Boolean);
+    const configsEvaluted = getConfigFromFiles(configs);
+    const isServerlessMode = !!(configsEvaluted.serverless || opts.serverless);
 
     const unknownOptions = this.getUnknownOptions();
     const cliArgs = {
@@ -359,7 +234,7 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
-      serverless: !!serverlessMode,
+      serverless: isServerlessMode,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
