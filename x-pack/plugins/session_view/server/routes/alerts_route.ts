@@ -117,14 +117,14 @@ export const searchAlerts = async (
       index: indices.join(','),
       sort: [{ '@timestamp': 'asc' }],
       search_after: cursor ? [cursor] : undefined,
-      fields: ALERT_FIELDS,
+      _source: ALERT_FIELDS,
     });
 
     // if an alert is being investigated, fetch it on it's own, as it's not guaranteed to come back in the above request.
     // we only need to do this for the first page of alerts.
     if (!cursor && investigatedAlertId) {
       const investigatedAlertSearch = await client.find({
-        fields: ALERT_FIELDS,
+        _source: ALERT_FIELDS,
         query: {
           match: {
             [ALERT_UUID_PROPERTY]: investigatedAlertId,

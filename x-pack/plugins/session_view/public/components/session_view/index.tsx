@@ -160,8 +160,8 @@ export const SessionView = ({
   }, [totalTTYOutputBytes?.total]);
 
   const handleRefresh = useCallback(() => {
-    refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
-    refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
+    refetchAlerts({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchTotalTTYOutput();
   }, [refetch, refetchAlerts, refetchTotalTTYOutput]);
 
@@ -199,9 +199,9 @@ export const SessionView = ({
   }, [newUpdatedAlertsStatus, fetchAlertStatus]);
 
   const onSearchIndexChange = useCallback(
-    (index: number) => {
+    (i: number) => {
       if (searchResults) {
-        const process = searchResults[index];
+        const process = searchResults[i];
 
         if (process) {
           onProcessSelected(process);
