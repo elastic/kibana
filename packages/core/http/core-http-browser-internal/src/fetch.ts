@@ -91,10 +91,6 @@ export class Fetch {
         );
         const initialResponse = this.fetchResponse(interceptedOptions);
 
-        if (interceptedOptions.rawResponse === false) {
-          resolve((await initialResponse) as HttpResponse<TResponseBody>);
-        }
-
         const interceptedResponse = await interceptResponse(
           interceptedOptions,
           initialResponse,
@@ -238,6 +234,12 @@ const validateFetchArguments = (
   } else {
     throw new Error(
       `Invalid fetch arguments, must either be (string, object) or (object, undefined), received (${typeof pathOrOptions}, ${typeof options})`
+    );
+  }
+
+  if (fullOptions.rawResponse && !fullOptions.asResponse) {
+    throw new Error(
+      'Invalid fetch arguments, rawResponse = true is only supported when asResponse = true'
     );
   }
 
