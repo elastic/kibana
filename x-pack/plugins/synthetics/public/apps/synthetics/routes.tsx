@@ -31,6 +31,7 @@ import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import {
+  InspectMonitorPortalNode,
   MonitorDetailsLinkPortalNode,
   MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
@@ -97,6 +98,7 @@ const getRoutes = (
             defaultMessage="Create Monitor"
           />
         ),
+        rightSideItems: [<OutPortal node={InspectMonitorPortalNode} />],
         children: (
           <FormattedMessage
             id="xpack.synthetics.addMonitor.pageHeader.description"
@@ -135,7 +137,10 @@ const getRoutes = (
             defaultMessage="Edit Monitor"
           />
         ),
-        rightSideItems: [<OutPortal node={MonitorTypePortalNode} />],
+        rightSideItems: [
+          <OutPortal node={MonitorTypePortalNode} />,
+          <OutPortal node={InspectMonitorPortalNode} />,
+        ],
         breadcrumbs: [
           {
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,

@@ -957,6 +957,20 @@
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.telemetry",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              "{ readonly settings: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -43,6 +43,10 @@ describe.skip('Alerts detection rules table auto-refresh', () => {
     }
   });
 
+  beforeEach(() => {
+    login();
+  });
+
   it('Auto refreshes rules', () => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
 

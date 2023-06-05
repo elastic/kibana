@@ -59,6 +59,7 @@ import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -313,9 +314,9 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-
   try {
+    const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+
     const myCases = await caseService.getCases({
       caseIds: query.cases.map((q) => q.id),
     });
@@ -451,7 +452,7 @@ export const update = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return CasesRt.encode(returnUpdatedCase);
+    return decodeOrThrow(CasesRt)(returnUpdatedCase);
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,

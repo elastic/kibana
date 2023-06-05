@@ -24,6 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
+  const retry = getService('retry');
 
   describe('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -47,8 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/154182
-    describe.skip('with a valid policy id', () => {
+    describe('with a valid policy id', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {
@@ -63,6 +63,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should display policy view', async () => {
+        this.timeout(150_000);
+        await retry.waitForWithTimeout('policy title is not empty', 120_000, async () => {
+          return (await testSubjects.getVisibleText('header-page-title')) !== '';
+        });
         expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
           policyInfo.packagePolicy.name
         );
@@ -81,47 +85,79 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('on the Malware protections section', () => {
-      let policyInfo: PolicyTestResourceInfo;
+    ['malware', 'ransomware'].forEach((protection) => {
+      describe(`on the ${protection} protections section`, () => {
+        let policyInfo: PolicyTestResourceInfo;
 
-      beforeEach(async () => {
-        policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
-        await testSubjects.existOrFail('malwareProtectionsForm');
-      });
+        beforeEach(async () => {
+          policyInfo = await policyTestResources.createPolicy();
+          await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+          await testSubjects.existOrFail(`${protection}ProtectionsForm`);
+        });
 
-      afterEach(async () => {
-        if (policyInfo) {
-          await policyInfo.cleanup();
-        }
-      });
+        afterEach(async () => {
+          if (policyInfo) {
+            await policyInfo.cleanup();
+          }
+        });
 
-      it('should show the supported Endpoint version', async () => {
-        expect(await testSubjects.getVisibleText('policySupportedVersions')).to.equal(
-          'Agent version ' + popupVersionsMap.get('malware')
-        );
-      });
+        it('should show the supported Endpoint version', async () => {
+          const supportedVersionElement = await testSubjects.findDescendant(
+            'policySupportedVersions',
+            await testSubjects.find(`${protection}ProtectionsForm`)
+          );
 
-      it('should show the custom message text area when the Notify User checkbox is checked', async () => {
-        expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(true);
-        await testSubjects.existOrFail('malwareUserNotificationCustomMessage');
-      });
+          expect(await supportedVersionElement.getVisibleText()).to.equal(
+            'Agent version ' + popupVersionsMap.get(protection)
+          );
+        });
 
-      it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('malwareUserNotificationCheckbox');
-        expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(false);
-        await testSubjects.missingOrFail('malwareUserNotificationCustomMessage');
-      });
+        it('should show the custom message text area when the Notify User checkbox is checked', async () => {
+          expect(await testSubjects.isChecked(`${protection}UserNotificationCheckbox`)).to.be(true);
+          await testSubjects.existOrFail(`${protection}UserNotificationCustomMessage`);
+        });
 
-      it('should preserve a custom notification message upon saving', async () => {
-        const customMessage = await testSubjects.find('malwareUserNotificationCustomMessage');
-        await customMessage.clearValue();
-        await customMessage.type('a custom malware notification message');
-        await pageObjects.policy.confirmAndSave();
-        await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        expect(await testSubjects.getVisibleText('malwareUserNotificationCustomMessage')).to.equal(
-          'a custom malware notification message'
-        );
+        it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
+          await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+            `${protection}UserNotificationCheckbox`
+          );
+          expect(await testSubjects.isChecked(`${protection}UserNotificationCheckbox`)).to.be(
+            false
+          );
+          await testSubjects.missingOrFail(`${protection}UserNotificationCustomMessage`);
+        });
+
+        it('should show a sample custom message', async () => {
+          const customMessageBox = await testSubjects.find(
+            `${protection}UserNotificationCustomMessage`
+          );
+          expect(await customMessageBox.getVisibleText()).equal(
+            'Elastic Security {action} {filename}'
+          );
+        });
+
+        it('should show a tooltip ', async () => {
+          const malwareTooltipIcon = await testSubjects.find(`${protection}TooltipIcon`);
+          await malwareTooltipIcon.moveMouseTo();
+
+          const malwareTooltip = await testSubjects.find(`${protection}Tooltip`);
+          expect(await malwareTooltip.getVisibleText()).equal(
+            `Selecting the user notification option will display a notification to the host user when ${protection} is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.`
+          );
+        });
+
+        it('should preserve a custom notification message upon saving', async () => {
+          const customMessageBox = await testSubjects.find(
+            `${protection}UserNotificationCustomMessage`
+          );
+          await customMessageBox.clearValue();
+          await customMessageBox.type('a custom notification message @$% 123');
+          await pageObjects.policy.confirmAndSave();
+          await testSubjects.existOrFail('policyDetailsSuccessMessage');
+          expect(
+            await testSubjects.getVisibleText(`${protection}UserNotificationCustomMessage`)
+          ).to.equal('a custom notification message @$% 123');
+        });
       });
     });
 
