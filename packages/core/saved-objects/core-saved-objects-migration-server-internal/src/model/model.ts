@@ -46,6 +46,7 @@ import {
   increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
+  REINDEX_TEMP_SUFFIX,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -86,7 +87,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else if (Either.isRight(res)) {
       // cluster routing allocation is enabled and we can continue with the migration as normal
@@ -124,7 +125,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       const laterVersionAlias = hasLaterVersionAlias(stateP.kibanaVersion, aliases);
       if (
-        // `.kibana_<version>` alias exists, and refers to a later version of Kibana
+        // a `.kibana_<version>` alias exist, which refers to a later version of Kibana
         // e.g. `.kibana_8.7.0` exists, and current stack version is 8.6.1
         // see https://github.com/elastic/kibana/issues/155136
         laterVersionAlias
@@ -266,7 +267,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'WAIT_FOR_MIGRATION_COMPLETION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -314,14 +315,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // If the write block failed because the index doesn't exist, it means
       // another instance already completed the legacy pre-migration. Proceed
       // to the next step.
-      if (isTypeof(res.left, 'index_not_found_exception')) {
+      const left = res.left;
+      if (isTypeof(left, 'index_not_found_exception')) {
         return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
       } else {
-        // @ts-expect-error TS doesn't correctly narrow this type to never
-        return throwBadResponse(stateP, res);
+        throwBadResponse(stateP, left);
       }
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -343,7 +344,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else if (Either.isRight(res)) {
       return {
@@ -476,10 +477,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS_PROPERTIES') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -723,13 +724,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'CALCULATE_EXCLUDE_FILTERS',
       };
-    } else if (isTypeof(res.left, 'index_not_found_exception')) {
+    } else {
       // We don't handle the following errors as the migration algorithm
       // will never cause them to occur:
       // - index_not_found_exception
-      return throwBadResponse(stateP, res.left as never);
-    } else {
-      return throwBadResponse(stateP, res.left);
+      throwBadResponse(stateP, res.left as never);
     }
   } else if (stateP.controlState === 'CALCULATE_EXCLUDE_FILTERS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -753,7 +752,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -788,7 +787,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
@@ -813,14 +812,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
       }
     } else if (Either.isLeft(res)) {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: 'An error occurred whilst waiting for other migrators to get to this step.',
-        throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
-      };
+      const left = res.left;
+
+      if (isTypeof(left, 'synchronization_failed')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
+        };
+      } else {
+        throwBadResponse(stateP, left);
+      }
     } else {
-      return throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -954,14 +959,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         sourceIndexMappings: Option.none,
       };
     } else if (Either.isLeft(res)) {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: 'An error occurred whilst waiting for other migrators to get to this step.',
-        throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
-      };
+      const left = res.left;
+
+      if (isTypeof(left, 'synchronization_failed')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
+        };
+      } else {
+        throwBadResponse(stateP, left);
+      }
     } else {
-      return throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
     // We follow a similar control flow as for
@@ -1458,7 +1469,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // index.
       return {
         ...stateP,
-        controlState: 'MARK_VERSION_INDEX_READY',
+        controlState: stateP.mustRelocateDocuments
+          ? 'MARK_VERSION_INDEX_READY_SYNC'
+          : 'MARK_VERSION_INDEX_READY',
         versionIndexReadyActions: stateP.versionIndexReadyActions,
       };
     } else {
@@ -1474,9 +1487,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      if (res.right === 'index_already_exists') {
+        // We were supposed to be on a "fresh deployment" state (we did not find any aliases)
+        // but the target index already exists. Assume it can be from a previous upgrade attempt that:
+        // - managed to clone ..._reindex_temp into target
+        // - but did NOT finish the process (aka did not get to update the index aliases)
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        };
+      }
       return {
         ...stateP,
-        controlState: 'MARK_VERSION_INDEX_READY',
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
       };
     } else if (Either.isLeft(res)) {
       const left = res.left;
@@ -1495,7 +1518,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
@@ -1503,7 +1526,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // left responses to handle here.
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
+  } else if (
+    stateP.controlState === 'MARK_VERSION_INDEX_READY' ||
+    stateP.controlState === 'MARK_VERSION_INDEX_READY_SYNC'
+  ) {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'DONE' };
@@ -1516,7 +1542,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
       } else if (isTypeof(left, 'index_not_found_exception')) {
-        if (left.index === stateP.tempIndex) {
+        if (left.index.endsWith(REINDEX_TEMP_SUFFIX)) {
           // another instance has already completed the migration and deleted
           // the temporary index
           return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
@@ -1531,6 +1557,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // cause it to occur (this error is only relevant to the LEGACY_DELETE
         // step).
         throwBadResponse(stateP, left as never);
+      } else if (isTypeof(left, 'synchronization_failed')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
+        };
       } else {
         throwBadResponse(stateP, left);
       }
@@ -1584,6 +1617,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // The state-action machine will never call the model in the terminating states
     throwBadControlState(stateP as never);
   } else {
-    return throwBadControlState(stateP);
+    throwBadControlState(stateP);
   }
 };
