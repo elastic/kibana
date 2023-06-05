@@ -150,34 +150,31 @@ export function getFleetPolicyStep({
               streams: [],
               type: 'pf-elastic-collector',
               vars: {
-                "host": {
-                  "value": ":8260",
-                  "type": "text"
+                host: {
+                  value: ':8260',
+                  type: 'text',
                 },
-                "secret_token": {
-                  "value": "foo_bar",
-                  "type": "text"
+                secret_token: {
+                  value: 'foo_bar',
+                  type: 'text',
                 },
-                "tls_enabled": {
-                  "value": true,
-                  "type": "bool"
+                tls_enabled: {
+                  value: true,
+                  type: 'bool',
                 },
-                "tls_supported_protocols": {
-                  "value": [
-                    "TLSv1.1",
-                    "TLSv1.2"
-                  ],
-                  "type": "text"
+                tls_supported_protocols: {
+                  value: ['TLSv1.1', 'TLSv1.2'],
+                  type: 'text',
                 },
-                "tls_certificate_path": {
-                  "value": "/app/config/certs/node.crt",
-                  "type": "text"
+                tls_certificate_path: {
+                  value: '/app/config/certs/node.crt',
+                  type: 'text',
                 },
-                "tls_key_path": {
-                  "value": "/app/config/certs/node.key",
-                  "type": "text"
-                }
-              }
+                tls_key_path: {
+                  value: '/app/config/certs/node.key',
+                  type: 'text',
+                },
+              },
             },
           ],
         },
