@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import VirtualList from 'react-tiny-virtual-list';
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import React, { useCallback, useRef } from 'react';
+import { List } from 'react-virtualized';
+import { EuiEmptyPrompt, EuiButton, useResizeObserver } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SearchResult as SearchResultType, State } from '../../../types';
@@ -24,12 +24,32 @@ const ITEM_HEIGHT = 64;
 
 export const SearchResult = React.memo(
   ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const { width = 300 } = useResizeObserver(ref.current);
     const dispatch = useDispatch();
     const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
     const clearSearch = () => {
       dispatch({ type: 'search:update', value: '' });
     };
+
+    const rowRenderer = useCallback(
+      ({ index, style }) => {
+        const item = result[index];
+
+        return (
+          <div key={item.field.id} style={style}>
+            <SearchResultItem
+              item={item}
+              areActionButtonsVisible={status === 'idle'}
+              isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
+              isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
+            />
+          </div>
+        );
+      },
+      [fieldToEdit, result, status]
+    );
 
     return result.length === 0 ? (
       <EuiEmptyPrompt
@@ -53,29 +73,18 @@ export const SearchResult = React.memo(
         }
       />
     ) : (
-      <VirtualList
-        data-test-subj="mappingsEditorSearchResult"
-        style={{ overflowX: 'hidden', ...virtualListStyle }}
-        width="100%"
-        height={listHeight}
-        itemCount={result.length}
-        itemSize={ITEM_HEIGHT}
-        overscanCount={4}
-        renderItem={({ index, style }) => {
-          const item = result[index];
-
-          return (
-            <div key={item.field.id} style={style}>
-              <SearchResultItem
-                item={item}
-                areActionButtonsVisible={status === 'idle'}
-                isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
-                isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
-              />
-            </div>
-          );
-        }}
-      />
+      <div ref={ref}>
+        <List
+          data-test-subj="mappingsEditorSearchResult"
+          style={{ overflowX: 'hidden', ...virtualListStyle }}
+          width={width}
+          height={listHeight}
+          rowCount={result.length}
+          rowHeight={ITEM_HEIGHT}
+          overscanRowCount={4}
+          rowRenderer={rowRenderer}
+        />
+      </div>
     );
   }
 );

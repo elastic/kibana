@@ -920,7 +920,6 @@
     "react-router-dom": "^5.2.0",
     "react-shortcuts": "^2.1.0",
     "react-syntax-highlighter": "^15.3.1",
-    "react-tiny-virtual-list": "^2.2.0",
     "react-use": "^15.3.8",
     "react-virtualized": "^9.22.3",
     "react-visibility-sensor": "^5.1.1",

@@ -5,11 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useMemo, useCallback } from 'react';
-import VirtualList from 'react-tiny-virtual-list';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { List } from 'react-virtualized';
 import { i18n } from '@kbn/i18n';
 import { get, isEqual } from 'lodash';
-import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiTextColor,
+  useResizeObserver,
+} from '@elastic/eui';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
@@ -125,6 +132,9 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   // fields.
   const listHeight = Math.min(filteredFields.length * ITEM_HEIGHT, height - SHOW_MORE_HEIGHT);
 
+  const ref = useRef<HTMLDivElement>(null);
+  const { width = 300 } = useResizeObserver(ref.current);
+
   const toggleShowAllFields = useCallback(() => {
     setShowAllFields((prev) => !prev);
   }, []);
@@ -179,36 +189,41 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       </div>
     );
 
+  const rowRenderer = useCallback(
+    ({ index, style }) => {
+      const field = filteredFields[index];
+
+      return (
+        <div key={field.key} style={style} data-test-subj="indexPatternFieldList">
+          <PreviewListItem
+            key={field.key}
+            field={field}
+            toggleIsPinned={controller.togglePinnedField}
+          />
+        </div>
+      );
+    },
+    [controller.togglePinnedField, filteredFields]
+  );
+
   if (currentDocument === undefined || height === -1) {
     return null;
   }
 
   return (
-    <div className="indexPatternFieldEditor__previewFieldList">
+    <div ref={ref} className="indexPatternFieldEditor__previewFieldList">
       {isEmptySearchResultVisible ? (
         renderEmptyResult()
       ) : (
-        <VirtualList
+        <List
           className="eui-scrollBar"
           style={{ overflowX: 'hidden' }}
-          width="100%"
+          width={width}
           height={listHeight}
-          itemCount={filteredFields.length}
-          itemSize={ITEM_HEIGHT}
-          overscanCount={4}
-          renderItem={({ index, style }) => {
-            const field = filteredFields[index];
-
-            return (
-              <div key={field.key} style={style} data-test-subj="indexPatternFieldList">
-                <PreviewListItem
-                  key={field.key}
-                  field={field}
-                  toggleIsPinned={controller.togglePinnedField}
-                />
-              </div>
-            );
-          }}
+          rowCount={filteredFields.length}
+          rowHeight={ITEM_HEIGHT}
+          overscanRowCount={4}
+          rowRenderer={rowRenderer}
         />
       )}
 
