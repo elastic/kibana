@@ -31,6 +31,14 @@ describe('Search service', () => {
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
   }
 
+  async function runMockDelete(mockContext: any, mockRequest: any, mockResponse: any) {
+    registerSearchRoute(mockCoreSetup.http.createRouter());
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.versioned.delete.mock.results[0].value.addVersion.mock.calls[0][1];
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
+  }
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockCoreSetup = coreMock.createSetup();
@@ -155,5 +163,27 @@ describe('Search service', () => {
     expect(error.statusCode).toBe(500);
     expect(error.body.message).toBe('This is odd');
     expect(error.body.attributes).toBe(undefined);
+  });
+
+  it('DELETE request calls cancel with the given ID and strategy', async () => {
+    const mockContext = {
+      search: {
+        cancel: jest.fn(),
+      },
+    };
+
+    const id = '1234';
+    const strategy = 'foo';
+    const params = { id, strategy };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params,
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await runMockDelete(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search.cancel).toBeCalled();
+    expect(mockContext.search.cancel).toBeCalledWith(id, { strategy });
   });
 });
