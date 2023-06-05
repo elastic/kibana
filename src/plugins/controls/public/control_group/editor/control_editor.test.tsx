@@ -83,7 +83,7 @@ describe('Data control editor', () => {
     controlEditor.update();
   };
 
-  describe.skip('creating a new control', () => {
+  describe('creating a new control', () => {
     test('does not show non-aggregatable field', async () => {
       await mountComponent();
       const nonAggOption = findTestSubject(controlEditor, 'field-picker-select-machine.os');
