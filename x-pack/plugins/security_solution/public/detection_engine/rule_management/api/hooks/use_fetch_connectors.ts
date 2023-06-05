@@ -8,8 +8,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-// import * as i18n from './translations';
 import { fetchConnectors, fetchConnectorTypes } from '../api';
+import * as i18n from './translations';
 
 export const useFetchConnectors = () => {
   const { addError } = useAppToasts();
@@ -18,11 +18,10 @@ export const useFetchConnectors = () => {
     ['GET', BASE_ACTION_API_PATH, 'connectors'],
     ({ signal }) => fetchConnectors(signal),
     {
-      refetchInterval: 60000,
       onError: (error) => {
         addError(error, {
-          title: 'i18n.FETCH_ERROR',
-          toastMessage: 'i18n.FETCH_ERROR_DESCRIPTION',
+          title: i18n.CONNECTORS_FETCH_ERROR,
+          toastMessage: i18n.ACTIONS_FETCH_ERROR_DESCRIPTION,
         });
       },
     }
@@ -36,11 +35,10 @@ export const useFetchConnectorTypes = () => {
     ['GET', BASE_ACTION_API_PATH, 'connector_types', 'siem'],
     ({ signal }) => fetchConnectorTypes(signal),
     {
-      refetchInterval: 60000,
       onError: (error) => {
         addError(error, {
-          title: 'i18n.FETCH_ERROR',
-          toastMessage: 'i18n.FETCH_ERROR_DESCRIPTION',
+          title: i18n.CONNECTOR_TYPES_FETCH_ERROR,
+          toastMessage: i18n.ACTIONS_FETCH_ERROR_DESCRIPTION,
         });
       },
     }

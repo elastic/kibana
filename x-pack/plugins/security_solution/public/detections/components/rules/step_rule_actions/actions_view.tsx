@@ -97,7 +97,7 @@ export const StepActionsRule: React.FC<{ ruleActionsData: ActionsStepRule }> = (
   const { data: connectors, isLoading } = useFetchConnectors();
   const { data: connectorTypes } = useFetchConnectorTypes();
 
-  if (!ruleActionsData || !connectors || isLoading || !connectorTypes) {
+  if (isLoading || !connectors || !connectorTypes || !ruleActionsData) {
     return null;
   }
 
@@ -139,10 +139,6 @@ interface NotificationActionProps {
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-interface ResponseActionProps {
-  action: Omit<RuleAction, 'id' | 'group'>;
-}
-
 function NotificationAction({
   action,
   connectorTypes,
@@ -180,6 +176,10 @@ function NotificationAction({
       <EuiSpacer size="s" />
     </EuiFlexItem>
   );
+}
+
+interface ResponseActionProps {
+  action: Omit<RuleAction, 'id' | 'group'>;
 }
 
 function ResponseAction({ action }: ResponseActionProps) {

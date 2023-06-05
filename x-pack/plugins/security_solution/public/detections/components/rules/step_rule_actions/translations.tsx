@@ -77,11 +77,6 @@ export const SUMMARY_OF_ALERTS_PER_RULE_RUN = i18n.translate(
   { defaultMessage: 'Summary of alerts. Per rule run.' }
 );
 
-export const SUMMARY_OF_ALERTS = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
-  { defaultMessage: 'Summary of alerts' }
-);
-
 export const PERIODICALLY = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.periodically',
   { defaultMessage: 'Periodically' }
