@@ -21,7 +21,6 @@ beforeEach(() => {
 });
 
 describe('VulnerabilitiesByResource', () => {
-  // Mock the dataView prop
   const dataView: any = {};
 
   const renderVulnerabilityByResource = () => {
