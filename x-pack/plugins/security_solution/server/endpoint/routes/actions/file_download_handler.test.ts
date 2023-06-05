@@ -17,7 +17,7 @@ import { EndpointAuthorizationError, NotFoundError } from '../../errors';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import type { FleetFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { FleetFromHostFileClientInterface } from '@kbn/fleet-plugin/server';
 
 jest.mock('../../services');
 
@@ -73,16 +73,15 @@ describe('Response Actions file download API', () => {
 
   describe('Route handler', () => {
     let fileDownloadHandler: ReturnType<typeof getActionFileDownloadRouteHandler>;
-    let fleetFilesClientMock: jest.Mocked<FleetFileClientInterface>;
+    let fleetFilesClientMock: jest.Mocked<FleetFromHostFileClientInterface>;
 
     beforeEach(async () => {
       fileDownloadHandler = getActionFileDownloadRouteHandler(apiTestSetup.endpointAppContextMock);
 
       validateActionIdMock.mockImplementation(async () => {});
 
-      fleetFilesClientMock = (await apiTestSetup.endpointAppContextMock.service.getFleetFilesClient(
-        'from-host'
-      )) as jest.Mocked<FleetFileClientInterface>;
+      fleetFilesClientMock =
+        (await apiTestSetup.endpointAppContextMock.service.getFleetFromHostFilesClient()) as jest.Mocked<FleetFromHostFileClientInterface>;
     });
 
     it('should error if action ID is invalid', async () => {

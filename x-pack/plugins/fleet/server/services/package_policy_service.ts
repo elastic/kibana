@@ -56,6 +56,11 @@ export interface PackagePolicyClient {
     request?: KibanaRequest
   ): Promise<PackagePolicy>;
 
+  inspect(
+    soClient: SavedObjectsClientContract,
+    packagePolicy: NewPackagePolicyWithId
+  ): Promise<NewPackagePolicy>;
+
   bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,

@@ -7,15 +7,17 @@
  */
 
 import React from 'react';
-
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { DiscoverGridEmbeddable, DiscoverGridEmbeddableProps } from './saved_search_grid';
 import { DiscoverDocTableEmbeddable } from '../components/doc_table/create_doc_table_embeddable';
 import { DocTableEmbeddableProps } from '../components/doc_table/doc_table_embeddable';
+import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import { SearchProps } from './saved_search_embeddable';
 
 interface SavedSearchEmbeddableComponentProps {
   searchProps: SearchProps;
   useLegacyTable: boolean;
+  query?: AggregateQuery | Query;
 }
 
 const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
@@ -24,14 +26,22 @@ const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 export function SavedSearchEmbeddableComponent({
   searchProps,
   useLegacyTable,
+  query,
 }: SavedSearchEmbeddableComponentProps) {
   if (useLegacyTable) {
-    return <DiscoverDocTableEmbeddableMemoized {...(searchProps as DocTableEmbeddableProps)} />;
+    const isPlainRecord = isTextBasedQuery(query);
+    return (
+      <DiscoverDocTableEmbeddableMemoized
+        {...(searchProps as DocTableEmbeddableProps)}
+        isPlainRecord={isPlainRecord}
+      />
+    );
   }
   return (
     <DiscoverGridEmbeddableMemoized
       {...(searchProps as DiscoverGridEmbeddableProps)}
       showFullScreenButton={false}
+      query={query}
       className="dscDiscoverGrid"
     />
   );
