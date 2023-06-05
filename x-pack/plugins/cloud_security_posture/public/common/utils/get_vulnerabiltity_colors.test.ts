@@ -50,4 +50,11 @@ describe('getSeverityStatusColor', () => {
   it('should return #aaa for an unknown severity', () => {
     expect(getSeverityStatusColor('UNKNOWN')).toBe('#aaa');
   });
+
+  it('should return handle severity case insensitively', () => {
+    expect(getSeverityStatusColor('high')).toBe(euiThemeVars.euiColorVis9_behindText);
+    expect(getSeverityStatusColor('High')).toBe(euiThemeVars.euiColorVis9_behindText);
+    expect(getSeverityStatusColor('critical')).toBe(euiThemeVars.euiColorDanger);
+    expect(getSeverityStatusColor('criticaL')).toBe(euiThemeVars.euiColorDanger);
+  });
 });
