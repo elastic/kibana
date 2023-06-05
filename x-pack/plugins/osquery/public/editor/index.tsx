@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
@@ -22,6 +22,10 @@ interface OsqueryEditorProps {
   }>;
 }
 
+const editorOptions = {
+  theme: 'osquery',
+  automaticLayout: true,
+};
 const MIN_HEIGHT = 100;
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   defaultValue,
@@ -40,14 +44,6 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   );
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
-
-  const editorOptions = useMemo(
-    () => ({
-      theme: 'osquery',
-      automaticLayout: true,
-    }),
-    []
-  );
 
   useEffect(() => {
     const disposable = initializeOsqueryEditor();
