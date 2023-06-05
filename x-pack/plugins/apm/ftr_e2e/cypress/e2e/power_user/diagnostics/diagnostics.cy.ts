@@ -45,7 +45,7 @@ describe('Diagnostics', () => {
       cy.loginAs({ username: 'elastic', password: 'changeme' });
       cy.visitKibana('/app/apm/diagnostics/import-export');
       cy.get('#file-picker').selectFile(
-        './cypress/e2e/power_user/diagnostics/apm-diagnostics-8.9.0-1685708312530.json'
+        './cypress/e2e/power_user/diagnostics/apm_diagnostics_8.9.0_1685708312530.json'
       );
     });
 
