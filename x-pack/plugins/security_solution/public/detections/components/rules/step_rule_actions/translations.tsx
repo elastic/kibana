@@ -68,16 +68,16 @@ export const RESPONSE_ACTIONS = i18n.translate(
 );
 
 export const FOR_EACH_ALERT_PER_RULE_RUN = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.forEachOption',
+  'xpack.securitySolution.detectionEngine.actionNotifyWhen.forEachOption',
   { defaultMessage: 'For each alert. Per rule run.' }
 );
 
 export const SUMMARY_OF_ALERTS_PER_RULE_RUN = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
+  'xpack.securitySolution.detectionEngine.actionNotifyWhen.summaryOption',
   { defaultMessage: 'Summary of alerts. Per rule run.' }
 );
 
 export const PERIODICALLY = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.periodically',
+  'xpack.securitySolution.detectionEngine.actionNotifyWhen.periodically',
   { defaultMessage: 'Periodically' }
 );
