@@ -9,4 +9,6 @@ import { createHtmlPortalNode } from 'react-reverse-portal';
 
 export const MonitorTypePortalNode = createHtmlPortalNode();
 
+export const InspectMonitorPortalNode = createHtmlPortalNode();
+
 export const MonitorDetailsLinkPortalNode = createHtmlPortalNode();
