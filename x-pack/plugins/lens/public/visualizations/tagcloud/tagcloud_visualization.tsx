@@ -19,6 +19,7 @@ import {
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry } from '@kbn/coloring';
+import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
@@ -42,7 +43,7 @@ export const getTagcloudVisualization = ({
   visualizationTypes: [
     {
       id: 'lnsTagcloud',
-      icon: 'visTagCloud',
+      icon: IconChartTagcloud,
       label: TAGCLOUD_LABEL,
       groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
         defaultMessage: 'Proportion',
@@ -72,7 +73,7 @@ export const getTagcloudVisualization = ({
 
   getDescription() {
     return {
-      icon: 'visTagCloud',
+      icon: IconChartTagcloud,
       label: TAGCLOUD_LABEL,
     };
   },

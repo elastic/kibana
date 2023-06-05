@@ -6,6 +6,7 @@
  */
 
 import { partition } from 'lodash';
+import { IconChartTagcloud } from '@kbn/chart-icons';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
@@ -38,7 +39,7 @@ export function suggestions({
     })
     .map((bucket) => {
       return {
-        previewIcon: 'visTagCloud',
+        previewIcon: IconChartTagcloud,
         title: TAGCLOUD_LABEL,
         hide: true, // hide suggestions while in tech preview
         score: 0.1,
