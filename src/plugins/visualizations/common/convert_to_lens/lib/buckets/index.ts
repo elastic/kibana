@@ -96,11 +96,11 @@ export const getBucketColumns = (
       }
     case BUCKET_TYPES.SIGNIFICANT_TERMS:
       return convertToSignificantTermsColumn(
-          agg.aggId ?? '',
-          { agg, dataView, metricColumns, aggs, visType },
-          label,
-          isSplit
-        );
+        agg.aggId ?? '',
+        { agg, dataView, metricColumns, aggs, visType },
+        label,
+        isSplit
+      );
   }
 
   return null;

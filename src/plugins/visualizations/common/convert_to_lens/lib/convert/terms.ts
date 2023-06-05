@@ -70,7 +70,9 @@ const getOrderByWithAgg = ({
   };
 };
 
-export const filterOutEmptyValues = (values: string | Array<number | string>): number[] | string[] => {
+export const filterOutEmptyValues = (
+  values: string | Array<number | string>
+): number[] | string[] => {
   if (typeof values === 'string') {
     return Boolean(values) ? [values] : [];
   }
