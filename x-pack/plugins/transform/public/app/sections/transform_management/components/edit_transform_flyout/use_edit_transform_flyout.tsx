@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
 
-import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../constants/validation_messages';
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
 import {
   DEFAULT_TRANSFORM_FREQUENCY,

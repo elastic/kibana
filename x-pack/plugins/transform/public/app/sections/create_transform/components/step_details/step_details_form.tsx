@@ -28,7 +28,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../constants/validation_messages';
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
 import {
   isEsIndices,
   isEsIngestPipelines,

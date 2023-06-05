@@ -11,7 +11,7 @@ import {
   numberRange10To10000NotValidErrorMessage,
   numberRangeMinus1To100NotValidErrorMessage,
   pageSearchSizeInvalidErrorMessage,
-} from '../constants/validation_messages';
+} from './constants/validation_messages';
 
 const RETENTION_POLICY_MIN_AGE_SECONDS = 60;
 const TIME_UNITS = ['nanos', 'micros', 'ms', 's', 'm', 'h', 'd'];
