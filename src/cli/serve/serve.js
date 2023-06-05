@@ -206,7 +206,7 @@ export default function (program) {
 
   command.action(async function (opts) {
     const configs = compileConfigStack({
-      configOverride: opts.config,
+      configOverrides: opts.config,
       devConfig: opts.devConfig,
       dev: opts.dev,
       serverless: opts.serverless,

@@ -22,7 +22,7 @@ const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
 
 /**
  * Collects paths to configurations to be included in the final configuration stack.
- * @param {{configOverride?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true}} options Options impacting the outgoing config list
+ * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true}} options Options impacting the outgoing config list
  * @returns List of paths to configurations to be merged, from left to right.
  */
 export function compileConfigStack({ configOverrides, devConfig, dev, serverless }) {
