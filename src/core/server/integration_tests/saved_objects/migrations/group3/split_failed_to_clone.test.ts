@@ -13,7 +13,6 @@ import {
   type SavedObjectsType,
   MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-// @ts-expect-error
 import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
 import {
   clearLog,
