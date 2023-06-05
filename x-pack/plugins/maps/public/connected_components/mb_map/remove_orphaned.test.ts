@@ -45,10 +45,7 @@ class MockLayer {
   private readonly _mbSourceIds: string[];
   private readonly _mbLayerIdsToSource: Array<{ id: string; source: string }>;
 
-  constructor(
-    mbSourceIds: string[],
-    mbLayerIdsToSource: Array<{ id: string; source: string }>
-  ) {
+  constructor(mbSourceIds: string[], mbLayerIdsToSource: Array<{ id: string; source: string }>) {
     this._mbSourceIds = mbSourceIds;
     this._mbLayerIdsToSource = mbLayerIdsToSource;
   }
