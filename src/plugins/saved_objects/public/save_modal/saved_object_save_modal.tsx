@@ -92,11 +92,19 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     const hasColumns = !!this.props.rightOptions;
 
+    const titleInputValid =
+      hasAttemptedSubmit &&
+      ((!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0);
+
     const formBodyContent = (
       <>
         <EuiFormRow
           fullWidth
           label={<FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />}
+          isInvalid={titleInputValid}
+          error={i18n.translate('savedObjects.saveModal.titleRequired', {
+            defaultMessage: 'A title is required',
+          })}
         >
           <EuiFieldText
             fullWidth
@@ -104,10 +112,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
-            isInvalid={
-              hasAttemptedSubmit &&
-              ((!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0)
-            }
+            isInvalid={titleInputValid}
             aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
           />
         </EuiFormRow>
