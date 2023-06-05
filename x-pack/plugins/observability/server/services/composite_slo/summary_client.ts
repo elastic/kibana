@@ -16,7 +16,7 @@ import {
   toMomentUnitOfTime,
 } from '@kbn/slo-schema';
 import moment from 'moment';
-import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { CompositeSLO, CompositeSLOId, DateRange, Summary } from '../../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
@@ -38,7 +38,7 @@ export class DefaultSummaryClient implements SummaryClient {
       {}
     );
     const searches = compositeSloList.flatMap((compositeSlo) => [
-      { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+      { index: SLO_DESTINATION_INDEX_PATTERN },
       generateSearchQuery(compositeSlo, dateRangeByCompositeSlo[compositeSlo.id]),
     ]);
 
