@@ -16,7 +16,7 @@ export interface OutputError {
   statusCode: number;
 }
 
-export const createGenAiDashboard = async ({
+export const getGenAiDashboard = async ({
   logger,
   savedObjectsClient,
 }: {
@@ -33,13 +33,15 @@ export const createGenAiDashboard = async ({
       genAiSavedObjectId
     );
 
-    console.log('doesExist', doesExist);
+    console.log('GET!!!!! doesExist', doesExist);
 
     return {
       success: true,
       body: doesExist,
     };
   } catch (error) {
+    console.log('GET!!!!! error', error);
+
     logger.error(`Failed to fetch Gen Ai Dashboard saved object: ${error.message}`);
     return { success: false, error: { message: error.message, statusCode: error.statusCode } };
   }
@@ -53,9 +55,11 @@ export const createGenAiDashboard = async ({
         id: genAiSavedObjectId,
       }
     );
+    console.log('CREATE!!!!! doesExist', result);
 
     return { success: true, body: result };
   } catch (error) {
+    console.log('CREATE!!!!! error', error);
     logger.error(`Failed to create Gen Ai Dashboard saved object: ${error.message}`);
     return {
       success: false,

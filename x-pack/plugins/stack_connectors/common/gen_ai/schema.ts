@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 export const GenAiConfigSchema = schema.object({
   apiProvider: schema.string(),
   apiUrl: schema.string(),
+  dashboardUrl: schema.string(),
 });
 
 export const GenAiSecretsSchema = schema.object({ apiKey: schema.string() });
