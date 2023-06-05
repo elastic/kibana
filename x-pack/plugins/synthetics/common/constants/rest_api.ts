@@ -40,6 +40,7 @@ export enum API_URLS {
   INDEX_TEMPLATES = '/internal/uptime/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
+  SYNTHETICS_MONITOR_INSPECT = '/internal/uptime/service/monitor/inspect',
   GET_SYNTHETICS_MONITOR = '/internal/uptime/service/monitor/{monitorId}',
   SYNTHETICS_ENABLEMENT = '/internal/uptime/service/enablement',
   RUN_ONCE_MONITOR = '/internal/uptime/service/monitors/run_once',

@@ -969,61 +969,20 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.burnRateThreshold",
-            "type": "number",
+            "id": "def-public.BurnRateRuleParams.windows",
+            "type": "Array",
             "tags": [],
-            "label": "burnRateThreshold",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.maxBurnRateThreshold",
-            "type": "number",
-            "tags": [],
-            "label": "maxBurnRateThreshold",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.longWindow",
-            "type": "Object",
-            "tags": [],
-            "label": "longWindow",
+            "label": "windows",
             "description": [],
             "signature": [
               {
                 "pluginId": "observability",
                 "scope": "public",
                 "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Duration",
-                "text": "Duration"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.shortWindow",
-            "type": "Object",
-            "tags": [],
-            "label": "shortWindow",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Duration",
-                "text": "Duration"
-              }
+                "section": "def-public.WindowSchema",
+                "text": "WindowSchema"
+              },
+              "[]"
             ],
             "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
             "deprecated": false,
@@ -3459,6 +3418,104 @@
               "number[]"
             ],
             "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.WindowSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "WindowSchema",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.burnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "burnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.maxBurnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "maxBurnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.longWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "longWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.shortWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "shortWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.actionGroup",
+            "type": "string",
+            "tags": [],
+            "label": "actionGroup",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11697,6 +11754,59 @@
     "functions": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.asDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "asDuration",
+        "description": [
+          "\nConverts value and returns it formatted - 00 unit"
+        ],
+        "signature": [
+          "(value: ",
+          "Maybe",
+          "<number>, { defaultValue = NOT_AVAILABLE_LABEL, extended }: FormatterOptions) => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "Maybe",
+              "<number>"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asDuration.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ defaultValue = NOT_AVAILABLE_LABEL, extended }",
+            "description": [],
+            "signature": [
+              "FormatterOptions"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.asPercent",
         "type": "Function",
         "tags": [],
@@ -11818,6 +11928,207 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getAlertDetailsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertDetailsUrl",
+        "description": [],
+        "signature": [
+          "(basePath: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          },
+          ", spaceId: string, alertUuid: string | null) => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IBasePath",
+                "text": "IBasePath"
+              }
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertUuid",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getAlertUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertUrl",
+        "description": [],
+        "signature": [
+          "(alertUuid: string | null, spaceId: string, startedAt: string, alertsLocator?: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.AlertsLocatorParams",
+            "text": "AlertsLocatorParams"
+          },
+          "> | undefined, publicBaseUrl?: string | undefined) => Promise<string>"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertUuid",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$3",
+            "type": "string",
+            "tags": [],
+            "label": "startedAt",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "alertsLocator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "common",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-common.AlertsLocatorParams",
+                "text": "AlertsLocatorParams"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$5",
+            "type": "string",
+            "tags": [],
+            "label": "publicBaseUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
