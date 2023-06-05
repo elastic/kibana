@@ -28,16 +28,23 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
     return [];
   }
 
-  const { indexPatternId, ...aggConfigs } = column.meta.sourceParams;
-  const indexPattern = await getIndexPatterns().get(indexPatternId);
-  const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
-    aggConfigs as AggConfigSerialized,
-  ]);
-  const aggConfig = aggConfigsInstance.aggs[0];
-  const field: DataViewFieldBase = aggConfig.params.field;
+  const { indexPatternId, ...aggConfigs } = column.meta.sourceParams || {};
+  let isDate = column.meta.type === 'date';
+  let field: DataViewFieldBase = { name: column.name, type: column.meta.type };
+  let indexPattern;
+  if (indexPatternId) {
+    indexPattern = await getIndexPatterns().get(indexPatternId);
+    const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
+      aggConfigs as AggConfigSerialized,
+    ]);
+    const aggConfig = aggConfigsInstance.aggs[0];
+    field = aggConfig.params.field;
 
-  if (!field || event.range.length <= 1) {
-    return [];
+    isDate = field.type === 'date';
+
+    if (!field || event.range.length <= 1) {
+      return [];
+    }
   }
 
   const min = event.range[0];
@@ -46,8 +53,6 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
   if (min === max) {
     return [];
   }
-
-  const isDate = field.type === 'date';
 
   const range: RangeFilterParams = {
     gte: isDate ? moment(min).toISOString() : min,

@@ -874,6 +874,7 @@ describe('Textbased Data Source', () => {
           isBucketed: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
+          scale: 'interval',
         });
       });
 

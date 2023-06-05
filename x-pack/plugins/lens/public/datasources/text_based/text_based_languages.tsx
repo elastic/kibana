@@ -614,6 +614,7 @@ export function getTextBasedDatasource({
               dataType: column?.meta?.type as DataType,
               label: columnLabelMap[columnId] ?? column?.fieldName,
               isBucketed: Boolean(column?.meta?.type !== 'number'),
+              scale: 'interval',
               hasTimeShift: false,
               hasReducedTimeRange: false,
             };
