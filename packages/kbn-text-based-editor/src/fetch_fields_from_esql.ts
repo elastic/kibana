@@ -8,7 +8,7 @@
 
 import { pluck } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { Query, AggregateQuery } from '@kbn/es-query';
+import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
@@ -20,9 +20,14 @@ interface TextBasedLanguagesErrorResponse {
   type: 'error';
 }
 
-export function fetchFieldsFromESQL(query: Query | AggregateQuery, expressions: ExpressionsStart) {
+export function fetchFieldsFromESQL(
+  query: Query | AggregateQuery,
+  expressions: ExpressionsStart,
+  time?: TimeRange
+) {
   return textBasedQueryStateToAstWithValidation({
     query,
+    time,
   })
     .then((ast) => {
       if (ast) {

@@ -49,7 +49,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  const isGroupAgg = isGroupAggregation(params.termField) || isEsqlQueryRule;
+  const isEsqlQuery = isEsqlQueryRule(params.searchType);
+  const isGroupAgg = isGroupAggregation(params.termField) || (isEsqlQuery && params.alertId);
+
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
   // value of the hit count. If the threshold condition is met, the hits are counted
@@ -107,7 +109,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     // group aggregations use the bucket selector agg to compare conditions
     // within the ES query, so only 'met' results are returned, therefore we don't need
     // to use the compareFn
-    const met = isGroupAgg ? true : compareFn(value, params.threshold);
+    const met = isGroupAgg || isEsqlQuery ? true : compareFn(value, params.threshold);
     if (!met) {
       unmetGroupValues[alertId] = value;
       continue;

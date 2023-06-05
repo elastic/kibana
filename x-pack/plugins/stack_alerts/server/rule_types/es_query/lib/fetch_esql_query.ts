@@ -8,7 +8,7 @@
 import { entries } from 'lodash';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView, DataViewsContract, getTime } from '@kbn/data-plugin/common';
-import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import { parseAggregationResults, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { OnlyEsqlQueryRuleParams } from '../types';
@@ -69,9 +69,7 @@ export async function fetchEsqlQuery({
   const response = await esClient.transport.request<EsqlTable>({
     method: 'POST',
     path: '/_esql',
-    body: {
-      ...query,
-    },
+    body: query,
   });
 
   return {
@@ -85,7 +83,7 @@ export async function fetchEsqlQuery({
         timed_out: false,
         _shards: { failed: 0, successful: 0, total: 0 },
         hits: { hits: [] },
-        aggregations: toEsResult(response),
+        aggregations: toEsResult(response, params.alertId),
       },
       resultLimit: alertLimit,
     }),
@@ -94,7 +92,7 @@ export async function fetchEsqlQuery({
   };
 }
 
-export function getEsqlQuery(
+function getEsqlQuery(
   index: DataView,
   params: OnlyEsqlQueryRuleParams,
   latestTimestamp: string | undefined,
@@ -173,45 +171,45 @@ export function getEsqlQuery(
   };
 }
 
-const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
-  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
-    acc[column.name] = row[i];
-
-    return acc;
-  }, {});
-};
-
-export const toEsResult = (results: EsqlTable) => {
-  const byInstanceId: Record<string, EsqlHit[]> = {};
-  results.values.forEach((row, i) => {
-    const id = 'test';
+const toEsResult = (results: EsqlTable, alertId?: string) => {
+  const documentsGrouping = results.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(results.columns, row);
+    const id = alertId ? document[alertId] ?? 'undefined' : UngroupedGroupId;
     const hit = {
       _id: id,
       _index: '',
-      _source: {
-        ...document,
-      },
+      _source: document,
     };
-    if (byInstanceId[id]) {
-      byInstanceId[id].push(hit);
+    if (acc[id]) {
+      acc[id].push(hit);
     } else {
-      byInstanceId[id] = [hit];
+      acc[id] = [hit];
     }
-  });
+
+    return acc;
+  }, {});
+
   return {
     groupAgg: {
-      buckets: entries(byInstanceId).map(([key, value]) => {
+      buckets: entries(documentsGrouping).map(([key, value]) => {
         return {
           key,
           doc_count: value.length,
           topHitsAgg: {
             hits: {
-              hits: value ?? [],
+              hits: value,
             },
           },
         };
       }),
     },
   };
+};
+
+const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
+  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
+    acc[column.name] = row[i];
+
+    return acc;
+  }, {});
 };
