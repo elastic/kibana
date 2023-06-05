@@ -969,61 +969,20 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.burnRateThreshold",
-            "type": "number",
+            "id": "def-public.BurnRateRuleParams.windows",
+            "type": "Array",
             "tags": [],
-            "label": "burnRateThreshold",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.maxBurnRateThreshold",
-            "type": "number",
-            "tags": [],
-            "label": "maxBurnRateThreshold",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.longWindow",
-            "type": "Object",
-            "tags": [],
-            "label": "longWindow",
+            "label": "windows",
             "description": [],
             "signature": [
               {
                 "pluginId": "observability",
                 "scope": "public",
                 "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Duration",
-                "text": "Duration"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.shortWindow",
-            "type": "Object",
-            "tags": [],
-            "label": "shortWindow",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Duration",
-                "text": "Duration"
-              }
+                "section": "def-public.WindowSchema",
+                "text": "WindowSchema"
+              },
+              "[]"
             ],
             "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
             "deprecated": false,
@@ -3464,10 +3423,123 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.WindowSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "WindowSchema",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.burnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "burnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.maxBurnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "maxBurnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.longWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "longWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.shortWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "shortWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.actionGroup",
+            "type": "string",
+            "tags": [],
+            "label": "actionGroup",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.alertsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "alertsLocatorID",
+        "description": [],
+        "signature": [
+          "\"ALERTS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-public.apmServiceGroupMaxNumberOfServices",
@@ -3786,6 +3858,51 @@
           " | undefined; list: () => string[]; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.ruleDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "ruleDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULE_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.rulesLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "rulesLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULES_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.sloDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4342,7 +4459,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "CountResponse",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -4588,29 +4705,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -4716,7 +4833,33 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<TDocument>; }; graph: ",
                   "default",
-                  "; ilm: ",
+                  "; healthReport: { (this: That, params?: ",
+                  "HealthReportRequest",
+                  " | ",
+                  "HealthReportRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "HealthReportResponse",
+                  ">; (this: That, params?: ",
+                  "HealthReportRequest",
+                  " | ",
+                  "HealthReportRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "HealthReportResponse",
+                  ", unknown>>; (this: That, params?: ",
+                  "HealthReportRequest",
+                  " | ",
+                  "HealthReportRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "HealthReportResponse",
+                  ">; }; ilm: ",
                   "default",
                   "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
@@ -5162,7 +5305,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ScrollResponse",
-                  "<TDocument, TAggregations>>; }; searchMvt: { (this: That, params: ",
+                  "<TDocument, TAggregations>>; }; searchApplication: ",
+                  "default",
+                  "; searchMvt: { (this: That, params: ",
                   "SearchMvtRequest",
                   " | ",
                   "SearchMvtRequest",
@@ -5627,7 +5772,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "CountResponse",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -5873,29 +6018,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -6001,7 +6146,33 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<TDocument>; }; graph: ",
                   "default",
-                  "; ilm: ",
+                  "; healthReport: { (this: That, params?: ",
+                  "HealthReportRequest",
+                  " | ",
+                  "HealthReportRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "HealthReportResponse",
+                  ">; (this: That, params?: ",
+                  "HealthReportRequest",
+                  " | ",
+                  "HealthReportRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "HealthReportResponse",
+                  ", unknown>>; (this: That, params?: ",
+                  "HealthReportRequest",
+                  " | ",
+                  "HealthReportRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "HealthReportResponse",
+                  ">; }; ilm: ",
                   "default",
                   "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
@@ -6447,7 +6618,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ScrollResponse",
-                  "<TDocument, TAggregations>>; }; searchMvt: { (this: That, params: ",
+                  "<TDocument, TAggregations>>; }; searchApplication: ",
+                  "default",
+                  "; searchMvt: { (this: That, params: ",
                   "SearchMvtRequest",
                   " | ",
                   "SearchMvtRequest",
@@ -7244,15 +7417,7 @@
         "label": "AbstractObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ [x: string]: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<string, ",
+          "{ [x: string]: { endpoint: string; params?: ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -7260,7 +7425,7 @@
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
-          " | undefined, any, any, Record<string, any>>; }"
+          " | undefined; handler: ({}: any) => Promise<any>; } & Record<string, any>; }"
         ],
         "path": "x-pack/plugins/observability/server/routes/types.ts",
         "deprecated": false,
@@ -7309,21 +7474,25 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /internal/observability/slos/{id}/_diagnosis\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /internal/observability/slos/{id}/_diagnosis\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
+          "{ \"GET /api/observability/composite_slos 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
           "StringC",
-          "; }>; }>, ",
+          "; page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; sortBy: ",
+          "LiteralC",
+          "<\"creationTime\">; sortDirection: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7331,7 +7500,223 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; sloSavedObject: string | ",
+          " & { params?: { query?: { name?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"PUT /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; body: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; compositeMethod: ",
+          "LiteralC",
+          "<\"weightedAverage\">; sources: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; revision: ",
+          "NumberC",
+          "; weight: ",
+          "NumberC",
+          "; }>>; timeWindow: ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; isRolling: ",
+          "LiteralC",
+          "<boolean>; }>; budgetingMethod: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"occurrences\">, ",
+          "LiteralC",
+          "<\"timeslices\">]>; objective: ",
+          "TypeC",
+          "<{ target: ",
+          "NumberC",
+          "; }>; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; body: { name?: string | undefined; compositeMethod?: \"weightedAverage\" | undefined; sources?: { id: string; revision: number; weight: number; }[] | undefined; timeWindow?: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: { target: number; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /api/observability/composite_slos 2023-05-24\": { endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; timeWindow: ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; isRolling: ",
+          "LiteralC",
+          "<boolean>; }>; budgetingMethod: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"occurrences\">, ",
+          "LiteralC",
+          "<\"timeslices\">]>; objective: ",
+          "TypeC",
+          "<{ target: ",
+          "NumberC",
+          "; }>; compositeMethod: ",
+          "LiteralC",
+          "<\"weightedAverage\">; sources: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; revision: ",
+          "NumberC",
+          "; weight: ",
+          "NumberC",
+          "; }>>; }>, ",
+          "PartialC",
+          "<{ id: ",
+          "StringC",
+          "; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>]>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { name: string; timeWindow: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<{ sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; sloSavedObject: string | ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -7345,7 +7730,7 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>; }, ",
+          ">>; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7353,15 +7738,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /internal/observability/slos/_diagnosis\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /internal/observability/slos/_diagnosis\", undefined, ",
+          "; \"GET /internal/observability/slos/_diagnosis\": { endpoint: \"GET /internal/observability/slos/_diagnosis\"; params?: undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7369,11 +7746,11 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { licenseAndFeatures: ",
+          ") => Promise<{ licenseAndFeatures: ",
           "PublicLicenseJSON",
           "; userPrivileges: ",
           "SecurityGetUserPrivilegesResponse",
-          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; }, ",
+          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7381,15 +7758,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"PUT /api/observability/slos/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"PUT /api/observability/slos/{id}\", ",
+          "; \"PUT /api/observability/slos/{id} 2023-05-22\": { endpoint: \"PUT /api/observability/slos/{id} 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -7619,7 +7988,7 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>; }>, ",
+          ">; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7627,7 +7996,47 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          " & { params: { path: { id: string; }; body: { name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; } | undefined; timeWindow?: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isCalendar: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }) | undefined; settings?: { syncDelay?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; frequency?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7635,21 +8044,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /api/observability/slos/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos/{id}\", ",
+          "; \"GET /api/observability/slos/{id} 2023-05-22\": { endpoint: \"GET /api/observability/slos/{id} 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7657,7 +8058,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7665,15 +8066,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /api/observability/slos\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos\", ",
+          "; \"GET /api/observability/slos 2023-05-22\": { endpoint: \"GET /api/observability/slos 2023-05-22\"; params?: ",
           "PartialC",
           "<{ query: ",
           "PartialC",
@@ -7697,7 +8090,7 @@
           "LiteralC",
           "<\"asc\">, ",
           "LiteralC",
-          "<\"desc\">]>; }>; }>, ",
+          "<\"desc\">]>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7705,7 +8098,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          " & { params?: { query?: { name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7713,15 +8106,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /internal/observability/slos/_historical_summary\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /internal/observability/slos/_historical_summary\", ",
+          "; \"POST /internal/observability/slos/_historical_summary\": { endpoint: \"POST /internal/observability/slos/_historical_summary\"; params?: ",
           "TypeC",
           "<{ body: ",
           "TypeC",
@@ -7729,7 +8114,7 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>; }>, ",
+          ">; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7737,7 +8122,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { [x: string]: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }, ",
+          " & { params: { body: { sloIds: string[]; }; }; }) => Promise<{ [x: string]: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7745,21 +8130,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /api/observability/slos/{id}/enable\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/observability/slos/{id}/enable\", ",
+          "; \"POST /api/observability/slos/{id}/enable 2023-05-22\": { endpoint: \"POST /api/observability/slos/{id}/enable 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7767,7 +8144,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", void, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7775,21 +8152,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /api/observability/slos/{id}/disable\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/observability/slos/{id}/disable\", ",
+          "; \"POST /api/observability/slos/{id}/disable 2023-05-22\": { endpoint: \"POST /api/observability/slos/{id}/disable 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7797,7 +8166,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", void, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7805,21 +8174,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"DELETE /api/observability/slos/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"DELETE /api/observability/slos/{id}\", ",
+          "; \"DELETE /api/observability/slos/{id} 2023-05-22\": { endpoint: \"DELETE /api/observability/slos/{id} 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7827,7 +8188,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", void, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7835,15 +8196,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /api/observability/slos\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/observability/slos\", ",
+          "; \"POST /api/observability/slos 2023-05-22\": { endpoint: \"POST /api/observability/slos 2023-05-22\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -8075,7 +8428,7 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>]>; }>, ",
+          ">; }>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8083,7 +8436,47 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; }, ",
+          " & { params: { body: { name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }; } & { id?: string | undefined; settings?: { syncDelay?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; frequency?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8091,15 +8484,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
+          "; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-05-22\": { endpoint: \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-05-22\"; params?: ",
           "TypeC",
           "<{ query: ",
           "TypeC",
@@ -8109,7 +8494,7 @@
           "StringC",
           ">; namespace: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8117,7 +8502,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", string[], ",
+          " & { params: { query: { registrationContexts: string[]; namespace: string; }; }; }) => Promise<string[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8125,17 +8510,9 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; }[TEndpoint] extends ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<any, any, any, infer TReturnType, ",
+          "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
           "ServerRouteCreateOptions",
-          "> ? TReturnType : never"
+          " ? TReturnType : never"
         ],
         "path": "x-pack/plugins/observability/server/routes/types.ts",
         "deprecated": false,
@@ -8165,21 +8542,25 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/observability/slos/{id}/_diagnosis\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /internal/observability/slos/{id}/_diagnosis\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
+          "{ \"GET /api/observability/composite_slos 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
           "StringC",
-          "; }>; }>, ",
+          "; page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; sortBy: ",
+          "LiteralC",
+          "<\"creationTime\">; sortDirection: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8187,7 +8568,223 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; sloSavedObject: string | ",
+          " & { params?: { query?: { name?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"PUT /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; body: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; compositeMethod: ",
+          "LiteralC",
+          "<\"weightedAverage\">; sources: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; revision: ",
+          "NumberC",
+          "; weight: ",
+          "NumberC",
+          "; }>>; timeWindow: ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; isRolling: ",
+          "LiteralC",
+          "<boolean>; }>; budgetingMethod: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"occurrences\">, ",
+          "LiteralC",
+          "<\"timeslices\">]>; objective: ",
+          "TypeC",
+          "<{ target: ",
+          "NumberC",
+          "; }>; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; body: { name?: string | undefined; compositeMethod?: \"weightedAverage\" | undefined; sources?: { id: string; revision: number; weight: number; }[] | undefined; timeWindow?: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: { target: number; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<never>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /api/observability/composite_slos 2023-05-24\": { endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; timeWindow: ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; isRolling: ",
+          "LiteralC",
+          "<boolean>; }>; budgetingMethod: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"occurrences\">, ",
+          "LiteralC",
+          "<\"timeslices\">]>; objective: ",
+          "TypeC",
+          "<{ target: ",
+          "NumberC",
+          "; }>; compositeMethod: ",
+          "LiteralC",
+          "<\"weightedAverage\">; sources: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; revision: ",
+          "NumberC",
+          "; weight: ",
+          "NumberC",
+          "; }>>; }>, ",
+          "PartialC",
+          "<{ id: ",
+          "StringC",
+          "; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>]>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { name: string; timeWindow: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<{ sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; sloSavedObject: string | ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -8201,7 +8798,7 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>; }, ",
+          ">>; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8209,15 +8806,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /internal/observability/slos/_diagnosis\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /internal/observability/slos/_diagnosis\", undefined, ",
+          "; \"GET /internal/observability/slos/_diagnosis\": { endpoint: \"GET /internal/observability/slos/_diagnosis\"; params?: undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8225,11 +8814,11 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { licenseAndFeatures: ",
+          ") => Promise<{ licenseAndFeatures: ",
           "PublicLicenseJSON",
           "; userPrivileges: ",
           "SecurityGetUserPrivilegesResponse",
-          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; }, ",
+          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8237,15 +8826,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"PUT /api/observability/slos/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"PUT /api/observability/slos/{id}\", ",
+          "; \"PUT /api/observability/slos/{id} 2023-05-22\": { endpoint: \"PUT /api/observability/slos/{id} 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -8475,7 +9056,7 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>; }>, ",
+          ">; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8483,7 +9064,47 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          " & { params: { path: { id: string; }; body: { name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; } | undefined; timeWindow?: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isCalendar: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }) | undefined; settings?: { syncDelay?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; frequency?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8491,21 +9112,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /api/observability/slos/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos/{id}\", ",
+          "; \"GET /api/observability/slos/{id} 2023-05-22\": { endpoint: \"GET /api/observability/slos/{id} 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8513,7 +9126,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8521,15 +9134,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /api/observability/slos\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos\", ",
+          "; \"GET /api/observability/slos 2023-05-22\": { endpoint: \"GET /api/observability/slos 2023-05-22\"; params?: ",
           "PartialC",
           "<{ query: ",
           "PartialC",
@@ -8553,7 +9158,7 @@
           "LiteralC",
           "<\"asc\">, ",
           "LiteralC",
-          "<\"desc\">]>; }>; }>, ",
+          "<\"desc\">]>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8561,7 +9166,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          " & { params?: { query?: { name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8569,15 +9174,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /internal/observability/slos/_historical_summary\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /internal/observability/slos/_historical_summary\", ",
+          "; \"POST /internal/observability/slos/_historical_summary\": { endpoint: \"POST /internal/observability/slos/_historical_summary\"; params?: ",
           "TypeC",
           "<{ body: ",
           "TypeC",
@@ -8585,7 +9182,7 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>; }>, ",
+          ">; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8593,7 +9190,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { [x: string]: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }, ",
+          " & { params: { body: { sloIds: string[]; }; }; }) => Promise<{ [x: string]: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8601,21 +9198,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /api/observability/slos/{id}/enable\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/observability/slos/{id}/enable\", ",
+          "; \"POST /api/observability/slos/{id}/enable 2023-05-22\": { endpoint: \"POST /api/observability/slos/{id}/enable 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8623,7 +9212,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", void, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8631,21 +9220,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /api/observability/slos/{id}/disable\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/observability/slos/{id}/disable\", ",
+          "; \"POST /api/observability/slos/{id}/disable 2023-05-22\": { endpoint: \"POST /api/observability/slos/{id}/disable 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8653,7 +9234,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", void, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8661,21 +9242,13 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"DELETE /api/observability/slos/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"DELETE /api/observability/slos/{id}\", ",
+          "; \"DELETE /api/observability/slos/{id} 2023-05-22\": { endpoint: \"DELETE /api/observability/slos/{id} 2023-05-22\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
           "<{ id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8683,7 +9256,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", void, ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8691,15 +9264,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"POST /api/observability/slos\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/observability/slos\", ",
+          "; \"POST /api/observability/slos 2023-05-22\": { endpoint: \"POST /api/observability/slos 2023-05-22\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -8931,7 +9496,7 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>]>; }>, ",
+          ">; }>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8939,7 +9504,47 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; }, ",
+          " & { params: { body: { name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isRolling: boolean; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }; } & { id?: string | undefined; settings?: { syncDelay?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; frequency?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8947,15 +9552,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
+          "; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-05-22\": { endpoint: \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-05-22\"; params?: ",
           "TypeC",
           "<{ query: ",
           "TypeC",
@@ -8965,7 +9562,7 @@
           "StringC",
           ">; namespace: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8973,7 +9570,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", string[], ",
+          " & { params: { query: { registrationContexts: string[]; namespace: string; }; }; }) => Promise<string[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8981,7 +9578,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          ">; }"
+          "; }"
         ],
         "path": "x-pack/plugins/observability/server/routes/get_global_observability_server_route_repository.ts",
         "deprecated": false,
@@ -11127,7 +11724,23 @@
         "GetResponse",
         "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
         "WriteResponseBase",
-        ">; } | undefined>; }"
+        ">; } | undefined>; alertsLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        {
+          "pluginId": "observability",
+          "scope": "common",
+          "docId": "kibObservabilityPluginApi",
+          "section": "def-common.AlertsLocatorParams",
+          "text": "AlertsLocatorParams"
+        },
+        ">; }"
       ],
       "path": "x-pack/plugins/observability/server/plugin.ts",
       "deprecated": false,
@@ -11139,6 +11752,59 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.asDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "asDuration",
+        "description": [
+          "\nConverts value and returns it formatted - 00 unit"
+        ],
+        "signature": [
+          "(value: ",
+          "Maybe",
+          "<number>, { defaultValue = NOT_AVAILABLE_LABEL, extended }: FormatterOptions) => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "Maybe",
+              "<number>"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asDuration.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ defaultValue = NOT_AVAILABLE_LABEL, extended }",
+            "description": [],
+            "signature": [
+              "FormatterOptions"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.asPercent",
@@ -11262,6 +11928,207 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getAlertDetailsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertDetailsUrl",
+        "description": [],
+        "signature": [
+          "(basePath: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          },
+          ", spaceId: string, alertUuid: string | null) => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IBasePath",
+                "text": "IBasePath"
+              }
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertUuid",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getAlertUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertUrl",
+        "description": [],
+        "signature": [
+          "(alertUuid: string | null, spaceId: string, startedAt: string, alertsLocator?: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.AlertsLocatorParams",
+            "text": "AlertsLocatorParams"
+          },
+          "> | undefined, publicBaseUrl?: string | undefined) => Promise<string>"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertUuid",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$3",
+            "type": "string",
+            "tags": [],
+            "label": "startedAt",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "alertsLocator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "common",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-common.AlertsLocatorParams",
+                "text": "AlertsLocatorParams"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$5",
+            "type": "string",
+            "tags": [],
+            "label": "publicBaseUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -11515,7 +12382,118 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.AlertsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.AlertsLocatorParams",
+            "text": "AlertsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.baseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "baseUrl",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "AlertStatus",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "parentPluginId": "observability",
@@ -11543,6 +12521,21 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.alertsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "alertsLocatorID",
+        "description": [],
+        "signature": [
+          "\"ALERTS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.apmAWSLambdaPriceFactor",

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { InventoryItemType } from '../../../common/inventory_models/types';
@@ -46,24 +45,4 @@ export const RedirectToNodeLogs = ({
   }, [filter, locators.nodeLogsLocator, logViewId, nodeId, nodeType, time]);
 
   return null;
-};
-
-export const getNodeLogsUrl = ({
-  nodeId,
-  nodeType,
-  time,
-}: {
-  nodeId: string;
-  nodeType: InventoryItemType;
-  time?: number;
-}): LinkDescriptor => {
-  return {
-    app: 'logs',
-    pathname: `link-to/${nodeType}-logs/${nodeId}`,
-    search: time
-      ? {
-          time: `${time}`,
-        }
-      : undefined,
-  };
 };

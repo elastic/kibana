@@ -15,3 +15,4 @@ export * from './locations';
 export * from './synthetics_private_locations';
 export * from './synthetics_overview_status';
 export * from './synthetics_params';
+export * from './filters';

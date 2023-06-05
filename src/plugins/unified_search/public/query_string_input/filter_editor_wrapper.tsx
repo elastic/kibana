@@ -51,7 +51,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   const fetchIndexAbortController = useRef<AbortController>();
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { uiSettings, data, usageCollection, appName } = kibana.services;
+  const { uiSettings, data, usageCollection, appName, docLinks } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const [dataViews, setDataviews] = useState<DataView[]>([]);
   const [newFilter, setNewFilter] = useState<Filter | undefined>(undefined);
@@ -118,6 +118,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={filtersForSuggestions}
           suggestionsAbstraction={suggestionsAbstraction}
+          docLinks={docLinks}
         />
       )}
     </div>

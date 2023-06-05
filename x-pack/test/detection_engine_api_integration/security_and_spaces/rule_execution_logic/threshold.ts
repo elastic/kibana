@@ -312,6 +312,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    // https://github.com/elastic/kibana/issues/149920
+    it('generates 1 alert when threshold is met and rule query has wildcard in field name', async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        query: 'agent.ty*:auditbeat', // this query should match all documents from index and we will receive 1 alert, similarly to "generates 1 signal from Threshold rules when threshold is met" test case
+        threshold: {
+          field: ['host.id'],
+          value: 700,
+        },
+      };
+      const createdRule = await createRule(supertest, log, rule);
+      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      expect(alerts.hits.hits.length).eql(1);
+    });
+
     describe('Timestamp override and fallback', async () => {
       before(async () => {
         await esArchiver.load(

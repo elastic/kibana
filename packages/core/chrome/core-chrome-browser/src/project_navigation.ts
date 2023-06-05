@@ -7,6 +7,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { ChromeNavLink } from './nav_links';
 
 /** @internal */
 type AppId = string;
@@ -17,21 +18,38 @@ type DeepLinkId = string;
 /** @internal */
 export type AppDeepLinkId = `${AppId}:${DeepLinkId}`;
 
-/** @public */
+/**
+ * @public
+ *
+ * App id or deeplink id
+ */
 export type ChromeProjectNavigationLink = AppId | AppDeepLinkId;
 
 /** @public */
 export interface ChromeProjectNavigationNode {
-  id?: string;
-  link?: ChromeProjectNavigationLink;
-  children?: ChromeProjectNavigationNode[];
-
-  title?: string;
+  /** Optional id, if not passed a "link" must be provided. */
+  id: string;
+  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
+  title: string;
+  /** Path in the tree of the node */
+  path: string[];
+  /** App id or deeplink id */
+  deepLink?: ChromeNavLink;
+  /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
+  /** Optional children of the navigation node */
+  children?: ChromeProjectNavigationNode[];
 }
 
 /** @public */
 export interface ChromeProjectNavigation {
+  /**
+   * The URL href for the home link
+   */
+  homeRef: string;
+  /**
+   * The navigation tree representation of the side bar navigation.
+   */
   navigationTree: ChromeProjectNavigationNode[];
 }
 

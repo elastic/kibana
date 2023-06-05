@@ -31,6 +31,8 @@ export interface TypeTransforms {
   latestVersion: Record<TransformType, string>;
   /** Ordered list of transforms registered for the type **/
   transforms: Transform[];
+  /** Per-version schemas for the given type */
+  versionSchemas: Record<string, TypeVersionSchema>;
 }
 
 /**
@@ -94,3 +96,8 @@ export interface TransformResult {
    */
   additionalDocs: SavedObjectUnsanitizedDoc[];
 }
+
+/**
+ * per-version persistence schema for {@link TypeTransforms}
+ */
+export type TypeVersionSchema = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;

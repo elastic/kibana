@@ -66,7 +66,7 @@ export const setupValueSuggestionProvider = (
       suggestionType?: string
     ) => {
       usageCollector?.trackRequest();
-      let path = `/api/kibana/suggestions/values/${index}`;
+      let path = `/internal/kibana/suggestions/values/${index}`;
       if (suggestionType) {
         path = `/internal/${suggestionType}/suggestions/values`;
       }
@@ -81,6 +81,7 @@ export const setupValueSuggestionProvider = (
             method,
           }),
           signal,
+          version: '1',
         })
         .then((r) => {
           usageCollector?.trackResult();

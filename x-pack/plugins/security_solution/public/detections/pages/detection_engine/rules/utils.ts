@@ -183,6 +183,16 @@ const DEFAULT_FROM = '1m';
 const THREAT_MATCH_INTERVAL = '1h';
 const THREAT_MATCH_FROM = '5m';
 
+export const defaultSchedule = {
+  interval: DEFAULT_INTERVAL,
+  from: DEFAULT_FROM,
+};
+
+export const defaultThreatMatchSchedule = {
+  interval: THREAT_MATCH_INTERVAL,
+  from: THREAT_MATCH_FROM,
+};
+
 export const getStepScheduleDefaultValue = (ruleType: Type | undefined): ScheduleStepRule => {
   return {
     interval: isThreatMatchRule(ruleType) ? THREAT_MATCH_INTERVAL : DEFAULT_INTERVAL,

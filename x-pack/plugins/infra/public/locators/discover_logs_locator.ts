@@ -7,13 +7,12 @@
 
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { LogsLocatorDependencies, LogsLocatorParams } from './logs_locator';
-
-const DISCOVER_LOGS_LOCATOR_ID = 'DISCOVER_LOGS_LOCATOR';
+import { LOGS_LOCATOR_ID } from './logs_locator';
 
 export type DiscoverLogsLocator = LocatorPublic<LogsLocatorParams>;
 
 export class DiscoverLogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
-  public readonly id = DISCOVER_LOGS_LOCATOR_ID;
+  public readonly id = LOGS_LOCATOR_ID;
 
   constructor(protected readonly deps: LogsLocatorDependencies) {}
 
