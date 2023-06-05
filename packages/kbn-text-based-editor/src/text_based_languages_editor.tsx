@@ -367,7 +367,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
     useCallback(async () => {
       const indices = await dataViews.getIndices({
-        showAllIndices: true,
+        showAllIndices: false,
         pattern: '*',
         isRollupIndex: () => false,
       });
