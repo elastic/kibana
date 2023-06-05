@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-/** @public */
+/** @internal */
 export const ELASTIC_HTTP_VERSION_HEADER = 'elastic-api-version' as const;
 
 export const X_ELASTIC_INTERNAL_ORIGIN_REQUEST = 'x-elastic-internal-origin' as const;

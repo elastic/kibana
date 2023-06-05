@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
@@ -23,20 +22,8 @@ import {
 import { APP_ID, LEGACY_NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../common/constants';
 import { savedObjectTypes } from '../../saved_objects';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import {
-  blocklistSubFeature,
-  endpointListSubFeature,
-  eventFiltersSubFeature,
-  executeActionSubFeature,
-  fileOperationsSubFeature,
-  hostIsolationExceptionsSubFeature,
-  hostIsolationSubFeature,
-  policyManagementSubFeature,
-  processOperationsSubFeature,
-  responseActionsHistorySubFeature,
-  trustedApplicationsSubFeature,
-} from './security_kibana_sub_features';
-import type { AppFeaturesSecurityConfig } from './types';
+import { SecuritySubFeatureId } from './security_kibana_sub_features';
+import type { AppFeaturesSecurityConfig, BaseKibanaFeatureConfig } from './types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 
 // Same as the plugin id defined by Cloud Security Posture
@@ -55,9 +42,7 @@ const SECURITY_RULE_TYPES = [
   NEW_TERMS_RULE_TYPE_ID,
 ];
 
-export const getSecurityBaseKibanaFeature = (
-  experimentalFeatures: ExperimentalFeatures
-): KibanaFeatureConfig => ({
+export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: SERVER_APP_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
     defaultMessage: 'Security',
@@ -135,42 +120,51 @@ export const getSecurityBaseKibanaFeature = (
       ui: ['show'],
     },
   },
-  subFeatures: getSubFeatures(experimentalFeatures),
 });
 
-function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
-  const subFeatures: SubFeatureConfig[] = [];
+export const getSecurityBaseKibanaSubFeatureIds = (
+  experimentalFeatures: ExperimentalFeatures
+): SecuritySubFeatureId[] => {
+  const subFeatureIds: SecuritySubFeatureId[] = [];
 
   if (experimentalFeatures.endpointRbacEnabled) {
-    subFeatures.push(
-      endpointListSubFeature,
-      trustedApplicationsSubFeature,
-      hostIsolationExceptionsSubFeature,
-      blocklistSubFeature,
-      eventFiltersSubFeature,
-      policyManagementSubFeature
+    subFeatureIds.push(
+      SecuritySubFeatureId.endpointList,
+      SecuritySubFeatureId.trustedApplications,
+      SecuritySubFeatureId.hostIsolationExceptions,
+      SecuritySubFeatureId.blocklist,
+      SecuritySubFeatureId.eventFilters,
+      SecuritySubFeatureId.policyManagement
     );
   }
 
   if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {
-    subFeatures.push(
-      responseActionsHistorySubFeature,
-      hostIsolationSubFeature,
-      processOperationsSubFeature
+    subFeatureIds.push(
+      SecuritySubFeatureId.responseActionsHistory,
+      SecuritySubFeatureId.hostIsolation,
+      SecuritySubFeatureId.processOperations
     );
   }
   if (experimentalFeatures.responseActionGetFileEnabled) {
-    subFeatures.push(fileOperationsSubFeature);
+    subFeatureIds.push(SecuritySubFeatureId.fileOperations);
   }
   // planned for 8.8
   if (experimentalFeatures.responseActionExecuteEnabled) {
-    subFeatures.push(executeActionSubFeature);
+    subFeatureIds.push(SecuritySubFeatureId.executeAction);
   }
 
-  return subFeatures;
-}
+  return subFeatureIds;
+};
 
-// maps the AppFeatures keys to Kibana privileges
+/**
+ * Maps the AppFeatures keys to Kibana privileges that will be merged
+ * into the base privileges config for the Security app.
+ *
+ * Privileges can be added in different ways:
+ * - `privileges`: the privileges that will be added directly into the main Security feature.
+ * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
+ * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
+ */
 export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
