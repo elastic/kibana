@@ -19,6 +19,8 @@ servers:
 paths:
   '/s/{spaceId}/api/observability/composite_slos':
     $ref: 'paths/s@{spaceid}@api@composite_slos.yaml'
+  '/s/{spaceId}/api/observability/composite_slos/{compositeSloId}':
+    $ref: 'paths/s@{spaceid}@api@composite_slos@{compositesloid}.yaml'
   '/s/{spaceId}/api/observability/slos':
     $ref: 'paths/s@{spaceid}@api@slos.yaml'
   '/s/{spaceId}/api/observability/slos/{sloId}':

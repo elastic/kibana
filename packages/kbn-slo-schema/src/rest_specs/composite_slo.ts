@@ -11,10 +11,10 @@ import {
   budgetingMethodSchema,
   compositeSloIdSchema,
   dateType,
-  rollingTimeWindowSchema,
+  objectiveSchema,
   summarySchema,
   tagsSchema,
-  targetSchema,
+  timeWindowSchema,
   weightedAverageCompositeMethodSchema,
   weightedAverageSourceSchema,
 } from '../schema';
@@ -23,9 +23,9 @@ const createCompositeSLOParamsSchema = t.type({
   body: t.intersection([
     t.type({
       name: t.string,
-      timeWindow: rollingTimeWindowSchema,
+      timeWindow: timeWindowSchema,
       budgetingMethod: budgetingMethodSchema,
-      objective: targetSchema,
+      objective: objectiveSchema,
       compositeMethod: weightedAverageCompositeMethodSchema,
       sources: t.array(weightedAverageSourceSchema),
     }),
@@ -40,9 +40,9 @@ const createCompositeSLOResponseSchema = t.type({
 const compositeSLOResponseSchema = t.type({
   id: compositeSloIdSchema,
   name: t.string,
-  timeWindow: rollingTimeWindowSchema,
+  timeWindow: timeWindowSchema,
   budgetingMethod: budgetingMethodSchema,
-  objective: targetSchema,
+  objective: objectiveSchema,
   compositeMethod: weightedAverageCompositeMethodSchema,
   sources: t.array(weightedAverageSourceSchema),
   tags: tagsSchema,
@@ -63,9 +63,9 @@ const updateCompositeSLOParamsSchema = t.type({
     name: t.string,
     compositeMethod: weightedAverageCompositeMethodSchema,
     sources: t.array(weightedAverageSourceSchema),
-    timeWindow: rollingTimeWindowSchema,
+    timeWindow: timeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
-    objective: targetSchema,
+    objective: objectiveSchema,
     tags: tagsSchema,
   }),
 });
@@ -90,7 +90,6 @@ const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
 const sortBySchema = t.literal('creationTime');
 const findCompositeSLOParamsSchema = t.partial({
   query: t.partial({
-    name: t.string,
     page: t.string,
     perPage: t.string,
     sortBy: sortBySchema,
@@ -107,7 +106,7 @@ const findCompositeSLOResponseSchema = t.type({
 
 type CreateCompositeSLOInput = t.OutputOf<typeof createCompositeSLOParamsSchema.props.body>; // Raw payload sent by the frontend
 type CreateCompositeSLOParams = t.TypeOf<typeof createCompositeSLOParamsSchema.props.body>; // Parsed payload used by the backend
-type CreateCompositeSLOResponse = t.TypeOf<typeof createCompositeSLOResponseSchema>; // Raw response sent to the frontend
+type CreateCompositeSLOResponse = t.OutputOf<typeof createCompositeSLOResponseSchema>; // Raw response sent to the frontend
 
 type GetCompositeSLOResponse = t.OutputOf<typeof getCompositeSLOResponseSchema>;
 
@@ -116,14 +115,17 @@ type FindCompositeSLOResponse = t.OutputOf<typeof findCompositeSLOResponseSchema
 
 type UpdateCompositeSLOInput = t.OutputOf<typeof updateCompositeSLOParamsSchema.props.body>;
 type UpdateCompositeSLOParams = t.TypeOf<typeof updateCompositeSLOParamsSchema.props.body>;
-type UpdateCompositeSLOResponse = t.TypeOf<typeof updateCompositeSLOResponseSchema>;
+type UpdateCompositeSLOResponse = t.OutputOf<typeof updateCompositeSLOResponseSchema>;
 
 export {
+  compositeSLOResponseSchema,
   createCompositeSLOParamsSchema,
   deleteCompositeSLOParamsSchema,
   findCompositeSLOParamsSchema,
+  findCompositeSLOResponseSchema,
   getCompositeSLOParamsSchema,
   updateCompositeSLOParamsSchema,
+  updateCompositeSLOResponseSchema,
 };
 
 export type {
