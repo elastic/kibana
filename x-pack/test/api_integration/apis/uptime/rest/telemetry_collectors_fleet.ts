@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const client = getService('es');
   const testDataStreamName = 'synthetics-http-default';
 
-  describe('telemetry collectors fleet', () => {
+  describe('TelemetryCollectorsFleet', () => {
     const createDataStream = async (name: string) => {
       // A data stream requires an index template before it can be created.
       await client.indices.putIndexTemplate({
