@@ -127,12 +127,10 @@ describe('links', () => {
   });
 
   describe('Host Isolation Exception', () => {
-    it('should return HIE if user has write permission (licensed)', async () => {
+    it('should return HIE if user has access permission (licensed)', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({ canWriteHostIsolationExceptions: true })
+        getEndpointAuthzInitialStateMock({ canAccessHostIsolationExceptions: true })
       );
-
-      fakeHttpServices.get.mockResolvedValue({ total: 100 });
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
@@ -146,9 +144,8 @@ describe('links', () => {
     it('should NOT return HIE if the user has no HIE permission', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
-          canWriteHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
           canReadHostIsolationExceptions: false,
-          canDeleteHostIsolationExceptions: false,
         })
       );
 
@@ -161,12 +158,11 @@ describe('links', () => {
       expect(fakeHttpServices.get).not.toHaveBeenCalled();
     });
 
-    it('should NOT return HIE if user has read and delete permissions (no license) and NO HIE entries exist', async () => {
+    it('should NOT return HIE if user has read permission (no license) and NO HIE entries exist', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
-          canWriteHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
           canReadHostIsolationExceptions: true,
-          canDeleteHostIsolationExceptions: true,
         })
       );
 
@@ -185,12 +181,11 @@ describe('links', () => {
       });
     });
 
-    it('should return HIE if user has read and delete permission∫ (no license) but HIE entries exist', async () => {
+    it('should return HIE if user has read permission (no license) but HIE entries exist', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
-          canWriteHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
           canReadHostIsolationExceptions: true,
-          canDeleteHostIsolationExceptions: true,
         })
       );
 
