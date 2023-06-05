@@ -34,7 +34,7 @@ export function removeOrphanedSourcesAndLayers(
       return layer.ownsMbLayerId(mbLayer.id);
     });
     if (!targetLayer) {
-      mbMap.removeLayer(mbLayer.id)
+      mbMap.removeLayer(mbLayer.id);
     }
   });
 
