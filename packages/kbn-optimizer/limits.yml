@@ -7,7 +7,7 @@ pageLoadAssetSize:
   banners: 17946
   bfetch: 22837
   canvas: 1066647
-  cases: 175000
+  cases: 180000
   charts: 55000
   cloud: 21076
   cloudChat: 19894
@@ -38,6 +38,7 @@ pageLoadAssetSize:
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 35741
+  essSecurity: 16573
   esUiShared: 326654
   eventAnnotation: 22000
   exploratoryView: 74673
@@ -118,7 +119,7 @@ pageLoadAssetSize:
   serverless: 16573
   serverlessObservability: 30000
   serverlessSearch: 30000
-  serverlessSecurity: 41807
+  serverlessSecurity: 66019
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032
