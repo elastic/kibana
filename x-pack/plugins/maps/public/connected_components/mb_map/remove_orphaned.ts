@@ -19,7 +19,6 @@ export function removeOrphanedSourcesAndLayers(
     return;
   }
 
-  const mbLayerIdsToRemove: string[] = [];
   mbStyle.layers.forEach((mbLayer) => {
     // ignore mapbox layers from spatial filter layer
     if (spatialFilterLayer.ownsMbLayerId(mbLayer.id)) {
@@ -35,26 +34,23 @@ export function removeOrphanedSourcesAndLayers(
       return layer.ownsMbLayerId(mbLayer.id);
     });
     if (!targetLayer) {
-      mbLayerIdsToRemove.push(mbLayer.id);
+      mbMap.removeLayer(mbLayer.id)
     }
   });
-  mbLayerIdsToRemove.forEach((mbLayerId) => mbMap.removeLayer(mbLayerId));
 
-  const mbSourcesToRemove = [];
   for (const mbSourceId in mbStyle.sources) {
     if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
       // ignore mapbox sources from spatial filter layer
       if (spatialFilterLayer.ownsMbSourceId(mbSourceId)) {
-        return;
+        continue;
       }
 
       const targetLayer = layerList.find((layer) => {
         return layer.ownsMbSourceId(mbSourceId);
       });
       if (!targetLayer) {
-        mbSourcesToRemove.push(mbSourceId);
+        mbMap.removeSource(mbSourceId);
       }
     }
   }
-  mbSourcesToRemove.forEach((mbSourceId) => mbMap.removeSource(mbSourceId));
 }
