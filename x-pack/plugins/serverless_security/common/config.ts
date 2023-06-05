@@ -7,13 +7,23 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const productLineId = schema.oneOf([
-  schema.literal('securityEssentials'),
-  schema.literal('securityComplete'),
+export const productLine = schema.oneOf([
+  schema.literal('security'),
+  schema.literal('endpoint'),
+  schema.literal('cloud'),
 ]);
-export type SecurityProductLineId = TypeOf<typeof productLineId>;
+export type SecurityProductLine = TypeOf<typeof productLine>;
 
-export const productLineIds = schema.arrayOf<SecurityProductLineId>(productLineId, {
-  defaultValue: ['securityEssentials'],
+export const productTier = schema.oneOf([schema.literal('essentials'), schema.literal('complete')]);
+export type SecurityProductTier = TypeOf<typeof productTier>;
+
+export const productType = schema.object({
+  product_line: productLine,
+  product_tier: productTier,
 });
-export type SecurityProductLineIds = TypeOf<typeof productLineIds>;
+export type SecurityProductType = TypeOf<typeof productType>;
+
+export const productTypes = schema.arrayOf<SecurityProductType>(productType, {
+  defaultValue: [],
+});
+export type SecurityProductTypes = TypeOf<typeof productTypes>;
