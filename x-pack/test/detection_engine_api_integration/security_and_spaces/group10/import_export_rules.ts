@@ -55,12 +55,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('Endpoint Exception', () => {
       /* 
-        After the 8.7 version, this test can be treated as testing exporting an old version of 
-        List Item because for ex the "expire_time" property is not part of the 
-        getCreateExceptionListMinimalSchemaMock and this is how we can differentiate between 
-        an Old version of a list item and a newer. The reason behind it is both List and Rule don't
-       keep the version so that we can use it to simulate migration cases
-    */
+       Following the release of version 8.7, this test can be considered as an evaluation of exporting 
+       an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
+       within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
+       and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule, 
+       thereby enabling simulation of migration scenarios. 
+      */
       it('should be able to reimport a rule referencing an old version of endpoint exception list with existing comments', async () => {
         // create an exception list
         const { body: exceptionBody } = await supertestWithoutAuth
@@ -218,12 +218,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('Detection Exception', () => {
       /* 
-        After the 8.7 version, this test can be treated as testing exporting an old version of 
-        List Item because for ex the "expire_time" property is not part of the 
-        getCreateExceptionListMinimalSchemaMock and this is how we can differentiate between 
-        an Old version of a list item and a newer. The reason behind it is both List and Rule don't
-       keep the version so that we can use it to simulate migration cases
-    */
+       Following the release of version 8.7, this test can be considered as an evaluation of exporting 
+       an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
+       within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
+       and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule, 
+       thereby enabling simulation of migration scenarios. 
+      */
       it('should be able to reimport a rule referencing an old version of detection exception list with existing comments', async () => {
         // create an exception list
         const { body: exceptionBody } = await supertestWithoutAuth

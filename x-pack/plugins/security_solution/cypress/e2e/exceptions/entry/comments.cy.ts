@@ -12,11 +12,7 @@ import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
+import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
@@ -60,15 +56,14 @@ describe('Add, copy comments in different exceptions type and validate sharing t
   describe('Rule exceptions', () => {
     beforeEach(() => {
       esArchiverResetKibana();
-      esArchiverLoad('exceptions');
       login();
       const exceptionList = getExceptionList();
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
         createRule({
           ...getNewRule(),
-          query: 'agent.name:*',
-          index: ['exceptions*'],
+          query: '*',
+          index: ['*'],
           exceptions_list: [
             {
               id: response.body.id,
@@ -100,10 +95,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();
-    });
-
-    after(() => {
-      esArchiverUnload('exceptions');
     });
 
     it('Add comment on a new exception, add another comment has unicode from a different user and copy to clipboard', () => {
@@ -163,14 +154,13 @@ describe('Add, copy comments in different exceptions type and validate sharing t
   describe('Endpoint exceptions', () => {
     beforeEach(() => {
       esArchiverResetKibana();
-      esArchiverLoad('auditbeat');
       login();
       // create rule with exception
       createEndpointExceptionList().then((response) => {
         createRule({
           ...getNewRule(),
-          query: 'event.code:*',
-          index: ['auditbeat*'],
+          query: '*',
+          index: ['*'],
           exceptions_list: [
             {
               id: (response as ResponseType).body.id,
@@ -185,10 +175,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToEndpointExceptionsTab();
-    });
-
-    after(() => {
-      esArchiverUnload('auditbeat');
     });
 
     it('Add comment on a new exception, and add another comment has unicode character from a different user', () => {

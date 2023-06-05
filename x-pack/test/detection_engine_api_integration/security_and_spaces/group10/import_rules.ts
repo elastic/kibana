@@ -1423,11 +1423,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         /* 
-         After the 8.7 version, this test can be treated as testing importing an old version of 
-         List Item as The "expire_time" property is not part of the getImportExceptionsListItemSchemaMock
-         and this is how we can differentiate between an Old version of a list item and a newer.
-         The reason behind it is both List and Rule don't keep the version so that we can use it to  
-         simulate migration cases
+          Following the release of version 8.7, this test can be considered as an evaluation of exporting 
+          an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
+          within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
+          and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule, 
+          thereby enabling simulation of migration scenarios. 
         */
         it('should be able to import a rule and an old version exception list, then delete it successfully', async () => {
           const simpleRule = getSimpleRule('rule-1');

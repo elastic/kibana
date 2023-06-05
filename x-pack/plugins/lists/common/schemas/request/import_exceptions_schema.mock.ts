@@ -24,8 +24,9 @@ export const getImportExceptionsListSchemaMock = (
 });
 
 /** 
-  This mock holds the old properties of the Exception List item
-  so that we can test the migration test cases
+ This mock retains the previous properties of the Exception List item, enabling us to 
+ conduct migration test cases.  As it lacks the new "expire_time" property, and considering 
+ the absence of API versioning, we can utilize this mock to simulate the migration scenarios.
 */
 export const getImportExceptionsListItemSchemaMock = (
   itemId = 'item_id_1',
@@ -40,9 +41,9 @@ export const getImportExceptionsListItemSchemaMock = (
 });
 
 /**  
-  This mock will hold the new properties of the Exception List item
-  so please keep it updated with the new ones and use it to test the 
-  new scenarios 
+ Please ensure that this mock is updated with the new properties of the Exception List item, 
+ for example the inclusion of the "expire_time" property. This will allow us to test and evaluate 
+ the new scenarios effectively.
 */
 export const getImportExceptionsListItemNewerVersionSchemaMock = (
   itemId = 'item_id_1',
