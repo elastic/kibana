@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { capitalize } from 'lodash';
 import React from 'react';
-
-import { useKibana } from '../../../utils/kibana_react';
-import { toDurationLabel } from '../../../utils/slo/labels';
 import { ChartData } from '../../../typings/slo';
+import { useKibana } from '../../../utils/kibana_react';
+import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { WideChart } from './wide_chart';
 
 export interface Props {
@@ -44,10 +44,23 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration', {
-                defaultMessage: 'Last {duration}',
-                values: { duration: toDurationLabel(slo.timeWindow.duration) },
-              })}
+              {'isRolling' in slo.timeWindow
+                ? i18n.translate(
+                    'xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration',
+                    {
+                      defaultMessage: 'Last {duration}',
+                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.observability.slo.sloDetails.sliHistoryChartPanel.durationCalendarAligned',
+                    {
+                      defaultMessage: '{duration}',
+                      values: {
+                        duration: capitalize(toDurationAdverbLabel(slo.timeWindow.duration)),
+                      },
+                    }
+                  )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -8,13 +8,18 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { occurrencesBudgetingMethodSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { capitalize } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-
-import { toBudgetingMethodLabel, toIndicatorTypeLabel } from '../../../utils/slo/labels';
-import { toDurationLabel } from '../../../utils/slo/labels';
 import { useKibana } from '../../../utils/kibana_react';
+import {
+  BUDGETING_METHOD_OCCURRENCES,
+  BUDGETING_METHOD_TIMESLICES,
+  toDurationAdverbLabel,
+  toDurationLabel,
+  toIndicatorTypeLabel,
+} from '../../../utils/slo/labels';
 import { OverviewItem } from './overview_item';
 
 export interface Props {
@@ -71,11 +76,28 @@ export function Overview({ slo }: Props) {
           <OverviewItem
             title={i18n.translate(
               'xpack.observability.slo.sloDetails.overview.budgetingMethodTitle',
-              {
-                defaultMessage: 'Budgeting method',
-              }
+              { defaultMessage: 'Budgeting method' }
             )}
-            subtitle={<EuiText size="s">{toBudgetingMethodLabel(slo.budgetingMethod)}</EuiText>}
+            subtitle={
+              occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) ? (
+                <EuiText size="s">{BUDGETING_METHOD_OCCURRENCES}</EuiText>
+              ) : (
+                <EuiText size="s">
+                  {BUDGETING_METHOD_TIMESLICES} (
+                  {i18n.translate(
+                    'xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethodDetails',
+                    {
+                      defaultMessage: '{duration} slices, {target} target',
+                      values: {
+                        duration: toDurationLabel(slo.objective.timesliceWindow!),
+                        target: numeral(slo.objective.timesliceTarget!).format(percentFormat),
+                      },
+                    }
+                  )}
+                  )
+                </EuiText>
+              )
+            }
           />
         </EuiFlexGroup>
 
@@ -138,9 +160,9 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
   }
 
   return i18n.translate('xpack.observability.slo.sloDetails.overview.calendarAlignedTimeWindow', {
-    defaultMessage: '{duration}',
+    defaultMessage: '{duration} calendar aligned',
     values: {
-      duration: timeWindow.duration,
+      duration: capitalize(toDurationAdverbLabel(timeWindow.duration)),
     },
   });
 }
