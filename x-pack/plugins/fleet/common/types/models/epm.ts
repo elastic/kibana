@@ -417,13 +417,15 @@ export interface RegistryVarsEntry {
   };
 }
 
+// Deprecated as part of the removing public references to saved object schemas
+// See https://github.com/elastic/kibana/issues/149098
 /**
  * @deprecated
  */
-export interface InstallSavedObject {
-  type?: string;
-  id?: string;
-  attributes?: Installation;
+export interface InstallableSavedObject {
+  type: string;
+  id: string;
+  attributes: Installation;
   references?: SOReference[];
   created_at?: string;
   updated_at?: string;
@@ -432,6 +434,11 @@ export interface InstallSavedObject {
   namespaces?: string[];
 }
 
+// Deprecated as part of the removing public references to saved object schemas
+// See https://github.com/elastic/kibana/issues/149098
+/**
+ * @deprecated
+ */
 interface SOReference {
   name: string;
   type: string;
@@ -457,7 +464,7 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  savedObject?: InstallSavedObject;
+  savedObject: InstallableSavedObject;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -521,12 +528,12 @@ export type InstallStatusExcluded<T = {}> = T & {
 
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
-  savedObject?: InstallSavedObject;
+  savedObject: InstallableSavedObject;
 };
 
 export type Installing<T = {}> = T & {
   status: InstallationStatus['Installing'];
-  savedObject?: InstallSavedObject;
+  savedObject: InstallableSavedObject;
 };
 
 export type NotInstalled<T = {}> = T & {

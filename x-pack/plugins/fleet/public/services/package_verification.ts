@@ -17,7 +17,7 @@ export function isPackageUnverified(
   pkg: PackageInfo | PackageListItem,
   packageVerificationKeyId?: string
 ) {
-  if (!('savedObject' in pkg) || !pkg?.savedObject?.attributes) return false;
+  if (!('savedObject' in pkg)) return false;
 
   const { verification_status: verificationStatus, verification_key_id: verificationKeyId } =
     pkg.savedObject.attributes;

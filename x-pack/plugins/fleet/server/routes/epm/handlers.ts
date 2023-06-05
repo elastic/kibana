@@ -75,7 +75,7 @@ import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_veri
 import type { ReauthorizeTransformRequestSchema, SimpleSOAssetAttributes } from '../../types';
 import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
 import { getDataStreams } from '../../services/epm/data_streams';
-import { allowedAssetTypes } from '../../../common/constants';
+import { allowedAssetTypesLookup } from '../../../common/constants';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -307,8 +307,6 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
-
     const savedObjectsClient = (await context.fleet).internalSoClient;
     const { objects } = request.body;
 

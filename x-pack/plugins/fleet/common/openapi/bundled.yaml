@@ -223,7 +223,7 @@ paths:
                         type: string
                   description: list of items necessary to fetch assets
               required:
-                - packages
+                - assetIds
   /epm/categories:
     get:
       summary: List package categories

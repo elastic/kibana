@@ -65,8 +65,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       if ('savedObject' in packageInfo) {
         if (spaces) {
           const { id: spaceId } = await spaces.getActiveSpace();
-          const assetInstallSpaceId =
-            packageInfo?.savedObject?.attributes?.installed_kibana_space_id;
+          const assetInstallSpaceId = packageInfo.savedObject.attributes.installed_kibana_space_id;
           // if assets are installed in a different space no need to attempt to load them.
           if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
             setAssetsInstalledInCurrentSpace(false);
@@ -75,12 +74,11 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           }
         }
 
-        const packageAttributes = packageInfo.savedObject?.attributes;
+        const packageAttributes = packageInfo.savedObject.attributes;
 
         if (
-          packageAttributes?.installed_es &&
           Array.isArray(packageAttributes.installed_es) &&
-          packageAttributes.installed_es.length > 0
+          packageAttributes.installed_es?.length > 0
         ) {
           const deferredAssets = packageAttributes.installed_es.filter(
             (asset) => asset.deferred === true
@@ -88,13 +86,13 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           setDeferredInstallations(deferredAssets);
         }
 
-        const authorizedTransforms = (packageAttributes?.installed_es || []).filter(
+        const authorizedTransforms = packageAttributes.installed_es.filter(
           (asset) => asset.type === ElasticsearchAssetType.transform && !asset.deferred
         );
 
         if (
-          authorizedTransforms?.length === 0 &&
-          (!packageAttributes?.installed_kibana || packageAttributes.installed_kibana.length === 0)
+          authorizedTransforms.length === 0 &&
+          (!packageAttributes.installed_kibana || packageAttributes.installed_kibana.length === 0)
         ) {
           setIsLoading(false);
           return;
@@ -102,7 +100,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         try {
           const assetIds: AssetSOObject[] = [
             ...authorizedTransforms,
-            ...(packageAttributes?.installed_kibana || []),
+            ...packageAttributes?.installed_kibana,
           ].map(({ id, type }) => ({
             id,
             type,

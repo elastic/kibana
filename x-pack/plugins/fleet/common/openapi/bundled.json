@@ -352,7 +352,7 @@
                   }
                 },
                 "required": [
-                  "packages"
+                  "assetIds"
                 ]
               }
             }

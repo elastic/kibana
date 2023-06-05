@@ -29,4 +29,4 @@ post:
                     type: string
               description: list of items necessary to fetch assets
           required:
-            - packages
+            - assetIds

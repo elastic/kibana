@@ -44,9 +44,7 @@ export const usePackageInstallationsQuery = () => {
     () =>
       allInstalledPackages.filter(
         (item) =>
-          'savedObject' in item &&
-          item?.savedObject?.attributes?.version &&
-          semverLt(item.savedObject.attributes.version, item.version)
+          'savedObject' in item && semverLt(item.savedObject.attributes.version, item.version)
       ),
     [allInstalledPackages]
   );
@@ -58,12 +56,12 @@ export const usePackageInstallationsQuery = () => {
           if (!pkgPolicy.package) return false;
           const { name, version } = pkgPolicy.package;
           const installedPackage = allInstalledPackages.find(
-            (installedPkg) => installedPkg?.savedObject?.attributes?.name === name
+            (installedPkg) =>
+              'savedObject' in installedPkg && installedPkg.savedObject.attributes.name === name
           );
           if (
             installedPackage &&
             'savedObject' in installedPackage &&
-            installedPackage?.savedObject?.attributes?.version &&
             semverLt(version, installedPackage.savedObject.attributes.version)
           ) {
             const packageData = result.get(name) ?? {

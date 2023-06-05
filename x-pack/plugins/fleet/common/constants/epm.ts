@@ -88,3 +88,5 @@ export const allowedAssetTypes: AllowedAssetTypes = [
   KibanaAssetType.visualization,
   ElasticsearchAssetType.transform,
 ];
+
+export const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
