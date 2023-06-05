@@ -84,11 +84,12 @@ export const EditControlFlyout = ({
         width: changes.width,
         embeddableId: embeddable.id,
       });
-    if (changes.grow && changes.grow !== panel.grow)
+    if (changes.grow !== undefined && changes.grow !== panel.grow) {
       controlGroup.dispatch.setControlGrow({
         grow: changes.grow,
         embeddableId: embeddable.id,
       });
+    }
 
     closeFlyout();
     await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
