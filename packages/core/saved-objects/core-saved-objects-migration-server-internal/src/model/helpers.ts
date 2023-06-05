@@ -20,6 +20,9 @@ import type { BulkIndexOperationTuple } from './create_batches';
 import { OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
 
 /** @internal */
+export const REINDEX_TEMP_SUFFIX = '_reindex_temp';
+
+/** @internal */
 export type Aliases = Partial<Record<string, string>>;
 
 /**
@@ -311,7 +314,7 @@ export function getMigrationType({
  * @returns A temporary index name to reindex documents
  */
 export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
-  `${indexPrefix}_${kibanaVersion}_reindex_temp`;
+  `${indexPrefix}_${kibanaVersion}${REINDEX_TEMP_SUFFIX}`;
 
 /** Increase batchSize by 20% until a maximum of maxBatchSize */
 export const increaseBatchSize = (
