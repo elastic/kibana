@@ -19,19 +19,19 @@ import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {
   action: LogsEndpointActionWithHosts;
-  isNewFlyout?: boolean;
+  isExpandableFlyout?: boolean;
 }
 
 const StyledEuiComment = styled(EuiComment)`
   figure {
-    background-color: ${(props: { isNewFlyout?: boolean }) =>
-      props.isNewFlyout ? 'white' : 'transparent'};
+    background-color: ${(props: { isExpandableFlyout?: boolean }) =>
+      props.isExpandableFlyout ? 'white' : 'transparent'};
   }
 `;
 
 export const EndpointResponseActionResults = ({
   action,
-  isNewFlyout,
+  isExpandableFlyout,
 }: EndpointResponseActionResultsProps) => {
   const { rule, agent } = action;
   const { action_id: actionId, expiration } = action.EndpointActions;
@@ -65,7 +65,7 @@ export const EndpointResponseActionResults = ({
     <>
       <EuiSpacer size="s" />
       <StyledEuiComment
-        isNewFlyout={isNewFlyout}
+        isExpandableFlyout={isExpandableFlyout}
         username={rule?.name}
         timestamp={<FormattedRelative value={action['@timestamp']} />}
         event={eventText}

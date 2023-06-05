@@ -25,13 +25,13 @@ import type { OsqueryActionResultProps } from './types';
 
 const StyledEuiComment = styled(EuiComment)`
   figure {
-    background-color: ${(props: { isNewFlyout?: boolean }) =>
-      props.isNewFlyout ? 'white' : 'transparent'};
+    background-color: ${(props: { isExpandableFlyout?: boolean }) =>
+      props.isExpandableFlyout ? 'white' : 'transparent'};
   }
 `;
 
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
-  ({ actionId, ruleName, startDate, ecsData, isNewFlyout }) => {
+  ({ actionId, ruleName, startDate, ecsData, isExpandableFlyout }) => {
     const { read } = useKibana().services.application.capabilities.osquery;
 
     const [isLive, setIsLive] = useState(false);
@@ -49,7 +49,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
       <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
         <StyledEuiComment
-          isNewFlyout={isNewFlyout}
+          isExpandableFlyout={isExpandableFlyout}
           username={ruleName && ruleName[0]}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}

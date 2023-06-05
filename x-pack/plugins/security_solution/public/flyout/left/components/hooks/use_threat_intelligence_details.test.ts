@@ -72,7 +72,7 @@ describe('useThreatIntelligenceDetails', () => {
         _id: 'testId',
         _index: 'testIndex',
       },
-      ecs: null,
+      dataAsNestedObject: null,
     });
   });
 

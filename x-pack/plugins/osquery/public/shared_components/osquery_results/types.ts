@@ -20,5 +20,5 @@ export interface OsqueryActionResultProps {
   actionId: string;
   queryId: string;
   startDate: string;
-  isNewFlyout?: boolean;
+  isExpandableFlyout?: boolean;
 }

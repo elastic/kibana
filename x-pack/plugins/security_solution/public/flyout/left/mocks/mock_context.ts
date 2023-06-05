@@ -42,7 +42,7 @@ export const mockContextValue: LeftPanelContext = {
     _id: 'testId',
     _index: 'testIndex',
   },
-  ecs: {
+  dataAsNestedObject: {
     _id: 'testId',
   },
 };

@@ -31,11 +31,11 @@ const TabContentWrapper = styled.div`
 export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,
-  isNewFlyout,
+  isExpandableFlyout,
 }: {
   ecsData?: Ecs | null;
   rawEventData: SearchHit | undefined;
-  isNewFlyout?: boolean;
+  isExpandableFlyout?: boolean;
 }): EuiTabbedContentTab | undefined => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
@@ -73,7 +73,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
             actions={automatedList.items}
             ruleName={ruleName}
             ecsData={ecsData}
-            isNewFlyout={isNewFlyout}
+            isExpandableFlyout={isExpandableFlyout}
           />
         ) : null}
       </TabContentWrapper>

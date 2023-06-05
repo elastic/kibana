@@ -27,8 +27,11 @@ const InlineBlock = styled.div`
   line-height: 1.7em;
 `;
 
+/**
+ * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
+ */
 export const ResponseDetails: React.FC = () => {
-  const { data, ecs } = useLeftPanelContext();
+  const { data, dataAsNestedObject } = useLeftPanelContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
@@ -41,12 +44,12 @@ export const ResponseDetails: React.FC = () => {
 
   const responseActionsView = useResponseActionsView({
     rawEventData: data,
-    ecsData: ecs,
-    isNewFlyout: true,
+    ecsData: dataAsNestedObject,
+    isExpandableFlyout: true,
   });
   const osqueryView = useOsqueryTab({
     rawEventData: data,
-    ecsData: ecs,
+    ecsData: dataAsNestedObject,
   });
 
   return (

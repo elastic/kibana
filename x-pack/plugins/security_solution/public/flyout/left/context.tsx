@@ -41,7 +41,7 @@ export interface LeftPanelContext {
 
   data: SearchHit | undefined;
 
-  ecs: Ecs | null;
+  dataAsNestedObject: Ecs | null;
 }
 
 export const LeftFlyoutContext = createContext<LeftPanelContext | undefined>(undefined);
@@ -62,12 +62,13 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, dataFormattedForFieldBrowser, searchHit, ecs] = useTimelineEventsDetails({
-    indexName: eventIndex,
-    eventId: id ?? '',
-    runtimeMappings: sourcererDataView.runtimeMappings,
-    skip: !id,
-  });
+  const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject] =
+    useTimelineEventsDetails({
+      indexName: eventIndex,
+      eventId: id ?? '',
+      runtimeMappings: sourcererDataView.runtimeMappings,
+      skip: !id,
+    });
   const getFieldsData = useGetFieldsData(searchHit?.fields);
 
   const contextValue = useMemo(
@@ -79,10 +80,10 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
             getFieldsData,
             data: searchHit,
             dataFormattedForFieldBrowser,
-            ecs,
+            dataAsNestedObject,
           }
         : undefined,
-    [id, indexName, getFieldsData, searchHit, dataFormattedForFieldBrowser, ecs]
+    [id, indexName, getFieldsData, searchHit, dataFormattedForFieldBrowser, dataAsNestedObject]
   );
 
   if (loading) {
