@@ -15,6 +15,7 @@ import {
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
   ConfigKey,
@@ -23,7 +24,6 @@ import {
   EncryptedSyntheticsMonitor,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import { formatKibanaNamespace } from '../../../common/formatters';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import {

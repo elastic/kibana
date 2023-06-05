@@ -16,7 +16,7 @@ import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
 import { IBasePath } from '@kbn/core/server';
 
-import { memoize, last } from 'lodash';
+import { memoize, last, upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
 import { Duration, SLO, toDurationUnit } from '../../../domain/models';
@@ -31,6 +31,12 @@ import {
   BurnRateRuleTypeState,
   WindowSchema,
 } from './types';
+import {
+  ALERT_ACTION,
+  HIGH_PRIORITY_ACTION,
+  MEDIUM_PRIORITY_ACTION,
+  LOW_PRIORITY_ACTION,
+} from '../../../../common/constants';
 
 const SHORT_WINDOW = 'SHORT_WINDOW';
 const LONG_WINDOW = 'LONG_WINDOW';
@@ -143,6 +149,7 @@ export const getRuleExecutor = ({
 
       if (shouldAlert) {
         const reason = buildReason(
+          windowDef.actionGroup,
           longWindowDuration,
           longWindowBurnRate,
           shortWindowDuration,
@@ -196,7 +203,21 @@ export const getRuleExecutor = ({
     return { state: {} };
   };
 
+function getActionGroupName(id: string) {
+  switch (id) {
+    case HIGH_PRIORITY_ACTION.id:
+      return HIGH_PRIORITY_ACTION.name;
+    case MEDIUM_PRIORITY_ACTION.id:
+      return MEDIUM_PRIORITY_ACTION.name;
+    case LOW_PRIORITY_ACTION.id:
+      return LOW_PRIORITY_ACTION.name;
+    default:
+      return ALERT_ACTION.name;
+  }
+}
+
 function buildReason(
+  actionGroup: string,
   longWindowDuration: Duration,
   longWindowBurnRate: number,
   shortWindowDuration: Duration,
@@ -205,8 +226,9 @@ function buildReason(
 ) {
   return i18n.translate('xpack.observability.slo.alerting.burnRate.reason', {
     defaultMessage:
-      'The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
+      '{actionGroupName}: The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
     values: {
+      actionGroupName: upperCase(getActionGroupName(actionGroup)),
       longWindowDuration: longWindowDuration.format(),
       longWindowBurnRate: numeral(longWindowBurnRate).format('0.[00]'),
       shortWindowDuration: shortWindowDuration.format(),

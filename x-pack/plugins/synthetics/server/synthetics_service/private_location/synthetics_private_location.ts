@@ -9,7 +9,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   ConfigKey,
   HeartbeatConfig,
@@ -18,6 +18,7 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -90,10 +91,10 @@ export class SyntheticsPrivateLocation {
         {
           ...(config as Partial<MonitorFields>),
           config_id: config.fields?.config_id,
-          location_name: privateLocation.label,
+          location_name: stringifyString(privateLocation.label),
           location_id: privateLocation.id,
-          'monitor.project.id': config.fields?.['monitor.project.name'],
-          'monitor.project.name': config.fields?.['monitor.project.name'],
+          'monitor.project.id': stringifyString(config.fields?.['monitor.project.name']),
+          'monitor.project.name': stringifyString(config.fields?.['monitor.project.name']),
         },
         globalParams
       );
