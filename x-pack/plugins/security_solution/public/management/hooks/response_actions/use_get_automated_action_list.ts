@@ -9,9 +9,10 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 
-import { compact, map } from 'lodash';
+import { compact, filter, map } from 'lodash';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
+import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import { SortOrder } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import type {
   ActionResponsesRequestOptions,
@@ -29,6 +30,7 @@ import type {
 interface GetAutomatedActionsListOptions {
   enabled: boolean;
 }
+
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
   { enabled }: GetAutomatedActionsListOptions
@@ -55,12 +57,17 @@ export const useGetAutomatedActionList = (
         )
       );
 
-      // fields have to firstly be expanded from dottej object to kind of normal nested object
-      const items = map(responseData.edges, (edge) => {
-        if (edge.fields) {
+      // fields have to firstly be expanded from dotted object to kind of normal nested object
+      const items = map(
+        filter(responseData.edges, 'fields'),
+        (
+          edge: ResponseActionsSearchHit & {
+            fields: object;
+          }
+        ) => {
           return expandDottedObject(edge.fields, true);
         }
-      });
+      );
 
       return {
         ...responseData,
