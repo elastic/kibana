@@ -7,10 +7,10 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import VirtualList from 'react-virtualized/dist/commonjs/List';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import { i18n } from '@kbn/i18n';
 import { get, isEqual } from 'lodash';
 import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
@@ -126,8 +126,6 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   // fields.
   const listHeight = Math.min(filteredFields.length * ITEM_HEIGHT, height - SHOW_MORE_HEIGHT);
 
-  const { ref, width = 300 } = useResizeObserver<HTMLDivElement>();
-
   const toggleShowAllFields = useCallback(() => {
     setShowAllFields((prev) => !prev);
   }, []);
@@ -204,20 +202,24 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   }
 
   return (
-    <div ref={ref} className="indexPatternFieldEditor__previewFieldList">
+    <div className="indexPatternFieldEditor__previewFieldList">
       {isEmptySearchResultVisible ? (
         renderEmptyResult()
       ) : (
-        <VirtualList
-          className="eui-scrollBar"
-          style={{ overflowX: 'hidden' }}
-          width={width}
-          height={listHeight}
-          rowCount={filteredFields.length}
-          rowHeight={ITEM_HEIGHT}
-          overscanRowCount={4}
-          rowRenderer={rowRenderer}
-        />
+        <AutoSizer disableHeight>
+          {({ width }) => (
+            <VirtualList
+              className="eui-scrollBar"
+              style={{ overflowX: 'hidden' }}
+              width={width}
+              height={listHeight}
+              rowCount={filteredFields.length}
+              rowHeight={ITEM_HEIGHT}
+              overscanRowCount={4}
+              rowRenderer={rowRenderer}
+            />
+          )}
+        </AutoSizer>
       )}
 
       {renderToggleFieldsButton()}

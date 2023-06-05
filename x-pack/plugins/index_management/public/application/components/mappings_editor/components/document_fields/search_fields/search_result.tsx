@@ -7,9 +7,9 @@
 
 import React, { useCallback } from 'react';
 import VirtualList from 'react-virtualized/dist/commonjs/List';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { SearchResult as SearchResultType, State } from '../../../types';
 import { useDispatch } from '../../../mappings_state_context';
@@ -25,7 +25,6 @@ const ITEM_HEIGHT = 64;
 
 export const SearchResult = React.memo(
   ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
-    const { ref, width = 300 } = useResizeObserver<HTMLDivElement>();
     const dispatch = useDispatch();
     const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
@@ -73,18 +72,20 @@ export const SearchResult = React.memo(
         }
       />
     ) : (
-      <div ref={ref}>
-        <VirtualList
-          data-test-subj="mappingsEditorSearchResult"
-          style={{ overflowX: 'hidden', ...virtualListStyle }}
-          width={width}
-          height={listHeight}
-          rowCount={result.length}
-          rowHeight={ITEM_HEIGHT}
-          overscanRowCount={4}
-          rowRenderer={rowRenderer}
-        />
-      </div>
+      <AutoSizer disableHeight>
+        {({ width }) => (
+          <VirtualList
+            data-test-subj="mappingsEditorSearchResult"
+            style={{ overflowX: 'hidden', ...virtualListStyle }}
+            width={width}
+            height={listHeight}
+            rowCount={result.length}
+            rowHeight={ITEM_HEIGHT}
+            overscanRowCount={4}
+            rowRenderer={rowRenderer}
+          />
+        )}
+      </AutoSizer>
     );
   }
 );
