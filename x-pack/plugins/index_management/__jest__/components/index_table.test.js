@@ -144,7 +144,7 @@ const getActionMenuButtons = (rendered) => {
 describe('index table', () => {
   const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
 
-  const setupMockComponent = (extraDependencies) => {
+  const setupMockComponent = (dependenciesOverride) => {
     const services = {
       extensionsService: new ExtensionsService(),
       uiMetricService: new UiMetricService('index_management'),
@@ -172,7 +172,7 @@ describe('index table', () => {
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <AppContextProvider value={{ ...appDependencies, ...extraDependencies }}>
+          <AppContextProvider value={{ ...appDependencies, ...dependenciesOverride }}>
             <AppWithoutRouter />
           </AppContextProvider>
         </MemoryRouter>
