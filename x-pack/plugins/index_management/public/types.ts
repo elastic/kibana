@@ -9,6 +9,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services';
+import { ServerlessPluginSetup } from '@kbn/serverless/public';
 
 export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
@@ -16,7 +17,7 @@ export interface IndexManagementPluginSetup {
 
 export interface SetupDependencies {
   fleet?: unknown;
-  serverless?: unknown;
+  serverless?: ServerlessPluginSetup;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
 }
