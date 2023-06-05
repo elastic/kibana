@@ -29,6 +29,9 @@ const options = {
 const pathPrefix = '/internal/session';
 const version = '1';
 
+const idAndAttrsOnly = (so?: SearchSessionRestResponse) =>
+  so && { id: so.id, attributes: so.attributes };
+
 export function registerSessionRoutes(router: DataPluginRouter, logger: Logger): void {
   router.versioned.post({ path: pathPrefix, access, options }).addVersion(
     {
@@ -58,21 +61,19 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
 
       try {
         const searchContext = await context.search;
-        const response: SearchSessionRestResponse | undefined = await searchContext.saveSession(
-          sessionId,
-          {
-            name,
-            appId,
-            expires,
-            locatorId,
-            initialState,
-            restoreState,
-          }
-        );
 
-        return res.ok({
-          body: response,
+        const response = await searchContext.saveSession(sessionId, {
+          name,
+          appId,
+          expires,
+          locatorId,
+          initialState,
+          restoreState,
         });
+
+        const body: SearchSessionRestResponse | undefined = idAndAttrsOnly(response);
+
+        return res.ok({ body });
       } catch (err) {
         logger.error(err);
         return reportServerError(res, err);
@@ -101,10 +102,9 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       try {
         const searchContext = await context.search;
         const response: SearchSessionRestResponse = await searchContext!.getSession(id);
+        const body = idAndAttrsOnly(response);
 
-        return res.ok({
-          body: response,
-        });
+        return res.ok({ body });
       } catch (e) {
         const err = e.output?.payload || e;
         logger.error(err);
@@ -182,9 +182,13 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           search,
         });
 
-        return res.ok({
-          body: response,
-        });
+        const body = {
+          total: response.total,
+          saved_objects: response.saved_objects.map(idAndAttrsOnly),
+          statuses: response.statuses,
+        };
+
+        return res.ok({ body });
       } catch (err) {
         logger.error(err);
         return reportServerError(res, err);
@@ -227,11 +231,6 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             id: schema.string(),
           }),
         },
-        response: {
-          200: {
-            body: schema.never(),
-          },
-        },
       },
     },
     async (context, request, res) => {
@@ -262,15 +261,10 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             expires: schema.maybe(schema.string()),
           }),
         },
-        response: {
-          200: {
-            // todo
-            body: schema.any(),
-          },
-        },
       },
     },
     async (context, request, res) => {
+      console.log('put /{id}');
       const { id } = request.params;
       const { name, expires } = request.body;
       try {
@@ -278,9 +272,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         // todo
         const response = await searchContext.updateSession(id, { name, expires });
 
-        return res.ok({
-          body: response,
-        });
+        return res.ok();
       } catch (err) {
         logger.error(err);
         return reportServerError(res, err);
@@ -300,25 +292,17 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             expires: schema.string(),
           }),
         },
-        response: {
-          200: {
-            // todo
-            body: schema.any(),
-          },
-        },
       },
     },
     async (context, request, res) => {
+      console.log('post /{id}/_extend');
       const { id } = request.params;
       const { expires } = request.body;
       try {
         const searchContext = await context.search;
-        // todo
-        const response = await searchContext.extendSession(id, new Date(expires));
+        await searchContext.extendSession(id, new Date(expires));
 
-        return res.ok({
-          body: response,
-        });
+        return res.ok();
       } catch (e) {
         const err = e.output?.payload || e;
         logger.error(err);

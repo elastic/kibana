@@ -10,7 +10,7 @@ import { PublicContract } from '@kbn/utility-types';
 import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
-  SavedObjectsFindResponse,
+  // SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
@@ -80,18 +80,12 @@ export class SessionsClient {
     });
   }
 
-  public rename(
-    sessionId: string,
-    newName: string
-  ): Promise<SavedObjectsUpdateResponse<Pick<SearchSessionSavedObjectAttributes, 'name'>>> {
-    return this.update(sessionId, { name: newName });
+  public async rename(sessionId: string, newName: string): Promise<void> {
+    await this.update(sessionId, { name: newName });
   }
 
-  public extend(
-    sessionId: string,
-    expires: string
-  ): Promise<SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>> {
-    return this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
+  public async extend(sessionId: string, expires: string): Promise<void> {
+    await this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
       body: JSON.stringify({ expires }),
     });
   }
