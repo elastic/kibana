@@ -181,11 +181,12 @@ describe('filterByAgent', () => {
     });
 
     it('android/java', () => {
-      expect(getSettingKeysForAgent('android/java')).toEqual(['recording']);
+      expect(getSettingKeysForAgent('android/java')).toEqual(['recording', 'sessionSampleRate']);
     });
 
     it('iOS/swift', () => {
-      expect(getSettingKeysForAgent('iOS/swift')).toEqual(['recording']);
+      expect(getSettingKeysForAgent('iOS/swift')).toEqual(['recording', 'sessionSampleRate']);
+
     });
 
     it('"All" services (no agent name)', () => {
