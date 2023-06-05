@@ -7,7 +7,12 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { Map as MbMap, LayerSpecification, SourceSpecification, StyleSpecification } from '@kbn/mapbox-gl';
+import type {
+  Map as MbMap,
+  LayerSpecification,
+  SourceSpecification,
+  StyleSpecification,
+} from '@kbn/mapbox-gl';
 import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 import _ from 'lodash';
@@ -39,9 +44,13 @@ class MockMbMap {
 class MockLayer {
   private readonly _layerId: string;
   private readonly _mbSourceIds: string[];
-  private readonly _mbLayerIdsToSource: { id: string, source: string }[];
+  private readonly _mbLayerIdsToSource: Array<{ id: string; source: string }>;
 
-  constructor(layerId: string, mbSourceIds: string[], mbLayerIdsToSource: { id: string, source: string }[]) {
+  constructor(
+    layerId: string,
+    mbSourceIds: string[],
+    mbLayerIdsToSource: Array<{ id: string; source: string }>
+  ) {
     this._mbSourceIds = mbSourceIds;
     this._mbLayerIdsToSource = mbLayerIdsToSource;
     this._layerId = layerId;
@@ -80,8 +89,8 @@ function getMockStyle(orderedMockLayerList: MockLayer[]) {
     });
     mockLayer.getMbLayersIdsToSource().forEach(({ id, source }) => {
       mockStyle.layers.push({
-        id: id,
-        source: source,
+        id,
+        source,
       } as unknown as LayerSpecification);
     });
   });
@@ -128,7 +137,11 @@ describe('removeOrphanedSourcesAndLayers', () => {
     const currentStyle = getMockStyle(currentLayerList);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap as unknown as MbMap, nextLayerList as unknown as ILayer[], spatialFilterLayer as unknown as ILayer);
+    removeOrphanedSourcesAndLayers(
+      mockMbMap as unknown as MbMap,
+      nextLayerList as unknown as ILayer[],
+      spatialFilterLayer as unknown as ILayer
+    );
     const removedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerList);
@@ -146,7 +159,11 @@ describe('removeOrphanedSourcesAndLayers', () => {
     const currentStyle = getMockStyle(currentLayerList);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap as unknown as MbMap, nextLayerList as unknown as ILayer[], spatialFilterLayer as unknown as ILayer);
+    removeOrphanedSourcesAndLayers(
+      mockMbMap as unknown as MbMap,
+      nextLayerList as unknown as ILayer[],
+      spatialFilterLayer as unknown as ILayer
+    );
     const removedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerList);
@@ -164,7 +181,11 @@ describe('removeOrphanedSourcesAndLayers', () => {
     const currentStyle = getMockStyle(currentLayerList);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap as unknown as MbMap, nextLayerList as unknown as ILayer[], spatialFilterLayer as unknown as ILayer);
+    removeOrphanedSourcesAndLayers(
+      mockMbMap as unknown as MbMap,
+      nextLayerList as unknown as ILayer[],
+      spatialFilterLayer as unknown as ILayer
+    );
     const removedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerList);
@@ -175,7 +196,11 @@ describe('removeOrphanedSourcesAndLayers', () => {
     const styleWithSpatialFilters = getMockStyle([spatialFilterLayer]);
     const mockMbMap = new MockMbMap(styleWithSpatialFilters);
 
-    removeOrphanedSourcesAndLayers(mockMbMap as unknown as MbMap, [], spatialFilterLayer as unknown as ILayer);
+    removeOrphanedSourcesAndLayers(
+      mockMbMap as unknown as MbMap,
+      [],
+      spatialFilterLayer as unknown as ILayer
+    );
     expect(mockMbMap.getStyle()).toEqual(styleWithSpatialFilters);
   });
 
@@ -187,10 +212,17 @@ describe('removeOrphanedSourcesAndLayers', () => {
     const currentStyle = getMockStyle(currentLayerList);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap as unknown as MbMap, [], spatialFilterLayer as unknown as ILayer);
+    removeOrphanedSourcesAndLayers(
+      mockMbMap as unknown as MbMap,
+      [],
+      spatialFilterLayer as unknown as ILayer
+    );
     const removedStyle = mockMbMap.getStyle();
 
-    expect(Object.keys(removedStyle.sources)).toEqual(['SPATIAL_FILTERS_LAYER_ID_source1', 'SPATIAL_FILTERS_LAYER_ID_source2']);
+    expect(Object.keys(removedStyle.sources)).toEqual([
+      'SPATIAL_FILTERS_LAYER_ID_source1',
+      'SPATIAL_FILTERS_LAYER_ID_source2',
+    ]);
   });
 
   test('should not remove mapbox gl draw layers and sources', () => {
@@ -201,7 +233,11 @@ describe('removeOrphanedSourcesAndLayers', () => {
     currentStyle.layers.push({ id: 'gl-draw-points' } as unknown as LayerSpecification);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap as unknown as MbMap, layerList as unknown as ILayer[], spatialFilterLayer as unknown as ILayer);
+    removeOrphanedSourcesAndLayers(
+      mockMbMap as unknown as MbMap,
+      layerList as unknown as ILayer[],
+      spatialFilterLayer as unknown as ILayer
+    );
     expect(mockMbMap.getStyle()).toEqual(currentStyle);
   });
 });
