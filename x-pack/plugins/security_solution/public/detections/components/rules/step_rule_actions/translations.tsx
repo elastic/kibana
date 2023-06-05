@@ -52,3 +52,37 @@ function RuleSnoozeDescription(): JSX.Element {
 }
 
 export const RULE_SNOOZE_DESCRIPTION = <RuleSnoozeDescription />;
+
+export const NOTIFICATION_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.notificationActions',
+  {
+    defaultMessage: 'Notification actions',
+  }
+);
+
+export const RESPONSE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.responseActions',
+  {
+    defaultMessage: 'Response actions',
+  }
+);
+
+export const FOR_EACH_ALERT_PER_RULE_RUN = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.forEachOption',
+  { defaultMessage: 'For each alert. Per rule run.' }
+);
+
+export const SUMMARY_OF_ALERTS_PER_RULE_RUN = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
+  { defaultMessage: 'Summary of alerts. Per rule run.' }
+);
+
+export const SUMMARY_OF_ALERTS = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
+  { defaultMessage: 'Summary of alerts' }
+);
+
+export const PERIODICALLY = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.periodically',
+  { defaultMessage: 'Periodically' }
+);

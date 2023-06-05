@@ -6,162 +6,199 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import type { RuleActionFrequency } from '@kbn/alerting-plugin/common';
+import { EuiToolTip, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import type { RuleActionFrequency, RuleAction } from '@kbn/alerting-plugin/common';
+import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
+import type { ActionResult } from '@kbn/actions-plugin/server';
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useFetchConnectors,
   useFetchConnectorTypes,
 } from '../../../../detection_engine/rule_management/api/hooks/use_fetch_connectors';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { ActionsStepRule, RuleAction } from '../../../pages/detection_engine/rules/types';
+import type { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
+import { getActionDetails } from '../../../../detection_engine/rule_response_actions/constants';
+import * as i18n from './translations';
 
-const FOR_EACH_ALERT = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.forEachOption',
-  { defaultMessage: 'For each alert' }
-);
-const SUMMARY_OF_ALERTS = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
-  { defaultMessage: 'Summary of alerts' }
+const DescriptionLine = ({ children }: { children: React.ReactNode }) => (
+  <EuiFlexItem>
+    <EuiText size="xs" color="subdued">
+      {children}
+    </EuiText>
+  </EuiFlexItem>
 );
 
-const getFrequencyText = (frequency: RuleActionFrequency) => {
+export const FrequencyDescription: React.FC<{ frequency?: RuleActionFrequency }> = ({
+  frequency,
+}) => {
+  if (!frequency) {
+    return null;
+  }
+
   if (!frequency.summary) {
-    return FOR_EACH_ALERT; // For each alert, per rule run
+    return <DescriptionLine>{i18n.FOR_EACH_ALERT_PER_RULE_RUN}</DescriptionLine>;
   }
 
   if (frequency.notifyWhen === 'onActiveAlert') {
-    return `${SUMMARY_OF_ALERTS}, for every rule run`; // Summary of alerts, per rule run
+    return <DescriptionLine>{i18n.SUMMARY_OF_ALERTS_PER_RULE_RUN}</DescriptionLine>;
+  }
+
+  if (!frequency.throttle) {
+    return null;
   }
 
   const value = frequency.throttle.slice(0, frequency.throttle.length - 1);
   const unit = frequency.throttle.charAt(frequency.throttle.length - 1);
-  const unitText =
-    unit === 's' ? 'seconds' : unit === 'm' ? 'minutes' : unit === 'h' ? 'hours' : 'days';
 
-  let throttleText = '';
+  const messagesByUnit: { [unit: string]: JSX.Element } = {
+    s: (
+      <FormattedMessage
+        id="kbn.securitySolution.rules.onceInEverySecondsLabel"
+        defaultMessage="Once {secondsCount, plural, one {a} other {in every}} {secondsCount, plural, one {second} other {# seconds}}"
+        values={{ secondsCount: value }}
+      />
+    ),
+    m: (
+      <FormattedMessage
+        id="kbn.securitySolution.rules.onceInEveryMinutesLabel"
+        defaultMessage="Once {minutesCount, plural, one {a} other {in every}} {minutesCount, plural, one {minute} other {# minutes}}"
+        values={{ minutesCount: value }}
+      />
+    ),
+    h: (
+      <FormattedMessage
+        id="kbn.securitySolution.rules.onceInEveryHoursLabel"
+        defaultMessage="Once {hoursCount, plural, one {an} other {in every}} {hoursCount, plural, one {hour} other {# hours}}"
+        values={{ hoursCount: value }}
+      />
+    ),
+    d: (
+      <FormattedMessage
+        id="kbn.securitySolution.rules.onceInEveryDaysLabel"
+        defaultMessage="Once {daysCount, plural, one {a} other {in every}} {daysCount, plural, one {day} other {# days}}"
+        values={{ daysCount: value }}
+      />
+    ),
+  };
 
-  if (frequency.throttle === '1d') {
-    throttleText = 'once a day';
-  } else if (frequency.throttle === '1h') {
-    throttleText = 'once an hour';
-  } else if (frequency.throttle === '1m') {
-    throttleText = 'once a minute';
-  } else if (frequency.throttle === '1s') {
-    throttleText = 'once a second';
-  } else {
-    throttleText = `once in every ${value} ${unitText}`;
-  }
-
-  return `${SUMMARY_OF_ALERTS}, ${throttleText}`;
+  return <DescriptionLine>{messagesByUnit[unit] || i18n.PERIODICALLY}</DescriptionLine>;
 };
 
 export const StepActionsRule: React.FC<{ ruleActionsData: ActionsStepRule }> = ({
   ruleActionsData,
 }) => {
   const {
-    services: {
-      triggersActionsUi: { actionTypeRegistry },
-    },
+    services: { triggersActionsUi },
   } = useKibana();
 
+  const actionTypeRegistry = triggersActionsUi.actionTypeRegistry as ActionTypeRegistryContract;
+
   const { data: connectors, isLoading } = useFetchConnectors();
+  const { data: connectorTypes } = useFetchConnectorTypes();
 
-  const connectorTypesResult = useFetchConnectorTypes();
-
-  if (!ruleActionsData || !connectors || isLoading || !connectorTypesResult.data) {
+  if (!ruleActionsData || !connectors || isLoading || !connectorTypes) {
     return null;
   }
 
-  console.log({ connectorTypesResult, responseActions: ruleActionsData.responseActions });
+  const notificationActions = ruleActionsData.actions;
+  const responseActions = ruleActionsData.responseActions || [];
+
+  const hasBothNotificationAndResponseActions =
+    notificationActions.length > 0 && responseActions.length > 0;
 
   return (
     <div>
-      {/* <div>Notification actions</div> */}
-      {ruleActionsData.actions.map((action) => (
+      {hasBothNotificationAndResponseActions && (
+        <EuiText size="m">{i18n.NOTIFICATION_ACTIONS}</EuiText>
+      )}
+      <EuiSpacer size="s" />
+      {notificationActions.map((action) => (
         <NotificationAction
           action={action}
-          connectorTypesResult={connectorTypesResult}
+          connectorTypes={connectorTypes}
           connectors={connectors}
           actionTypeRegistry={actionTypeRegistry}
         />
       ))}
-      {/* <div>Response actions</div>
-      {(ruleActionsData.responseActions || []).map((action) => (
-        <ResponseAction
-          action={action}
-          connectorTypesResult={connectorTypesResult}
-          connectors={connectors}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      ))} */}
+      <EuiSpacer size="m" />
+
+      {hasBothNotificationAndResponseActions && <EuiText size="m">{i18n.RESPONSE_ACTIONS}</EuiText>}
+      <EuiSpacer size="s" />
+      {responseActions.map((action) => (
+        <ResponseAction action={action} />
+      ))}
     </div>
   );
 };
 
+interface NotificationActionProps {
+  action: RuleAction;
+  connectorTypes: ActionType[];
+  connectors: Array<AsApiContract<ActionResult>>;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+
+interface ResponseActionProps {
+  action: Omit<RuleAction, 'id' | 'group'>;
+}
+
 function NotificationAction({
   action,
-  connectorTypesResult,
+  connectorTypes,
   connectors,
   actionTypeRegistry,
-}: {
-  action: RuleAction;
-}) {
-  const connectorType = connectorTypesResult.data.find(({ id }) => id === action.actionTypeId).name;
-  const connectorName = connectors.find(({ id }) => id === action.id).name;
+}: NotificationActionProps) {
+  const connectorType = connectorTypes.find(({ id }) => id === action.actionTypeId);
+  const connectorTypeName = connectorType?.name ?? '';
+
+  const connector = connectors.find(({ id }) => id === action.id);
+  const connectorName = connector?.name ?? '';
+
+  const iconType = actionTypeRegistry.get(action.actionTypeId)?.iconClass ?? 'apps';
 
   return (
-    <div style={{ display: 'flex', marginBottom: '16px', alignItems: 'center' }}>
-      <div>
-        <EuiToolTip
-          // data-test-subj={`${ruleName}-tooltip`}
-          // title={'title'}
-          content={connectorType}
-          anchorClassName="eui-textTruncate"
-        >
-          <EuiIcon size="m" type={actionTypeRegistry.get(action.actionTypeId)?.iconClass} />
-        </EuiToolTip>
-      </div>
+    <EuiFlexItem>
+      <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={connectorTypeName} anchorClassName="eui-textTruncate">
+            <EuiIcon size="m" type={iconType} />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">{connectorName}</EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" component="span">
+            <EuiSpacer size="xs" />
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="s" type="bell" color="subdued" />
+            </EuiFlexItem>
+            <FrequencyDescription frequency={action.frequency} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <div style={{ marginLeft: '12px' }}>
-        <div>{connectorName}</div>
-        <div style={{ color: '#69707d', fontSize: '12px' }}>
-          {getFrequencyText(action.frequency)}
-        </div>
-      </div>
-    </div>
+      <EuiSpacer size="s" />
+    </EuiFlexItem>
   );
 }
 
-function ResponseAction({
-  action,
-  connectorTypesResult,
-  connectors,
-  actionTypeRegistry,
-}: {
-  action: RuleAction;
-}) {
-  const connectorType = connectorTypesResult.data.find(({ id }) => id === action.actionTypeId).name;
-  const connectorName = connectors.find(({ id }) => id === action.id).name;
+function ResponseAction({ action }: ResponseActionProps) {
+  const { name, logo } = getActionDetails(action.actionTypeId);
 
   return (
-    <div>
-      <div>
-        <EuiToolTip
-          // data-test-subj={`${ruleName}-tooltip`}
-          // title={'title'}
-          content={connectorType}
-          anchorClassName="eui-textTruncate"
-        >
-          <EuiIcon size="m" type={actionTypeRegistry.get(action.actionTypeId)?.iconClass} />
-        </EuiToolTip>
-      </div>
-    </div>
+    <EuiFlexItem>
+      <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={name} anchorClassName="eui-textTruncate">
+            <EuiIcon size="m" type={logo} />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">{name}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+    </EuiFlexItem>
   );
 }
-
-// type={
-//   typeof item.iconClass === 'string'
-//     ? item.iconClass
-//     : suspendedComponentWithProps(item.iconClass as React.ComponentType)
-// }
