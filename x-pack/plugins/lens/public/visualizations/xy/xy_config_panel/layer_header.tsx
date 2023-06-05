@@ -96,13 +96,20 @@ function AnnotationsLayerHeader({
       }
       indicator={
         hasUnsavedChanges && (
-          <EuiIconTip
-            content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
-              defaultMessage: 'Unsaved changes',
-            })}
-            type="dot"
-            color={euiThemeVars.euiColorSuccess}
-          />
+          <div
+            css={css`
+              padding-bottom: 3px;
+              padding-left: 4px;
+            `}
+          >
+            <EuiIconTip
+              content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
+                defaultMessage: 'Unsaved changes',
+              })}
+              type="dot"
+              color={euiThemeVars.euiColorSuccess}
+            />
+          </div>
         )
       }
     />

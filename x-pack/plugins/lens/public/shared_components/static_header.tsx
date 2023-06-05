@@ -40,15 +40,7 @@ export const StaticHeader = ({
         <EuiTitle size="xxs">
           <h5>{label}</h5>
         </EuiTitle>
-        {indicator && (
-          <div
-            css={css`
-              padding-bottom: 3px;
-            `}
-          >
-            {indicator}
-          </div>
-        )}
+        {indicator}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
