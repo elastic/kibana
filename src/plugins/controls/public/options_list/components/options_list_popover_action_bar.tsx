@@ -21,6 +21,7 @@ import {
 import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
+import { OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE } from '../../../common/options_list/types';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -62,7 +63,7 @@ export const OptionsListPopoverActionBar = ({
               value={searchString.value}
               data-test-subj="optionsList-control-search-input"
               placeholder={OptionsListStrings.popover.searchPlaceholder[
-                searchTechnique ?? 'prefix'
+                searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
               ].getPlaceholderText()}
             />
           </EuiFlexItem>

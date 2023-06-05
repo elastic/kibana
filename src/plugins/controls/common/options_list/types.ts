@@ -15,6 +15,7 @@ import type { DataControlInput } from '../types';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export type OptionsListSearchTechnique = 'prefix' | 'wildcard';
+export const OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;

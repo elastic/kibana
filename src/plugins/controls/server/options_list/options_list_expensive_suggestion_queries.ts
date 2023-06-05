@@ -9,7 +9,11 @@
 import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
+import {
+  OptionsListRequestBody,
+  OptionsListSuggestions,
+  OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE,
+} from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 import {
@@ -65,7 +69,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         textOrKeywordQuery = {
           filteredSuggestions: {
             filter: {
-              [(searchTechnique as string) ?? 'prefix']: {
+              [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
                 [fieldName]: {
                   value:
                     searchTechnique === 'wildcard'

@@ -29,7 +29,10 @@ import {
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
-import { OptionsListSearchTechnique } from '../../../common/options_list/types';
+import {
+  OptionsListSearchTechnique,
+  OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE,
+} from '../../../common/options_list/types';
 
 const TooltipText = ({ label, tooltip }: { label: string; tooltip: string }) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -155,7 +158,7 @@ export const OptionsListEditorOptions = ({
           >
             <EuiRadioGroup
               options={searchOptions}
-              idSelected={state.searchTechnique ?? 'prefix'}
+              idSelected={state.searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE}
               onChange={(id) => {
                 const searchTechnique = id as OptionsListSearchTechnique;
                 onChange({ searchTechnique });
