@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import { CoreStart } from '@kbn/core/public';
+
 import { EmbeddableStart, EmbeddableStartDependencies } from '.';
 
 export let core: CoreStart;
@@ -15,9 +18,18 @@ export let uiActions: EmbeddableStartDependencies['uiActions'];
 export let inspector: EmbeddableStartDependencies['inspector'];
 export let savedObjectsManagement: EmbeddableStartDependencies['savedObjectsManagement'];
 
-let notifyPluginServicesReady: () => void;
-export const untilPluginStartServicesReady = () =>
-  new Promise<void>((resolve) => (notifyPluginServicesReady = resolve));
+const servicesReady$ = new BehaviorSubject(false);
+export const untilPluginStartServicesReady = () => {
+  if (servicesReady$.value) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const subscription = servicesReady$.subscribe((isInitialized) => {
+      if (isInitialized) {
+        subscription.unsubscribe();
+        resolve();
+      }
+    });
+  });
+};
 
 export const setKibanaServices = (
   kibanaCore: CoreStart,
@@ -30,5 +42,5 @@ export const setKibanaServices = (
   embeddableStart = selfStart;
   savedObjectsManagement = deps.savedObjectsManagement;
 
-  notifyPluginServicesReady();
+  servicesReady$.next(true);
 };

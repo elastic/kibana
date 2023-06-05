@@ -26,11 +26,11 @@ export type EmbeddableNotificationAction = Action<
 >;
 
 export interface EmbeddablePanelProps {
-  showBadges: boolean;
-  showShadow: boolean;
-  hideHeader: boolean;
+  showBadges?: boolean;
+  showShadow?: boolean;
+  hideHeader?: boolean;
   embeddable: IEmbeddable;
-  showNotifications: boolean;
+  showNotifications?: boolean;
   containerContext?: EmbeddableContainerContext;
   actionPredicate?: (actionId: string) => boolean;
 

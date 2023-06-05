@@ -11,7 +11,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
 import {
-  EmbeddableChildPanel,
+  EmbeddablePanelAsync,
   EmbeddablePhaseEvent,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
@@ -52,9 +52,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
-    const {
-      embeddable: { EmbeddablePanel: PanelComponent },
-    } = pluginServices.getServices();
     const container = useDashboardContainer();
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -76,13 +73,10 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       >
         {isRenderable ? (
           <>
-            <EmbeddableChildPanel
-              // This key is used to force rerendering on embeddable type change while the id remains the same
-              key={type}
-              embeddableId={id}
+            <EmbeddablePanelAsync
+              // TODO onPanelStatusChange
+              getEmbeddable={() => container.untilEmbeddableLoaded(id)}
               index={index}
-              onPanelStatusChange={onPanelStatusChange}
-              {...{ container, PanelComponent }}
             />
             {children}
           </>
