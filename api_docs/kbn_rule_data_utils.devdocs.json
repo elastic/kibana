@@ -104,7 +104,7 @@
         "signature": [
           "(sortIds: ",
           "SortResults",
-          " | null | undefined) => (string | number)[] | null | undefined"
+          " | null | undefined) => any[] | null | undefined"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

@@ -781,7 +781,7 @@
           ],
           "label": "getIsOptedIn",
           "description": [
-            "\nResolves `true` if the user has opted into send Elastic usage data.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
+            "\nResolves `true` if sending usage to Elastic is enabled.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
           ],
           "signature": [
             "() => Promise<boolean>"

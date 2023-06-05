@@ -13,16 +13,20 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 
 // Skipping these for now as the feature is protected behind a feature flag set to false by default
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip('Expandable flyout left panel threat intelligence', { testIsolation: false }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-    expandFirstAlertExpandableFlyout();
-  });
+describe.skip(
+  'Expandable flyout left panel threat intelligence',
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  () => {
+    before(() => {
+      cleanKibana();
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+      expandFirstAlertExpandableFlyout();
+    });
 
-  it('should serialize its state to url', () => {
-    cy.url().should('include', 'eventFlyout');
-  });
-});
+    it('should serialize its state to url', () => {
+      cy.url().should('include', 'eventFlyout');
+    });
+  }
+);
