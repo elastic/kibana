@@ -31,6 +31,7 @@ describe('TaskValidator', () => {
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({ foo: fooTaskDefinition });
       const taskValidator = new TaskValidator({
+        logger: mockLogger(),
         definitions,
         allowReadingInvalidState: false,
       });
@@ -55,6 +56,7 @@ describe('TaskValidator', () => {
         },
       });
       const taskValidator = new TaskValidator({
+        logger: mockLogger(),
         definitions,
         allowReadingInvalidState: false,
       });
@@ -80,6 +82,7 @@ describe('TaskValidator', () => {
         },
       });
       const taskValidator = new TaskValidator({
+        logger: mockLogger(),
         definitions,
         allowReadingInvalidState: false,
       });
@@ -105,6 +108,7 @@ describe('TaskValidator', () => {
         },
       });
       const taskValidator = new TaskValidator({
+        logger: mockLogger(),
         definitions,
         allowReadingInvalidState: false,
       });
@@ -129,6 +133,7 @@ describe('TaskValidator', () => {
         },
       });
       const taskValidator = new TaskValidator({
+        logger: mockLogger(),
         definitions,
         allowReadingInvalidState: false,
       });
@@ -163,6 +168,7 @@ describe('TaskValidator', () => {
         },
       });
       const taskValidator = new TaskValidator({
+        logger: mockLogger(),
         definitions,
         allowReadingInvalidState: false,
       });
@@ -194,6 +200,7 @@ describe('TaskValidator', () => {
         },
       });
       const taskValidator = new TaskValidator({
+        logger: mockLogger(),
         definitions,
         allowReadingInvalidState: false,
       });

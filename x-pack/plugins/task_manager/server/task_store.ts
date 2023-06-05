@@ -13,7 +13,7 @@ import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
+import type { SavedObjectsBulkDeleteResponse, Logger } from '@kbn/core/server';
 
 import {
   SavedObject,
@@ -47,6 +47,7 @@ export interface StoreOpts {
   serializer: ISavedObjectsSerializer;
   adHocTaskCounter: AdHocTaskCounter;
   allowReadingInvalidState: boolean;
+  logger: Logger;
 }
 
 export interface SearchOpts {
@@ -126,6 +127,7 @@ export class TaskStore {
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
     this.taskValidator = new TaskValidator({
+      logger: opts.logger,
       definitions: opts.definitions,
       allowReadingInvalidState: opts.allowReadingInvalidState,
     });

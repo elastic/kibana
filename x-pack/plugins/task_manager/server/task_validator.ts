@@ -6,13 +6,15 @@
  */
 
 import { isEmpty, max } from 'lodash';
-import { type ObjectType } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import type { TaskInstance, ConcreteTaskInstance, TaskDefinition } from './task';
 
 interface TaskValidatorOpts {
   allowReadingInvalidState: boolean;
   definitions: TaskTypeDictionary;
+  logger: Logger;
 }
 
 type LatestStateSchema =
@@ -24,10 +26,12 @@ type LatestStateSchema =
     };
 
 export class TaskValidator {
+  private readonly logger: Logger;
   private readonly definitions: TaskTypeDictionary;
   private readonly allowReadingInvalidState: boolean;
 
-  constructor({ definitions, allowReadingInvalidState }: TaskValidatorOpts) {
+  constructor({ definitions, allowReadingInvalidState, logger }: TaskValidatorOpts) {
+    this.logger = logger;
     this.definitions = definitions;
     this.allowReadingInvalidState = allowReadingInvalidState;
   }
@@ -60,7 +64,10 @@ export class TaskValidator {
         if (!this.allowReadingInvalidState) {
           throw e;
         }
-        // TODO Log / telemetry
+        this.logger.debug(
+          `[${task.taskType}][${task.id}] State validation failure, but allowing to proceed given allow_reading_invalid_state is true: ${e.message}`
+        );
+        // TODO telemetry
       }
 
       return {

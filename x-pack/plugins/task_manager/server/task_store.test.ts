@@ -76,6 +76,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -249,6 +250,7 @@ describe('TaskStore', () => {
       childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -319,6 +321,7 @@ describe('TaskStore', () => {
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -418,6 +421,7 @@ describe('TaskStore', () => {
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -524,6 +528,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -566,6 +571,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -601,6 +607,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -636,6 +643,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -695,6 +703,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -789,6 +798,7 @@ describe('TaskStore', () => {
           }));
 
           const store = new TaskStore({
+            logger: mockLogger(),
             index: 'tasky',
             taskManagerId: '',
             serializer,
@@ -810,6 +820,7 @@ describe('TaskStore', () => {
       );
 
       const store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -829,6 +840,7 @@ describe('TaskStore', () => {
       );
 
       const store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -848,6 +860,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
