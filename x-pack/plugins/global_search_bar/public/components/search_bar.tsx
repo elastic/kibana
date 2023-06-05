@@ -5,58 +5,39 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useRef, useState, useEffect } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiHeaderSectionItemButton,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiSelectableTemplateSitewide,
+  EuiSelectableTemplateSitewideOption,
+  euiSelectableTemplateSitewideRenderOptions,
+  useEuiTheme,
+} from '@elastic/eui';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { ApplicationStart } from '@kbn/core/public';
+import type {
+  GlobalSearchFindParams,
+  GlobalSearchPluginStart,
+  GlobalSearchResult,
+} from '@kbn/global-search-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
-import {
-  useEuiTheme,
-  EuiFormLabel,
-  EuiHeaderSectionItemButton,
-  EuiIcon,
-  EuiSelectableTemplateSitewide,
-  EuiSelectableTemplateSitewideOption,
-  euiSelectableTemplateSitewideRenderOptions,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core/public';
-import type {
-  GlobalSearchPluginStart,
-  GlobalSearchResult,
-  GlobalSearchFindParams,
-} from '@kbn/global-search-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { blurEvent, CLICK_METRIC, COUNT_METRIC, getClickMetric, isMac, sort } from '.';
+import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
-import { resultToOption, suggestionToOption } from '../lib';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-const blurEvent = new FocusEvent('focusout', {
-  bubbles: true,
-});
-
-const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
-  if (a.score < b.score) return 1;
-  if (a.score > b.score) return -1;
-  return 0;
-};
-
-const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
-  const titleA = a.title.toUpperCase(); // ignore upper and lowercase
-  const titleB = b.title.toUpperCase(); // ignore upper and lowercase
-  if (titleA < titleB) return -1;
-  if (titleA > titleB) return 1;
-  return 0;
-};
 
 interface SearchBarProps {
   globalSearch: GlobalSearchPluginStart;
@@ -146,7 +127,7 @@ export const SearchBar: FC<SearchBarProps> = ({
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
-          trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
+          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_REQUEST);
         }
 
         const rawParams = parseSearchParams(searchValue);
@@ -170,7 +151,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
-              aggregatedResults = [...results, ...aggregatedResults].sort(sortByScore);
+              aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
               setOptions(aggregatedResults, suggestions, searchParams.tags);
               return;
             }
@@ -178,14 +159,14 @@ export const SearchBar: FC<SearchBarProps> = ({
             // if searchbar is empty, filter to only applications and sort alphabetically
             results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
 
-            aggregatedResults = [...results, ...aggregatedResults].sort(sortByTitle);
+            aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
 
             setOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: () => {
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
-            trackUiMetric(METRIC_TYPE.COUNT, 'unhandled_error');
+            trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.UNHANDLED_ERROR);
           },
           complete: () => {},
         });
@@ -199,7 +180,7 @@ export const SearchBar: FC<SearchBarProps> = ({
     (event: KeyboardEvent) => {
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        trackUiMetric(METRIC_TYPE.COUNT, 'shortcut_used');
+        trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SHORTCUT_USED);
         if (searchRef) {
           searchRef.focus();
         } else if (buttonRef) {
@@ -231,15 +212,16 @@ export const SearchBar: FC<SearchBarProps> = ({
       try {
         if (type === 'application') {
           const key = selected.keys ?? 'unknown';
-          trackUiMetric(METRIC_TYPE.CLICK, [
-            'user_navigated_to_application',
-            `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
-          ]);
+          const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
+          trackUiMetric(
+            METRIC_TYPE.CLICK,
+            getClickMetric(CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION, application)
+          );
         } else {
-          trackUiMetric(METRIC_TYPE.CLICK, [
-            'user_navigated_to_saved_object',
-            `user_navigated_to_saved_object_${type}`, // which type of saved object
-          ]);
+          trackUiMetric(
+            METRIC_TYPE.CLICK,
+            getClickMetric(CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT, type)
+          );
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -309,7 +291,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         'aria-label': placeholderText,
         placeholder: placeholderText,
         onFocus: () => {
-          trackUiMetric(METRIC_TYPE.COUNT, 'search_focus');
+          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_FOCUS);
           setInitialLoad(true);
           setShowAppend(false);
         },
