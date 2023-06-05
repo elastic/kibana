@@ -25,6 +25,8 @@ interface SearchString {
 
 // Component state is only used by public components.
 export interface OptionsListComponentState {
+  selectedOptions?: string[];
+  existsSelected?: boolean;
   availableOptions?: OptionsListSuggestions;
   allowExpensiveQueries: boolean;
   invalidSelections?: string[];
@@ -35,6 +37,11 @@ export interface OptionsListComponentState {
   field?: FieldSpec;
   error?: string;
 }
+
+export type OptionsListStateFromControl = Pick<
+  OptionsListEmbeddableInput,
+  'selectedOptions' | 'existsSelected'
+>;
 
 // public only - redux embeddable state type
 export type OptionsListReduxState = ReduxEmbeddableState<

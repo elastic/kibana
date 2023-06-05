@@ -38,8 +38,8 @@ export const OptionsListPopoverSuggestions = ({
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
   const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
-  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
-  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
+  const existsSelected = optionsList.select((state) => state.componentState.existsSelected);
+  const selectedOptions = optionsList.select((state) => state.componentState.selectedOptions);
 
   const isLoading = optionsList.select((state) => state.output.loading) ?? false;
 
