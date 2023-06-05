@@ -272,10 +272,11 @@ export class ChromeService {
           }
 
           // if projectNavigation wasn't set fallback to the default breadcrumbs
-          // TODO: remove it when every solution uses the project navigation config
-          const projectBreadcrumbs$ = projectNavigationConfig
-            ? projectNavigation.getProjectBreadcrumbs$()
-            : breadcrumbs$;
+          // TODO: Uncommented when we support the project navigation config
+          // const projectBreadcrumbs$ = projectNavigationConfig
+          //   ? projectNavigation.getProjectBreadcrumbs$()
+          //   : breadcrumbs$;
+          const projectBreadcrumbs$ = breadcrumbs$;
 
           return (
             <ProjectHeader
