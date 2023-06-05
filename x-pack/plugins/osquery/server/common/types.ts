@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
-
 export interface IQueryPayload {
-  attributes?: {
-    name: string;
-    id: string;
-  };
+  name: string;
+  id: string;
 }
 
 export type SOShard = Array<{ key: string; value: number }>;
 
-export interface PackSavedObjectAttributes {
+export interface PackSavedObject {
+  saved_object_id: string;
   name: string;
   description: string | undefined;
   queries: Array<{
@@ -36,11 +33,10 @@ export interface PackSavedObjectAttributes {
   updated_by: string | undefined;
   policy_ids?: string[];
   shards: SOShard;
+  references: Array<{ name: string; type: string; id: string }>;
 }
 
-export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;
-
-export interface SavedQuerySavedObjectAttributes {
+export interface SavedQuerySavedObject {
   id: string;
   description: string | undefined;
   query: string;
@@ -54,8 +50,6 @@ export interface SavedQuerySavedObjectAttributes {
   updated_at: string;
   updated_by: string | undefined;
 }
-
-export type SavedQuerySavedObject = SavedObject<PackSavedObjectAttributes>;
 
 export interface HTTPError extends Error {
   statusCode: number;
