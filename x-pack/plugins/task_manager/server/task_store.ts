@@ -36,6 +36,7 @@ import {
 
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { TaskValidator } from './task_validator';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -45,6 +46,7 @@ export interface StoreOpts {
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
   adHocTaskCounter: AdHocTaskCounter;
+  allowReadingInvalidState: boolean;
 }
 
 export interface SearchOpts {
@@ -104,6 +106,7 @@ export class TaskStore {
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
+  private readonly taskValidator: TaskValidator;
 
   /**
    * Constructs a new TaskStore.
@@ -122,6 +125,10 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.taskValidator = new TaskValidator({
+      definitions: opts.definitions,
+      allowReadingInvalidState: opts.allowReadingInvalidState,
+    });
     this.esClientWithoutRetries = opts.esClient.child({
       // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
       // The poller doesn't need retry logic because it will try again at the next polling cycle
@@ -150,9 +157,13 @@ export class TaskStore {
 
     let savedObject;
     try {
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
+        taskInstance,
+        'write'
+      );
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
-        taskInstanceToAttributes(taskInstance),
+        taskInstanceToAttributes(validatedTaskInstance),
         { id: taskInstance.id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
@@ -163,7 +174,8 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjectToConcreteTaskInstance(savedObject);
+    const result = savedObjectToConcreteTaskInstance(savedObject);
+    return this.taskValidator.getValidatedTaskInstance(result, 'read');
   }
 
   /**
@@ -174,9 +186,13 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
+        taskInstance,
+        'write'
+      );
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(taskInstance),
+        attributes: taskInstanceToAttributes(validatedTaskInstance),
         id: taskInstance.id,
       };
     });
@@ -197,7 +213,10 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjects.saved_objects.map((so) => savedObjectToConcreteTaskInstance(so));
+    return savedObjects.saved_objects.map((so) => {
+      const taskInstance = savedObjectToConcreteTaskInstance(so);
+      return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
+    });
   }
 
   /**
@@ -223,7 +242,8 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const attributes = taskInstanceToAttributes(doc);
+    const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write');
+    const attributes = taskInstanceToAttributes(validatedTaskInstance);
 
     let updatedSavedObject;
     try {
@@ -241,13 +261,14 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjectToConcreteTaskInstance(
+    const taskInstance = savedObjectToConcreteTaskInstance(
       // The SavedObjects update api forces a Partial on the `attributes` on the response,
       // but actually returns the whole object that is passed to it, so as we know we're
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
+    return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
   }
 
   /**
@@ -259,7 +280,8 @@ export class TaskStore {
    */
   public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      attrsById.set(doc.id, taskInstanceToAttributes(doc));
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write');
+      attrsById.set(doc.id, taskInstanceToAttributes(validatedTaskInstance));
       return attrsById;
     }, new Map());
 
@@ -283,21 +305,22 @@ export class TaskStore {
     }
 
     return updatedSavedObjects.map((updatedSavedObject) => {
-      return updatedSavedObject.error !== undefined
-        ? asErr({
-            type: 'task',
-            id: updatedSavedObject.id,
-            error: updatedSavedObject.error,
-          })
-        : asOk(
-            savedObjectToConcreteTaskInstance({
-              ...updatedSavedObject,
-              attributes: defaults(
-                updatedSavedObject.attributes,
-                attributesByDocId.get(updatedSavedObject.id)!
-              ),
-            })
-          );
+      if (updatedSavedObject.error !== undefined) {
+        return asErr({
+          type: 'task',
+          id: updatedSavedObject.id,
+          error: updatedSavedObject.error,
+        });
+      }
+
+      const taskInstance = savedObjectToConcreteTaskInstance({
+        ...updatedSavedObject,
+        attributes: defaults(
+          updatedSavedObject.attributes,
+          attributesByDocId.get(updatedSavedObject.id)!
+        ),
+      });
+      return asOk(this.taskValidator.getValidatedTaskInstance(taskInstance, 'read'));
     });
   }
 
@@ -346,7 +369,8 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
-    return savedObjectToConcreteTaskInstance(result);
+    const taskInstance = savedObjectToConcreteTaskInstance(result);
+    return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
   }
 
   /**
@@ -369,7 +393,12 @@ export class TaskStore {
       if (task.error) {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
-      return asOk(savedObjectToConcreteTaskInstance(task));
+      const taskInstance = savedObjectToConcreteTaskInstance(task);
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
+        taskInstance,
+        'read'
+      );
+      return asOk(validatedTaskInstance);
     });
   }
 
@@ -413,7 +442,9 @@ export class TaskStore {
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-          .map(savedObjectToConcreteTaskInstance),
+          .map((doc) => savedObjectToConcreteTaskInstance(doc))
+          .map((doc) => this.taskValidator.getValidatedTaskInstance(doc, 'read'))
+          .filter((doc): doc is ConcreteTaskInstance => !!doc),
       };
     } catch (e) {
       this.errors$.next(e);

@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { RunContext, TaskDefinition } from './task';
 import { mockLogger } from './test_utils';
 import {
-  sanitizeTaskDefinitions,
+  sanitizeAndAugmentTaskDefinitions,
   TaskDefinitionRegistry,
   TaskTypeDictionary,
 } from './task_type_dictionary';
@@ -55,16 +55,17 @@ describe('taskTypeDictionary', () => {
     definitions = new TaskTypeDictionary(mockLogger());
   });
 
-  describe('sanitizeTaskDefinitions', () => {});
+  describe('sanitizeAndAugmentTaskDefinitions', () => {});
   it('provides tasks with defaults', () => {
     const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
-    const result = sanitizeTaskDefinitions(taskDefinitions);
+    const result = sanitizeAndAugmentTaskDefinitions(taskDefinitions);
 
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
           "createTaskRunner": [Function],
           "description": "one super cool task",
+          "stateSchemaByVersion": undefined,
           "timeout": "5m",
           "title": "Test",
           "type": "test_task_type_0",
@@ -72,6 +73,7 @@ describe('taskTypeDictionary', () => {
         Object {
           "createTaskRunner": [Function],
           "description": "one super cool task",
+          "stateSchemaByVersion": undefined,
           "timeout": "5m",
           "title": "Test",
           "type": "test_task_type_1",
@@ -79,6 +81,7 @@ describe('taskTypeDictionary', () => {
         Object {
           "createTaskRunner": [Function],
           "description": "one super cool task",
+          "stateSchemaByVersion": undefined,
           "timeout": "5m",
           "title": "Test",
           "type": "test_task_type_2",
@@ -108,7 +111,7 @@ describe('taskTypeDictionary', () => {
         },
       };
 
-      return sanitizeTaskDefinitions(taskDefinitions);
+      return sanitizeAndAugmentTaskDefinitions(taskDefinitions);
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
@@ -135,7 +138,7 @@ describe('taskTypeDictionary', () => {
         },
       };
 
-      return sanitizeTaskDefinitions(taskDefinitions);
+      return sanitizeAndAugmentTaskDefinitions(taskDefinitions);
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
@@ -162,7 +165,7 @@ describe('taskTypeDictionary', () => {
         },
       };
 
-      return sanitizeTaskDefinitions(taskDefinitions);
+      return sanitizeAndAugmentTaskDefinitions(taskDefinitions);
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(

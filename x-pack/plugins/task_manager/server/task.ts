@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
 
@@ -138,6 +138,15 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
+    stateSchemaByVersion: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          schema: schema.any(),
+          up: schema.any(),
+        })
+      )
+    ),
   },
   {
     validate({ timeout }) {
@@ -158,6 +167,13 @@ export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
 };
 
 export enum TaskStatus {
@@ -248,6 +264,7 @@ export interface TaskInstance {
   // this can be fixed by supporting generics in the future
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
+  stateVersion?: number;
 
   /**
    * The serialized traceparent string of the current APM transaction or span.

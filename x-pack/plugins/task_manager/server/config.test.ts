@@ -12,6 +12,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": false,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -64,6 +65,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": false,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -114,6 +116,7 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": false,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,

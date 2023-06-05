@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
@@ -49,6 +50,14 @@ const taskDefinitions = new TaskTypeDictionary(mockLogger());
 taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
+    stateSchemaByVersion: {
+      1: {
+        schema: schema.object({
+          foo: schema.string(),
+        }),
+        up: (doc) => doc,
+      },
+    },
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
@@ -74,6 +83,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -118,6 +128,7 @@ describe('TaskStore', () => {
           scope: undefined,
           startedAt: null,
           state: '{"foo":"bar"}',
+          stateVersion: 1,
           status: 'idle',
           taskType: 'report',
           user: undefined,
@@ -140,6 +151,7 @@ describe('TaskStore', () => {
         scope: undefined,
         startedAt: null,
         state: { foo: 'bar' },
+        stateVersion: 1,
         status: 'idle',
         taskType: 'report',
         user: undefined,
@@ -244,6 +256,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -313,6 +326,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -411,6 +425,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -458,6 +473,7 @@ describe('TaskStore', () => {
           scope: undefined,
           startedAt: null,
           state: JSON.stringify(task.state),
+          stateVersion: 1,
           status: task.status,
           taskType: task.taskType,
           user: undefined,
@@ -475,6 +491,7 @@ describe('TaskStore', () => {
         startedAt: null,
         user: undefined,
         version: '123',
+        stateVersion: 1,
       });
     });
 
@@ -514,6 +531,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -555,6 +573,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -589,6 +608,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -623,6 +643,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -635,6 +656,7 @@ describe('TaskStore', () => {
         id: randomId(),
         params: { hello: 'world' },
         state: { foo: 'bar' },
+        stateVersion: 1,
         taskType: 'report',
         attempts: 3,
         status: 'idle' as TaskStatus,
@@ -680,6 +702,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -745,6 +768,7 @@ describe('TaskStore', () => {
             id: randomId(),
             params: { hello: 'world' },
             state: { foo: 'bar' },
+            stateVersion: 1,
             taskType: 'report',
             attempts: 3,
             status: status as TaskStatus,
@@ -772,6 +796,7 @@ describe('TaskStore', () => {
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
+            allowReadingInvalidState: false,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -792,6 +817,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -810,6 +836,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -828,6 +855,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -849,6 +877,7 @@ describe('TaskStore', () => {
               scheduledAt: '2019-02-12T21:01:22.479Z',
               startedAt: null,
               state: '{"foo":"bar"}',
+              stateVersion: 1,
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
@@ -888,6 +917,7 @@ describe('TaskStore', () => {
               scheduledAt: '2019-02-12T21:01:22.479Z',
               startedAt: null,
               state: '{"foo":"bar"}',
+              stateVersion: 1,
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
@@ -909,6 +939,7 @@ describe('TaskStore', () => {
           scope: undefined,
           startedAt: null,
           state: { foo: 'bar' },
+          stateVersion: 1,
           status: 'idle',
           taskType: 'report',
           user: undefined,

@@ -422,6 +422,7 @@ describe('TaskPool', () => {
           type: '',
           title: '',
           timeout: '5m',
+          getLatestStateSchema: () => undefined,
           createTaskRunner: jest.fn(),
         };
       },
