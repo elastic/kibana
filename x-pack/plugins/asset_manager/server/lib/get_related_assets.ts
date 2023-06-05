@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
-import { Asset, AssetType, Relation, RelationField } from '../../common/types_api';
+import { Asset, AssetKind, Relation, RelationField } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
 
@@ -18,7 +18,7 @@ interface GetRelatedAssetsOptions extends ElasticsearchAccessorOptions {
   from?: string;
   to?: string;
   relation: Relation;
-  type?: AssetType[];
+  kind?: AssetKind[];
 }
 
 export async function getRelatedAssets({
@@ -29,7 +29,7 @@ export async function getRelatedAssets({
   ean,
   excludeEans,
   relation,
-  type,
+  kind,
 }: GetRelatedAssetsOptions): Promise<Asset[]> {
   const relationField = relationToIndirectField(relation);
   const must: QueryDslQueryContainer[] = [
@@ -40,10 +40,10 @@ export async function getRelatedAssets({
     },
   ];
 
-  if (type?.length) {
+  if (kind?.length) {
     must.push({
       terms: {
-        ['asset.type']: type,
+        ['asset.kind']: kind,
       },
     });
   }

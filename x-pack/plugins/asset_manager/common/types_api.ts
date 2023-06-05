@@ -134,7 +134,7 @@ export interface K8sCluster extends WithTimestamp {
 
 export interface AssetFilters {
   type?: AssetType | AssetType[];
-  kind?: AssetKind;
+  kind?: AssetKind | AssetKind[];
   ean?: string | string[];
   id?: string;
   typeLike?: string;
