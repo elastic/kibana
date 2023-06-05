@@ -63,11 +63,6 @@ const deleteIndexPatternRouteFactory =
               { unknowns: 'allow' }
             ),
           },
-          response: {
-            200: {
-              body: schema.never(),
-            },
-          },
         },
       },
       router.handleLegacyErrors(
@@ -90,7 +85,11 @@ const deleteIndexPatternRouteFactory =
             id,
           });
 
-          return res.ok();
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
         })
       )
     );
