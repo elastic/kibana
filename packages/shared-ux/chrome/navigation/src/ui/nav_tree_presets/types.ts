@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeProjectNavigationLink } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type { DeepLinkId as AnalyticsDeepLink } from '@kbn/deeplinks-analytics';
 
@@ -17,9 +17,9 @@ import type { ID as ManagementID } from './management';
 import type { ID as MlID } from './ml';
 
 export type NodeDefinitionWithChildren<
-  LinkId extends ChromeProjectNavigationLink = ChromeProjectNavigationLink,
-  Id extends ChromeProjectNavigationLink = LinkId,
-  ChildrenID extends ChromeProjectNavigationLink = Id
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenID extends string = Id
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };
@@ -28,9 +28,6 @@ export type AnalyticsNodeDefinition = NodeDefinitionWithChildren<AnalyticsDeepLi
 
 export type DevToolsNodeDefinition = NodeDefinitionWithChildren<DevToolsLink, DevtoolsID>;
 
-export type ManagementNodeDefinition = NodeDefinitionWithChildren<
-  ChromeProjectNavigationLink,
-  ManagementID
->;
+export type ManagementNodeDefinition = NodeDefinitionWithChildren<AppDeepLinkId, ManagementID>;
 
-export type MlNodeDefinition = NodeDefinitionWithChildren<ChromeProjectNavigationLink, MlID>;
+export type MlNodeDefinition = NodeDefinitionWithChildren<AppDeepLinkId, MlID>;

@@ -21,13 +21,6 @@ export type AppId = DevToolsApp | AnalyticsApp;
 /** @public */
 export type AppDeepLinkId = AnalyticsDeepLink | DevToolsLink;
 
-/**
- * @public
- *
- * App id or deeplink id
- */
-export type ChromeProjectNavigationLink = AppDeepLinkId;
-
 /** @public */
 export interface ChromeProjectNavigationNode {
   /** Optional id, if not passed a "link" must be provided. */

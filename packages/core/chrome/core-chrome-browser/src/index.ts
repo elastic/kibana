@@ -31,7 +31,8 @@ export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
 export type {
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
-  ChromeProjectNavigationLink,
+  AppDeepLinkId,
+  AppId,
   SideNavCompProps,
   SideNavComponent,
   ChromeSetProjectBreadcrumbsParams,

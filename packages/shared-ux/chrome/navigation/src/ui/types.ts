@@ -7,10 +7,7 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import type {
-  ChromeProjectNavigationLink,
-  ChromeProjectNavigationNode,
-} from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import type { CloudLinkProps, RecentlyAccessedProps } from './components';
 
@@ -21,9 +18,9 @@ import type { CloudLinkProps, RecentlyAccessedProps } from './components';
  * deep link and children.
  */
 export interface NodeDefinition<
-  LinkId extends ChromeProjectNavigationLink = ChromeProjectNavigationLink,
-  Id extends ChromeProjectNavigationLink = LinkId,
-  ChildrenId extends ChromeProjectNavigationLink = Id
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenId extends string = Id
 > {
   /** Optional id, if not passed a "link" must be provided. */
   id?: Id;

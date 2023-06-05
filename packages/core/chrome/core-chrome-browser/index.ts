@@ -7,6 +7,8 @@
  */
 
 export type {
+  AppDeepLinkId,
+  AppId,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
@@ -29,7 +31,6 @@ export type {
   ChromeStart,
   ChromeStyle,
   ChromeUserBanner,
-  ChromeProjectNavigationLink,
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
   SideNavCompProps,
