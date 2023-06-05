@@ -179,7 +179,9 @@ export function FieldInputs({
           defaultMessage: 'Add field',
         })}
         isDisabled={
-          column.params.orderBy.type === 'rare' || column.params.orderBy.type === 'significant' || localValues.length > MAX_MULTI_FIELDS_SIZE
+          column.params.orderBy.type === 'rare' ||
+          column.params.orderBy.type === 'significant' ||
+          localValues.length > MAX_MULTI_FIELDS_SIZE
         }
       />
     </>
