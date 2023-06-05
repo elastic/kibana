@@ -41,7 +41,7 @@ export class RollupPlugin implements Plugin {
       setUiStatsReporter(usageCollection.reportUiCounter.bind(usageCollection, UIM_APP_NAME));
     }
 
-    if (indexManagement) {
+    if (indexManagement && isRollupUiEnabled) {
       indexManagement.extensionsService.addBadge(rollupBadgeExtension);
       indexManagement.extensionsService.addToggle(rollupToggleExtension);
     }
