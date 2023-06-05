@@ -43,5 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const testCases = createTestCases();
   const tests = createTestDefinitions(testCases, false);
-  addTests(`_disable_legacy_url_aliases`, { tests });
+  // FLAKY: https://github.com/elastic/kibana/issues/158711, https://github.com/elastic/kibana/issues/158366
+  // Also, https://github.com/elastic/kibana/issues/158918
+  // esArchiver fails with no_shard_available_action_exception after deleting indexes
+  // addTests(`_disable_legacy_url_aliases`, { tests });
 }
