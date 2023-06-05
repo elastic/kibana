@@ -17,5 +17,5 @@ export async function getApmPolicy({
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
 }) {
-  return await packagePolicyClient.get(soClient, ELASTIC_CLOUD_APM_POLICY);
+  return packagePolicyClient.get(soClient, ELASTIC_CLOUD_APM_POLICY);
 }
