@@ -17,15 +17,24 @@ export interface Section {
   cards?: Card[];
   id: string;
   title: string;
+  icon?: EuiIconProps;
+  description?: string;
+}
+
+export interface Badge {
+  name: string;
+  id: string;
 }
 
 export interface Step {
+  badges: Badge[];
   done?: boolean;
-  description?: string | React.ReactNode;
+  description?: string[];
   id: string;
   splitPanel?: React.ReactNode;
   title: string;
   timeInMinutes?: number;
+  icon: EuiIconProps;
 }
 
 export interface Card {

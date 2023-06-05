@@ -93,12 +93,45 @@ export const WATCH_OVERVIEW_VIDEO_TITLE = i18n.translate(
   }
 );
 
-export const WATCH_OVERVIEW_VIDEO_DESCRIPTION = i18n.translate(
-  'xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description',
+export const PRODUCT_BADGE_ANALYTICS = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.productBadge.analytics',
   {
-    defaultMessage: `Elastic security keeps your organization’s data safe from attack .
-    Our unified security platform combines Analytics, EDR, and cloud security capabilities into a single SaaS product, providing organizations with a comprehensive solution to protect against a wide range of security threats. With centralized management, real-time threat detection and response, and scalability, our platform can help organizations improve their security posture and reduce the risk of data breaches.
-    Watch the video to explore the core features that allow you to keep your data safe.`,
+    defaultMessage: 'Analytics',
+  }
+);
+
+export const PRODUCT_BADGE_CLOUD = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.productBadge.cloud',
+  {
+    defaultMessage: 'Cloud',
+  }
+);
+
+export const PRODUCT_BADGE_EDR = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.productBadge.edr',
+  {
+    defaultMessage: 'EDR',
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_DESCRIPTION1 = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description1',
+  {
+    defaultMessage: `Elastic security keeps your organization’s data safe from attack. `,
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_DESCRIPTION2 = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description2',
+  {
+    defaultMessage: `Our unified security platform combines Analytics, EDR, and cloud security capabilities into a single SaaS product, providing organizations with a comprehensive solution to protect against a wide range of security threats. With centralized management, real-time threat detection and response, and scalability, our platform can help organizations improve their security posture and reduce the risk of data breaches.`,
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_DESCRIPTION3 = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description3',
+  {
+    defaultMessage: `Watch the video to explore the core features that allow you to keep your data safe.`,
   }
 );
 

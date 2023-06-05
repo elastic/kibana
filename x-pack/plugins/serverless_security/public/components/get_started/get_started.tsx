@@ -57,4 +57,6 @@ export const GetStartedComponent: React.FC = () => {
     </KibanaPageTemplate>
   );
 };
+
+GetStartedComponent.displayName = 'GetStartedComponent';
 export const GetStarted = React.memo(GetStartedComponent);
