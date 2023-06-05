@@ -242,11 +242,17 @@ export const useTransformConfigData = (
   ]);
 
   if (sortingColumns.length > 0) {
-    const sortingColumnsWithTypes = sortingColumns.map((c) => ({
-      ...c,
+    const sortingColumnsWithTypes = sortingColumns.map((c) => {
       // Since items might contain undefined/null values, we want to accurate find the data type
-      type: typeof tableItems.find((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
-    }));
+      const populatedItem = tableItems.find(
+        (item) => getNestedOrEscapedVal(item, c.id) !== undefined
+      );
+
+      return {
+        ...c,
+        type: typeof getNestedOrEscapedVal(populatedItem, c.id),
+      };
+    });
     tableItems.sort(multiColumnSortFactory(sortingColumnsWithTypes));
   }
 
