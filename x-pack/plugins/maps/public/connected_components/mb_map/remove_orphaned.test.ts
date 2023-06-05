@@ -42,18 +42,15 @@ class MockMbMap {
 }
 
 class MockLayer {
-  private readonly _layerId: string;
   private readonly _mbSourceIds: string[];
   private readonly _mbLayerIdsToSource: Array<{ id: string; source: string }>;
 
   constructor(
-    layerId: string,
     mbSourceIds: string[],
     mbLayerIdsToSource: Array<{ id: string; source: string }>
   ) {
     this._mbSourceIds = mbSourceIds;
     this._mbLayerIdsToSource = mbLayerIdsToSource;
-    this._layerId = layerId;
   }
 
   // Custom interface used in getMockStyle for populating maplibre style with layers and sources
@@ -99,12 +96,12 @@ function getMockStyle(orderedMockLayerList: MockLayer[]) {
 }
 
 function makeSingleSourceMockLayer(layerId: string) {
+  const source1 = layerId + '_source1';
   return new MockLayer(
-    layerId,
-    [layerId],
+    [source1],
     [
-      { id: layerId + '_fill', source: layerId },
-      { id: layerId + '_line', source: layerId },
+      { id: source1 + '_fill', source: source1 },
+      { id: source1 + '_line', source: source1 },
     ]
   );
 }
@@ -113,7 +110,6 @@ function makeMultiSourceMockLayer(layerId: string) {
   const source1 = layerId + '_source1';
   const source2 = layerId + '_source2';
   return new MockLayer(
-    layerId,
     [source1, source2],
     [
       { id: source1 + '_fill', source: source1 },
