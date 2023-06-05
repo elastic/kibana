@@ -103,12 +103,12 @@ describe('Diagnostics', () => {
 
       cy.get('[data-test-subj="indicedWithProblems"] .euiTableRow').should(
         'have.length',
-        4
+        18
       );
 
       cy.get('[data-test-subj="indicedWithoutProblems"] .euiTableRow').should(
         'have.length',
-        20
+        17
       );
     });
   });
