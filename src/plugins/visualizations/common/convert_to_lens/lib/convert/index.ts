@@ -22,3 +22,4 @@ export * from './last_value';
 export * from './range';
 export * from './percentage_mode';
 export * from './static_value';
+export * from './significant_terms';

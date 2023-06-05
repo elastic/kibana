@@ -16,11 +16,13 @@ import {
   convertToFiltersColumn,
   convertToTermsColumn,
   convertToRangeColumn,
+  convertToSignificantTermsColumn,
 } from '../convert';
 import { getFieldNameFromField, getLabel, isSchemaConfig } from '../utils';
 
 export type BucketAggs =
   | BUCKET_TYPES.TERMS
+  | BUCKET_TYPES.SIGNIFICANT_TERMS
   | BUCKET_TYPES.DATE_HISTOGRAM
   | BUCKET_TYPES.FILTERS
   | BUCKET_TYPES.RANGE
@@ -28,6 +30,7 @@ export type BucketAggs =
 
 const SUPPORTED_BUCKETS: string[] = [
   BUCKET_TYPES.TERMS,
+  BUCKET_TYPES.SIGNIFICANT_TERMS,
   BUCKET_TYPES.DATE_HISTOGRAM,
   BUCKET_TYPES.FILTERS,
   BUCKET_TYPES.RANGE,
@@ -91,6 +94,13 @@ export const getBucketColumns = (
           dropEmptyRowsInDateHistogram
         );
       }
+    case BUCKET_TYPES.SIGNIFICANT_TERMS:
+      return convertToSignificantTermsColumn(
+          agg.aggId ?? '',
+          { agg, dataView, metricColumns, aggs, visType },
+          label,
+          isSplit
+        );
   }
 
   return null;
