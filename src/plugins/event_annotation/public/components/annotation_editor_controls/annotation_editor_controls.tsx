@@ -46,6 +46,15 @@ import { TooltipSection } from './tooltip_annotation_panel';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
 
+export interface Props {
+  annotation: EventAnnotationConfig;
+  onAnnotationChange: (annotation: EventAnnotationConfig) => void;
+  dataView: DataView;
+  getDefaultRangeEnd: (rangeStart: string) => string;
+  calendarClassName?: string;
+  queryInputServices: QueryInputServices;
+}
+
 const AnnotationEditorControls = ({
   annotation: currentAnnotation,
   onAnnotationChange,
@@ -53,14 +62,7 @@ const AnnotationEditorControls = ({
   getDefaultRangeEnd,
   calendarClassName,
   queryInputServices,
-}: {
-  annotation: EventAnnotationConfig;
-  onAnnotationChange: (annotation: EventAnnotationConfig) => void;
-  dataView: DataView;
-  getDefaultRangeEnd: (rangeStart: string) => string;
-  calendarClassName?: string;
-  queryInputServices: QueryInputServices;
-}) => {
+}: Props) => {
   const { hasFieldData } = useExistingFieldsReader();
 
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
