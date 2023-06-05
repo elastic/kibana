@@ -8,8 +8,8 @@
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ExtensionsSetup } from './services';
 import { ServerlessPluginSetup } from '@kbn/serverless/public';
+import { ExtensionsSetup } from './services';
 
 export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
