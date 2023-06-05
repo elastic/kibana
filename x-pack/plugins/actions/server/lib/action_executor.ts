@@ -257,7 +257,7 @@ export class ActionExecutor {
         // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
         if (result.status === 'ok' && actionTypeId === '.gen-ai') {
           const data = result.data as unknown as {
-            usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
           };
           event.kibana = event.kibana || {};
           event.kibana.action = event.kibana.action || {};
@@ -269,9 +269,9 @@ export class ActionExecutor {
                 ...event.kibana.action.execution,
                 gen_ai: {
                   usage: {
-                    total_tokens: data.usage.total_tokens,
-                    prompt_tokens: data.usage.prompt_tokens,
-                    completion_tokens: data.usage.completion_tokens,
+                    total_tokens: data.usage?.total_tokens,
+                    prompt_tokens: data.usage?.prompt_tokens,
+                    completion_tokens: data.usage?.completion_tokens,
                   },
                 },
               },
