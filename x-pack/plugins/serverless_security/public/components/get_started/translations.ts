@@ -60,6 +60,18 @@ export const WELCOME_PANEL_PROGRESS_TRACKER_TITLE = i18n.translate(
   }
 );
 
+export const STEP_TIME_MIN = (min: number) =>
+  i18n.translate('xpack.serverlessSecurity.getStarted.togglePanel.progressTracker.stepTimeMin', {
+    defaultMessage: 'About {min} {min, plural, =1 {min} other {mins}}',
+    values: { min },
+  });
+
+export const STEPS_LEFT = (steps: number) =>
+  i18n.translate('xpack.serverlessSecurity.getStarted.togglePanel.progressTracker.stepsLeft', {
+    defaultMessage: '{steps} {steps, plural, =1 {step} other {steps}} left',
+    values: { steps },
+  });
+
 export const GET_SET_UP_TITLE = i18n.translate(
   'xpack.serverlessSecurity.getStarted.togglePanel.getSetUp.title',
   {
@@ -71,6 +83,29 @@ export const INTRODUCTION_TITLE = i18n.translate(
   'xpack.serverlessSecurity.getStarted.togglePanel.introduction.title',
   {
     defaultMessage: 'Introduction',
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_TITLE = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.title',
+  {
+    defaultMessage: 'Watch the overview video',
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_DESCRIPTION = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description',
+  {
+    defaultMessage: `Elastic security keeps your organization’s data safe from attack .
+    Our unified security platform combines Analytics, EDR, and cloud security capabilities into a single SaaS product, providing organizations with a comprehensive solution to protect against a wide range of security threats. With centralized management, real-time threat detection and response, and scalability, our platform can help organizations improve their security posture and reduce the risk of data breaches.
+    Watch the video to explore the core features that allow you to keep your data safe.`,
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_HEADER = i18n.translate(
+  'xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.header',
+  {
+    defaultMessage: 'Elastic Security',
   }
 );
 

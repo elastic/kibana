@@ -6,6 +6,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
+import React from 'react';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GetStartedComponentProps = {};
@@ -13,14 +14,27 @@ export type GetStartedComponentProps = {};
 export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
 
 export interface Section {
+  cards?: Card[];
   id: string;
   title: string;
-  titleSize?: 's' | 'xs' | 'xxs';
-  titleElement?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p';
-  sections?: Section[];
-  icon?: EuiIconProps;
-  description?: string;
+}
+
+export interface Step {
+  done?: boolean;
+  description?: string | React.ReactNode;
+  id: string;
+  splitPanel?: React.ReactNode;
+  title: string;
+  timeInMinutes?: number;
+}
+
+export interface Card {
   activeConditions?: TogglePanelId[];
+  description?: string | React.ReactNode;
+  icon?: EuiIconProps;
+  id: string;
+  steps?: Step[];
+  title: string;
 }
 
 export enum TogglePanelId {

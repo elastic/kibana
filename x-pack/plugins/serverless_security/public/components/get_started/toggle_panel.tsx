@@ -23,7 +23,14 @@ import {
 import { css } from '@emotion/react';
 import respond from './images/respond.svg';
 import protect from './images/protect.svg';
-import { Section, Switch, TogglePanelAction, TogglePanelId, TogglePanelReducer } from './types';
+import {
+  Card,
+  Section,
+  Switch,
+  TogglePanelAction,
+  TogglePanelId,
+  TogglePanelReducer,
+} from './types';
 import * as i18n from './translations';
 
 const ActiveConditions = {
@@ -33,35 +40,54 @@ const ActiveConditions = {
   endpointToggled: [TogglePanelId.Endpoint],
 };
 
-const body: Section[] = [
+const sections: Section[] = [
   {
     id: 'getSetUp',
     title: i18n.GET_SET_UP_TITLE,
-    sections: [
+    cards: [
       {
         icon: { type: 'securityApp', size: 'xl', className: 'eui-alignMiddle' },
-        titleSize: 'xxs',
         title: i18n.INTRODUCTION_TITLE,
         id: 'introduction',
         activeConditions: ActiveConditions.anyCondition,
+        steps: [
+          {
+            id: 'watchOverviewVideo',
+            title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
+            description: i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION,
+            done: false,
+            splitPanel: (
+              <iframe
+                allowFullScreen
+                className="vidyard_iframe"
+                frameBorder="0"
+                height="100%"
+                referrerPolicy="no-referrer"
+                sandbox="allow-scripts allow-same-origin"
+                scrolling="no"
+                src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
+                title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
+                width="100%"
+              />
+            ),
+            timeInMinutes: 3,
+          },
+        ],
       },
       {
         icon: { type: 'agentApp', size: 'xl' },
-        titleSize: 'xxs',
         title: i18n.BRING_IN_YOUR_DATA_TITLE,
         id: 'bringInYourData',
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: 'advancedSettingsApp', size: 'xl' },
-        titleSize: 'xxs',
         title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
         id: 'activateAndCreateRules',
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: protect, size: 'xl' },
-        titleSize: 'xxs',
         title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
         id: 'protectYourEnvironmentInRuntime',
         activeConditions: [...ActiveConditions.cloudToggled, ...ActiveConditions.endpointToggled],
@@ -71,24 +97,21 @@ const body: Section[] = [
   {
     id: 'getMoreFromElasticSecurity',
     title: i18n.GET_MORE_TITLE,
-    sections: [
+    cards: [
       {
         icon: { type: 'advancedSettingsApp', size: 'xl' },
-        titleSize: 'xxs',
         title: i18n.MASTER_THE_INVESTIGATION_TITLE,
         id: 'masterTheInvestigationsWorkflow',
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: respond, size: 'xl' },
-        titleSize: 'xxs',
         title: i18n.RESPOND_TO_THREATS_TITLE,
         id: 'respondToThreatsWithAutomation',
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: 'spacesApp', size: 'xl' },
-        titleSize: 'xxs',
         title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
         id: 'optimizeYourWorkspace',
         activeConditions: ActiveConditions.anyCondition,
@@ -152,10 +175,16 @@ const TogglePanelComponent = ({}) => {
     ));
   };
 
-  const setUpBodyNodes = useCallback(
-    (sections: Section[] | undefined, activeSections: Set<TogglePanelId>) =>
-      sections?.reduce<React.ReactNode[]>((acc, item, index) => {
-        if (item?.activeConditions?.some((condition) => activeSections.has(condition))) {
+  const setUpCards = useCallback(
+    (cards: Card[] | undefined, activeSections: Set<TogglePanelId>) =>
+      cards?.reduce<React.ReactNode[]>((acc, cardItem, index) => {
+        if (cardItem?.activeConditions?.some((condition) => activeSections.has(condition))) {
+          const timeInMins =
+            cardItem?.steps?.reduce(
+              (totalMin, { timeInMinutes }) => (totalMin += timeInMinutes ?? 0),
+              0
+            ) ?? 0;
+          const stepsLeft = cardItem?.steps?.filter(({ done }) => !done).length ?? 0;
           acc.push(
             <EuiFlexItem key={`set-up-card-${index}`}>
               <EuiPanel
@@ -172,19 +201,38 @@ const TogglePanelComponent = ({}) => {
                     padding: ${euiTheme.size.xxs} 10px;
                   `}
                 >
-                  <EuiFlexItem grow={false}>
-                    {item.icon && <EuiIcon {...item.icon} className="eui-alignMiddle" />}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={true}>
-                    <EuiTitle
-                      size="xxs"
-                      css={css`
-                        line-height: ${euiTheme.base * 2}px;
-                      `}
-                    >
-                      <h4>{item.title}</h4>
-                    </EuiTitle>
-                  </EuiFlexItem>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      {cardItem.icon && <EuiIcon {...cardItem.icon} className="eui-alignMiddle" />}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>
+                      <EuiTitle
+                        size="xxs"
+                        css={css`
+                          line-height: ${euiTheme.base * 2}px;
+                        `}
+                      >
+                        <h4>{cardItem.title}</h4>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    {(timeInMins > 0 || stepsLeft > 0) && (
+                      <EuiFlexItem
+                        css={css`
+                          align-items: end;
+                        `}
+                      >
+                        <EuiText
+                          size="s"
+                          css={css`
+                            line-height: ${euiTheme.base * 2}px;
+                          `}
+                        >
+                          {stepsLeft && <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>}
+                          {timeInMins && <span> • {i18n.STEP_TIME_MIN(timeInMins)}</span>}
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
@@ -230,8 +278,8 @@ const TogglePanelComponent = ({}) => {
         grow={1}
       >
         {state.activeSections.size > 0 ? (
-          body.reduce<React.ReactNode[]>((acc, section) => {
-            const nodes = setUpBodyNodes(section.sections, state.activeSections);
+          sections.reduce<React.ReactNode[]>((acc, section) => {
+            const nodes = setUpCards(section.cards, state.activeSections);
             if (nodes && nodes.length > 0) {
               acc.push(
                 <EuiPanel
