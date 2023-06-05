@@ -6,6 +6,7 @@
  */
 import { formatKibanaNamespace } from '../../../../../../common/formatters';
 import { DEFAULT_FIELDS } from '../constants';
+
 import {
   ConfigKey,
   DataStream,
