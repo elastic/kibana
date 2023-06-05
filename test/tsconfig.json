@@ -67,6 +67,7 @@
     "@kbn/dev-proc-runner",
     "@kbn/enterprise-search-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/discover-plugin"
+    "@kbn/discover-plugin",
+    "@kbn/core-http-common"
   ]
 }

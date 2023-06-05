@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { MetricsPageTemplate } from '../../../page_template';
 import hostsLandingBetaLight from './hosts_landing_beta_light.svg';
 import hostsLandingBetaDark from './hosts_landing_beta_dark.svg';
@@ -23,7 +23,7 @@ interface Props {
 
 export const EnableHostsViewPage = ({ actions }: Props) => {
   const backgroundColor = useEuiBackgroundColor('subdued');
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useIsDarkMode();
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts_feature_enable_landing_page' });
   useTrackPageview({

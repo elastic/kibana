@@ -51,10 +51,12 @@ import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
 describe('Create a timeline from a template', () => {
   before(() => {
     deleteTimelines();
+    login();
     createTimelineTemplate(getTimeline());
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
 
@@ -77,7 +79,7 @@ describe('Timelines', (): void => {
 
   describe('Toggle create timeline from plus icon', () => {
     context('Privileges: CRUD', () => {
-      before(() => {
+      beforeEach(() => {
         login();
         visit(OVERVIEW_URL);
       });
@@ -90,7 +92,7 @@ describe('Timelines', (): void => {
     });
 
     context('Privileges: READ', () => {
-      before(() => {
+      beforeEach(() => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
       });
@@ -99,7 +101,7 @@ describe('Timelines', (): void => {
         createNewTimeline();
         cy.get(TIMELINE_PANEL).should('be.visible');
         cy.get(EDIT_TIMELINE_BTN).should('be.disabled');
-        cy.get(EDIT_TIMELINE_BTN).first().trigger('mouseover', { force: true });
+        cy.get(EDIT_TIMELINE_BTN).first().realHover();
         cy.get(EDIT_TIMELINE_TOOLTIP).should('be.visible');
         cy.get(EDIT_TIMELINE_TOOLTIP).should(
           'have.text',
@@ -110,11 +112,8 @@ describe('Timelines', (): void => {
   });
 
   describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
-    before(() => {
-      login();
-    });
-
     beforeEach(() => {
+      login();
       visit(OVERVIEW_URL);
       openTimelineUsingToggle();
       addNameAndDescriptionToTimeline(getTimeline());
@@ -192,7 +191,9 @@ describe('Timelines', (): void => {
           cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
           cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
           waitForTimelineChanges();
-          cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}').clear();
+          cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
+          cy.get(TIMELINE_CORRELATION_INPUT).clear();
+
           // TODO: It may need a further refactor to handle the frequency with which react calls this api
           // Since it's based on real time text changes...and real time query validation
           // there's almost no guarantee on the number of calls, so a cypress.wait may actually be more appropriate
