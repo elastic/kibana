@@ -61,7 +61,7 @@ export const getLocationToDiscover = async ({
   core,
   timeRange,
   filter,
-  logView,
+  logView = DEFAULT_LOG_VIEW,
   resolvedLogView,
 }: LocationToDiscoverParams) => {
   const [coreSetup, plugins, pluginStart] = await core.getStartServices();
@@ -70,7 +70,7 @@ export const getLocationToDiscover = async ({
   let clientResolvedLogView = resolvedLogView;
 
   // if redirection is called from server, resolvedLogView must be presented.
-  if ('savedObjects' in coreSetup && !resolvedLogView) {
+  if ('elasticsearch' in coreSetup && !resolvedLogView) {
     throw new Error('ResolvedLogView must be provided.');
   }
   // if redirection is called from public, we have access to logViewsClient and can resolved the log view
