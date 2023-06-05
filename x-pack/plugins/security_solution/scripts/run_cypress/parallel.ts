@@ -63,11 +63,9 @@ export const cli = () => {
 
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-      const files = retrieveIntegrations(
-        spec ? (spec.includes(',') ? spec.split(',') : [spec]) : cypressConfigFile?.e2e?.specPattern
-      );
+      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
-      if (!files.length) {
+      if (!files?.length) {
         throw new Error('No files found');
       }
 
@@ -290,6 +288,7 @@ export const cli = () => {
 
             const options = {
               installDir: process.env.KIBANA_INSTALL_DIR,
+              ci: process.env.CI,
             };
 
             const shutdownEs = await pRetry(
@@ -308,9 +307,10 @@ export const cli = () => {
               procs,
               config,
               installDir: options?.installDir,
-              extraKbnOpts: options?.installDir
-                ? []
-                : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+              extraKbnOpts:
+                options?.installDir || options?.ci || !isOpen
+                  ? []
+                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
             });
 
@@ -322,7 +322,9 @@ export const cli = () => {
               EsVersion.getDefault()
             );
 
-            const customEnv = await functionalTestRunner.run(abortCtrl.signal);
+            const customEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
+              retries: 1,
+            });
 
             if (isOpen) {
               await cypress.open({
