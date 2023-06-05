@@ -7,9 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NEW_CHAT = i18n.translate(
-  'xpack.elasticAssistant.assistant.newChatById.newChatByIdButton',
+export const VIEW = i18n.translate(
+  'xpack.securitySolution.assistant.content.promptContexts.viewTitle',
   {
-    defaultMessage: 'Chat',
+    defaultMessage: 'view',
+  }
+);
+
+export const INDEX = i18n.translate(
+  'xpack.securitySolution.assistant.content.promptContexts.indexTitle',
+  {
+    defaultMessage: 'index',
   }
 );
