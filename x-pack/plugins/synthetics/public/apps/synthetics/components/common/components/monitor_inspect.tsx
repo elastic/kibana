@@ -154,7 +154,7 @@ const MonitorCode = ({ code }: { code: string }) => (
 );
 
 const formatContent = (result: MonitorInspectResponse) => {
-  const firstResult = result.publicConfigs?.[0].monitors?.[0];
+  const firstResult = result.publicConfigs?.[0]?.monitors?.[0];
 
   const currentInput = result.privateConfig?.inputs.find((input) => input.enabled);
   const compiledConfig = currentInput?.streams.find((stream) =>
