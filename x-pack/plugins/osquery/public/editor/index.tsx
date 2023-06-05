@@ -24,7 +24,6 @@ interface OsqueryEditorProps {
 
 const editorOptions = {
   theme: 'osquery',
-  automaticLayout: true,
 };
 const MIN_HEIGHT = 100;
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
