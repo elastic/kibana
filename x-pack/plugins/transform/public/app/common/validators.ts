@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { numberValidator } from '@kbn/ml-agg-utils';
+import {
+  numberOfRetriesInvalidErrorMessage,
+  pageSearchSizeInvalidErrorMessage,
+} from '../constants/validation_messages';
+
 const RETENTION_POLICY_MIN_AGE_SECONDS = 60;
 const TIME_UNITS = ['nanos', 'micros', 'ms', 's', 'm', 'h', 'd'];
 
@@ -119,14 +125,44 @@ export const transformFrequencyValidator = (value: string): boolean => {
   return isValidFrequency({ number, timeUnit });
 };
 
+// The reducers and utility functions in this file provide the following features:
+// - getDefaultState()
+//   Sets up the initial form state. It supports overrides to apply a pre-existing configuration.
+//   The implementation of this function is the only one that's specifically required to define
+//   the features of the transform edit form. All other functions are generic and could be reused
+//   in the future for other forms.
+//
+// - formReducerFactory() / formFieldReducer()
+//   These nested reducers take care of updating and validating the form state.
+//
+// - applyFormStateToTransformConfig() (iterates over getUpdateValue())
+//   Once a user hits the update button, these functions take care of extracting the information
+//   necessary to create the update request. They take into account whether a field needs to
+//   be included at all in the request (for example, if it hadn't been changed).
+//   The code is also able to identify relationships/dependencies between form fields.
+//   For example, if the `pipeline` field was changed, it's necessary to make the `index`
+//   field part of the request, otherwise the update would fail.
+
+// A Validator function takes in a value to check and returns an array of error messages.
+// If no messages (empty array) get returned, the value is valid.
+export type Validator = (value: any, isOptional?: boolean) => string[];
+
 /**
  * Validates transform max_page_search_size input.
- * Must be a number between 10 and 10000.
+ * Must be a number between 10 and 65536.
  * @param value User input value.
  */
-export function transformSettingsMaxPageSearchSizeValidator(value: number): boolean {
-  return value >= 10 && value <= 10000;
-}
+export const transformSettingsPageSearchSizeValidator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: 10, max: 65536, integerOnly: true })(+value) === null
+    ? []
+    : [pageSearchSizeInvalidErrorMessage];
+
+export const transformSettingsNumberOfRetriesValidator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
+    ? []
+    : [numberOfRetriesInvalidErrorMessage];
 
 /**
  * Validates whether string input can be parsed as a valid JSON

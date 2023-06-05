@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
 
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../constants/validation_messages';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
 import {
   DEFAULT_TRANSFORM_FREQUENCY,
@@ -24,6 +25,9 @@ import {
   isValidFrequency,
   isValidRetentionPolicyMaxAge,
   ParsedDuration,
+  transformSettingsNumberOfRetriesValidator,
+  transformSettingsPageSearchSizeValidator,
+  Validator,
 } from '../../../../common/validators';
 
 // This custom hook uses nested reducers to provide a generic framework to manage form state
@@ -78,28 +82,6 @@ export interface FormSection {
 
 type EditTransformFlyoutSectionsState = Record<EditTransformFormSections, FormSection>;
 
-// The reducers and utility functions in this file provide the following features:
-// - getDefaultState()
-//   Sets up the initial form state. It supports overrides to apply a pre-existing configuration.
-//   The implementation of this function is the only one that's specifically required to define
-//   the features of the transform edit form. All other functions are generic and could be reused
-//   in the future for other forms.
-//
-// - formReducerFactory() / formFieldReducer()
-//   These nested reducers take care of updating and validating the form state.
-//
-// - applyFormStateToTransformConfig() (iterates over getUpdateValue())
-//   Once a user hits the update button, these functions take care of extracting the information
-//   necessary to create the update request. They take into account whether a field needs to
-//   be included at all in the request (for example, if it hadn't been changed).
-//   The code is also able to identify relationships/dependencies between form fields.
-//   For example, if the `pipeline` field was changed, it's necessary to make the `index`
-//   field part of the request, otherwise the update would fail.
-
-// A Validator function takes in a value to check and returns an array of error messages.
-// If no messages (empty array) get returned, the value is valid.
-type Validator = (value: any, isOptional?: boolean) => string[];
-
 // Note on the form validation and input components used:
 // All inputs use `EuiFieldText` which means all form values will be treated as strings.
 // This means we cast other formats like numbers coming from the transform config to strings,
@@ -113,35 +95,10 @@ const numberAboveZeroNotValidErrorMessage = i18n.translate(
   }
 );
 
-const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormNumberGreaterThanOrEqualToNegativeOneNotValidErrorMessage',
-  {
-    defaultMessage: 'Number of retries needs to be between 0 and 100, or -1 for infinite retries.',
-  }
-);
-
 export const integerAboveZeroValidator: Validator = (value) =>
   !(value + '').includes('.') && numberValidator({ min: 1, integerOnly: true })(+value) === null
     ? []
     : [numberAboveZeroNotValidErrorMessage];
-
-export const integerRangeMinus1To100Validator: Validator = (value) =>
-  !(value + '').includes('.') &&
-  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
-    ? []
-    : [numberRangeMinus1To100NotValidErrorMessage];
-
-const numberRange10To10000NotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
-  {
-    defaultMessage: 'Value needs to be an integer between 10 and 10000.',
-  }
-);
-export const integerRange10To10000Validator: Validator = (value) =>
-  !(value + '').includes('.') &&
-  numberValidator({ min: 10, max: 100001, integerOnly: true })(+value) === null
-    ? []
-    : [numberRange10To10000NotValidErrorMessage];
 
 const requiredErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormRequiredErrorMessage',
@@ -208,30 +165,23 @@ export const frequencyValidator: Validator = (arg) => {
   return isValidFrequency(parsedArg) ? [] : [frequencyNotValidErrorMessage];
 };
 
-// Retention policy max age validator
-const retentionPolicyMaxAgeNotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeNotValidErrorMessage',
-  {
-    defaultMessage: 'Invalid max age format. Minimum of 60s required.',
-  }
-);
 export const retentionPolicyMaxAgeValidator: Validator = (arg) => {
-  const parsedArg = parseDurationAboveZero(arg, retentionPolicyMaxAgeNotValidErrorMessage);
+  const parsedArg = parseDurationAboveZero(arg, retentionPolicyMaxAgeInvalidErrorMessage);
 
   if (Array.isArray(parsedArg)) {
     return parsedArg;
   }
 
-  return isValidRetentionPolicyMaxAge(parsedArg) ? [] : [retentionPolicyMaxAgeNotValidErrorMessage];
+  return isValidRetentionPolicyMaxAge(parsedArg) ? [] : [retentionPolicyMaxAgeInvalidErrorMessage];
 };
 
 const validate = {
   string: stringValidator,
   frequency: frequencyValidator,
   integerAboveZero: integerAboveZeroValidator,
-  integerRangeMinus1To100: integerRangeMinus1To100Validator,
-  integerRange10To10000: integerRange10To10000Validator,
-  retentionPolicyMaxAge: retentionPolicyMaxAgeValidator,
+  transformSettingsNumberOfRetriesValidator,
+  transformSettingsPageSearchSizeValidator,
+  retentionPolicyMaxAgeValidator,
 } as const;
 
 export const initializeField = (
@@ -424,7 +374,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         defaultValue: `${DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE}`,
         isNullable: true,
         isOptional: true,
-        validator: 'integerRange10To10000',
+        validator: 'transformSettingsPageSearchSizeValidator',
         valueParser: (v) => +v,
       }
     ),
@@ -436,7 +386,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         defaultValue: undefined,
         isNullable: true,
         isOptional: true,
-        validator: 'integerRangeMinus1To100',
+        validator: 'transformSettingsNumberOfRetriesValidator',
         valueParser: (v) => +v,
       }
     ),
@@ -462,7 +412,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         isNullable: false,
         isOptional: true,
         section: 'retentionPolicy',
-        validator: 'retentionPolicyMaxAge',
+        validator: 'retentionPolicyMaxAgeValidator',
       }
     ),
   },

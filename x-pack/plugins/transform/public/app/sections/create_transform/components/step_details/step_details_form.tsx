@@ -28,6 +28,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../constants/validation_messages';
 import { integerRangeMinus1To100Validator } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
 import {
   isEsIndices,
@@ -56,7 +57,7 @@ import {
   continuousModeDelayValidator,
   retentionPolicyMaxAgeValidator,
   transformFrequencyValidator,
-  transformSettingsMaxPageSearchSizeValidator,
+  transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
 import { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
@@ -303,9 +304,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     );
     const [transformSettingsDocsPerSecond] = useState(defaults.transformSettingsDocsPerSecond);
 
-    const isTransformSettingsMaxPageSearchSizeValid = transformSettingsMaxPageSearchSizeValidator(
+    const transformSettingsMaxPageSearchSizeErrors = transformSettingsPageSearchSizeValidator(
       transformSettingsMaxPageSearchSize
     );
+    const isTransformSettingsMaxPageSearchSizeValid =
+      transformSettingsMaxPageSearchSizeErrors.length === 0;
 
     const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
       string | number | undefined
@@ -731,11 +734,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 isInvalid={!retentionPolicyMaxAgeEmpty && !isRetentionPolicyMaxAgeValid}
                 error={
                   !retentionPolicyMaxAgeEmpty &&
-                  !isRetentionPolicyMaxAgeValid && [
-                    i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyMaxAgeError', {
-                      defaultMessage: 'Invalid max age format. Minimum of 60s required.',
-                    }),
-                  ]
+                  !isRetentionPolicyMaxAgeValid && [retentionPolicyMaxAgeInvalidErrorMessage]
                 }
                 helpText={i18n.translate(
                   'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeHelpText',
@@ -821,14 +820,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 defaultMessage: 'Maximum page search size',
               })}
               isInvalid={!isTransformSettingsMaxPageSearchSizeValid}
-              error={
-                !isTransformSettingsMaxPageSearchSizeValid && [
-                  i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeError', {
-                    defaultMessage:
-                      'max_page_search_size needs to be a number between 10 and 10000.',
-                  }),
-                ]
-              }
+              error={transformSettingsMaxPageSearchSizeErrors}
               helpText={i18n.translate(
                 'xpack.transform.stepDetailsForm.maxPageSearchSizeHelpText',
                 {
@@ -845,10 +837,14 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     values: { defaultValue: 500 },
                   }
                 )}
-                value={transformSettingsMaxPageSearchSize.toString()}
-                onChange={(e) =>
-                  setTransformSettingsMaxPageSearchSize(parseInt(e.target.value, 10))
-                }
+                value={transformSettingsMaxPageSearchSize?.toString()}
+                onChange={(e) => {
+                  if (e.target.value !== '') {
+                    setTransformSettingsMaxPageSearchSize(parseInt(e.target.value, 10));
+                  } else {
+                    setTransformSettingsMaxPageSearchSize(undefined);
+                  }
+                }}
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.maxPageSearchSizeAriaLabel',
                   {
