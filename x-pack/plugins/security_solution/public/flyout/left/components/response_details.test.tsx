@@ -53,7 +53,7 @@ jest.mock('../../../common/lib/kibana', () => {
 });
 
 const defaultContextValue = {
-  ecs: {
+  dataAsNestedObject: {
     _id: 'test',
   },
   data: rawEventData,
