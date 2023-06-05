@@ -332,10 +332,48 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         },
       },
     },
-    onboarding: timeframeMapSchema,
-    agent_configuration: timeframeMapAllSchema,
-    max_transaction_groups_per_service: timeframeMapSchema,
-    max_error_groups_per_service: timeframeMapSchema,
+    onboarding: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'Total number of onboarding documents within the last day',
+        },
+      },
+      all: {
+        ...long,
+        _meta: {
+          description: 'The total number of onboarding documents overall',
+        },
+      },
+    },
+    agent_configuration: {
+      all: {
+        ...long,
+        _meta: {
+          description:
+            'The total number of apm-agent-configuration documents overall',
+        },
+      },
+    },
+    max_transaction_groups_per_service: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'The total number of distinct transaction groups for the top service for the last last 24 hours',
+        },
+      },
+    },
+    max_error_groups_per_service: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'The total number of distinct error groups for the top service for the last last 24 hours',
+        },
+      },
+    },
     traces: {
       '1d': {
         ...long,
@@ -368,13 +406,63 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     },
   },
   retainment: {
-    span: { ms: long },
-    transaction: { ms: long },
-    error: { ms: long },
-    metric: { ms: long },
-    onboarding: { ms: long },
+    span: {
+      ms: {
+        ...long,
+        _meta: {
+          description:
+            'Represent the time difference in milliseconds between the current date and the date when the span document was recorded',
+        },
+      },
+    },
+    transaction: {
+      ms: {
+        ...long,
+        _meta: {
+          description:
+            'Represent the time difference in milliseconds between the current date and the date when the transaction document was recorded',
+        },
+      },
+    },
+    error: {
+      ms: {
+        ...long,
+        _meta: {
+          description:
+            'Represent the time difference in milliseconds between the current date and the date when the error document was recorded',
+        },
+      },
+    },
+    metric: {
+      ms: {
+        ...long,
+        _meta: {
+          description:
+            'Represent the time difference in milliseconds between the current date and the date when the metric document was recorded',
+        },
+      },
+    },
+    onboarding: {
+      ms: {
+        ...long,
+        _meta: {
+          description:
+            'Represent the time difference in milliseconds between the current date and the date when the onboarding document was recorded',
+        },
+      },
+    },
   },
-  integrations: { ml: { all_jobs_count: long } },
+  integrations: {
+    ml: {
+      all_jobs_count: {
+        ...long,
+        _meta: {
+          description:
+            'Total number of anomaly detection jobs associated with the jobs apm-*, *-high_mean_response_time',
+        },
+      },
+    },
+  },
 
   indices: {
     // cannot find related data
@@ -388,7 +476,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       },
     },
     // cannot find related data
-
     traces: {
       shards: {
         total: {
@@ -409,21 +496,64 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
               },
             },
           },
-          store: { size_in_bytes: long },
+          store: {
+            size_in_bytes: {
+              ...long,
+              _meta: {
+                description: 'Size of the index in byte units.',
+              },
+            },
+          },
         },
       },
     },
-    shards: { total: long },
+    shards: {
+      total: {
+        ...long,
+        _meta: {
+          description: 'The total number of shards',
+        },
+      },
+    },
     all: {
       total: {
-        docs: { count: long },
-        store: { size_in_bytes: long },
+        docs: {
+          count: {
+            ...long,
+            _meta: {
+              description: 'The total number of all documents overall',
+            },
+          },
+        },
+        store: {
+          size_in_bytes: {
+            ...long,
+            _meta: {
+              description: 'Size of the index in byte units.',
+            },
+          },
+        },
       },
     },
   },
   service_groups: {
-    kuery_fields: { type: 'array', items: { type: 'keyword' } },
-    total: long,
+    kuery_fields: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of up to 500 unique fields used to create the service groups. Example  [service.language.name, service.name] ',
+        },
+      },
+    },
+    total: {
+      ...long,
+      _meta: {
+        description:
+          'Total number of service groups retrived from the saved object across all spaces',
+      },
+    },
   },
   per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   tasks: {
