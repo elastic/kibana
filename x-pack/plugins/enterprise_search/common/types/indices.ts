@@ -21,6 +21,8 @@ export interface AlwaysShowPattern {
 }
 export interface ElasticsearchIndex {
   count: number; // Elasticsearch _count
+  has_in_progress_syncs?: boolean; // these default to false if not a connector or crawler
+  has_pending_syncs?: boolean;
   health?: HealthStatus;
   hidden: boolean;
   name: IndexName;

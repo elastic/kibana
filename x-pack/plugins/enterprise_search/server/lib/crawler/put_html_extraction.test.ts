@@ -45,7 +45,6 @@ describe('updateHtmlExtraction lib function', () => {
       },
       id: 'connectorId',
       index: CONNECTORS_INDEX,
-      refresh: 'wait_for',
     });
   });
 });
