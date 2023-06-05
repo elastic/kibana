@@ -904,6 +904,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
+/src/cli/serve/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
@@ -931,7 +932,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 # Core
 /config/kibana.yml @elastic/kibana-core
 /typings/ @elastic/kibana-core
-/src/cli/serve/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
