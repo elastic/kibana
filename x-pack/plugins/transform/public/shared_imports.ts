@@ -8,7 +8,6 @@
 export { XJsonMode } from '@kbn/ace';
 export type { UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
 export { useRequest } from '@kbn/es-ui-shared-plugin/public';
-export { getSavedSearch, getSavedSearchUrlConflictMessage } from '@kbn/discover-plugin/public';
 
 export type {
   GetMlSharedImportsReturnType,

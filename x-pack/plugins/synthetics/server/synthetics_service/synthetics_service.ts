@@ -27,12 +27,7 @@ import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient, ServiceData } from './service_api_client';
-import {
-  ConfigData,
-  formatHeartbeatRequest,
-  formatMonitorConfigFields,
-  mixParamsWithGlobalParams,
-} from './formatters/format_configs';
+
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -47,6 +42,12 @@ import {
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
+import {
+  ConfigData,
+  formatHeartbeatRequest,
+  formatMonitorConfigFields,
+  mixParamsWithGlobalParams,
+} from './formatters/public_formatters/format_configs';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';

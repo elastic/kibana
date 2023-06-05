@@ -114,6 +114,7 @@ export function createConnectorDocument({
     index_name: indexName,
     is_native: isNative,
     language,
+    last_access_control_sync_scheduled_at: null,
     last_access_control_sync_status: null,
     last_seen: null,
     last_sync_error: null,
