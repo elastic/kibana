@@ -455,8 +455,7 @@ describe('parseIndexAliases', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/156061
-describe.skip('retries', () => {
+describe('retries', () => {
   let esContext = contextMock.create();
   // set up context APIs to return defaults indicating already created
   beforeEach(() => {
@@ -472,9 +471,9 @@ describe.skip('retries', () => {
   test('createIlmPolicyIfNotExists with 1 retry', async () => {
     esContext.esAdapter.doesIlmPolicyExist.mockRejectedValueOnce(new Error('retry 1'));
 
-    const timeStart = Date.now();
+    const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = Date.now() - timeStart;
+    const timeElapsed = performance.now() - timeStart;
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY);
 
@@ -492,9 +491,9 @@ describe.skip('retries', () => {
     esContext.esAdapter.doesIndexTemplateExist.mockRejectedValueOnce(new Error('retry 2a'));
     esContext.esAdapter.doesIndexTemplateExist.mockRejectedValueOnce(new Error('retry 2b'));
 
-    const timeStart = Date.now();
+    const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = Date.now() - timeStart;
+    const timeElapsed = performance.now() - timeStart;
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY * (1 + 2));
 
@@ -518,9 +517,9 @@ describe.skip('retries', () => {
     // make sure it only tries 5 times - this one should not be reported
     esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5f'));
 
-    const timeStart = Date.now();
+    const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = Date.now() - timeStart;
+    const timeElapsed = performance.now() - timeStart;
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY * (1 + 2 + 4 + 8));
 

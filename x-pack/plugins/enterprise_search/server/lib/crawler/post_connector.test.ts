@@ -90,6 +90,7 @@ describe('recreateConnectorDocument lib function', () => {
         index_name: 'indexName',
         is_native: false,
         language: '',
+        last_access_control_sync_scheduled_at: null,
         last_access_control_sync_status: null,
         last_incremental_sync_scheduled_at: null,
         last_seen: null,
