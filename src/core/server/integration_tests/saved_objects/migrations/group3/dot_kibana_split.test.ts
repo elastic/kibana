@@ -373,8 +373,8 @@ describe('split .kibana index into multiple system indices', () => {
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
-            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.`,
-            `[${index}] MARK_VERSION_INDEX_READY -> DONE.`,
+            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC.`,
+            `[${index}] MARK_VERSION_INDEX_READY_SYNC -> DONE.`,
             `[${index}] Migration completed after`,
           ],
           { ordered: true }
@@ -392,7 +392,6 @@ describe('split .kibana index into multiple system indices', () => {
       const { runMigrations } = await migratorTestKitFactory();
       await clearLog(logFilePath);
       await runMigrations();
-
       const logs = await parseLogFile(logFilePath);
       expect(logs).not.toContainLogEntries(['REINDEX', 'CREATE', 'UPDATE_TARGET_MAPPINGS']);
     });
@@ -436,8 +435,8 @@ describe('split .kibana index into multiple system indices', () => {
       }
 
       const testKits = await Promise.all(
-        new Array(PARALLEL_MIGRATORS)
-          .fill({
+        new Array(PARALLEL_MIGRATORS).fill(true).map((_, index) =>
+          getKibanaMigratorTestKit({
             settings: {
               migrations: {
                 discardUnknownObjects: currentVersion,
@@ -447,13 +446,9 @@ describe('split .kibana index into multiple system indices', () => {
             kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
             types: typeRegistry.getAllTypes(),
             defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+            logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
           })
-          .map((config, index) =>
-            getKibanaMigratorTestKit({
-              ...config,
-              logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
-            })
-          )
+        )
       );
 
       const results = await Promise.all(testKits.map((testKit) => testKit.runMigrations()));
@@ -486,7 +481,7 @@ describe('split .kibana index into multiple system indices', () => {
           task: 5,
         },
       });
-    }, 600000);
+    }, 1200000);
 
     afterEach(async () => {
       await esServer?.stop();

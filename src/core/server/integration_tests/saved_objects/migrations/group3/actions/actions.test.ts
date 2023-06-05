@@ -1880,7 +1880,7 @@ describe('migration actions', () => {
         expect(res).toMatchInlineSnapshot(`
           Object {
             "_tag": "Right",
-            "right": "create_index_succeeded",
+            "right": "index_already_exists",
           }
         `);
       });
