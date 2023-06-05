@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
 import {
   Field,
@@ -27,7 +27,7 @@ export class MultiMetricJobCreator extends JobCreator {
 
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
     this._wizardInitialized$.next(true);

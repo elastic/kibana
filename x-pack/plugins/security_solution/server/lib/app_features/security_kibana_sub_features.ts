@@ -10,7 +10,7 @@ import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { APP_ID } from '../../../common';
 
-export const endpointListSubFeature: SubFeatureConfig = {
+const endpointListSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
@@ -58,7 +58,7 @@ export const endpointListSubFeature: SubFeatureConfig = {
     },
   ],
 };
-export const trustedApplicationsSubFeature: SubFeatureConfig = {
+const trustedApplicationsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
@@ -112,7 +112,7 @@ export const trustedApplicationsSubFeature: SubFeatureConfig = {
     },
   ],
 };
-export const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
+const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
@@ -169,7 +169,7 @@ export const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
     },
   ],
 };
-export const blocklistSubFeature: SubFeatureConfig = {
+const blocklistSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.blockList.privilegesTooltip',
@@ -223,7 +223,7 @@ export const blocklistSubFeature: SubFeatureConfig = {
     },
   ],
 };
-export const eventFiltersSubFeature: SubFeatureConfig = {
+const eventFiltersSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
@@ -277,7 +277,7 @@ export const eventFiltersSubFeature: SubFeatureConfig = {
     },
   ],
 };
-export const policyManagementSubFeature: SubFeatureConfig = {
+const policyManagementSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
@@ -326,7 +326,7 @@ export const policyManagementSubFeature: SubFeatureConfig = {
   ],
 };
 
-export const responseActionsHistorySubFeature: SubFeatureConfig = {
+const responseActionsHistorySubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
@@ -376,7 +376,7 @@ export const responseActionsHistorySubFeature: SubFeatureConfig = {
     },
   ],
 };
-export const hostIsolationSubFeature: SubFeatureConfig = {
+const hostIsolationSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
@@ -411,7 +411,7 @@ export const hostIsolationSubFeature: SubFeatureConfig = {
   ],
 };
 
-export const processOperationsSubFeature: SubFeatureConfig = {
+const processOperationsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.processOperations.privilegesTooltip',
@@ -447,7 +447,7 @@ export const processOperationsSubFeature: SubFeatureConfig = {
     },
   ],
 };
-export const fileOperationsSubFeature: SubFeatureConfig = {
+const fileOperationsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
@@ -486,7 +486,7 @@ export const fileOperationsSubFeature: SubFeatureConfig = {
 
 // execute operations are not available in 8.7,
 // but will be available in 8.8
-export const executeActionSubFeature: SubFeatureConfig = {
+const executeActionSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
@@ -523,3 +523,34 @@ export const executeActionSubFeature: SubFeatureConfig = {
     },
   ],
 };
+
+export enum SecuritySubFeatureId {
+  endpointList = 'endpointListSubFeature',
+  trustedApplications = 'trustedApplicationsSubFeature',
+  hostIsolationExceptions = 'hostIsolationExceptionsSubFeature',
+  blocklist = 'blocklistSubFeature',
+  eventFilters = 'eventFiltersSubFeature',
+  policyManagement = 'policyManagementSubFeature',
+  responseActionsHistory = 'responseActionsHistorySubFeature',
+  hostIsolation = 'hostIsolationSubFeature',
+  processOperations = 'processOperationsSubFeature',
+  fileOperations = 'fileOperationsSubFeature',
+  executeAction = 'executeActionSubFeature',
+}
+
+// Defines all the ordered Security subFeatures available
+export const securitySubFeaturesMap = Object.freeze(
+  new Map<SecuritySubFeatureId, SubFeatureConfig>([
+    [SecuritySubFeatureId.endpointList, endpointListSubFeature],
+    [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
+    [SecuritySubFeatureId.hostIsolationExceptions, hostIsolationExceptionsSubFeature],
+    [SecuritySubFeatureId.blocklist, blocklistSubFeature],
+    [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature],
+    [SecuritySubFeatureId.policyManagement, policyManagementSubFeature],
+    [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature],
+    [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature],
+    [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
+    [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
+    [SecuritySubFeatureId.executeAction, executeActionSubFeature],
+  ])
+);
