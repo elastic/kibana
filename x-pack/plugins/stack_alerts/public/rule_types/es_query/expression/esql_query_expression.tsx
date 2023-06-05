@@ -157,7 +157,6 @@ export const EsqlQueryExpression: React.FC<
         expandCodeEditor={() => true}
         isCodeEditorExpanded={true}
         errors={[]}
-        disableExpandToggle={true}
         onTextLangQuerySubmit={() => setTestQuery(!testQuery)}
       />
       <EuiSpacer size="m" />
