@@ -46,9 +46,8 @@ class MockLayer {
     this._mbLayerIdsToSource = mbLayerIdsToSource;
     this._layerId = layerId;
   }
-  getId() {
-    return this._layerId;
-  }
+
+  // Custom interface used in getMockStyle for populating maplibre style with layers and sources
   getMbSourceIds() {
     return this._mbSourceIds;
   }
@@ -56,10 +55,7 @@ class MockLayer {
     return this._mbLayerIdsToSource;
   }
 
-  getMbLayerIds() {
-    return this._mbLayerIdsToSource.map(({ id }) => id);
-  }
-
+  // ILayer interface
   ownsMbLayerId(mbLayerId: string) {
     return this._mbLayerIdsToSource.some((mbLayerToSource) => {
       return mbLayerToSource.id === mbLayerId;
