@@ -41,7 +41,9 @@ export type DataGridItem = Record<string, any>;
 export type ChartsVisible = boolean | undefined;
 
 /**
- * Row count relation.
+ * Row count relation for the data grid's number of rows.
+ * It's an alias of `estypes.SearchTotalHitsRelation` ("eq" or "gte")
+ * that can also be undefined.
  */
 export type RowCountRelation = estypes.SearchTotalHitsRelation | undefined;
 
