@@ -29,7 +29,6 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../constants/validation_messages';
-import { integerRangeMinus1To100Validator } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
 import {
   isEsIndices,
   isEsIngestPipelines,
@@ -55,6 +54,7 @@ import {
 import { EsIndexName, DataViewTitle } from './common';
 import {
   continuousModeDelayValidator,
+  integerRangeMinus1To100Validator,
   retentionPolicyMaxAgeValidator,
   transformFrequencyValidator,
   transformSettingsPageSearchSizeValidator,
@@ -299,9 +299,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
     const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);
 
-    const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState(
-      defaults.transformSettingsMaxPageSearchSize
-    );
+    const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState<
+      number | undefined
+    >(defaults.transformSettingsMaxPageSearchSize);
     const [transformSettingsDocsPerSecond] = useState(defaults.transformSettingsDocsPerSecond);
 
     const transformSettingsMaxPageSearchSizeErrors = transformSettingsPageSearchSizeValidator(
@@ -837,10 +837,15 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     values: { defaultValue: 500 },
                   }
                 )}
-                value={transformSettingsMaxPageSearchSize?.toString()}
+                value={
+                  transformSettingsMaxPageSearchSize
+                    ? transformSettingsMaxPageSearchSize.toString()
+                    : transformSettingsMaxPageSearchSize
+                }
                 onChange={(e) => {
                   if (e.target.value !== '') {
-                    setTransformSettingsMaxPageSearchSize(parseInt(e.target.value, 10));
+                    const parsed = parseInt(e.target.value, 10);
+                    setTransformSettingsMaxPageSearchSize(isFinite(parsed) ? parsed : undefined);
                   } else {
                     setTransformSettingsMaxPageSearchSize(undefined);
                   }
