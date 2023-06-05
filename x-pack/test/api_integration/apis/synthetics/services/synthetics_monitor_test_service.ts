@@ -7,6 +7,9 @@
 
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
@@ -25,6 +28,35 @@ export class SyntheticsMonitorTestService {
       url = '/s/' + space + url;
     }
     return this.supertest.get(url).set('kbn-xsrf', 'true').expect(200);
+  }
+
+  async addMonitor(monitor: any) {
+    const res = await this.supertest
+      .post(API_URLS.SYNTHETICS_MONITORS)
+      .set('kbn-xsrf', 'true')
+      .send(monitor)
+      .expect(200);
+
+    return res.body as SavedObject<MonitorFields>;
+  }
+
+  async inspectMonitor(monitor: any, hideParams: boolean = true) {
+    const res = await this.supertest
+      .post(API_URLS.SYNTHETICS_MONITOR_INSPECT)
+      .set('kbn-xsrf', 'true')
+      .send(monitor)
+      .expect(200);
+
+    // remove the id and config_id from the response
+    delete res.body.result?.publicConfigs?.[0].monitors[0].id;
+    delete res.body.result?.publicConfigs?.[0].monitors[0].streams[0].id;
+    delete res.body.result?.publicConfigs?.[0].monitors[0].streams[0].config_id;
+    delete res.body.result?.publicConfigs?.[0].monitors[0].streams[0].fields.config_id;
+    delete res.body.result?.publicConfigs?.[0].output.api_key;
+    delete res.body.result?.publicConfigs?.[0].license_issued_to;
+    delete res.body.result?.publicConfigs?.[0].stack_version;
+
+    return res.body as { result: MonitorInspectResponse; decodedCode: string };
   }
 
   async addProjectMonitors(project: string, monitors: any) {

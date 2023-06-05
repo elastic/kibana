@@ -24928,7 +24928,6 @@
     "xpack.ml.trainedModels.modelsList.builtInModelMessage": "内置模型",
     "xpack.ml.trainedModels.modelsList.collapseRow": "折叠",
     "xpack.ml.trainedModels.modelsList.createdAtHeader": "创建于",
-    "xpack.ml.trainedModels.modelsList.deleteDisabledTooltip": "模型有关联的管道",
     "xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel": "取消",
     "xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel": "删除",
     "xpack.ml.trainedModels.modelsList.deleteModelActionLabel": "删除模型",
