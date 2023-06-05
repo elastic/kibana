@@ -20,11 +20,7 @@ import {
   SyntheticsPrivateLocation,
 } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
-import {
-  ConfigData,
-  formatHeartbeatRequest,
-  mixParamsWithGlobalParams,
-} from '../formatters/format_configs';
+
 import {
   MonitorFields,
   SyntheticsMonitorWithId,
@@ -34,6 +30,11 @@ import {
   SyntheticsMonitorWithSecrets,
   MonitorServiceLocation,
 } from '../../../common/runtime_types';
+import {
+  ConfigData,
+  formatHeartbeatRequest,
+  mixParamsWithGlobalParams,
+} from '../formatters/public_formatters/format_configs';
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;

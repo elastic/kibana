@@ -8,12 +8,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../../app/types';
-import type { NavLinkItem } from '../navigation/types';
+import type { NavigationLink } from '../../links/types';
 import { TestProviders } from '../../mock';
 import { LandingLinksIcons } from './landing_links_icons';
 import * as telemetry from '../../lib/telemetry';
 
-const DEFAULT_NAV_ITEM: NavLinkItem = {
+const DEFAULT_NAV_ITEM: NavigationLink = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
