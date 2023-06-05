@@ -86,6 +86,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "enterprise_search_telemetry": "9ac912e1417fc8681e0cd383775382117c9e3d3d",
         "epm-packages": "2449bb565f987eff70b1b39578bb17e90c404c6e",
         "epm-packages-assets": "7a3e58efd9a14191d0d1a00b8aaed30a145fd0b1",
+        "event-annotation-group": "715ba867d8c68f3c9438052210ea1c30a9362582",
         "event_loop_delays_daily": "01b967e8e043801357503de09199dfa3853bab88",
         "exception-list": "4aebc4e61fb5d608cae48eaeb0977e8db21c61a4",
         "exception-list-agnostic": "6d3262d58eee28ac381ec9654f93126a58be6f5d",

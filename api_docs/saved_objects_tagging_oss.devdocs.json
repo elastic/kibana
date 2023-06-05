@@ -1377,7 +1377,7 @@
             "section": "def-common.Tag",
             "text": "Tag"
           },
-          " | { type: \"__create_option__\"; }>> & { initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }"
+          " | { type: \"__create_option__\"; }>> & { initialSelection: string[]; onTagsSelected: (ids: string[]) => void; markOptional?: boolean | undefined; }"
         ],
         "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
