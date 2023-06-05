@@ -7,7 +7,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Field, Aggregation, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
@@ -21,7 +21,7 @@ export class PopulationJobCreator extends JobCreator {
   private _byFields: SplitField[] = [];
   protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
     this._wizardInitialized$.next(true);

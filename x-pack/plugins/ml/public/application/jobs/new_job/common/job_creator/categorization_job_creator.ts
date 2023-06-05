@@ -13,7 +13,7 @@ import {
   mlCategory,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
@@ -51,7 +51,7 @@ export class CategorizationJobCreator extends JobCreator {
   private _partitionFieldName: string | null = null;
   private _ccsVersionFailure: boolean = false;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);

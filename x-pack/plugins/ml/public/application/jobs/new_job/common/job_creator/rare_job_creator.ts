@@ -12,7 +12,7 @@ import {
   type Aggregation,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
@@ -29,7 +29,7 @@ export class RareJobCreator extends JobCreator {
   private _rareAgg: Aggregation;
   private _freqRareAgg: Aggregation;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.RARE;
     this._wizardInitialized$.next(true);

@@ -124,7 +124,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       const laterVersionAlias = hasLaterVersionAlias(stateP.kibanaVersion, aliases);
       if (
-        // `.kibana_<version>` alias exists, and refers to a later version of Kibana
+        // a `.kibana_<version>` alias exist, which refers to a later version of Kibana
         // e.g. `.kibana_8.7.0` exists, and current stack version is 8.6.1
         // see https://github.com/elastic/kibana/issues/155136
         laterVersionAlias

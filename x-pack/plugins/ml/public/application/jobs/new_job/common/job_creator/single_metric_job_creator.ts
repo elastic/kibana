@@ -14,7 +14,7 @@ import {
   ML_JOB_AGGREGATION,
   ES_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
 import {
@@ -31,7 +31,7 @@ import { isSparseDataJob } from './util/general';
 export class SingleMetricJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
     this._wizardInitialized$.next(true);

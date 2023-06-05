@@ -20,7 +20,7 @@ import {
   mlJobAggregationsWithoutEsEquivalent,
 } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import type {
@@ -53,7 +53,7 @@ import { ml } from '../../../../services/ml_api_service';
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: DataView;
-  protected _savedSearch: SavedSearchSavedObject | null;
+  protected _savedSearch: SavedSearch | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _indexPatternDisplayName: string = '';
   protected _job_config: Job;
@@ -81,7 +81,7 @@ export class JobCreator {
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
 
@@ -109,7 +109,7 @@ export class JobCreator {
     return this._type;
   }
 
-  public get savedSearch(): SavedSearchSavedObject | null {
+  public get savedSearch(): SavedSearch | null {
     return this._savedSearch;
   }
 
