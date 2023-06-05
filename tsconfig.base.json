@@ -610,6 +610,8 @@
       "@kbn/deeplinks-analytics/*": ["packages/deeplinks/analytics/*"],
       "@kbn/deeplinks-devtools": ["packages/deeplinks/devtools"],
       "@kbn/deeplinks-devtools/*": ["packages/deeplinks/devtools/*"],
+      "@kbn/deeplinks-ml": ["packages/deeplinks/ml"],
+      "@kbn/deeplinks-ml/*": ["packages/deeplinks/ml/*"],
       "@kbn/dev-cli-errors": ["packages/kbn-dev-cli-errors"],
       "@kbn/dev-cli-errors/*": ["packages/kbn-dev-cli-errors/*"],
       "@kbn/dev-cli-runner": ["packages/kbn-dev-cli-runner"],

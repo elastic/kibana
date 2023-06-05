@@ -6,34 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { DeepLinkId as MlDeepLink } from '@kbn/deeplinks-ml';
 
 import type { NodeDefinitionWithChildren } from './types';
 
 export type ID =
   | 'sharedux:ml'
   | 'root'
-  | 'overview'
-  | 'notifications'
   | 'anomaly_detection'
-  | 'jobs'
-  | 'explorer'
-  | 'single_metric_viewer'
-  | 'settings'
   | 'data_frame_analytics'
-  | 'results_explorer'
-  | 'analytics_map'
   | 'model_management'
-  | 'trained_models'
-  | 'nodes'
   | 'data_visualizer'
-  | 'file'
-  | 'data_view'
-  | 'aiops_labs'
-  | 'explain_log_rate_spikes'
-  | 'log_pattern_analysis';
+  | 'aiops_labs';
 
-export const ml: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
+export const ml: NodeDefinitionWithChildren<MlDeepLink, ID> = {
   id: 'sharedux:ml',
   title: 'Machine learning',
   icon: 'indexMapping',
@@ -43,14 +29,10 @@ export const ml: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
       id: 'root',
       children: [
         {
-          id: 'overview',
-          title: 'Overview',
-          href: '/app/ml/overview',
+          link: 'ml:overview',
         },
         {
-          id: 'notifications',
-          title: 'Notifications',
-          href: '/app/ml/notifications',
+          link: 'ml:notifications',
         },
       ],
     },
@@ -59,24 +41,17 @@ export const ml: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
       id: 'anomaly_detection',
       children: [
         {
-          id: 'jobs',
           title: 'Jobs',
-          href: '/app/ml/jobs',
+          link: 'ml:anomalyDetection',
         },
         {
-          id: 'explorer',
-          title: 'Anomaly explorer',
-          href: '/app/ml/explorer',
+          link: 'ml:anomalyExplorer',
         },
         {
-          id: 'single_metric_viewer',
-          title: 'Single metric viewer',
-          href: '/app/ml/timeseriesexplorer',
+          link: 'ml:singleMetricViewer',
         },
         {
-          id: 'settings',
-          title: 'Settings',
-          href: '/app/ml/settings',
+          link: 'ml:settings',
         },
       ],
     },
@@ -85,19 +60,14 @@ export const ml: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
       title: 'Data frame analytics',
       children: [
         {
-          id: 'jobs',
           title: 'Jobs',
-          href: '/app/ml/data_frame_analytics',
+          link: 'ml:dataFrameAnalytics',
         },
         {
-          id: 'results_explorer',
-          title: 'Results explorer',
-          href: '/app/ml/data_frame_analytics/exploration',
+          link: 'ml:resultExplorer',
         },
         {
-          id: 'analytics_map',
-          title: 'Analytics map',
-          href: '/app/ml/data_frame_analytics/map',
+          link: 'ml:analyticsMap',
         },
       ],
     },
@@ -106,14 +76,10 @@ export const ml: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
       title: 'Model management',
       children: [
         {
-          id: 'trained_models',
-          title: 'Trained models',
-          href: '/app/ml/trained_models',
+          link: 'ml:nodesOverview',
         },
         {
-          id: 'nodes',
-          title: 'Nodes',
-          href: '/app/ml/nodes',
+          link: 'ml:nodes',
         },
       ],
     },
@@ -122,14 +88,12 @@ export const ml: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
       title: 'Data visualizer',
       children: [
         {
-          id: 'file',
           title: 'File',
-          href: '/app/ml/filedatavisualizer',
+          link: 'ml:fileUpload',
         },
         {
-          id: 'data_view',
           title: 'Data view',
-          href: '/app/ml/datavisualizer_index_select',
+          link: 'ml:indexDataVisualizer',
         },
       ],
     },
@@ -138,14 +102,11 @@ export const ml: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
       title: 'AIOps labs',
       children: [
         {
-          id: 'explain_log_rate_spikes',
           title: 'Explain log rate spikes',
-          href: '/app/ml/aiops/explain_log_rate_spikes_index_select',
+          link: 'ml:explainLogRateSpikes',
         },
         {
-          id: 'log_pattern_analysis',
-          title: 'Log pattern analysis',
-          href: '/app/ml/aiops/log_categorization_index_select',
+          link: 'ml:logPatternAnalysis',
         },
       ],
     },

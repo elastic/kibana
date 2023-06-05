@@ -7,8 +7,9 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import type { DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
+import type { DeepLinkId as DevToolsDeepLink } from '@kbn/deeplinks-devtools';
 import type { DeepLinkId as AnalyticsDeepLink } from '@kbn/deeplinks-analytics';
+import type { DeepLinkId as MlDeepLink } from '@kbn/deeplinks-ml';
 
 import type { NodeDefinition } from '../types';
 import type { ID as AnalyticsID } from './analytics';
@@ -26,8 +27,8 @@ export type NodeDefinitionWithChildren<
 
 export type AnalyticsNodeDefinition = NodeDefinitionWithChildren<AnalyticsDeepLink, AnalyticsID>;
 
-export type DevToolsNodeDefinition = NodeDefinitionWithChildren<DevToolsLink, DevtoolsID>;
+export type DevToolsNodeDefinition = NodeDefinitionWithChildren<DevToolsDeepLink, DevtoolsID>;
 
 export type ManagementNodeDefinition = NodeDefinitionWithChildren<AppDeepLinkId, ManagementID>;
 
-export type MlNodeDefinition = NodeDefinitionWithChildren<AppDeepLinkId, MlID>;
+export type MlNodeDefinition = NodeDefinitionWithChildren<MlDeepLink, MlID>;
