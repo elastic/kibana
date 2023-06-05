@@ -14,13 +14,9 @@ import {
   investigateInTimelineFromFlyout,
   investigateInTimelineFromTable,
   openTimeline,
+  createNewTimeline,
 } from '../tasks/timeline';
-import {
-  closeFlyout,
-  openBarchartPopoverMenu,
-  openFlyout,
-  openFlyoutTakeAction,
-} from '../tasks/common';
+import { closeFlyout, openFlyout, openFlyoutTakeAction } from '../tasks/common';
 import { TIMELINE_DRAGGABLE_ITEM } from '../screens/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { login, visit } from '../tasks/login';
@@ -38,42 +34,44 @@ describe('Timeline', () => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  it('should add entry in timeline when clicking in the barchart legend', () => {
-    openBarchartPopoverMenu();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(2000);
-    addToTimelineFromBarchartLegend();
-    openTimeline();
+  describe('From flyout', () => {
+    afterEach(() => {
+      createNewTimeline();
+    });
 
-    cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+    it('should add entry in timeline when clicking in the barchart legend', () => {
+      addToTimelineFromBarchartLegend();
+      openTimeline();
 
-    closeTimeline();
+      cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+
+      closeTimeline();
+    });
+    it('should add entry in timeline when clicking in an indicator flyout overview tab table row', () => {
+      openFlyout(0);
+      addToTimelineFromFlyoutOverviewTabTable();
+      closeFlyout();
+      openTimeline();
+
+      cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+
+      closeTimeline();
+    });
+
+    it('should add entry in timeline when clicking in an indicator flyout overview block', () => {
+      openFlyout(0);
+      addToTimelineFromFlyoutOverviewTabBlock();
+      closeFlyout();
+      openTimeline();
+
+      cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+
+      closeTimeline();
+    });
   });
 
   it('should add entry in timeline when clicking in an indicator table cell', () => {
     addToTimelineFromTableCell();
-    openTimeline();
-
-    cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
-
-    closeTimeline();
-  });
-
-  it('should add entry in timeline when clicking in an indicator flyout overview tab table row', () => {
-    openFlyout(0);
-    addToTimelineFromFlyoutOverviewTabTable();
-    closeFlyout();
-    openTimeline();
-
-    cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
-
-    closeTimeline();
-  });
-
-  it('should add entry in timeline when clicking in an indicator flyout overview block', () => {
-    openFlyout(0);
-    addToTimelineFromFlyoutOverviewTabBlock();
-    closeFlyout();
     openTimeline();
 
     cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
