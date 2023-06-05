@@ -27,9 +27,10 @@ export const SessionView: FC = () => {
   const { sessionView } = useKibana().services;
   const { getFieldsData, indexName } = useLeftPanelContext();
 
-  const index = getFieldsData(KIBANA_ANCESTOR_INDEX) || indexName;
+  const ancestorIndex = getField(getFieldsData(KIBANA_ANCESTOR_INDEX)); // e.g in case of alert, we want to grab it's origin index
   const sessionEntityId = getField(getFieldsData(SESSION_ENTITY_ID));
   const sessionStartTime = getField(getFieldsData(SESSION_START_TIME));
+  const index = ancestorIndex || indexName;
 
   if (!index || !sessionEntityId || !sessionStartTime) {
     return (

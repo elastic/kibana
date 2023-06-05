@@ -152,8 +152,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
     const { process, _id, _index, timestamp, kibana } = ecsData;
     const sessionEntityId = process?.entry_leader?.entity_id?.[0];
     const sessionStartTime = process?.entry_leader?.start?.[0];
+    const index = kibana?.alert?.ancestors?.index?.[0] || _index;
 
-    if (_index === undefined || sessionEntityId === undefined || sessionStartTime === undefined) {
+    if (index === undefined || sessionEntityId === undefined || sessionStartTime === undefined) {
       return null;
     }
 
@@ -163,7 +164,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       (investigatedAlertId && ecsData.kibana?.alert.original_time?.[0]) || timestamp;
 
     return {
-      index: _index,
+      index,
       sessionEntityId,
       sessionStartTime,
       jumpToEntityId,
