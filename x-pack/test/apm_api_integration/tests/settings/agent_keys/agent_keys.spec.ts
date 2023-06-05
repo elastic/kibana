@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
           expect(error.res.status).to.be(403);
           expect(error.res.body.message).contain('is missing the following requested privilege');
-          expect(error.res.body.attributes.data).to.eql({
+          expect(error.res.body.attributes?.data).to.eql({
             missingPrivileges: allApplicationPrivileges,
           });
         });
