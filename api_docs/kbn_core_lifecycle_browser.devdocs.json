@@ -587,10 +587,6 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/utils/get_visualization_instance.ts"
-              },
-              {
-                "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/plugin.ts"
               },
               {
@@ -626,24 +622,8 @@
                 "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
-              },
-              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
                 "plugin": "ml",
@@ -708,10 +688,6 @@
               {
                 "plugin": "eventAnnotation",
                 "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.test.ts"
               },
               {
                 "plugin": "discover",
