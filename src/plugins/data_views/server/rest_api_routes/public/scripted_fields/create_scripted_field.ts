@@ -78,6 +78,7 @@ export const registerCreateScriptedFieldRoute = (
 
           indexPattern.fields.add({
             ...field,
+            runtimeField: undefined,
             aggregatable: true,
             searchable: true,
           });

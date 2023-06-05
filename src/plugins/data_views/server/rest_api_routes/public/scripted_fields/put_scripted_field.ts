@@ -79,6 +79,7 @@ export const registerPutScriptedFieldRoute = (
 
           indexPattern.fields.add({
             ...field,
+            runtimeField: undefined, // make sure not creating runttime field with scripted field endpoint
             aggregatable: true,
             searchable: true,
           });
