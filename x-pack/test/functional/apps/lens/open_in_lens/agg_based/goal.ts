@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Average machine.ram',
           subtitle: undefined,
           extraText: '',
-          value: '131.04m%',
+          value: '131,040,360.81%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
           showingTrendline: false,
