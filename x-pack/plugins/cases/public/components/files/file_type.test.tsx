@@ -12,11 +12,11 @@ import type { ExternalReferenceAttachmentViewProps } from '../../client/attachme
 import type { AppMockRenderer } from '../../common/mock';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import { createAppMockRenderer } from '../../common/mock';
 import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
 import userEvent from '@testing-library/user-event';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 describe('getFileType', () => {
   const fileType = getFileType();

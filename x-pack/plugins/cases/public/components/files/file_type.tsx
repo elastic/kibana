@@ -6,6 +6,7 @@
  */
 import React from 'react';
 
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import type {
   ExternalReferenceAttachmentType,
   ExternalReferenceAttachmentViewProps,
@@ -13,7 +14,6 @@ import type {
 import type { DownloadableFile } from './types';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import { FileDownloadButton } from './file_download_button';
 import { FileNameLink } from './file_name_link';
 import { FilePreview } from './file_preview';

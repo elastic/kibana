@@ -13,14 +13,11 @@ import type {
   CommentAttributesWithoutRefs,
   ExternalReferenceWithoutRefs,
 } from '../../../common/api';
-import {
-  ExternalReferenceStorageType,
-  FILE_ATTACHMENT_TYPE,
-  CommentType,
-} from '../../../common/api';
+import { ExternalReferenceStorageType, CommentType } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { CASE_REF_NAME, EXTERNAL_REFERENCE_REF_NAME } from '../../common/constants';

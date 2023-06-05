@@ -10,8 +10,9 @@ import styled from 'styled-components';
 
 import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useKibana } from '../../../../common/lib/kibana';
-import { LENS_VISUALIZATION_HEIGHT } from './constants';
+import { useKibana } from '../../common/lib/kibana';
+
+const LENS_VISUALIZATION_HEIGHT = 200;
 
 const Container = styled.div`
   min-height: ${LENS_VISUALIZATION_HEIGHT}px;
@@ -29,10 +30,7 @@ interface LensMarkDownRendererProps {
   timeRange?: TypedLensByValueInput['timeRange'];
 }
 
-const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
-  attributes,
-  timeRange,
-}) => {
+const LensRendererComponent: React.FC<LensMarkDownRendererProps> = ({ attributes, timeRange }) => {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
@@ -60,6 +58,10 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     </Container>
   );
 };
-LensMarkDownRendererComponent.displayName = 'LensMarkDownRenderer';
 
-export const LensMarkDownRenderer = React.memo(LensMarkDownRendererComponent);
+LensRendererComponent.displayName = 'LensRenderer';
+
+export const LensRenderer = React.memo(LensRendererComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { LensRenderer as default };
