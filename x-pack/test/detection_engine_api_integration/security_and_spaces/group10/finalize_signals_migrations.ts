@@ -17,7 +17,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteMigrations,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
@@ -47,6 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   const getSignalsMigrationStatus = async (query: any) => {
     const { body } = await supertest
@@ -102,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     it('replaces the original index alias with the migrated one', async () => {

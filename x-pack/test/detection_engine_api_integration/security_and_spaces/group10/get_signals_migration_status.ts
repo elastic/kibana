@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad } from '../../utils';
+import { createSignalsIndex, deleteAllAlerts, getIndexNameFromLoad } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
@@ -19,6 +19,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   const getSignalsMigrationStatus = async (query: any) => {
     const { body } = await supertest
@@ -44,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     it('returns no indexes if no signals exist in the specified range', async () => {

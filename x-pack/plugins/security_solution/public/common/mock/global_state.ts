@@ -6,6 +6,7 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
@@ -48,6 +49,10 @@ import { UsersFields } from '../../../common/search_strategy/security_solution/u
 import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../store/sourcerer';
 
+const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
+  mockIndexFields.map((field) => [field.name, field])
+);
+
 export const mockSourcererState: SourcererState = {
   ...initialSourcererState,
   signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
@@ -56,7 +61,7 @@ export const mockSourcererState: SourcererState = {
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
     indexFields: mockIndexFields,
-    fields: mockIndexFields,
+    fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
     runtimeMappings: mockRuntimeMappings,

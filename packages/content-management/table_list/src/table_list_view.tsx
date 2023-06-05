@@ -87,7 +87,14 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   onClickTitle?: (item: T) => void;
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
+  /**
+   * Edit action onClick handler. Edit action not provided when property is not provided
+   */
   editItem?(item: T): void;
+  /**
+   * Handler to set edit action visiblity per item.
+   */
+  showEditActionForItem?(item: T): boolean;
   /**
    * Name for the column containing the "title" value.
    */
@@ -251,6 +258,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   findItems,
   createItem,
   editItem,
+  showEditActionForItem,
   deleteItems,
   getDetailViewLink,
   onClickTitle,
@@ -523,6 +531,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
+          available: (v) => (showEditActionForItem ? showEditActionForItem(v) : true),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
         });
@@ -577,6 +586,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     contentEditor,
     inspectItem,
+    showEditActionForItem,
   ]);
 
   const itemsById = useMemo(() => {

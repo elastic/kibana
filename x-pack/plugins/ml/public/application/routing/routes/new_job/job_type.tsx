@@ -41,7 +41,6 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     savedSearchId,
     deps.config,
     deps.dataViewsContract,
-    deps.getSavedSearchDeps,
     basicResolvers(deps)
   );
   return (

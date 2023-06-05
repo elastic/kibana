@@ -77,6 +77,7 @@ describe('helpers', () => {
           getGroupByFieldsOnClick: jest.fn(),
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isAssistantEnabled: true,
           onAddToNewCase: jest.fn(),
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'auditbeat-*',
