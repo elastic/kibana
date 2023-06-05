@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -30,7 +32,9 @@ export function getRuleType(
   EsQueryRuleState,
   {},
   ActionContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  string,
+  StackAlert
 > {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
@@ -187,5 +191,49 @@ export function getRuleType(
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    alerts: {
+      context: 'stack',
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          [ALERT_REASON]: {
+            type: 'keyword',
+            array: false,
+            required: false,
+          },
+          'kibana.alert.value': {
+            type: 'scaled_float',
+            scaling_factor: 100,
+            array: false,
+            required: false,
+          },
+          'kibana.alert.conditions': {
+            type: 'keyword',
+            array: false,
+            required: false,
+          },
+          'kibana.alert.title': {
+            type: 'keyword',
+            array: false,
+            required: false,
+          },
+          'kibana.alert.date_start': {
+            type: 'date',
+            array: false,
+            required: false,
+          },
+          'kibana.alert.date_end': {
+            type: 'date',
+            array: false,
+            required: false,
+          },
+          'kibana.alert.latest_timestamp': {
+            type: 'date',
+            array: false,
+            required: false,
+          },
+        },
+      },
+    },
   };
 }
