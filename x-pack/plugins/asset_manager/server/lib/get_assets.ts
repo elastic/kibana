@@ -36,7 +36,7 @@ export async function getAssets({
       });
     }
 
-    if (filters.type?.length) {
+    if (filters.type) {
       must.push({
         terms: {
           ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],
@@ -47,7 +47,7 @@ export async function getAssets({
     if (filters.kind) {
       must.push({
         term: {
-          ['asset.kind']: filters.kind,
+          ['asset.kind']: Array.isArray(filters.kind) ? filters.kind : [filters.kind],
         },
       });
     }
@@ -72,6 +72,14 @@ export async function getAssets({
       must.push({
         wildcard: {
           ['asset.type']: filters.typeLike,
+        },
+      });
+    }
+
+    if (filters.kindLike) {
+      must.push({
+        wildcard: {
+          ['asset.kind']: filters.kindLike,
         },
       });
     }

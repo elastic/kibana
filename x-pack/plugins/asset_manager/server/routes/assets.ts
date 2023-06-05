@@ -16,7 +16,7 @@ import {
   createLiteralValueFromUndefinedRT,
 } from '@kbn/io-ts-utils';
 import { debug } from '../../common/debug_log';
-import { AssetType, assetTypeRT, relationRT } from '../../common/types_api';
+import { AssetType, assetTypeRT, AssetKind, assetKindRT, relationRT } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
 import { getAssets } from '../lib/get_assets';
 import { getAllRelatedAssets } from '../lib/get_all_related_assets';
@@ -25,14 +25,19 @@ import { getEsClientFromContext } from './utils';
 import { AssetNotFoundError } from '../lib/errors';
 import { isValidRange, toArray } from '../lib/utils';
 
+function maybeArrayRT(t: rt.Mixed) {
+  return rt.union([rt.array(t), t]);
+}
+
 const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);
 const assetDateRT = rt.union([dateRt, datemathStringRt]);
 const getAssetsQueryOptionsRT = rt.exact(
   rt.partial({
     from: assetDateRT,
     to: assetDateRT,
-    type: rt.union([rt.array(assetTypeRT), assetTypeRT]),
-    ean: rt.union([rt.array(rt.string), rt.string]),
+    type: maybeArrayRT(assetTypeRT),
+    kind: maybeArrayRT(assetKindRT),
+    ean: maybeArrayRT(rt.string),
     size: sizeRT,
   })
 );
@@ -46,7 +51,8 @@ const getAssetsDiffQueryOptionsRT = rt.exact(
       bTo: assetDateRT,
     }),
     rt.partial({
-      type: rt.union([rt.array(assetTypeRT), assetTypeRT]),
+      type: maybeArrayRT(assetTypeRT),
+      kind: maybeArrayRT(assetKindRT),
     }),
   ])
 );
@@ -62,7 +68,8 @@ const getRelatedAssetsQueryOptionsRT = rt.exact(
     }),
     rt.partial({
       to: assetDateRT,
-      type: rt.union([rt.array(assetTypeRT), assetTypeRT]),
+      type: maybeArrayRT(assetTypeRT),
+      kind: maybeArrayRT(assetKindRT),
     }),
   ])
 );
@@ -86,6 +93,12 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       if (filters.type && filters.ean) {
         return res.badRequest({
           body: 'Filters "type" and "ean" are mutually exclusive but found both.',
+        });
+      }
+
+      if (filters.kind && filters.ean) {
+        return res.badRequest({
+          body: 'Filters "kind" and "ean" are mutually exclusive but found both.',
         });
       }
 
@@ -116,6 +129,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       const esClient = await getEsClientFromContext(context);
 
       const type = toArray<AssetType>(req.query.type);
+      const kind = toArray<AssetKind>(req.query.kind);
 
       if (to && !isValidRange(from, to)) {
         return res.badRequest({
@@ -131,6 +145,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
               from,
               to,
               type,
+              kind,
               maxDistance,
               size,
               relation,
@@ -158,6 +173,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
     async (context, req, res) => {
       const { aFrom, aTo, bFrom, bTo } = req.query;
       const type = toArray<AssetType>(req.query.type);
+      const kind = toArray<AssetKind>(req.query.kind);
 
       if (!isValidRange(aFrom, aTo)) {
         return res.badRequest({
@@ -180,6 +196,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
             from: aFrom,
             to: aTo,
             type,
+            kind,
           },
         });
 
@@ -189,6 +206,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
             from: bFrom,
             to: bTo,
             type,
+            kind,
           },
         });
 

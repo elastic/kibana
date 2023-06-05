@@ -138,6 +138,7 @@ export interface AssetFilters {
   ean?: string | string[];
   id?: string;
   typeLike?: string;
+  kindLike?: string;
   eanLike?: string;
   collectionVersion?: number | 'latest' | 'all';
   from?: string;
