@@ -275,15 +275,81 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     },
   },
   counts: {
-    transaction: timeframeMapSchema,
-    span: timeframeMapSchema,
-    error: timeframeMapSchema,
-    metric: timeframeMapSchema,
+    transaction: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'Total number of transaction documents within the last day',
+        },
+      },
+      all: {
+        ...long,
+        _meta: {
+          description: 'The total number of transaction documents overall',
+        },
+      },
+    },
+    span: {
+      '1d': {
+        ...long,
+        _meta: {
+          description: 'Total number of span documents within the last day',
+        },
+      },
+      all: {
+        ...long,
+        _meta: {
+          description: 'The total number of span documents overall',
+        },
+      },
+    },
+    error: {
+      '1d': {
+        ...long,
+        _meta: {
+          description: 'Total number of error documents within the last day',
+        },
+      },
+      all: {
+        ...long,
+        _meta: {
+          description: 'The total number of error documents overall',
+        },
+      },
+    },
+    metric: {
+      '1d': {
+        ...long,
+        _meta: {
+          description: 'Total number of metric documents within the last day',
+        },
+      },
+      all: {
+        ...long,
+        _meta: {
+          description: 'The total number of metric documents overall',
+        },
+      },
+    },
     onboarding: timeframeMapSchema,
     agent_configuration: timeframeMapAllSchema,
     max_transaction_groups_per_service: timeframeMapSchema,
     max_error_groups_per_service: timeframeMapSchema,
-    traces: timeframeMapSchema,
+    traces: {
+      '1d': {
+        ...long,
+        _meta: {
+          description: 'Total number of tracees documents within the last day',
+        },
+      },
+      all: {
+        ...long,
+        _meta: {
+          description: 'The total number of traces documents overall',
+        },
+      },
+    },
     services: timeframeMapSchema,
   },
   cardinality: {
@@ -311,6 +377,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   integrations: { ml: { all_jobs_count: long } },
 
   indices: {
+    // cannot find related data
     metric: {
       shards: { total: long },
       all: {
@@ -320,11 +387,28 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         },
       },
     },
+    // cannot find related data
+
     traces: {
-      shards: { total: long },
+      shards: {
+        total: {
+          ...long,
+          _meta: {
+            description: 'The total number of shards',
+          },
+        },
+      },
       all: {
         total: {
-          docs: { count: long },
+          docs: {
+            count: {
+              ...long,
+              _meta: {
+                description:
+                  'The total number of transaction and span documents overall',
+              },
+            },
+          },
           store: { size_in_bytes: long },
         },
       },
