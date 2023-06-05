@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { ChromeProjectNavigationLink } from '@kbn/core-chrome-browser';
 
-import type { NodeDefinitionWithChildren } from '.';
+import type { NodeDefinitionWithChildren } from './types';
 
 export type ID =
   | 'sharedux:management'
@@ -49,7 +50,7 @@ export type ID =
   | 'advanced_settings'
   | 'upgrade_assistant';
 
-export const management: NodeDefinitionWithChildren<ID> = {
+export const management: NodeDefinitionWithChildren<ChromeProjectNavigationLink, ID> = {
   id: 'sharedux:management',
   title: 'Management',
   icon: 'gear',

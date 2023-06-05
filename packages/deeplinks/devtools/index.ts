@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const DEV_TOOLS_APP_ID = 'dev_tools' as const;
+export const DEV_TOOLS_APP_ID = 'dev_tools';
 
 export const searchProfiler = {
   id: 'searchprofiler',
@@ -38,10 +38,10 @@ export type DeepLink =
   | typeof grokDebugger
   | typeof console;
 
-export type LinkId = DeepLink['id'];
-
 export type AppId = typeof DEV_TOOLS_APP_ID;
 
-export type AppDeepLinkId = `${AppId}:${LinkId}`;
+export type LinkId = DeepLink['id'];
+
+export type DeepLinkId = AppId | `${AppId}:${LinkId}`;
 
 export const deepLinks: DeepLink[] = [searchProfiler, painlessLab, grokDebugger, console];

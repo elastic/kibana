@@ -5,18 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 
-import type { NodeDefinitionWithChildren } from '.';
+import type { NodeDefinitionWithChildren } from './types';
 
-export type ID =
-  | 'sharedux:devtools'
-  | 'root'
-  | 'console'
-  | 'search_profiler'
-  | 'grok_debugger'
-  | 'painless_lab';
+export type ID = 'sharedux:devtools' | 'root';
 
-export const devtools: NodeDefinitionWithChildren<ID> = {
+export const devtools: NodeDefinitionWithChildren<DevToolsLink, ID> = {
   title: 'Developer tools',
   id: 'sharedux:devtools',
   icon: 'editorCodeBlock',
@@ -25,22 +20,18 @@ export const devtools: NodeDefinitionWithChildren<ID> = {
       id: 'root',
       children: [
         {
-          id: 'console',
           title: 'Console',
           link: 'dev_tools:console',
         },
         {
-          id: 'search_profiler',
           title: 'Search profiler',
           link: 'dev_tools:searchprofiler',
         },
         {
-          id: 'grok_debugger',
           title: 'Grok debugger',
           link: 'dev_tools:grokdebugger',
         },
         {
-          id: 'painless_lab',
           title: 'Painless lab',
           link: 'dev_tools:painless_lab',
         },

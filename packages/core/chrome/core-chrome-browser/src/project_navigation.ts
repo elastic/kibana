@@ -5,23 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AppDeepLinkId as DevToolsLink, AppId as DevToolsApp } from '@kbn/deeplinks-devtools';
 import type { ComponentType } from 'react';
+import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
+import type {
+  AppId as AnalyticsApp,
+  DeepLinkId as AnalyticsDeepLink,
+} from '@kbn/deeplinks-analytics';
+
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
 
-/** @internal */
-type AppId = DevToolsApp;
+/** @public */
+export type AppId = DevToolsApp | AnalyticsApp;
 
-/** @internal */
-export type AppDeepLinkId = AppId | DevToolsLink;
+/** @public */
+export type AppDeepLinkId = AnalyticsDeepLink | DevToolsLink;
 
 /**
  * @public
  *
  * App id or deeplink id
  */
-export type ChromeProjectNavigationLink = AppId | AppDeepLinkId;
+export type ChromeProjectNavigationLink = AppDeepLinkId;
 
 /** @public */
 export interface ChromeProjectNavigationNode {

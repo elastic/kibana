@@ -20,17 +20,21 @@ import type { CloudLinkProps, RecentlyAccessedProps } from './components';
  * A navigation node definition with its unique id, title, path in the tree and optional
  * deep link and children.
  */
-export interface NodeDefinition<T extends string = string, C extends string = T> {
+export interface NodeDefinition<
+  LinkId extends ChromeProjectNavigationLink = ChromeProjectNavigationLink,
+  Id extends ChromeProjectNavigationLink = LinkId,
+  ChildrenId extends ChromeProjectNavigationLink = Id
+> {
   /** Optional id, if not passed a "link" must be provided. */
-  id?: T;
+  id?: Id;
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
   title?: string;
   /** App id or deeplink id */
-  link?: ChromeProjectNavigationLink;
+  link?: LinkId;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
   /** Optional children of the navigation node */
-  children?: Array<NodeDefinition<C>>;
+  children?: Array<NodeDefinition<LinkId, ChildrenId>>;
   /**
    * Temporarilly we allow href to be passed.
    * Once all the deeplinks will be exposed in packages we will not allow href anymore

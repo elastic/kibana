@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { NodeDefinitionWithChildren } from '.';
+import type { DeepLinkId as AnalyticsDeepLink } from '@kbn/deeplinks-analytics';
 
-export type ID = 'sharedux:analytics' | 'root' | 'discover' | 'dashboard' | 'visualize_library';
+import type { NodeDefinitionWithChildren } from './types';
 
-export const analytics: NodeDefinitionWithChildren<ID> = {
+export type ID = 'sharedux:analytics' | 'root';
+
+export const analytics: NodeDefinitionWithChildren<AnalyticsDeepLink, ID> = {
   // Make sure we have a unique id otherwise it might override a custom id from the project
   id: 'sharedux:analytics',
   title: 'Data exploration',
@@ -21,18 +23,14 @@ export const analytics: NodeDefinitionWithChildren<ID> = {
       children: [
         {
           title: 'Discover',
-          id: 'discover',
-          href: '/app/discover',
+          link: 'discover',
         },
         {
           title: 'Dashboard',
-          id: 'dashboard',
-          href: '/app/dashboards',
+          link: 'dashboard',
         },
         {
-          id: 'visualize_library',
-          title: 'Visualize Library',
-          href: '/app/visualize',
+          link: 'visualize',
         },
       ],
     },

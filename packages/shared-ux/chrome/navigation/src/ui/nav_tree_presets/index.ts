@@ -7,36 +7,39 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { NavigationGroupPreset, NodeDefinition } from '../types';
-import { analytics, type ID as AnalyticsID } from './analytics';
-import { devtools, type ID as DevtoolsID } from './devtools';
-import { management, type ID as ManagementID } from './management';
-import { ml, type ID as MlID } from './ml';
 
-export type NodeDefinitionWithChildren<ID extends string = string> = NodeDefinition<ID> & {
-  children: Required<NodeDefinition<ID>>['children'];
-};
+import type { NavigationGroupPreset } from '../types';
+import type {
+  AnalyticsNodeDefinition,
+  DevToolsNodeDefinition,
+  ManagementNodeDefinition,
+  MlNodeDefinition,
+} from './types';
+import { analytics } from './analytics';
+import { devtools } from './devtools';
+import { management } from './management';
+import { ml } from './ml';
 
-export function getPresets(preset: 'devtools'): NodeDefinitionWithChildren<DevtoolsID>;
-export function getPresets(preset: 'management'): NodeDefinitionWithChildren<ManagementID>;
-export function getPresets(preset: 'ml'): NodeDefinitionWithChildren<MlID>;
-export function getPresets(preset: 'analytics'): NodeDefinitionWithChildren<AnalyticsID>;
+export function getPresets(preset: 'devtools'): DevToolsNodeDefinition;
+export function getPresets(preset: 'management'): ManagementNodeDefinition;
+export function getPresets(preset: 'ml'): MlNodeDefinition;
+export function getPresets(preset: 'analytics'): AnalyticsNodeDefinition;
 export function getPresets(preset: 'all'): {
-  analytics: NodeDefinitionWithChildren<AnalyticsID>;
-  devtools: NodeDefinitionWithChildren<DevtoolsID>;
-  ml: NodeDefinitionWithChildren<MlID>;
-  management: NodeDefinitionWithChildren<ManagementID>;
+  analytics: AnalyticsNodeDefinition;
+  devtools: DevToolsNodeDefinition;
+  ml: MlNodeDefinition;
+  management: ManagementNodeDefinition;
 };
 export function getPresets(preset: NavigationGroupPreset | 'all'):
-  | NodeDefinitionWithChildren<DevtoolsID>
-  | NodeDefinitionWithChildren<ManagementID>
-  | NodeDefinitionWithChildren<MlID>
-  | NodeDefinitionWithChildren<AnalyticsID>
+  | DevToolsNodeDefinition
+  | ManagementNodeDefinition
+  | MlNodeDefinition
+  | AnalyticsNodeDefinition
   | {
-      analytics: NodeDefinitionWithChildren<AnalyticsID>;
-      devtools: NodeDefinitionWithChildren<DevtoolsID>;
-      ml: NodeDefinitionWithChildren<MlID>;
-      management: NodeDefinitionWithChildren<ManagementID>;
+      analytics: AnalyticsNodeDefinition;
+      devtools: DevToolsNodeDefinition;
+      ml: MlNodeDefinition;
+      management: ManagementNodeDefinition;
     } {
   if (preset === 'all') {
     return {

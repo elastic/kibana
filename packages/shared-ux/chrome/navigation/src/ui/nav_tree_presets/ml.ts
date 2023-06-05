@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { NodeDefinitionWithChildren } from '.';
+import type { ChromeProjectNavigationLink } from '@kbn/core-chrome-browser';
+
+import type { NodeDefinitionWithChildren } from './types';
 
 export type ID =
   | 'sharedux:ml'
@@ -31,7 +33,7 @@ export type ID =
   | 'explain_log_rate_spikes'
   | 'log_pattern_analysis';
 
-export const ml: NodeDefinitionWithChildren<ID> = {
+export const ml: NodeDefinitionWithChildren<ChromeProjectNavigationLink, ID> = {
   id: 'sharedux:ml',
   title: 'Machine learning',
   icon: 'indexMapping',
