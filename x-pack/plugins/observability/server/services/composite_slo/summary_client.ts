@@ -69,10 +69,7 @@ export class DefaultSummaryClient implements SummaryClient {
           const sourceSloTotalSlices = bucket.total.value;
           maxSloTotalSlices =
             sourceSloTotalSlices > maxSloTotalSlices ? sourceSloTotalSlices : maxSloTotalSlices;
-          const sourceSloSliValue = computeSLI({
-            good: sourceSloGoodSlices,
-            total: sourceSloTotalSlices,
-          });
+          const sourceSloSliValue = computeSLI(sourceSloGoodSlices, sourceSloTotalSlices);
           const sourceSloWeight = compositeSlo.sources.find(
             (source) => source.id === sourceSloId
           )!.weight; // used to build the query, therefore exists
@@ -103,7 +100,7 @@ export class DefaultSummaryClient implements SummaryClient {
           const sourceSloId = bucket.key;
           const sourceSloGood = bucket.good.value;
           const sourceSloTotal = bucket.total.value;
-          const sourceSloSliValue = computeSLI({ good: sourceSloGood, total: sourceSloTotal });
+          const sourceSloSliValue = computeSLI(sourceSloGood, sourceSloTotal);
           const sourceSloWeight = compositeSlo.sources.find(
             (source) => source.id === sourceSloId
           )!.weight; // used to build the query, therefore exists
