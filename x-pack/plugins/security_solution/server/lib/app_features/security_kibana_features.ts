@@ -145,7 +145,7 @@ export const getSecurityBaseKibanaSubFeatureIds = (
 export const getSecurityAppFeaturesConfig = (
   experimentalFeatures: ExperimentalFeatures
 ): AppFeaturesSecurityConfig => {
-  const endpointResponseActionsSubFeatureIds = [];
+  const endpointResponseActionsSubFeatureIds = [SecuritySubFeatureId.processOperations];
   if (experimentalFeatures.responseActionGetFileEnabled) {
     endpointResponseActionsSubFeatureIds.push(SecuritySubFeatureId.fileOperations);
   }
