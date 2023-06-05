@@ -68,7 +68,7 @@ export const riskFieldMap = {
 } as const;
 
 export const ilmPolicyName = '.risk-score-ilm-policy';
-export const mappingComponentName = 'risk-score-mappings';
+export const mappingComponentName = '.risk-score-mappings';
 export const totalFieldsLimit = 1000;
 
 const riskScoreBaseIndexName = 'risk-score';

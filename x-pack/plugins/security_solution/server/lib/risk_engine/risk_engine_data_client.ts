@@ -33,14 +33,29 @@ interface RiskEngineDataClientOpts {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
 
+interface Writer {
+  bulk: () => Promise<void>;
+}
+
 export class RiskEngineDataClient {
+  private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
   public async getWriter({ namespace }: { namespace: string }) {
-    this.initializeResources({ namespace });
-    return {
+    if (this.writerCache.get(namespace)) {
+      return this.writerCache.get(namespace);
+    }
+
+    await this.initializeResources({ namespace });
+    return this.writerCache.get(namespace);
+  }
+
+  private async initialiseWriter(namespace: string) {
+    const writer: Writer = {
       bulk: async () => {},
     };
+    this.writerCache.set(namespace, writer);
+    return this.writerCache.get(namespace);
   }
 
   public async initializeResources({
@@ -130,6 +145,8 @@ export class RiskEngineDataClient {
         totalFieldsLimit,
         indexPatterns,
       });
+
+      this.initialiseWriter(namespace);
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error}`);
     }
