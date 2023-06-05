@@ -105,6 +105,7 @@ export type AllowedAssetTypes = [
   ElasticsearchAssetType.transform
 ];
 
+// Defined as part of the removing public references to saved object schemas
 export interface SimpleSOAssetType {
   id: string;
   type: ElasticsearchAssetType | KibanaSavedObjectType;
@@ -464,7 +465,7 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  savedObject: InstallableSavedObject;
+  savedObject?: InstallableSavedObject;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -528,12 +529,12 @@ export type InstallStatusExcluded<T = {}> = T & {
 
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
-  savedObject: InstallableSavedObject;
+  savedObject?: InstallableSavedObject;
 };
 
 export type Installing<T = {}> = T & {
   status: InstallationStatus['Installing'];
-  savedObject: InstallableSavedObject;
+  savedObject?: InstallableSavedObject;
 };
 
 export type NotInstalled<T = {}> = T & {
