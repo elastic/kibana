@@ -42,7 +42,7 @@ export const createAction = async (
     );
 
     auditLoggingService.writeCustomAuditLog({
-      message: `User ${action.user_id} created Fleet action [id=${action.action_id}] with input_type [${action.input_type}]`,
+      message: `User created Fleet action [id=${action.action_id}, user_id=${action.user_id}, input_type=${action.input_type}]`,
     });
 
     return body;
@@ -52,6 +52,23 @@ export const createAction = async (
       createActionError
     );
   }
+};
+
+const getLoggingInfo = ({
+  id,
+  actions,
+}: {
+  id: string;
+  actions: FleetActionRequest[];
+}): {
+  input_type: string;
+  user_id: string;
+} => {
+  const action = actions.filter((item) => item.action_id === id)[0];
+  return {
+    input_type: action.input_type,
+    user_id: action.user_id,
+  };
 };
 
 type BulkCreate = Array<{ create: { _index: string; _id: string } } | FleetActionRequest>;
@@ -92,8 +109,10 @@ export const bulkCreateActions = async (
 
     responseItems.forEach((item) => {
       if (!item.create?.error) {
+        const id = item.create?._id ?? '';
+        const loggingInfo = getLoggingInfo({ id, actions });
         auditLoggingService.writeCustomAuditLog({
-          message: `User created Fleet action [id=${item.create?._id}]`,
+          message: `User created Fleet action [id=${id}, user_id=${loggingInfo.user_id}, input_type=${loggingInfo.input_type}]`,
         });
       }
     });

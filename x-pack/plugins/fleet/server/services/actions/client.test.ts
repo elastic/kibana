@@ -45,7 +45,7 @@ describe('actions', () => {
       const action = generateFleetAction({ action_id: '1', input_type: 'foo' });
       expect(await fleetActionsClient.create(action)).toEqual(action);
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `User ${action.user_id} created Fleet action [id=1] with input_type [foo]`,
+        message: `User created Fleet action [id=1, user_id=${action.user_id}, input_type=foo]`,
       });
     });
     it('should throw error when action does not match package name', async () => {
@@ -78,9 +78,9 @@ describe('actions', () => {
         })),
       });
 
-      // expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
-      //   message: `User created Fleet action [id=${expect.any(String)}]`,
-      // });
+      expect(mockedAuditLoggingService.writeCustomAuditLog).lastCalledWith({
+        message: `User created Fleet action [id=${actions[1].action_id}, user_id=${actions[1].user_id}, input_type=foo]`,
+      });
     });
 
     it('should report errored documents', async () => {
