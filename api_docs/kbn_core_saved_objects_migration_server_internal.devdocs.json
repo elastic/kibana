@@ -702,7 +702,7 @@
           "\nWrite the up-to-date transformed documents to the index, overwriting any\ndocuments that are still on their outdated version."
         ],
         "signature": [
-          "({ client, index, operations, refresh, }: ",
+          "({ client, index, operations, refresh, useAliasToPreventAutoCreate, }: ",
           "BulkOverwriteTransformedDocumentsParams",
           ") => ",
           "TaskEither",
@@ -725,7 +725,7 @@
             "id": "def-common.bulkOverwriteTransformedDocuments.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n  }",
+            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n    useAliasToPreventAutoCreate = false,\n  }",
             "description": [],
             "signature": [
               "BulkOverwriteTransformedDocumentsParams"

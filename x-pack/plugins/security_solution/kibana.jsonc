@@ -43,6 +43,7 @@
       "files",
       "controls",
       "savedObjectsManagement",
+      "stackConnectors",
     ],
     "optionalPlugins": [
       "cloudExperiments",
