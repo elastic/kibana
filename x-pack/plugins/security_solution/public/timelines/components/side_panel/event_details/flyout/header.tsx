@@ -18,6 +18,7 @@ interface FlyoutHeaderComponentProps {
   isHostIsolationPanelOpen: boolean;
   isolateAction: 'isolateHost' | 'unisolateHost';
   loading: boolean;
+  promptContextId?: string;
   ruleName: string;
   showAlertDetails: () => void;
   timestamp: string;
@@ -30,6 +31,7 @@ const FlyoutHeaderContentComponent = ({
   isHostIsolationPanelOpen,
   isolateAction,
   loading,
+  promptContextId,
   ruleName,
   showAlertDetails,
   timestamp,
@@ -44,6 +46,7 @@ const FlyoutHeaderContentComponent = ({
           eventIndex={eventIndex}
           isAlert={isAlert}
           loading={loading}
+          promptContextId={promptContextId}
           ruleName={ruleName}
           timestamp={timestamp}
         />
@@ -60,6 +63,7 @@ const FlyoutHeaderComponent = ({
   isHostIsolationPanelOpen,
   isolateAction,
   loading,
+  promptContextId,
   ruleName,
   showAlertDetails,
   timestamp,
@@ -73,6 +77,7 @@ const FlyoutHeaderComponent = ({
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         isolateAction={isolateAction}
         loading={loading}
+        promptContextId={promptContextId}
         ruleName={ruleName}
         showAlertDetails={showAlertDetails}
         timestamp={timestamp}
