@@ -226,7 +226,14 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     core.savedObjects.registerType(compositeSlo);
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(plugins.alerting, this.logger, ruleDataService, core.http.basePath, config);
+    registerRuleTypes(
+      plugins.alerting,
+      this.logger,
+      ruleDataService,
+      core.http.basePath,
+      config,
+      alertsLocator
+    );
     registerSloUsageCollector(plugins.usageCollection);
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
