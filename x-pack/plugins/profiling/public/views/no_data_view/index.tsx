@@ -24,11 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { AsyncStatus, useAsync } from '../hooks/use_async';
-import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
-import { ProfilingAppPageTemplate } from './profiling_app_page_template';
+import { AsyncStatus, useAsync } from '../../hooks/use_async';
+import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
-export function NoDataPage({ subTitle }: { subTitle: string }) {
+export function NoDataView({ subTitle }: { subTitle: string }) {
   const {
     services: { setupDataCollectionInstructions },
     start: { core },
