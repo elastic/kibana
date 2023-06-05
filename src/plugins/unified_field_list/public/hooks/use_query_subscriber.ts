@@ -16,6 +16,7 @@ import { getResolvedDateRange } from '../utils/get_resolved_date_range';
  */
 export interface QuerySubscriberParams {
   data: DataPublicPluginStart;
+  listenToSearchSessionUpdates?: boolean;
 }
 
 /**
@@ -31,9 +32,13 @@ export interface QuerySubscriberResult {
 /**
  * Memorizes current query, filters and absolute date range
  * @param data
+ * @param listenToSearchSessionUpdates
  * @public
  */
-export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
+export const useQuerySubscriber = ({
+  data,
+  listenToSearchSessionUpdates = true,
+}: QuerySubscriberParams) => {
   const timefilter = data.query.timefilter.timefilter;
   const [result, setResult] = useState<QuerySubscriberResult>(() => {
     const state = data.query.getState();
@@ -47,6 +52,10 @@ export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
   });
 
   useEffect(() => {
+    if (!listenToSearchSessionUpdates) {
+      return;
+    }
+
     const subscription = data.search.session.state$.subscribe((sessionState) => {
       const dateRange = getResolvedDateRange(timefilter);
       setResult((prevState) => ({
@@ -57,7 +66,24 @@ export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, timefilter, data.search.session.state$]);
+  }, [setResult, timefilter, data.search.session.state$, listenToSearchSessionUpdates]);
+
+  useEffect(() => {
+    if (listenToSearchSessionUpdates) {
+      return;
+    }
+
+    const subscription = timefilter.getTimeUpdate$().subscribe(() => {
+      const dateRange = getResolvedDateRange(timefilter);
+      setResult((prevState) => ({
+        ...prevState,
+        fromDate: dateRange.fromDate,
+        toDate: dateRange.toDate,
+      }));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [setResult, timefilter, listenToSearchSessionUpdates]);
 
   useEffect(() => {
     const subscription = data.query.state$.subscribe(({ state, changes }) => {

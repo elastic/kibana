@@ -268,6 +268,7 @@ describe('createInitialState', () => {
           },
         },
         "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
+        "tempIndexAlias": ".kibana_task_manager_8.1.0_reindex_temp_alias",
         "tempIndexMappings": Object {
           "dynamic": false,
           "properties": Object {

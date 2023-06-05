@@ -23,3 +23,5 @@ export const AvailableAnnotationIcons = {
   TAG: 'tag',
   TRIANGLE: 'triangle',
 } as const;
+
+export const EVENT_ANNOTATION_GROUP_TYPE = 'event-annotation-group';

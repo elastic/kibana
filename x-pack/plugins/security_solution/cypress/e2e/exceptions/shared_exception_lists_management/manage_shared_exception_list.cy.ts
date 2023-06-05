@@ -85,6 +85,7 @@ describe('Manage shared exception list', () => {
     });
 
     beforeEach(() => {
+      login();
       visitWithoutDateRange(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
     });
