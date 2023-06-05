@@ -20,11 +20,14 @@ export const hasInput = (embeddable: DashboardVisualizationEmbeddable) => {
   return attributes != null && timeRange != null;
 };
 
+type PersistableStateAttachmentWithoutOwner = Omit<CommentRequestPersistableStateType, 'owner'>;
+
 export const getLensCaseAttachment = ({
   timeRange,
   attributes,
-}: Omit<EmbeddableInput, 'id'>): Omit<CommentRequestPersistableStateType, 'owner'> => ({
-  persistableStateAttachmentState: { attributes, timeRange },
-  persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-  type: CommentType.persistableState,
-});
+}: Omit<EmbeddableInput, 'id'>): PersistableStateAttachmentWithoutOwner =>
+  ({
+    persistableStateAttachmentState: { attributes, timeRange },
+    persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
+    type: CommentType.persistableState,
+  } as unknown as PersistableStateAttachmentWithoutOwner);
