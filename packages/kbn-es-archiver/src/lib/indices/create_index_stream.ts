@@ -131,6 +131,13 @@ export function createCreateIndexStream({
           }
         );
 
+        // Ensure all shards are started
+        await client.cluster.health({
+          index,
+          wait_for_status: 'green',
+          timeout: '60s',
+        });
+
         stats.createdIndex(index, { settings });
       } catch (err) {
         if (
