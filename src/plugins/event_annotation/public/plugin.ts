@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationService } from './event_annotation_service';
 import {
@@ -19,8 +20,8 @@ import {
 import { getFetchEventAnnotations } from './fetch_event_annotations';
 
 export interface EventAnnotationStartDependencies {
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   data: DataPublicPluginStart;
-  uiSettings: IUiSettingsClient;
 }
 
 interface SetupDependencies {
@@ -29,14 +30,12 @@ interface SetupDependencies {
 
 /** @public */
 export type EventAnnotationPluginStart = EventAnnotationService;
-export type EventAnnotationPluginSetup = EventAnnotationService;
+export type EventAnnotationPluginSetup = void;
 
 /** @public */
 export class EventAnnotationPlugin
   implements Plugin<EventAnnotationPluginSetup, EventAnnotationService>
 {
-  private readonly eventAnnotationService = new EventAnnotationService();
-
   public setup(
     core: CoreSetup<EventAnnotationStartDependencies, EventAnnotationService>,
     dependencies: SetupDependencies
@@ -48,13 +47,12 @@ export class EventAnnotationPlugin
     dependencies.expressions.registerFunction(
       getFetchEventAnnotations({ getStartServices: core.getStartServices })
     );
-    return this.eventAnnotationService;
   }
 
   public start(
     core: CoreStart,
     startDependencies: EventAnnotationStartDependencies
   ): EventAnnotationService {
-    return this.eventAnnotationService;
+    return new EventAnnotationService(core, startDependencies.savedObjectsManagement);
   }
 }

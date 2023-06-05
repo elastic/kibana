@@ -7,6 +7,7 @@
  */
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
+import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { loadAndResolveDataView } from '../utils/resolve_data_view';
 import { DiscoverInternalStateContainer } from './discover_internal_state_container';
@@ -150,6 +151,11 @@ const getStateDataView = async (
   const { dataView, dataViewSpec } = params ?? {};
   if (dataView) {
     return dataView;
+  }
+  const query = appState?.query;
+
+  if (isTextBasedQuery(query)) {
+    return await getDataViewByTextBasedQueryLang(query, dataView, services);
   }
 
   const result = await loadAndResolveDataView(
