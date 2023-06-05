@@ -8,7 +8,7 @@
 import { HttpStart } from '@kbn/core/public';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { ILogViewsClient, LogViewStatus, ResolvedLogView } from '../../../common/log_views';
+import type { ILogViewsClient, LogViewStatus, ResolvedLogView } from '../../../common/log_views';
 
 export type LogViewsServiceSetup = void;
 

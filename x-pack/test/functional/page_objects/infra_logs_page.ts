@@ -8,8 +8,9 @@
 import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
 import querystring from 'querystring';
 import { encode } from '@kbn/rison';
-import type { FilterStateInUrl, PositionStateInUrl } from '@kbn/infra-plugin/common/log_views';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { PositionStateInUrl } from '@kbn/infra-plugin/public/observability_logs/log_stream_position_state/src/url_state_storage_service';
+import type { FilterStateInUrl } from '@kbn/infra-plugin/public/observability_logs/log_stream_query_state';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface TabsParams {
   stream: {

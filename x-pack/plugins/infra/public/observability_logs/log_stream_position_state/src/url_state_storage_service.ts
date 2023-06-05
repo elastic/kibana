@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as rt from 'io-ts';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { InvokeCreator } from 'xstate';
-import { positionStateInUrlRT } from '../../../../common/log_views';
-import { pickTimeKey } from '../../../../common/time';
+import { minimalTimeKeyRT, pickTimeKey } from '../../../../common/time';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import type { LogStreamPositionContext, LogStreamPositionEvent } from './types';
 interface LogStreamPositionUrlStateDependencies {
@@ -88,6 +87,12 @@ export const initializeFromUrl =
       });
     }
   };
+
+export const positionStateInUrlRT = rt.partial({
+  position: rt.union([rt.partial(minimalTimeKeyRT.props), rt.null]),
+});
+
+export type PositionStateInUrl = rt.TypeOf<typeof positionStateInUrlRT>;
 
 const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
   return positionStateInUrlRT.decode(queryValueFromUrl);
