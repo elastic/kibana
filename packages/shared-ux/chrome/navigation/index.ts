@@ -8,16 +8,16 @@
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
-export { DefaultNavigation, Navigation, getPresets } from './src/ui';
+export { DefaultNavigation, getPresets, Navigation } from './src/ui';
 
 export type {
-  NavigationTreeDefinition,
-  ProjectNavigationDefinition,
-  NodeDefinition,
-  NavigationGroupPreset,
-  GroupDefinition,
-  RecentlyAccessedDefinition,
   CloudLinkDefinition,
+  GroupDefinition,
+  NavigationGroupPreset,
+  NavigationTreeDefinition,
+  NodeDefinition,
+  ProjectNavigationDefinition,
+  RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
 } from './src/ui';
 
