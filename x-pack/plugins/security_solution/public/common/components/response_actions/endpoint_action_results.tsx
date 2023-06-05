@@ -46,7 +46,7 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
 
   const hostName = useMemo(
     // we want to get the first and only hostname
-    () => expandedAction?.hosts?.[Object.keys(expandedAction?.hosts)[0]].name,
+    () => (expandedAction?.hosts ? Object.values(expandedAction.hosts)[0].name : ''),
     [expandedAction?.hosts]
   );
 

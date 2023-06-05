@@ -35,7 +35,10 @@ import { setWith } from 'lodash';
  *     },
  *   }
  */
-export const expandDottedObject = (dottedObj: object, changeArrayOfLengthOneToString = false) => {
+export const expandDottedObject = (
+  dottedObj: object,
+  changeArrayOfLengthOneToString = false
+): object => {
   if (Array.isArray(dottedObj)) {
     return dottedObj;
   }

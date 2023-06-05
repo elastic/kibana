@@ -55,6 +55,7 @@ export const useGetAutomatedActionList = (
         )
       );
 
+      // fields have to firstly be expanded from dottej object to kind of normal nested object
       const items = map(responseData.edges, (edge) => {
         if (edge.fields) {
           return expandDottedObject(edge.fields, true);
