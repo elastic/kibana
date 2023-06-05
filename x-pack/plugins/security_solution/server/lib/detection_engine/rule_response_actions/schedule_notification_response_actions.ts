@@ -41,10 +41,15 @@ export const getScheduleNotificationResponseActionsService =
             agentIds: uniq([...acc.agentIds, agentId]),
             alertIds: [...acc.alertIds, (alert as unknown as { _id: string })._id],
             hosts: {
-              ...acc.hosts,
-              [agentId]: {
-                name: alert.agent?.name || '',
-              },
+              // sometimes alert.agent doesnt contain 'name' this ternary's purpose is to make sure we do not overwrite a legit name with an empty string
+              ...(alert.agent?.name
+                ? {
+                    ...acc.hosts,
+                    [agentId]: {
+                      name: alert.agent?.name || '',
+                    },
+                  }
+                : acc.hosts),
             },
           };
         }
