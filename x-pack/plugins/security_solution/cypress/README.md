@@ -45,9 +45,16 @@ Please, before opening a PR with the new test, please make sure that the test fa
 
 ## Running the tests
 
-There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
+### Run them locally
+Run the tests locally with the following command:
+
+| Command | Description |
+| -- | -- |
+| `yarn cypress:open` | Starts a local ES and Kibana and runs the Cypress binary. All e2e specs are available to run via the UI |
 
 ### Execution modes
+
+There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
 
 #### Interactive mode
 
@@ -63,7 +70,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
 
-Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism`
+Tests run on buildkite PR pipeline is parallelized. It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism`
 
 ```yml
     ...
@@ -288,6 +295,17 @@ Contains the specs that are executed in a Cross Cluster Search configuration.
 ### e2e/
 
 Cypress convention starting version 10 (previously known as integration). Contains the specs that are going to be executed.
+
+### e2e/explore and e2e/investigations
+
+These directories contain tests which are run in their own Buildkite pipeline. 
+
+If you belong to one of the teams listed in the table, please add new e2e specs to the corresponding directory.
+
+| Directory | Area team |
+| -- | -- |
+| `e2e/explore` | Threat Hunting Explore |
+| `e2e/investigations | Threat Hunting Investigations |
 
 ### fixtures/
 
