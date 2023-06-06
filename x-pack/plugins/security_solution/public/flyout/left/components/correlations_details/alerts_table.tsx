@@ -40,11 +40,7 @@ export const columns = [
     truncateText: true,
     render: (value: string) => {
       const decodedSeverity = Severity.decode(value);
-      if (isRight(decodedSeverity)) {
-        return <SeverityBadge value={decodedSeverity.right} />;
-      }
-
-      return value;
+      return isRight(decodedSeverity) ? <SeverityBadge value={decodedSeverity.right} /> : value
     },
   },
 ];

@@ -99,7 +99,6 @@ export const CorrelationsDetails: React.FC = () => {
         title={`${ancestryAlertsIds.length} alerts related by ancestry`}
         iconType={'warning'}
         expandable={true}
-        expanded={true}
       >
         <AlertsTable
           alertIds={ancestryAlertsIds}
@@ -113,7 +112,6 @@ export const CorrelationsDetails: React.FC = () => {
         title={`${sameSourceAlertsIds.length} alerts related by source event`}
         iconType={'warning'}
         expandable={true}
-        expanded={true}
       >
         <AlertsTable
           alertIds={sameSourceAlertsIds}
@@ -127,7 +125,6 @@ export const CorrelationsDetails: React.FC = () => {
         title={`${alertsBySessionIds.length} alerts related by session`}
         iconType={'warning'}
         expandable={true}
-        expanded={false}
       >
         <AlertsTable
           data-test-subj={CORRELATIONS_DETAILS_BY_SESSION}
