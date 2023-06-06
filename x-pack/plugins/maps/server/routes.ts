@@ -21,40 +21,44 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
   const [coreStart, { data: dataPlugin }]: [CoreStart, StartDeps] =
     (await coreSetup.getStartServices()) as unknown as [CoreStart, StartDeps];
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `/${FONTS_API_PATH}/{fontstack}/{range}`,
-      options: {
-        access: 'internal',
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              fontstack: schema.string(),
+              range: schema.string(),
+            }),
+          },
+        },
       },
-      validate: {
-        params: schema.object({
-          fontstack: schema.string(),
-          range: schema.string(),
-        }),
-      },
-    },
-    (context, request, response) => {
-      const range = path.normalize(request.params.range);
-      const rootPath = path.resolve(__dirname, 'fonts', 'open_sans');
-      const fontPath = path.resolve(rootPath, `${range}.pbf`);
-      return !fontPath.startsWith(rootPath)
-        ? response.notFound()
-        : new Promise((resolve) => {
-            fs.readFile(fontPath, (error, data) => {
-              if (error) {
-                resolve(response.notFound());
-              } else {
-                resolve(
-                  response.ok({
-                    body: data,
-                  })
-                );
-              }
+      (context, request, response) => {
+        const range = path.normalize(request.params.range);
+        const rootPath = path.resolve(__dirname, 'fonts', 'open_sans');
+        const fontPath = path.resolve(rootPath, `${range}.pbf`);
+        return !fontPath.startsWith(rootPath)
+          ? response.notFound()
+          : new Promise((resolve) => {
+              fs.readFile(fontPath, (error, data) => {
+                if (error) {
+                  resolve(response.notFound());
+                } else {
+                  resolve(
+                    response.ok({
+                      body: data,
+                    })
+                  );
+                }
+              });
             });
-          });
-    }
-  );
+      }
+    );
 
   router.versioned
     .get({
