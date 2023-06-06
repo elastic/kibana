@@ -295,7 +295,7 @@ export class HttpConfig implements IHttpConfig {
 
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
     this.eluMonitor = rawHttpConfig.eluMonitor;
-    this.versioned = rawHttpConfig.version;
+    this.versioned = rawHttpConfig.versioned;
   }
 }
 

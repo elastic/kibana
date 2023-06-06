@@ -18,6 +18,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
+jest.mock('@kbn/core-http-router-server-internal');
 import { HttpService } from './http_service';
 import { HttpConfigType, config } from './http_config';
 import { cspConfig } from './csp';
@@ -479,4 +480,44 @@ test('does not start http server if configured with `autoListen:false`', async (
 
   expect(httpServer.start).not.toHaveBeenCalled();
   await service.stop();
+});
+
+test('passes versioned config to router', async () => {
+  const configService = createConfigService({
+    versioned: {
+      handlerResolution: 'newest',
+      strictClientVersionCheck: false,
+    },
+  });
+
+  const httpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerRouter: jest.fn() }),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  const prebootHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
+  mockHttpServer.mockImplementationOnce(() => httpServer);
+
+  const service = new HttpService({ coreId, configService, env, logger });
+  await service.preboot(prebootDeps);
+  const { createRouter } = await service.setup(setupDeps);
+  await service.stop();
+
+  createRouter('/foo');
+
+  expect(Router).toHaveBeenCalledTimes(1);
+  expect(Router).toHaveBeenNthCalledWith(
+    1,
+    '/foo',
+    expect.any(Object), // logger
+    expect.any(Function), // context enhancer
+    expect.objectContaining({ isDev: true, versionedRouteResolution: 'newest' })
+  );
 });

@@ -122,8 +122,11 @@ function validOptions(
 interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
-  /** Whether we are running in a serverless */
-  isServerless?: boolean;
+  /**
+   * Which route resolution algo to use
+   * @default 'oldest'
+   */
+  versionedRouteResolution?: 'newest' | 'oldest';
 }
 
 /**
@@ -143,7 +146,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     public readonly routerPath: string,
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
-    private readonly options: RouterOptions = { isDev: false, isServerless: false }
+    private readonly options: RouterOptions = {
+      isDev: false,
+      versionedRouteResolution: 'oldest',
+    }
   ) {
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
@@ -220,7 +226,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
         isDev: this.options.isDev,
-        defaultHandlerResolutionStrategy: this.options.isServerless ? 'newest' : 'oldest',
+        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
       });
     }
     return this.versionedRouter;
