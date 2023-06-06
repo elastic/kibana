@@ -12,6 +12,7 @@ import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_NAMESPACE,
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -49,6 +50,9 @@ const augmentAlerts = <T>({
         [ALERT_START]: currentTimeOverride ?? new Date(),
         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
         [VERSION]: kibanaVersion,
+        ...(options?.maintenanceWindowIds?.length
+          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
+          : {}),
         ...commonRuleFields,
         ...alert._source,
       },
@@ -184,6 +188,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory
                     .create(alert._id)
+                    .replaceState({
+                      signals_count: 1,
+                    })
                     .scheduleActions(type.defaultActionGroupId, {
                       rule: mapKeys(snakeCase, {
                         ...options.params,
@@ -376,6 +383,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory
                     .create(alert._id)
+                    .replaceState({
+                      signals_count: 1,
+                    })
                     .scheduleActions(type.defaultActionGroupId, {
                       rule: mapKeys(snakeCase, {
                         ...options.params,

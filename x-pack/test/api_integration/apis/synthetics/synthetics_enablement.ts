@@ -248,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
             overwrite: true,
             attributes: {
               id: apiKeyResult.body.id,
-              name: 'synthetics-api-key (required for monitor management)',
+              name: 'synthetics-api-key (required for Synthetics App)',
               apiKey: apiKeyResult.body.api_key,
             },
           });

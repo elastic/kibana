@@ -12,8 +12,8 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import {
   IndexMappingMeta,
-  getModelVersionsFromMappingMeta,
-  getModelVersionMapForTypes,
+  getVirtualVersionsFromMappingMeta,
+  getVirtualVersionMap,
   getModelVersionDelta,
 } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -35,8 +35,8 @@ export const generateAdditiveMappingDiff = ({
   meta,
   deletedTypes,
 }: GenerateAdditiveMappingsDiffOpts): SavedObjectsMappingProperties => {
-  const typeVersions = getModelVersionMapForTypes(types);
-  const mappingVersion = getModelVersionsFromMappingMeta({
+  const typeVersions = getVirtualVersionMap(types);
+  const mappingVersion = getVirtualVersionsFromMappingMeta({
     meta,
     source: 'mappingVersions',
     knownTypes: types.map((type) => type.name),

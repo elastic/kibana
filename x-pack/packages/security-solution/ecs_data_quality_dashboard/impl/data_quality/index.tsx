@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import numeral from '@elastic/numeral';
 import type {
   FlameElementEvent,
@@ -18,6 +19,7 @@ import type {
 import React, { useCallback } from 'react';
 
 import { Body } from './data_quality_panel/body';
+import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
 
 interface Props {
@@ -38,7 +40,9 @@ interface Props {
     groupByField0: string;
     groupByField1: string;
   };
+  httpFetch: HttpHandler;
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -59,7 +63,9 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   defaultBytesFormat,
   defaultNumberFormat,
   getGroupByFieldsOnClick,
+  httpFetch,
   ilmPhases,
+  isAssistantEnabled,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
@@ -79,19 +85,22 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   return (
-    <Body
-      addSuccessToast={addSuccessToast}
-      canUserCreateAndReadCases={canUserCreateAndReadCases}
-      formatBytes={formatBytes}
-      formatNumber={formatNumber}
-      getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-      ilmPhases={ilmPhases}
-      lastChecked={lastChecked}
-      openCreateCaseFlyout={openCreateCaseFlyout}
-      patterns={patterns}
-      setLastChecked={setLastChecked}
-      theme={theme}
-    />
+    <DataQualityProvider httpFetch={httpFetch}>
+      <Body
+        addSuccessToast={addSuccessToast}
+        canUserCreateAndReadCases={canUserCreateAndReadCases}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
+        getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+        ilmPhases={ilmPhases}
+        isAssistantEnabled={isAssistantEnabled}
+        lastChecked={lastChecked}
+        openCreateCaseFlyout={openCreateCaseFlyout}
+        patterns={patterns}
+        setLastChecked={setLastChecked}
+        theme={theme}
+      />
+    </DataQualityProvider>
   );
 };
 

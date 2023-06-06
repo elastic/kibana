@@ -11,7 +11,6 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type {
-  CreateInventoryViewAttributesRequestPayload,
   InventoryViewRequestQuery,
   UpdateInventoryViewAttributesRequestPayload,
 } from '../../../common/http_api/latest';
@@ -34,11 +33,8 @@ export interface IInventoryViewsClient {
   delete(inventoryViewId: string): Promise<{}>;
   find(query: InventoryViewRequestQuery): Promise<InventoryView[]>;
   get(inventoryViewId: string, query: InventoryViewRequestQuery): Promise<InventoryView>;
-  create(
-    inventoryViewAttributes: CreateInventoryViewAttributesRequestPayload
-  ): Promise<InventoryView>;
   update(
-    inventoryViewId: string,
+    inventoryViewId: string | null,
     inventoryViewAttributes: UpdateInventoryViewAttributesRequestPayload,
     query: InventoryViewRequestQuery
   ): Promise<InventoryView>;

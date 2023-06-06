@@ -7,6 +7,7 @@
 
 import { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { severitySchemaConfig } from './utils/custom_sort_script';
 
 export const vulnerabilitiesColumns = {
   actions: 'actions',
@@ -14,7 +15,8 @@ export const vulnerabilitiesColumns = {
   cvss: 'vulnerability.score.base',
   resource: 'resource.name',
   severity: 'vulnerability.severity',
-  package_version: 'vulnerability.package.name',
+  package: 'vulnerability.package.name',
+  version: 'vulnerability.package.version',
   fix_version: 'vulnerability.package.fixed_version',
 };
 
@@ -73,12 +75,21 @@ export const getVulnerabilitiesColumnsGrid = (
     }),
     initialWidth: 100,
     cellActions,
+    schema: severitySchemaConfig.type,
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.package_version,
-    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.packageAndVersion', {
-      defaultMessage: 'Package and Version',
+    id: vulnerabilitiesColumns.package,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.package', {
+      defaultMessage: 'Package',
+    }),
+    cellActions,
+  },
+  {
+    ...defaultColumnProps(),
+    id: vulnerabilitiesColumns.version,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.version', {
+      defaultMessage: 'Version',
     }),
     cellActions,
   },

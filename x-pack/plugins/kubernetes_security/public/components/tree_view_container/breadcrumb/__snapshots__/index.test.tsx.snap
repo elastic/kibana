@@ -113,29 +113,6 @@ Object {
               </button>
             </span>
           </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-            >
-              <button
-                class="euiButtonEmpty css-9t7nyf-empty-primary"
-                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButtonEmpty__content"
-                >
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Respond
-                  </span>
-                </span>
-              </button>
-            </span>
-          </div>
         </div>
       </div>
     </div>
@@ -244,29 +221,6 @@ Object {
                   class="euiButtonEmpty__text"
                 >
                   selected image
-                </span>
-              </span>
-            </button>
-          </span>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          >
-            <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
-              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-              type="button"
-            >
-              <span
-                class="euiButtonContent euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Respond
                 </span>
               </span>
             </button>
@@ -442,29 +396,6 @@ Object {
               </button>
             </span>
           </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-            >
-              <button
-                class="euiButtonEmpty css-9t7nyf-empty-primary"
-                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButtonEmpty__content"
-                >
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Respond
-                  </span>
-                </span>
-              </button>
-            </span>
-          </div>
         </div>
       </div>
     </div>
@@ -573,29 +504,6 @@ Object {
                   class="euiButtonEmpty__text"
                 >
                   selected image
-                </span>
-              </span>
-            </button>
-          </span>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          >
-            <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
-              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-              type="button"
-            >
-              <span
-                class="euiButtonContent euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Respond
                 </span>
               </span>
             </button>
@@ -792,29 +700,6 @@ Object {
               </button>
             </span>
           </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-            >
-              <button
-                class="euiButtonEmpty css-9t7nyf-empty-primary"
-                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButtonEmpty__content"
-                >
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Respond
-                  </span>
-                </span>
-              </button>
-            </span>
-          </div>
         </div>
       </div>
     </div>
@@ -944,29 +829,6 @@ Object {
                   class="euiButtonEmpty__text"
                 >
                   selected image
-                </span>
-              </span>
-            </button>
-          </span>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          >
-            <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
-              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-              type="button"
-            >
-              <span
-                class="euiButtonContent euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Respond
                 </span>
               </span>
             </button>
@@ -1121,30 +983,6 @@ Object {
               </button>
             </span>
           </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-            >
-              <button
-                class="euiButtonEmpty css-1at5a38-empty-disabled"
-                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-                disabled=""
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButtonEmpty__content"
-                >
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Respond
-                  </span>
-                </span>
-              </button>
-            </span>
-          </div>
         </div>
       </div>
     </div>
@@ -1232,30 +1070,6 @@ Object {
                   class="euiButtonEmpty__text"
                 >
                   selected image
-                </span>
-              </span>
-            </button>
-          </span>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          >
-            <button
-              class="euiButtonEmpty css-1at5a38-empty-disabled"
-              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
-              disabled=""
-              type="button"
-            >
-              <span
-                class="euiButtonContent euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Respond
                 </span>
               </span>
             </button>

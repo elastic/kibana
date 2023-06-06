@@ -239,4 +239,11 @@ export const PackagePolicySchema = schema.object({
       compiled_input: schema.maybe(schema.any()),
     })
   ),
+  secret_references: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+      })
+    )
+  ),
 });

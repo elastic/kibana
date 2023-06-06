@@ -20,6 +20,7 @@ import {
   HOSTS,
   KQL_INPUT,
   NETWORK,
+  LOADING_INDICATOR,
   openNavigationPanel,
 } from '../../screens/security_header';
 import { TIMELINE_TITLE } from '../../screens/timeline';
@@ -70,7 +71,7 @@ const ABSOLUTE_DATE = {
 };
 
 describe('url state', () => {
-  before(() => {
+  beforeEach(() => {
     login();
   });
 
@@ -286,14 +287,14 @@ describe('url state', () => {
     populateTimeline();
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
-
+    cy.get(LOADING_INDICATOR).should('not.exist');
     cy.wait('@timeline').then(({ response }) => {
       addNameToTimeline(getTimeline().title);
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
-      cy.visit('/app/home');
-      cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
+      visit('/app/home');
+      visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');

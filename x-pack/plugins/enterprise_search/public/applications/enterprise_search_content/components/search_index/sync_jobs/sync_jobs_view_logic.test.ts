@@ -80,6 +80,7 @@ describe('SyncJobsViewLogic', () => {
         metadata: {},
         started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
+        total_document_count: null,
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: 'hostname_fake',
       };

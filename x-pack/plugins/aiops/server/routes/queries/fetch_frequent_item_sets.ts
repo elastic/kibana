@@ -57,7 +57,7 @@ export function getShouldClauses(significantTerms: SignificantTerm[]) {
 export function getFrequentItemSetsAggFields(significantTerms: SignificantTerm[]) {
   return Array.from(
     group(significantTerms, ({ fieldName }) => fieldName),
-    ([field, values]) => ({ field, include: values.map((d) => d.fieldValue) })
+    ([field, values]) => ({ field, include: values.map((d) => String(d.fieldValue)) })
   );
 }
 
@@ -100,7 +100,6 @@ export async function fetchFrequentItemSets(
 
   const frequentItemSetsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     fi: {
-      // @ts-expect-error `frequent_item_sets` is not yet part of `AggregationsAggregationContainer`
       frequent_item_sets: {
         minimum_set_size: 2,
         size: 200,

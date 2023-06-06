@@ -6,7 +6,7 @@
  */
 
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
@@ -251,9 +251,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/150557
-  describe.skip('export jobs', function () {
+  describe('export jobs', function () {
     this.tags(['ml']);
+
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -282,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToStackManagement();
       await ml.navigation.navigateToStackManagementJobsListPage();
     });
+
     after(async () => {
       await ml.api.cleanMlIndices();
       ml.stackManagementJobs.deleteExportedFiles([

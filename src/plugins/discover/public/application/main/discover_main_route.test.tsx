@@ -13,12 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
-import { dataViewMock } from '../../__mocks__/data_view';
-import { SavedObject } from '@kbn/core/public';
-import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import { DiscoverMainApp } from './discover_main_app';
-import { SearchSource } from '@kbn/data-plugin/common';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
 jest.mock('./discover_main_app', () => {
@@ -80,27 +75,11 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
 };
 function getServicesMock(hasESData = true, hasUserDataView = true) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
-  dataViewsMock.getCache = jest.fn(() => {
-    return Promise.resolve([dataViewMock as unknown as SavedObject<DataViewSavedObjectAttrs>]);
-  });
-  dataViewsMock.get = jest.fn(() => Promise.resolve(dataViewMock));
-  dataViewsMock.getDefaultDataView = jest.fn(() => Promise.resolve(dataViewMock));
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),
     hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
-  dataViewsMock.refreshFields = jest.fn();
-
-  discoverServiceMock.data.search.searchSource.createEmpty = jest.fn(() => {
-    const fields: Record<string, unknown> = {};
-    const empty = {
-      ...searchSourceInstanceMock,
-      setField: (key: string, value: unknown) => (fields[key] = value),
-      getField: (key: string) => fields[key],
-    };
-    return empty as unknown as SearchSource;
-  });
   return discoverServiceMock;
 }
 

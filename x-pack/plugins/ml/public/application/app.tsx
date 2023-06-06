@@ -20,6 +20,7 @@ import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 
+import { firstValueFrom } from 'rxjs';
 import { mlCapabilities } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
@@ -74,10 +75,19 @@ export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const redirectToMlAccessDeniedPage = async () => {
-    const accessDeniedPageUrl = await deps.share.url.locators.get(ML_APP_LOCATOR)!.getUrl({
-      page: ML_PAGES.ACCESS_DENIED,
-    });
-    await coreStart.application.navigateToUrl(accessDeniedPageUrl);
+    // access maybe be denied due to an expired license, so check the license status first
+    // if the license has expired, redirect to the license management page
+    const license = await firstValueFrom(deps.licensing.license$);
+    const redirectPage =
+      license.status === 'expired'
+        ? deps.share.url.locators.get('LICENSE_MANAGEMENT_LOCATOR')!.getUrl({
+            page: 'dashboard',
+          })
+        : deps.share.url.locators.get(ML_APP_LOCATOR)!.getUrl({
+            page: ML_PAGES.ACCESS_DENIED,
+          });
+
+    await coreStart.application.navigateToUrl(await redirectPage);
   };
 
   const pageDeps = {
@@ -87,10 +97,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
-    getSavedSearchDeps: {
-      search: deps.data.search,
-      savedObjectsClient: coreStart.savedObjects.client,
-    },
   };
 
   const services = {
@@ -113,6 +119,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     licensing: deps.licensing,
     lens: deps.lens,
     savedObjectsManagement: deps.savedObjectsManagement,
+    savedSearch: deps.savedSearch,
     ...coreStart,
   };
 
@@ -167,6 +174,7 @@ export const renderApp = (
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
+    savedSearch: deps.savedSearch,
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,

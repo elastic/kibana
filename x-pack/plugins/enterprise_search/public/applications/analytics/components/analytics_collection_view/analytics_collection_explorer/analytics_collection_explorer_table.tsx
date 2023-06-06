@@ -16,6 +16,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiI18nNumber,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -270,6 +271,7 @@ const tableSettings: {
     },
   },
 };
+const MAX_ITEMS = 10000;
 
 export const AnalyticsCollectionExplorerTable = () => {
   const { euiTheme } = useEuiTheme();
@@ -292,6 +294,8 @@ export const AnalyticsCollectionExplorerTable = () => {
   const handleTableChange = ({ sort, page }: Criteria<ExploreTableItem>) => {
     onTableChange({ page, sort });
   };
+  const startNumberItemsOnPage = pageSize * pageIndex + (items.length ? 1 : 0);
+  const endNumberItemsOnPage = pageSize * pageIndex + items.length;
 
   useEffect(() => {
     if (!selectedTable) {
@@ -335,19 +339,33 @@ export const AnalyticsCollectionExplorerTable = () => {
           <EuiSpacer size="xl" />
 
           <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.analytics.collectionsView.explorer.tableSummary"
-              defaultMessage="Showing {items} of {totalItemsCount}"
-              values={{
-                items: (
-                  <strong>
-                    {pageSize * pageIndex + Number(!!items.length)}-
-                    {pageSize * pageIndex + items.length}
-                  </strong>
-                ),
-                totalItemsCount,
-              }}
-            />
+            {totalItemsCount > MAX_ITEMS ? (
+              <FormattedMessage
+                id="xpack.enterpriseSearch.analytics.collectionsView.explorer.tableSummaryIndeterminate"
+                defaultMessage="Showing {items} of first {maxItemsCount} results"
+                values={{
+                  items: (
+                    <strong>
+                      {startNumberItemsOnPage}-{endNumberItemsOnPage}
+                    </strong>
+                  ),
+                  maxItemsCount: <EuiI18nNumber value={MAX_ITEMS} />,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.enterpriseSearch.analytics.collectionsView.explorer.tableSummary"
+                defaultMessage="Showing {items} of {totalItemsCount}"
+                values={{
+                  items: (
+                    <strong>
+                      {startNumberItemsOnPage}-{endNumberItemsOnPage}
+                    </strong>
+                  ),
+                  totalItemsCount,
+                }}
+              />
+            )}
           </EuiText>
 
           <EuiSpacer size="m" />
@@ -365,7 +383,7 @@ export const AnalyticsCollectionExplorerTable = () => {
               pageSize,
               pageSizeOptions: [10, 20, 50],
               showPerPageOptions: true,
-              totalItemCount: totalItemsCount,
+              totalItemCount: Math.min(totalItemsCount, MAX_ITEMS),
             }}
             onChange={handleTableChange}
           />

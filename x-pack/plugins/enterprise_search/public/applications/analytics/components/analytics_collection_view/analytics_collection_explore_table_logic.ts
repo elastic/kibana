@@ -187,7 +187,7 @@ const tablesParams: {
     requestParams: (
       dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
-      aggregationFieldName = 'search.results.items.page.url'
+      aggregationFieldName = 'page.url.original'
     ) =>
       getBaseSearchTemplate(
         dataView,
@@ -237,7 +237,7 @@ const tablesParams: {
     requestParams: (
       dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
-      aggregationFieldName = 'page.referrer'
+      aggregationFieldName = 'page.referrer.original'
     ) =>
       getBaseSearchTemplate(
         dataView,
@@ -293,7 +293,7 @@ const tablesParams: {
       getBaseSearchTemplate(
         dataView,
         aggregationFieldName,
-        { eventType: 'page_view', search, timeRange },
+        { search, timeRange },
         {
           formula: {
             aggs: {

@@ -19,7 +19,7 @@ import {
   waitForReleaseOption,
 } from '../../tasks/isolate';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
-import { closeAllToasts } from '../../tasks/close_all_toasts';
+import { closeAllToasts } from '../../tasks/toasts';
 import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
@@ -30,10 +30,11 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 
 describe('Isolate command', () => {
   describe('from Manage', () => {
-    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-    let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let isolatedEndpointHostnames: [string, string];
     let endpointHostnames: [string, string];
+
     before(() => {
       indexEndpointHosts({
         count: 2,
@@ -63,16 +64,15 @@ describe('Isolate command', () => {
     after(() => {
       if (endpointData) {
         endpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         endpointData = undefined;
       }
 
       if (isolatedEndpointData) {
         isolatedEndpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         isolatedEndpointData = undefined;
       }
     });
+
     beforeEach(() => {
       login();
     });
@@ -89,35 +89,33 @@ describe('Isolate command', () => {
   });
 
   describe('from Alerts', () => {
-    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     let hostname: string;
 
     before(() => {
-      indexEndpointHosts({ withResponseActions: false, isolation: false })
-        .then((indexEndpoints) => {
+      indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
+        (indexEndpoints) => {
           endpointData = indexEndpoints;
           hostname = endpointData.data.hosts[0].host.name;
-        })
-        .then(() => {
+
           return indexEndpointRuleAlerts({
             endpointAgentId: endpointData.data.hosts[0].agent.id,
             endpointHostname: endpointData.data.hosts[0].host.name,
             endpointIsolated: false,
           });
-        });
+        }
+      );
     });
 
     after(() => {
       if (endpointData) {
         endpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         endpointData = undefined;
       }
 
       if (alertData) {
         alertData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         alertData = undefined;
       }
     });
@@ -192,9 +190,9 @@ describe('Isolate command', () => {
   });
 
   describe('from Cases', () => {
-    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-    let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
-    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     let caseAlertActions: ReturnType<typeof addAlertsToCase>;
     let alertId: string;
     let caseUrlPath: string;
@@ -210,41 +208,39 @@ describe('Isolate command', () => {
         .then((indexEndpoints) => {
           endpointData = indexEndpoints;
           hostname = endpointData.data.hosts[0].host.name;
-        })
-        .then(() => {
+
           return indexEndpointRuleAlerts({
             endpointAgentId: endpointData.data.hosts[0].agent.id,
             endpointHostname: endpointData.data.hosts[0].host.name,
             endpointIsolated: false,
-          }).then((indexedAlert) => {
-            alertData = indexedAlert;
-            alertId = alertData.alerts[0]._id;
           });
         })
-        .then(() => {
-          caseAlertActions = addAlertsToCase({
-            caseId: caseData.data.id,
-            alertIds: [alertId],
-          });
+        .then((indexedAlert) => {
+          alertData = indexedAlert;
+          alertId = alertData.alerts[0]._id;
+
+          if (caseData) {
+            caseAlertActions = addAlertsToCase({
+              caseId: caseData.data.id,
+              alertIds: [alertId],
+            });
+          }
         });
     });
 
     after(() => {
       if (caseData) {
         caseData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         caseData = undefined;
       }
 
       if (endpointData) {
         endpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         endpointData = undefined;
       }
 
       if (alertData) {
         alertData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         alertData = undefined;
       }
     });

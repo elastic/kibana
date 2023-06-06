@@ -166,6 +166,7 @@ describe('embeddable', () => {
       capabilities: {
         canSaveDashboards: true,
         canSaveVisualizations: true,
+        canOpenVisualizations: true,
         discover: {},
         navLinks: {},
       },
@@ -185,6 +186,7 @@ describe('embeddable', () => {
           },
           indexPatterns: {},
           indexPatternRefs: [],
+          activeVisualizationState: null,
         }),
       ...props,
     };
@@ -361,6 +363,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -380,6 +383,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -413,6 +417,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -432,6 +437,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
       },
       { id: '123', searchSessionId: 'firstSession' } as LensEmbeddableInput
@@ -940,6 +946,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -965,6 +972,7 @@ describe('embeddable', () => {
               },
               indexPatterns: {},
               indexPatternRefs: [],
+              activeVisualizationState: null,
             }),
           uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         },
@@ -1039,6 +1047,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -1058,6 +1067,7 @@ describe('embeddable', () => {
               },
               indexPatterns: {},
               indexPatternRefs: [],
+              activeVisualizationState: null,
             }),
         },
         { id: '123', timeRange, query, filters } as LensEmbeddableInput
@@ -1135,6 +1145,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -1155,6 +1166,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       },
@@ -1185,5 +1197,26 @@ describe('embeddable', () => {
         },
       })
     );
+  });
+
+  it('should not be editable for no visualize library privileges', async () => {
+    const embeddable = new Embeddable(
+      getEmbeddableProps({
+        capabilities: {
+          canSaveDashboards: false,
+          canSaveVisualizations: true,
+          canOpenVisualizations: false,
+          discover: {},
+          navLinks: {},
+        },
+      }),
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    expect(embeddable.getOutput().editable).toBeUndefined();
   });
 });

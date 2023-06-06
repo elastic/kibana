@@ -343,6 +343,11 @@ export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
 export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
+export type RuleSnoozeSettings = Pick<
+  Rule,
+  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
+>;
+
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
   index: number;
@@ -350,7 +355,6 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
-  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<

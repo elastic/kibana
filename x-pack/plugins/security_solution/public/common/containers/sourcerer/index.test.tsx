@@ -136,6 +136,11 @@ jest.mock('../../lib/kibana', () => ({
                   },
                 ],
                 getIndexPattern: () => 'hello*,world*,refreshed*',
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
               })
           ),
         },
@@ -240,7 +245,7 @@ describe('Sourcerer Hooks', () => {
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: false },
         });
-        expect(mockDispatch).toHaveBeenCalledTimes(9);
+        expect(mockDispatch).toHaveBeenCalledTimes(7);
         expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });

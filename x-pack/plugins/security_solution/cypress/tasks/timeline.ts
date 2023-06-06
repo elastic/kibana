@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
@@ -128,51 +129,43 @@ export const addNameAndDescriptionToTimeline = (
 };
 
 export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(NOTES_TAB_BUTTON).trigger('click');
-      return $el.find(NOTES_TEXT_AREA);
-    })
-    .should('exist');
-  return cy.root().find(NOTES_TAB_BUTTON);
+  cy.get(NOTES_TAB_BUTTON).click();
+  cy.get(NOTES_TEXT_AREA).should('exist');
+
+  return cy.get(NOTES_TAB_BUTTON);
 };
 
 export const goToCorrelationTab = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(TIMELINE_CORRELATION_TAB).trigger('click');
-      return $el.find(`${TIMELINE_TAB_CONTENT_EQL} ${TIMELINE_CORRELATION_INPUT}`);
-    })
-    .should('be.visible');
-  return cy.root().find(TIMELINE_CORRELATION_TAB);
+  cy.get(TIMELINE_CORRELATION_TAB).click();
+  cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${TIMELINE_CORRELATION_INPUT}`).should('be.visible');
+
+  return cy.get(TIMELINE_CORRELATION_TAB);
 };
 
 export const goToQueryTab = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(QUERY_TAB_BUTTON).trigger('click');
-      return $el.find(QUERY_TAB_BUTTON);
-    })
-    .should('have.class', 'euiTab-isSelected');
+  cy.get(QUERY_TAB_BUTTON).click();
+  cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
 };
 
 export const addNotesToTimeline = (notes: string) => {
-  goToNotesTab().then(() => {
-    cy.get(NOTES_TAB_BUTTON)
-      .find('.euiBadge__text')
-      .then(($el) => {
-        const notesCount = parseInt($el.text(), 10);
+  goToNotesTab();
 
-        cy.get(NOTES_TEXT_AREA).type(notes, {
-          parseSpecialCharSequences: false,
-          force: true,
-        });
-        cy.get(ADD_NOTE_BUTTON)
-          .pipe(($ele) => $ele.trigger('click'))
-          .should('have.attr', 'disabled');
-        cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
+  cy.get(NOTES_TAB_BUTTON)
+    .find('.euiBadge__text')
+    .invoke('text')
+    .then(parseInt)
+    .then((notesCount) => {
+      cy.get(NOTES_TEXT_AREA).type(notes, {
+        parseSpecialCharSequences: false,
+        force: true,
       });
-  });
+
+      cy.get(ADD_NOTE_BUTTON).click();
+      cy.get(ADD_NOTE_BUTTON).should('have.attr', 'disabled');
+
+      cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
+    });
+
   goToQueryTab();
   goToNotesTab();
 };
@@ -226,10 +219,11 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
 
 export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: number) => {
   const dragTargetSelector = GET_TIMELINE_GRID_CELL(fieldName);
-  const dragTarget = cy.get(dragTargetSelector);
-  dragTarget.eq(rowNumber).then((currentSubject) => {
-    drag(currentSubject);
-  });
+  cy.get(dragTargetSelector)
+    .eq(rowNumber)
+    .then((currentSubject) => {
+      drag(currentSubject);
+    });
   let dropTarget: Cypress.Chainable<JQuery<HTMLElement>>;
 
   cy.get('body').then((body) => {
@@ -248,11 +242,14 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE)
-    .should('be.visible')
-    .then((el) => {
-      cy.wrap(el).trigger('click');
-    });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
+  recurse(
+    () => {
+      cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).click();
+      return cy.root();
+    },
+    ($el) => $el.find(HOVER_ACTIONS.ADD_TO_TIMELINE).length === 0
+  );
 };
 
 export const addNewCase = () => {
@@ -260,13 +257,13 @@ export const addNewCase = () => {
 };
 
 export const attachTimelineToNewCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
-  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
+  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click();
 };
 
 export const attachTimelineToExistingCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
-  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
+  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
 };
 
 const clickIdHoverActionOverflowButton = () => {
@@ -289,37 +286,38 @@ export const closeOpenTimelineModal = () => {
 };
 
 export const closeTimeline = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(CLOSE_TIMELINE_BTN).filter(':visible').trigger('click');
-      return $el.find(QUERY_TAB_BUTTON);
-    })
-    .should('not.be.visible');
+  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
+  cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
 };
 
 export const removeDataProvider = () => {
-  cy.get(PROVIDER_BADGE)
-    .click()
-    .then(() => cy.get(PROVIDER_BADGE_DELETE).click());
+  cy.get(PROVIDER_BADGE).click();
+  cy.get(PROVIDER_BADGE_DELETE).click();
 };
 
 export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON)
-    .filter(':visible')
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.visible');
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
+  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE)
-    .eq(0)
-    .pipe(($el) => $el.trigger('click'));
+  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+};
+
+export const openCreateTimelineOptionsPopover = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+};
+
+export const closeCreateTimelineOptionsPopover = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').type('{esc}');
 };
 
 export const createNewTimelineTemplate = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  openCreateTimelineOptionsPopover();
   cy.get(CREATE_NEW_TIMELINE_TEMPLATE).click();
 };
 
 export const executeTimelineKQL = (query: string) => {
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear();
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
 };
 
@@ -338,8 +336,7 @@ export const deleteTimeline = () => {
 };
 
 export const markAsFavorite = () => {
-  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
-  cy.get(STAR_ICON).should('be.visible').pipe(click);
+  cy.get(STAR_ICON).should('be.visible').click();
   cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
@@ -350,15 +347,13 @@ export const openTimelineFieldsBrowser = () => {
 
 export const openTimelineInspectButton = () => {
   cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
-  cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+  cy.get(TIMELINE_INSPECT_BUTTON).click({ force: true });
 };
 
 export const openTimelineFromSettings = () => {
-  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
-  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').pipe(click);
+  openCreateTimelineOptionsPopover();
   cy.get(OPEN_TIMELINE_ICON).should('be.visible');
-  cy.get(OPEN_TIMELINE_ICON).pipe(click);
+  cy.get(OPEN_TIMELINE_ICON).click();
 };
 
 export const openTimelineTemplateFromSettings = (id: string) => {
@@ -389,10 +384,8 @@ export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 export const persistNoteToFirstEvent = (notes: string) => {
   cy.get(EVENT_NOTE).first().click({ force: true });
   cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.root().pipe(($el) => {
-    $el.find(ADD_NOTE_BUTTON).trigger('click');
-    return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
-  });
+  cy.get(ADD_NOTE_BUTTON).click();
+  cy.get(NOTES_TAB_BUTTON).find('.euiBadge');
 };
 
 export const populateTimeline = () => {
@@ -452,13 +445,9 @@ export const waitForTimelineChanges = () => {
 export const refreshTimelinesUntilTimeLinePresent = (
   id: string
 ): Cypress.Chainable<JQuery<HTMLHtmlElement>> => {
-  return cy
-    .root()
-    .pipe(($el) => {
-      $el.find(REFRESH_BUTTON).trigger('click');
-      return $el.find(TIMELINE(id));
-    })
-    .should('be.visible');
+  cy.get(REFRESH_BUTTON).click();
+  cy.get(TIMELINE(id)).should('be.visible');
+  return cy.get(TIMELINE(id));
 };
 
 export const clickingOnCreateTimelineFormTemplateBtn = () => {

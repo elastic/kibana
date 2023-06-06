@@ -16,12 +16,13 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
+import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
-import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
+  DEFAULT_RESULTS_FIELD,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -39,7 +40,6 @@ import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
-import { UrlConfig } from '../../../../../common/types/custom_urls';
 import {
   CombinedJob,
   Job,
@@ -197,7 +197,7 @@ export function isValidCustomUrlSettingsTimeRange(timeRangeSettings: TimeRange):
 
 export function isValidCustomUrlSettings(
   settings: CustomUrlSettings,
-  savedCustomUrls: UrlConfig[]
+  savedCustomUrls: MlUrlConfig[]
 ): boolean {
   let isValid = isValidLabel(settings.label, savedCustomUrls);
   if (isValid === true) {
@@ -206,7 +206,7 @@ export function isValidCustomUrlSettings(
   return isValid;
 }
 
-export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig> {
+export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
@@ -237,7 +237,7 @@ function getUrlRangeFromSettings(settings: CustomUrlSettings) {
   };
 }
 
-async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig> {
+async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
   // Get the complete list of attributes for the selected dashboard (query, filters).
   const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
 
@@ -352,7 +352,7 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
 
   const urlValue = `discover#/?_g=${_g}&_a=${_a}`;
 
-  const urlToAdd: KibanaUrlConfig = {
+  const urlToAdd: MlKibanaUrlConfig = {
     url_name: settings.label,
     url_value: urlValue,
     time_range: TIME_RANGE_TYPE.AUTO,
@@ -389,8 +389,8 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Promise<string> {
-  const interval = parseInterval(job.analysis_config.bucket_span);
+async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): Promise<string> {
+  const interval = parseInterval(job.analysis_config.bucket_span!);
   const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -463,6 +463,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
       undefined,
       jobConfig,
       datafeedConfig
+      // @ts-expect-error TODO: fix after elasticsearch-js bump
     )) as unknown as estypes.MlPreviewDatafeedResponse<Record<string, unknown>>['data'];
 
     const docTimeFieldName = job.data_description.time_field;
@@ -479,7 +480,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
 
 async function getDataFrameAnalyticsTestUrl(
   job: DataFrameAnalyticsConfig,
-  customUrl: UrlConfig,
+  customUrl: MlUrlConfig,
   currentTimeFilter?: EsQueryTimeRange
 ): Promise<string> {
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -522,7 +523,7 @@ async function getDataFrameAnalyticsTestUrl(
 
 export function getTestUrl(
   job: Job | DataFrameAnalyticsConfig,
-  customUrl: UrlConfig,
+  customUrl: MlUrlConfig,
   currentTimeFilter?: EsQueryTimeRange
 ) {
   if (isDataFrameAnalyticsConfigs(job)) {

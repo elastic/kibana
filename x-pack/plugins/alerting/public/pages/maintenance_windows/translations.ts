@@ -20,6 +20,20 @@ export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const READ_ONLY_BADGE_TEXT = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.text',
+  {
+    defaultMessage: 'Read only',
+  }
+);
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create or edit maintenance Windows',
+  }
+);
+
 export const CREATE_NEW_BUTTON = i18n.translate(
   'xpack.alerting.maintenanceWindows.createNewButton',
   {
@@ -66,7 +80,7 @@ export const CREATE_MAINTENANCE_WINDOW_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.create.description',
   {
     defaultMessage:
-      'Schedule a single or recurring period in which rule notifications cease and alerts are in maintenance mode.',
+      'Schedule a single or recurring period in which new alerts do not send notifications.',
   }
 );
 
@@ -297,6 +311,13 @@ export const CREATE_FORM_WEEKDAY_SHORT = (dayOfWeek: string) => [
     values: { dayOfWeek },
   }),
 ];
+
+export const CREATE_FORM_BYWEEKDAY_REQUIRED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.byweekdayFieldRequiredError',
+  {
+    defaultMessage: 'A week day is required.',
+  }
+);
 
 export const CREATE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY = (startDate: Moment) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.repeatOnMonthlyDay', {

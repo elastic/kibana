@@ -8,6 +8,7 @@
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { ml } from '../../services/ml_api_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
@@ -23,7 +24,6 @@ import {
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { GetAnnotationsResponse } from '../../../../common/types/annotations';
-import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 export interface Interval {
   asMilliseconds: () => number;

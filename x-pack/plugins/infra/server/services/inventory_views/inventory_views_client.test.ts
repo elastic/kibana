@@ -15,10 +15,7 @@ import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { InventoryViewsClient } from './inventory_views_client';
 import { createInventoryViewMock } from '../../../common/inventory_views/inventory_view.mock';
-import {
-  CreateInventoryViewAttributesRequestPayload,
-  UpdateInventoryViewAttributesRequestPayload,
-} from '../../../common/http_api/latest';
+import { UpdateInventoryViewAttributesRequestPayload } from '../../../common/http_api/latest';
 
 describe('InventoryViewsClient class', () => {
   const mockFindInventoryList = (savedObjectsClient: jest.Mocked<SavedObjectsClientContract>) => {
@@ -115,45 +112,6 @@ describe('InventoryViewsClient class', () => {
     expect(inventoryView).toEqual(inventoryViewMock);
   });
 
-  describe('.create', () => {
-    it('generate a new inventory view', async () => {
-      const { inventoryViewsClient, savedObjectsClient } = createInventoryViewsClient();
-
-      const inventoryViewMock = createInventoryViewMock('new_id', {
-        name: 'New view',
-        isStatic: false,
-      } as InventoryViewAttributes);
-
-      mockFindInventoryList(savedObjectsClient);
-
-      savedObjectsClient.create.mockResolvedValue({
-        ...inventoryViewMock,
-        type: inventoryViewSavedObjectName,
-        references: [],
-      });
-
-      const inventoryView = await inventoryViewsClient.create({
-        name: 'New view',
-      } as CreateInventoryViewAttributesRequestPayload);
-
-      expect(savedObjectsClient.create).toHaveBeenCalled();
-      expect(inventoryView).toEqual(inventoryViewMock);
-    });
-
-    it('throws an error when a conflicting name is given', async () => {
-      const { inventoryViewsClient, savedObjectsClient } = createInventoryViewsClient();
-
-      mockFindInventoryList(savedObjectsClient);
-
-      await expect(
-        async () =>
-          await inventoryViewsClient.create({
-            name: 'Custom',
-          } as CreateInventoryViewAttributesRequestPayload)
-      ).rejects.toThrow('A view with that name already exists.');
-    });
-  });
-
   describe('.update', () => {
     it('update an existing inventory view by id', async () => {
       const { inventoryViewsClient, infraSources, savedObjectsClient } =
@@ -171,7 +129,7 @@ describe('InventoryViewsClient class', () => {
 
       infraSources.getSourceConfiguration.mockResolvedValue(basicTestSourceConfiguration);
 
-      savedObjectsClient.update.mockResolvedValue({
+      savedObjectsClient.create.mockResolvedValue({
         ...inventoryViewMock,
         type: inventoryViewSavedObjectName,
         references: [],
@@ -185,7 +143,7 @@ describe('InventoryViewsClient class', () => {
         {}
       );
 
-      expect(savedObjectsClient.update).toHaveBeenCalled();
+      expect(savedObjectsClient.create).toHaveBeenCalled();
       expect(inventoryView).toEqual(inventoryViewMock);
     });
 

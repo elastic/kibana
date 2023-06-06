@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -17,6 +16,7 @@ import {
   EuiIcon,
   euiPaletteColorBlind,
 } from '@elastic/eui';
+import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
 import { TooltipWrapper } from './tooltip_wrapper';
 
 const tooltipContent = {
@@ -31,28 +31,6 @@ const tooltipContent = {
       'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
   }),
 };
-
-// copied from coloring package
-function isValidPonyfill(colorString: string) {
-  // we're using an old version of chroma without the valid function
-  try {
-    chroma(colorString);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-function isValidColor(colorString?: string) {
-  // chroma can handle also hex values with alpha channel/transparency
-  // chroma accepts also hex without #, so test for it
-  return (
-    colorString && colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString)
-  );
-}
-
-const getColorAlpha = (color?: string | null) =>
-  (color && isValidColor(color) && chroma(color)?.alpha()) || 1;
 
 export const ColorPicker = ({
   label,
@@ -132,7 +110,7 @@ export const ColorPicker = ({
       swatches={
         currentColorAlpha === 1
           ? euiPaletteColorBlind()
-          : euiPaletteColorBlind().map((c) => chroma(c).alpha(currentColorAlpha).hex())
+          : euiPaletteColorBlind().map((c) => makeColorWithAlpha(c, currentColorAlpha).hex())
       }
     />
   );

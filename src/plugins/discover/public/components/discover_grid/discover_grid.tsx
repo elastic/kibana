@@ -9,6 +9,8 @@
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
@@ -23,9 +25,9 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
+import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -51,6 +53,8 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
+
+const themeDefault = { darkMode: false };
 
 interface SortObj {
   id: string;
@@ -136,6 +140,10 @@ export interface DiscoverGridProps {
    */
   showTimeCol: boolean;
   /**
+   * Determines whether the full screen button should be displayed
+   */
+  showFullScreenButton?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
@@ -184,6 +192,10 @@ export interface DiscoverGridProps {
    */
   filters?: Filter[];
   /**
+   * Query applied by KQL bar or text based editor
+   */
+  query?: Query | AggregateQuery;
+  /**
    * Saved search id used for links to single doc and surrounding docs in the flyout
    */
   savedSearchId?: string;
@@ -195,6 +207,7 @@ export interface DiscoverGridProps {
    * Service dependencies
    */
   services: {
+    core: CoreStart;
     fieldFormats: FieldFormatsStart;
     addBasePath: HttpStart['basePath']['prepend'];
     uiSettings: IUiSettingsClient;
@@ -215,6 +228,7 @@ export const DiscoverGrid = ({
   expandedDoc,
   onAddColumn,
   filters,
+  query,
   savedSearchId,
   onFilter,
   onRemoveColumn,
@@ -228,6 +242,7 @@ export const DiscoverGrid = ({
   setExpandedDoc,
   settings,
   showTimeCol,
+  showFullScreenButton = true,
   sort,
   useNewFieldsApi,
   isSortEnabled = true,
@@ -244,6 +259,7 @@ export const DiscoverGrid = ({
   services,
 }: DiscoverGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
+  const { darkMode } = useObservable(services.core.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -346,13 +362,18 @@ export const DiscoverGrid = ({
    */
   const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
 
+  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
   const onTableSort = useCallback(
     (sortingColumnsData) => {
-      if (isSortEnabled && onSort) {
-        onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+      if (isSortEnabled) {
+        if (isPlainRecord) {
+          setInmemorySortingColumns(sortingColumnsData);
+        } else if (onSort) {
+          onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+        }
       }
     },
-    [onSort, isSortEnabled]
+    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
   );
 
   const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
@@ -421,6 +442,7 @@ export const DiscoverGrid = ({
         showTimeCol,
         defaultColumns,
         isSortEnabled,
+        isPlainRecord,
         services: {
           uiSettings,
           toastNotifications,
@@ -439,6 +461,7 @@ export const DiscoverGrid = ({
       settings,
       defaultColumns,
       isSortEnabled,
+      isPlainRecord,
       uiSettings,
       toastNotifications,
       dataViewFieldEditor,
@@ -463,10 +486,13 @@ export const DiscoverGrid = ({
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {
-      return { columns: sortingColumns, onSort: onTableSort };
+      return {
+        columns: isPlainRecord ? inmemorySortingColumns : sortingColumns,
+        onSort: onTableSort,
+      };
     }
     return { columns: sortingColumns, onSort: () => {} };
-  }, [sortingColumns, onTableSort, isSortEnabled]);
+  }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && DocumentView);
 
@@ -510,14 +536,16 @@ export const DiscoverGrid = ({
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           }
         : {
             ...toolbarVisibilityDefaults,
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           },
-    [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
+    [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
   const rowHeightsOptions = useRowHeightsOptions({
@@ -564,7 +592,7 @@ export const DiscoverGrid = ({
         rows: displayedRows,
         onFilter,
         dataView,
-        isDarkMode: services.uiSettings.get('theme:darkMode'),
+        isDarkMode: darkMode,
         selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
           setSelectedDocs(newSelectedDocs);
@@ -583,11 +611,7 @@ export const DiscoverGrid = ({
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
-          className={classnames(
-            className,
-            'dscDiscoverGrid__table',
-            isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : 'dscDiscoverGrid__documentsMode'
-          )}
+          className={classnames(className, 'dscDiscoverGrid__table')}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}
@@ -605,6 +629,7 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
+            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
             gridStyle={GRID_STYLE}
           />
         </div>
@@ -652,6 +677,7 @@ export const DiscoverGrid = ({
             onAddColumn={onAddColumn}
             onClose={() => setExpandedDoc(undefined)}
             setExpandedDoc={setExpandedDoc}
+            query={query}
           />
         )}
       </span>

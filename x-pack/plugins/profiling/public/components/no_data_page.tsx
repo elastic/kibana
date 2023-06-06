@@ -5,6 +5,8 @@
  * 2.0.
  */
 import {
+  EuiButton,
+  EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
@@ -28,6 +31,7 @@ import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 export function NoDataPage({ subTitle }: { subTitle: string }) {
   const {
     services: { setupDataCollectionInstructions },
+    start: { core },
   } = useProfilingDependencies();
 
   const { data, status } = useAsync(
@@ -39,6 +43,8 @@ export function NoDataPage({ subTitle }: { subTitle: string }) {
 
   const secretToken = data?.variables.secretToken;
   const collectionAgentHostPort = data?.variables.apmServerUrl.replace('https://', '');
+  const symbolUrl = data?.variables.apmServerUrl.replace(/\.apm\./, '.symbols.');
+  const hostAgentVersion = 'v3';
 
   const tabs = [
     {
@@ -66,7 +72,7 @@ export function NoDataPage({ subTitle }: { subTitle: string }) {
               {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
 --set "collectionAgentHostPort=${collectionAgentHostPort}" \\
---set "image.baseUrl=docker.elastic.co,image.repository=observability,image.name=profiling-agent" \\
+--set "version=${hostAgentVersion}" \\
 optimyze/pf-host-agent`}
             </EuiCodeBlock>
           ),
@@ -104,7 +110,7 @@ optimyze/pf-host-agent`}
             <EuiCodeBlock paddingSize="s" isCopyable>
               {`docker run --name host-agent --privileged --pid=host -v /etc/machine-id:/etc/machine-id:ro \\
 -v /var/run/docker.sock:/var/run/docker.sock -v /sys/kernel/debug:/sys/kernel/debug:ro \\
-docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
+docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-host-agent \\
 -project-id=1 -secret-token=${secretToken} \\
 -collection-agent=${collectionAgentHostPort}`}
             </EuiCodeBlock>
@@ -124,8 +130,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              wget -O pf-host-agent.tgz &quot;https://ela.st/pf-host-agent-amd64&quot; && tar xzf
-              pf-host-agent.tgz
+              {`wget -O pf-host-agent.tgz "https://ela.st/pf-host-agent-amd64-${hostAgentVersion}" && tar xzf pf-host-agent.tgz`}
             </EuiCodeBlock>
           ),
         },
@@ -163,8 +168,11 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right DEB package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
-              https://ela.st/pf-host-agent-linux
+            <EuiLink
+              target="_blank"
+              href={`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
+            >
+              {`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
             </EuiLink>
           ),
         },
@@ -213,8 +221,11 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right RPM package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
-              https://ela.st/pf-host-agent-linux
+            <EuiLink
+              target="_blank"
+              href={`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
+            >
+              {`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
             </EuiLink>
           ),
         },
@@ -259,37 +270,136 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
       steps: [
         {
           title: i18n.translate('xpack.profiling.tabs.symbols.step1', {
-            defaultMessage: 'Download the symbtool binary from the URL below:',
+            defaultMessage: 'Download and extract symbtool',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://ela.st/symbtool-linux-amd64`}>
-              https://ela.st/symbtool-linux-amd64
-            </EuiLink>
+            <EuiText>
+              <b>For x86_64:</b>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`wget -O symbtool-amd64.tgz "https://ela.st/symbtool-linux-amd64" && tar xzf symbtool-amd64.tgz && cd symbtool-*-linux-x86_64`}
+              </EuiCodeBlock>
+              <EuiSpacer size="m" />
+              <b>For ARM64:</b>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`wget -O symbtool-arm64.tgz "https://ela.st/symbtool-linux-arm64" && tar xzf symbtool-arm64.tgz && cd symbtool-*-linux-arm64`}
+              </EuiCodeBlock>
+            </EuiText>
           ),
         },
         {
           title: i18n.translate('xpack.profiling.tabs.symbols.step2', {
-            defaultMessage: 'Generate an Elasticsearch token:',
+            defaultMessage: 'Generate an Elasticsearch token',
           }),
           content: (
-            <EuiLink
-              target="_blank"
-              href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
-            >
-              {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
-                defaultMessage: 'Instructions here',
-              })}
-            </EuiLink>
+            <EuiText>
+              <EuiLink
+                target="_blank"
+                href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+              >
+                {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
+                  defaultMessage: 'Instructions here',
+                })}
+              </EuiLink>
+            </EuiText>
           ),
         },
         {
           title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
-            defaultMessage: 'Run:',
+            defaultMessage: 'Upload symbols',
           }),
           content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`./symbtool push-symbols executable --url <symb service IP> --api-key {} --help`}
-            </EuiCodeBlock>
+            <div>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`./symbtool push-symbols executable -u "${symbolUrl}" -t <ES token> -e <my executable>`}
+              </EuiCodeBlock>
+              <EuiSpacer size="m" />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.profiling.tabs.symbols.step3.replace"
+                  defaultMessage="Replace {es_token} etc. with the actual values. You can pass {help} to obtain a list of other arguments."
+                  values={{
+                    es_token: <EuiCode>{`<ES token>`}</EuiCode>,
+                    help: <EuiCode>--help</EuiCode>,
+                  }}
+                />
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.profiling.tabs.symbols.step3.doc-ref"
+                  defaultMessage="Documentation for more advanced uses cases is available in {link}."
+                  values={{
+                    link: (
+                      <EuiLink
+                        target="_blank"
+                        href={`https://www.elastic.co/guide/en/observability/current/profiling-add-symbols.html`}
+                      >
+                        {i18n.translate('xpack.profiling.tabs.symbols.step3.doc-ref.link', {
+                          defaultMessage: 'the corresponding documentation page',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </div>
+          ),
+        },
+      ],
+    },
+    {
+      key: 'elasticAgentIntegration',
+      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
+        defaultMessage: 'Elastic Agent Integration',
+      }),
+      steps: [
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
+            defaultMessage: 'Copy credentials',
+          }),
+          content: (
+            <>
+              <EuiText>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
+                  defaultMessage:
+                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
+                })}
+              </EuiText>
+              <EuiSpacer />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
+                  defaultMessage: 'Secret token: {secretToken}',
+                  values: { secretToken },
+                })}
+              </EuiCodeBlock>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.apmServerUrl', {
+                  defaultMessage: 'APM server url: {apmServerUrl}',
+                  values: { apmServerUrl: collectionAgentHostPort },
+                })}
+              </EuiCodeBlock>
+            </>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
+            defaultMessage: 'Fleet',
+          }),
+          content: (
+            <EuiButton
+              iconType="gear"
+              fill
+              href={`${core.http.basePath.prepend(
+                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview'
+              )}`}
+            >
+              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
+                defaultMessage: 'Manage Universal Profiling agent in Fleet',
+              })}
+            </EuiButton>
           ),
         },
       ],

@@ -6,8 +6,8 @@
  */
 
 import d3 from 'd3';
+import { getAnomalyScoreExplanationImpactValue } from '@kbn/ml-anomaly-utils';
 import { calculateTextWidth } from './string_utils';
-import { getAnomalyScoreExplanationImpactValue } from '../../../common/util/anomaly_utils';
 import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/locator';

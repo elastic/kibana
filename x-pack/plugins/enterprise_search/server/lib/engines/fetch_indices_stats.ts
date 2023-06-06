@@ -9,21 +9,23 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server/src/client/
 
 import { EnterpriseSearchEngineIndex } from '../../../common/types/engines';
 
-export const fetchIndicesStats = async (client: IScopedClusterClient, indices: string[]) => {
-  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
-    index: indices,
+import { availableIndices } from './available_indices';
+
+export const fetchIndicesStats = async (
+  client: IScopedClusterClient,
+  indices: string[]
+): Promise<EnterpriseSearchEngineIndex[]> => {
+  const indicesStats = await client.asCurrentUser.indices.stats({
+    index: await availableIndices(client, indices),
     metric: ['docs'],
   });
 
-  const indicesWithStats = indices.map((indexName: string) => {
-    const indexStats = indicesStats[indexName];
-    const hydratedIndex: EnterpriseSearchEngineIndex = {
-      count: indexStats?.total?.docs?.count ?? 0,
+  return indices.map((index) => {
+    const indexStats = indicesStats.indices?.[index];
+    return {
+      count: indexStats?.primaries?.docs?.count ?? null,
       health: indexStats?.health ?? 'unknown',
-      name: indexName,
+      name: index,
     };
-    return hydratedIndex;
   });
-
-  return indicesWithStats;
 };

@@ -14,11 +14,14 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/core",
     "@kbn/kibana-react-plugin",
-    "@kbn/utils",
+    "@kbn/management-plugin",
     "@kbn/serverless-project-switcher",
     "@kbn/serverless-types",
+    "@kbn/utils",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-internal",
   ]
 }

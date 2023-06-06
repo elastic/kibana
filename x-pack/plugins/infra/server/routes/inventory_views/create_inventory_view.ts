@@ -9,6 +9,7 @@ import { isBoom } from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import {
   createInventoryViewRequestPayloadRT,
+  inventoryViewRequestQueryRT,
   inventoryViewResponsePayloadRT,
   INVENTORY_VIEW_URL,
 } from '../../../common/http_api/latest';
@@ -24,15 +25,16 @@ export const initCreateInventoryViewRoute = ({
       path: INVENTORY_VIEW_URL,
       validate: {
         body: createValidationFunction(createInventoryViewRequestPayloadRT),
+        query: createValidationFunction(inventoryViewRequestQueryRT),
       },
     },
     async (_requestContext, request, response) => {
-      const { body } = request;
+      const { body, query } = request;
       const [, , { inventoryViews }] = await getStartServices();
       const inventoryViewsClient = inventoryViews.getScopedClient(request);
 
       try {
-        const inventoryView = await inventoryViewsClient.create(body.attributes);
+        const inventoryView = await inventoryViewsClient.update(null, body.attributes, query);
 
         return response.custom({
           statusCode: 201,

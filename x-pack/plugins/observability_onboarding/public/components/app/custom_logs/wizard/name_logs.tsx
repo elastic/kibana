@@ -33,7 +33,26 @@ export function NameLogs() {
   }
 
   return (
-    <StepPanel title="Give your logs a name">
+    <StepPanel
+      title="Give your logs a name"
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <EuiButtonEmpty href="/app/observability/overview">
+              Skip for now
+            </EuiButtonEmpty>,
+            <EuiButton
+              color="primary"
+              fill
+              onClick={onContinue}
+              isDisabled={!datasetName}
+            >
+              Save and Continue
+            </EuiButton>,
+          ]}
+        />
+      }
+    >
       <StepPanelContent>
         <EuiText color="subdued">
           <p>Pick a name for your logs, this will become your dataset name.</p>
@@ -52,21 +71,6 @@ export function NameLogs() {
           </EuiFormRow>
         </EuiForm>
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButtonEmpty href="/app/observability/overview">
-            Skip for now
-          </EuiButtonEmpty>,
-          <EuiButton
-            color="primary"
-            fill
-            onClick={onContinue}
-            isDisabled={!datasetName}
-          >
-            Save and Continue
-          </EuiButton>,
-        ]}
-      />
     </StepPanel>
   );
 }

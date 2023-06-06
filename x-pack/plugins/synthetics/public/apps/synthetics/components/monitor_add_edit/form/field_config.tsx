@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import {
+  EuiIcon,
   EuiCode,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
@@ -59,7 +60,7 @@ import {
   ThrottlingWrapper,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
-import { useMonitorName } from '../hooks/use_monitor_name';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
   DataStream,
@@ -122,7 +123,7 @@ export const MONITOR_TYPE_CONFIG = {
           'Navigate through multiple steps or pages to test key user flows from a real browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
     beta: false,
   },
@@ -146,7 +147,7 @@ export const MONITOR_TYPE_CONFIG = {
           'Test a single page load including all objects on the page from a real web browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
     beta: false,
   },
@@ -164,7 +165,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -182,7 +183,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -200,7 +201,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -420,7 +421,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
         onChange: (updatedValues: FormLocation[]) => {
-          setValue(ConfigKey.LOCATIONS, updatedValues, {
+          const valuesToSave = updatedValues.map(({ id, label, isServiceManaged }) => ({
+            id,
+            label,
+            isServiceManaged,
+          }));
+          setValue(ConfigKey.LOCATIONS, valuesToSave, {
             shouldValidate: Boolean(formState.submitCount > 0),
           });
         },
@@ -577,7 +583,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink data-test-subj="syntheticsFIELDLearnMoreLink" href="#" target="_blank">
+        <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
+          href="https://www.elastic.co/guide/en/fleet/current/data-streams.html"
+          target="_blank"
+        >
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}
@@ -1153,9 +1163,26 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
     component: ThrottlingWrapper,
-    label: i18n.translate('xpack.synthetics.monitorConfig.throttling.label', {
-      defaultMessage: 'Connection profile',
-    }),
+    label: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
+        defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
+        values={{
+          icon: <EuiIcon type="alert" color="warning" size="s" />,
+          link: (
+            <EuiLink
+              data-test-subj="syntheticsFIELDNoticeLink"
+              href={'https://github.com/elastic/synthetics/blob/main/docs/throttling.md'}
+              target="_blank"
+            >
+              {i18n.translate('xpack.synthetics.monitorConfig.throttlingDisabled.link', {
+                defaultMessage: 'notice',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
     required: true,
     controlled: true,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.throttling.helpText', {

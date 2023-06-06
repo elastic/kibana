@@ -18,14 +18,20 @@ import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getEntityFieldList,
+  type MlEntityField,
+  type MlInfluencer,
+  type MlRecordForInfluencer,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
 
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { getDataViewIdFromName } from '../util/index_utils';
-import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -46,11 +52,8 @@ import {
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { MlResultsService } from '../services/results_service';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
-import { Influencer } from '../../../common/types/anomalies';
-import { RecordForInfluencer } from '../services/results_service/results_service';
 
 export interface ExplorerJob {
   id: string;
@@ -108,7 +111,7 @@ export interface AnomaliesTableData {
   jobIds: string[];
 }
 
-export interface ChartRecord extends RecordForInfluencer {
+export interface ChartRecord extends MlRecordForInfluencer {
   function: string;
 }
 
@@ -138,7 +141,7 @@ export interface SourceIndicesWithGeoFields {
 // create new job objects based on standard job config objects
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
-    const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+    const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
     return {
       id: job.job_id,
       selected: false,
@@ -191,7 +194,7 @@ export async function loadFilteredTopInfluencers(
 
   // Add the influencers from the top scoring anomalies.
   records.forEach((record) => {
-    const influencersByName: Influencer[] = record.influencers || [];
+    const influencersByName: MlInfluencer[] = record.influencers || [];
     influencersByName.forEach((influencer) => {
       const fieldName = influencer.influencer_field_name;
       const fieldValues = influencer.influencer_field_values;
@@ -208,7 +211,7 @@ export async function loadFilteredTopInfluencers(
     uniqValuesByName[fieldName] = uniq(fieldValues);
   });
 
-  const filterInfluencers: EntityField[] = [];
+  const filterInfluencers: MlEntityField[] = [];
   Object.keys(uniqValuesByName).forEach((fieldName) => {
     // Find record influencers with the same field name as the clicked on cell(s).
     const matchingFieldName = influencers.find((influencer) => {
@@ -321,7 +324,7 @@ export function getSelectionTimeRange(
 export function getSelectionInfluencers(
   selectedCells: AppStateSelectedCells | undefined | null,
   fieldName: string
-): EntityField[] {
+): MlEntityField[] {
   if (
     !!selectedCells &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&

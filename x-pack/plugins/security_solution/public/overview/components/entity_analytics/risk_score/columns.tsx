@@ -47,6 +47,7 @@ export const getRiskScoreColumns = (
     name: i18n.ENTITY_NAME(riskEntity),
     truncateText: false,
     mobileOptions: { show: true },
+    className: 'inline-actions-table-cell',
     render: (entityName: string) => {
       if (entityName != null && entityName.length > 0) {
         return riskEntity === RiskScoreEntity.host ? (
@@ -139,20 +140,9 @@ export const getRiskScoreColumns = (
     name: i18n.ALERTS,
     truncateText: false,
     mobileOptions: { show: true },
+    className: 'inline-actions-table-cell',
     render: (alertCount: number, risk) => (
-      <SecurityCellActions
-        field={{
-          name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-          value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
-          type: 'keyword',
-          aggregatable: true,
-        }}
-        mode={CellActionsMode.HOVER_RIGHT}
-        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-        metadata={{
-          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
-        }}
-      >
+      <>
         <EuiLink
           data-test-subj="risk-score-alerts"
           disabled={alertCount === 0}
@@ -164,7 +154,20 @@ export const getRiskScoreColumns = (
         >
           <FormattedCount count={alertCount} />
         </EuiLink>
-      </SecurityCellActions>
+        <StyledCellActions
+          field={{
+            name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+            value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.INLINE}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+          }}
+        />
+      </>
     ),
   },
 ];

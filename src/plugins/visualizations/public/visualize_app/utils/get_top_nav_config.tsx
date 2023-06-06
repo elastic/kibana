@@ -117,8 +117,6 @@ export const getTopNavConfig = (
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
-    savedObjects,
-    theme,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -145,7 +143,6 @@ export const getTopNavConfig = (
 
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: savedObjects.client,
         overlays,
         savedObjectsTagging,
       });
@@ -547,6 +544,7 @@ export const getTopNavConfig = (
                     onTagsSelected={(newSelection) => {
                       selectedTags = newSelection;
                     }}
+                    markOptional
                   />
                 );
               }

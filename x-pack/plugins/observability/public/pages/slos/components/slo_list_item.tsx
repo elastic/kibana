@@ -181,8 +181,9 @@ export function SloListItem({
             button={
               <EuiButtonIcon
                 aria-label="Actions"
-                display="empty"
                 color="text"
+                disabled={!slo.summary}
+                display="empty"
                 iconType="boxesVertical"
                 size="s"
                 onClick={handleClickActions}

@@ -23,13 +23,11 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { LicenseService } from '../../../../common/license';
 import {
   ISOLATE_HOST_ROUTE_V2,
@@ -54,10 +52,10 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -67,7 +65,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { ActionCreateService } from '../../services/actions';
+import { actionCreateService } from '../../services/actions';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -123,19 +121,14 @@ describe('Response actions', () => {
       licenseService.start(licenseEmitter);
 
       const endpointContext = {
-        logFactory: loggingSystemMock.create(),
+        ...createMockEndpointAppContext(),
         service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       };
 
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
-        actionCreateService: new ActionCreateService(
-          mockScopedClient.asInternalUser,
-          endpointContext
-        ),
+        actionCreateService: actionCreateService(mockScopedClient.asInternalUser, endpointContext),
         licenseService,
       });
 
@@ -179,6 +172,7 @@ describe('Response actions', () => {
             };
           }
         );
+        const metadataResponse = docGen.generateHostMetadata();
 
         const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
@@ -186,7 +180,7 @@ describe('Response actions', () => {
         );
         ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
           return {
-            body: legacyMetadataSearchResponseMock(searchResponse),
+            body: legacyMetadataSearchResponseMock(searchResponse ?? metadataResponse),
           };
         });
 

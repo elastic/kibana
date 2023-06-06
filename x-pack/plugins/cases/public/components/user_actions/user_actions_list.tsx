@@ -11,7 +11,7 @@ import { EuiCommentList } from '@elastic/eui';
 import React, { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import type { CaseUserActions } from '../../containers/types';
+import type { UserActionUI } from '../../containers/types';
 import type { UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { isUserActionTypeSupported } from './helpers';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -48,17 +48,6 @@ const MyEuiCommentList = styled(EuiCommentList)`
       }
     }
 
-    & .comment-alert .euiCommentEvent {
-      background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiBorderThin};
-      padding: ${theme.eui.euiSizeS};
-      border-radius: ${theme.eui.euiSizeXS};
-    }
-
-    & .comment-alert .euiCommentEvent__headerData {
-      flex-grow: 1;
-    }
-
     & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
       box-shadow: none;
       .euiCommentEvent__header {
@@ -78,7 +67,7 @@ export type UserActionListProps = Omit<
   | 'statusActionButton'
 > &
   Pick<UserActionBuilderArgs, 'commentRefs' | 'handleManageQuote'> & {
-    caseUserActions: CaseUserActions[];
+    caseUserActions: UserActionUI[];
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
     bottomActions?: EuiCommentProps[];

@@ -6,8 +6,8 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { AnomalyResultType } from '../../common/types/anomalies';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
 
@@ -125,7 +125,7 @@ export function registerCollector(
       const aggResponse = result.aggregations as {
         count_by_result_type: {
           buckets: Array<{
-            key: AnomalyResultType;
+            key: MlAnomalyResultType;
             doc_count: number;
           }>;
         };

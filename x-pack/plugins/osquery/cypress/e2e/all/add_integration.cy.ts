@@ -37,7 +37,7 @@ describe('ALL - Add Integration', () => {
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
+      savedQueryId = data.saved_object_id;
     });
   });
 
@@ -81,7 +81,6 @@ describe('ALL - Add Integration', () => {
     it('should add the old integration and be able to upgrade it', () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
-      cy.contains(integrationName);
       policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
@@ -183,15 +182,11 @@ describe('ALL - Add Integration', () => {
       cy.get(`[title="${policyName}"]`).click();
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.contains(/^Advanced$/).click();
-      cy.getBySel('codeEditorContainer').within(() => {
-        cy.contains(`"${packName}":`);
-      });
+      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
       cy.getBySel('saveIntegration').click();
       cy.get(`a[title="${integrationName}"]`).click();
       cy.contains(/^Advanced$/).click();
-      cy.getBySel('codeEditorContainer').within(() => {
-        cy.contains(`"${packName}":`);
-      });
+      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
       cy.contains('Cancel').click();
       closeModalIfVisible();
       cy.get(`[title="${integrationName}"]`)

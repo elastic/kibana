@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getModelVersionMapForTypes } from '@kbn/core-saved-objects-base-server-internal';
+import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { REMOVED_TYPES } from '../../core';
 import type { MigrateIndexOptions } from '../migrate_index';
 import type { MigratorContext } from './types';
@@ -26,6 +26,7 @@ export const createContext = ({
   indexPrefix,
   typeRegistry,
   serializer,
+  nodeRoles,
 }: CreateContextOps): MigratorContext => {
   return {
     migrationConfig,
@@ -33,13 +34,15 @@ export const createContext = ({
     kibanaVersion,
     indexPrefix,
     types,
-    typeModelVersions: getModelVersionMapForTypes(types.map((type) => typeRegistry.getType(type)!)),
+    typeVirtualVersions: getVirtualVersionMap(types.map((type) => typeRegistry.getType(type)!)),
     elasticsearchClient,
     typeRegistry,
     serializer,
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
     deletedTypes: REMOVED_TYPES,
+    batchSize: migrationConfig.batchSize,
     discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
+    nodeRoles,
   };
 };

@@ -10,7 +10,7 @@ import { Redirect, useParams, useHistory } from 'react-router-dom';
 import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { RunTestButton } from './run_test_btn';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useFleetPermissions } from '../../../hooks';
@@ -29,6 +29,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
     handleSubmit,
     formState: { errors, defaultValues },
     getValues,
+    getFieldState,
   } = useFormContext();
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<SyntheticsMonitor | null>(
@@ -47,7 +48,12 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
   const canSavePrivateLocation = !hasAnyPrivateLocationSelected || canSaveIntegrations;
 
   const formSubmitter = (formData: Record<string, any>) => {
-    if (!Object.keys(errors).length) {
+    // An additional invalid field check to account for customHook managed validation
+    const isAnyFieldInvalid = Object.keys(getValues()).some(
+      (fieldKey) => getFieldState(fieldKey).invalid
+    );
+
+    if (!Object.keys(errors).length && !isAnyFieldInvalid) {
       setMonitorData(format(formData, readOnly));
     }
   };

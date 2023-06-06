@@ -17,7 +17,7 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
@@ -27,11 +27,7 @@ import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import {
-  VISUALIZE_ENABLE_LABS_SETTING,
-  SAVED_OBJECTS_LIMIT_SETTING,
-  SAVED_OBJECTS_PER_PAGE_SETTING,
-} from '../..';
+import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../..';
 import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
@@ -46,6 +42,7 @@ interface VisualizeUserContent extends VisualizationListItem, UserContentCommonS
     description?: string;
     editApp: string;
     editUrl: string;
+    readOnly: boolean;
     error?: string;
   };
 }
@@ -69,6 +66,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
       description: savedObject.description as string,
       editApp: savedObject.editApp as string,
       editUrl: savedObject.editUrl as string,
+      readOnly: savedObject.readOnly as boolean,
       error: savedObject.error as string,
     },
   };
@@ -160,22 +158,18 @@ export const VisualizeListing = () => {
         references,
         referencesToExclude,
       }: {
-        references?: SavedObjectsFindOptionsReference[];
-        referencesToExclude?: SavedObjectsFindOptionsReference[];
+        references?: SavedObjectReference[];
+        referencesToExclude?: SavedObjectReference[];
       } = {}
     ) => {
-      const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return findListItems(
-        savedObjects.client,
         getTypes(),
         searchTerm,
         listingLimit,
         references,
         referencesToExclude
       ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => {
-        const content = hits
-          .filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental')
-          .map(toTableListViewSavedObject);
+        const content = hits.map(toTableListViewSavedObject);
 
         visualizedUserContent.current = content;
 
@@ -185,7 +179,7 @@ export const VisualizeListing = () => {
         };
       });
     },
-    [listingLimit, uiSettings, savedObjects.client]
+    [listingLimit]
   );
 
   const onContentEditorSave = useCallback(
@@ -201,11 +195,11 @@ export const VisualizeListing = () => {
             description: args.description ?? '',
             tags: args.tags,
           },
-          { savedObjectsClient: savedObjects.client, overlays, savedObjectsTagging }
+          { overlays, savedObjectsTagging }
         );
       }
     },
-    [overlays, savedObjects.client, savedObjectsTagging]
+    [overlays, savedObjectsTagging]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -228,7 +222,7 @@ export const VisualizeListing = () => {
                     false,
                     false,
                     () => {},
-                    { savedObjectsClient: savedObjects.client, overlays }
+                    { overlays }
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -247,7 +241,7 @@ export const VisualizeListing = () => {
         },
       ],
     }),
-    [overlays, savedObjects.client]
+    [overlays]
   );
 
   const deleteItems = useCallback(
@@ -299,6 +293,9 @@ export const VisualizeListing = () => {
       findItems={fetchItems}
       deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
       editItem={visualizeCapabilities.save ? editItem : undefined}
+      showEditActionForItem={({ attributes: { readOnly } }) =>
+        visualizeCapabilities.save && !readOnly
+      }
       customTableColumn={getCustomColumn()}
       listingLimit={listingLimit}
       initialPageSize={initialPageSize}
@@ -318,8 +315,10 @@ export const VisualizeListing = () => {
       tableListTitle={i18n.translate('visualizations.listing.table.listTitle', {
         defaultMessage: 'Visualize Library',
       })}
-      getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-        getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
+      getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
+        readOnly
+          ? undefined
+          : getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
       }
     >
       {dashboardCapabilities.createNew && (

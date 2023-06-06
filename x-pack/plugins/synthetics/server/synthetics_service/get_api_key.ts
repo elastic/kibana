@@ -126,7 +126,7 @@ export const generateAPIKey = async ({
 
   /* Not exposed to the user. May grant as internal user */
   return security.authc.apiKeys?.grantAsInternalUser(request, {
-    name: 'synthetics-api-key (required for monitor management)',
+    name: 'synthetics-api-key (required for Synthetics App)',
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
     },
@@ -171,7 +171,7 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
 
   const { canEnable, canManageApiKeys } = hasPrivileges;
 
-  if (!config.service?.manifestUrl) {
+  if (!config.service?.manifestUrl && !config.service?.devUrl) {
     return {
       canEnable: true,
       canManageApiKeys,

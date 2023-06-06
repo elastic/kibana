@@ -13,7 +13,7 @@ import {
   RequiredPaletteParamTypes,
 } from '@kbn/coloring';
 
-import Color from 'color';
+import chroma from 'chroma-js';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const DEFAULT_PALETTE_NAME = 'gray';
@@ -31,7 +31,7 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
 };
 
 export const transparentizePalettes = (palettes: PaletteRegistry) => {
-  const addAlpha = (c: string | null) => (c ? new Color(c).hex() + `80` : `000000`);
+  const addAlpha = (c: string | null) => (c ? chroma(c).hex() + `80` : `000000`).toUpperCase();
   const transparentizePalette = (palette: PaletteDefinition<unknown>) => ({
     ...palette,
     getCategoricalColor: (

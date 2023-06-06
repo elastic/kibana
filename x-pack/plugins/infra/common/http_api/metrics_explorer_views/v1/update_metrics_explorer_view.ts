@@ -23,7 +23,3 @@ export type UpdateMetricsExplorerViewAttributesRequestPayload = rt.TypeOf<
 export const updateMetricsExplorerViewRequestPayloadRT = rt.type({
   attributes: updateMetricsExplorerViewAttributesRequestPayloadRT,
 });
-
-export type UpdateMetricsExplorerViewRequestPayload = rt.TypeOf<
-  typeof updateMetricsExplorerViewRequestPayloadRT
->;

@@ -300,6 +300,10 @@ generating deep links to other apps using locators, and creating short URLs.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
+|{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[textBasedLanguages]
+|The editor accepts the following properties:
+
+
 |<<uiactions-plugin>>
 |UI Actions plugins provides API to manage *triggers* and *actions*.
 
@@ -530,6 +534,10 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ess_security/README.md[essSecurity]
+|This plugin contains the ESS/on-prem deployments (non-serverless) customizations for Security Solution.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
@@ -673,6 +681,10 @@ Elastic.
 |An awesome Kibana reporting plugin
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/reporting_export_types/README.md[reportingExportTypes]
+|This plugin is intended to be a central point for the export types of reporting to convene before hitting the reporting plugin.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
@@ -720,6 +732,10 @@ Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless_search/README.mdx[serverlessSearch]
 |This plugin contains configuration and code used to create a Serverless Search project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless_security/README.mdx[serverlessSecurity]
+|This plugin contains configuration and code used to create a Serverless Security project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
 import { Subject, Subscription } from 'rxjs';
+import React, { createContext, useContext } from 'react';
 
 import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import {
@@ -20,13 +21,14 @@ import {
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -43,6 +45,7 @@ import {
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
 import { pluginServices } from '../../services/plugin_services';
+import { initializeDashboard } from './create/create_dashboard';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
@@ -92,7 +95,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
 
-  public subscriptions: Subscription = new Subscription();
+  public integrationSubscriptions: Subscription = new Subscription();
+  public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
@@ -168,6 +172,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           ...DEFAULT_DASHBOARD_INPUT,
           id: initialInput.id,
         },
+        animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
         hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
         lastSavedId: savedObjectId,
       },
@@ -279,7 +284,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     super.destroy();
     this.cleanupStateTools();
     this.controlGroup?.destroy();
-    this.subscriptions.unsubscribe();
+    this.diffingSubscription.unsubscribe();
+    this.integrationSubscriptions.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
@@ -287,26 +293,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
-
-  /**
-   * Sometimes when the ID changes, it's due to a clone operation, or a save as operation. In these cases,
-   * most of the state hasn't actually changed, so there isn't any reason to destroy this container and
-   * load up a fresh one. When an id change is in progress, the renderer can check this method, and if it returns
-   * true, the renderer can safely skip destroying and rebuilding the container.
-   */
-  public isExpectingIdChange() {
-    return this.expectingIdChange;
-  }
-  private expectingIdChange = false;
-  public expectIdChange() {
-    /**
-     * this.expectingIdChange = true; TODO - re-enable this for saving speed-ups. It causes some functional test failures because the _g param is not carried over.
-     * See https://github.com/elastic/kibana/issues/147491 for more information.
-     **/
-    setTimeout(() => {
-      this.expectingIdChange = false;
-    }, 1); // turn this off after the next update.
-  }
 
   public runClone = runClone;
   public runSaveAs = runSaveAs;
@@ -331,9 +317,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const {
       explicitInput: { timeRange, refreshInterval },
       componentState: {
-        lastSavedInput: { timeRestore: lastSavedTimeRestore },
+        lastSavedInput: {
+          controlGroupInput: lastSavedControlGroupInput,
+          timeRestore: lastSavedTimeRestore,
+        },
       },
     } = this.getState();
+
+    if (
+      this.controlGroup &&
+      lastSavedControlGroupInput &&
+      !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
+    ) {
+      this.controlGroup.updateInput(lastSavedControlGroupInput);
+    }
 
     // if we are using the unified search integration, we need to force reset the time picker.
     if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
@@ -348,6 +345,49 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
     }
   }
+
+  public navigateToDashboard = async (
+    newSavedObjectId?: string,
+    newCreationOptions?: Partial<DashboardCreationOptions>
+  ) => {
+    this.integrationSubscriptions.unsubscribe();
+    this.integrationSubscriptions = new Subscription();
+    this.stopSyncingWithUnifiedSearch?.();
+
+    const {
+      dashboardSavedObject: { loadDashboardStateFromSavedObject },
+    } = pluginServices.getServices();
+    if (newCreationOptions) {
+      this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
+    }
+    const loadDashboardReturn = await loadDashboardStateFromSavedObject({ id: newSavedObjectId });
+
+    const dashboardContainerReady$ = new Subject<DashboardContainer>();
+    const untilDashboardReady = () =>
+      new Promise<DashboardContainer>((resolve) => {
+        const subscription = dashboardContainerReady$.subscribe((container) => {
+          subscription.unsubscribe();
+          resolve(container);
+        });
+      });
+
+    const { input: newInput, searchSessionId } = await initializeDashboard({
+      creationOptions: this.creationOptions,
+      controlGroup: this.controlGroup,
+      untilDashboardReady,
+      loadDashboardReturn,
+    });
+
+    this.searchSessionId = searchSessionId;
+
+    this.updateInput(newInput);
+    batch(() => {
+      this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
+      this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
+      this.dispatch.setLastSavedId(newSavedObjectId);
+    });
+    dashboardContainerReady$.next(this);
+  };
 
   /**
    * Gets all the dataviews that are actively being used in the dashboard

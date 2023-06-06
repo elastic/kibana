@@ -6,46 +6,60 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearchAttributes } from '../../../common';
+import { i18n } from '@kbn/i18n';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
+import type { SavedSearchCrudTypes } from '../../../common/content_management';
 
 interface GetSavedSearchDependencies {
   search: DataPublicPluginStart['search'];
-  savedObjectsClient: SavedObjectsClientContract;
+  contentManagement: ContentManagementPublicStart['client'];
   spaces?: SpacesApi;
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
-const getEmptySavedSearch = ({
-  search,
-}: {
-  search: DataPublicPluginStart['search'];
-}): SavedSearch => ({
-  searchSource: search.searchSource.createEmpty(),
-});
+const getSavedSearchUrlConflictMessage = async (json: string) =>
+  i18n.translate('savedSearch.legacyURLConflict.errorMessage', {
+    defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+    values: { json },
+  });
 
-const findSavedSearch = async (
+export const getSavedSearch = async (
   savedSearchId: string,
-  { search, savedObjectsClient, spaces, savedObjectsTagging }: GetSavedSearchDependencies
+  { search, spaces, savedObjectsTagging, contentManagement }: GetSavedSearchDependencies
 ) => {
-  const so = await savedObjectsClient.resolve<SavedSearchAttributes>(
-    SAVED_SEARCH_TYPE,
-    savedSearchId
-  );
+  const so = await contentManagement.get<
+    SavedSearchCrudTypes['GetIn'],
+    SavedSearchCrudTypes['GetOut']
+  >({
+    contentTypeId: SAVED_SEARCH_TYPE,
+    id: savedSearchId,
+  });
 
-  if (!so.saved_object || so.saved_object.error) {
-    throw new SavedObjectNotFound(SAVED_SEARCH_TYPE, savedSearchId);
+  // @ts-expect-error
+  if (so.error) {
+    throw new Error(`Could not locate that search (id: ${savedSearchId})`);
   }
 
-  const savedSearch = so.saved_object;
+  if (so.meta.outcome === 'conflict') {
+    throw new Error(
+      await getSavedSearchUrlConflictMessage(
+        JSON.stringify({
+          targetType: SAVED_SEARCH_TYPE,
+          sourceId: savedSearchId,
+          targetSpace: (await spaces?.getActiveSpace())?.id,
+        })
+      )
+    );
+  }
+
+  const savedSearch = so.item;
 
   const parsedSearchSourceJSON = parseSearchSourceJSON(
     savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
@@ -60,33 +74,27 @@ const findSavedSearch = async (
     ? savedObjectsTagging.ui.getTagIdsFromReferences(savedSearch.references)
     : undefined;
 
-  return fromSavedSearchAttributes(
+  const returnVal = fromSavedSearchAttributes(
     savedSearchId,
     savedSearch.attributes,
     tags,
+    savedSearch.references,
     await search.searchSource.create(searchSourceValues),
-    {
-      outcome: so.outcome,
-      aliasTargetId: so.alias_target_id,
-      aliasPurpose: so.alias_purpose,
-      errorJSON:
-        so.outcome === 'conflict' && spaces
-          ? JSON.stringify({
-              targetType: SAVED_SEARCH_TYPE,
-              sourceId: savedSearchId,
-              targetSpace: (await spaces.getActiveSpace()).id,
-            })
-          : undefined,
-    }
+    so.meta
   );
+
+  return returnVal;
 };
 
-/** @public **/
-export const getSavedSearch = async (
-  savedSearchId: string | undefined,
-  dependencies: GetSavedSearchDependencies
-) => {
-  return savedSearchId
-    ? findSavedSearch(savedSearchId, dependencies)
-    : getEmptySavedSearch(dependencies);
-};
+/**
+ * Returns a new saved search
+ * Used when e.g. Discover is opened without a saved search id
+ * @param search
+ */
+export const getNewSavedSearch = ({
+  search,
+}: {
+  search: DataPublicPluginStart['search'];
+}): SavedSearch => ({
+  searchSource: search.searchSource.createEmpty(),
+});

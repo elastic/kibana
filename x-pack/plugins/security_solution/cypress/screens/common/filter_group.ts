@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../../helpers/common';
+
 export const FILTER_GROUP_LOADING = '[data-test-subj="filter-group__loading"]';
 export const FILTER_GROUP_ITEMS = '[data-test-subj="filter-group__items"]';
 export const FILTER_GROUP_CLEAR = '[data-test-subj="filter-group__clear"]';
@@ -45,12 +47,12 @@ export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU = '[data-test-subj="filter
 export const DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON =
   '[data-test-subj="filter-group__context--reset"]';
 
-export const FILTER_GROUP_CONTEXT_EDIT_CONTROLS = '[data-test-subj="filter_group__context--edit"]';
+export const FILTER_GROUP_CONTEXT_EDIT_CONTROLS = '[data-test-subj="filter-group__context--edit"]';
 
-export const FILTER_GROUP_CONTEXT_SAVE_CONTROLS = '[data-test-subj="filter_group__context--save"]';
+export const FILTER_GROUP_CONTEXT_SAVE_CONTROLS = '[data-test-subj="filter-group__context--save"]';
 
 export const FILTER_GROUP_CONTEXT_DISCARD_CHANGES =
-  '[data-test-subj="filter_group__context--discard"]';
+  '[data-test-subj="filter-group__context--discard"]';
 
 export const FILTER_GROUP_ADD_CONTROL = '[data-test-subj="filter-group__add-control"]';
 
@@ -67,6 +69,14 @@ export const FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS = {
   FIELD_PICKER: (fieldName: string) => `[data-test-subj="field-picker-select-${fieldName}"]`,
   FIELD_LABEL: '[data-test-subj="control-editor-title-input"]',
   SAVE: '[data-test-subj="control-editor-save"]',
+  CANCEL: getDataTestSubjectSelector('control-editor-cancel'),
+  FILTER_FIELD_TYPE: getDataTestSubjectSelector('toggleFieldFilterButton'),
+  FIELD_TYPES: {
+    STRING: getDataTestSubjectSelector('typeFilter-string'),
+    BOOLEAN: getDataTestSubjectSelector('typeFilter-boolean'),
+    IP: getDataTestSubjectSelector('typeFilter-ip'),
+    NUMBER: getDataTestSubjectSelector('typeFilter-number'),
+  },
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_DELETE = (idx: number) => {

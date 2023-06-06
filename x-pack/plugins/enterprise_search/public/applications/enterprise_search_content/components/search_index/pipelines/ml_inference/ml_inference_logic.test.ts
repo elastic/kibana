@@ -16,6 +16,7 @@ import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
+import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/attach_ml_inference_pipeline';
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
@@ -85,6 +86,7 @@ describe('MlInferenceLogic', () => {
     FetchMlInferencePipelinesApiLogic
   );
   const { mount: mountGetDocumentsApiLogic } = new LogicMounter(GetDocumentsApiLogic);
+  const { mount: mountStartTextExpansionModel } = new LogicMounter(StartTextExpansionModelApiLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -97,6 +99,7 @@ describe('MlInferenceLogic', () => {
     mountCreateMlInferencePipelineApiLogic();
     mountAttachMlInferencePipelineApiLogic();
     mountGetDocumentsApiLogic();
+    mountStartTextExpansionModel();
     mount();
   });
 
@@ -626,6 +629,17 @@ describe('MlInferenceLogic', () => {
             },
           ],
         });
+      });
+    });
+    describe('startTextExpansionModelSuccess', () => {
+      it('fetches ml models', () => {
+        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
+        StartTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: 'started',
+          modelId: 'foo',
+        });
+
+        expect(MLInferenceLogic.actions.makeMLModelsRequest).toHaveBeenCalledWith(undefined);
       });
     });
   });

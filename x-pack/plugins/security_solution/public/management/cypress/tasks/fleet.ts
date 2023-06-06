@@ -17,6 +17,7 @@ import {
   packagePolicyRouteService,
 } from '@kbn/fleet-plugin/common';
 import type { PutAgentReassignResponse } from '@kbn/fleet-plugin/common/types';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { request } from './common';
 
 export const getEndpointIntegrationVersion = (): Cypress.Chainable<string> =>
@@ -56,3 +57,16 @@ export const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
   }).then(({ body }) => {
     return body.items?.[0]?.revision ?? -1;
   });
+
+export const createAgentPolicyTask = (
+  version: string,
+  policyPrefix?: string
+): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
+  const policyName = `${policyPrefix || 'Reassign'} ${Math.random().toString(36).substring(2, 7)}`;
+
+  return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
+    policyName,
+    endpointPackageVersion: version,
+    agentPolicyName: policyName,
+  });
+};
