@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { merge, omit } from 'lodash';
-import { IntegrationConfigType } from '../../..';
+import { PackageInputType } from '../../..';
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
 import { getApmPolicy } from './get_apm_policy';
 
@@ -51,15 +51,15 @@ export function generateSecretToken() {
   return result;
 }
 
-export function getVarsFor(config: IntegrationConfigType) {
-  const configKeys = Object.keys(config) as Array<keyof IntegrationConfigType>;
+export function getVarsFor(config: PackageInputType) {
+  const configKeys = Object.keys(config) as Array<keyof PackageInputType>;
   const hasSecretToken = configKeys.some((key) => key === 'secret_token');
   if (!hasSecretToken) {
     configKeys.push('secret_token');
   }
 
   return configKeys.reduce<
-    Partial<Record<keyof IntegrationConfigType, { type: 'text' | 'bool'; value: any }>>
+    Partial<Record<keyof PackageInputType, { type: 'text' | 'bool'; value: any }>>
   >((acc, currKey) => {
     const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
     const type = typeof value === 'boolean' ? 'bool' : 'text';
@@ -158,7 +158,7 @@ export function getFleetPolicyStep({
               enabled: true,
               streams: [],
               type: 'pf-elastic-symbolizer',
-              vars: config?.simbolizer ? getVarsFor(config.simbolizer) : {},
+              vars: config?.symbolizer ? getVarsFor(config.symbolizer) : {},
             },
           ],
         },

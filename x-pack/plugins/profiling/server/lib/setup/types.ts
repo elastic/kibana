@@ -24,5 +24,5 @@ export interface ProfilingSetupStepFactoryOptions {
   logger: Logger;
   spaceId: string;
   isCloudEnabled: boolean;
-  config: ProfilingConfig['config'];
+  config: ProfilingConfig;
 }

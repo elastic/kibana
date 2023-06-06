@@ -58,7 +58,7 @@ export function registerSetupRoute({
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-          config: dependencies.config.config,
+          config: dependencies.config,
         });
 
         const hasDataPromise = hasProfilingData({
@@ -116,7 +116,7 @@ export function registerSetupRoute({
           soClient: (await context.core).savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-          config: dependencies.config.config,
+          config: dependencies.config,
         });
 
         await eachSeries(steps, (step, cb) => {
