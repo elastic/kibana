@@ -53,6 +53,13 @@ export function useTextBasedQueryLanguage({
         query: undefined,
       };
     }
+    if (queryString.current) {
+      queryString.current = '';
+    }
+
+    if (isPrevTransformationalMode.current) {
+      isPrevTransformationalMode.current = true;
+    }
   }, []);
 
   useEffect(() => {
@@ -113,7 +120,7 @@ export function useTextBasedQueryLanguage({
         const queryChanged = query[language] !== queryString.current;
         // no need to reset index to state if it hasn't changed
         const addDataViewToState = Boolean(dataViewObj?.id !== index);
-        if (!queryChanged && !addColumnsToState) {
+        if (!queryChanged && !addColumnsToState && !addDataViewToState) {
           return;
         }
 
