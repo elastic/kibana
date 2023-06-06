@@ -156,6 +156,8 @@ export const GuidePanelFlyoutBody = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer />
       </>
     );
   }

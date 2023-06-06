@@ -1,6 +1,8 @@
-[role="xpack"]
 [[xpack-ml]]
 = {ml-cap}
+:frontmatter-tags-products: [ml] 
+:frontmatter-tags-content-type: [overview] 
+:frontmatter-tags-user-goals: [analyze]
 
 [partintro]
 --
@@ -33,6 +35,9 @@ information, refer to {ml-docs}/ml-limitations.html[{ml-cap}].
 
 [[xpack-ml-anomalies]]
 == {anomaly-detect-cap}
+:frontmatter-tags-products: [ml] 
+:frontmatter-tags-content-type: [overview] 
+:frontmatter-tags-user-goals: [analyze]
 
 The Elastic {ml} {anomaly-detect} feature automatically models the normal
 behavior of your time series data — learning trends, periodicity, and more — in
@@ -84,6 +89,9 @@ and {ml-docs}/ml-ad-overview.html[{ml-cap} {anomaly-detect}].
 
 [[xpack-ml-dfanalytics]]
 == {dfanalytics-cap}
+:frontmatter-tags-products: [ml] 
+:frontmatter-tags-content-type: [overview] 
+:frontmatter-tags-user-goals: [analyze]
 
 The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
 {classification}, {oldetection}, and {regression} algorithms and generate new
@@ -101,6 +109,9 @@ For more information about the {dfanalytics} feature, see
 
 [[xpack-ml-aiops]]
 == AIOps Labs
+:frontmatter-tags-products: [ml] 
+:frontmatter-tags-content-type: [overview] 
+:frontmatter-tags-user-goals: [analyze]
 
 AIOps Labs is a part of {ml-app} in {kib} which provides features that use 
 advanced statistical methods to help you interpret your data and its behavior.
@@ -130,7 +141,7 @@ the spike and displays them in a table. You can optionally choose to summarize
 the results into groups. The table also shows an indicator of the level of 
 impact and a sparkline showing the shape of the impact in the chart. Hovering 
 over a row displays the impact on the histogram chart in more detail. You can 
-inspect a field in **Discover**, further investiage in **Log pattern analysis**, 
+inspect a field in **Discover**, further investigate in **Log pattern analysis**, 
 or copy the table row information as a query filter to the clipboard by 
 selecting the corresponding option under the **Actions** column. You can also 
 pin a table row by clicking on it then move the cursor to the histogram chart. 

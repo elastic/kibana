@@ -911,11 +911,15 @@
             "signature": [
               "React.FunctionComponent<(",
               "DisambiguateSet",
-              "<EuiButtonEmptyPropsForAnchor, EuiButtonEmptyPropsForButton> & ",
+              "<EuiButtonEmptyPropsForAnchor, ",
+              "EuiButtonEmptyPropsForButton",
+              "> & ",
               "CommonEuiButtonEmptyProps",
               " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
               "DisambiguateSet",
-              "<EuiButtonEmptyPropsForButton, EuiButtonEmptyPropsForAnchor> & ",
+              "<",
+              "EuiButtonEmptyPropsForButton",
+              ", EuiButtonEmptyPropsForAnchor> & ",
               "CommonEuiButtonEmptyProps",
               " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>)> | React.FunctionComponent<(",
               "DisambiguateSet",
@@ -4736,6 +4740,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
