@@ -18,9 +18,20 @@ export const formatRuleData: (
     const reason = fields[ALERT_REASON] ?? '';
     const alertStartDate = fields[ALERT_START];
     const time = alertStartDate != null ? new Date(alertStartDate).valueOf() : undefined;
+    const url = logsLocator.getRedirectUrl({ time });
+
+    // the alerts UI appends the link to the base url so we need to remove it here
+    const link = extractLink(url);
 
     return {
       reason,
-      link: logsLocator.getRedirectUrl({ time }),
+      link,
     };
   };
+
+const extractLink = (url: string): string => {
+  const substring = '/app';
+  const substringIndex = url.indexOf(substring);
+
+  return url.substring(substringIndex);
+};
