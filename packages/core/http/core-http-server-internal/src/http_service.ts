@@ -36,7 +36,7 @@ import {
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from './types';
-import { registerCoreHandlers } from './lifecycle_handlers';
+import { registerCoreHandlers } from './register_lifecycle_handlers';
 import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {

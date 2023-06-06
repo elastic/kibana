@@ -15,13 +15,24 @@ import type {
   OnPreRoutingToolkit,
   OnPostAuthHandler,
 } from '@kbn/core-http-server';
+import { createTestEnv } from '@kbn/config-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+
+jest.mock('./lifecycle_handlers', () => {
+  const actual = jest.requireActual('./lifecycle_handlers');
+  return {
+    ...actual,
+    createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
+  };
+});
 import {
   createCustomHeadersPreResponseHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
+import { registerCoreHandlers } from './register_lifecycle_handlers';
+
 import { HttpConfig } from './http_config';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
@@ -54,6 +65,10 @@ const forgeRequest = ({
     kibanaRouteOptions,
   });
 };
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('xsrf post-auth handler', () => {
   let toolkit: ToolkitMock;
@@ -422,5 +437,33 @@ describe('customHeaders pre-response handler', () => {
         headerB: 'value-B',
       },
     });
+  });
+});
+
+describe('lifecycle handler registration', () => {
+  it('will not register client version checking if disabled via config', () => {
+    const registrarMock = {
+      registerAuth: jest.fn(),
+      registerOnPostAuth: jest.fn(),
+      registerOnPreAuth: jest.fn(),
+      registerOnPreResponse: jest.fn(),
+      registerOnPreRouting: jest.fn(),
+    };
+
+    const config = {
+      csp: { header: '' },
+      xsrf: {},
+      versioned: {
+        handlerResolution: 'newest',
+        strictClientVersionCheck: false,
+      },
+    } as unknown as HttpConfig;
+
+    registerCoreHandlers(registrarMock, config, createTestEnv());
+    expect(createVersionCheckPostAuthHandler).toHaveBeenCalledTimes(0);
+
+    config.versioned.strictClientVersionCheck = true;
+    registerCoreHandlers(registrarMock, config, createTestEnv());
+    expect(createVersionCheckPostAuthHandler).toHaveBeenCalledTimes(1);
   });
 });
