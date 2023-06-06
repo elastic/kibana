@@ -85,8 +85,8 @@ export const setupKqlQuerySuggestionProvider = (
       selectionEnd
     )}`;
     const fn = await asyncGetSuggestionsByTypeFn();
-    return Promise.all(await fn(cursoredQuery, querySuggestionsArgs)).then((suggestionsByType) => {
-      return dedup(flatten(suggestionsByType));
-    });
+    return Promise.all(await fn(cursoredQuery, querySuggestionsArgs)).then((suggestionsByType) =>
+      dedup(flatten(suggestionsByType))
+    );
   };
 };

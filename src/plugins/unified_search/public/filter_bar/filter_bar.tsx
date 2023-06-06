@@ -25,7 +25,6 @@ export interface Props {
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   hiddenPanelOptions?: FilterItemsProps['hiddenPanelOptions'];
-
   /**
    * Applies extra styles necessary when coupled with the query bar
    */
