@@ -96,6 +96,10 @@ interface DetectionEngineAlertTableProps {
   onRuleChange?: () => void;
 }
 
+// default list of columns is not applicable for the alerts table
+// it is mostly used in Explore tables such as Host/User Events.
+const alertTableDefaults = { ...tableDefaults, columns: [] };
+
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
   flyoutSize,
@@ -139,7 +143,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
   const dataTableFromStore = useShallowEqualSelector(
-    (state) => getTable(state, tableId) ?? tableDefaults
+    (state) => getTable(state, tableId) ?? alertTableDefaults
   );
   const isDataTableInitialized = dataTableFromStore.initialized;
 
