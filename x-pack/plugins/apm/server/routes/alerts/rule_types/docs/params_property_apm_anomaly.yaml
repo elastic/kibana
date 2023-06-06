@@ -1,4 +1,5 @@
 # @kbn-doc-linker partial
+
 required:
   - windowSize
   - windowUnit
