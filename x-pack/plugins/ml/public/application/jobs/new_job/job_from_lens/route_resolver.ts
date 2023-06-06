@@ -9,19 +9,15 @@ import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import { LensGetIn, LensGetOut } from '@kbn/lens-plugin/common/content_management/v1';
+import { i18n } from '@kbn/i18n';
+import { PageDependencies } from '../../../routing/router';
 import { QuickLensJobCreator } from './quick_create_job';
 import { ml } from '../../../services/ml_api_service';
-
-import {
-  getUiSettings,
-  getSavedObjectsClient,
-  getTimefilter,
-  getShare,
-  getLens,
-} from '../../../util/dependency_cache';
+import { getUiSettings, getTimefilter, getShare, getLens } from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
-
 export async function resolver(
+  pageDeps: PageDependencies,
   lensSavedObjectId: string | undefined,
   lensSavedObjectRisonString: string | undefined,
   fromRisonStrong: string,
@@ -30,12 +26,29 @@ export async function resolver(
   filtersRisonString: string,
   layerIndexRisonString: string
 ) {
-  let vis: LensSavedObjectAttributes;
+  let vis: LensSavedObjectAttributes | undefined;
   if (lensSavedObjectId) {
-    vis = await getLensSavedObject(lensSavedObjectId);
+    try {
+      const lensObj = await pageDeps.contentManagement.client.get<LensGetIn, LensGetOut>({
+        contentTypeId: 'lens',
+        id: lensSavedObjectId,
+      });
+
+      // @ts-expect-error LensSavedObjectAttributes from Len's content management API currently differs from public export
+      vis = { ...lensObj.item.attributes, references: lensObj.item.references };
+    } catch (err) {
+      throw new Error(
+        i18n.translate('xpack.ml.newJob.fromLens.createJob.error.getLensContentError', {
+          defaultMessage: `Cannot find Lens content with id {lensSavedObjectId}. Got {err}`,
+          values: { lensSavedObjectId, err },
+        })
+      );
+    }
   } else if (lensSavedObjectRisonString) {
     vis = rison.decode(lensSavedObjectRisonString) as unknown as LensSavedObjectAttributes;
-  } else {
+  }
+
+  if (!vis) {
     throw new Error('Cannot create visualization');
   }
 
@@ -79,10 +92,4 @@ export async function resolver(
     ml
   );
   await jobCreator.createAndStashADJob(vis, from, to, query, filters, layerIndex);
-}
-
-async function getLensSavedObject(id: string) {
-  const savedObjectClient = getSavedObjectsClient();
-  const so = await savedObjectClient.get<LensSavedObjectAttributes>('lens', id);
-  return so.attributes;
 }

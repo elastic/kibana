@@ -98,6 +98,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
+    contentManagement: deps.contentManagement,
   };
 
   const services = {

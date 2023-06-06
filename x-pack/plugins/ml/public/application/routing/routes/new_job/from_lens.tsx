@@ -31,7 +31,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   );
 
   const { context } = useResolver(deps, undefined, undefined, {
-    redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
+    redirect: () => resolver(deps, lensId, vis, from, to, query, filters, layerIndex),
   });
   return (
     <PageLoader context={context}>

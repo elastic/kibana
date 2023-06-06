@@ -13,6 +13,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 export const createMlStartDepsMock = () => ({
   data: dataPluginMock.createStartContract(),
@@ -34,4 +35,5 @@ export const createMlPageDepsMock = () => ({
   config: uiSettingsServiceMock.createStartContract(),
   setBreadcrumbs: jest.fn(),
   redirectToMlAccessDeniedPage: jest.fn(),
+  contentManagement: contentManagementMock.createStartContract(),
 });

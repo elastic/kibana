@@ -31,7 +31,8 @@
       "unifiedSearch",
       "savedObjectsFinder",
       "savedObjectsManagement",
-      "savedSearch"
+      "savedSearch",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "alerting",

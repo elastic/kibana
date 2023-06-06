@@ -191,6 +191,9 @@ export function getBasePath() {
   return cache.basePath;
 }
 
+/**
+ * @deprecated Need to remove dependency of saved objects client in client/public
+ */
 export function getSavedObjectsClient() {
   if (cache.savedObjectsClient === null) {
     throw new Error("savedObjectsClient hasn't been initialized");

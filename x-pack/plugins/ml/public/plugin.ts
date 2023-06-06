@@ -46,6 +46,7 @@ import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/publi
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -72,6 +73,7 @@ export interface MlStartDependencies {
   security: SecurityPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export interface MlSetupDependencies {
@@ -141,6 +143,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             cases: pluginsStart.cases,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
+            contentManagement: pluginsStart.contentManagement,
           },
           params
         );
