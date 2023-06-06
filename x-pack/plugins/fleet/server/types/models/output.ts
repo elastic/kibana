@@ -7,7 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { outputType } from '../../../common/constants';
+import {
+  kafkaAuthType,
+  kafkaCompressionType,
+  kafkaPartitionType,
+  kafkaSaslMechanism,
+  kafkaTopicWhenType,
+  outputType,
+} from '../../../common/constants';
 
 export function validateLogstashHost(val: string) {
   if (val.match(/^http([s]){0,1}:\/\//)) {
@@ -25,23 +32,9 @@ export function validateLogstashHost(val: string) {
   }
 }
 
-const OutputBaseSchema = {
+const BaseSchema = {
   id: schema.maybe(schema.string()),
   name: schema.string(),
-  type: schema.oneOf([
-    schema.literal(outputType.Elasticsearch),
-    schema.literal(outputType.Logstash),
-  ]),
-  hosts: schema.conditional(
-    schema.siblingRef('type'),
-    schema.literal(outputType.Elasticsearch),
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
-      minSize: 1,
-    }),
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
-      minSize: 1,
-    })
-  ),
   is_default: schema.boolean({ defaultValue: false }),
   is_default_monitoring: schema.boolean({ defaultValue: false }),
   ca_sha256: schema.maybe(schema.string()),
@@ -71,7 +64,118 @@ const OutputBaseSchema = {
   ),
 };
 
-export const NewOutputSchema = schema.object({ ...OutputBaseSchema });
+const ElasticSearchBaseSchema = {
+  ...BaseSchema,
+  type: schema.literal(outputType.Elasticsearch),
+  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+};
+
+const LogstashBaseSchema = {
+  ...BaseSchema,
+  type: schema.literal(outputType.Logstash),
+  hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
+};
+
+const KafkaBaseSchema = {
+  ...BaseSchema,
+  type: schema.literal(outputType.Kafka),
+  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  version: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  compression: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaCompressionType.Gzip),
+      schema.literal(kafkaCompressionType.Snappy),
+      schema.literal(kafkaCompressionType.Lz4),
+    ])
+  ),
+  compression_level: schema.conditional(
+    schema.siblingRef('compression'),
+    schema.literal(kafkaCompressionType.Gzip),
+    schema.number(),
+    schema.never()
+  ),
+  client_id: schema.maybe(schema.string()),
+  auth_type: schema.oneOf([
+    schema.literal(kafkaAuthType.Userpass),
+    schema.literal(kafkaAuthType.Ssl),
+    schema.literal(kafkaAuthType.Kerberos),
+  ]),
+  username: schema.maybe(schema.string()),
+  password: schema.conditional(
+    schema.siblingRef('username'),
+    schema.string(),
+    schema.string(),
+    schema.never()
+  ),
+  sasl: schema.maybe(
+    schema.object({
+      mechanism: schema.maybe(
+        schema.oneOf([
+          schema.literal(kafkaSaslMechanism.Plain),
+          schema.literal(kafkaSaslMechanism.ScramSha256),
+          schema.literal(kafkaSaslMechanism.ScramSha512),
+        ])
+      ),
+    })
+  ),
+  ssl: schema.maybe(
+    schema.object({
+      certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+      certificate: schema.maybe(schema.string()),
+      key: schema.maybe(schema.string()),
+    })
+  ),
+  partition: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaPartitionType.Random),
+      schema.literal(kafkaPartitionType.RoundRobin),
+      schema.literal(kafkaPartitionType.Hash),
+    ])
+  ),
+  random: schema.maybe(schema.object({ group_events: schema.maybe(schema.number()) })),
+  round_robin: schema.maybe(schema.object({ group_events: schema.maybe(schema.number()) })),
+  hash: schema.maybe(
+    schema.object({ hash: schema.maybe(schema.string()), random: schema.maybe(schema.boolean()) })
+  ),
+  topics: schema.arrayOf(
+    schema.object({
+      topic: schema.string(),
+      when: schema.maybe(
+        schema.object({
+          type: schema.maybe(
+            schema.oneOf([
+              schema.literal(kafkaTopicWhenType.And),
+              schema.literal(kafkaTopicWhenType.Not),
+              schema.literal(kafkaTopicWhenType.Or),
+              schema.literal(kafkaTopicWhenType.Equals),
+              schema.literal(kafkaTopicWhenType.Contains),
+              schema.literal(kafkaTopicWhenType.Regexp),
+              schema.literal(kafkaTopicWhenType.HasFields),
+              schema.literal(kafkaTopicWhenType.Network),
+              schema.literal(kafkaTopicWhenType.Range),
+            ])
+          ),
+          condition: schema.maybe(schema.string()),
+        })
+      ),
+    }),
+    { minSize: 1 }
+  ),
+  headers: schema.maybe(
+    schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }))
+  ),
+  timeout: schema.maybe(schema.number()),
+  broker_timeout: schema.maybe(schema.number()),
+};
+
+export const OutputBaseSchema = schema.oneOf([
+  schema.object(ElasticSearchBaseSchema),
+  schema.object(LogstashBaseSchema),
+  schema.object(KafkaBaseSchema),
+]);
+
+export const NewOutputSchema = OutputBaseSchema;
 
 export const UpdateOutputSchema = schema.object({
   name: schema.maybe(schema.string()),
@@ -113,7 +217,7 @@ export const UpdateOutputSchema = schema.object({
   ),
 });
 
-export const OutputSchema = schema.object({
+export const OutputSchema = {
   ...OutputBaseSchema,
-  id: schema.string(),
-});
+  ...schema.object({ id: schema.string() }),
+};

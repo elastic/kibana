@@ -390,6 +390,7 @@ class OutputService {
     if (!output.config_yaml && output.shipper) {
       data.shipper = null;
     }
+
     if (output.config_yaml) {
       const configJs = safeLoad(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;

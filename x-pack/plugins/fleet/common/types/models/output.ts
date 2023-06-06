@@ -7,8 +7,16 @@
 
 import type { outputType } from '../../constants';
 import type { ValueOf } from '..';
+import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
+import type { kafkaPartitionType } from '../../constants';
+import type { kafkaTopicWhenType } from '../../constants';
 
 export type OutputType = typeof outputType;
+export type KafkaCompressionType = typeof kafkaCompressionType;
+export type KafkaAuthType = typeof kafkaAuthType;
+export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
+export type KafkaPartitionType = typeof kafkaPartitionType;
+export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 
 export interface NewOutput {
   is_default: boolean;
@@ -45,4 +53,44 @@ export interface ShipperOutput {
   mem_queue_events?: number | null;
   queue_flush_timeout?: number | null;
   max_batch_bytes?: number | null;
+}
+
+export interface KafkaOutput extends NewOutput {
+  hosts: string[];
+  client_id: string; // defaults to 'Elastic Agent'
+  version?: string; // defaults to 1.0.0 by beats/agents if not set
+  key?: string;
+  compression?: ValueOf<KafkaCompressionType>; // defaults to 'gzip'
+  compression_level?: number; // defaults to 4, only for gzip
+  auth_type: ValueOf<KafkaAuthType>;
+  // user_pass auth
+  username?: string;
+  password?: string;
+  sasl?: {
+    mechanism?: ValueOf<KafkaSaslMechanism>;
+  };
+  partition?: ValueOf<KafkaPartitionType>;
+  random?: {
+    group_events?: number;
+  };
+  round_robin?: {
+    group_events?: number;
+  };
+  hash?: {
+    hash?: string;
+    random?: boolean;
+  };
+  topics: Array<{
+    topic: string;
+    when?: {
+      type?: ValueOf<KafkaTopicWhenType>;
+      conditional?: string;
+    };
+  }>;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
+  timeout?: number;
+  broker_timeout?: number;
 }
