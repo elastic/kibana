@@ -67,6 +67,8 @@ export class ServerlessPlugin
         (core.chrome as InternalChromeStart).project.setSideNavComponent(sideNavigationComponent),
       setNavigation: (projectNavigation) =>
         (core.chrome as InternalChromeStart).project.setNavigation(projectNavigation),
+      setBreadcrumbs: (breadcrumbs, params) =>
+        (core.chrome as InternalChromeStart).project.setBreadcrumbs(breadcrumbs, params),
     };
   }
 
