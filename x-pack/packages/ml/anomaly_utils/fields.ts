@@ -98,7 +98,7 @@ export interface Aggregation {
    */
   type: typeof METRIC_AGG_TYPE;
   /**
-   * The model lot agg definition.
+   * The model plot agg definition.
    */
   mlModelPlotAgg: {
     min: string;
