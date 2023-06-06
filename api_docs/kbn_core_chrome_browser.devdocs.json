@@ -1491,6 +1491,22 @@
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [
+              "\nTemporarilly we allow href to be passed.\nOnce all the deeplinks will be exposed in packages we will not allow href anymore\nand force deeplink id to be passed"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
