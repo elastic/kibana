@@ -17,9 +17,9 @@ import type {
   MlKibanaUrlConfig,
   MlCustomUrlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
+import type { DataGridItem } from '@kbn/ml-data-grid';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
-import type { DataGridItem } from '../components/data_grid';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.

@@ -35,6 +35,7 @@ export function SeriesDatePicker({ series, seriesId }: Props) {
 
   return (
     <EuiSuperDatePicker
+      width="full"
       start={series?.time?.from}
       end={series?.time?.to}
       onTimeChange={onTimeChange}

@@ -39,6 +39,12 @@ export interface ChromeProjectNavigationNode {
   icon?: string;
   /** Optional children of the navigation node */
   children?: ChromeProjectNavigationNode[];
+  /**
+   * Temporarilly we allow href to be passed.
+   * Once all the deeplinks will be exposed in packages we will not allow href anymore
+   * and force deeplink id to be passed
+   */
+  href?: string;
 }
 
 /** @public */
