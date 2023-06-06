@@ -8,6 +8,8 @@
 import { PackageInputType } from '../..';
 import { getVarsFor } from './fleet_policies';
 
+const secretTokenRegex = /^[a-zA-Z0-9]+$/;
+
 describe('getVarsFor', () => {
   it('returns the vars object for the keys defined plus secret token', () => {
     const config: PackageInputType = {
@@ -24,6 +26,7 @@ describe('getVarsFor', () => {
     });
     expect(secretToken?.type).toBe('text');
     expect(secretToken?.value.length).toBe(16);
+    expect(secretTokenRegex.test(secretToken?.value)).toBeTruthy();
     expect(result).toEqual({
       host: { type: 'text', value: 'example.com' },
       tls_enabled: { type: 'bool', value: true },
@@ -40,7 +43,7 @@ describe('getVarsFor', () => {
       tls_supported_protocols: ['foo', 'bar'],
       tls_certificate_path: '123',
       tls_key_path: '456',
-      secret_token: 'bar',
+      secret_token: 'bar!',
     };
 
     const { secret_token: secretToken, ...result } = getVarsFor({
@@ -48,8 +51,9 @@ describe('getVarsFor', () => {
       includeSecretToken: true,
     });
     expect(secretToken?.type).toBe('text');
-    expect(secretToken?.value).not.toBe('bar');
+    expect(secretToken?.value).not.toBe('bar!');
     expect(secretToken?.value.length).toBe(16);
+    expect(secretTokenRegex.test(secretToken?.value)).toBeTruthy();
     expect(result).toEqual({
       host: { type: 'text', value: 'example.com' },
       tls_enabled: { type: 'bool', value: true },
