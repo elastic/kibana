@@ -5,10 +5,8 @@
  * 2.0.
  */
 import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  policiesQueryParamsSchema,
-  DEFAULT_POLICIES_PER_PAGE,
-} from '../../../common/schemas/policy';
+import { policiesQueryParamsSchema } from '../../../common';
+import { DEFAULT_POLICIES_PER_PAGE } from '../../../common/constants';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCloudDefendPackagePolicies,

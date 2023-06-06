@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import Chance from 'chance';
-import type { CloudDefendPolicy } from '../../../common/types';
+import type { CloudDefendPolicy } from '../../../common';
 
 type CreateCloudDefendIntegrationFixtureInput = {
   chance?: Chance.Chance;

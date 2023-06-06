@@ -16,11 +16,7 @@ import {
   STATUS_ROUTE_PATH,
 } from '../../../common/constants';
 import type { CloudDefendApiRequestHandlerContext, CloudDefendRouter } from '../../types';
-import type {
-  CloudDefendSetupStatus,
-  CloudDefendStatusCode,
-  IndexStatus,
-} from '../../../common/types';
+import type { CloudDefendSetupStatus, CloudDefendStatusCode, IndexStatus } from '../../../common';
 import {
   getAgentStatusesByAgentPolicies,
   getCloudDefendAgentPolicies,
@@ -168,16 +164,16 @@ const getCloudDefendStatus = async ({
   return response;
 };
 
-export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter): void =>
-  router.get(
-    {
+export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter) =>
+  router.versioned
+    .get({
+      access: 'internal',
       path: STATUS_ROUTE_PATH,
-      validate: {},
       options: {
         tags: ['access:cloud-defend-read'],
       },
-    },
-    async (context, request, response) => {
+    })
+    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const cloudDefendContext = await context.cloudDefend;
       try {
         const status = await getCloudDefendStatus(cloudDefendContext);
@@ -194,5 +190,4 @@ export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter): void
           statusCode: error.statusCode,
         });
       }
-    }
-  );
+    });
