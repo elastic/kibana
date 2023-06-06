@@ -10,7 +10,7 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core
 import { ProfilingPlugin } from './plugin';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   elasticsearch: schema.maybe(
     schema.object({
       hosts: schema.string(),
