@@ -272,7 +272,7 @@ describe('terms', () => {
             accuracyMode: true,
             include: ['C.'],
             exclude: ['U.'],
-            orderBy: { type: 'significant' }
+            orderBy: { type: 'significant' },
           },
         },
         'col1',
