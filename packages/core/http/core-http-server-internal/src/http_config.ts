@@ -167,7 +167,7 @@ const configSchema = schema.object(
       }
     ),
     restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
-    version: schema.object({
+    versioned: schema.object({
       // Which handler resolution algo to use: "newest" or "oldest"
       handlerResolution: schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
         defaultValue: 'oldest',
@@ -247,6 +247,7 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
+  public versioned: { handlerResolution: 'newest' | 'oldest'; strictClientVersionCheck: boolean };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
 
@@ -294,6 +295,7 @@ export class HttpConfig implements IHttpConfig {
 
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
     this.eluMonitor = rawHttpConfig.eluMonitor;
+    this.versioned = rawHttpConfig.version;
   }
 }
 
