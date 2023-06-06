@@ -15,7 +15,17 @@ export const assetTypeRT = rt.union([
 
 export type AssetType = rt.TypeOf<typeof assetTypeRT>;
 
-export type AssetKind = 'cluster' | 'host' | 'pod' | 'container' | 'service';
+export const assetKindRT = rt.union([
+  rt.literal('cluster'),
+  rt.literal('host'),
+  rt.literal('pod'),
+  rt.literal('container'),
+  rt.literal('service'),
+  rt.literal('alert'),
+]);
+
+export type AssetKind = rt.TypeOf<typeof assetKindRT>;
+
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -124,10 +134,11 @@ export interface K8sCluster extends WithTimestamp {
 
 export interface AssetFilters {
   type?: AssetType | AssetType[];
-  kind?: AssetKind;
+  kind?: AssetKind | AssetKind[];
   ean?: string | string[];
   id?: string;
   typeLike?: string;
+  kindLike?: string;
   eanLike?: string;
   collectionVersion?: number | 'latest' | 'all';
   from?: string;
