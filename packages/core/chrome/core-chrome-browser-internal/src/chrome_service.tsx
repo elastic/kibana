@@ -177,11 +177,6 @@ export class ChromeService {
       chromeStyle$.next(style);
     };
 
-    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
-      validateChromeStyle();
-      projectNavigation.setProjectSideNavComponent(component);
-    };
-
     const validateChromeStyle = () => {
       const chromeStyle = chromeStyle$.getValue();
       if (chromeStyle !== 'project') {
@@ -190,6 +185,11 @@ export class ChromeService {
           `Invalid ChromeStyle value of "${chromeStyle}". This method requires ChromeStyle set to "project".`
         );
       }
+    };
+
+    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
+      validateChromeStyle();
+      projectNavigation.setProjectSideNavComponent(component);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
