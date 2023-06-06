@@ -17,7 +17,7 @@ import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ES_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -186,7 +186,7 @@ export function getFormBasedDatasource({
       return loadInitialState({
         persistedState,
         references,
-        defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+        defaultIndexPatternId: uiSettings.get('defaultIndex'),
         storage,
         initialContext,
         indexPatternRefs,
@@ -425,8 +425,16 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
+    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
+      toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        uiSettings,
+        dateRange,
+        nowInstant,
+        searchSessionId
+      ),
 
     renderLayerSettings(domElement, props) {
       render(
@@ -578,7 +586,6 @@ export function getFormBasedDatasource({
                 uiSettings={uiSettings}
                 storage={storage}
                 fieldFormats={fieldFormats}
-                savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
@@ -854,7 +861,8 @@ export function getFormBasedDatasource({
             layer,
             columnId,
             frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
-            frameDatasourceAPI.dateRange
+            frameDatasourceAPI.dateRange,
+            uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
         }
       );

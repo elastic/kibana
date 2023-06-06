@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import { EuiCard } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { DecorateWithKibanaContext } from './processes.story_decorators';
-
+import type { Meta, Story } from '@storybook/react/types-6-0';
+import { DecorateWithKibanaContext } from '../../__stories__/decorator';
 import { Processes, type ProcessesProps } from './processes';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 
-export default {
+const stories: Meta<ProcessesProps> = {
   title: 'infra/Asset Details View/Components/Processes',
-  decorators: [
-    (wrappedStory) => <EuiCard title="Processes">{wrappedStory()}</EuiCard>,
-    (wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>,
-    decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
-  ],
+  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: Processes,
   args: {
     node: {
@@ -43,39 +35,48 @@ export default {
     nodeType: 'host',
     currentTime: 1683630468,
   },
-} as Meta;
+};
 
 const Template: Story<ProcessesProps> = (args) => {
   return <Processes {...args} />;
 };
 
-export const DefaultProcessesAndSummary = Template.bind({});
-DefaultProcessesAndSummary.args = {};
-
-export const Loading = Template.bind({});
-Loading.parameters = {
-  show: {
-    contentType: 'loading',
-  },
-};
+export const Default = Template.bind({});
+Default.args = {};
 
 export const OnlySummary = Template.bind({});
 OnlySummary.parameters = {
-  show: {
-    contentType: 'onlySummary',
+  apiResponse: {
+    mock: 'onlySummary',
   },
 };
 
 export const OnlyProcesses = Template.bind({});
 OnlyProcesses.parameters = {
-  show: {
-    contentType: 'onlyProcesses',
+  apiResponse: {
+    mock: 'onlyProcesses',
   },
 };
 
 export const NoData = Template.bind({});
 NoData.parameters = {
-  show: {
-    contentType: 'noData',
+  apiResponse: {
+    mock: 'noData',
   },
 };
+
+export const LoadingState = Template.bind({});
+LoadingState.parameters = {
+  apiResponse: {
+    mock: 'loading',
+  },
+};
+
+export const ErrorState = Template.bind({});
+ErrorState.parameters = {
+  apiResponse: {
+    mock: 'error',
+  },
+};
+
+export default stories;

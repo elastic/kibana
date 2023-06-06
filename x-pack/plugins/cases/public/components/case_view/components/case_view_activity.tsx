@@ -271,7 +271,7 @@ export const CaseViewActivity = ({
           ) : null}
           <SeveritySidebarSelector
             isDisabled={!permissions.update}
-            isLoading={isLoading}
+            isLoading={isLoading && loadingKey === 'severity'}
             selectedSeverity={caseData.severity}
             onSeverityChange={onUpdateSeverity}
           />

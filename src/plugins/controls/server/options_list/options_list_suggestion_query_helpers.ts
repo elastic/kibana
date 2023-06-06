@@ -20,8 +20,11 @@ export const getSortType = (sort?: OptionsListSortingType) => {
     : { [OPTIONS_LIST_DEFAULT_SORT.by]: OPTIONS_LIST_DEFAULT_SORT.direction };
 };
 
-export const getEscapedQuery = (q: string = '') =>
+export const getEscapedRegexQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
+
+export const getEscapedWildcardQuery = (q: string = '') =>
+  q.replace(/[?*]/g, (match) => `\\${match}`);
 
 export const getIpBuckets = (
   rawEsResult: any,
