@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Tooltip } from './tooltip';
 import { generateSeriesId, LayersAccessorsTitles, LayersFieldFormats } from '../../helpers';
-import { XYChartSeriesIdentifier } from '@elastic/charts';
+import { XYChartSeriesIdentifier, Tooltip } from '@elastic/charts';
 import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
 import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 

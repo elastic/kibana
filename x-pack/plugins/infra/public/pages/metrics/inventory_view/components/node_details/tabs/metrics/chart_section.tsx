@@ -14,6 +14,7 @@ import {
   Settings,
   TickFormatter,
   TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import moment from 'moment';
 import React from 'react';
@@ -91,11 +92,8 @@ export const ChartSection = ({
           ticks={6}
           showGridLines
         />
-        <Settings
-          onPointerUpdate={onPointerUpdate}
-          tooltip={tooltipProps}
-          {...getTimelineChartThemes(isDarkMode)}
-        />
+        <Tooltip {...tooltipProps} />
+        <Settings onPointerUpdate={onPointerUpdate} {...getTimelineChartThemes(isDarkMode)} />
       </Chart>
     </>
   );

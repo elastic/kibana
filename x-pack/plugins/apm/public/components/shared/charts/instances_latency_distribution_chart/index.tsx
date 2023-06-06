@@ -17,6 +17,7 @@ import {
   TooltipInfo,
   TooltipProps,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -123,10 +124,10 @@ export function InstancesLatencyDistributionChart({
         id="instancesLatencyDistribution"
       >
         <Chart>
+          <Tooltip {...tooltip} />
           <Settings
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}
-            tooltip={tooltip}
             showLegend
             theme={chartTheme}
             xDomain={xDomain}

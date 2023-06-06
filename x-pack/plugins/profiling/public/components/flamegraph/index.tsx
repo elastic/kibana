@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
+import {
+  Chart,
+  Datum,
+  Flame,
+  FlameLayerValue,
+  PartialTheme,
+  Settings,
+  Tooltip,
+} from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -108,45 +116,45 @@ export function FlameGraph({
                         setHighlightedVmIndex(selectedElement!.vmIndex);
                       }
                     }}
-                    tooltip={{
-                      actions: [{ label: '', onSelect: () => {} }],
-                      customTooltip: (props) => {
-                        if (!primaryFlamegraph) {
-                          return <></>;
-                        }
+                  />
+                  <Tooltip
+                    actions={[{ label: '', onSelect: () => {} }]}
+                    customTooltip={(props) => {
+                      if (!primaryFlamegraph) {
+                        return <></>;
+                      }
 
-                        const valueIndex = props.values[0].valueAccessor as number;
-                        const label = primaryFlamegraph.Label[valueIndex];
-                        const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
-                        const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
-                        const totalSeconds = primaryFlamegraph.TotalSeconds;
-                        const nodeID = primaryFlamegraph.ID[valueIndex];
+                      const valueIndex = props.values[0].valueAccessor as number;
+                      const label = primaryFlamegraph.Label[valueIndex];
+                      const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
+                      const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
+                      const totalSeconds = primaryFlamegraph.TotalSeconds;
+                      const nodeID = primaryFlamegraph.ID[valueIndex];
 
-                        const comparisonNode = columnarData.comparisonNodesById[nodeID];
+                      const comparisonNode = columnarData.comparisonNodesById[nodeID];
 
-                        return (
-                          <FlameGraphTooltip
-                            isRoot={valueIndex === 0}
-                            label={label}
-                            countInclusive={countInclusive}
-                            countExclusive={countExclusive}
-                            totalSamples={totalSamples}
-                            totalSeconds={totalSeconds}
-                            comparisonCountInclusive={comparisonNode?.CountInclusive}
-                            comparisonCountExclusive={comparisonNode?.CountExclusive}
-                            comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
-                            comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
-                            baselineScaleFactor={baseline}
-                            comparisonScaleFactor={comparison}
-                            onShowMoreClick={() => {
-                              if (!showInformationWindow) {
-                                toggleShowInformationWindow();
-                              }
-                              setHighlightedVmIndex(valueIndex);
-                            }}
-                          />
-                        );
-                      },
+                      return (
+                        <FlameGraphTooltip
+                          isRoot={valueIndex === 0}
+                          label={label}
+                          countInclusive={countInclusive}
+                          countExclusive={countExclusive}
+                          totalSamples={totalSamples}
+                          totalSeconds={totalSeconds}
+                          comparisonCountInclusive={comparisonNode?.CountInclusive}
+                          comparisonCountExclusive={comparisonNode?.CountExclusive}
+                          comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
+                          comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
+                          baselineScaleFactor={baseline}
+                          comparisonScaleFactor={comparison}
+                          onShowMoreClick={() => {
+                            if (!showInformationWindow) {
+                              toggleShowInformationWindow();
+                            }
+                            setHighlightedVmIndex(valueIndex);
+                          }}
+                        />
+                      );
                     }}
                   />
                   <Flame

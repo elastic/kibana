@@ -22,6 +22,7 @@ import {
   RectAnnotationDatum,
   XYChartElementEvent,
   TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -293,11 +294,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             ticks={6}
             showGridLines
           />
-          <Settings
-            tooltip={tooltipProps}
-            onElementClick={onClickPoint}
-            {...getTimelineChartThemes(isDarkMode)}
-          />
+          <Tooltip {...tooltipProps} />
+          <Settings onElementClick={onClickPoint} {...getTimelineChartThemes(isDarkMode)} />
         </Chart>
       </TimelineChartContainer>
     </TimelineContainer>

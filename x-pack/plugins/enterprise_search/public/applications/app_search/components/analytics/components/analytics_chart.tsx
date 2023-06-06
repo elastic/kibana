@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import moment from 'moment';
 
-import { Chart, Settings, LineSeries, CurveType, Axis } from '@elastic/charts';
+import { Chart, Settings, LineSeries, CurveType, Axis, Tooltip } from '@elastic/charts';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
@@ -36,12 +36,12 @@ export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
 
   return (
     <Chart size={{ height }}>
+      <Tooltip
+        headerFormatter={(tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT)}
+      />
       <Settings
         theme={charts.theme.useChartsTheme()}
         baseTheme={charts.theme.useChartsBaseTheme()}
-        tooltip={{
-          headerFormatter: (tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT),
-        }}
       />
       {lines.map(({ id, data, isDashed }) => (
         <LineSeries

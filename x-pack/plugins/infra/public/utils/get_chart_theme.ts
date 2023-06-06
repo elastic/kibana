@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  Theme,
-  PartialTheme,
-  LIGHT_THEME,
-  DARK_THEME,
-  SettingsProps,
-} from '@elastic/charts';
+import { Theme, PartialTheme, LIGHT_THEME, DARK_THEME, SettingsProps } from '@elastic/charts';
 
 // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
 export function getChartTheme(isDarkMode: boolean): Theme {
@@ -33,11 +27,14 @@ const TIMELINE_LIGHT_THEME: PartialTheme = {
   },
 };
 
-
-export const getTimelineChartThemes = (isDarkMode: boolean): Pick<SettingsProps, 'baseTheme' | 'theme'> => isDarkMode ? {
-    baseTheme: DARK_THEME
-  } :
-  {
-    baseTheme: LIGHT_THEME,
-    theme: TIMELINE_LIGHT_THEME,
-  }
+export const getTimelineChartThemes = (
+  isDarkMode: boolean
+): Pick<SettingsProps, 'baseTheme' | 'theme'> =>
+  isDarkMode
+    ? {
+        baseTheme: DARK_THEME,
+      }
+    : {
+        baseTheme: LIGHT_THEME,
+        theme: TIMELINE_LIGHT_THEME,
+      };

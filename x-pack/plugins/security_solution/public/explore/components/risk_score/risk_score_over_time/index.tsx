@@ -16,6 +16,7 @@ import {
   Position,
   AnnotationDomainType,
   LineAnnotation,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
@@ -144,13 +145,10 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                     <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
                   ) : (
                     <Chart>
-                      <Settings
-                        {...chartDefaultSettings}
-                        theme={theme}
-                        tooltip={{
-                          headerFormatter,
-                        }}
+                      <Tooltip
+                        headerFormatter={headerFormatter}
                       />
+                      <Settings {...chartDefaultSettings} theme={theme} />
                       <Axis
                         id="bottom"
                         position={Position.Bottom}

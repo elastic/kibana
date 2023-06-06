@@ -18,6 +18,7 @@ import {
   XYChartElementEvent,
   TooltipContainer,
   CustomTooltip,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';

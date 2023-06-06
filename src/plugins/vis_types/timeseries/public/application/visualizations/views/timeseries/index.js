@@ -24,6 +24,7 @@ import {
   TooltipType,
   StackMode,
   Placement,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -170,6 +171,15 @@ export const TimeSeries = ({
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
+      <Tooltip
+        snap
+        type={
+          tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
+            ? TooltipType.Follow
+            : TooltipType.VerticalCursor}
+        boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+        headerFormatter={tooltipFormatter}
+      />
       <Settings
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
@@ -217,15 +227,6 @@ export const TimeSeries = ({
           chartTheme,
         ]}
         baseTheme={baseTheme}
-        tooltip={{
-          snap: true,
-          type:
-            tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
-              ? TooltipType.Follow
-              : TooltipType.VerticalCursor,
-          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-          headerFormatter: tooltipFormatter,
-        }}
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },
         }}

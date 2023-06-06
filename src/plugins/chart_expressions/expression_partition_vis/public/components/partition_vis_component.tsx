@@ -19,6 +19,7 @@ import {
   SeriesIdentifier,
   PartitionElementEvent,
   SettingsProps,
+  Tooltip,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -484,6 +485,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 splitColumnAccessor={splitChartColumnAccessor}
                 splitRowAccessor={splitChartRowAccessor}
               />
+              <Tooltip {...tooltip} />
               <Settings
                 noResults={
                   <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
@@ -498,7 +500,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 legendSort={customLegendSort}
-                tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
                 onElementClick={([elementEvent]) => {
                   // this cast is safe because we are rendering a partition chart

@@ -30,6 +30,7 @@ import {
   Settings,
   TooltipSettings,
   TooltipValue,
+  Tooltip,
 } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -439,6 +440,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 >
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
+                      <Tooltip {...tooltipOptions} />
                       <Settings
                         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
@@ -447,7 +449,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}
-                        tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
                       />

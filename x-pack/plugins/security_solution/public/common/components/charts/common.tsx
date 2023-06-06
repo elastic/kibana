@@ -18,7 +18,7 @@ import type {
 } from '@elastic/charts';
 import { DARK_THEME, LIGHT_THEME, Position } from '@elastic/charts';
 import { EuiFlexGroup } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';

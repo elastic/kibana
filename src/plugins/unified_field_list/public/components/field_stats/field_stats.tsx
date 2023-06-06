@@ -31,6 +31,7 @@ import {
   ScaleType,
   Settings,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
@@ -485,8 +486,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         <div data-test-subj="unifiedFieldStats-timeDistribution">
           <div data-test-subj={`${dataTestSubject}-histogram`}>
             <Chart size={{ height: 200, width: 300 - 32 }}>
+              <Tooltip type={TooltipType.None} />
               <Settings
-                tooltip={{ type: TooltipType.None }}
                 theme={customChartTheme}
                 baseTheme={chartBaseTheme}
                 xDomain={
@@ -535,12 +536,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             data-test-subj={`${dataTestSubject}-histogram`}
             size={{ height: 200, width: '100%' }}
           >
-            <Settings
-              rotation={90}
-              tooltip={{ type: TooltipType.None }}
-              theme={customChartTheme}
-              baseTheme={chartBaseTheme}
-            />
+            <Tooltip type={TooltipType.None} />
+            <Settings rotation={90} theme={customChartTheme} baseTheme={chartBaseTheme} />
 
             <Axis
               id="key"

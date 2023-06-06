@@ -20,6 +20,7 @@ import {
   Settings,
   Tooltip,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 
 import { XYChartElementEvent } from '@elastic/charts/dist/specs/settings';

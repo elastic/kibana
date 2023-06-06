@@ -46,6 +46,7 @@ import {
   timeFormatter,
   Tooltip,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import {
