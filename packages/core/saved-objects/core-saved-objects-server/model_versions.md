@@ -212,7 +212,7 @@ This is a new concept introduced by model versions. This schema is used for inte
 When retrieving a savedObject document from an index, if the version of the document is higher than the latest version
 known of the Kibana instance, the document will go through the `forwardCompatibility` schema of the associated model version.
 
-These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert the document to 
+**Important:** These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert the document to 
 the **shape** of the document at the given version.
 
 Basically, this schema should keep all the known fields of a given version, and remove all the unknown fields, without throwing.
@@ -262,6 +262,10 @@ const myType: SavedObjectsType = {
           { foo: schema.string(), bar: schema.string() },
           { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
         ),
+        // schema that will be used to validate input during `create` and `bulkCreate`
+        create:  schema.object(
+          { foo: schema.string(), bar: schema.string() },
+        )
       },
     },
   },
@@ -274,10 +278,14 @@ const myType: SavedObjectsType = {
 };
 ```
 
+**Important:** Note the `{ unknowns: 'ignore' }` in the `forwardCompatibility`'s schema options. This is required when using
+               `config-schema` based schemas for `forwardCompatibility`, as this what will evict the additional fields without
+               throwing an error (like `_.pick`ing only the known fields)
+
 From here, say we want to introduce a new `dolly` field that is not indexed, and that we don't need to populate with a default value.
 
 To achieve that, we need to introduce a new model version, with the only thing to do will be to define the 
-new `forwardCompatibility` schema to include this new field.
+associated schemas to include this new field.
 
 The added model version would look like:
 
@@ -287,12 +295,14 @@ let modelVersion2: SavedObjectsModelVersion = {
   // not an indexed field, no data backfill, so changes are actually empty
   changes: [],
   schemas: {
-    // the only addition in this model version: taking the new field into account
-    // for the forwardCompatibility schema
+    // the only addition in this model version: taking the new field into account for the schemas
     forwardCompatibility: schema.object(
       { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
       { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
     ),
+    create:  schema.object(
+      { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
+    )
   },
 };
 ```
@@ -312,6 +322,9 @@ const myType: SavedObjectsType = {
           { foo: schema.string(), bar: schema.string() },
           { unknowns: 'ignore' }
         ),
+        create:  schema.object(
+          { foo: schema.string(), bar: schema.string() },
+        )
       },
     },
     2: {
@@ -321,6 +334,9 @@ const myType: SavedObjectsType = {
           { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
           { unknowns: 'ignore' }
         ),
+        create:  schema.object(
+          { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
+        )
       },
     },
   },
@@ -343,7 +359,7 @@ To reuse the previous example, let's say the `dolly` field we want to add would 
 In that case, the new version needs to do the following:
 - add a `mappings_addition` type change to define the new mappings
 - update the root `mappings` accordingly
-- add an updated `forwardCompatibility` as we did for the previous example
+- add the updated schemas as we did for the previous example
 
 The new version definition would look like: 
 
@@ -364,6 +380,9 @@ let modelVersion2: SavedObjectsModelVersion = {
       { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
       { unknowns: 'ignore' }
     ),
+    create:  schema.object(
+      { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
+    )
   },
 };
 ```
@@ -375,6 +394,7 @@ mappings: {
   properties: {
     foo: { type: 'text' },
     bar: { type: 'text' },
+    dolly: { type: 'text' },
   },
 },
 ```
@@ -402,6 +422,9 @@ const myType: SavedObjectsType = {
           { foo: schema.string(), bar: schema.string() },
           { unknowns: 'ignore' }
         ),
+        create:  schema.object(
+          { foo: schema.string(), bar: schema.string() },
+        )
       },
     },
     2: {
@@ -418,6 +441,9 @@ const myType: SavedObjectsType = {
           { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
           { unknowns: 'ignore' }
         ),
+        create:  schema.object(
+          { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
+        )
       },
     },
   },
@@ -463,6 +489,9 @@ let modelVersion2: SavedObjectsModelVersion = {
       { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
       { unknowns: 'ignore' }
     ),
+    create:  schema.object(
+      { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
+    )
   },
 };
 ```
@@ -490,6 +519,9 @@ const myType: SavedObjectsType = {
           { foo: schema.string(), bar: schema.string() },
           { unknowns: 'ignore' }
         ),
+        create:  schema.object(
+          { foo: schema.string(), bar: schema.string() },
+        )
       },
     },
     2: {
@@ -513,6 +545,9 @@ const myType: SavedObjectsType = {
           { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
           { unknowns: 'ignore' }
         ),
+        create:  schema.object(
+          { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
+        )
       },
     },
   },
