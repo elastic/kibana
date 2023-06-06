@@ -11,7 +11,7 @@ import { EventAnnotationGroupConfig, getDefaultManualAnnotation } from '../../..
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { GroupEditorControls } from './group_editor_controls';
-import { EuiSelectProps, EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
+import { EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
@@ -109,15 +109,17 @@ describe('event annotation group editor', () => {
       wrapper.find(TagSelector).prop('onTagsSelected')(['im a new tag!']);
     });
 
-    const setDataViewId = (id: string) =>
-      (
-        wrapper.find(
-          "EuiSelect[data-test-subj='annotationDataViewSelection']"
-        ) as ReactWrapper<EuiSelectProps>
-      ).prop('onChange')!({ target: { value: id } } as React.ChangeEvent<HTMLSelectElement>);
+    // TODO - reenable data view selection tests when ENABLE_INDIVIDUAL_ANNOTATION_EDITING is set to true!
 
-    setDataViewId(dataViewId);
-    setDataViewId(adHocDataViewId);
+    // const setDataViewId = (id: string) =>
+    //   (
+    //     wrapper.find(
+    //       "EuiSelect[data-test-subj='annotationDataViewSelection']"
+    //     ) as ReactWrapper<EuiSelectProps>
+    //   ).prop('onChange')!({ target: { value: id } } as React.ChangeEvent<HTMLSelectElement>);
+
+    // setDataViewId(dataViewId);
+    // setDataViewId(adHocDataViewId);
 
     expect(updateMock.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -162,31 +164,6 @@ describe('event annotation group editor', () => {
             "tags": Array [
               "im a new tag!",
             ],
-            "title": "My group",
-          },
-        ],
-        Array [
-          Object {
-            "annotations": Array [],
-            "dataViewSpec": undefined,
-            "description": "",
-            "ignoreGlobalFilters": false,
-            "indexPatternId": "my-index-pattern",
-            "tags": Array [],
-            "title": "My group",
-          },
-        ],
-        Array [
-          Object {
-            "annotations": Array [],
-            "dataViewSpec": Object {
-              "id": "ad-hoc",
-              "title": "Ad Hoc Data View",
-            },
-            "description": "",
-            "ignoreGlobalFilters": false,
-            "indexPatternId": "ad-hoc",
-            "tags": Array [],
             "title": "My group",
           },
         ],

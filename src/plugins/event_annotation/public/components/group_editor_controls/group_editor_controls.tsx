@@ -131,39 +131,42 @@ export const GroupEditorControls = ({
             }
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('eventAnnotation.groupEditor.dataView', {
-            defaultMessage: 'Data view',
-          })}
-        >
-          <EuiSelect
-            data-test-subj="annotationDataViewSelection"
-            options={dataViews.map(({ id: value, title, name }) => ({
-              value,
-              text: name ?? title,
-            }))}
-            value={group.indexPatternId}
-            onChange={({ target: { value } }) =>
-              update({
-                ...group,
-                indexPatternId: value,
-                dataViewSpec: value === adHocDataView?.id ? adHocDataView.toSpec(false) : undefined,
-              })
-            }
-          />
-        </EuiFormRow>
         {ENABLE_INDIVIDUAL_ANNOTATION_EDITING && (
-          <EuiFormRow
-            label={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
-              defaultMessage: 'Annotations',
-            })}
-          >
-            <AnnotationList
-              annotations={group.annotations}
-              selectAnnotation={setSelectedAnnotation}
-              update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
-            />
-          </EuiFormRow>
+          <>
+            <EuiFormRow
+              label={i18n.translate('eventAnnotation.groupEditor.dataView', {
+                defaultMessage: 'Data view',
+              })}
+            >
+              <EuiSelect
+                data-test-subj="annotationDataViewSelection"
+                options={dataViews.map(({ id: value, title, name }) => ({
+                  value,
+                  text: name ?? title,
+                }))}
+                value={group.indexPatternId}
+                onChange={({ target: { value } }) =>
+                  update({
+                    ...group,
+                    indexPatternId: value,
+                    dataViewSpec:
+                      value === adHocDataView?.id ? adHocDataView.toSpec(false) : undefined,
+                  })
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
+                defaultMessage: 'Annotations',
+              })}
+            >
+              <AnnotationList
+                annotations={group.annotations}
+                selectAnnotation={setSelectedAnnotation}
+                update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
+              />
+            </EuiFormRow>
+          </>
         )}
       </EuiForm>
     </>
