@@ -221,7 +221,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="telemetry.telemetryConfigAndLinkDescription"
-            defaultMessage="Enabling usage collection (also known as Telemetry) allows us to learn
+            defaultMessage="Enabling usage collection allows us to learn
             what our users are most interested in, so we can improve our products and services.
             Refer to our {privacyStatementLink}."
             values={{
