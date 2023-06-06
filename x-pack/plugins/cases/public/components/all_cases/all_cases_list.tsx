@@ -69,7 +69,7 @@ const mapToReadableSolutionName = (solution: string): Solution => {
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
-  onRowClick?: (theCase?: CaseUI) => void;
+  onRowClick?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
@@ -250,6 +250,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       mapToReadableSolutionName(solution)
     );
 
+    const onCreateCasePressed = useCallback(() => {
+      onRowClick?.(undefined, true);
+    }, [onRowClick]);
+
     return (
       <>
         <ProgressLoader
@@ -276,7 +280,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             severity: filterOptions.severity,
           }}
           hiddenStatuses={hiddenStatuses}
-          onCreateCasePressed={onRowClick}
+          onCreateCasePressed={onCreateCasePressed}
           isSelectorView={isSelectorView}
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
@@ -284,7 +288,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         <CasesTable
           columns={columns}
           data={data}
-          goToCreateCase={onRowClick}
+          goToCreateCase={onRowClick ? onCreateCasePressed : undefined}
           isCasesLoading={isLoadingCases}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}

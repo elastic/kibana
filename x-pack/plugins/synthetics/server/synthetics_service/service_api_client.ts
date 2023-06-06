@@ -12,10 +12,10 @@ import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
 import { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
+import { convertToDataStreamFormat } from './formatters/public_formatters/convert_to_data_stream';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
-import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../common/config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
