@@ -21,48 +21,6 @@ export const registerCoreHandlers = (
   config: HttpConfig,
   env: Env
 ) => {
-  jest.mock('./lifecycle_handlers', () => {
-    const actual = jest.requireActual('./lifecycle_handlers');
-    return {
-      ...actual,
-      createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-    };
-  });
-  jest.mock('./lifecycle_handlers', () => {
-    const actual = jest.requireActual('./lifecycle_handlers');
-    return {
-      ...actual,
-      createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-    };
-  });
-  jest.mock('./lifecycle_handlers', () => {
-    const actual = jest.requireActual('./lifecycle_handlers');
-    return {
-      ...actual,
-      createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-    };
-  });
-  jest.mock('./lifecycle_handlers', () => {
-    const actual = jest.requireActual('./lifecycle_handlers');
-    return {
-      ...actual,
-      createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-    };
-  });
-  jest.mock('./lifecycle_handlers', () => {
-    const actual = jest.requireActual('./lifecycle_handlers');
-    return {
-      ...actual,
-      createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-    };
-  });
-  jest.mock('./lifecycle_handlers', () => {
-    const actual = jest.requireActual('./lifecycle_handlers');
-    return {
-      ...actual,
-      createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-    };
-  });
   // add headers based on config
   registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
   // add extra request checks stuff
