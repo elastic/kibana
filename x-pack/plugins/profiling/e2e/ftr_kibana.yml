@@ -1,5 +1,3 @@
-xpack.profiling.enabled: true
-
 xpack.cloud.id: 'foo'
 xpack.fleet.packages:
   - name: apm
