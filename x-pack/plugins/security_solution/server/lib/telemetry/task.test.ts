@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { SuccessfulRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { SuccessfulRunResult, RunContext } from '@kbn/task-manager-plugin/server/task';
 import { SecurityTelemetryTask } from './task';
 import {
   createMockTaskInstance,
@@ -106,7 +106,7 @@ describe('test security telemetry task', () => {
     const createTaskRunner =
       mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][testType].createTaskRunner;
 
-    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
+    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance } as RunContext);
     const testResult = (await taskRunner.run()) as SuccessfulRunResult;
 
     expect(mockTelemetryTaskConfig.getLastExecutionTime).toHaveBeenCalled();

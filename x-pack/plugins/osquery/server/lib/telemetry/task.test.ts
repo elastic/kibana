@@ -15,6 +15,7 @@ import {
   createMockTelemetryReceiver,
   createMockOsqueryTelemetryTask,
 } from './__mocks__';
+import type { RunContext } from '@kbn/task-manager-plugin/server/task';
 
 describe('test osquery telemetry task', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -94,7 +95,7 @@ describe('test osquery telemetry task', () => {
     const createTaskRunner =
       mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][testType].createTaskRunner;
 
-    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
+    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance } as RunContext);
     const testResult = (await taskRunner.run()) as SuccessfulRunResult;
 
     expect(mockTelemetryTaskConfig.getLastExecutionTime).toHaveBeenCalled();

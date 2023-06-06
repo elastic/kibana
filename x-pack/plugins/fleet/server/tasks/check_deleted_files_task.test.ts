@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerSetupContract, RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -98,8 +98,7 @@ describe('check deleted files task', () => {
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
       const taskRunner = createTaskRunner({
         taskInstance,
-        taskConfig: { skip: { enabled: false, delay: '3s' } },
-      });
+      } as RunContext);
       return taskRunner.run();
     };
 

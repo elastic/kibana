@@ -16,7 +16,7 @@ import {
 import { createMockEndpointAppContext } from '../../mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerSetupContract, RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -105,7 +105,7 @@ describe('check metadata transforms task', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance } as RunContext);
       return taskRunner.run();
     };
 
