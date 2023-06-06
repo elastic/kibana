@@ -1,5 +1,6 @@
 title: Bulk get assets response
 type: object
+deprecated: true
 properties:
   response:
     type: array
