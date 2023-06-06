@@ -145,9 +145,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                     <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
                   ) : (
                     <Chart>
-                      <Tooltip
-                        headerFormatter={headerFormatter}
-                      />
+                      <Tooltip headerFormatter={headerFormatter} />
                       <Settings {...chartDefaultSettings} theme={theme} />
                       <Axis
                         id="bottom"

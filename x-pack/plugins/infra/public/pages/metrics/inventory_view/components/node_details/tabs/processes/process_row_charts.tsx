@@ -127,9 +127,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
           ticks={6}
           gridLine={{ visible: true }}
         />
-        <Tooltip
-          headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')}
-        />
+        <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
         <Settings theme={getChartTheme(isDarkMode)} />
       </Chart>
     </ChartContainer>

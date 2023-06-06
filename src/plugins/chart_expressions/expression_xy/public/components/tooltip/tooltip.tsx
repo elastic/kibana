@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TooltipInfo, XYChartSeriesIdentifier, Tooltip } from '@elastic/charts';
+import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';

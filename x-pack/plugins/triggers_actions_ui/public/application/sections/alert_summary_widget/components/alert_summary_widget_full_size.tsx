@@ -63,7 +63,8 @@ export const AlertSummaryWidgetFullSize = ({
       <Chart size={['100%', 170]}>
         <Tooltip
           headerFormatter={(tooltip) =>
-            moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT)}
+            moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT)
+          }
         />
         <Settings
           legendPosition={Position.Right}
@@ -83,8 +84,20 @@ export const AlertSummaryWidgetFullSize = ({
             tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
           }}
         />
-        <Axis id="left" position={Position.Left} gridLine={{ visible: true }} integersOnly ticks={4} />
-        <Axis id="right" position={Position.Right} gridLine={{ visible: true }} integersOnly ticks={4} />
+        <Axis
+          id="left"
+          position={Position.Left}
+          gridLine={{ visible: true }}
+          integersOnly
+          ticks={4}
+        />
+        <Axis
+          id="right"
+          position={Position.Right}
+          gridLine={{ visible: true }}
+          integersOnly
+          ticks={4}
+        />
         <LineSeries
           id="Active"
           xScaleType={ScaleType.Time}

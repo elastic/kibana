@@ -18,7 +18,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
   TooltipType,
   Tooltip,
 } from '@elastic/charts';

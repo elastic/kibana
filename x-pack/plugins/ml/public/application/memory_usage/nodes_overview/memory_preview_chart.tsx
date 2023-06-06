@@ -113,7 +113,8 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         headerFormatter={({ value }) =>
           i18n.translate('xpack.ml.trainedModels.nodesList.memoryBreakdown', {
             defaultMessage: 'Approximate memory breakdown',
-          })}
+          })
+        }
       />
       <Settings
         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md

@@ -36,9 +36,7 @@ export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
 
   return (
     <Chart size={{ height }}>
-      <Tooltip
-        headerFormatter={(tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT)}
-      />
+      <Tooltip headerFormatter={(tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT)} />
       <Settings
         theme={charts.theme.useChartsTheme()}
         baseTheme={charts.theme.useChartsBaseTheme()}

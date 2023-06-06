@@ -122,12 +122,9 @@ export function CriticalPathFlamegraph(
                   const valueIndex = tooltipProps.values[0]
                     .valueAccessor as number;
                   const operationId = flameGraph.operationId[valueIndex];
-                  const operationMetadata =
-                    criticalPath?.metadata[operationId];
-                  const countInclusive =
-                    flameGraph.viewModel.value[valueIndex];
-                  const countExclusive =
-                    flameGraph.countExclusive[valueIndex];
+                  const operationMetadata = criticalPath?.metadata[operationId];
+                  const countInclusive = flameGraph.viewModel.value[valueIndex];
+                  const countExclusive = flameGraph.countExclusive[valueIndex];
 
                   return (
                     <CriticalPathFlamegraphTooltip
