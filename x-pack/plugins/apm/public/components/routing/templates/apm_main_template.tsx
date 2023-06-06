@@ -21,7 +21,7 @@ import { getNoDataConfig } from './no_data_config';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 // Paths that must skip the no data screen
-const bypassNoDataScreenPaths = ['/settings'];
+const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 
 /*
  * This template contains:
