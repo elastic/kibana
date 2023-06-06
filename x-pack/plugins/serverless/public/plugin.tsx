@@ -7,6 +7,7 @@
 
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
@@ -81,11 +82,13 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-          <ProjectSwitcher {...{ currentProjectType }} />
-        </ProjectSwitcherKibanaProvider>
-      </KibanaThemeProvider>,
+      <I18nProvider>
+        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+            <ProjectSwitcher {...{ currentProjectType }} />
+          </ProjectSwitcherKibanaProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>,
       targetDomElement
     );
 
