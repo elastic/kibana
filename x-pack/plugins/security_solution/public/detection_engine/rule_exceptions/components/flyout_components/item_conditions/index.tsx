@@ -20,6 +20,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
+  DataViewField,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
@@ -89,6 +90,8 @@ interface ExceptionsFlyoutConditionsComponentProps {
     type: ExceptionListType,
     osTypes?: Array<'linux' | 'macos' | 'windows'> | undefined
   ) => DataViewBase;
+
+  getExtendedField?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({
@@ -105,6 +108,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onExceptionItemAdd,
   onSetErrorExists,
   onFilterIndexPatterns,
+  getExtendedField,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
   const isEndpointException = useMemo(
@@ -267,6 +271,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
         allowCustomFieldOptions: !isEndpointException,
+        getExtendedField,
       })}
     </>
   );
