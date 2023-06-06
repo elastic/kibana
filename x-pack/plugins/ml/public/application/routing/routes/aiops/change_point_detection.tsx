@@ -8,15 +8,12 @@
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { parse } from 'query-string';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute } from '../..';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { createPath, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { checkBasicLicense } from '../../../license';
-import { cacheDataViewsContract } from '../../../util/index_utils';
+import { useRouteResolver } from '../../use_resolver';
 import { ChangePointDetectionPage as Page } from '../../../aiops';
 
 export const changePointDetectionRouteFactory = (
@@ -41,12 +38,8 @@ export const changePointDetectionRouteFactory = (
   disabled: !CHANGE_POINT_DETECTION_ENABLED,
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-  });
+const PageWrapper: FC<PageProps> = () => {
+  const { context } = useRouteResolver('basic', []);
 
   return (
     <PageLoader context={context}>
