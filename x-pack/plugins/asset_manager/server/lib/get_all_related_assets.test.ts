@@ -86,7 +86,7 @@ describe('getAllRelatedAssets', () => {
 
   it('returns the primary and a directly referenced parent', async () => {
     const parentAsset: AssetWithoutTimestamp = {
-      'asset.ean': 'primary-ean',
+      'asset.ean': 'parent-ean',
       'asset.type': 'k8s.pod',
       'asset.kind': 'pod',
       'asset.id': uuid(),
