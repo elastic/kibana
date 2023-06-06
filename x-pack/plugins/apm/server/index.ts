@@ -57,8 +57,18 @@ const configSchema = schema.object({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  serverlessOnboarding: schema.boolean({ defaultValue: false }),
-  managedServiceUrl: schema.string({ defaultValue: '' }),
+  serverlessOnboarding: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
+  managedServiceUrl: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.string({ defaultValue: '' }),
+    schema.never()
+  ),
 });
 
 // plugin config

@@ -178,6 +178,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.ui.enabled (boolean)',
         'xpack.apm.ui.maxTraceItems (number)',
         'xpack.apm.managedServiceUrl (string)',
+        'xpack.apm.serverlessOnboarding (boolean)',
         'xpack.apm.latestAgentVersionsUrl (string)',
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',

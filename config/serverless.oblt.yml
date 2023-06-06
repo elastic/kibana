@@ -23,6 +23,9 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
+## APM Serverless Onboarding flow
+xpack.apm.serverlessOnboarding: true
+
 ## Required for force installation of APM Package
 xpack.fleet.packages:
   - name: apm
