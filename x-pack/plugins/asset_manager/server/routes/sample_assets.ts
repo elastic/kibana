@@ -129,7 +129,6 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
       if (!errorWhileDeleting && deletedDataStreams.length === dataStreamsToDelete.length) {
         return res.ok({ body: { deleted: deletedDataStreams } });
       } else {
-        console.log('\n\n\n500 500 500 500 500\n\n\n');
         return res.custom({
           statusCode: 500,
           body: {

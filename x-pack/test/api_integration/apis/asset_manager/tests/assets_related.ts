@@ -40,18 +40,18 @@ export default function ({ getService }: FtrProviderContext) {
         const relations = [
           {
             name: 'ancestors',
-            ean: 'k8s.node:node-101',
-            expectedRelatedEans: ['k8s.cluster:cluster-001'],
+            ean: 'host:node-101',
+            expectedRelatedEans: ['cluster:cluster-001'],
           },
           {
             name: 'descendants',
-            ean: 'k8s.cluster:cluster-001',
-            expectedRelatedEans: ['k8s.node:node-101', 'k8s.node:node-102', 'k8s.node:node-103'],
+            ean: 'cluster:cluster-001',
+            expectedRelatedEans: ['host:node-101', 'host:node-102', 'host:node-103'],
           },
           {
             name: 'references',
-            ean: 'k8s.pod:pod-200xrg1',
-            expectedRelatedEans: ['k8s.cluster:cluster-001'],
+            ean: 'pod:pod-200xrg1',
+            expectedRelatedEans: ['cluster:cluster-001'],
           },
         ];
 
@@ -158,8 +158,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(
             results.references.map((asset: Asset) => pick(asset, ['asset.ean', 'distance']))
           ).to.eql([
-            { 'asset.ean': 'k8s.node:node-203', distance: 1 },
-            { 'asset.ean': 'k8s.pod:pod-203ugg9', distance: 2 },
+            { 'asset.ean': 'host:node-203', distance: 1 },
+            { 'asset.ean': 'pod:pod-203ugg9', distance: 2 },
           ]);
         });
 

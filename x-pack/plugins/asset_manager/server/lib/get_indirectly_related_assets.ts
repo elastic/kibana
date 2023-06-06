@@ -10,6 +10,7 @@ import { debug } from '../../common/debug_log';
 import { Asset, AssetKind, Relation, RelationField } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
+import { isStringOrNonEmptyArray } from './utils';
 
 interface GetRelatedAssetsOptions extends ElasticsearchAccessorOptions {
   size?: number;
@@ -18,10 +19,10 @@ interface GetRelatedAssetsOptions extends ElasticsearchAccessorOptions {
   from?: string;
   to?: string;
   relation: Relation;
-  kind?: AssetKind[];
+  kind?: AssetKind | AssetKind[];
 }
 
-export async function getRelatedAssets({
+export async function getIndirectlyRelatedAssets({
   esClient,
   size = 100,
   from = 'now-24h',
@@ -40,10 +41,10 @@ export async function getRelatedAssets({
     },
   ];
 
-  if (kind?.length) {
+  if (isStringOrNonEmptyArray(kind)) {
     must.push({
       terms: {
-        ['asset.kind']: kind,
+        ['asset.kind']: Array.isArray(kind) ? kind : [kind],
       },
     });
   }
@@ -88,7 +89,7 @@ export async function getRelatedAssets({
     },
   };
 
-  debug('Performing Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
+  debug('Performing Indirectly Related Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
 
   const response = await esClient.search<Asset>(dsl);
   return response.hits.hits.map((hit) => hit._source).filter((asset): asset is Asset => !!asset);

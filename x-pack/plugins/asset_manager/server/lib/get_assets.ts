@@ -9,6 +9,7 @@ import { debug } from '../../common/debug_log';
 import { Asset, AssetFilters } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
+import { isStringOrNonEmptyArray } from './utils';
 
 interface GetAssetsOptions extends ElasticsearchAccessorOptions {
   size?: number;
@@ -24,6 +25,8 @@ export async function getAssets({
 }: GetAssetsOptions): Promise<Asset[]> {
   // Maybe it makes the most sense to validate the filters here?
 
+  debug('Get Assets Filters:', JSON.stringify(filters));
+
   const { from = 'now-24h', to = 'now' } = filters;
   const must: QueryDslQueryContainer[] = [];
 
@@ -36,7 +39,12 @@ export async function getAssets({
       });
     }
 
-    if (filters.type) {
+    if (isStringOrNonEmptyArray(filters.type)) {
+      debug(
+        'filters.type IS string or non empty array?',
+        typeof filters.type,
+        JSON.stringify(filters.type)
+      );
       must.push({
         terms: {
           ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],
@@ -44,7 +52,12 @@ export async function getAssets({
       });
     }
 
-    if (filters.kind) {
+    if (isStringOrNonEmptyArray(filters.kind)) {
+      debug(
+        'filters.kind IS string or non empty array?',
+        typeof filters.kind,
+        JSON.stringify(filters.kind)
+      );
       must.push({
         terms: {
           ['asset.kind']: Array.isArray(filters.kind) ? filters.kind : [filters.kind],
@@ -52,7 +65,7 @@ export async function getAssets({
       });
     }
 
-    if (filters.ean) {
+    if (isStringOrNonEmptyArray(filters.ean)) {
       must.push({
         terms: {
           ['asset.ean']: Array.isArray(filters.ean) ? filters.ean : [filters.ean],
@@ -121,7 +134,7 @@ export async function getAssets({
     },
   };
 
-  debug('Performing Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
+  debug('Performing Get Assets Query', '\n\n', JSON.stringify(dsl, null, 2));
 
   const response = await esClient.search<Asset>(dsl);
   return response.hits.hits.map((hit) => hit._source).filter((asset): asset is Asset => !!asset);

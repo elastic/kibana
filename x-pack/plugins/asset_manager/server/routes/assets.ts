@@ -130,11 +130,8 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
     async (context, req, res) => {
       // Add references into sample data and write integration tests
 
-      const { from, to, ean, relation, maxDistance, size } = req.query || {};
+      const { from, to, ean, relation, maxDistance, size, type, kind } = req.query || {};
       const esClient = await getEsClientFromContext(context);
-
-      const type = toArray<AssetType>(req.query.type);
-      const kind = toArray<AssetKind>(req.query.kind);
 
       if (to && !isValidRange(from, to)) {
         return res.badRequest({
@@ -176,9 +173,9 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       },
     },
     async (context, req, res) => {
-      const { aFrom, aTo, bFrom, bTo } = req.query;
-      const type = toArray<AssetType>(req.query.type);
-      const kind = toArray<AssetKind>(req.query.kind);
+      const { aFrom, aTo, bFrom, bTo, type, kind } = req.query;
+      // const type = toArray<AssetType>(req.query.type);
+      // const kind = toArray<AssetKind>(req.query.kind);
 
       if (!isValidRange(aFrom, aTo)) {
         return res.badRequest({

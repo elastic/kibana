@@ -12,7 +12,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { v4 as uuid } from 'uuid';
 import { AssetWithoutTimestamp } from '../../common/types_api';
 import { getAssets } from './get_assets'; // Mocked
-import { getRelatedAssets } from './get_related_assets'; // Mocked
+import { getRelatedAssets } from './get_indirectly_related_assets'; // Mocked
 import { getAllRelatedAssets } from './get_all_related_assets';
 
 const esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;

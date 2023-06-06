@@ -7,9 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { flatten, without } from 'lodash';
+import { debug } from '../../common/debug_log';
 import { Asset, AssetType, AssetKind, Relation, RelationField } from '../../common/types_api';
 import { getAssets } from './get_assets';
-import { getRelatedAssets } from './get_related_assets';
+import { getIndirectlyRelatedAssets } from './get_indirectly_related_assets';
 import { AssetNotFoundError } from './errors';
 import { toArray } from './utils';
 
@@ -102,21 +103,27 @@ type FindRelatedAssetsOptions = Pick<
 async function findRelatedAssets(
   esClient: ElasticsearchClient,
   primary: Asset,
-  { relation, from, to, kind = [], visitedEans }: FindRelatedAssetsOptions
+  { relation, from, to, kind, visitedEans }: FindRelatedAssetsOptions
 ): Promise<Asset[]> {
   const relationField = relationToDirectField(relation);
-  const directlyRelatedEans = toArray(primary[relationField]);
+  const directlyRelatedEans = toArray<string>(primary[relationField]);
+
+  debug('Directly Related EAN values found on primary asset', directlyRelatedEans);
 
   let directlyRelatedAssets: Asset[] = [];
-  if (directlyRelatedEans.length) {
-    // get the directly related assets we haven't visited already
+
+  // get the directly related assets we haven't visited already
+  const remainingEansToFind = without(directlyRelatedEans, ...visitedEans);
+  if (remainingEansToFind.length > 0) {
     directlyRelatedAssets = await getAssets({
       esClient,
-      filters: { ean: without(directlyRelatedEans, ...visitedEans), from, to, kind },
+      filters: { ean: remainingEansToFind, from, to, kind },
     });
   }
 
-  const indirectlyRelatedAssets = await getRelatedAssets({
+  debug('Directly related assets found:', JSON.stringify(directlyRelatedAssets));
+
+  const indirectlyRelatedAssets = await getIndirectlyRelatedAssets({
     esClient,
     ean: primary['asset.ean'],
     excludeEans: visitedEans.concat(directlyRelatedEans),
@@ -125,6 +132,8 @@ async function findRelatedAssets(
     to,
     kind,
   });
+
+  debug('Indirectly related assets found:', JSON.stringify(indirectlyRelatedAssets));
 
   return [...directlyRelatedAssets, ...indirectlyRelatedAssets];
 }

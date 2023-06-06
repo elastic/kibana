@@ -107,20 +107,26 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return the difference in assets present between two time ranges', async () => {
-        const onlyInA = sampleAssetDocs.slice(0, 2);
-        const onlyInB = sampleAssetDocs.slice(sampleAssetDocs.length - 2);
-        const inBoth = sampleAssetDocs.slice(2, sampleAssetDocs.length - 2);
+        const onlyInA = sampleAssetDocs.slice(0, 2); // first two sample assets
+        const onlyInB = sampleAssetDocs.slice(sampleAssetDocs.length - 2); // last two sample assets
+        const inBoth = sampleAssetDocs.slice(2, sampleAssetDocs.length - 2); // everything between first 2, last 2
         const now = new Date();
         const oneHourAgo = new Date(now.getTime() - 1000 * 60 * 60 * 1);
         const twoHoursAgo = new Date(now.getTime() - 1000 * 60 * 60 * 2);
+
+        // Set 1: Two hours ago, excludes inBoth + onlyInB (leaves just onlyInA)
         await createSampleAssets(supertest, {
           baseDateTime: twoHoursAgo.toISOString(),
           excludeEans: inBoth.concat(onlyInB).map((asset) => asset['asset.ean']),
         });
+
+        // Set 2: One hour ago, excludes onlyInA + onlyInB (leaves just inBoth)
         await createSampleAssets(supertest, {
           baseDateTime: oneHourAgo.toISOString(),
           excludeEans: onlyInA.concat(onlyInB).map((asset) => asset['asset.ean']),
         });
+
+        // Set 3: Right now, excludes inBoth + onlyInA (leaves just onlyInB)
         await createSampleAssets(supertest, {
           excludeEans: inBoth.concat(onlyInA).map((asset) => asset['asset.ean']),
         });
@@ -130,6 +136,8 @@ export default function ({ getService }: FtrProviderContext) {
         const seventyMinuesAgo = new Date(now.getTime() - 1000 * 60 * 70 * 1);
         const tenMinutesAfterNow = new Date(now.getTime() + 1000 * 60 * 10);
 
+        // Range A: 2h10m ago - 50m ago (Sets 1 and 2)
+        // Range B: 70m ago - 10m after now (Sets 2 and 3)
         const getResponse = await supertest
           .get(DIFF_ENDPOINT)
           .query({
