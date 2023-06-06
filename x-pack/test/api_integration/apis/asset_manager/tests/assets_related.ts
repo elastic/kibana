@@ -40,18 +40,18 @@ export default function ({ getService }: FtrProviderContext) {
         const relations = [
           {
             name: 'ancestors',
-            ean: 'k8s.node:node-101',
-            expectedRelatedEans: ['k8s.cluster:cluster-001'],
+            ean: 'host:node-101',
+            expectedRelatedEans: ['cluster:cluster-001'],
           },
           {
             name: 'descendants',
-            ean: 'k8s.cluster:cluster-001',
-            expectedRelatedEans: ['k8s.node:node-101', 'k8s.node:node-102', 'k8s.node:node-103'],
+            ean: 'cluster:cluster-001',
+            expectedRelatedEans: ['host:node-101', 'host:node-102', 'host:node-103'],
           },
           {
             name: 'references',
-            ean: 'k8s.pod:pod-200xrg1',
-            expectedRelatedEans: ['k8s.cluster:cluster-001'],
+            ean: 'pod:pod-200xrg1',
+            expectedRelatedEans: ['cluster:cluster-001'],
           },
         ];
 
@@ -158,8 +158,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(
             results.references.map((asset: Asset) => pick(asset, ['asset.ean', 'distance']))
           ).to.eql([
-            { 'asset.ean': 'k8s.node:node-203', distance: 1 },
-            { 'asset.ean': 'k8s.pod:pod-203ugg9', distance: 2 },
+            { 'asset.ean': 'host:node-203', distance: 1 },
+            { 'asset.ean': 'pod:pod-203ugg9', distance: 2 },
           ]);
         });
 
@@ -317,8 +317,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('with asset.type filters', () => {
-        it('should filter by the provided asset type', async () => {
+      describe('with asset.kind filters', () => {
+        it('should filter by the provided asset kind', async () => {
           await createSampleAssets(supertest);
 
           const sampleCluster = sampleAssetDocs.find(
@@ -333,7 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
               from: 'now-1d',
               ean: sampleCluster!['asset.ean'],
               maxDistance: 1,
-              type: ['k8s.pod'],
+              kind: ['pod'],
             })
             .expect(200);
 
@@ -358,7 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
               from: 'now-1d',
               ean: sampleCluster!['asset.ean'],
               maxDistance: 2,
-              type: ['k8s.pod'],
+              kind: ['pod'],
             })
             .expect(200);
 
@@ -367,7 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
           } = getResponse;
           expect(results.descendants).to.have.length(9);
           expect(results.descendants.every((asset: { distance: number }) => asset.distance === 2));
-          expect(results.descendants.every((asset: Asset) => asset['asset.type'] === 'k8s.pod'));
+          expect(results.descendants.every((asset: Asset) => asset['asset.kind'] === 'pod'));
         });
       });
     });
