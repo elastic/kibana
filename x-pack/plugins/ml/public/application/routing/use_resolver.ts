@@ -49,6 +49,7 @@ export const useRouteResolver = (
       mlServices: { mlCapabilities },
       uiSettings,
       data: { dataViews },
+      savedSearch: savedSearchService,
     },
   } = useMlKibana();
 
@@ -61,6 +62,33 @@ export const useRouteResolver = (
 
   // Check if the user has all required permissions
   const capabilitiesResults = usePermissionCheck(requiredCapabilities);
+
+  /**
+   * TODO revisit this callback and the way we resolce data view and saved search
+   * as it's not optimal
+   */
+  const getDataViewAndSavedSearchCallback = useCallback(
+    async (ssId: string) => {
+      const resp: DataViewAndSavedSearch = {
+        savedSearch: null,
+        dataView: null,
+      };
+
+      if (ssId === undefined) {
+        return resp;
+      }
+
+      const ss = await savedSearchService.get(ssId);
+      if (ss === null) {
+        return resp;
+      }
+      const dataViewIdTemp = ss.references?.find((r) => r.type === 'index-pattern')?.id;
+      resp.dataView = await dataViews.get(dataViewIdTemp!);
+      resp.savedSearch = ss;
+      return resp;
+    },
+    [savedSearchService, dataViews]
+  );
 
   /**
    * Resolve data view or saved search if exist in the URL.
@@ -81,10 +109,10 @@ export const useRouteResolver = (
     let savedSearch = null;
 
     if (savedSearchId !== undefined) {
-      savedSearch = await getSavedSearch().get(savedSearchId);
-      dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
+      savedSearch = await savedSearchService.get(savedSearchId);
+      dataViewAndSavedSearch = await getDataViewAndSavedSearchCallback(savedSearchId);
     } else if (dataViewId !== undefined) {
-      dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
+      dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
     }
 
     const { savedSearch: deprecatedSavedSearchObj, dataView } = dataViewAndSavedSearch;
@@ -101,7 +129,14 @@ export const useRouteResolver = (
       deprecatedSavedSearchObj,
       selectedSavedSearch: savedSearch,
     };
-  }, [dataViewId, savedSearchId, uiSettings]);
+  }, [
+    dataViewId,
+    savedSearchId,
+    uiSettings,
+    dataViews,
+    savedSearchService,
+    getDataViewAndSavedSearchCallback,
+  ]);
 
   const resolveCustomResolvers = useCallback(async () => {
     if (!customResolvers) return;
@@ -115,7 +150,7 @@ export const useRouteResolver = (
     const res = await Promise.all(funcs.map((r) => r()));
     res.forEach((r, i) => (tempResults[funcNames[i]] = r));
 
-    return res;
+    return tempResults;
   }, [customResolvers]);
 
   if (capabilitiesResults.some((v) => v === false)) {

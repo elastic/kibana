@@ -15,6 +15,8 @@ import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-r
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
+import { getMlNodeCount } from '../../ml_nodes_check';
+import { loadMlServerInfo } from '../../services/ml_server_info';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
@@ -22,8 +24,7 @@ import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_j
 
 import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';
-import { useResolver } from '../use_resolver';
-import { basicResolvers } from '../resolvers';
+import { useRouteResolver } from '../use_resolver';
 import { Explorer } from '../../explorer';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
@@ -42,9 +43,10 @@ import { PageTitle } from '../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import {
-  useAnomalyExplorerContext,
   AnomalyExplorerContextProvider,
+  useAnomalyExplorerContext,
 } from '../../explorer/anomaly_explorer_context';
+import { loadSavedSearches } from '../../util/index_utils';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -69,25 +71,30 @@ export const explorerRouteFactory = (
   'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context, results } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    {
-      ...basicResolvers(deps),
-      jobs: mlJobService.loadJobsWrapper,
-      jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
-    }
-  );
+const PageWrapper: FC<PageProps> = () => {
+  const {
+    services: {
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+
+  const { context, results } = useRouteResolver('full', ['canGetJobs'], {
+    getMlNodeCount,
+    loadMlServerInfo,
+    loadSavedSearches,
+    jobs: mlJobService.loadJobsWrapper,
+    jobsWithTimeRange: () => mlApiServices.jobs.jobsWithTimerange(getDateFormatTz()),
+  });
+
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
     <PageLoader context={context}>
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
         <AnomalyExplorerContextProvider>
-          <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+          {results ? (
+            <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+          ) : null}
         </AnomalyExplorerContextProvider>
       </MlAnnotationUpdatesContext.Provider>
     </PageLoader>

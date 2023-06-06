@@ -21,6 +21,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 
 import { firstValueFrom } from 'rxjs';
+import { cacheDataViewsContract } from './util/index_utils';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
@@ -187,6 +188,9 @@ export const renderApp = (
     share: deps.share,
     lens: deps.lens,
   });
+
+  // Temp
+  cacheDataViewsContract(deps.data.dataViews);
 
   appMountParams.onAppLeave((actions) => actions.default());
 

@@ -68,8 +68,9 @@ export interface PageDependencies {
 }
 
 export const PageLoader: FC<{ context: MlContextValue | null }> = ({ context, children }) => {
+  const isLoading = context === null;
   return (
-    <EuiSkeletonText lines={10} isLoading={context === null}>
+    <EuiSkeletonText lines={10} isLoading={isLoading}>
       <MlContext.Provider value={context!}>{children}</MlContext.Provider>
     </EuiSkeletonText>
   );
