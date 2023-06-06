@@ -13,7 +13,6 @@ import {
   createJourneyScreenshotBlocksRoute,
 } from './pings';
 import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
-import { createLogPageViewRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
 import { UMRestApiRouteFactory } from './types';
 import {
@@ -42,7 +41,6 @@ export const legacyUptimeRestApiRoutes: UMRestApiRouteFactory[] = [
   createMonitorListRoute,
   createGetStatusBarRoute,
   createGetSnapshotCount,
-  createLogPageViewRoute,
   createGetPingHistogramRoute,
   createGetMonitorDurationRoute,
   createJourneyRoute,

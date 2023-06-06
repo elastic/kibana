@@ -189,7 +189,7 @@ export const startFleetServerWithDocker = async ({
   log.indent(4);
 
   const esURL = new URL(elasticUrl);
-  const containerName = `dev-fleet-server.${esURL.hostname}`;
+  const containerName = `dev-fleet-server.${fleetServerPort}`;
   let esUrlWithRealIp: string = elasticUrl;
 
   if (isElasticOnLocalhost) {

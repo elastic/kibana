@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export function useUpdateSlo() {
   const {
@@ -32,8 +33,8 @@ export function useUpdateSlo() {
             values: { name },
           })
         );
-        queryClient.invalidateQueries(['fetchSloList']);
-        queryClient.invalidateQueries(['fetchHistoricalSummary']);
+        queryClient.invalidateQueries(sloKeys.lists());
+        queryClient.invalidateQueries(sloKeys.historicalSummaries());
       },
       onError: (error, { slo: { name } }) => {
         toasts.addError(new Error(String(error)), {

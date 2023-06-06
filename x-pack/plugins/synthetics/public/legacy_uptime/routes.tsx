@@ -25,7 +25,6 @@ import {
 } from '../../common/constants';
 import { MappingErrorPage, MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
-import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
 import {
   SyntheticsCheckSteps,
@@ -50,7 +49,6 @@ type RouteProps = LazyObservabilityPageTemplateProps & {
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  telemetryId: UptimePage;
 };
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.legacyBaseTitle', {
@@ -71,7 +69,6 @@ const getRoutes = (): RouteProps[] => {
       path: MONITOR_ROUTE,
       component: MonitorPage,
       dataTestSubj: 'uptimeMonitorPage',
-      telemetryId: UptimePage.Monitor,
       pageHeader: {
         children: <MonitorPageTitleContent />,
         pageTitle: <MonitorPageTitle />,
@@ -86,7 +83,6 @@ const getRoutes = (): RouteProps[] => {
       path: SETTINGS_ROUTE,
       component: SettingsPage,
       dataTestSubj: 'uptimeSettingsPage',
-      telemetryId: UptimePage.Settings,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -106,7 +102,6 @@ const getRoutes = (): RouteProps[] => {
       path: CERTIFICATES_ROUTE,
       component: CertificatesPage,
       dataTestSubj: 'uptimeCertificatesPage',
-      telemetryId: UptimePage.Certificates,
       pageHeader: {
         pageTitle: <CertificateTitle />,
         rightSideItems: [<CertRefreshBtn />],
@@ -120,7 +115,6 @@ const getRoutes = (): RouteProps[] => {
       path: STEP_DETAIL_ROUTE,
       component: StepDetailPage,
       dataTestSubj: 'uptimeStepDetailPage',
-      telemetryId: UptimePage.StepDetail,
       pageHeader: {
         children: <StepDetailPageChildren />,
         pageTitle: <StepDetailPageHeader />,
@@ -132,7 +126,6 @@ const getRoutes = (): RouteProps[] => {
       path: SYNTHETIC_CHECK_STEPS_ROUTE,
       component: SyntheticsCheckSteps,
       dataTestSubj: 'uptimeSyntheticCheckStepsPage',
-      telemetryId: UptimePage.SyntheticCheckStepsPage,
       pageHeader: {
         pageTitle: <SyntheticsCheckStepsPageHeader />,
         rightSideItems: [<SyntheticsCheckStepsPageRightSideItem />],
@@ -143,7 +136,6 @@ const getRoutes = (): RouteProps[] => {
       path: OVERVIEW_ROUTE,
       component: OverviewPageComponent,
       dataTestSubj: 'uptimeOverviewPage',
-      telemetryId: UptimePage.Overview,
       pageHeader: {
         pageTitle: MONITORING_OVERVIEW_LABEL,
         rightSideItems: [<UptimeDatePicker />],
@@ -156,7 +148,6 @@ const getRoutes = (): RouteProps[] => {
       path: MAPPING_ERROR_ROUTE,
       component: MappingErrorPage,
       dataTestSubj: 'uptimeMappingErrorPage',
-      telemetryId: UptimePage.MappingError,
       pageHeader: {
         pageTitle: (
           <div>
@@ -172,12 +163,7 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = ({
-  path,
-  title,
-  telemetryId,
-}) => {
-  useUptimeTelemetry(telemetryId);
+const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);
@@ -198,13 +184,12 @@ export const PageRouter: FC = () => {
           path,
           component: RouteComponent,
           dataTestSubj,
-          telemetryId,
           pageHeader,
           ...pageTemplateProps
         }) => (
-          <Route path={path} key={telemetryId} exact={true}>
+          <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
-              <RouteInit title={title} path={path} telemetryId={telemetryId} />
+              <RouteInit title={title} path={path} />
               <UptimePageTemplateComponent
                 path={path}
                 pageHeader={pageHeader}
