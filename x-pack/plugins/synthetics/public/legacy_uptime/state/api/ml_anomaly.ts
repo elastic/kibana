@@ -24,11 +24,11 @@ import {
 import { getJobPrefix, getMLJobId } from '../../../../common/lib/ml';
 
 export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
-  return await apiService.get(API_URLS.ML_CAPABILITIES, { version: '1' });
+  return await apiService.get(API_URLS.ML_CAPABILITIES);
 };
 
 export const getExistingJobs = async (): Promise<JobExistResult> => {
-  return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID, { version: '1' });
+  return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID);
 };
 
 export const createMLJob = async ({
@@ -54,9 +54,7 @@ export const createMLJob = async ({
     },
   };
 
-  const response: DataRecognizerConfigResponse = await apiService.post(url, data, undefined, {
-    version: '1',
-  });
+  const response: DataRecognizerConfigResponse = await apiService.post(url, data);
   if (response?.jobs?.[0]?.id === getMLJobId(monitorId)) {
     const jobResponse = response.jobs[0];
     const datafeedResponse = response.datafeeds[0];
@@ -78,7 +76,7 @@ export const createMLJob = async ({
 export const deleteMLJob = async ({ monitorId }: MonitorIdParam): Promise<DeleteJobResults> => {
   const data = { jobIds: [getMLJobId(monitorId)] };
 
-  return await apiService.post(API_URLS.ML_DELETE_JOB, data, undefined, { version: '1' });
+  return await apiService.post(API_URLS.ML_DELETE_JOB, data);
 };
 
 export const fetchAnomalyRecords = async ({
@@ -99,5 +97,5 @@ export const fetchAnomalyRecords = async ({
     maxRecords: 500,
     maxExamples: 10,
   };
-  return apiService.post(API_URLS.ML_ANOMALIES_RESULT, data, undefined, { version: '1' });
+  return apiService.post(API_URLS.ML_ANOMALIES_RESULT, data);
 };

@@ -6,14 +6,9 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { Field, Aggregation, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
-import {
-  Field,
-  Aggregation,
-  SplitField,
-  AggFieldPair,
-} from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
@@ -28,7 +23,7 @@ export class GeoJobCreator extends JobCreator {
 
   protected _type: JOB_TYPE = JOB_TYPE.GEO;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.GEO;
     this._wizardInitialized$.next(true);

@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('does not add a monitor if there is an error in creating integration', async () => {
       const newMonitor = { ...httpMonitorJson };
 
-      const invalidName = '[] -  invalid name';
+      const invalidName = '!@#$%^&*()_++[\\-\\]- wow';
 
       newMonitor.locations.push({
         id: testFleetPolicyID,
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.body).eql({
         statusCode: 500,
         message:
-          'YAMLException: end of the stream or a document separator is expected at line 3, column 10:\n    name: [] -  invalid name\n             ^',
+          'YAMLException: unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w,"\n                                     ^',
         error: 'Internal Server Error',
       });
 
