@@ -43,8 +43,8 @@ export const OptionsListControl = ({
   const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
   const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
-  const existsSelected = optionsList.select((state) => state.componentState.existsSelected);
-  const selectedOptions = optionsList.select((state) => state.componentState.selectedOptions);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
   const loading = optionsList.select((state) => state.output.loading);
 
@@ -122,22 +122,6 @@ export const OptionsListControl = ({
       ),
     };
   }, [exclude, existsSelected, validSelections, invalidSelections]);
-
-  const onSelectChangeDebounced = useMemo(
-    () =>
-      debounce(
-        () => {
-          optionsList.dispatch.setStateFromOptionsControl({ selectedOptions, existsSelected });
-        },
-        isPopoverOpen ? 500 : 0
-      ),
-    [existsSelected, selectedOptions, isPopoverOpen, optionsList.dispatch]
-  );
-
-  useEffect(() => {
-    onSelectChangeDebounced();
-    return () => onSelectChangeDebounced.cancel();
-  }, [onSelectChangeDebounced]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>

@@ -11,11 +11,7 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { Filter } from '@kbn/es-query';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import {
-  OptionsListReduxState,
-  OptionsListComponentState,
-  OptionsListStateFromControl,
-} from './types';
+import { OptionsListReduxState, OptionsListComponentState } from './types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
 import {
   OPTIONS_LIST_DEFAULT_SORT,
@@ -30,12 +26,12 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
 
 export const optionsListReducers = {
   deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.componentState.selectedOptions) return;
-    const itemIndex = state.componentState.selectedOptions.indexOf(action.payload);
+    if (!state.explicitInput.selectedOptions) return;
+    const itemIndex = state.explicitInput.selectedOptions.indexOf(action.payload);
     if (itemIndex !== -1) {
-      const newSelections = [...state.componentState.selectedOptions];
+      const newSelections = [...state.explicitInput.selectedOptions];
       newSelections.splice(itemIndex, 1);
-      state.componentState.selectedOptions = newSelections;
+      state.explicitInput.selectedOptions = newSelections;
     }
   },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
@@ -65,37 +61,29 @@ export const optionsListReducers = {
       ...action.payload,
     };
   },
-  setStateFromOptionsControl: (
-    state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<OptionsListStateFromControl>
-  ) => {
-    state.explicitInput.selectedOptions = action.payload.selectedOptions ?? [];
-    if (action.payload.existsSelected !== undefined)
-      state.explicitInput.existsSelected = action.payload.existsSelected;
-  },
   selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     if (action.payload) {
-      state.componentState.existsSelected = true;
-      state.componentState.selectedOptions = [];
+      state.explicitInput.existsSelected = true;
+      state.explicitInput.selectedOptions = [];
     } else {
-      state.componentState.existsSelected = false;
+      state.explicitInput.existsSelected = false;
     }
   },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.componentState.selectedOptions) state.componentState.selectedOptions = [];
-    if (state.componentState.existsSelected) state.componentState.existsSelected = false;
-    state.componentState.selectedOptions?.push(action.payload);
+    if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
+    state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<string>
   ) => {
-    state.componentState.selectedOptions = [action.payload];
-    if (state.componentState.existsSelected) state.componentState.existsSelected = false;
+    state.explicitInput.selectedOptions = [action.payload];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
-    if (state.componentState.existsSelected) state.componentState.existsSelected = false;
-    if (state.componentState.selectedOptions) state.componentState.selectedOptions = [];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
+    if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
   },
   setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.explicitInput.exclude = action.payload;

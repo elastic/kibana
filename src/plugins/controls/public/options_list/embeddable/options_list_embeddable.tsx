@@ -117,8 +117,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.typeaheadSubject = new Subject<string>();
     this.loadMoreSubject = new Subject<number>();
 
-    const { selectedOptions, existsSelected } = input;
-
     // build redux embeddable tools
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       OptionsListReduxState,
@@ -126,7 +124,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     >({
       embeddable: this,
       reducers: optionsListReducers,
-      initialComponentState: { ...getDefaultComponentState(), selectedOptions, existsSelected },
+      initialComponentState: getDefaultComponentState(),
     });
 
     this.select = reduxEmbeddableTools.select;
