@@ -21,6 +21,7 @@ properties:
     type: string
   savedObject:
     type: object
+    deprecated: true
 required:
   - description
   - download
