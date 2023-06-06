@@ -20,7 +20,7 @@ const kibanaBuildId = process.argv[5] || '';
       commit,
       branch,
       env: {
-        KIBANA_BUILD_ID: kibanaBuildId
+        KIBANA_BUILD_ID: kibanaBuildId,
       },
       ignore_pipeline_branch_filters: true, // Required because of a Buildkite bug
     });
