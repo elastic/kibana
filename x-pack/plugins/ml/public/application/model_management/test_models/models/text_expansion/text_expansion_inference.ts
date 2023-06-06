@@ -160,8 +160,6 @@ function parseResponse(
   const adjustedTokenWeights = originalTokenWeights
     // sort by value descending
     .sort((a, b) => b.value - a.value)
-    // take top 10
-    .slice(0, 10)
     .map(({ token, value }) => {
       // if token is in query results, multiply value by query result value
       const adjustedValue = value * (queryResults[token] ?? 0);
