@@ -17,6 +17,6 @@ jest.mock('./http_server', () => {
   };
 });
 
-jest.mock('./lifecycle_handlers', () => ({
+jest.mock('./register_lifecycle_handlers', () => ({
   registerCoreHandlers: jest.fn(),
 }));

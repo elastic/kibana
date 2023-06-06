@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+jest.mock('./lifecycle_handlers', () => {
+  const actual = jest.requireActual('./lifecycle_handlers');
+  return {
+    ...actual,
+    createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
+  };
+});
+
 import type {
   KibanaRequest,
   RouteMethod,
@@ -17,14 +25,6 @@ import type {
 } from '@kbn/core-http-server';
 import { createTestEnv } from '@kbn/config-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-
-jest.mock('./lifecycle_handlers', () => {
-  const actual = jest.requireActual('./lifecycle_handlers');
-  return {
-    ...actual,
-    createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-  };
-});
 import {
   createCustomHeadersPreResponseHandler,
   createRestrictInternalRoutesPostAuthHandler,
