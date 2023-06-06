@@ -8,6 +8,6 @@
 export const compositeSloKeys = {
   all: ['compositeSlo'] as const,
   lists: () => [...compositeSloKeys.all, 'list'] as const,
-  list: (filters: { sortBy: string; page: number }) =>
+  list: (filters: { sortBy: string; page: number; name: string }) =>
     [...compositeSloKeys.lists(), filters] as const,
 };

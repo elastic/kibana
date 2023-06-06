@@ -18,6 +18,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { compositeSloKeys } from './query_key_factory';
 
 interface Params {
+  name?: string;
   page?: number;
   sortBy?: string;
   shouldRefetch?: boolean;
@@ -39,6 +40,7 @@ const SHORT_REFETCH_INTERVAL = 1000 * 5; // 5 seconds
 const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchCompositeSloList({
+  name = '',
   page = 1,
   sortBy = 'creationTime',
   shouldRefetch,
@@ -54,7 +56,7 @@ export function useFetchCompositeSloList({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: compositeSloKeys.list({ page, sortBy }),
+      queryKey: compositeSloKeys.list({ name, page, sortBy }),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<FindCompositeSLOResponse>(
@@ -62,6 +64,7 @@ export function useFetchCompositeSloList({
             {
               query: {
                 ...(page && { page }),
+                ...(name && { name }),
                 ...(sortBy && { sortBy }),
               },
               signal,
@@ -97,7 +100,7 @@ export function useFetchCompositeSloList({
       onError: (error: Error) => {
         toasts.addError(error, {
           title: i18n.translate('xpack.observability.slo.list.errorNotification', {
-            defaultMessage: 'Something went wrong while fetching composite SLOs',
+            defaultMessage: 'Something went wrong while fetching SLOs',
           }),
         });
       },
