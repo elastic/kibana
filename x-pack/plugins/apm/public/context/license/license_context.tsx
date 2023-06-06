@@ -16,8 +16,9 @@ export const LicenseContext = React.createContext<ILicense | undefined>(
 );
 
 export function LicenseProvider({ children }: { children: React.ReactChild }) {
-  const { license$ } = useApmPluginContext().plugins.licensing;
-  const license = useObservable(license$);
+  const { plugins } = useApmPluginContext();
+  const { licensing } = plugins;
+  const license = useObservable(licensing.license$);
   // if license is not loaded yet, consider it valid
   const hasInvalidLicense = license?.isActive === false;
 
