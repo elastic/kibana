@@ -308,10 +308,10 @@ export const getBulkAssetsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const savedObjectsClient = (await context.fleet).internalSoClient;
-    const { objects } = request.body;
+    const { assetIds } = request.body;
 
     const { resolved_objects: resolvedObjects } =
-      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(objects);
+      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(assetIds);
     const res: SimpleSOAssetType[] = resolvedObjects
       .map(({ saved_object: savedObject }) => savedObject)
       .filter(
