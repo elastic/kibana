@@ -157,7 +157,9 @@ export const DecisionPathChart = ({
               values: { predictionFieldName, xAxisLabel },
             }
           )}
-          showGridLines={false}
+          gridLine={{
+            visible: false,
+          }}
           position={Position.Top}
           showOverlappingTicks
           domain={
@@ -169,7 +171,13 @@ export const DecisionPathChart = ({
               : undefined
           }
         />
-        <Axis showGridLines={true} id="left" position={Position.Left} />
+        <Axis
+          gridLine={{
+            visible: true,
+          }}
+          id="left"
+          position={Position.Left}
+        />
         <LineSeries
           id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathLine'}
           name={xAxisLabel}

@@ -90,7 +90,7 @@ export const ChartSection = ({
           tickFormat={tickFormatter}
           domain={domain}
           ticks={6}
-          showGridLines
+          gridLine={{ visible: true }}
         />
         <Tooltip {...tooltipProps} />
         <Settings onPointerUpdate={onPointerUpdate} {...getTimelineChartThemes(isDarkMode)} />

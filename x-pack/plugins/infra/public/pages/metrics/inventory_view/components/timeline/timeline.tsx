@@ -292,7 +292,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             tickFormat={yAxisFormatter}
             domain={domain}
             ticks={6}
-            showGridLines
+            gridLine={{ visible: true }}
           />
           <Tooltip {...tooltipProps} />
           <Settings onElementClick={onClickPoint} {...getTimelineChartThemes(isDarkMode)} />

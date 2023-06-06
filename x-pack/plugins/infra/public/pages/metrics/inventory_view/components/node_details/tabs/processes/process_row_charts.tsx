@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipProps } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -95,10 +95,6 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
 
   const yAxisFormatter = createFormatter('percent');
 
-  const tooltipProps: TooltipProps = {
-    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
-  };
-
   const dataDomain = calculateDomain(timeseries, [chartMetric], false);
   const domain = dataDomain
     ? {
@@ -129,9 +125,12 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
           tickFormat={yAxisFormatter}
           domain={domain}
           ticks={6}
-          showGridLines
+          gridLine={{ visible: true }}
         />
-        <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+        <Tooltip
+          headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')}
+        />
+        <Settings theme={getChartTheme(isDarkMode)} />
       </Chart>
     </ChartContainer>
   );

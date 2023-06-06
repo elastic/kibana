@@ -153,8 +153,8 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                         id="bottom"
                         position={Position.Bottom}
                         tickFormat={dataTimeFormatter}
-                        showGridLines
                         gridLine={{
+                          visible: true,
                           strokeWidth: 1,
                           opacity: 1,
                           dash: [3, 5],

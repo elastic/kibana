@@ -45,7 +45,9 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
           min: 0,
           max: 1,
         }}
-        showGridLines={false}
+        gridLine={{
+          visible: false,
+        }}
       />
     ) : null;
 

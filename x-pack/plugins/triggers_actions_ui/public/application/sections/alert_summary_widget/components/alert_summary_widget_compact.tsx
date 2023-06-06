@@ -15,7 +15,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
@@ -100,7 +99,14 @@ export const AlertSummaryWidgetCompact = ({
               <Chart size={{ height: 50 }}>
                 <Tooltip type={TooltipType.None} />
                 <Settings theme={chartTheme} baseTheme={baseTheme} />
-                <Axis hide id="activeAlertsAxis" position={Position.Left} showGridLines={false} />
+                <Axis
+                  hide
+                  id="activeAlertsAxis"
+                  position={Position.Left}
+                  gridLine={{
+                    visible: false,
+                  }}
+                />
                 <LineSeries
                   id={'activeAlertsChart'}
                   xScaleType={ScaleType.Time}

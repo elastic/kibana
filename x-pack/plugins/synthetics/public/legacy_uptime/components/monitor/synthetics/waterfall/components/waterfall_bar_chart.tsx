@@ -107,7 +107,9 @@ export const WaterfallBarChart = ({
           position={Position.Top}
           tickFormat={memoizedTickFormat}
           domain={domain}
-          showGridLines={true}
+          gridLine={{
+            visible: true,
+          }}
           style={{
             axisLine: {
               visible: false,

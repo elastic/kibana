@@ -75,14 +75,16 @@ export const AlertSummaryWidgetFullSize = ({
           id="bottom"
           position={Position.Bottom}
           timeAxisLayerCount={2}
-          showGridLines
+          gridLine={{
+            visible: true,
+          }}
           style={{
             tickLine: { size: 0.0001, padding: 4 },
             tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
           }}
         />
-        <Axis id="left" position={Position.Left} showGridLines integersOnly ticks={4} />
-        <Axis id="right" position={Position.Right} showGridLines integersOnly ticks={4} />
+        <Axis id="left" position={Position.Left} gridLine={{ visible: true }} integersOnly ticks={4} />
+        <Axis id="right" position={Position.Right} gridLine={{ visible: true }} integersOnly ticks={4} />
         <LineSeries
           id="Active"
           xScaleType={ScaleType.Time}

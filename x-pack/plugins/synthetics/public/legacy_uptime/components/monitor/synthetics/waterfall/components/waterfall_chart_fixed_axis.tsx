@@ -43,7 +43,9 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
           position={Position.Top}
           tickFormat={tickFormat}
           domain={domain}
-          showGridLines={true}
+          gridLine={{
+            visible: true,
+          }}
         />
 
         <BarSeries

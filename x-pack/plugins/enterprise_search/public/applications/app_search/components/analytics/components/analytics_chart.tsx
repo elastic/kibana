@@ -58,9 +58,9 @@ export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
         id="bottom-axis"
         position="bottom"
         tickFormat={(d) => moment(d).format(X_AXIS_DATE_FORMAT)}
-        showGridLines
+        gridLine={{ visible: true }}
       />
-      <Axis id="left-axis" position="left" ticks={4} showGridLines />
+      <Axis id="left-axis" position="left" ticks={4} gridLine={{ visible: true }} />
     </Chart>
   );
 };

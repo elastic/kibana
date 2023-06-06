@@ -110,7 +110,7 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         tickFormat={timeFormatter(niceTimeFormatByDay(2))}
         ticks={4}
       />
-      <Axis ticks={3} id="left-axis" position="left" showGridLines domain={{ min: 0, max: 100 }} />
+      <Axis ticks={3} id="left-axis" position="left" gridLine={{ visible: true }} domain={{ min: 0, max: 100 }} />
     </Chart>
   );
 };

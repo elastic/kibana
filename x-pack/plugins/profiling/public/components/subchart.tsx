@@ -260,7 +260,7 @@ export function SubChart({
           <Axis
             id="left-axis"
             position="left"
-            showGridLines
+            gridLine={{ visible: true }}
             tickFormat={(d) => (showAxes ? Number(d).toFixed(0) : '')}
             style={
               showAxes

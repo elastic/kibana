@@ -32,7 +32,6 @@ import {
   XYChartSeriesIdentifier,
   TooltipValue,
   SettingsProps,
-  Tooltip,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
