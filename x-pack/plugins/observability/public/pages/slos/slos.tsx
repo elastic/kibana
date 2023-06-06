@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { Fragment, useEffect, useState } from 'react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
@@ -21,6 +29,9 @@ import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { paths } from '../../config/paths';
 
+const SLO_TAB = 'slo';
+const COMPOSITE_SLO_TAB = 'composite_slo';
+
 export function SlosPage() {
   const {
     application: { navigateToUrl },
@@ -31,9 +42,7 @@ export function SlosPage() {
   const { hasAtLeast } = useLicense();
 
   const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
-
-  const { total } = sloList || {};
-
+  const total = sloList?.total ?? 0;
   const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
 
   useBreadcrumbs([
@@ -63,6 +72,39 @@ export function SlosPage() {
     return null;
   }
 
+  const tabs: EuiTabbedContentTab[] = [
+    {
+      id: SLO_TAB,
+      name: i18n.translate('xpack.observability.slo.sloList.tab.sloLabel', {
+        defaultMessage: 'SLOs',
+      }),
+      'data-test-subj': 'sloTab',
+      content: (
+        <Fragment>
+          <EuiSpacer size="l" />
+          <SloList autoRefresh={isAutoRefreshing} />
+        </Fragment>
+      ),
+    },
+    {
+      id: COMPOSITE_SLO_TAB,
+      name: i18n.translate('xpack.observability.slo.sloList.tab.compositeSloLabel', {
+        defaultMessage: 'Composite SLOs',
+      }),
+      'data-test-subj': 'compositeSloTab',
+      content: (
+        <Fragment>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup direction="column" gutterSize="xl">
+            <EuiFlexItem>
+              <EuiText>Composite slo</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      ),
+    },
+  ];
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -89,7 +131,11 @@ export function SlosPage() {
       }}
       data-test-subj="slosPage"
     >
-      <SloList autoRefresh={isAutoRefreshing} />
+      <EuiTabbedContent
+        data-test-subj="sloListTabbedContent"
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+      />
     </ObservabilityPageTemplate>
   );
 }
