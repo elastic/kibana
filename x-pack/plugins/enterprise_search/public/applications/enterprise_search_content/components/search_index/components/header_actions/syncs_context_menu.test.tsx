@@ -61,34 +61,6 @@ describe('SyncsContextMenu', () => {
     expect(popover.props().isOpen).toEqual(false);
   });
 
-  it('renders more syncs menu', () => {
-    setMockValues({
-      ...mockValues,
-      hasDocumentLevelSecurityFeature: true,
-      hasIncrementalSyncFeature: true,
-      isWaitingForSync: false,
-    });
-    const wrapper = mountWithIntl(<SyncsContextMenu />);
-    const button = wrapper.find(
-      'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
-    );
-    button.simulate('click');
-
-    const menuItems = wrapper
-      .find(EuiContextMenuPanel)
-      .find(EuiResizeObserver)
-      .find(EuiContextMenuItem);
-    expect(menuItems).toHaveLength(3);
-
-    const firstButton = menuItems.at(0);
-    const secondButton = menuItems.at(1);
-    const thirdButton = menuItems.at(2);
-
-    expect(firstButton.text()).toEqual('Sync');
-    expect(secondButton.text()).toEqual('More syncs');
-    expect(thirdButton.text()).toEqual('Cancel Syncs');
-  });
-
   it('Can cancel syncs', () => {
     setMockValues({ ...mockValues, isSyncing: true });
     const wrapper = mountWithIntl(<SyncsContextMenu />);

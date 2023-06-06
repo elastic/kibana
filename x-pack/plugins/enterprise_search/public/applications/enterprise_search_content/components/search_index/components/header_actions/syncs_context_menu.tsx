@@ -74,9 +74,6 @@ export const SyncsContextMenu: React.FC = () => {
   const shouldShowIncrementalSync =
     productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
 
-  const shouldShowMoreSync =
-    !syncLoading && (shouldShowDocumentLevelSecurity || shouldShowIncrementalSync);
-
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 0,
@@ -97,16 +94,43 @@ export const SyncsContextMenu: React.FC = () => {
                 },
               },
             ]),
-        ...(shouldShowMoreSync
+        ...(shouldShowIncrementalSync
           ? [
               {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
-                'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-moreSyncs`,
+                'data-telemetry-id':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+                'data-test-subj':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
                 icon: 'play',
-                name: i18n.translate('xpack.enterpriseSearch.index.header.moreSyncsTitle', {
-                  defaultMessage: 'More syncs',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
+                  defaultMessage: 'Incremental content',
                 }),
-                panel: 1,
+                onClick: () => {
+                  closePopover();
+                  startIncrementalSync();
+                },
+              },
+            ]
+          : []),
+        ...(shouldShowDocumentLevelSecurity
+          ? [
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+                'data-test-subj':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                icon: 'play',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
+                  defaultMessage: 'Access Control',
+                }),
+                onClick: () => {
+                  closePopover();
+                  startAccessControlSync();
+                },
               },
             ]
           : []),
@@ -132,80 +156,6 @@ export const SyncsContextMenu: React.FC = () => {
         },
       ],
       title: 'Sync',
-    },
-    {
-      id: 1,
-      items: [
-        {
-          // @ts-ignore - data-* attributes are applied but doesn't exist on types
-          'data-telemetry-id':
-            'entSearchContent-${ingestionMethod}-header-sync-more-fullContentSync',
-          'data-test-subj': 'entSearchContent-${ingestionMethod}-header-sync-more-fullContentSync',
-          icon: 'play',
-          name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullContentSync', {
-            defaultMessage: 'Full content',
-          }),
-          onClick: () => {
-            closePopover();
-            startSync();
-          },
-        },
-        ...(shouldShowIncrementalSync
-          ? [
-              {
-                // @ts-ignore - data-* attributes are applied but doesn't exist on types
-                'data-telemetry-id':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
-                'data-test-subj':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
-                icon: 'play',
-                name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
-                  defaultMessage: 'Incremental content',
-                }),
-                onClick: () => {
-                  closePopover();
-                  startIncrementalSync();
-                },
-              },
-            ]
-          : []),
-        ...(shouldShowDocumentLevelSecurity
-          ? [
-              {
-                // @ts-ignore - data-* attributes are applied but doesn't exist on types
-                'data-telemetry-id':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-                'data-test-subj':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-                icon: 'play',
-                name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
-                  defaultMessage: 'Access Control',
-                }),
-                onClick: () => {
-                  closePopover();
-                  startAccessControlSync();
-                },
-              },
-            ]
-          : []),
-        {
-          // @ts-ignore - data-* attributes are applied but doesn't exist on types
-          'data-telemetry-id': 'entSearchContent-${ingestionMethod}-header-sync-more-allSync',
-          'data-test-subj': 'entSearchContent-${ingestionMethod}-header-sync-more-allSync',
-          icon: 'play',
-          name: i18n.translate('xpack.enterpriseSearch.index.header.more.allSync', {
-            defaultMessage: 'All',
-          }),
-          onClick: () => {
-            closePopover();
-            startSync();
-            startAccessControlSync();
-          },
-        },
-      ],
-      title: i18n.translate('xpack.enterpriseSearch.index.header.syncMenuTitle', {
-        defaultMessage: 'Sync',
-      }),
     },
   ];
 
