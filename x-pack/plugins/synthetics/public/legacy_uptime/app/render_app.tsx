@@ -65,6 +65,8 @@ export function renderApp(
           },
           {
             linkType: 'discuss',
+            title: 'Discuss',
+            iconType: 'discuss',
             href: 'https://discuss.elastic.co/c/uptime',
           },
         ],

@@ -14,6 +14,7 @@ import {
   EuiTitle,
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
+import ReactDOM from 'react-dom';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
@@ -21,7 +22,6 @@ import { Variables } from '../variables';
 
 import {
   TopNavMenu,
-  WelcomePanel,
   HelpPanel,
   SomethingWentWrongCallout,
   NetworkRequestStatusBar,
@@ -33,10 +33,11 @@ import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+import { ConsoleDocumentation } from '../../components/console_documentation';
 
 export function Main() {
   const {
-    services: { storage },
+    services: { storage, chrome },
   } = useServicesContext();
 
   const { ready: editorsReady } = useEditorReadContext();
@@ -46,9 +47,29 @@ export function Main() {
     lastResult: { data: requestData, error: requestError },
   } = useRequestReadContext();
 
-  const [showWelcome, setShowWelcomePanel] = useState(
-    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
-  );
+  chrome.setHelpExtension({
+    appName: i18n.translate('console.helpMenu.appName', {
+      defaultMessage: 'Console',
+    }),
+    links: [
+      {
+        iconType: 'consoleApp',
+        linkType: 'documentation',
+        href: `https://www.elastic.co/guide/en/kibana/current/console-kibana.html`,
+      },
+      {
+        iconType: 'questionInCircle',
+        linkType: 'documentation',
+        title: 'How do I send requests?',
+        priority: 100,
+        content: <ConsoleDocumentation />,
+      },
+    ],
+  });
+
+  // const [showWelcome, setShowWelcomePanel] = useState(
+  //   () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
+  // );
 
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -124,14 +145,14 @@ export function Main() {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {done && showWelcome ? (
+      {/* {done && showWelcome ? (
         <WelcomePanel
           onDismiss={() => {
             storage.set('version_welcome_shown', '@@SENSE_REVISION');
             setShowWelcomePanel(false);
           }}
         />
-      ) : null}
+      ) : null} */}
 
       {showSettings ? (
         <Settings onClose={() => setShowSettings(false)} editorInstance={editorInstance} />

@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/help-center-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "help_center",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["screenshotMode"],
+    "optionalPlugins": ["security"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
+  }
+}

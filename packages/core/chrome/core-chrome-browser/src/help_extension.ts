@@ -8,6 +8,7 @@
 
 import type React from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
+import { ReactNode } from 'react';
 
 /** @public */
 export interface ChromeHelpMenuActions {
@@ -33,7 +34,7 @@ export interface ChromeHelpExtension {
 /** @public */
 export type ChromeHelpExtensionLinkBase = Pick<
   EuiButtonEmptyProps,
-  'iconType' | 'target' | 'rel' | 'data-test-subj'
+  'iconType' | 'target' | 'rel' | 'data-test-subj' | 'title'
 >;
 
 /** @public */
@@ -46,6 +47,8 @@ export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLi
    * Include at least one app-specific label to be applied to the new github issue
    */
   labels: string[];
+
+  href: string;
   /**
    * Provides initial text for the title of the issue
    */
@@ -75,7 +78,11 @@ export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExte
    * URL to documentation page.
    * i.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
    */
-  href: string;
+  href?: string;
+
+  priority?: number;
+
+  content?: ReactNode;
 }
 
 /** @public */
@@ -104,6 +111,8 @@ export interface ChromeGlobalHelpExtensionMenuLink extends ChromeHelpExtensionMe
    * Highest priority items are listed at the top of the list of links.
    */
   priority: number;
+  image: string;
+  description: string;
 }
 
 /** @public */

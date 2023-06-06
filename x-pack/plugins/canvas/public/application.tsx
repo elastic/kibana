@@ -24,7 +24,6 @@ import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
-import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
 import { init as initStatsReporter } from './lib/ui_metric';
@@ -47,6 +46,7 @@ import { size } from '../canvas_plugin_src/renderers/plot/plugins/size';
 import { text } from '../canvas_plugin_src/renderers/plot/plugins/text';
 
 import './style/index.scss';
+import { KeyboardShortcutsDoc } from './components/keyboard_shortcuts_doc';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
@@ -145,21 +145,18 @@ export const initializeCanvas = async (
     }),
     links: [
       {
+        iconType: 'canvasApp',
         linkType: 'documentation',
         href: docLinks.links.canvas.guide,
       },
+      {
+        priority: 100,
+        iconType: 'keyboard',
+        linkType: 'documentation',
+        title: 'Keyboard shortcuts',
+        content: <KeyboardShortcutsDoc onClose={() => {}} />,
+      },
     ],
-    content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <Provider store={canvasStore}>
-            <HelpMenu hideHelpMenu={hideHelpMenu} />
-          </Provider>
-        </KibanaThemeProvider>,
-        domNode
-      );
-      return () => ReactDOM.unmountComponentAtNode(domNode);
-    },
   });
 
   if (setupPlugins.usageCollection) {

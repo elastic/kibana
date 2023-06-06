@@ -44,6 +44,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 interface Props {
+  chrome: ChromeStart;
   spacesManager: SpacesManager;
   notifications: NotificationsStart;
   getFeatures: FeaturesPluginStart['getFeatures'];
@@ -73,9 +74,31 @@ export class SpacesGridPage extends Component<Props, State> {
   }
 
   public componentDidMount() {
+    console.log('DID MOUNT');
+
+    this.props.chrome.setHelpExtension({
+      appName: i18n.translate('xpack.spaces.helpMenu.appName', {
+        defaultMessage: 'Spaces',
+      }),
+      links: [
+        {
+          iconType: 'questionInCircle',
+          linkType: 'documentation',
+          title: 'What is a space?',
+          priority: 100,
+          content: <>HERE</>,
+        },
+      ],
+    });
+
     if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
+  }
+
+  public componentWillUnmount() {
+    console.log('unmount');
+    this.props.chrome.setHelpExtension(undefined);
   }
 
   public render() {

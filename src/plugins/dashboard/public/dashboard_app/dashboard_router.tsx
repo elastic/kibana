@@ -34,7 +34,11 @@ import { createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
-import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
+import {
+  dashboardReadonlyBadge,
+  getDashboardBreadcrumb,
+  getDashboardPageTitle,
+} from './_dashboard_app_strings';
 import { DashboardEmbedSettings, DashboardMountContextProps, RedirectToProps } from './types';
 
 export const dashboardUrlParams = {
@@ -167,11 +171,12 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   );
 
   setHelpExtension({
-    appName: getDashboardPageTitle(),
+    appName: getDashboardBreadcrumb(),
     links: [
       {
         linkType: 'documentation',
         href: `${dashboardDocLink}`,
+        iconType: 'dashboardApp',
       },
     ],
   });

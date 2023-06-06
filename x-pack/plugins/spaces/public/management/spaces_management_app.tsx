@@ -57,6 +57,7 @@ export const spacesManagementApp = Object.freeze({
           setBreadcrumbs([{ ...spacesFirstBreadcrumb, href: undefined }]);
           return (
             <SpacesGridPage
+              chrome={coreStart.chrome}
               capabilities={application.capabilities}
               getFeatures={features.getFeatures}
               notifications={notifications}

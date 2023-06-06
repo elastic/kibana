@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["public/**/*", "server/**/*", "common/*", "../../../typings/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/security-plugin",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/core-chrome-browser",
+    "@kbn/kibana-utils-plugin"
+  ],
+  "exclude": ["target/**/*"]
+}

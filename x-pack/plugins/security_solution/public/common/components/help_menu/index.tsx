@@ -18,27 +18,26 @@ export const HelpMenu = React.memo(() => {
       appName: SOLUTION_NAME,
       links: [
         {
-          content: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation', {
-            defaultMessage: 'Security documentation',
-          }),
           href: docLinks.links.siem.guide,
-          iconType: 'documents',
-          linkType: 'custom',
+          iconType: 'logoSecurity',
+          linkType: 'documentation',
           target: '_blank',
           rel: 'noopener',
         },
         {
-          content: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation.ecs', {
-            defaultMessage: 'ECS documentation',
+          title: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation.ecs', {
+            defaultMessage: 'ECS',
           }),
           href: docLinks.links.ecs.guide,
           iconType: 'documents',
-          linkType: 'custom',
+          linkType: 'documentation',
           target: '_blank',
           rel: 'noopener',
         },
         {
           linkType: 'discuss',
+          title: 'Discuss',
+          iconType: 'discuss',
           href: 'https://discuss.elastic.co/c/security',
           target: '_blank',
           rel: 'noopener',

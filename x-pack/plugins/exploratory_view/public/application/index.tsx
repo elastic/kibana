@@ -62,7 +62,14 @@ export const renderApp = ({
     appName: i18n.translate('xpack.exploratoryView.feedbackMenu.appName', {
       defaultMessage: 'Observability',
     }),
-    links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
+    links: [
+      {
+        linkType: 'discuss',
+        title: 'Discuss',
+        iconType: 'discuss',
+        href: 'https://ela.st/observability-discuss',
+      },
+    ],
   });
 
   // ensure all divs are .kbnAppWrappers

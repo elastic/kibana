@@ -17,6 +17,8 @@ export function setHelpExtension({ chrome, http }: CoreStart) {
     links: [
       {
         linkType: 'discuss',
+        title: 'Discuss',
+        iconType: 'discuss',
         href: 'https://discuss.elastic.co/c/apm',
       },
       {

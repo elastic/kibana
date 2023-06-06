@@ -311,7 +311,6 @@ export class ChromeService {
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
           breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-          kibanaDocLink={docLinks.links.kibana.guide}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -381,6 +380,8 @@ export class ChromeService {
       },
 
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
+
+      getHelpSupportUrl$: () => helpSupportUrl$.pipe(takeUntil(this.stop$)),
 
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
 

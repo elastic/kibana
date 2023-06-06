@@ -29,6 +29,7 @@ export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink, appName }) => 
         {
           href: docLink,
           linkType: 'documentation',
+          iconType: 'machineLearningApp',
         },
       ],
     });

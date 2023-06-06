@@ -134,6 +134,8 @@ export interface ChromeStart {
    */
   setHelpSupportUrl(url: string): void;
 
+  getHelpSupportUrl$(): Observable<string | undefined>;
+
   /**
    * Get an observable of the current locked state of the nav drawer.
    */

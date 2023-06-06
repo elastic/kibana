@@ -22,6 +22,8 @@ export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLi
       links: [
         {
           linkType: 'discuss',
+          title: 'Discuss',
+          iconType: 'discuss',
           href: feedbackLink,
         },
       ],

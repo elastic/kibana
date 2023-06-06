@@ -12,6 +12,8 @@ import { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
+import PrettyPicture from '../common/images/illustration-cloud-migration-1216x840.png';
+
 export class CloudDataMigrationPlugin
   implements Plugin<void, void, CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart>
 {
@@ -56,6 +58,11 @@ export class CloudDataMigrationPlugin
         'data-test-subj': 'migrate_data_to_cloud__help_menu_link',
         priority: 200,
         external: true,
+        image: PrettyPicture,
+        description: i18n.translate('xpack.cloudDataMigration.drescription', {
+          defaultMessage:
+            'Get instant access to the latest features that optimize performance, streamline your migration process with no downtime, and take advantage of built-in security best practices.',
+        }),
       });
     }
   }

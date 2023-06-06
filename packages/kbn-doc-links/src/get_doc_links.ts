@@ -288,7 +288,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
     kibana: {
-      guide: `${KIBANA_DOCS}index.html`,
+      guide: `${KIBANA_DOCS}introduction.html`,
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
@@ -378,7 +378,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       apiCompatibilityHeader: `${ELASTICSEARCH_DOCS}api-conventions.html#api-compatibility`,
     },
     siem: {
-      guide: `${SECURITY_SOLUTION_DOCS}index.html`,
+      guide: `${SECURITY_SOLUTION_DOCS}es-overview.html`,
       gettingStarted: `${SECURITY_SOLUTION_DOCS}index.html`,
       privileges: `${SECURITY_SOLUTION_DOCS}sec-requirements.html`,
       ml: `${SECURITY_SOLUTION_DOCS}machine-learning.html`,
@@ -709,7 +709,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
     },
     ecs: {
-      guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+      guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/ecs-reference.html`,
     },
     clients: {
       /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */

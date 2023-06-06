@@ -9,6 +9,7 @@ import React, { useState, lazy, useEffect, useCallback } from 'react';
 import { RouteComponentProps, Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
@@ -21,6 +22,7 @@ import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { RulesHelp } from './docs/rules_documentation';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
 const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
@@ -39,11 +41,30 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const { chrome, setBreadcrumbs } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
-
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
   }> = [];
+
+  useEffect(() => {
+    chrome.setHelpExtension({
+      appName: i18n.translate('xpack.triggersActionsUI.helpMenu.appName', {
+        defaultMessage: 'Rules',
+      }),
+      links: [
+        {
+          iconType: 'questionInCircle',
+          linkType: 'documentation',
+          title: 'What is a rule?',
+          priority: 100,
+          content: <RulesHelp />,
+        },
+      ],
+    });
+    return () => {
+      chrome.setHelpExtension(undefined);
+    };
+  }, [chrome]);
 
   tabs.push({
     id: 'rules',

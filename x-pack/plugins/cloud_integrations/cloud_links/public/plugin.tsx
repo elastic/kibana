@@ -34,6 +34,8 @@ export class CloudLinksPlugin
       if (guidedOnboarding?.guidedOnboardingApi?.isEnabled) {
         core.chrome.registerGlobalHelpExtensionMenuLink({
           linkType: 'custom',
+          image: '',
+          description: '',
           href: core.http.basePath.prepend('/app/home#/getting_started'),
           content: (
             <FormattedMessage id="xpack.cloudLinks.setupGuide" defaultMessage="Setup guides" />
