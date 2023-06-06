@@ -1030,7 +1030,9 @@
           "IndexNotGreenTimeout",
           " | ",
           "ClusterShardLimitExceeded",
-          ", \"create_index_succeeded\">"
+          ", ",
+          "CreateIndexSuccessResponse",
+          ">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/create_index.ts",
         "deprecated": false,
