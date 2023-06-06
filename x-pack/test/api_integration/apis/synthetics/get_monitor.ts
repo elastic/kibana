@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { ConfigKey, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -61,7 +62,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const expected = [mon1, mon2];
 
-        expect(foundMonitors).eql(expected);
+        expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at'))).eql(
+          expected.map(({ attributes }: any) => attributes)
+        );
       });
 
       it('with page params', async () => {
@@ -152,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id1) + '?decrypted=true')
           .expect(200);
 
-        expect(apiResponse.body.attributes).eql({
+        expect(apiResponse.body).eql({
           ...monitors[0],
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,

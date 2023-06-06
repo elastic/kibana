@@ -370,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
               '-' +
               testPolicyId
         );
@@ -402,7 +402,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
               '-' +
               testPolicyId
         );

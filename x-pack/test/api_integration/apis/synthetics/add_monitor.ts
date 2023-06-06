@@ -184,11 +184,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      expect(response.body.attributes).not.to.have.keys('unknownkey', 'url');
+      expect(response.body).not.to.have.keys('unknownkey', 'url');
     });
 
     it('can create monitor with API key with proper permissions', async () => {
-      await supertestAPI
+      const response: Record<string, any> = await supertestAPI
         .post('/internal/security/api_key')
         .set('kbn-xsrf', 'xxx')
         .send({
@@ -209,26 +209,25 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         })
-        .expect(200)
-        .then(async (response: Record<string, any>) => {
-          const { name, encoded: apiKey } = response.body;
-          expect(name).to.eql('test_api_key');
+        .expect(200);
 
-          const config = getService('config');
+      const { name, encoded: apiKey } = response.body;
+      expect(name).to.eql('test_api_key');
 
-          const { hostname, protocol, port } = config.get('servers.kibana');
-          const kibanaServerUrl = formatUrl({ hostname, protocol, port });
-          const supertestNoAuth = supertest(kibanaServerUrl);
+      const config = getService('config');
 
-          const apiResponse = await supertestNoAuth
-            .post(API_URLS.SYNTHETICS_MONITORS)
-            .auth(name, apiKey)
-            .set('kbn-xsrf', 'true')
-            .set('Authorization', `ApiKey ${apiKey}`)
-            .send(httpMonitorJson);
+      const { hostname, protocol, port } = config.get('servers.kibana');
+      const kibanaServerUrl = formatUrl({ hostname, protocol, port });
+      const supertestNoAuth = supertest(kibanaServerUrl);
 
-          expect(apiResponse.status).eql(200);
-        });
+      const apiResponse = await supertestNoAuth
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .auth(name, apiKey)
+        .set('kbn-xsrf', 'true')
+        .set('Authorization', `ApiKey ${apiKey}`)
+        .send(httpMonitorJson);
+
+      expect(apiResponse.status).eql(200);
     });
 
     it('can not create monitor with API key without proper permissions', async () => {

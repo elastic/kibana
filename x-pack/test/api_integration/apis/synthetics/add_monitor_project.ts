@@ -65,9 +65,9 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(200);
         const { monitors } = response.body;
-        if (monitors[0]?.id) {
+        if (monitors[0]?.config_id) {
           await supertest
-            .delete(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}/${monitors[0].id}`)
+            .delete(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}/${monitors[0].config_id}`)
             .set('kbn-xsrf', 'true')
             .send(projectMonitors)
             .expect(200);
@@ -152,17 +152,17 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].id
+            createdMonitorsResponse.body.monitors[0].config_id
           );
 
-          expect(decryptedCreatedMonitor.body.attributes).to.eql({
+          expect(decryptedCreatedMonitor.body).to.eql({
             __ui: {
               script_source: {
                 file_name: '',
                 is_generated_script: false,
               },
             },
-            config_id: decryptedCreatedMonitor.body.id,
+            config_id: decryptedCreatedMonitor.body.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
             alert: {
@@ -258,10 +258,10 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].id
+            createdMonitorsResponse.body.monitors[0].config_id
           );
 
-          expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql({
+          expect(decryptedCreatedMonitor.body.throttling).to.eql({
             value: null,
             id: 'no-throttling',
             label: 'No throttling',
@@ -315,16 +315,16 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].id
+            createdMonitorsResponse.body.monitors[0].config_id
           );
 
-          expect(decryptedCreatedMonitor.body.attributes).to.eql({
+          expect(decryptedCreatedMonitor.body).to.eql({
             __ui: {
               is_tls_enabled: isTLSEnabled,
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
-            config_id: decryptedCreatedMonitor.body.id,
+            config_id: decryptedCreatedMonitor.body.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['${testLocal1}', 'saved'],
@@ -445,14 +445,14 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].id
+            createdMonitorsResponse.body.monitors[0].config_id
           );
 
-          expect(decryptedCreatedMonitor.body.attributes).to.eql({
+          expect(decryptedCreatedMonitor.body).to.eql({
             __ui: {
               is_tls_enabled: isTLSEnabled,
             },
-            config_id: decryptedCreatedMonitor.body.id,
+            config_id: decryptedCreatedMonitor.body.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.receive': '',
             'check.send': '',
@@ -554,11 +554,11 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].id
+            createdMonitorsResponse.body.monitors[0].config_id
           );
 
-          expect(decryptedCreatedMonitor.body.attributes).to.eql({
-            config_id: decryptedCreatedMonitor.body.id,
+          expect(decryptedCreatedMonitor.body).to.eql({
+            config_id: decryptedCreatedMonitor.body.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
             alert: {
@@ -776,7 +776,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
+        expect(monitors[0][ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
         await security.user.delete(username);
@@ -831,7 +831,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(customNamespace);
+        expect(monitors[0][ConfigKey.NAMESPACE]).eql(customNamespace);
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
         await security.user.delete(username);
@@ -887,7 +887,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(customNamespace);
+        expect(monitors[0][ConfigKey.NAMESPACE]).eql(customNamespace);
       } finally {
         await deleteMonitor(httpProjectMonitors.monitors[1].id, project, SPACE_ID);
         await security.user.delete(username);
@@ -1049,13 +1049,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-          getResponse.body.monitors[0].id,
+          getResponse.body.monitors[0].config_id,
           true,
           SPACE_ID
         );
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(decryptedCreatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
+        expect(decryptedCreatedMonitor.body[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
           projectMonitors.monitors[0].content
         );
 
@@ -1087,13 +1087,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitorsUpdated.length).eql(1);
 
         const decryptedUpdatedMonitor = await monitorTestService.getMonitor(
-          monitorsUpdated[0].id,
+          monitorsUpdated[0].config_id,
           true,
           SPACE_ID
         );
-        expect(decryptedUpdatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
-          updatedSource
-        );
+        expect(decryptedUpdatedMonitor.body[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(updatedSource);
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
         await security.user.delete(username);
@@ -1146,7 +1144,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]).eql(
+        expect(monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]).eql(
           `${projectMonitors.monitors[0].id}-${project}-${SPACE_ID}`
         );
       } finally {
@@ -1184,7 +1182,7 @@ export default function ({ getService }: FtrProviderContext) {
         const modifiedMonitor = { ...monitors[0]?.attributes, ...updates };
 
         await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
+          .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.config_id)
           .set('kbn-xsrf', 'true')
           .send(modifiedMonitor)
           .expect(200);
@@ -1203,12 +1201,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         // ensure that monitor can still be decrypted
-        await monitorTestService.getMonitor(monitors[0]?.id);
+        await monitorTestService.getMonitor(monitors[0]?.config_id);
       } finally {
         await Promise.all([
-          projectMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, project);
-          }),
+          projectMonitors.monitors.map((monitor) => deleteMonitor(monitor.id, project)),
         ]);
       }
     });
@@ -1243,7 +1239,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(200);
         const { monitors } = response.body;
-        expect(monitors[0].attributes.enabled).eql(false);
+        expect(monitors[0].enabled).eql(false);
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {
@@ -1417,17 +1413,15 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-            }-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${project}-default-Test private location 0`
         );
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
-        const configId = monitorsResponse.body.monitors[0].id;
-        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const configId = monitorsResponse.body.monitors[0].config_id;
+        const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
 
         comparePolicies(
           packagePolicy,
@@ -1485,17 +1479,15 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-            }-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
           `${httpProjectMonitors.monitors[1].id}-${project}-default-Test private location 0`
         );
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
-        const configId = monitorsResponse.body.monitors[0].id;
-        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const configId = monitorsResponse.body.monitors[0].config_id;
+        const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
 
         comparePolicies(
           packagePolicy,
@@ -1549,9 +1541,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-            }-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1571,9 +1561,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-            }-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1611,15 +1599,13 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-            }-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
-        const configId = monitorsResponse.body.monitors[0].id;
-        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const configId = monitorsResponse.body.monitors[0].config_id;
+        const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
 
         comparePolicies(
           packagePolicy,
@@ -1649,9 +1635,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
-            }-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1694,7 +1678,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const configId = monitorsResponse.body.monitors[0].id;
-        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
         const policyId = `${id}-${testPolicyId}`;
 
         const packagePolicy = apiResponsePolicy.body.items.find(
@@ -1734,7 +1718,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const configId2 = monitorsResponse.body.monitors[0].id;
-        const id2 = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const id2 = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
         const policyId2 = `${id}-${testPolicyId}`;
 
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
@@ -1786,7 +1770,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         updatedMonitorsResponse.forEach((response) => {
-          expect(response.body.monitors[0].attributes.locations).eql([
+          expect(response.body.monitors[0].locations).eql([
             {
               id: 'localhost',
               label: 'Local Synthetics Service',
@@ -1942,7 +1926,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.ALERT_CONFIG]).eql({
+        expect(monitors[0][ConfigKey.ALERT_CONFIG]).eql({
           status: {
             enabled: testAlert.status.enabled,
           },
