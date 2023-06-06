@@ -14,7 +14,7 @@ import {
   RouteConfig as ReactRouterConfig,
 } from 'react-router-config';
 import qs from 'query-string';
-import { findLastIndex, merge, compact } from 'lodash';
+import { findLastIndex, merge, compact, sortBy, orderBy } from 'lodash';
 import { mergeRt, deepExactRt } from '@kbn/io-ts-utils';
 import { FlattenRoutesOf, Route, RouteWithPath, Router, RouteMap } from './types';
 
@@ -87,8 +87,18 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
     let matches: Array<MatchedRoute<{}, ReactRouterConfig>> = [];
     let matchIndex: number = -1;
 
-    for (const path of paths) {
-      const greedy = path.endsWith('/*') || args.length === 0;
+    const pathsWithScore = paths.map((path) => {
+      const greedy = path.endsWith('/*') || args.length === 0 ? 1 : 0;
+      return {
+        length: path.length,
+        greedy,
+        path,
+      };
+    });
+
+    const sortedPaths = orderBy(pathsWithScore, ['greedy', 'length'], ['desc', 'desc']);
+
+    for (const { path, greedy } of sortedPaths) {
       matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(location.pathname));
 
       matchIndex = greedy

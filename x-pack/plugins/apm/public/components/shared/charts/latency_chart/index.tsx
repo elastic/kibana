@@ -65,6 +65,10 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { environment } = useEnvironmentsContext();
 
+  console.log('LatencyChart', {
+    transactionName: 'transactionName' in query ? query.transactionName : null,
+  });
+
   const { latencyChartsData, latencyChartsStatus } =
     useTransactionLatencyChartsFetcher({
       kuery,

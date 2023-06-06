@@ -38,6 +38,10 @@ export function useTransactionLatencyChartsFetcher({
     '/mobile-services/{serviceName}'
   );
 
+  console.log('useTransactionLatencyChartFetcher', {
+    transactionName,
+  });
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
