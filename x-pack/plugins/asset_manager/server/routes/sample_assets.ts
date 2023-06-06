@@ -132,10 +132,7 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
         return res.custom({
           statusCode: 500,
           body: {
-            message: [
-              'TEST change - Not all found data streams were deleted',
-              errorWhileDeleting,
-            ].join(' - '),
+            message: ['Not all found data streams were deleted', errorWhileDeleting].join(' - '),
             deleted: deletedDataStreams,
             matching: dataStreamsToDelete,
           },

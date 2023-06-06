@@ -24,7 +24,6 @@ export async function getAssets({
   filters = {},
 }: GetAssetsOptions): Promise<Asset[]> {
   // Maybe it makes the most sense to validate the filters here?
-
   debug('Get Assets Filters:', JSON.stringify(filters));
 
   const { from = 'now-24h', to = 'now' } = filters;
@@ -40,11 +39,6 @@ export async function getAssets({
     }
 
     if (isStringOrNonEmptyArray(filters.type)) {
-      debug(
-        'filters.type IS string or non empty array?',
-        typeof filters.type,
-        JSON.stringify(filters.type)
-      );
       must.push({
         terms: {
           ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],
@@ -53,11 +47,6 @@ export async function getAssets({
     }
 
     if (isStringOrNonEmptyArray(filters.kind)) {
-      debug(
-        'filters.kind IS string or non empty array?',
-        typeof filters.kind,
-        JSON.stringify(filters.kind)
-      );
       must.push({
         terms: {
           ['asset.kind']: Array.isArray(filters.kind) ? filters.kind : [filters.kind],
