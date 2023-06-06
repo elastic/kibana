@@ -10,15 +10,15 @@ import React, { FC } from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
-  TableListTabParentProps,
+  type TableListTabParentProps,
   TableListViewKibanaProvider,
 } from '@kbn/content-management-table-list';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { EventAnnotationServiceType } from './event_annotation_service/types';
+import type { EventAnnotationServiceType } from './event_annotation_service/types';
 import { EventAnnotationGroupTableList } from './components/table_list';
 
 export interface EventAnnotationListingPageServices {
