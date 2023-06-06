@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   type CoPilotPromptId,
   type PromptParamsOf,
