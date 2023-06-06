@@ -11,11 +11,11 @@ import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
-import { RecentItem } from '../../../../types/internal';
-import { useNavigation as useServices } from '../../../services';
-import { navigationStyles as styles } from '../../../styles';
+import { RecentItem } from '../../../types/internal';
+import { useNavigation as useServices } from '../../services';
+import { navigationStyles as styles } from '../../styles';
 
-import { getI18nStrings } from '../../i18n_strings';
+import { getI18nStrings } from '../i18n_strings';
 
 export interface Props {
   recentlyAccessed$?: Observable<RecentItem[]>;

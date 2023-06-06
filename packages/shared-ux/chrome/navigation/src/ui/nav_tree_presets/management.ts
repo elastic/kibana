@@ -55,170 +55,200 @@ export const management: NodeDefinitionWithChildren<ID> = {
   icon: 'gear',
   children: [
     {
-      title: '',
       id: 'root',
+      title: '',
       children: [
         {
-          title: 'Stack monitoring',
           id: 'stack_monitoring',
+          title: 'Stack monitoring',
+          href: '/app/monitoring',
         },
       ],
     },
     {
-      title: 'Integration management',
       id: 'integration_management',
+      title: 'Integration management',
       children: [
         {
-          title: 'Integrations',
           id: 'integrations',
+          title: 'Integrations',
+          href: '/app/integrations',
         },
         {
-          title: 'Fleet',
           id: 'fleet',
+          title: 'Fleet',
+          href: '/app/fleet',
         },
         {
-          title: 'Osquery',
           id: 'osquery',
+          title: 'Osquery',
+          href: '/app/osquery',
         },
       ],
     },
     {
-      title: 'Stack management',
       id: 'stack_management',
+      title: 'Stack management',
       children: [
         {
-          title: 'Ingest',
           id: 'ingest',
+          title: 'Ingest',
           children: [
             {
-              title: 'Ingest pipelines',
               id: 'ingest_pipelines',
+              title: 'Ingest pipelines',
+              href: '/app/management/ingest/ingest_pipelines',
             },
             {
-              title: 'Logstash pipelines',
               id: 'logstash_pipelines',
+              title: 'Logstash pipelines',
+              href: '/app/management/ingest/pipelines',
             },
           ],
         },
         {
-          title: 'Data',
           id: 'data',
+          title: 'Data',
           children: [
             {
-              title: 'Index management',
               id: 'index_management',
+              title: 'Index management',
+              href: '/app/management/data/index_management',
             },
             {
-              title: 'Index lifecycle policies',
               id: 'index_lifecycle_policies',
+              title: 'Index lifecycle policies',
+              href: '/app/management/data/index_lifecycle_management',
             },
             {
-              title: 'Snapshot and restore',
               id: 'snapshot_and_restore',
+              title: 'Snapshot and restore',
+              href: 'app/management/data/snapshot_restore',
             },
             {
-              title: 'Rollup jobs',
               id: 'rollup_jobs',
+              title: 'Rollup jobs',
+              href: '/app/management/data/rollup_jobs',
             },
             {
-              title: 'Transforms',
               id: 'transforms',
+              title: 'Transforms',
+              href: '/app/management/data/transform',
             },
             {
-              title: 'Cross-cluster replication',
               id: 'cross_cluster_replication',
+              title: 'Cross-cluster replication',
+              href: '/app/management/data/cross_cluster_replication',
             },
             {
-              title: 'Remote clusters',
               id: 'remote_clusters',
+              title: 'Remote clusters',
+              href: '/app/management/data/remote_clusters',
             },
           ],
         },
         {
-          title: 'Alerts and insights',
           id: 'alerts_and_insights',
+          title: 'Alerts and insights',
           children: [
             {
-              title: 'Rules',
               id: 'rules',
+              title: 'Rules',
+              href: '/app/management/insightsAndAlerting/triggersActions/rules',
             },
             {
-              title: 'Cases',
               id: 'cases',
+              title: 'Cases',
+              href: '/app/management/insightsAndAlerting/cases',
             },
             {
-              title: 'Connectors',
               id: 'connectors',
+              title: 'Connectors',
+              href: '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors',
             },
             {
-              title: 'Reporting',
               id: 'reporting',
+              title: 'Reporting',
+              href: '/app/management/insightsAndAlerting/reporting',
             },
             {
-              title: 'Machine learning',
               id: 'machine_learning',
+              title: 'Machine learning',
+              href: '/app/management/insightsAndAlerting/jobsListLink',
             },
             {
-              title: 'Watcher',
               id: 'watcher',
+              title: 'Watcher',
+              href: '/app/management/insightsAndAlerting/watcher',
             },
           ],
         },
         {
-          title: 'Security',
           id: 'security',
+          title: 'Security',
           children: [
             {
-              title: 'Users',
               id: 'users',
+              title: 'Users',
+              href: '/app/management/security/users',
             },
             {
-              title: 'Roles',
               id: 'roles',
+              title: 'Roles',
+              href: '/app/management/security/roles',
             },
             {
-              title: 'Role mappings',
               id: 'role_mappings',
+              title: 'Role mappings',
+              href: '/app/management/security/role_mappings',
             },
             {
-              title: 'API keys',
               id: 'api_keys',
+              title: 'API keys',
+              href: '/app/management/security/api_keys',
             },
           ],
         },
         {
-          title: 'Kibana',
           id: 'kibana',
+          title: 'Kibana',
           children: [
             {
-              title: 'Data view',
               id: 'data_views',
+              title: 'Data view',
+              href: '/app/management/kibana/dataViews',
             },
             {
-              title: 'Saved objects',
               id: 'saved_objects',
+              title: 'Saved objects',
+              href: '/app/management/kibana/objects',
             },
             {
-              title: 'Tags',
               id: 'tags',
+              title: 'Tags',
+              href: '/app/management/kibana/tags',
             },
             {
-              title: 'Search sessions',
               id: 'search_sessions',
+              title: 'Search sessions',
+              href: '/app/management/kibana/search_sessions',
             },
             {
-              title: 'Spaces',
               id: 'spaces',
+              title: 'Spaces',
+              href: '/app/management/kibana/spaces',
             },
             {
-              title: 'Advanced settings',
               id: 'advanced_settings',
+              title: 'Advanced settings',
+              href: '/app/management/kibana/settings',
             },
           ],
         },
         {
-          title: 'Upgrade assistant',
           id: 'upgrade_assistant',
+          title: 'Upgrade assistant',
+          href: '/app/management/stack/upgrade_assistant',
         },
       ],
     },
