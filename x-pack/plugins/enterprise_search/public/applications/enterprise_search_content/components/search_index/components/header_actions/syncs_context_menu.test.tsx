@@ -27,6 +27,8 @@ import { SyncsContextMenu } from './syncs_context_menu';
 
 describe('SyncsContextMenu', () => {
   const startSync = jest.fn();
+  const startIncrementalSync = jest.fn();
+  const startAccessControlSync = jest.fn();
   const cancelSyncs = jest.fn();
 
   const mockValues = {
@@ -48,6 +50,8 @@ describe('SyncsContextMenu', () => {
     setMockValues(mockValues);
     setMockActions({
       cancelSyncs,
+      startAccessControlSync,
+      startIncrementalSync,
       startSync,
     });
   });
@@ -73,14 +77,14 @@ describe('SyncsContextMenu', () => {
       .find(EuiContextMenuPanel)
       .find(EuiResizeObserver)
       .find(EuiContextMenuItem);
-    expect(menuItems).toHaveLength(1);
+    expect(menuItems).toHaveLength(3);
 
-    const firstButton = menuItems;
+    const lastButton = menuItems.at(2);
 
-    expect(firstButton.prop('disabled')).toEqual(false);
-    expect(firstButton.text()).toEqual('Cancel Syncs');
+    expect(lastButton.prop('disabled')).toEqual(false);
+    expect(lastButton.text()).toEqual('Cancel Syncs');
 
-    menuItems.first().simulate('click');
+    menuItems.last().simulate('click');
     expect(cancelSyncs).toHaveBeenCalled();
   });
 
@@ -96,17 +100,17 @@ describe('SyncsContextMenu', () => {
       .find(EuiContextMenuPanel)
       .find(EuiResizeObserver)
       .find(EuiContextMenuItem);
-    expect(menuItems).toHaveLength(2);
+    expect(menuItems).toHaveLength(4);
 
     const firstButton = menuItems.get(0);
 
     expect(firstButton.props).toEqual(
       expect.objectContaining({
-        children: 'Sync',
+        children: 'Full Content',
         disabled: false,
       })
     );
-    menuItems.first().simulate('click');
+    menuItems.at(0).simulate('click');
     expect(startSync).toHaveBeenCalled();
   });
 });

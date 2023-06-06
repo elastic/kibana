@@ -87,7 +87,9 @@ export const SyncsContextMenu: React.FC = () => {
                 'data-test-subj': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
                 disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
                 icon: 'play',
-                name: getSyncButtonText(),
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullSync', {
+                  defaultMessage: 'Full Content',
+                }),
                 onClick: () => {
                   closePopover();
                   startSync();
@@ -105,7 +107,7 @@ export const SyncsContextMenu: React.FC = () => {
                 disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
-                  defaultMessage: 'Incremental content',
+                  defaultMessage: 'Incremental Content',
                 }),
                 onClick: () => {
                   closePopover();
