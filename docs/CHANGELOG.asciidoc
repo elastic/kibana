@@ -83,20 +83,19 @@ With network throttling being disabled, your monitors may run more quickly (i.e.
 [%collapsible]
 ====
 *Details* +
-If you have {elastic-sec} or {observability} rules that send alert summaries, do not upgrade {kib} to 8.8.0. Upgrade to 8.8.1 instead.
+If a cluster meets all of the following conditions, its {elastic-sec} and {observability} rules will fail and no actions will be sent:
 
-There is an initialization bug in the alerting plugin that causes impacted {kib} nodes to fail to send the summary notifications.
-The {kib} log contains error messages like the following example:
+- The {elastic-sec} and {observability} rules were created in version 8.6 or earlier releases.
+- There must be an {ref}/index-templates.html[index template] (for any index) that isn't composed of component templates.
 
-[source,text]
+The following error messages in the {kib} log occur when {kib} starts or when the rules run:
+
+[source,sh]
 ----
-Error installing common resources for AlertsService.
-No additional resources will be installed and rule execution may be impacted.
-- Failure during installation. Cannot read properties of undefined ...
+Error installing component template .alerts-ecs-mappings - Cannot read properties of undefined (reading 'includes')
+
+Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - Failure during installation. Cannot read properties of undefined (reading 'includes')
 ----
-
-
-If the action frequency is `for each alert` instead of `summary of alerts`, the action is not affected by this bug.
 
 *Impact* +
 If you have upgraded to 8.8.0 and your alerting rules fail, upgrade to 8.8.1.
