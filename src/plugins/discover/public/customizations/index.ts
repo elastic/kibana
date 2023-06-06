@@ -9,6 +9,5 @@
 export * from './customization_types';
 export * from './customization_provider';
 export * from './customization_service';
-export * from './profile_aware_locator';
 export * from './profile_registry';
 export * from './types';

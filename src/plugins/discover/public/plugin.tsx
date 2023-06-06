@@ -75,7 +75,6 @@ import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 import {
   CustomizationCallback,
   createProfileRegistry,
-  ProfileAwareLocator,
   createCustomizeFunction,
 } from './customizations';
 
@@ -220,7 +219,6 @@ export class DiscoverPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private profileRegistry = createProfileRegistry();
   private locator?: DiscoverAppLocator;
-  private profileAwareLocator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
 
@@ -235,17 +233,12 @@ export class DiscoverPlugin
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
       );
-      const contextLocator = plugins.share.url.locators.create(
+      this.contextLocator = plugins.share.url.locators.create(
         new DiscoverContextAppLocatorDefinition({ useHash })
       );
-      const singleDocLocator = plugins.share.url.locators.create(
+      this.singleDocLocator = plugins.share.url.locators.create(
         new DiscoverSingleDocLocatorDefinition()
       );
-
-      // Create profile-aware locators for internal use
-      this.profileAwareLocator = new ProfileAwareLocator(this.locator);
-      this.contextLocator = new ProfileAwareLocator(contextLocator);
-      this.singleDocLocator = new ProfileAwareLocator(singleDocLocator);
     }
 
     this.docViewsRegistry = new DocViewsRegistry();
@@ -335,13 +328,19 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+          locator: this.locator!,
+          contextLocator: this.contextLocator!,
+          singleDocLocator: this.singleDocLocator!,
+        });
+
         const services = buildServices(
           coreStart,
           discoverStartPlugins,
           this.initializerContext,
-          this.profileAwareLocator!,
-          this.contextLocator!,
-          this.singleDocLocator!
+          locator,
+          contextLocator,
+          singleDocLocator
         );
 
         // make sure the data view list is up to date
@@ -438,13 +437,19 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
+      const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+        locator: this.locator!,
+        contextLocator: this.contextLocator!,
+        singleDocLocator: this.singleDocLocator!,
+      });
+
       return buildServices(
         coreStart,
         discoverStartPlugins,
         this.initializerContext,
-        this.locator!,
-        this.contextLocator!,
-        this.singleDocLocator!
+        locator,
+        contextLocator,
+        singleDocLocator
       );
     };
 
@@ -452,3 +457,24 @@ export class DiscoverPlugin
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
+
+/**
+ * Create profile-aware locators for internal use
+ */
+const getProfileAwareLocators = async ({
+  locator,
+  contextLocator,
+  singleDocLocator,
+}: {
+  locator: DiscoverAppLocator;
+  contextLocator: DiscoverContextAppLocator;
+  singleDocLocator: DiscoverSingleDocLocator;
+}) => {
+  const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
+
+  return {
+    locator: new ProfileAwareLocator(locator),
+    contextLocator: new ProfileAwareLocator(contextLocator),
+    singleDocLocator: new ProfileAwareLocator(singleDocLocator),
+  };
+};
