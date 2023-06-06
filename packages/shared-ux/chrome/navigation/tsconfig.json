@@ -22,9 +22,9 @@
     "@kbn/shared-ux-storybook-mock",
     "@kbn/i18n",
     "@kbn/core-chrome-browser",
-    "@kbn/deeplinks-analytics",
-    "@kbn/deeplinks-devtools",
-    "@kbn/deeplinks-ml"
+    "@kbn/default-nav-analytics",
+    "@kbn/default-nav-ml",
+    "@kbn/default-nav-devtools"
   ],
   "exclude": [
     "target/**/*"
