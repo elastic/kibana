@@ -265,7 +265,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     hasDocumentLevelSecurityFeature: [
       () => [selectors.connector],
       (connector?: Connector) =>
-        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY] || false,
+        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false,
     ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
@@ -273,7 +273,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     hasIncrementalSyncFeature: [
       () => [selectors.connector],
-      (connector?: Connector) => connector?.features?.[FeatureName.INCREMENTAL_SYNC] || false,
+      (connector?: Connector) =>
+        connector?.features?.[FeatureName.INCREMENTAL_SYNC]?.enabled || false,
     ],
     htmlExtraction: [
       () => [selectors.connector],

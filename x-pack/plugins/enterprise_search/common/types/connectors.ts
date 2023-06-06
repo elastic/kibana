@@ -175,10 +175,10 @@ export enum FeatureName {
 }
 
 export type ConnectorFeatures = Partial<{
-  [FeatureName.DOCUMENT_LEVEL_SECURITY]: boolean;
+  [FeatureName.DOCUMENT_LEVEL_SECURITY]: { enabled: boolean };
   [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
   [FeatureName.FILTERING_RULES]: boolean;
-  [FeatureName.INCREMENTAL_SYNC]: boolean;
+  [FeatureName.INCREMENTAL_SYNC]: { enabled: boolean };
   [FeatureName.SYNC_RULES]: {
     advanced?: {
       enabled: boolean;
