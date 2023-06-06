@@ -10,7 +10,7 @@ import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { XJsonModeType } from './runtime_mappings';
 
 interface Props {
