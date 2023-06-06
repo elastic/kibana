@@ -97,6 +97,16 @@ A list of available variables can be accessed by selecting the
 Click **Save**. The alert has been created and is now active!
 
 [float]
+[[apm-alert-view]]
+=== View alerts and rules
+
+Alerts can be viewed within the context of any service.
+After selecting a service, go to the **Alerts** tab to view any alerts that are active for the selected service.
+
+[role="screenshot"]
+image::apm/images/active-alert-status.png[View active alerts by service]
+
+[float]
 [[apm-alert-manage]]
 === Manage alerts and rules
 
