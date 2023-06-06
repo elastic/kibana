@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-
-import type { NodeDefinitionWithChildren } from '@kbn/shared-ux-chrome-navigation';
+import type { NodeDefinitionWithChildren } from '@kbn/core-chrome-browser';
 
 import type { DeepLinkId } from './deep_links';
 

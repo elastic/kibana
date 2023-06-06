@@ -7,54 +7,15 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  ChromeProjectNavigationNode,
+  NodeDefinition,
+} from '@kbn/core-chrome-browser';
 
 import type { CloudLinkProps, RecentlyAccessedProps } from './components';
 
-export type NonEmptyArray<T> = [T, ...T[]];
-
-/**
- * @public
- *
- * A navigation node definition with its unique id, title, path in the tree and optional
- * deep link and children.
- */
-export interface NodeDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
-  ChildrenId extends string = Id
-> {
-  /** Optional id, if not passed a "link" must be provided. */
-  id?: Id;
-  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title?: string;
-  /** App id or deeplink id */
-  link?: LinkId;
-  /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
-  icon?: string;
-  /** Optional children of the navigation node */
-  children?: NonEmptyArray<NodeDefinition<LinkId, ChildrenId>>;
-  /**
-   * Temporarilly we allow href to be passed.
-   * Once all the deeplinks will be exposed in packages we will not allow href anymore
-   * and force deeplink id to be passed
-   */
-  href?: string;
-}
-
-/**
- * @public
- *
- * A navigation node definition with its unique id, title, path in the tree and optional
- * deep link and children.
- */
-export type NodeDefinitionWithChildren<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
-  ChildrenID extends string = Id
-> = NodeDefinition<LinkId, Id, ChildrenID> & {
-  children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
-};
+type NonEmptyArray<T> = [T, ...T[]];
 
 /**
  * @public
