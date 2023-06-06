@@ -17,9 +17,21 @@ export const FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN = '.fleet-filedelivery-
 export const FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN = '.fleet-filedelivery-data-*';
 
 // which integrations support file upload and the name to use for the file upload index
-export const FILE_STORAGE_INTEGRATION_INDEX_NAMES: Readonly<Record<string, string>> = {
-  elastic_agent: 'agent',
-  endpoint: 'endpoint',
+export const FILE_STORAGE_INTEGRATION_INDEX_NAMES: Readonly<
+  Record<
+    string,
+    {
+      /** name to be used for the index */
+      name: string;
+      /** If integration supports files sent from host to ES/Kibana */
+      fromHost: boolean;
+      /** If integration supports files to be sent to host from kibana */
+      toHost: boolean;
+    }
+  >
+> = {
+  elastic_agent: { name: 'agent', fromHost: true, toHost: false },
+  endpoint: { name: 'endpoint', fromHost: true, toHost: true },
 };
 export const FILE_STORAGE_INTEGRATION_NAMES: Readonly<string[]> = Object.keys(
   FILE_STORAGE_INTEGRATION_INDEX_NAMES
