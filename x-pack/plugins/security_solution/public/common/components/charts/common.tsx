@@ -16,7 +16,7 @@ import type {
   AxisStyle,
   BarSeriesStyle,
 } from '@elastic/charts';
-import { DARK_THEME, LIGHT_THEME, mergeWithDefaultTheme, Position } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME, Position } from '@elastic/charts';
 import { EuiFlexGroup } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -111,14 +111,14 @@ const theme: PartialTheme = {
     barsPadding: 0.05,
   },
 };
-export const useTheme = () => {
+export const useTheme = (): Pick<SettingsProps, 'baseTheme' | 'theme'> => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
-  const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const themeValue = useMemo(() => mergeWithDefaultTheme(theme, defaultTheme), []);
-
-  return themeValue;
+  const baseTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+  return {
+    baseTheme,
+    theme,
+  };
 };
 
 export const chartDefaultSettings = {
