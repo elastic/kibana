@@ -44,7 +44,7 @@ export class TaskValidator {
     }
 
     const taskTypeDef = this.definitions.get(task.taskType);
-    const lastestStateSchema = this.getLatestSchema(taskTypeDef);
+    const lastestStateSchema = getLatestStateSchema(taskTypeDef);
 
     // TODO: Remove once all task types report their state schema
     if (!lastestStateSchema) {
@@ -131,23 +131,23 @@ export class TaskValidator {
 
     return latestStateSchema.schema.extendsDeep({ unknowns }).validate(state);
   }
+}
 
-  private getLatestSchema(taskTypeDef: TaskDefinition): LatestStateSchema {
-    if (!taskTypeDef.stateSchemaByVersion) {
-      return;
-    }
-
-    const versions = Object.keys(taskTypeDef.stateSchemaByVersion).map((v) => parseInt(v, 10));
-    const latest = max(versions);
-
-    if (latest === undefined) {
-      return;
-    }
-
-    return {
-      version: latest,
-      schema: taskTypeDef.stateSchemaByVersion[latest].schema,
-      up: taskTypeDef.stateSchemaByVersion[latest].up,
-    };
+function getLatestStateSchema(taskTypeDef: TaskDefinition): LatestStateSchema {
+  if (!taskTypeDef.stateSchemaByVersion) {
+    return;
   }
+
+  const versions = Object.keys(taskTypeDef.stateSchemaByVersion).map((v) => parseInt(v, 10));
+  const latest = max(versions);
+
+  if (latest === undefined) {
+    return;
+  }
+
+  return {
+    version: latest,
+    schema: taskTypeDef.stateSchemaByVersion[latest].schema,
+    up: taskTypeDef.stateSchemaByVersion[latest].up,
+  };
 }
