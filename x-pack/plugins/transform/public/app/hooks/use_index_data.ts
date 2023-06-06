@@ -10,9 +10,22 @@ import { useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import {
+  getFieldType,
+  getDataGridSchemaFromKibanaFieldType,
+  getDataGridSchemaFromESFieldType,
+  getFieldsFromKibanaIndexPattern,
+  showDataGridColumnChartErrorMessageToast,
+  useDataGrid,
+  useRenderCellValue,
+  getProcessedFields,
+  type EsSorting,
+  type UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
 import {
   isEsSearchResponse,
@@ -24,12 +37,9 @@ import {
   removeKeywordPostfix,
 } from '../../../common/utils/field_utils';
 import { getErrorMessage } from '../../../common/utils/errors';
-import { isRuntimeMappings } from '../../../common/shared_imports';
-
-import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
 import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
-import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { useToastNotifications } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 import { SearchItems } from './use_search_items';
@@ -47,18 +57,6 @@ export const useIndexData = (
   const api = useApi();
   const dataSearch = useDataSearch();
   const toastNotifications = useToastNotifications();
-  const {
-    ml: {
-      getFieldType,
-      getDataGridSchemaFromKibanaFieldType,
-      getDataGridSchemaFromESFieldType,
-      getFieldsFromKibanaIndexPattern,
-      showDataGridColumnChartErrorMessageToast,
-      useDataGrid,
-      useRenderCellValue,
-      getProcessedFields,
-    },
-  } = useAppDependencies();
 
   const [dataViewFields, setDataViewFields] = useState<string[]>();
 
@@ -150,7 +148,6 @@ export const useIndexData = (
     if (combinedRuntimeMappings !== undefined) {
       result = Object.keys(combinedRuntimeMappings).map((fieldName) => {
         const field = combinedRuntimeMappings[fieldName];
-        // @ts-expect-error @elastic/elasticsearch does not support yet "composite" type for runtime fields
         const schema = getDataGridSchemaFromESFieldType(field.type);
         return { id: fieldName, schema };
       });
@@ -166,13 +163,7 @@ export const useIndexData = (
     });
 
     return result.sort((a, b) => a.id.localeCompare(b.id));
-  }, [
-    dataViewFields,
-    dataView.fields,
-    combinedRuntimeMappings,
-    getDataGridSchemaFromESFieldType,
-    getDataGridSchemaFromKibanaFieldType,
-  ]);
+  }, [dataViewFields, dataView.fields, combinedRuntimeMappings]);
 
   // EuiDataGrid State
 

@@ -138,7 +138,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline": "670a02b3c2a399bca781ff1e4781793b208b471a",
         "siem-ui-timeline-note": "0a32fb776907f596bedca292b8c646496ae9c57b",
         "siem-ui-timeline-pinned-event": "082daa3ce647b33873f6abccf340bdfa32057c8d",
-        "slo": "4415e0ae7af10b79a207843acee454a931a01386",
+        "slo": "2048ab6791df2e1ae0936f29c20765cb8d2fcfaa",
         "space": "8de4ec513e9bbc6b2f1d635161d850be7747d38e",
         "spaces-usage-stats": "3abca98713c52af8b30300e386c7779b3025a20e",
         "synthetics-monitor": "ca7c0710c0607e44b2c52e5a41086b8b4a214f63",
