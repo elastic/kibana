@@ -31,7 +31,7 @@ const FIELD_REQUIRED_ERROR = i18n.translate(
   }
 );
 const PIPELINE_NAME_EXISTS_ERROR = i18n.translate(
-  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.invalidPipelineName',
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.pipelineNameExistsError',
   {
     defaultMessage: 'Name already used by another pipeline.',
   }
