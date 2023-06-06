@@ -36,3 +36,6 @@ telemetry.allowChangingOptInStatus: false
 server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includeSubDomains
 # Disable embedding for serverless MVP
 server.securityResponseHeaders.disableEmbedding: true
+
+server.versioned.handlerResolution: newest # default to newest routes
+server.versioned.strictClientVersionCheck: false # do not enforce client version check
