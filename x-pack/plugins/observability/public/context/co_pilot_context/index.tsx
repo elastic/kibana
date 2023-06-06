@@ -6,7 +6,7 @@
  */
 
 import { createContext } from 'react';
-import { CoPilotService } from '../../typings/co_pilot';
+import { type CoPilotService } from '../../typings/co_pilot';
 
 export const CoPilotContext = createContext<CoPilotService | undefined>(undefined);
 

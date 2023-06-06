@@ -61,7 +61,7 @@ import {
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
-import { CoPilotService } from './typings/co_pilot';
+import { type CoPilotService } from './typings/co_pilot';
 
 export interface ConfigSchema {
   unsafe: {

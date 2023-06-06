@@ -22,8 +22,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, Observable, of } from 'rxjs';
 import { CoPilotPromptId } from '../../../common';
-import { PromptParamsOf } from '../../../common/co_pilot';
-import { CoPilotService, PromptObservableState } from '../../typings/co_pilot';
+import type { PromptParamsOf } from '../../../common/co_pilot';
+import type { CoPilotService, PromptObservableState } from '../../typings/co_pilot';
 
 const cursorCss = css`
   @keyframes blink {
