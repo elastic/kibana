@@ -6,13 +6,13 @@
  */
 
 jest.mock('./get_assets', () => ({ getAssets: jest.fn() }));
-jest.mock('./get_related_assets', () => ({ getRelatedAssets: jest.fn() }));
+jest.mock('./get_indirectly_related_assets', () => ({ getIndirectlyRelatedAssets: jest.fn() }));
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { v4 as uuid } from 'uuid';
 import { AssetWithoutTimestamp } from '../../common/types_api';
 import { getAssets } from './get_assets'; // Mocked
-import { getRelatedAssets } from './get_indirectly_related_assets'; // Mocked
+import { getIndirectlyRelatedAssets } from './get_indirectly_related_assets'; // Mocked
 import { getAllRelatedAssets } from './get_all_related_assets';
 
 const esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
@@ -20,7 +20,7 @@ const esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurre
 describe('getAllRelatedAssets', () => {
   beforeEach(() => {
     (getAssets as jest.Mock).mockReset();
-    (getRelatedAssets as jest.Mock).mockReset();
+    (getIndirectlyRelatedAssets as jest.Mock).mockReset();
   });
 
   it('throws if it cannot find the primary asset', async () => {
@@ -35,7 +35,9 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -61,10 +63,12 @@ describe('getAllRelatedAssets', () => {
 
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAssetWithoutParents]);
     // Distance 1
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -100,10 +104,12 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAssetWithDirectParent]);
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -145,10 +151,12 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAssetWithIndirectParent]);
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([]);
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -198,10 +206,12 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([directlyReferencedParent]);
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([indirectlyReferencedParent]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([indirectlyReferencedParent]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -249,10 +259,12 @@ describe('getAllRelatedAssets', () => {
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
     // Code should filter out any directly referenced parent from the indirectly referenced parents query
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -330,7 +342,7 @@ describe('getAllRelatedAssets', () => {
     };
 
     // Only using directly referenced parents
-    (getRelatedAssets as jest.Mock).mockResolvedValue([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValue([]);
 
     // Primary
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);
@@ -415,7 +427,7 @@ describe('getAllRelatedAssets', () => {
     };
 
     // Only using directly referenced parents
-    (getRelatedAssets as jest.Mock).mockResolvedValue([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValue([]);
 
     // Primary
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);
@@ -507,7 +519,7 @@ describe('getAllRelatedAssets', () => {
     };
 
     // Only using directly referenced parents
-    (getRelatedAssets as jest.Mock).mockResolvedValue([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValue([]);
 
     // Primary
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);

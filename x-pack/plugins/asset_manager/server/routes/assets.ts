@@ -16,14 +16,14 @@ import {
   createLiteralValueFromUndefinedRT,
 } from '@kbn/io-ts-utils';
 import { debug } from '../../common/debug_log';
-import { AssetType, assetTypeRT, AssetKind, assetKindRT, relationRT } from '../../common/types_api';
+import { assetTypeRT, assetKindRT, relationRT } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
 import { getAssets } from '../lib/get_assets';
 import { getAllRelatedAssets } from '../lib/get_all_related_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 import { AssetNotFoundError } from '../lib/errors';
-import { isValidRange, toArray } from '../lib/utils';
+import { isValidRange } from '../lib/utils';
 
 function maybeArrayRT(t: rt.Mixed) {
   return rt.union([rt.array(t), t]);
@@ -103,8 +103,6 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       }
 
       const esClient = await getEsClientFromContext(context);
-
-      console.log('IN ASSETS ENDPOINT', JSON.stringify({ filters, size }));
 
       try {
         const results = await getAssets({ esClient, size, filters });
