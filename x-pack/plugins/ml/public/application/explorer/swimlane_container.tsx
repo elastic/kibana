@@ -18,6 +18,7 @@ import {
   BrushEndListener,
   Chart,
   ElementClickListener,
+  CustomTooltip,
   Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
@@ -80,7 +81,7 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
 const SwimLaneTooltip =
-  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  (fieldName?: string): CustomTooltip =>
   ({ values }) => {
     const tooltipData: TooltipValue[] = [];
 
