@@ -15,10 +15,7 @@ import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/chart
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import {
-  getColumnByAccessor,
-  getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -84,7 +81,6 @@ export const TagCloudChart = ({
   renderComplete,
   syncColors,
 }: TagCloudChartProps) => {
-
   if (visData.rows.length === 0) {
     return <EmptyPlaceholder icon={IconChartTagcloud} renderComplete={renderComplete} />;
   }
@@ -159,9 +155,7 @@ export const TagCloudChart = ({
       const termsBucketId = getColumnByAccessor(bucket, visData.columns)!.id;
       const clickedValue = elements[0][0].text;
 
-      const columnIndex = visData.columns.findIndex(
-        (col) => col.id === termsBucketId
-      );
+      const columnIndex = visData.columns.findIndex((col) => col.id === termsBucketId);
       if (columnIndex < 0) {
         return;
       }
