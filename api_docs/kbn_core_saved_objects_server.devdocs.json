@@ -8286,6 +8286,29 @@
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsModelVersionSchemaDefinitions.create",
+            "type": "Object",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nThe schema applied when creating a document of the current version\nAllows for validating properties using @kbn/config-schema validations"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsValidationSpec",
+                "text": "SavedObjectsValidationSpec"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
