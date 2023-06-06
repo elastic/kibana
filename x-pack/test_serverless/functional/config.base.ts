@@ -57,6 +57,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
       },
+      junit: options.junit,
     };
   };
 }

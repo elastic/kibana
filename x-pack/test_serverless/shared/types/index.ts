@@ -8,4 +8,5 @@
 export interface CreateTestConfigOptions {
   serverlessProject: 'es' | 'oblt' | 'security' | undefined;
   testFiles: string[];
+  junit: { reportName: string },
 }
