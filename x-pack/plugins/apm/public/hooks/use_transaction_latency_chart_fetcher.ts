@@ -45,7 +45,9 @@ export function useTransactionLatencyChartsFetcher({
     numBuckets: 100,
     start,
     end,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
 
   const shouldUseDurationSummary =
