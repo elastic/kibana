@@ -21,12 +21,24 @@ export const fetchEngineFieldCapabilities = async (
   engine: EnterpriseSearchEngine
 ): Promise<EnterpriseSearchEngineFieldCapabilities> => {
   const { name, updated_at_millis, indices } = engine;
+
+  const availableIndicesList = await availableIndices(client, indices);
+
+  if (Array.isArray(availableIndicesList) && !availableIndicesList.length) {
+    return {
+      fields: [],
+      name,
+      updated_at_millis,
+    };
+  }
+
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({
     fields: '*',
     filters: '-metadata',
     include_unmapped: true,
-    index: await availableIndices(client, indices),
+    index: availableIndicesList,
   });
+
   const fields = parseFieldsCapabilities(fieldCapabilities);
   return {
     fields,
