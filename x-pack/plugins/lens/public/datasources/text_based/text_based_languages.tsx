@@ -369,7 +369,7 @@ export function getTextBasedDatasource({
       domElement: Element,
       props: DatasourceDimensionTriggerProps<TextBasedPrivateState>
     ) => {
-      const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state);
+      const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const layer = props.state.layers[props.layerId];
       const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
       let customLabel: string | undefined = columnLabelMap[props.columnId];
@@ -588,7 +588,7 @@ export function getTextBasedDatasource({
       return false;
     },
 
-    getPublicAPI({ state, layerId }: PublicAPIProps<TextBasedPrivateState>) {
+    getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
         datasourceId: 'textBased',
 
@@ -607,7 +607,7 @@ export function getTextBasedDatasource({
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.allColumns?.find((c) => c.columnId === columnId);
-          const columnLabelMap = TextBasedDatasource.uniqueLabels(state);
+          const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
 
           if (column) {
             return {

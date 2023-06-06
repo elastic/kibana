@@ -10,6 +10,7 @@ import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lod
 import moment, { Moment } from 'moment';
 
 import { Unit } from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
 import { parseInterval, splitStringInterval } from '../../../utils';
 import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
@@ -272,11 +273,15 @@ export class TimeBuckets {
           ? convertDurationToNormalizedEsInterval(interval, originalUnit)
           : convertIntervalToEsInterval(this._originalInterval);
 
-      const prettyUnits = moment.normalizeUnits(esInterval.unit);
+      const prettyUnits = moment.normalizeUnits(esInterval.unit) as moment.unitOfTime.Base;
+
+      const durationDescription = moment
+        .duration(esInterval.value, prettyUnits)
+        .locale(i18n.getLocale())
+        .humanize();
 
       return Object.assign(interval, {
-        description:
-          esInterval.value === 1 ? prettyUnits : esInterval.value + ' ' + prettyUnits + 's',
+        description: durationDescription,
         esValue: esInterval.value,
         esUnit: esInterval.unit,
         expression: esInterval.expression,
