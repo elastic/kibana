@@ -29,7 +29,6 @@ describe('TaskValidator', () => {
   describe('getValidatedTaskInstance()', () => {
     it(`should return the task as-is whenever the task definition isn't in the definitions dictionary`, () => {
       const definitions = new TaskTypeDictionary(mockLogger());
-      definitions.registerTaskDefinitions({ foo: fooTaskDefinition });
       const taskValidator = new TaskValidator({
         logger: mockLogger(),
         definitions,
@@ -64,6 +63,24 @@ describe('TaskValidator', () => {
       const { stateVersion, ...result } = taskValidator.getValidatedTaskInstance(task, 'write');
       expect(result).toEqual(task);
       expect(stateVersion).toEqual(1);
+    });
+
+    it(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: fooTaskDefinition,
+      });
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({ state: { foo: 'bar' } });
+      expect(() =>
+        taskValidator.getValidatedTaskInstance(task, 'write')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[TaskValidator] stateSchemaByVersion not defined for task type: foo"`
+      );
     });
 
     it(`should fail to validate the state schema on write when unknown fields are present`, () => {

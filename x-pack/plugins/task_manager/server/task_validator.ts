@@ -46,10 +46,10 @@ export class TaskValidator {
     const taskTypeDef = this.definitions.get(task.taskType);
     const lastestStateSchema = getLatestStateSchema(taskTypeDef);
 
-    // TODO: Remove once all task types report their state schema
-    if (!lastestStateSchema) {
-      return task;
-    }
+    // // TODO: Remove once all task types report their state schema
+    // if (!lastestStateSchema) {
+    //   return task;
+    // }
 
     if (mode === 'read') {
       let state = task.state;
