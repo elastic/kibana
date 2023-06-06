@@ -21,7 +21,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
-import { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,

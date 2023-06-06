@@ -26,7 +26,7 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 
-import { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
