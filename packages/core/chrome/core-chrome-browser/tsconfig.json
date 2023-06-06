@@ -13,7 +13,10 @@
   ],
   "kbn_references": [
     "@kbn/core-mount-utils-browser",
-    "@kbn/core-application-common"
+    "@kbn/core-application-common",
+    "@kbn/deeplinks-devtools",
+    "@kbn/deeplinks-analytics",
+    "@kbn/deeplinks-ml"
   ],
   "exclude": [
     "target/**/*",

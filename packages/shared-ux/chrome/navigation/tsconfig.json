@@ -21,7 +21,10 @@
     "@kbn/core-http-browser",
     "@kbn/shared-ux-storybook-mock",
     "@kbn/i18n",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/deeplinks-analytics",
+    "@kbn/deeplinks-devtools",
+    "@kbn/deeplinks-ml"
   ],
   "exclude": [
     "target/**/*"
