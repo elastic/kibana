@@ -540,8 +540,6 @@ export class TaskRunner<
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-      await rulesClient.clearExpiredSnoozes({ id: rule.id });
-
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
       } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
@@ -757,6 +755,18 @@ export class TaskRunner<
         async () => this.prepareToRun()
       );
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
+
+      (async () => {
+        try {
+          await preparedResult.rulesClient.clearExpiredSnoozes({
+            rule: preparedResult.rule,
+            version: preparedResult.version,
+          });
+        } catch (e) {
+          // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
+          this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
+        }
+      })();
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
 
