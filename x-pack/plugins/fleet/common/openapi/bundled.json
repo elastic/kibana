@@ -942,7 +942,8 @@
                           ]
                         },
                         "savedObject": {
-                          "type": "object"
+                          "type": "object",
+                          "deprecated": true
                         },
                         "latestVersion": {
                           "type": "string"
@@ -1589,7 +1590,8 @@
             },
             "name": "kuery",
             "in": "query",
-            "required": false
+            "required": false,
+            "deprecated": true
           }
         ]
       }
@@ -5463,6 +5465,7 @@
         "name": "kuery",
         "in": "query",
         "required": false,
+        "deprecated": true,
         "schema": {
           "type": "string"
         }
@@ -5488,7 +5491,8 @@
         "in": "query",
         "required": false,
         "schema": {
-          "type": "string"
+          "type": "string",
+          "deprecated": true
         }
       },
       "sort_order": {
@@ -5768,7 +5772,8 @@
             "type": "string"
           },
           "savedObject": {
-            "type": "object"
+            "type": "object",
+            "deprecated": true
           }
         },
         "required": [

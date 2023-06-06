@@ -598,6 +598,7 @@ paths:
                           - not_installed
                       savedObject:
                         type: object
+                        deprecated: true
                       latestVersion:
                         type: string
                       keepPoliciesUpToDate:
@@ -1000,6 +1001,7 @@ paths:
           name: kuery
           in: query
           required: false
+          deprecated: true
   /agent_status/data:
     get:
       summary: Get incoming agent data
@@ -3409,6 +3411,7 @@ components:
       name: kuery
       in: query
       required: false
+      deprecated: true
       schema:
         type: string
     show_inactive:
@@ -3429,6 +3432,7 @@ components:
       required: false
       schema:
         type: string
+        deprecated: true
     sort_order:
       name: sortOrder
       in: query
@@ -3622,6 +3626,7 @@ components:
           type: string
         savedObject:
           type: object
+          deprecated: true
       required:
         - description
         - download
