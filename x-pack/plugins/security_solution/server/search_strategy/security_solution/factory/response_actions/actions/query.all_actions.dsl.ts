@@ -21,6 +21,7 @@ export const buildResponseActionsQuery = ({
     index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
     ignore_unavailable: true,
     body: {
+      fields: [{ field: '*' }, { field: 'EndpointActions.*', include_unmapped: true }],
       query: {
         bool: {
           minimum_should_match: 2,
