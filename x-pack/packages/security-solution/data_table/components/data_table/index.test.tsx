@@ -48,13 +48,6 @@ jest.mock('../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
 }));
 
-jest.mock(
-  'react-visibility-sensor',
-  () =>
-    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-      children({ isVisible: true })
-);
-
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
     matches: false,
