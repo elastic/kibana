@@ -629,7 +629,7 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
-            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
+            inMemory={isPlainRecord && columns.length ? { level: 'sorting' } : undefined}
             gridStyle={GRID_STYLE}
           />
         </div>
