@@ -217,7 +217,35 @@ the **shape** of the document at the given version.
 
 Basically, this schema should keep all the known fields of a given version, and remove all the unknown fields, without throwing.
 
-Usage examples are available in the `use-case examples` section below.
+Forward compatibility schema can be implemented in two different ways.
+
+1. Using `config-schema`
+
+*Example of schema for a version having two fields: someField and anotherField*
+
+```ts
+const versionSchema = schema.object(
+  {
+    someField: schema.maybe(schema.string()),
+    anotherField: schema.maybe(schema.string()),
+  },
+  { unknowns: 'ignore' }
+);
+```
+
+**Important:** Note the `{ unknowns: 'ignore' }` in the schema's options. This is required when using
+`config-schema` based schemas, as this what will evict the additional fields without throwing an error.
+
+2. Using a plain javascript function
+
+*Example of schema for a version having two fields: someField and anotherField*
+
+```ts
+const versionSchema: SavedObjectModelVersionEvictionFn = (attributes) => {
+  const knownFields = ['someField', 'anotherField'];
+  return pick(attributes, knownFields);
+}
+```
 
 **note:** *Even if highly recommended, implementing this schema is not strictly required. Type owners can manage unknown fields
           and inter-version compatibility themselves in their service layer instead.*
@@ -277,10 +305,6 @@ const myType: SavedObjectsType = {
   },
 };
 ```
-
-**Important:** Note the `{ unknowns: 'ignore' }` in the `forwardCompatibility`'s schema options. This is required when using
-               `config-schema` based schemas for `forwardCompatibility`, as this what will evict the additional fields without
-               throwing an error (like `_.pick`ing only the known fields)
 
 From here, say we want to introduce a new `dolly` field that is not indexed, and that we don't need to populate with a default value.
 
