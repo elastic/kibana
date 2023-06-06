@@ -16,6 +16,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/t
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { EventAnnotationService } from './event_annotation_service';
 import {
   manualPointEventAnnotation,
@@ -62,7 +63,9 @@ export class EventAnnotationPlugin
     );
 
     dependencies.visualizations.listingViewRegistry.add({
-      title: 'Annotation Groups',
+      title: i18n.translate('eventAnnotation.listingViewTitle', {
+        defaultMessage: 'Annotation Groups',
+      }),
       id: ANNOTATIONS_LISTING_VIEW_ID,
       getTableList: async (props) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
