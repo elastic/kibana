@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { DASHBOARD_APP_ID, DISCOVER_APP_ID, VISUALIZE_APP_ID } from './constants';
+import { DASHBOARD_APP_ID, DISCOVER_APP_ID, VISUALIZE_APP_ID } from './constants';
 
-export {
-  defaultNavigation,
-  type NavigationID,
-  type AnalyticsNodeDefinition,
-} from './default_navigation';
+export type AppId = typeof DISCOVER_APP_ID | typeof DASHBOARD_APP_ID | typeof VISUALIZE_APP_ID;
 
-export type { AppId, DeepLinkId } from './deep_links';
+export type DeepLinkId = AppId;

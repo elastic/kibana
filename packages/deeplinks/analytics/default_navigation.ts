@@ -5,28 +5,29 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { i18n } from '@kbn/i18n';
+import type { NodeDefinitionWithChildren } from '@kbn/shared-ux-chrome-navigation';
 
-import type { DeepLinkId as AnalyticsDeepLink } from '@kbn/deeplinks-analytics';
+import type { DeepLinkId } from './deep_links';
 
-import type { NodeDefinitionWithChildren } from '../types';
+export type NavigationID = 'rootNav:analytics' | 'root';
 
-export type ID = 'sharedux:analytics' | 'root';
+export type AnalyticsNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, NavigationID>;
 
-export const analytics: NodeDefinitionWithChildren<AnalyticsDeepLink, ID> = {
-  // Make sure we have a unique id otherwise it might override a custom id from the project
-  id: 'sharedux:analytics',
-  title: 'Data exploration',
+export const defaultNavigation: AnalyticsNodeDefinition = {
+  id: 'rootNav:analytics',
+  title: i18n.translate('deeplinks.analytics.dataExploration', {
+    defaultMessage: 'Data exploration',
+  }),
   icon: 'stats',
   children: [
     {
       id: 'root',
       children: [
         {
-          title: 'Discover',
           link: 'discover',
         },
         {
-          title: 'Dashboard',
           link: 'dashboard',
         },
         {
