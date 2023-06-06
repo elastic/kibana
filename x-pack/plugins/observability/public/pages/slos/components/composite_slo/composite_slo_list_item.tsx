@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
+import { CompositeSloBadges } from './badges/composite_slo_badges';
+import { CompositeSloSummary } from './composite_slo_summary';
 
 export interface CompositeSloListItemProps {
   compositeSlo: CompositeSLOWithSummaryResponse;
@@ -42,7 +44,12 @@ export function CompositeSloListItem({ compositeSlo, onConfirmDelete }: Composit
                     <span>{compositeSlo.name}</span>
                   </EuiText>
                 </EuiFlexItem>
+                <CompositeSloBadges isLoading={!compositeSlo.summary} compositeSlo={compositeSlo} />
               </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              {compositeSlo.summary ? <CompositeSloSummary compositeSlo={compositeSlo} /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

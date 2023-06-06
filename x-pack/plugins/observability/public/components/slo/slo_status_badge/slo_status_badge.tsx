@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { CompositeSLOWithSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface SloStatusProps {
-  slo: SLOWithSummaryResponse;
+  slo: SLOWithSummaryResponse | CompositeSLOWithSummaryResponse;
 }
 
 export function SloStatusBadge({ slo }: SloStatusProps) {

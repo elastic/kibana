@@ -7,7 +7,11 @@
 
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import {
+  CompositeSLOWithSummaryResponse,
+  rollingTimeWindowTypeSchema,
+  SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
 import React from 'react';
@@ -15,7 +19,7 @@ import { toMomentUnitOfTime } from '../../../../../utils/slo/duration';
 import { toDurationLabel } from '../../../../../utils/slo/labels';
 
 export interface Props {
-  slo: SLOWithSummaryResponse;
+  slo: SLOWithSummaryResponse | CompositeSLOWithSummaryResponse;
 }
 
 export function SloTimeWindowBadge({ slo }: Props) {
