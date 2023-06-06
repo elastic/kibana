@@ -26,6 +26,7 @@ import type { FieldOptionValue } from '@kbn/visualization-ui-components/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import moment from 'moment';
+import { htmlIdGenerator } from '@elastic/eui/src/services/accessibility/html_id_generator';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   AvailableAnnotationIcon,
@@ -53,7 +54,10 @@ export interface Props {
   getDefaultRangeEnd: (rangeStart: string) => string;
   calendarClassName?: string;
   queryInputServices: QueryInputServices;
+  appName: string;
 }
+
+export const idPrefix = htmlIdGenerator()();
 
 const AnnotationEditorControls = ({
   annotation: currentAnnotation,
@@ -62,6 +66,7 @@ const AnnotationEditorControls = ({
   getDefaultRangeEnd,
   calendarClassName,
   queryInputServices,
+  appName,
 }: Props) => {
   const { hasFieldData } = useExistingFieldsReader();
 
@@ -166,6 +171,7 @@ const AnnotationEditorControls = ({
             dataView={dataView}
             queryInputShouldOpen={queryInputShouldOpen}
             queryInputServices={queryInputServices}
+            appName={appName}
           />
         ) : (
           <ConfigPanelManualAnnotation
@@ -197,7 +203,7 @@ const AnnotationEditorControls = ({
               customIconSet={annotationsIconSet}
             />
             <TextDecorationSetting
-              idPrefix="TODO"
+              idPrefix={idPrefix}
               setConfig={update}
               currentConfig={currentAnnotation}
               isQueryBased={isQueryBased}
@@ -259,7 +265,7 @@ const AnnotationEditorControls = ({
               }}
             </TextDecorationSetting>
             <LineStyleSettings
-              idPrefix=""
+              idPrefix={idPrefix}
               setConfig={update}
               currentConfig={{
                 lineStyle: currentAnnotation.lineStyle,

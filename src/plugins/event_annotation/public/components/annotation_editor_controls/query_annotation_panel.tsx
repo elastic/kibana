@@ -33,12 +33,14 @@ export const ConfigPanelQueryAnnotation = ({
   onChange,
   queryInputShouldOpen,
   queryInputServices,
+  appName,
 }: {
   annotation?: QueryPointEventAnnotationConfig;
   onChange: (annotations: Partial<QueryPointEventAnnotationConfig> | undefined) => void;
   dataView: DataView;
   queryInputShouldOpen?: boolean;
   queryInputServices: QueryInputServices;
+  appName: string;
 }) => {
   const { hasFieldData } = useExistingFieldsReader();
   // list only date fields
@@ -82,7 +84,7 @@ export const ConfigPanelQueryAnnotation = ({
             onChange({ filter: { type: 'kibana_query', ...query } });
           }}
           dataView={dataView}
-          appName="TODO"
+          appName={appName}
           queryInputServices={queryInputServices}
         />
       </EuiFormRow>

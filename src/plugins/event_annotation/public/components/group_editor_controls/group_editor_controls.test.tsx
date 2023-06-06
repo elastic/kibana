@@ -110,6 +110,7 @@ describe('event annotation group editor', () => {
     });
 
     // TODO - reenable data view selection tests when ENABLE_INDIVIDUAL_ANNOTATION_EDITING is set to true!
+    // this will happen in https://github.com/elastic/kibana/issues/158774
 
     // const setDataViewId = (id: string) =>
     //   (

@@ -14,6 +14,7 @@ import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { search } from '@kbn/data-plugin/public';
+import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
 import { LensAppServices } from '../../../../app_plugin/types';
 import { updateLayer } from '..';
@@ -100,6 +101,7 @@ export const AnnotationsPanel = (
       }
       queryInputServices={queryInputServices}
       calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+      appName={LENS_APP_NAME}
     />
   ) : null;
 };

@@ -15,6 +15,7 @@ import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-os
 import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EVENT_ANNOTATION_APP_NAME } from '../../../common/constants';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../../common';
 import { AnnotationEditorControls } from '../annotation_editor_controls';
 import { AnnotationList } from './annotation_list';
@@ -177,6 +178,7 @@ export const GroupEditorControls = ({
       dataView={currentDataView}
       getDefaultRangeEnd={(rangeStart) => rangeStart}
       queryInputServices={queryInputServices}
+      appName={EVENT_ANNOTATION_APP_NAME}
     />
   );
 };

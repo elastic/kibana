@@ -141,7 +141,7 @@ export function TooltipSection({
             field: field.name,
             dataType: field.type,
           },
-          exists: dataView.id ? hasFieldData(dataView.id, field.name) : false, // TODO check this logic
+          exists: dataView.id ? hasFieldData(dataView.id, field.name) : false,
           compatible: true,
           'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
         } as FieldOption<FieldOptionValue>)
