@@ -119,44 +119,157 @@ const apmPerAgentSchema: Pick<
 };
 
 export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
-  service_id: keyword,
-  num_service_nodes: long,
-  num_transaction_types: long,
-  timed_out: { type: 'boolean' },
+  service_id: {
+    ...keyword,
+    _meta: {
+      description:
+        'Unique identifier that combines the SHA256 hashed representation of the service name and environment',
+    },
+  },
+  num_service_nodes: {
+    ...long,
+    _meta: {
+      description:
+        'Total number of the unique service instances that served the transaction',
+    },
+  },
+  num_transaction_types: {
+    ...long,
+    _meta: {
+      description: 'Total number of the unique transaction types',
+    },
+  },
+  timed_out: {
+    type: 'boolean',
+    _meta: {
+      description: 'Indicates whether the request timed out before completion',
+    },
+  },
   cloud: {
-    availability_zones: { type: 'array', items: { type: 'keyword' } },
-    regions: { type: 'array', items: { type: 'keyword' } },
-    providers: { type: 'array', items: { type: 'keyword' } },
+    availability_zones: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 5 cloud availability zones. Example [ca-central-1a, ca-central-1b]',
+        },
+      },
+    },
+    regions: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 5 cloud regions. Example [ca-central-1]',
+        },
+      },
+    },
+    providers: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'An array of the top 3 cloud provider. Example [aws]',
+        },
+      },
+    },
   },
   faas: {
     trigger: {
-      type: { type: 'array', items: { type: 'keyword' } },
+      type: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 5 faas trigger types. Example [http, timer, pubsub]',
+          },
+        },
+      },
     },
   },
   agent: {
-    name: keyword,
-    version: keyword,
-    activation_method: keyword,
+    name: {
+      ...keyword,
+      _meta: {
+        description:
+          'The top value of agent name for the service from transaction documents. Sorted by _score',
+      },
+    },
+    version: {
+      ...keyword,
+      _meta: {
+        description:
+          'The top value of agent version for the service from transaction documents. Sorted by _score',
+      },
+    },
+    activation_method: {
+      ...keyword,
+      _meta: {
+        description:
+          'The top value of agent activation method for the service from transaction documents. Sorted by _score',
+      },
+    },
   },
   service: {
     language: {
-      name: keyword,
-      version: keyword,
+      name: {
+        ...keyword,
+        _meta: {
+          description:
+            'The top value of language name for the service from transaction documents. Sorted by _score',
+        },
+      },
+      version: {
+        ...keyword,
+        _meta: {
+          description:
+            'The top value of language version for the service from transaction documents. Sorted by _score',
+        },
+      },
     },
     framework: {
-      name: keyword,
-      version: keyword,
+      name: {
+        ...keyword,
+        _meta: {
+          description:
+            'The top value of service framework name from transaction documents. Sorted by _score. Example AWS Lambda',
+        },
+      },
+      version: {
+        ...keyword,
+        _meta: {
+          description:
+            'The top value of service framework version from transaction documents. Sorted by _score',
+        },
+      },
     },
     runtime: {
-      name: keyword,
-      version: keyword,
+      name: {
+        ...keyword,
+        _meta: {
+          description:
+            'The top value of service runtime name from transaction documents. Sorted by _score',
+        },
+      },
+      version: {
+        ...keyword,
+        _meta: {
+          description:
+            'The top value of service runtime version version from transaction documents. Sorted by _score',
+        },
+      },
     },
   },
+  // No data found
   kubernetes: {
     pod: {
       name: keyword,
     },
   },
+  // No data found
   container: {
     id: keyword,
   },
@@ -378,20 +491,36 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       '1d': {
         ...long,
         _meta: {
-          description: 'Total number of tracees documents within the last day',
+          description: 'Total number of trace documents within the last day',
         },
       },
       all: {
         ...long,
         _meta: {
-          description: 'The total number of traces documents overall',
+          description: 'The total number of trace documents overall',
         },
       },
     },
+    // No tasks found
     services: timeframeMapSchema,
   },
+  // FIXME cardinality types seem to be wrong
   cardinality: {
-    client: { geo: { country_iso_code: { rum: timeframeMap1dSchema } } },
+    client: {
+      geo: {
+        country_iso_code: {
+          rum: {
+            '1d': {
+              ...long,
+              _meta: {
+                description:
+                  'Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs.',
+              },
+            },
+          },
+        },
+      },
+    },
     user_agent: {
       original: {
         all_agents: timeframeMap1dSchema,
