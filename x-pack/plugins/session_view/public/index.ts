@@ -8,6 +8,7 @@
 import { SessionViewPlugin } from './plugin';
 
 export type { SessionViewStart } from './types';
+export type { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '../common';
 
 export function plugin() {
   return new SessionViewPlugin();
