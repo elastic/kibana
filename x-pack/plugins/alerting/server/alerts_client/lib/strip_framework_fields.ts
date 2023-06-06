@@ -11,11 +11,13 @@ import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleAlertData } from '../../types';
 
 const allowedFrameworkFields: string[] = [ALERT_REASON];
-/**
- * Updates an existing alert document with data from the LegacyAlert class
- * Currently only populates framework fields and not any rule type specific fields
- */
 
+/**
+ * Remove framework fields from the alert payload reported by
+ * the rule type. Fields are considered framework fields if they are
+ * defined in the "alertFieldMap". Framework fields should only be
+ * set by the alerting framework during rule execution.
+ */
 export const stripFrameworkFields = <AlertData extends RuleAlertData>(
   payload: AlertData
 ): AlertData => {
