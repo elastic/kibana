@@ -8,8 +8,11 @@
 import moment from 'moment';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { schema } from '@kbn/config-schema';
-import { getAlertUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
-import { alertsLocatorID, AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import {
+  alertsLocatorID,
+  AlertsLocatorParams,
+  getAlertUrl,
+} from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';

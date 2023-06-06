@@ -10,7 +10,6 @@ import moment from 'moment';
 import datemath from '@kbn/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { getAlertUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
@@ -19,6 +18,7 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
+  getAlertUrl,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
