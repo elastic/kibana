@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
@@ -30,6 +30,18 @@ describe('Routing versioned requests', () => {
     server = createHttpServer({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
+      configService: createConfigService({
+        // We manually sync the config in our mock at this point
+        server:
+          cliArgs.serverless === true
+            ? {
+                versioned: {
+                  handlerResolution: 'newest',
+                  strictClientVersionCheck: false,
+                },
+              }
+            : undefined,
+      }),
     });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
