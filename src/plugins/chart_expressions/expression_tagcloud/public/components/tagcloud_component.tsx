@@ -10,7 +10,9 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
+import { IconChartTagcloud } from '@kbn/chart-icons';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import {
@@ -82,6 +84,11 @@ export const TagCloudChart = ({
   renderComplete,
   syncColors,
 }: TagCloudChartProps) => {
+
+  if (visData.rows.length === 0) {
+    return <EmptyPlaceholder icon={IconChartTagcloud} renderComplete={renderComplete} />;
+  }
+
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
 
