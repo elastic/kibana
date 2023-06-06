@@ -81,10 +81,6 @@ export const TagCloudChart = ({
   renderComplete,
   syncColors,
 }: TagCloudChartProps) => {
-  if (visData.rows.length === 0) {
-    return <EmptyPlaceholder icon={IconChartTagcloud} renderComplete={renderComplete} />;
-  }
-
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
 
@@ -186,6 +182,10 @@ export const TagCloudChart = ({
     },
     [bucket, bucketFormatter, fireEvent, visData]
   );
+
+  if (visData.rows.length === 0) {
+    return <EmptyPlaceholder icon={IconChartTagcloud} renderComplete={renderComplete} />;
+  }
 
   return (
     <EuiResizeObserver onResize={updateChart}>
