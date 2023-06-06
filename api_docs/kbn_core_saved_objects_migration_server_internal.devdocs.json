@@ -330,7 +330,7 @@
                 "id": "def-common.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    defaultIndexTypesMap = DEFAULT_INDEX_TYPES_MAP,\n    waitForMigrationCompletion,\n    nodeRoles,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -702,7 +702,7 @@
           "\nWrite the up-to-date transformed documents to the index, overwriting any\ndocuments that are still on their outdated version."
         ],
         "signature": [
-          "({ client, index, operations, refresh, }: ",
+          "({ client, index, operations, refresh, useAliasToPreventAutoCreate, }: ",
           "BulkOverwriteTransformedDocumentsParams",
           ") => ",
           "TaskEither",
@@ -725,7 +725,7 @@
             "id": "def-common.bulkOverwriteTransformedDocuments.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n  }",
+            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n    useAliasToPreventAutoCreate = false,\n  }",
             "description": [],
             "signature": [
               "BulkOverwriteTransformedDocumentsParams"
@@ -1030,7 +1030,9 @@
           "IndexNotGreenTimeout",
           " | ",
           "ClusterShardLimitExceeded",
-          ", \"create_index_succeeded\">"
+          ", ",
+          "CreateIndexSuccessResponse",
+          ">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/create_index.ts",
         "deprecated": false,
@@ -3492,6 +3494,20 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.KibanaMigratorOptions.defaultIndexTypesMap",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultIndexTypesMap",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-common.KibanaMigratorOptions.soMigrationsConfig",
             "type": "Object",
             "tags": [],
@@ -3589,21 +3605,6 @@
             "tags": [],
             "label": "waitForMigrationCompletion",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.KibanaMigratorOptions.defaultIndexTypesMap",
-            "type": "Object",
-            "tags": [],
-            "label": "defaultIndexTypesMap",
-            "description": [],
-            "signature": [
-              "IndexTypesMap",
-              " | undefined"
-            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false

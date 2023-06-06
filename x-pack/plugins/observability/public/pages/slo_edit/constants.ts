@@ -73,7 +73,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   timeWindow: {
     duration:
       TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
-    isRolling: true,
+    type: 'rolling',
   },
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
@@ -98,7 +98,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
   timeWindow: {
     duration:
       TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
-    isRolling: true,
+    type: 'rolling',
   },
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
