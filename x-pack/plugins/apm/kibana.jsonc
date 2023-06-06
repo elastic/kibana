@@ -44,7 +44,8 @@
       "security",
       "spaces",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "licenseManagement"
     ],
     "requiredBundles": [
       "fleet",
