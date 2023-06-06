@@ -121,27 +121,27 @@ export function toDurationAdverbLabel(durationStr: string): string {
   switch (duration.unit) {
     case 'm':
       return i18n.translate('xpack.observability.slo.duration.minutely', {
-        defaultMessage: 'minutely',
+        defaultMessage: 'Minutely',
       });
     case 'h':
       return i18n.translate('xpack.observability.slo.duration.hourly', {
-        defaultMessage: 'hourly',
+        defaultMessage: 'Hourly',
       });
     case 'd':
       return i18n.translate('xpack.observability.slo.duration.daily', {
-        defaultMessage: 'daily',
+        defaultMessage: 'Daily',
       });
     case 'w':
       return i18n.translate('xpack.observability.slo.duration.weekly', {
-        defaultMessage: 'weekly',
+        defaultMessage: 'Weekly',
       });
     case 'M':
       return i18n.translate('xpack.observability.slo.duration.monthly', {
-        defaultMessage: 'monthly',
+        defaultMessage: 'Monthly',
       });
     case 'Y':
       return i18n.translate('xpack.observability.slo.duration.yearly', {
-        defaultMessage: 'yearly',
+        defaultMessage: 'Yearly',
       });
   }
 }

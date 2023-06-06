@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { capitalize } from 'lodash';
 import React from 'react';
 import { ChartData } from '../../../typings/slo';
 import { useKibana } from '../../../utils/kibana_react';
@@ -51,15 +50,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
                       values: { duration: toDurationLabel(slo.timeWindow.duration) },
                     }
                   )
-                : i18n.translate(
-                    'xpack.observability.slo.sloDetails.errorBudgetChartPanel.durationCalendarAligned',
-                    {
-                      defaultMessage: '{duration}',
-                      values: {
-                        duration: capitalize(toDurationAdverbLabel(slo.timeWindow.duration)),
-                      },
-                    }
-                  )}
+                : toDurationAdverbLabel(slo.timeWindow.duration)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

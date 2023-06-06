@@ -13,7 +13,6 @@ import {
   rollingTimeWindowTypeSchema,
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
-import { capitalize } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { useKibana } from '../../../utils/kibana_react';
@@ -166,7 +165,7 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
   return i18n.translate('xpack.observability.slo.sloDetails.overview.calendarAlignedTimeWindow', {
     defaultMessage: '{duration} calendar aligned',
     values: {
-      duration: capitalize(toDurationAdverbLabel(timeWindow.duration)),
+      duration: toDurationAdverbLabel(timeWindow.duration),
     },
   });
 }
