@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isRuntimeMappings, type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -15,11 +16,9 @@ import {
   type DataFrameAnalysisConfigType,
   type FeatureProcessor,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
 import { defaultSearchQuery } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';

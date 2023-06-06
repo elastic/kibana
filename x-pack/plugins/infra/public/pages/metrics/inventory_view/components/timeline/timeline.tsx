@@ -16,12 +16,12 @@ import {
   Chart,
   Settings,
   Position,
-  TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
   RectAnnotation,
   RectAnnotationDatum,
   XYChartElementEvent,
+  TooltipProps,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -123,9 +123,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   }, [timeseries]);
 
   const isDarkMode = useIsDarkMode();
-  const tooltipProps = {
-    headerFormatter: (tooltipValue: TooltipValue) =>
-      moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
   const dataDomain = timeseries ? calculateDomain(timeseries, [chartMetric], false) : null;
