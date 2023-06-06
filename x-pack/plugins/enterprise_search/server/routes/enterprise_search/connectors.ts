@@ -125,7 +125,11 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/scheduling',
       validate: {
-        body: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        body: schema.object({
+          access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          full: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          incremental: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        }),
         params: schema.object({
           connectorId: schema.string(),
         }),

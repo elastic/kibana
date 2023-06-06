@@ -58,8 +58,10 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     expression: string;
     frequency: Frequency;
   }>({
-    expression: schedulingInput?.interval ?? '',
-    frequency: schedulingInput?.interval ? cronToFrequency(schedulingInput.interval) : 'HOUR',
+    expression: schedulingInput?.full.interval ?? '',
+    frequency: schedulingInput?.full.interval
+      ? cronToFrequency(schedulingInput.full.interval)
+      : 'HOUR',
   });
 
   if (!isConnectorIndex(index)) {
@@ -139,13 +141,17 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           )}
           <EuiFlexItem>
             <EuiSwitch
-              checked={scheduling.enabled}
+              checked={scheduling.full.enabled}
               label={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.connectorScheduling.switch.label',
                 { defaultMessage: 'Enable recurring syncs with the following schedule' }
               )}
               onChange={(e) => {
-                setScheduling({ ...scheduling, enabled: e.target.checked });
+                setScheduling({
+                  // TODO EFE- check if there is a better way ?
+                  ...scheduling,
+                  ...{ full: { enabled: e.target.checked, interval: scheduling.full.interval } },
+                });
                 setHasChanges(true);
               }}
             />
@@ -164,7 +170,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           <EuiFlexItem>
             <CronEditor
               data-telemetry-id="entSearchContent-connector-scheduling-editSchedule"
-              disabled={!scheduling.enabled}
+              disabled={!scheduling.full.enabled}
               fieldToPreferredValueMap={fieldToPreferredValueMap}
               cronExpression={simpleCron.expression}
               frequency={simpleCron.frequency}
@@ -178,7 +184,11 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                   frequency,
                 });
                 setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-                setScheduling({ ...scheduling, interval: expression });
+                setScheduling({
+                  // TODO EFE- check if there is a better way ?
+                  ...scheduling,
+                  ...{ full: { enabled: scheduling.full.enabled, interval: expression } },
+                });
                 setHasChanges(true);
               }}
               frequencyBlockList={['MINUTE']}
@@ -193,9 +203,9 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                   onClick={() => {
                     setScheduling(schedulingInput);
                     setSimpleCron({
-                      expression: schedulingInput?.interval ?? '',
-                      frequency: schedulingInput?.interval
-                        ? cronToFrequency(schedulingInput.interval)
+                      expression: schedulingInput?.full.interval ?? '',
+                      frequency: schedulingInput?.full.interval
+                        ? cronToFrequency(schedulingInput.full.interval)
                         : 'HOUR',
                     });
                     setHasChanges(false);

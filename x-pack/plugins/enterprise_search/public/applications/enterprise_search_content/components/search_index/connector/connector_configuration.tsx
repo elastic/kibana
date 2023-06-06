@@ -285,7 +285,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ),
-                  status: index.connector.scheduling.enabled ? 'complete' : 'incomplete',
+                  status: index.connector.scheduling.full.enabled ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {

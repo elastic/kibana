@@ -191,18 +191,9 @@ export type ConnectorFeatures = Partial<{
 
 export interface SchedulingConfiguraton {
   // interval has crontab syntax
-  access_control: {
-    enabled: boolean;
-    interval: string;
-  };
-  incremental: {
-    enabled: boolean;
-    interval: string;
-  };
-  full: {
-    enabled: boolean;
-    interval: string;
-  };
+  access_control: ConnectorScheduling;
+  full: ConnectorScheduling;
+  incremental: ConnectorScheduling;
 }
 
 export interface Connector {
