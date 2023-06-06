@@ -26,6 +26,7 @@ import { parseUrlQueryParams } from './utils';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { SORT_ORDER_VALUES } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { CASES_TABLE_PERPAGE_VALUES } from './types';
 
 export const getQueryParamsLocalStorageKey = (appId: string) => {
   const filteringKey = LOCAL_STORAGE_KEYS.casesQueryParams;
@@ -68,12 +69,15 @@ const getQueryParams = (
 };
 
 const validateQueryParams = (queryParams: QueryParams): QueryParams => {
-  queryParams.perPage = Math.min(queryParams.perPage, 100);
+  const perPage = Math.min(
+    queryParams.perPage,
+    CASES_TABLE_PERPAGE_VALUES[CASES_TABLE_PERPAGE_VALUES.length - 1]
+  );
+  const sortOrder = !SORT_ORDER_VALUES.includes(queryParams.sortOrder)
+    ? DEFAULT_QUERY_PARAMS.sortOrder
+    : queryParams.sortOrder;
 
-  if (!SORT_ORDER_VALUES.includes(queryParams.sortOrder))
-    queryParams.sortOrder = DEFAULT_QUERY_PARAMS.sortOrder;
-
-  return queryParams;
+  return { ...queryParams, perPage, sortOrder };
 };
 
 const getFilterOptions = (
