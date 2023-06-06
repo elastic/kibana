@@ -12,6 +12,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -41,6 +42,7 @@ const Millis2Nanos = 1000 * 1000;
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
+  security?: SecurityPluginStart;
   getServices: GetServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -102,7 +104,6 @@ export class ActionExecutor {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
-
     return withSpan(
       {
         name: `execute_action`,
@@ -119,6 +120,7 @@ export class ActionExecutor {
           actionTypeRegistry,
           eventLogger,
           preconfiguredActions,
+          security,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
@@ -260,6 +262,39 @@ export class ActionExecutor {
         };
 
         event.event = event.event || {};
+
+        // start gen_ai extension
+        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
+        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
+          const data = result.data as unknown as {
+            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+          };
+          event.kibana = event.kibana || {};
+          event.kibana.action = event.kibana.action || {};
+          event.kibana = {
+            ...event.kibana,
+            action: {
+              ...event.kibana.action,
+              execution: {
+                ...event.kibana.action.execution,
+                gen_ai: {
+                  usage: {
+                    total_tokens: data.usage?.total_tokens,
+                    prompt_tokens: data.usage?.prompt_tokens,
+                    completion_tokens: data.usage?.completion_tokens,
+                  },
+                },
+              },
+            },
+          };
+        }
+        // end gen_ai extension
+
+        const currentUser = security?.authc.getCurrentUser(request);
+
+        event.user = event.user || {};
+        event.user.name = currentUser?.username;
+        event.user.id = currentUser?.profile_uid;
 
         if (result.status === 'ok') {
           span?.setOutcome('success');

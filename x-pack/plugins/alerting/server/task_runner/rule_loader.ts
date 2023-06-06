@@ -36,6 +36,7 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   let rawRule: RawRule;
   let fakeRequest: CoreKibanaRequest;
   let rulesClient: RulesClientApi;
+  let version: string | undefined;
 
   try {
     const attributes = await getRuleAttributes<Params>(context, ruleId, spaceId);
@@ -45,6 +46,7 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
     rawRule = attributes.rawRule;
     fakeRequest = attributes.fakeRequest;
     rulesClient = attributes.rulesClient;
+    version = attributes.version;
   } catch (err) {
     throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
   }
@@ -83,6 +85,7 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
     apiKey,
     rulesClient,
     validatedParams,
+    version,
   };
 }
 
@@ -98,6 +101,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   rawRule: RawRule;
   fakeRequest: CoreKibanaRequest;
   rulesClient: RulesClientApi;
+  version?: string;
 }> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
@@ -120,6 +124,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
 
   return {
     rule,
+    version: rawRule.version,
     rawRule: rawRule.attributes,
     apiKey: rawRule.attributes.apiKey,
     enabled: rawRule.attributes.enabled,
