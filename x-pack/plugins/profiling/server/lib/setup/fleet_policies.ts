@@ -138,10 +138,15 @@ export function generateSecretToken() {
   return result;
 }
 
-export function getVarsFor(config: PackageInputType) {
+export function getVarsFor({
+  config,
+  includeSecretToken,
+}: {
+  config: PackageInputType;
+  includeSecretToken: boolean;
+}) {
   const configKeys = Object.keys(config) as Array<keyof PackageInputType>;
-  const hasSecretToken = configKeys.some((key) => key === 'secret_token');
-  if (!hasSecretToken) {
+  if (includeSecretToken) {
     configKeys.push('secret_token');
   }
 
@@ -181,7 +186,9 @@ export async function createCollectorPackagePolicy({
         enabled: true,
         streams: [],
         type: 'pf-elastic-collector',
-        vars: config?.collector ? getVarsFor(config.collector) : {},
+        vars: config?.collector
+          ? getVarsFor({ config: config.collector, includeSecretToken: true })
+          : {},
       },
     ],
   };
@@ -229,7 +236,10 @@ export async function createSymbolizerPackagePolicy({
         enabled: true,
         streams: [],
         type: 'pf-elastic-symbolizer',
-        vars: config?.symbolizer ? getVarsFor(config.symbolizer) : {},
+        // doesnt have secret token
+        vars: config?.symbolizer
+          ? getVarsFor({ config: config.symbolizer, includeSecretToken: false })
+          : {},
       },
     ],
   };

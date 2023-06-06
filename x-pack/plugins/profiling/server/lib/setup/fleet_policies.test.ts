@@ -18,7 +18,10 @@ describe('getVarsFor', () => {
       tls_key_path: '456',
     };
 
-    const { secret_token: secretToken, ...result } = getVarsFor(config);
+    const { secret_token: secretToken, ...result } = getVarsFor({
+      config,
+      includeSecretToken: true,
+    });
     expect(secretToken?.type).toBe('text');
     expect(secretToken?.value.length).toBe(16);
     expect(result).toEqual({
@@ -40,10 +43,36 @@ describe('getVarsFor', () => {
       secret_token: 'bar',
     };
 
-    const { secret_token: secretToken, ...result } = getVarsFor(config);
+    const { secret_token: secretToken, ...result } = getVarsFor({
+      config,
+      includeSecretToken: true,
+    });
     expect(secretToken?.type).toBe('text');
     expect(secretToken?.value).not.toBe('bar');
     expect(secretToken?.value.length).toBe(16);
+    expect(result).toEqual({
+      host: { type: 'text', value: 'example.com' },
+      tls_enabled: { type: 'bool', value: true },
+      tls_supported_protocols: { type: 'text', value: ['foo', 'bar'] },
+      tls_certificate_path: { type: 'text', value: '123' },
+      tls_key_path: { type: 'text', value: '456' },
+    });
+  });
+
+  it('returns vars without secret_token', () => {
+    const config: PackageInputType = {
+      host: 'example.com',
+      tls_enabled: true,
+      tls_supported_protocols: ['foo', 'bar'],
+      tls_certificate_path: '123',
+      tls_key_path: '456',
+    };
+
+    const { secret_token: secretToken, ...result } = getVarsFor({
+      config,
+      includeSecretToken: false,
+    });
+    expect(secretToken).toBeUndefined();
     expect(result).toEqual({
       host: { type: 'text', value: 'example.com' },
       tls_enabled: { type: 'bool', value: true },
