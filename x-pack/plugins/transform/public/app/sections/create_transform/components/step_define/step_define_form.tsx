@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { DataGrid } from '@kbn/ml-data-grid';
 import {
   mlTimefilterRefresh$,
   useTimefilter,
@@ -57,7 +58,7 @@ import {
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
@@ -98,9 +99,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { dataView } = searchItems;
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
-  const {
-    ml: { DataGrid },
-  } = useAppDependencies();
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     TransformStorageKey,
     TransformStorageMapped<typeof TRANSFORM_FROZEN_TIER_PREFERENCE>

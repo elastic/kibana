@@ -7,6 +7,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
 
 /** @internal */
@@ -39,6 +40,12 @@ export interface ChromeProjectNavigationNode {
   icon?: string;
   /** Optional children of the navigation node */
   children?: ChromeProjectNavigationNode[];
+  /**
+   * Temporarilly we allow href to be passed.
+   * Once all the deeplinks will be exposed in packages we will not allow href anymore
+   * and force deeplink id to be passed
+   */
+  href?: string;
 }
 
 /** @public */
@@ -62,3 +69,11 @@ export interface SideNavCompProps {
 
 /** @public */
 export type SideNavComponent = ComponentType<SideNavCompProps>;
+
+/** @public */
+export type ChromeProjectBreadcrumb = ChromeBreadcrumb;
+
+/** @public */
+export interface ChromeSetProjectBreadcrumbsParams {
+  absolute: boolean;
+}
