@@ -8,7 +8,6 @@
 
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type { SavedObjectsClientContract } from '@kbn/core/public';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
@@ -21,15 +20,11 @@ import type { DataViewCrudTypes } from '../common/content_management';
 
 import { DataViewSOType } from '../common/content_management';
 
-type SOClient = Pick<SavedObjectsClientContract, 'resolve'>;
-
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
   private contentManagementClient: ContentClient;
-  private savedObjectClient: SOClient;
 
-  constructor(contentManagementClient: ContentClient, savedObjectClient: SOClient) {
+  constructor(contentManagementClient: ContentClient) {
     this.contentManagementClient = contentManagementClient;
-    this.savedObjectClient = savedObjectClient;
   }
 
   async find(options: SavedObjectsClientCommonFindArgs) {
@@ -73,15 +68,6 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     }
 
     return response.item;
-  }
-
-  async getSavedSearch(id: string) {
-    const response = await this.savedObjectClient.resolve('search', id);
-
-    if (response.outcome === 'conflict') {
-      throw new DataViewSavedObjectConflictError(id);
-    }
-    return response.saved_object;
   }
 
   async update(

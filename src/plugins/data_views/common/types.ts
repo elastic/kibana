@@ -275,14 +275,6 @@ export interface SavedObjectsClientCommon {
    * @param attributes - attributes to update
    * @param options - client options
    */
-  getSavedSearch: (id: string) => Promise<SavedObject>;
-  /**
-   * Update a saved object by id
-   * @param type - type of saved object
-   * @param id - id of saved object
-   * @param attributes - attributes to update
-   * @param options - client options
-   */
   update: (
     id: string,
     attributes: DataViewAttributes,

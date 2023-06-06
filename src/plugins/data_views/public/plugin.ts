@@ -63,7 +63,7 @@ export class DataViewsPublicPlugin
     core: CoreStart,
     { fieldFormats, contentManagement }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
-    const { uiSettings, http, notifications, application, savedObjects } = core;
+    const { uiSettings, http, notifications, application } = core;
 
     const onNotifDebounced = debounceByKey(
       notifications.toasts.add.bind(notifications.toasts),
@@ -77,10 +77,7 @@ export class DataViewsPublicPlugin
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(
-        contentManagement.client,
-        savedObjects.client
-      ),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(contentManagement.client),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields, key) => {
