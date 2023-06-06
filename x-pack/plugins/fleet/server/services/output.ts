@@ -24,7 +24,13 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { SO_SEARCH_LIMIT, outputType } from '../../common/constants';
+import {
+  SO_SEARCH_LIMIT,
+  outputType,
+  kafkaSaslMechanism,
+  kafkaPartitionType,
+  kafkaCompressionType,
+} from '../../common/constants';
 import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
 import {
   OutputUnauthorizedError,
@@ -397,6 +403,48 @@ class OutputService {
 
       if (isShipperDisabled && output.shipper) {
         data.shipper = null;
+      }
+    }
+
+    if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+      if (!output.version) {
+        data.version = '1.0.0';
+      }
+      if (!output.compression) {
+        data.compression = kafkaCompressionType.Gzip;
+      }
+      if (
+        !output.compression ||
+        (output.compression === kafkaCompressionType.Gzip && !output.compression_level)
+      ) {
+        data.compression_level = 4;
+      }
+      if (!output.client_id) {
+        data.client_id = 'Elastic Agent';
+      }
+      if (output.username && output.password && !output.sasl?.mechanism) {
+        data.sasl = {
+          mechanism: kafkaSaslMechanism.Plain,
+        };
+      }
+      if (!output.partition) {
+        data.partition = kafkaPartitionType.Hash;
+      }
+      if (output.partition === kafkaPartitionType.Random && !output.random?.group_events) {
+        data.random = {
+          group_events: 1,
+        };
+      }
+      if (output.partition === kafkaPartitionType.RoundRobin && !output.round_robin?.group_events) {
+        data.round_robin = {
+          group_events: 1,
+        };
+      }
+      if (!output.timeout) {
+        data.timeout = 30;
+      }
+      if (!output.broker_timeout) {
+        data.broker_timeout = 10;
       }
     }
 

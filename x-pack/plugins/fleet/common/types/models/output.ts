@@ -18,7 +18,7 @@ export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 
-export interface NewOutput {
+interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
   is_preconfigured?: boolean;
@@ -38,6 +38,16 @@ export interface NewOutput {
   allow_edit?: string[];
 }
 
+export interface NewElasticsearchOutput extends NewBaseOutput {
+  type: OutputType['Elasticsearch'];
+}
+
+export interface NewLogstashOutput extends NewBaseOutput {
+  type: OutputType['Logstash'];
+}
+
+export type NewOutput = NewElasticsearchOutput | NewLogstashOutput | KafkaOutput;
+
 export type Output = NewOutput & {
   id: string;
 };
@@ -55,14 +65,15 @@ export interface ShipperOutput {
   max_batch_bytes?: number | null;
 }
 
-export interface KafkaOutput extends NewOutput {
-  hosts: string[];
-  client_id: string; // defaults to 'Elastic Agent'
+export interface KafkaOutput extends NewBaseOutput {
+  type: OutputType['Kafka'];
+  hosts?: string[];
+  client_id?: string; // defaults to 'Elastic Agent'
   version?: string; // defaults to 1.0.0 by beats/agents if not set
   key?: string;
   compression?: ValueOf<KafkaCompressionType>; // defaults to 'gzip'
   compression_level?: number; // defaults to 4, only for gzip
-  auth_type: ValueOf<KafkaAuthType>;
+  auth_type?: ValueOf<KafkaAuthType>;
   // user_pass auth
   username?: string;
   password?: string;
@@ -80,7 +91,7 @@ export interface KafkaOutput extends NewOutput {
     hash?: string;
     random?: boolean;
   };
-  topics: Array<{
+  topics?: Array<{
     topic: string;
     when?: {
       type?: ValueOf<KafkaTopicWhenType>;

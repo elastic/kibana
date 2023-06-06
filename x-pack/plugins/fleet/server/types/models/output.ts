@@ -170,13 +170,12 @@ const KafkaBaseSchema = {
 };
 
 export const OutputBaseSchema = schema.oneOf([
-  schema.object(ElasticSearchBaseSchema),
-  schema.object(LogstashBaseSchema),
-  schema.object(KafkaBaseSchema),
+  schema.object({ ...ElasticSearchBaseSchema }),
+  schema.object({ ...LogstashBaseSchema }),
+  schema.object({ ...KafkaBaseSchema }),
 ]);
 
-export const NewOutputSchema = OutputBaseSchema;
-
+export const NewOutputSchema = schema.object({ ...KafkaBaseSchema }); // TODO: add all output types
 export const UpdateOutputSchema = schema.object({
   name: schema.maybe(schema.string()),
   type: schema.maybe(
