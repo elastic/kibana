@@ -10,7 +10,7 @@ import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-bro
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { useNavigation as useNavigationServices } from '../../../services';
+import { useNavigation as useNavigationServices } from '../../services';
 import {
   ChromeProjectNavigationNodeEnhanced,
   NodeProps,

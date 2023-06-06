@@ -11,11 +11,16 @@ import { render } from '@testing-library/react';
 import { type Observable, of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
-import { getServicesMock } from '../../../mocks/src/jest';
-import { NavigationProvider } from '../../services';
+import { getServicesMock } from '../../mocks/src/jest';
+import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ProjectNavigationTreeDefinition, RootNavigationItemDefinition } from './types';
-import { defaultNavigationTree } from './default_navigation.test.helpers';
+import {
+  defaultAnalyticsNavGroup,
+  defaultDevtoolsNavGroup,
+  defaultManagementNavGroup,
+  defaultMlNavGroup,
+} from '../../mocks/src/default_navigation.test.helpers';
 
 const defaultProps = {
   homeRef: 'https://elastic.co',
@@ -371,47 +376,58 @@ describe('<DefaultNavigation />', () => {
 
       expect(navTreeGenerated).toEqual({
         homeRef: 'https://elastic.co',
-        navigationTree: [
+        navigationTree: expect.any(Array),
+      });
+
+      // The project navigation tree passed
+      expect(navTreeGenerated.navigationTree[0]).toEqual({
+        id: 'group1',
+        title: 'Group 1',
+        path: ['group1'],
+        children: [
           {
-            id: 'group1',
-            title: 'Group 1',
-            path: ['group1'],
-            children: [
-              {
-                id: 'item1',
-                title: 'Item 1',
-                path: ['group1', 'item1'],
-              },
-              {
-                id: 'item2',
-                path: ['group1', 'item2'],
-                title: 'Title from deeplink!',
-                deepLink: {
-                  id: 'item2',
-                  title: 'Title from deeplink!',
-                  baseUrl: '',
-                  url: '',
-                  href: '',
-                },
-              },
-              {
-                id: 'item3',
-                title: 'Deeplink title overriden',
-                path: ['group1', 'item3'],
-                deepLink: {
-                  id: 'item2',
-                  title: 'Title from deeplink!',
-                  baseUrl: '',
-                  url: '',
-                  href: '',
-                },
-              },
-            ],
+            id: 'item1',
+            title: 'Item 1',
+            path: ['group1', 'item1'],
           },
-          // The default navigation tree is added at the end
-          ...defaultNavigationTree.map(({ type, ...rest }) => rest),
+          {
+            id: 'item2',
+            path: ['group1', 'item2'],
+            title: 'Title from deeplink!',
+            deepLink: {
+              id: 'item2',
+              title: 'Title from deeplink!',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
+          },
+          {
+            id: 'item3',
+            title: 'Deeplink title overriden',
+            path: ['group1', 'item3'],
+            deepLink: {
+              id: 'item2',
+              title: 'Title from deeplink!',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
+          },
         ],
       });
+
+      // The default navigation tree for analytics
+      expect(navTreeGenerated.navigationTree[1]).toEqual(defaultAnalyticsNavGroup);
+
+      // The default navigation tree for ml
+      expect(navTreeGenerated.navigationTree[2]).toEqual(defaultMlNavGroup);
+
+      // The default navigation tree for devtools+
+      expect(navTreeGenerated.navigationTree[3]).toEqual(defaultDevtoolsNavGroup);
+
+      // The default navigation tree for management
+      expect(navTreeGenerated.navigationTree[4]).toEqual(defaultManagementNavGroup);
     });
   });
 });

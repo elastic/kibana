@@ -8,16 +8,11 @@
 
 import React, { FC, useCallback } from 'react';
 
-import { analytics, devtools, ml, management } from '../nav_tree_presets';
+import { getPresets } from '../nav_tree_presets';
 import { Navigation } from './navigation';
 import type { NavigationGroupPreset, NodeDefinition } from '../types';
 
-const navTreePresets: { [preset in NavigationGroupPreset]: NodeDefinition } = {
-  analytics,
-  ml,
-  devtools,
-  management,
-};
+const navTreePresets = getPresets('all');
 
 export interface Props {
   preset?: NavigationGroupPreset;
@@ -51,10 +46,7 @@ export const NavigationBucket: FC<Props> = ({
           <React.Fragment key={id}>
             {item.children ? (
               <Navigation.Group
-                id={item.id}
-                link={item.link}
-                title={item.title}
-                icon={item.icon}
+                {...item}
                 defaultIsCollapsed={
                   isRoot && defaultIsCollapsed !== undefined ? defaultIsCollapsed : undefined
                 }
@@ -62,7 +54,7 @@ export const NavigationBucket: FC<Props> = ({
                 {renderItems(item.children)}
               </Navigation.Group>
             ) : (
-              <Navigation.Item id={item.id} link={item.link} title={item.title} />
+              <Navigation.Item {...item} />
             )}
           </React.Fragment>
         );

@@ -14,9 +14,16 @@ interface Props {
   homeRef: string;
   unstyled?: boolean;
   footerChildren?: React.ReactNode;
+  dataTestSubj?: string;
 }
 
-export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, homeRef }) => {
+export const NavigationUI: FC<Props> = ({
+  children,
+  unstyled,
+  footerChildren,
+  homeRef,
+  dataTestSubj,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -33,6 +40,7 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, ho
           gutterSize="none"
           style={{ overflowY: 'auto' }}
           justifyContent="spaceBetween"
+          data-test-subj={dataTestSubj}
         >
           <EuiFlexItem grow={false}>{children}</EuiFlexItem>
 

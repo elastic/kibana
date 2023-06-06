@@ -69,10 +69,11 @@ const getDefaultNavigationTree = (
 
 let idCounter = 0;
 
-export const DefaultNavigation: FC<ProjectNavigationDefinition> = ({
+export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?: string }> = ({
   homeRef,
   projectNavigationTree,
   navigationTree,
+  dataTestSubj,
 }) => {
   if (!navigationTree && !projectNavigationTree) {
     throw new Error('One of navigationTree or projectNavigationTree must be defined');
@@ -130,7 +131,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition> = ({
   );
 
   return (
-    <Navigation homeRef={homeRef}>
+    <Navigation homeRef={homeRef} dataTestSubj={dataTestSubj}>
       <>
         {renderItems(navigationDefinition.body)}
         {navigationDefinition.footer && (

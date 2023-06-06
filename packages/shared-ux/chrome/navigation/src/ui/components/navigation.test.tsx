@@ -11,10 +11,15 @@ import { render } from '@testing-library/react';
 import { type Observable, of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
-import { getServicesMock } from '../../../../mocks/src/jest';
-import { NavigationProvider } from '../../../services';
+import {
+  defaultAnalyticsNavGroup,
+  defaultDevtoolsNavGroup,
+  defaultManagementNavGroup,
+  defaultMlNavGroup,
+} from '../../../mocks/src/default_navigation.test.helpers';
+import { getServicesMock } from '../../../mocks/src/jest';
+import { NavigationProvider } from '../../services';
 import { Navigation } from './navigation';
-import { defaultNavigationTree } from '../default_navigation.test.helpers';
 
 describe('<Navigation />', () => {
   const services = getServicesMock();
@@ -372,12 +377,24 @@ describe('<Navigation />', () => {
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-      const [navTree] = lastCall;
+      const [navTreeGenerated] = lastCall;
 
-      expect(navTree).toEqual({
+      expect(navTreeGenerated).toEqual({
         homeRef: 'https://elastic.co',
-        navigationTree: defaultNavigationTree.map(({ type, ...rest }) => rest),
+        navigationTree: expect.any(Array),
       });
+
+      // The default navigation tree for analytics
+      expect(navTreeGenerated.navigationTree[0]).toEqual(defaultAnalyticsNavGroup);
+
+      // The default navigation tree for ml
+      expect(navTreeGenerated.navigationTree[1]).toEqual(defaultMlNavGroup);
+
+      // The default navigation tree for devtools+
+      expect(navTreeGenerated.navigationTree[2]).toEqual(defaultDevtoolsNavGroup);
+
+      // The default navigation tree for management
+      expect(navTreeGenerated.navigationTree[3]).toEqual(defaultManagementNavGroup);
     });
 
     test('should render cloud link', async () => {
