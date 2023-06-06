@@ -30,6 +30,8 @@ export function CollectLogs() {
   const { navigateToKibanaUrl } = useKibanaNavigation();
   const { goToStep, goBack, getState, CurrentStep } = useWizard();
 
+  const { apiKeyId, autoDownloadConfig } = getState();
+
   function onInspect() {
     goToStep('inspect');
   }
@@ -47,7 +49,7 @@ export function CollectLogs() {
       return callApi(
         'GET /internal/observability_onboarding/custom_logs/progress',
         {
-          params: { query: { apiKeyId: getState().apiKeyId } },
+          params: { query: { apiKeyId } },
         }
       );
     }
@@ -100,13 +102,17 @@ export function CollectLogs() {
         loadingTitle: 'Connecting to the Elastic Agent',
         completedTitle: 'Connected to the Elastic Agent',
       },
-      {
-        id: 'ea-config',
-        incompleteTitle: 'Download Elastic Agent config',
-        loadingTitle: 'Downloading Elastic Agent config',
-        completedTitle:
-          'Downloaded Elastic Agent config to /opt/Elastic/Agent/elastic-agent.yml',
-      },
+      ...(autoDownloadConfig
+        ? [
+            {
+              id: 'ea-config',
+              incompleteTitle: 'Download Elastic Agent config',
+              loadingTitle: 'Downloading Elastic Agent config',
+              completedTitle:
+                'Downloaded Elastic Agent config to /opt/Elastic/Agent/elastic-agent.yml',
+            },
+          ]
+        : []),
       {
         id: 'logs-ingest',
         incompleteTitle: 'Check for shipped logs',
@@ -138,7 +144,7 @@ export function CollectLogs() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="ghost" fill onClick={onBack}>
+            <EuiButton color="text" onClick={onBack}>
               Back
             </EuiButton>,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">

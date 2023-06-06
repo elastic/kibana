@@ -16,6 +16,7 @@ import {
   EuiCodeBlock,
   EuiSteps,
   EuiSkeletonRectangle,
+  EuiSwitch,
 } from '@elastic/eui';
 import {
   StepPanel,
@@ -38,6 +39,11 @@ export function InstallElasticAgent() {
 
   function onBack() {
     goBack();
+  }
+
+  function onAutoDownloadConfig() {
+    const { autoDownloadConfig, ...state } = getState();
+    setState({ ...state, autoDownloadConfig: !autoDownloadConfig });
   }
 
   const { data: installShipperSetup, status: installShipperSetupStatus } =
@@ -148,9 +154,16 @@ export function InstallElasticAgent() {
                         apiEndpoint: installShipperSetup?.apiEndpoint,
                         scriptDownloadUrl:
                           installShipperSetup?.scriptDownloadUrl,
+                        autoDownloadConfig: wizardState.autoDownloadConfig,
                       })}
                     </EuiCodeBlock>
                   </EuiSkeletonRectangle>
+                  <EuiSpacer size="m" />
+                  <EuiSwitch
+                    label="Auto download config"
+                    checked={wizardState.autoDownloadConfig}
+                    onChange={onAutoDownloadConfig}
+                  />
                 </>
               ),
             },
@@ -177,7 +190,13 @@ export function InstallElasticAgent() {
                     height={300}
                     borderRadius="s"
                   >
-                    <EuiCodeBlock language="yaml" isCopyable>
+                    <EuiCodeBlock
+                      language="yaml"
+                      isCopyable
+                      style={{
+                        opacity: wizardState.autoDownloadConfig ? '.5' : '1',
+                      }}
+                    >
                       {yamlConfig}
                     </EuiCodeBlock>
                   </EuiSkeletonRectangle>
@@ -191,6 +210,7 @@ export function InstallElasticAgent() {
                     ).toString('base64')}`}
                     download="elastic-agent.yml"
                     target="_blank"
+                    isDisabled={wizardState.autoDownloadConfig}
                   >
                     Download config file
                   </EuiButton>
@@ -202,7 +222,7 @@ export function InstallElasticAgent() {
       </StepPanelContent>
       <StepPanelFooter
         items={[
-          <EuiButton color="ghost" fill onClick={onBack}>
+          <EuiButton color="text" onClick={onBack}>
             Back
           </EuiButton>,
           <EuiButton color="primary" fill onClick={onContinue}>
@@ -219,17 +239,21 @@ function getInstallShipperCommand({
   apiKeyEncoded = '$API_KEY',
   apiEndpoint = '$API_ENDPOINT',
   scriptDownloadUrl = '$SCRIPT_DOWNLOAD_URL',
+  autoDownloadConfig = false,
 }: {
   elasticAgentPlatform: ElasticAgentPlatform;
   apiKeyEncoded: string | undefined;
   apiEndpoint: string | undefined;
   scriptDownloadUrl: string | undefined;
+  autoDownloadConfig: boolean;
 }) {
   const setupScriptFilename = 'standalone_agent_setup.sh';
   const PLATFORM_COMMAND: Record<ElasticAgentPlatform, string> = {
     'linux-tar': oneLine`
       curl ${scriptDownloadUrl} -o ${setupScriptFilename} &&
-      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint}
+      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint} ${
+      autoDownloadConfig ? 'autoDownloadConfig=1' : ''
+    }
     `,
     macos: oneLine`
       curl -O https://elastic.co/agent-setup.sh &&

@@ -2,6 +2,7 @@
 
 API_KEY_ENCODED=$1
 API_ENDPOINT=$2
+AUTO_DOWNLOAD_CONFIG=$3
 
 updateStepProgress() {
   local STEPNAME="$1"
@@ -88,6 +89,8 @@ else
 fi
 
 downloadElasticAgentConfig() {
+  echo "Downloading elastic-agent.yml"
+  updateStepProgress "ea-config" "loading"
   curl --request GET \
     --url "${API_ENDPOINT}/elastic_agent/config" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
@@ -96,8 +99,6 @@ downloadElasticAgentConfig() {
     --no-progress-meter \
     --output /opt/Elastic/Agent/elastic-agent.yml
 
-  echo "Downloading elastic-agent.yml"
-  updateStepProgress "ea-config" "loading"
   if [ "$?" -eq 0 ]; then
     echo "Downloaded elastic-agent.yml"
     updateStepProgress "ea-config" "complete"
@@ -107,10 +108,14 @@ downloadElasticAgentConfig() {
     exit 1
   fi
 
-  echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana."
 }
 
-downloadElasticAgentConfig
+if [[ "${AUTO_DOWNLOAD_CONFIG}" == *"autoDownloadConfig=1"* ]]; then
+  downloadElasticAgentConfig
+  echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana."
+else
+  echo "Done with standalone Elastic Agent setup for custom logs. Make sure to add your configuration to /opt/Elastic/Agent/elastic-agent.yml, then look for streaming logs to arrive in Kibana."
+fi
 
 echo "Exit"
 exit 0

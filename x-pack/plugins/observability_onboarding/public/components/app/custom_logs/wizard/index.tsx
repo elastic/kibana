@@ -28,6 +28,7 @@ interface WizardState {
   uploadType?: 'log-file' | 'api-key';
   elasticAgentPlatform: 'linux-tar' | 'macos' | 'windows' | 'deb' | 'rpm';
   apiKeyId: string;
+  autoDownloadConfig: boolean;
 }
 
 const initialState: WizardState = {
@@ -37,6 +38,7 @@ const initialState: WizardState = {
   customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',
   apiKeyId: '',
+  autoDownloadConfig: false,
 };
 
 const { Provider, Step, useWizard } = createWizardContext({
