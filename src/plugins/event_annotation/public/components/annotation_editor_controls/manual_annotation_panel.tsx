@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
