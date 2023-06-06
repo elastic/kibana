@@ -8,10 +8,11 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
-import type {
+import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
+  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
 import { queryToAst } from '@kbn/data-plugin/common';
 import {
@@ -58,6 +59,7 @@ function getExpressionForLayer(
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -132,19 +134,25 @@ function getExpressionForLayer(
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
+    const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
     sortedReferences(referenceEntries).forEach((colId) => {
       const col = columns[colId];
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference' || def.input === 'managedReference') {
-        expressions.push(...def.toExpression(layer, colId, indexPattern));
+        expressions.push(
+          ...def.toExpression(layer, colId, indexPattern, {
+            dateRange,
+            now: nowInstant,
+            targetBars: histogramBarsTarget,
+          })
+        );
       }
     });
 
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
     let esAggsIdMap: Record<string, OriginalColumn[]> = {};
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
-    const histogramBarsTarget = uiSettings.get('histogram:barTarget');
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -469,6 +477,7 @@ export function toExpression(
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
@@ -477,6 +486,7 @@ export function toExpression(
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
       dateRange,
+      nowInstant,
       searchSessionId
     );
   }
