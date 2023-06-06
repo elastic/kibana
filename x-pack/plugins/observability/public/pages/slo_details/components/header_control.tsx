@@ -23,7 +23,7 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
+import { SloDeleteConfirmationModal } from '../../slos/components/slo/slo_delete_confirmation_modal';
 import type { RulesParams } from '../../../locators/rules';
 
 export interface Props {
