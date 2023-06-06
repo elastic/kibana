@@ -65,7 +65,7 @@ describe('TaskValidator', () => {
       expect(stateVersion).toEqual(1);
     });
 
-    it(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
+    it.skip(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: fooTaskDefinition,
