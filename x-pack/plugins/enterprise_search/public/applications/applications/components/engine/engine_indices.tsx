@@ -203,7 +203,7 @@ export const EngineIndices: React.FC = () => {
               {hasAllUnreachableIndices ? (
                 <>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.AllUnknownIndicesCallout.description',
+                    'xpack.enterpriseSearch.content.engine.indices.allUnknownIndicesCallout.description',
                     {
                       defaultMessage:
                         'Your search application has no reachable indices, Add some indices and check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
@@ -213,7 +213,7 @@ export const EngineIndices: React.FC = () => {
               ) : (
                 <>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.SomeUnknownIndicesCallout.description',
+                    'xpack.enterpriseSearch.content.engine.indices.someUnknownIndicesCallout.description',
                     {
                       defaultMessage:
                         'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
