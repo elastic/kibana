@@ -35,7 +35,7 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
   const serializedFormData = useMemo(() => serializer(watchedValues), [ecsMapping]);
 
   return (
-    <EuiFlyout type="push" size="m" onClose={onClose}>
+    <EuiFlyout type="push" size="m" onClose={onClose} data-test-subj={'osquery-save-query-flyout'}>
       <StyledEuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h5>

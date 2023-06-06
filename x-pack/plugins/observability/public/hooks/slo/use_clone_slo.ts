@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export function useCloneSlo() {
   const {
@@ -33,10 +34,10 @@ export function useCloneSlo() {
     {
       onMutate: async ({ slo, idToCopyFrom }) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList'], { exact: false });
+        await queryClient.cancelQueries(sloKeys.lists());
 
         const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
+          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) || []
         ).at(0);
 
         const [queryKey, data] = latestFetchSloListRequest || [];
@@ -70,7 +71,7 @@ export function useCloneSlo() {
       // If the mutation fails, use the context returned from onMutate to roll back
       onError: (_err, { slo }, context) => {
         if (context?.previousSloList) {
-          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
+          queryClient.setQueryData(sloKeys.lists(), context.previousSloList);
         }
         toasts.addDanger(
           i18n.translate('xpack.observability.slo.clone.errorNotification', {
@@ -80,7 +81,7 @@ export function useCloneSlo() {
         );
       },
       onSuccess: () => {
-        queryClient.invalidateQueries(['fetchSloList'], { exact: false });
+        queryClient.invalidateQueries(sloKeys.lists());
       },
     }
   );
