@@ -279,6 +279,21 @@ export const ConfigSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
+      jwt: schema.conditional(
+        schema.contextRef('serverless'),
+        true,
+        schema.object({
+          restrictToPaths: schema.maybe(
+            schema.arrayOf(
+              schema.string({
+                validate: (pathToValidate) =>
+                  /^\//.test(pathToValidate) ? undefined : 'must start with a slash',
+              })
+            )
+          ),
+        }),
+        schema.never()
+      ),
     }),
   }),
   audit: schema.object({

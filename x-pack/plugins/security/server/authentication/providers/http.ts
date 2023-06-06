@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { AuthenticationResult } from '../authentication_result';
@@ -13,8 +15,14 @@ import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 
+/**
+ * A a type-string of the Elasticsearch JWT realm.
+ */
+const JWT_REALM_TYPE = 'jwt';
+
 interface HTTPAuthenticationProviderOptions {
   supportedSchemes: Set<string>;
+  jwt?: { restrictToPaths?: string[] };
 }
 
 /**
@@ -32,6 +40,17 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly supportedSchemes: Set<string>;
 
+  /**
+   * An optional JWT bearer credentials configuration.
+   */
+  private readonly jwt?: {
+    /**
+     * A list of the Kibana internal URL paths that are allowed to be accessed with a valid JWT credentials. If not
+     * defined, no restriction is imposed
+     */
+    restrictToPaths?: Set<string>;
+  };
+
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     httpOptions: Readonly<HTTPAuthenticationProviderOptions>
@@ -44,6 +63,13 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     this.supportedSchemes = new Set(
       [...httpOptions.supportedSchemes].map((scheme) => scheme.toLowerCase())
     );
+    this.jwt = httpOptions.jwt
+      ? {
+          restrictToPaths: httpOptions.jwt.restrictToPaths
+            ? new Set(httpOptions.jwt.restrictToPaths.map((path) => path.toLowerCase()))
+            : undefined,
+        }
+      : httpOptions.jwt;
   }
 
   /**
@@ -79,6 +105,20 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(
         `Request to ${request.url.pathname}${request.url.search} has been authenticated via authorization header with "${authorizationHeader.scheme}" scheme.`
       );
+
+      // Respect the JWT bearer path restriction, if set. JWT authentication metadata also includes fields that we might
+      // want to take into account as well: jwt_claim_iss, jwt_claim_name, jwt_claim_aud and jwt_claim_sub.
+      if (
+        user.authentication_realm.type === JWT_REALM_TYPE &&
+        this.jwt?.restrictToPaths &&
+        !this.jwt.restrictToPaths.has(request.url.pathname)
+      ) {
+        this.logger.error(
+          `Attempted to authenticate with JWT credentials against ${request.url.pathname}${request.url.search}, but it's not allowed.`
+        );
+        return AuthenticationResult.failed(Boom.unauthorized());
+      }
+
       return AuthenticationResult.succeeded(user);
     } catch (err) {
       this.logger.debug(
