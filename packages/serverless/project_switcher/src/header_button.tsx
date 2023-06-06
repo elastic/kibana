@@ -6,26 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiHeaderLink, EuiHeaderSectionItem } from '@elastic/eui';
 import React, { MouseEventHandler } from 'react';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
-
-import { ProjectType } from '@kbn/serverless-types';
-
-import { icons } from './constants';
 
 export const TEST_ID = 'projectSwitcherButton';
 
 export interface Props {
   onClick: MouseEventHandler<HTMLButtonElement>;
-  currentProjectType: ProjectType;
 }
 
-export const HeaderButton = ({ onClick, currentProjectType }: Props) => (
-  <EuiHeaderSectionItemButton
-    aria-label="Developer Tools"
-    data-test-subj={TEST_ID}
-    {...{ onClick }}
-  >
-    <EuiIcon type={icons[currentProjectType]} size="m" />
-  </EuiHeaderSectionItemButton>
+export const HeaderButton = (props: Props) => (
+  <EuiHeaderSectionItem aria-label="Developer Tools">
+    <EuiHeaderLink
+      onClick={props.onClick}
+      iconSide="right"
+      iconType="arrowDown"
+      data-test-subj={TEST_ID}
+    >
+      <FormattedMessage
+        id="serverlessPackages.chrome.linkToCloud.projects"
+        defaultMessage="My project"
+      />
+    </EuiHeaderLink>
+  </EuiHeaderSectionItem>
 );

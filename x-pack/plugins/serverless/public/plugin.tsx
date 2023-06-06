@@ -53,7 +53,7 @@ export class ServerlessPlugin
     if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
       const { currentType } = developer.projectSwitcher;
 
-      core.chrome.navControls.registerRight({
+      core.chrome.navControls.registerLeft({
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
@@ -61,14 +61,15 @@ export class ServerlessPlugin
     core.chrome.setChromeStyle('project');
     management.setIsSidebarEnabled(false);
 
+    // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
+    const { project } = core.chrome as InternalChromeStart;
+
     return {
-      // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
       setSideNavComponent: (sideNavigationComponent) =>
-        (core.chrome as InternalChromeStart).project.setSideNavComponent(sideNavigationComponent),
-      setNavigation: (projectNavigation) =>
-        (core.chrome as InternalChromeStart).project.setNavigation(projectNavigation),
-      setBreadcrumbs: (breadcrumbs, params) =>
-        (core.chrome as InternalChromeStart).project.setBreadcrumbs(breadcrumbs, params),
+        project.setSideNavComponent(sideNavigationComponent),
+      setNavigation: (projectNavigation) => project.setNavigation(projectNavigation),
+      setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
+      setProjectHome: (homeHref: string) => project.setHome(homeHref),
     };
   }
 

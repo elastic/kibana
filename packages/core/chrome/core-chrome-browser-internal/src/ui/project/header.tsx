@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { createRef, useState } from 'react';
-import { Router } from 'react-router-dom';
 import {
   EuiHeader,
   EuiHeaderLogo,
@@ -15,67 +13,146 @@ import {
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
+  EuiLoadingSpinner,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeNavControl,
 } from '@kbn/core-chrome-browser/src';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
-import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
+import { i18n } from '@kbn/i18n';
+import React, { createRef, useState } from 'react';
+import { Router } from 'react-router-dom';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
+import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { ProjectNavigation } from './navigation';
+
+const headerCss = {
+  logo: {
+    container: css`
+      display: inline-block;
+      min-width: 56px; /* 56 = 40 + 8 + 8 */
+      padding: 0 8px;
+      cursor: pointer;
+    `,
+    logo: css`
+      min-width: 0; /* overrides min-width: 40px */
+      padding: 0;
+    `,
+    spinner: css`
+      position: relative;
+      left: 4px;
+      top: 2px;
+    `,
+  },
+  nav: {
+    toggleNavButton: css`
+      border-right: 1px solid #d3dae6;
+      margin-left: -1px;
+    `,
+  },
+};
+
+const headerStrings = {
+  logo: {
+    ariaLabel: i18n.translate('core.ui.primaryNav.goToHome.ariaLabel', {
+      defaultMessage: 'Go to home page',
+    }),
+  },
+  nav: {
+    closeNavAriaLabel: i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+      defaultMessage: 'Toggle primary navigation',
+    }),
+  },
+};
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
   kibanaDocLink: string;
+  children: React.ReactNode;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  homeHref$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
+  loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
+  navControlsLeft$: Observable<ChromeNavControl[]>;
+  navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
-  children: React.ReactNode;
+  prependBasePath: (url: string) => string;
 }
 
 const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
+
+const Logo = (
+  props: Pick<Props, 'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath'>
+) => {
+  const loadingCount = useObservable(props.loadingCount$, 0);
+  const homeHref = useObservable(props.homeHref$, '/app/home');
+  const { logo } = headerCss;
+
+  const navigateHome = (event: React.MouseEvent) => {
+    if (homeHref) {
+      props.application.navigateToUrl(props.prependBasePath(homeHref));
+    }
+    event.preventDefault();
+  };
+
+  return (
+    <span css={logo.container}>
+      {loadingCount === 0 ? (
+        <EuiHeaderLogo
+          iconType="logoElastic"
+          onClick={navigateHome}
+          css={logo}
+          data-test-subj="nav-header-logo"
+          aria-label={headerStrings.logo.ariaLabel}
+        />
+      ) : (
+        <a href={homeHref} onClick={navigateHome} css={logo.spinner}>
+          <EuiLoadingSpinner
+            size="l"
+            aria-hidden={false}
+            onClick={navigateHome}
+            data-test-subj="nav-header-loading-spinner"
+          />
+        </a>
+      )}
+    </span>
+  );
+};
 
 export const ProjectHeader = ({
   application,
   kibanaDocLink,
   kibanaVersion,
   children,
+  prependBasePath,
   ...observables
 }: Props) => {
   const [navId] = useState(htmlIdGenerator()());
   const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
-
-  const renderLogo = () => (
-    <EuiHeaderLogo
-      iconType="logoElastic"
-      href="#"
-      onClick={(e) => e.preventDefault()}
-      aria-label="Go to home page"
-    />
-  );
-
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
 
   return (
     <>
       <EuiHeader position="fixed" data-test-subj="kibanaProjectHeader">
         <EuiHeaderSection grow={false}>
-          <EuiHeaderSectionItem border="right">
+          <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
             <Router history={application.history}>
               <ProjectNavigation
                 isOpen={isOpen!}
@@ -88,9 +165,7 @@ export const ProjectHeader = ({
                 button={
                   <EuiHeaderSectionItemButton
                     data-test-subj="toggleNavButton"
-                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                      defaultMessage: 'Toggle primary navigation',
-                    })}
+                    aria-label={headerStrings.nav.closeNavAriaLabel}
                     onClick={() => setIsOpen(!isOpen)}
                     aria-expanded={isOpen!}
                     aria-pressed={isOpen!}
@@ -105,12 +180,31 @@ export const ProjectHeader = ({
               </ProjectNavigation>
             </Router>
           </EuiHeaderSectionItem>
-          <EuiHeaderSectionItem>{renderLogo()}</EuiHeaderSectionItem>
+
+          <EuiHeaderSectionItem>
+            <Logo
+              prependBasePath={prependBasePath}
+              application={application}
+              homeHref$={observables.homeHref$}
+              loadingCount$={observables.loadingCount$}
+            />
+          </EuiHeaderSectionItem>
+
+          <EuiHeaderSectionItem>
+            <HeaderNavControls navControls$={observables.navControlsLeft$} />
+          </EuiHeaderSectionItem>
+
           <EuiHeaderSectionItem>
             <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
+
         <EuiHeaderSection side="right">
+          <EuiHeaderSectionItem>
+            <HeaderNavControls navControls$={observables.navControlsCenter$} />
+            <HeaderNavControls navControls$={observables.navControlsRight$} />
+          </EuiHeaderSectionItem>
+
           <EuiHeaderSectionItem>
             <HeaderHelpMenu
               globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
@@ -121,18 +215,11 @@ export const ProjectHeader = ({
               navigateToUrl={application.navigateToUrl}
             />
           </EuiHeaderSectionItem>
-
-          <EuiHeaderSectionItem>
-            <HeaderNavControls navControls$={observables.navControlsRight$} />
-          </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
+
       {headerActionMenuMounter.mount && (
         <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
-          {/* TODO: This puts a group of nav menu items on the right edge of the screen,
-              but it should be possible for apps customize the layout in a grid and use spacers between items.
-              https://github.com/elastic/kibana/issues/158034 */}
-          <EuiHeaderSection />
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
               <HeaderActionMenu mounter={headerActionMenuMounter} />

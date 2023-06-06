@@ -12,7 +12,7 @@ import type {
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 
-import type { CloudLinkProps, RecentlyAccessedProps } from './components';
+import type { RecentlyAccessedProps } from './components';
 
 /**
  * @public
@@ -92,15 +92,6 @@ export interface RecentlyAccessedDefinition extends RecentlyAccessedProps {
 /**
  * @public
  *
- * A cloud link root item definition. Use it to add one or more links to the Cloud console
- */
-export interface CloudLinkDefinition extends CloudLinkProps {
-  type: 'cloudLink';
-}
-
-/**
- * @public
- *
  * A group root item definition.
  */
 export interface GroupDefinition extends NodeDefinition {
@@ -116,10 +107,7 @@ export interface GroupDefinition extends NodeDefinition {
  *
  * The navigation definition for a root item in the side navigation.
  */
-export type RootNavigationItemDefinition =
-  | RecentlyAccessedDefinition
-  | CloudLinkDefinition
-  | GroupDefinition;
+export type RootNavigationItemDefinition = RecentlyAccessedDefinition | GroupDefinition;
 
 export type ProjectNavigationTreeDefinition = Array<Omit<GroupDefinition, 'type'>>;
 
@@ -130,12 +118,12 @@ export type ProjectNavigationTreeDefinition = Array<Omit<GroupDefinition, 'type'
  */
 export interface NavigationTreeDefinition {
   /**
-   * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * Main content of the navigation. Can contain any number of "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
   body?: RootNavigationItemDefinition[];
   /**
-   * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * Footer content of the navigation. Can contain any number of "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
   footer?: RootNavigationItemDefinition[];
@@ -148,10 +136,6 @@ export interface NavigationTreeDefinition {
  * or when calling `setNavigation()` on the serverless plugin.
  */
 export interface ProjectNavigationDefinition {
-  /**
-   * The URL href for the home link
-   */
-  homeRef: string;
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * for a project. Use it if you only need to configure your project navigation and leave

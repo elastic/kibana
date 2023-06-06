@@ -51,10 +51,6 @@ export interface ChromeProjectNavigationNode {
 /** @public */
 export interface ChromeProjectNavigation {
   /**
-   * The URL href for the home link
-   */
-  homeRef: string;
-  /**
    * The navigation tree representation of the side bar navigation.
    */
   navigationTree: ChromeProjectNavigationNode[];

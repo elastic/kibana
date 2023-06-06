@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { Props as CloudLinkProps } from './cloud_link';
 export { Navigation } from './navigation';
 export type { Props as RecentlyAccessedProps } from './recently_accessed';

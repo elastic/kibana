@@ -30,6 +30,7 @@ export class ServerlessObservabilityPlugin
   ): ServerlessObservabilityPluginStart {
     const { observabilityShared, serverless } = setupDeps;
     observabilityShared.setIsSidebarEnabled(false);
+    serverless.setProjectHome('/app/enterprise_search/content/setup_guide');
     serverless.setSideNavComponent(getObservabilitySideNavComponent(core, { serverless }));
     return {};
   }

@@ -20,7 +20,6 @@ const devTools = getPresets('devtools');
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
-    { type: 'cloudLink', preset: 'projects' },
     { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
@@ -129,11 +128,7 @@ export const createServerlessSearchSideNavComponent =
   () => {
     return (
       <NavigationKibanaProvider core={core} serverless={serverless}>
-        <DefaultNavigation
-          homeRef="/app/elasticsearch"
-          navigationTree={navigationTree}
-          dataTestSubj="svlSearchSideNav"
-        />
+        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
       </NavigationKibanaProvider>
     );
   };

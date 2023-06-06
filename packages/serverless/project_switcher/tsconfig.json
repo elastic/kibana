@@ -19,5 +19,6 @@
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
     "@kbn/serverless-types",
+    "@kbn/i18n-react",
   ]
 }

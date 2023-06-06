@@ -26,6 +26,7 @@ export class ProjectNavigationService {
   private customProjectSideNavComponent$ = new BehaviorSubject<{
     current: SideNavComponent | null;
   }>({ current: null });
+  private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
@@ -40,6 +41,12 @@ export class ProjectNavigationService {
     // 3. keep track of currently active link / path (path will be used to highlight the link in the sidenav and display part of the breadcrumbs)
 
     return {
+      setProjectHome: (homeHref: string) => {
+        this.projectHome$.next(homeHref);
+      },
+      getProjectHome$: () => {
+        return this.projectHome$.asObservable();
+      },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);
       },

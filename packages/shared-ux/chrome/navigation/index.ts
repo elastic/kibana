@@ -23,8 +23,8 @@ export type {
 
 export type {
   ChromeNavigation,
-  ChromeNavigationViewModel,
-  NavigationServices,
   ChromeNavigationNode,
   ChromeNavigationNodeViewModel,
+  ChromeNavigationViewModel,
+  NavigationServices,
 } from './types';

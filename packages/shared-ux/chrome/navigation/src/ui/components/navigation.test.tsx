@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-
+import { render } from '@testing-library/react';
+import React from 'react';
+import { of, type Observable } from 'rxjs';
 import {
   defaultAnalyticsNavGroup,
   defaultDevtoolsNavGroup,
@@ -30,7 +29,7 @@ describe('<Navigation />', () => {
 
       const { findByTestId } = render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="group1">
               <Navigation.Item id="item1" title="Item 1" />
               <Navigation.Item id="item2" title="Item 2" />
@@ -62,7 +61,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'group1',
@@ -128,7 +126,7 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 {/* Title from deeplink */}
@@ -148,7 +146,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -221,7 +218,7 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 {/* Title from deeplink */}
@@ -243,7 +240,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -294,7 +290,7 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 <Navigation.Item link="item1">
@@ -311,9 +307,7 @@ describe('<Navigation />', () => {
 
       expect(await findByTestId('my-custom-element')).toBeVisible();
       expect(await findByTestId('my-other-custom-element')).toBeVisible();
-      expect(await (await findByTestId('my-other-custom-element')).textContent).toBe(
-        'Children prop'
-      );
+      expect((await findByTestId('my-other-custom-element')).textContent).toBe('Children prop');
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -321,7 +315,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -365,7 +358,7 @@ describe('<Navigation />', () => {
 
       render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group preset="analytics" />
             <Navigation.Group preset="ml" />
             <Navigation.Group preset="devtools" />
@@ -380,7 +373,6 @@ describe('<Navigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: expect.any(Array),
       });
 
@@ -397,31 +389,6 @@ describe('<Navigation />', () => {
       expect(navTreeGenerated.navigationTree[3]).toEqual(defaultManagementNavGroup);
     });
 
-    test('should render cloud link', async () => {
-      const onProjectNavigationChange = jest.fn();
-
-      const { findByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation homeRef="https://elastic.co">
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.CloudLink preset="deployments" />
-                <Navigation.CloudLink preset="projects" />
-                <Navigation.CloudLink href="https://foo.com" icon="myIcon" title="Custom link" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
-      );
-
-      expect(await findByTestId('nav-header-link-to-projects')).toBeVisible();
-      expect(await findByTestId('nav-header-link-to-deployments')).toBeVisible();
-      expect(await findByTestId('nav-header-link-to-cloud')).toBeVisible();
-      expect(await (await findByTestId('nav-header-link-to-cloud')).textContent).toBe(
-        'Custom link'
-      );
-    });
-
     test('should render recently accessed items', async () => {
       const recentlyAccessed$ = of([
         { label: 'This is an example', link: '/app/example/39859', id: '39850' },
@@ -430,7 +397,7 @@ describe('<Navigation />', () => {
 
       const { findByTestId } = render(
         <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 <Navigation.RecentlyAccessed />
@@ -441,7 +408,7 @@ describe('<Navigation />', () => {
       );
 
       expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
-      expect(await (await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+      expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
         'RecentThis is an exampleAnother example'
       );
     });
