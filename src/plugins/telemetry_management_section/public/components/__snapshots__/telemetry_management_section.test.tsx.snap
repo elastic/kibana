@@ -116,7 +116,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
               "displayName": "Share usage with Elastic",
               "isCustom": true,
               "isOverridden": false,
-              "name": "telemetry:enabled",
+              "name": "Usage collection",
               "requiresPageReload": false,
               "type": "boolean",
               "value": true,

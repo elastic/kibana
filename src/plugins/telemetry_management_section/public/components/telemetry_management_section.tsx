@@ -141,7 +141,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
               <LazyField
                 setting={{
                   type: 'boolean',
-                  name: 'telemetry:enabled',
+                  name: 'Usage collection',
                   displayName: i18n.translate('telemetry.provideUsageDataTitle', {
                     defaultMessage: 'Share usage with Elastic',
                   }),
