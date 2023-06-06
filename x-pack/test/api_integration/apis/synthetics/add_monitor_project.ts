@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           successfulMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id, project);
+            // return deleteMonitor(monitor.id, project);
           }),
         ]);
       }

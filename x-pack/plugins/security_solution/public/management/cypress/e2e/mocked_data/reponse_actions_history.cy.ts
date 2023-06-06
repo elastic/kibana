@@ -31,7 +31,8 @@ describe('Response actions history page', () => {
     }
   });
 
-  it('retains expanded action details on page reload', () => {
+  // Flakey, example build failure: https://buildkite.com/elastic/kibana-pull-request/builds/132245
+  it.skip('retains expanded action details on page reload', () => {
     cy.visit(`/app/security/administration/response_actions_history`);
     cy.getByTestSubj('response-actions-list-expand-button').eq(3).click(); // 4th row on 1st page
     cy.getByTestSubj('response-actions-list-details-tray').should('exist');
