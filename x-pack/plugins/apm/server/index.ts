@@ -69,6 +69,80 @@ const configSchema = schema.object({
     schema.string({ defaultValue: '' }),
     schema.never()
   ),
+  featureFlags: schema.object({
+    agentConfigurationAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    configurableIndicesAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    infrastructureTabAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    infraUiAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    migrationToFleetAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    sourcemapApiAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    spacesAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    schemaAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+    storageExplorerAvailable: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({
+        defaultValue: false,
+      }),
+      schema.oneOf([schema.literal(true)], { defaultValue: true })
+    ),
+  }),
 });
 
 // plugin config
@@ -129,6 +203,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     latestAgentVersionsUrl: true,
     managedServiceUrl: true,
     serverlessOnboarding: true,
+    featureFlags: true,
   },
   schema: configSchema,
 };
