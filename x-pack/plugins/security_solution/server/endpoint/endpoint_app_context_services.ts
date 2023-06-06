@@ -17,6 +17,7 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -69,6 +70,7 @@ export interface EndpointAppContextServiceStartContract {
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ReturnType<typeof actionCreateService> | undefined;
   cloud: CloudSetup;
+  createFleetActionsClient: FleetStartContract['createFleetActionsClient'];
 }
 
 /**
@@ -268,5 +270,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.createFleetFilesClient.fromHost('endpoint');
+  }
+
+  public async getFleetActionsClient(): Promise<FleetActionsClientInterface> {
+    if (!this.startDependencies?.createFleetActionsClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.createFleetActionsClient('endpoint');
   }
 }
