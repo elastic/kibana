@@ -21061,7 +21061,6 @@
     "xpack.lens.pieChart.visualOptionsLabel": "视觉选项",
     "xpack.lens.primaryMetric.headingLabel": "值",
     "xpack.lens.primaryMetric.label": "主要指标",
-    "xpack.lens.queryInput.appName": "Lens",
     "xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel": "CSV 下载",
     "xpack.lens.resetLayerAriaLabel": "清除图层",
     "xpack.lens.saveDuplicateRejectedDescription": "已拒绝使用重复标题保存确认",
