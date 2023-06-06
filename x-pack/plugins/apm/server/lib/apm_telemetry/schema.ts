@@ -399,7 +399,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       all: {
         ...long,
         _meta: {
-          description: 'The total number of transaction documents overall',
+          description: 'Total number of transaction documents overall',
         },
       },
     },
@@ -413,7 +413,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       all: {
         ...long,
         _meta: {
-          description: 'The total number of span documents overall',
+          description: 'Total number of span documents overall',
         },
       },
     },
@@ -427,7 +427,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       all: {
         ...long,
         _meta: {
-          description: 'The total number of error documents overall',
+          description: 'Total number of error documents overall',
         },
       },
     },
@@ -441,7 +441,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       all: {
         ...long,
         _meta: {
-          description: 'The total number of metric documents overall',
+          description: 'Total number of metric documents overall',
         },
       },
     },
@@ -456,7 +456,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       all: {
         ...long,
         _meta: {
-          description: 'The total number of onboarding documents overall',
+          description: 'Total number of onboarding documents overall',
         },
       },
     },
@@ -465,7 +465,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         ...long,
         _meta: {
           description:
-            'The total number of apm-agent-configuration documents overall',
+            'Total number of apm-agent-configuration documents overall',
         },
       },
     },
@@ -474,7 +474,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         ...long,
         _meta: {
           description:
-            'The total number of distinct transaction groups for the top service for the last last 24 hours',
+            'Total number of distinct transaction groups for the top service for the last last 24 hours',
         },
       },
     },
@@ -483,7 +483,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         ...long,
         _meta: {
           description:
-            'The total number of distinct error groups for the top service for the last last 24 hours',
+            'Total number of distinct error groups for the top service for the last last 24 hours',
         },
       },
     },
@@ -497,7 +497,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       all: {
         ...long,
         _meta: {
-          description: 'The total number of trace documents overall',
+          description: 'Total number of trace documents overall',
         },
       },
     },
@@ -610,7 +610,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         total: {
           ...long,
           _meta: {
-            description: 'The total number of shards',
+            description: 'Total number of shards',
           },
         },
       },
@@ -621,7 +621,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
               ...long,
               _meta: {
                 description:
-                  'The total number of transaction and span documents overall',
+                  'Total number of transaction and span documents overall',
               },
             },
           },
@@ -640,7 +640,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       total: {
         ...long,
         _meta: {
-          description: 'The total number of shards',
+          description: 'Total number of shards',
         },
       },
     },
@@ -650,7 +650,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
           count: {
             ...long,
             _meta: {
-              description: 'The total number of all documents overall',
+              description: 'Total number of all documents overall',
             },
           },
         },
