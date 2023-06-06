@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
+  useEuiTheme,
   EuiAccordion,
   EuiBadge,
   EuiButton,
@@ -26,9 +29,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useMutation } from '@tanstack/react-query';
-import React, { useState } from 'react';
+
 import {
   CANCEL_LABEL,
   DISABLED_LABEL,
@@ -81,6 +83,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   username,
   setApiKey,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { http } = useKibanaServices();
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
@@ -153,7 +156,12 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   });
   const createError = parseCreateError(error);
   return (
-    <EuiFlyout onClose={onClose} maxWidth="640px">
+    <EuiFlyout
+      onClose={onClose}
+      css={css`
+        max-width: calc(${euiTheme.size.xxxxl} * 10);
+      `}
+    >
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2>
@@ -225,7 +233,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
             id="apiKey.privileges"
             paddingSize="l"
             buttonContent={
-              <div style={{ paddingRight: euiThemeVars.euiSizeS }}>
+              <div style={{ paddingRight: euiTheme.size.s }}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="lock" />
@@ -279,7 +287,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
             id="apiKey.metadata"
             paddingSize="l"
             buttonContent={
-              <div style={{ paddingRight: euiThemeVars.euiSizeS }}>
+              <div style={{ paddingRight: euiTheme.size.s }}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="visVega" />
