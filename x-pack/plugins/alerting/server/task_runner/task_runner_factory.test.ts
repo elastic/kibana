@@ -69,7 +69,7 @@ let fakeTimer: sinon.SinonFakeTimers;
 describe('Task Runner Factory', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
   const mockedTaskConfig: TaskConfig = {
-    skip_invalid: { enabled: false, reschedule_delay: '3s', max_attempt: 10 },
+    skip: { enabled: false, delay: '3s' },
   };
 
   beforeAll(() => {
