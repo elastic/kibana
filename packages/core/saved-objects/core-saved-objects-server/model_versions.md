@@ -29,12 +29,12 @@ to add a new migration in-between 2 stack versions.
 
 <img src="mv_img_1.png" alt="multiple migration per stack version schema">
 
-Because of this, we needed a way to decouple SO versioning from the stack versioning.
+We needed a way to decouple SO versioning from the stack versioning to support this, and model versions do by design.
 
 ### 2. The current migrations API is unsafe for the zero-downtime and backward-compatible requirements
 
 On traditional deployments (on-prem/non-managed cloud), upgrading Kibana is done with downtime. 
-The upgrade process requires to shut down all the nodes of the prior version before deploying the new one. 
+The upgrade process requires shutting down all the nodes of the prior version before deploying the new one. 
 That way, there is always a single version of Kibana running at a given time, which avoids all risks of data incompatibility
 between version (e.g the new version introduces a migration that changes the shape of the document in a way that breaks compatibility
 with the previous version)
@@ -82,7 +82,7 @@ const myType: SavedObjectsType = {
   name: 'test',
   switchToModelVersionAt: '8.10.0',
   modelVersions: {
-    2: modelVersion2, // invalid: first version should be 1
+    2: modelVersion2, // invalid: first version must be 1
     4: modelVersion3, // invalid: skipped version 3
   },
   // ...other mandatory properties
@@ -133,7 +133,7 @@ It's currently composed of two main properties:
 
 Describes the list of changes applied during this version. 
 
-This is the part that replaces the old migration system, and allows defining when a version adds new mapping, 
+**Important:** This is the part that replaces the old migration system, and allows defining when a version adds new mapping, 
 mutates the documents, or other type-related changes.
 
 The current types of changes are:
@@ -342,7 +342,7 @@ To reuse the previous example, let's say the `dolly` field we want to add would 
 
 In that case, the new version needs to do the following:
 - add a `mappings_addition` type change to define the new mappings
-- updates the root `mappings` accordingly
+- update the root `mappings` accordingly
 - add an updated `forwardCompatibility` as we did for the previous example
 
 The new version definition would look like: 
