@@ -539,6 +539,55 @@ describe('MlInferenceLogic', () => {
         ]);
       });
     });
+    describe('formErrors', () => {
+      it('has errors when configuration is empty', () => {
+        expect(MLInferenceLogic.values.formErrors).toEqual({
+          modelID: 'Field is required.',
+          pipelineName: 'Field is required.',
+          sourceField: 'Field is required.',
+        });
+      });
+      it('has error for invalid pipeline names', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+          sourceField: 'body',
+          pipelineName: 'Invalid Pipeline Name',
+        });
+        const expectedErrors = {
+          pipelineName: 'Name must only contain letters, numbers, underscores, and hyphens.',
+        };
+
+        expect(MLInferenceLogic.values.formErrors).toEqual(expectedErrors);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'pipeline-name-$%^&',
+        });
+        expect(MLInferenceLogic.values.formErrors).toEqual(expectedErrors);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'pipeline-name',
+        });
+        expect(MLInferenceLogic.values.formErrors).toEqual({});
+      });
+      it('has pipelineName error when existing pipeline returned from fetch', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+          sourceField: 'body',
+        });
+        MLInferenceLogic.actions.fetchPipelineSuccess({
+          'mock-pipeline': {},
+        });
+
+        expect(MLInferenceLogic.values.formErrors).toEqual({
+          pipelineName: 'Name already used by another pipeline.',
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
@@ -641,6 +690,51 @@ describe('MlInferenceLogic', () => {
         });
 
         expect(MLInferenceLogic.actions.makeMLModelsRequest).toHaveBeenCalledWith(undefined);
+      });
+    });
+    describe('onAddInferencePipelineStepChange', () => {
+      it('calls setAddInferencePipelineStep with given step', () => {
+        jest.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
+        MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
+        expect(MLInferenceLogic.actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+          AddInferencePipelineSteps.Fields
+        );
+      });
+      it('triggers pipeline fetch when moving from configuration step', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
+        expect(MLInferenceLogic.actions.fetchPipelineByName).toHaveBeenCalledWith({
+          pipelineName: 'ml-inference-unit-test-pipeline',
+        });
+      });
+      it('does not trigger pipeline fetch existing pipeline is selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: true,
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
+        expect(MLInferenceLogic.actions.fetchPipelineByName).not.toHaveBeenCalled();
+      });
+    });
+    describe('fetchPipelineSuccess', () => {
+      it('goes back to configuration step when pipeline is found', () => {
+        jest.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
+
+        MLInferenceLogic.actions.fetchPipelineSuccess({
+          'mock-pipeline': {},
+        });
+        expect(MLInferenceLogic.actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+          AddInferencePipelineSteps.Configuration
+        );
       });
     });
   });
