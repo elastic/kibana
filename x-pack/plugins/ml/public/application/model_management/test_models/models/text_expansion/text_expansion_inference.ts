@@ -157,18 +157,15 @@ function parseResponse(
     value,
   }));
   let score = 0;
-  const adjustedTokenWeights = originalTokenWeights
-    // sort by value descending
-    .sort((a, b) => b.value - a.value)
-    .map(({ token, value }) => {
-      // if token is in query results, multiply value by query result value
-      const adjustedValue = value * (queryResults[token] ?? 0);
-      score += adjustedValue;
-      return {
-        token,
-        value: adjustedValue,
-      };
-    });
+  const adjustedTokenWeights = originalTokenWeights.map(({ token, value }) => {
+    // if token is in query results, multiply value by query result value
+    const adjustedValue = value * (queryResults[token] ?? 0);
+    score += adjustedValue;
+    return {
+      token,
+      value: adjustedValue,
+    };
+  });
 
   return {
     text,
