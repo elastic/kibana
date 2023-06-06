@@ -124,6 +124,30 @@ const myType: SavedObjectsType = {
 };
 ```
 
+**Note:** Having multiple changes of the same type for a given version is supported bu design 
+        to allow merging different sources (to prepare for an eventual higher-level API)
+
+*This definition would be perfectly valid:*
+
+```ts
+const version1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        someNewField: { type: 'text' },
+      },
+    },
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        anotherNewField: { type: 'text' },
+      },
+    },
+  ],
+};
+```
+
 
 It's currently composed of two main properties:
 
