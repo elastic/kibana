@@ -10,7 +10,7 @@ import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_job
 import type { PartitionFieldValueResponse } from '@kbn/ml-plugin/server/models/results_service/get_partition_fields_values';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -61,9 +61,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(requestBody: object): Promise<PartitionFieldValueResponse> {
     const { body, status } = await supertest
-      .post(`/api/ml/results/partition_fields_values`)
+      .post(`/internal/ml/results/partition_fields_values`)
       .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(200, status, body);
     return body;

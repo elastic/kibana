@@ -325,7 +325,7 @@ export class UserActionPersister {
     connectorId,
     attachmentId,
     refresh,
-  }: CreateUserActionClient<T>) {
+  }: CreateUserActionClient<T>): Promise<void> {
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
       const userActionBuilder = this.builderFactory.getBuilder<T>(type);
@@ -381,7 +381,7 @@ export class UserActionPersister {
     }
   }
 
-  public async bulkAuditLogCaseDeletion(caseIds: string[]) {
+  public async bulkAuditLogCaseDeletion(caseIds: string[]): Promise<void> {
     this.context.log.debug(`Attempting to log bulk case deletion`);
 
     for (const id of caseIds) {

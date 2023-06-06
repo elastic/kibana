@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { getIndexPatternLoad } from './expressions';
 import {
   DataViewsPublicPluginSetup,
@@ -25,6 +26,9 @@ import { getIndices, HasData } from './services';
 
 import { debounceByKey } from './debounce_by_key';
 
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common/constants';
+import { LATEST_VERSION } from '../common/content_management/v1/constants';
+
 export class DataViewsPublicPlugin
   implements
     Plugin<
@@ -38,18 +42,28 @@ export class DataViewsPublicPlugin
 
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
-    { expressions }: DataViewsPublicSetupDependencies
+    { expressions, contentManagement }: DataViewsPublicSetupDependencies
   ): DataViewsPublicPluginSetup {
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+
+    contentManagement.registry.register({
+      id: DATA_VIEW_SAVED_OBJECT_TYPE,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('dataViews.contentManagementType', {
+        defaultMessage: 'Data view',
+      }),
+    });
 
     return {};
   }
 
   public start(
     core: CoreStart,
-    { fieldFormats }: DataViewsPublicStartDependencies
+    { fieldFormats, contentManagement }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, application } = core;
+    const { uiSettings, http, notifications, application, savedObjects } = core;
 
     const onNotifDebounced = debounceByKey(
       notifications.toasts.add.bind(notifications.toasts),
@@ -63,7 +77,10 @@ export class DataViewsPublicPlugin
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(
+        contentManagement.client,
+        savedObjects.client
+      ),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields, key) => {

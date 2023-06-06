@@ -30,11 +30,11 @@ import {
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
+import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
 const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
-const URL_STORAGE_KEY = '_a';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
@@ -57,7 +57,7 @@ function InternalAlertsPage() {
     },
   } = useKibana().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
-  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY, {
+  const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
 

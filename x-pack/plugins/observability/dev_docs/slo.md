@@ -9,10 +9,13 @@ We currently support the following SLI:
 - APM Transaction Error Rate, known as APM Availability
 - APM Transaction Duration, known as APM Latency
 - Custom KQL
+- Custom Metric
 
 For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
 
 The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom 'timestampField' can be provided to override the default @timestamp field.
+
+The **custom Metric** SLI requires an index pattern, an optional filter query, a set of metrics for the numerator, and a set of metrics for the denominator. A custom 'timestampField' can be provided to override the default @timestamp field.
 
 ## SLO configuration
 
@@ -271,7 +274,7 @@ curl --request POST \
 
 </details>
 
-### Custom
+### Custom KQL
 
 <details>
 <summary>98.5% of 'logs lantency < 300ms' for 'groupId: group-0' over the last 7 days</summary>
@@ -302,6 +305,61 @@ curl --request POST \
 	"budgetingMethod": "occurrences",
 	"objective": {
 		"target": 0.985
+	}
+}'
+```
+
+</details>
+
+### Custom Metric
+
+<details>
+<summary>95.0% of events are processed over the last 7 days</summary>
+
+```
+curl --request POST \
+  --url http://localhost:5601/cyp/api/observability/slos \
+  --header 'Authorization: Basic ZWxhc3RpYzpjaGFuZ2VtZQ==' \
+  --header 'Content-Type: application/json' \
+  --header 'kbn-xsrf: oui' \
+  --data '{
+	"name": "My SLO Name",
+	"description": "My SLO Description",
+	"indicator": {
+		"type": "sli.metric.custom",
+		"params": {
+			"index": "high-cardinality-data-fake_stack.message_processor-*",
+      "good": {
+        "metrics": [
+          {
+            "name": "A",
+            "aggregation": "sum",
+            "field": "processor.processed"
+          }
+        ],
+        equation: 'A'
+      },
+			"total": {
+        "metrics": [
+          {
+            "name": "A",
+            "aggregation": "sum",
+            "processor.accepted"
+          }
+        ],
+        equation: 'A'
+      },
+			"filter": "",
+			"timestampField": "@timestamp"
+		}
+	},
+	"timeWindow": {
+		"duration": "7d",
+		"isRolling": true
+	},
+	"budgetingMethod": "occurrences",
+	"objective": {
+		"target": 0.95
 	}
 }'
 ```
