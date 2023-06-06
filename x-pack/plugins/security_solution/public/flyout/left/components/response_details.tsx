@@ -22,6 +22,11 @@ import * as i18n from './translations';
 
 export const RESPONSE_TAB_ID = 'response-details';
 
+const ExtendedFlyoutWrapper = styled.div`
+ figure {
+  background-color: white
+`;
+
 const InlineBlock = styled.div`
   display: inline-block;
   line-height: 1.7em;
@@ -45,7 +50,6 @@ export const ResponseDetails: React.FC = () => {
   const responseActionsView = useResponseActionsView({
     rawEventData: data,
     ecsData: dataAsNestedObject,
-    isExpandableFlyout: true,
   });
   const osqueryView = useOsqueryTab({
     rawEventData: data,
@@ -61,7 +65,9 @@ export const ResponseDetails: React.FC = () => {
       {!responseActions ? (
         <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>{i18n.RESPONSE_EMPTY}</InlineBlock>
       ) : (
-        <>{endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}</>
+        <ExtendedFlyoutWrapper>
+          {endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}
+        </ExtendedFlyoutWrapper>
       )}
     </div>
   );

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiComment, EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import { EuiComment, EuiErrorBoundary } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
-import styled from 'styled-components';
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
 import type { StartPlugins } from '../../types';
@@ -23,15 +22,8 @@ import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
 
-const StyledEuiComment = styled(EuiComment)`
-  figure {
-    background-color: ${(props: { isExpandableFlyout?: boolean }) =>
-      props.isExpandableFlyout ? 'white' : 'transparent'};
-  }
-`;
-
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
-  ({ actionId, ruleName, startDate, ecsData, isExpandableFlyout }) => {
+  ({ actionId, ruleName, startDate, ecsData }) => {
     const { read } = useKibana().services.application.capabilities.osquery;
 
     const [isLive, setIsLive] = useState(false);
@@ -47,9 +39,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
 
     return (
       <AlertAttachmentContext.Provider value={ecsData}>
-        <EuiSpacer size="s" />
-        <StyledEuiComment
-          isExpandableFlyout={isExpandableFlyout}
+        <EuiComment
           username={ruleName && ruleName[0]}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}
@@ -66,8 +56,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
               agentIds={data?.agents}
             />
           )}
-        </StyledEuiComment>
-        <EuiSpacer size="s" />
+        </EuiComment>
       </AlertAttachmentContext.Provider>
     );
   }

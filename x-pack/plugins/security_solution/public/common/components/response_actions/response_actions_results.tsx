@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import { EuiSpacer } from '@elastic/eui';
 import { EndpointResponseActionResults } from './endpoint_action_results';
 import type {
   LogsEndpointAction,
@@ -19,46 +20,53 @@ interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
   ruleName?: string[];
   ecsData?: Ecs | null;
-  isExpandableFlyout?: boolean;
 }
 
 export const ResponseActionsResults = React.memo(
-  ({ actions, ruleName, ecsData, isExpandableFlyout }: ResponseActionsResultsProps) => {
+  ({ actions, ruleName, ecsData }: ResponseActionsResultsProps) => {
     const {
       services: { osquery },
     } = useKibana();
     const { OsqueryResult } = osquery;
 
+    const getAction = useCallback(
+      (action: LogsEndpointActionWithHosts | LogsOsqueryAction) => {
+        if (isOsquery(action)) {
+          const actionId = action.action_id;
+          const queryId = action.queries[0].id;
+          const startDate = action['@timestamp'];
+
+          return (
+            <OsqueryResult
+              key={actionId}
+              actionId={actionId}
+              queryId={queryId}
+              startDate={startDate}
+              ruleName={ruleName}
+              ecsData={ecsData}
+            />
+          );
+        }
+        if (isEndpoint(action)) {
+          return (
+            <EndpointResponseActionResults action={action} key={action.EndpointActions.action_id} />
+          );
+        }
+        return null;
+      },
+      [OsqueryResult, ecsData, ruleName]
+    );
+
     return (
       <>
         {actions.map((action) => {
-          if (isOsquery(action)) {
-            const actionId = action.action_id;
-            const queryId = action.queries[0].id;
-            const startDate = action['@timestamp'];
-
-            return (
-              <OsqueryResult
-                key={actionId}
-                actionId={actionId}
-                queryId={queryId}
-                startDate={startDate}
-                ruleName={ruleName}
-                ecsData={ecsData}
-                isExpandableFlyout={isExpandableFlyout}
-              />
-            );
-          }
-          if (isEndpoint(action)) {
-            return (
-              <EndpointResponseActionResults
-                isExpandableFlyout={isExpandableFlyout}
-                action={action}
-                key={action.EndpointActions.action_id}
-              />
-            );
-          }
-          return null;
+          return (
+            <>
+              <EuiSpacer size="s" />
+              {getAction(action)}
+              <EuiSpacer size="s" />
+            </>
+          );
         })}
       </>
     );
