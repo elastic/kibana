@@ -6,19 +6,10 @@
  * Side Public License, v 1.
  */
 
-export {
-  DEV_TOOLS_APP_ID,
-  console,
-  deepLinks,
-  grokDebugger,
-  painlessLab,
-  searchProfiler,
-} from './constants';
+import { DEV_TOOLS_APP_ID } from './constants';
 
-export type { AppId, LinkId, DeepLinkId } from './deep_links';
+export type AppId = typeof DEV_TOOLS_APP_ID;
 
-export {
-  defaultNavigation,
-  type NavigationID,
-  type DevToolsNodeDefinition,
-} from './default_navigation';
+export type LinkId = 'searchprofiler' | 'painless_lab' | 'grokdebugger' | 'console';
+
+export type DeepLinkId = AppId | `${AppId}:${LinkId}`;

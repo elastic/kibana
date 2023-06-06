@@ -13,10 +13,13 @@ import {
   type AnalyticsNodeDefinition,
 } from '@kbn/deeplinks-analytics';
 import { defaultNavigation as ml, type MlNodeDefinition } from '@kbn/deeplinks-ml';
+import {
+  defaultNavigation as devtools,
+  type DevToolsNodeDefinition,
+} from '@kbn/deeplinks-devtools';
 
 import type { NavigationGroupPreset } from '../types';
-import type { DevToolsNodeDefinition, ManagementNodeDefinition } from './types';
-import { devtools } from './devtools';
+import type { ManagementNodeDefinition } from './types';
 import { management } from './management';
 
 export function getPresets(preset: 'devtools'): DevToolsNodeDefinition;
