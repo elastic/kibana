@@ -11,7 +11,6 @@ import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import type { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { InfraLocators } from '../../common/locators';
 import type { RulesServiceSetup } from '../services/rules';
 import type { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -40,5 +39,4 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   handleEsError: typeof handleEsError;
   logger: Logger;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  infraLocators: InfraLocators;
 }

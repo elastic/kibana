@@ -8,7 +8,7 @@
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { InfraPluginCoreSetup } from '../../server/types';
-import type { LogViewReference, ResolvedLogView } from '../log_views';
+import type { LogViewReference } from '../log_views';
 import type { TimeRange } from '../time';
 import type { InfraClientCoreSetup } from '../../public/types';
 
@@ -23,7 +23,6 @@ export interface LogsLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
   filter?: string;
   logView?: LogViewReference;
-  resolvedLogView?: ResolvedLogView & SerializableRecord;
 }
 
 export type LogsLocator = LocatorPublic<LogsLocatorParams>;
