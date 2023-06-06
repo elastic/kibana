@@ -11,7 +11,7 @@ import { RawAlertInstance } from '@kbn/alerting-state-types';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';
 
-interface BuildOngoingRecoveredAlertOpts<AlertData extends RuleAlertData> {
+interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
   legacyRawAlert: RawAlertInstance;
   timestamp: string;
@@ -23,15 +23,12 @@ interface BuildOngoingRecoveredAlertOpts<AlertData extends RuleAlertData> {
  * information
  */
 
-export const buildOngoingRecoveredAlert = <AlertData extends RuleAlertData>({
+export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   alert,
   legacyRawAlert,
   rule,
   timestamp,
-}: BuildOngoingRecoveredAlertOpts<AlertData>): Alert & AlertData => {
-  // If we're updating an active alert to be recovered,
-  // persist any maintenance window IDs on the alert, otherwise
-  // we should only be changing fields related to flapping
+}: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   return deepmerge.all(
     [
       alert,

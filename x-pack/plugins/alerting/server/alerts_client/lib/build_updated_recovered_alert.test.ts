@@ -6,7 +6,7 @@
  */
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertRule } from '../types';
-import { buildOngoingRecoveredAlert } from './build_ongoing_recovered_alert';
+import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 
 const rule = {
   category: 'My test rule',
@@ -58,7 +58,7 @@ const existingRecoveredAlert = {
   },
 };
 
-describe('buildOngoingRecoveredAlert', () => {
+describe('buildUpdatedRecoveredAlert', () => {
   test('should update already recovered alert document with updated flapping values and timestamp only', () => {
     const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
     legacyAlert.scheduleActions('default');
@@ -66,7 +66,7 @@ describe('buildOngoingRecoveredAlert', () => {
     legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
 
     expect(
-      buildOngoingRecoveredAlert<{}>({
+      buildUpdatedRecoveredAlert<{}>({
         alert: existingRecoveredAlert,
         legacyRawAlert: {
           meta: {

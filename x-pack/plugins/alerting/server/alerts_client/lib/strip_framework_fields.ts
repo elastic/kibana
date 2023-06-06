@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  cloneDeep,
-  isArray,
-  isEmpty,
-  isFunction,
-  fromPairs,
-  isObject,
-  isPlainObject,
-  omit,
-} from 'lodash';
+import { isArray, isEmpty, isFunction, fromPairs, isObject, isPlainObject, omit } from 'lodash';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleAlertData } from '../../types';
@@ -28,12 +19,11 @@ const allowedFrameworkFields: string[] = [ALERT_REASON];
 export const stripFrameworkFields = <AlertData extends RuleAlertData>(
   payload: AlertData
 ): AlertData => {
-  const result = cloneDeep(payload);
   const keysToStrip = Object.keys(alertFieldMap).filter(
     (key: string) => !allowedFrameworkFields.includes(key)
   );
   // lodash omit can leave empty objects so we strip them from the result
-  return removeEmptyObjects(omit(result, keysToStrip)) as AlertData;
+  return removeEmptyObjects(omit(payload, keysToStrip)) as AlertData;
 };
 
 type AlertTypes = string | number | boolean | object | AlertTypes[];
@@ -42,8 +32,6 @@ type AlertFields = AlertTypes | AlertRecord;
 
 const removeEmptyObjects = (data: AlertFields): AlertFields => {
   if (isFunction(data) || !isPlainObject(data) || isArray(data)) return data;
-
-  if (isArray(data)) return data.map(removeEmptyObjects);
 
   return fromPairs(
     Object.entries(data)

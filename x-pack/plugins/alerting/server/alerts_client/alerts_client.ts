@@ -34,7 +34,7 @@ import {
 import {
   buildNewAlert,
   buildOngoingAlert,
-  buildOngoingRecoveredAlert,
+  buildUpdatedRecoveredAlert,
   buildRecoveredAlert,
   formatRule,
 } from './lib';
@@ -288,7 +288,7 @@ export class AlertsClient<
                 timestamp: currentTime,
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
               })
-            : buildOngoingRecoveredAlert<AlertData>({
+            : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
                 legacyRawAlert: recoveredAlertsToReturn[id],
                 timestamp: currentTime,
