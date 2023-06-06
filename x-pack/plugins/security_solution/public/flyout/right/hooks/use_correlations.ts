@@ -69,11 +69,21 @@ export interface UseCorrelationsResult {
    * Data length
    */
   dataCount: number;
-
+  /**
+   * Ids of specific alerts correlated by session, can be used to fetch specific alert documents
+   */
   alertsBySessionIds: string[];
+  /**
+   * Ids of specific alerts correlated by source, can be used to fetch specific alert documents
+   */
   sameSourceAlertsIds: string[];
+  /**
+   * Ids of specific alerts correlated by ancestry, can be used to fetch specific alert documents
+   */
   ancestryAlertsIds: string[];
-
+  /**
+   * Cases data, can be used to render correlated cases table
+   */
   cases: CasesByAlertId;
 }
 
@@ -197,12 +207,12 @@ export const useCorrelations = ({
       loading:
         casesLoading || ancestryAlertsLoading || alertsBySessionLoading || sameSourceAlertsLoading,
       error: data.length === 0,
-      data: data || [],
+      data,
       dataCount: data.length || 0,
       alertsBySessionIds,
       sameSourceAlertsIds,
       ancestryAlertsIds: ancestryAlertsIds || [],
-      cases: cases || [],
+      cases,
     }),
     [
       alertsBySessionIds,

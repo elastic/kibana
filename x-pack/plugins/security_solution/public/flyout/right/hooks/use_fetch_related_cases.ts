@@ -32,7 +32,7 @@ export interface UseFetchRelatedCasesResult {
   /**
    * Cases data retrieved
    */
-  data: CasesByAlertId | undefined;
+  data: CasesByAlertId;
   /**
    * Number of data entries received
    */
@@ -61,7 +61,7 @@ export const useFetchRelatedCases = ({
     () => ({
       loading: isLoading,
       error: isError,
-      data,
+      data: data || [],
       dataCount: data?.length || 0,
     }),
     [data, isError, isLoading]

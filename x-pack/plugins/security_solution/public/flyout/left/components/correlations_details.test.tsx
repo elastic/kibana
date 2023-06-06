@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useCorrelations, type UseCorrelationsResult } from '../../../right/hooks/use_correlations';
+import { useTimelineEventsDetails } from '../../../timelines/containers/details';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useCorrelations, type UseCorrelationsResult } from '../../right/hooks/use_correlations';
 import { CorrelationsDetails } from './correlations_details';
 import { type CasesByAlertId, CaseStatuses } from '@kbn/cases-plugin/common/api';
-import type { SelectedDataView } from '../../../../common/store/sourcerer/model';
-import { TestProviders } from '../../../../common/mock';
-import { LeftFlyoutContext } from '../../context';
+import type { SelectedDataView } from '../../../common/store/sourcerer/model';
+import { TestProviders } from '../../../common/mock';
+import { LeftFlyoutContext } from '../context';
 
-jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../common/containers/sourcerer');
-jest.mock('../../../right/hooks/use_correlations');
+jest.mock('../../../timelines/containers/details');
+jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../right/hooks/use_correlations');
 
 const mockCasesByAlertId: CasesByAlertId = [
   {

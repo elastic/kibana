@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useFetchAlerts } from '../../../shared/hooks/use_fetch_alerts';
+import { useFetchAlerts } from './use_fetch_alerts';
 import { usePagination, useSorting } from './use_pagination_and_sorting';
 
 /**

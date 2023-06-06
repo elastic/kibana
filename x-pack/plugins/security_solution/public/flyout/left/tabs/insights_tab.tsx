@@ -30,10 +30,7 @@ import {
   ThreatIntelligenceDetails,
 } from '../components/threat_intelligence_details';
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
-import {
-  CORRELATIONS_TAB_ID,
-  CorrelationsDetails,
-} from '../components/correlations_details/correlations_details';
+import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {

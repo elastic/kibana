@@ -10,9 +10,9 @@ import { type Criteria, EuiBasicTable, formatDate, EuiEmptyPrompt } from '@elast
 
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isRight } from 'fp-ts/lib/Either';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
-import { usePaginatedAlerts } from './use_paginated_alerts';
-import { ERROR_MESSAGE, ERROR_TITLE } from '../../../shared/translations';
+import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -40,26 +40,26 @@ export const columns = [
     truncateText: true,
     render: (value: string) => {
       const decodedSeverity = Severity.decode(value);
-      return isRight(decodedSeverity) ? <SeverityBadge value={decodedSeverity.right} /> : value
+      return isRight(decodedSeverity) ? <SeverityBadge value={decodedSeverity.right} /> : value;
     },
   },
 ];
 
 export interface AlertsTableProps {
   /**
-  * Ids of alerts to display in the table
-  */
+   * Ids of alerts to display in the table
+   */
   alertIds: string[];
   /**
-  * Data test subject string for testing
-  */
+   * Data test subject string for testing
+   */
   ['data-test-subj']?: string;
 }
 
 /**
  * Renders paginated alert array based on the provided alertIds
  */
-export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': testSubject }) => {
+export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': dataTestSubj }) => {
   const { setPagination, setSorting, data, loading, paginationConfig, sorting, error } =
     usePaginatedAlerts(alertIds);
 
@@ -95,7 +95,7 @@ export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': 
         color="danger"
         title={<h2>{ERROR_TITLE('alert data')}</h2>}
         body={<p>{ERROR_MESSAGE('alert data')}</p>}
-        data-test-subj={`${testSubject}Error`}
+        data-test-subj={`${dataTestSubj}Error`}
       />
     );
   }
