@@ -6,12 +6,12 @@
  */
 
 import { union } from 'lodash';
-import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from './apm_rule_types';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../../common/es_fields/apm';
+} from '../es_fields/apm';
 
 export const getAllGroupByFields = (
   ruleType: string,

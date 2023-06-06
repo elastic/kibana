@@ -31,7 +31,7 @@ import {
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
-import { getAllGroupByFields } from '../utils/get_all_groupby_fields';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
 
 export type TransactionDurationChartPreviewResponse = Array<{
@@ -111,7 +111,7 @@ export async function getTransactionDurationChartPreview({
         series: {
           multi_terms: {
             terms: [...getGroupByTerms(allGroupByFields)],
-            size: 3,
+            size: 1000,
             ...getMultiTermsSortOrder(aggregationType),
           },
           aggs: {

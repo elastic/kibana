@@ -64,7 +64,7 @@ import {
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
-import { getAllGroupByFields } from '../utils/get_all_groupby_fields';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
