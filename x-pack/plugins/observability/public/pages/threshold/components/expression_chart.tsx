@@ -20,7 +20,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
-import { ObservabilityAppServices } from '../../../application/types';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   MetricsExplorerAggregation,
@@ -72,7 +71,7 @@ export function ExpressionChart({
   source,
   timeRange,
 }: Props) {
-  const { charts, uiSettings } = useKibana<ObservabilityAppServices>().services;
+  const { charts, uiSettings } = useKibana().services;
   const { isLoading, data } = useMetricsExplorerChartData(
     expression,
     derivedIndexPattern,
