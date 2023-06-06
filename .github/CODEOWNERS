@@ -306,6 +306,9 @@ src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
 packages/kbn-datemath @elastic/kibana-data-discovery
+packages/deeplinks/analytics @elastic/kibana-data-discovery
+packages/deeplinks/devtools @elastic/platform-deployment-management
+packages/deeplinks/ml @elastic/ml-ui
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
