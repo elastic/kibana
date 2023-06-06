@@ -28,7 +28,7 @@ describe('cli serverless project type', () => {
       expect(error).toBe(undefined);
 
       expect(stdout.toString('utf8')).toContain(
-        'FATAL CLI ERROR Error: invalid --serverless value, must be one of es, oblt, security'
+        'FATAL CLI ERROR Error: invalid --serverless value, must be one of es, oblt, security'
       );
 
       expect(status).toBe(1);

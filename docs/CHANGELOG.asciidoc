@@ -45,9 +45,37 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.8.0]]
 == {kib} 8.8.0
 
-coming::[8.8.0]
-
 Review the following information about the {kib} 8.8.0 release.
+
+[float]
+[[known-issues-8.8.0]]
+=== Known issues
+
+// tag::known-issue-155203[]
+[discrete]
+.Monitors in Synthetics may stop running
+[%collapsible]
+====
+*Details* +
+If Monitor Management was enabled prior to 8.6.0, the API key generated internally will not contain the required permissions. The Synthetics app will attempt to fix this automatically in {kibana-pull}155203[#155203] when a user with https://www.elastic.co/guide/en/observability/8.8/synthetics-role-setup.html[sufficient privileges] visits this page for the first time after upgrading to 8.8.0.
+
+*Impact* +
+All monitors configured to run on Elastic’s global managed testing infrastructure will stop running until a user with permissions has loaded the Synthetics app.
+====
+// end::known-issue-155203[]
+
+// tag::known-issue-156798[]
+[discrete]
+.Network throttling disabled for browser monitors in Synthetics
+[%collapsible]
+====
+*Details* +
+Network throttling has been temporarily disabled for browser-based Synthetics monitors running on Elastic’s global managed testing infrastructure and private locations. This will be enabled again at some point in the future. We're providing frequent updates on this issue in https://github.com/elastic/synthetics/blob/main/docs/throttling.md[this document].
+
+*Impact* +
+With network throttling being disabled, your monitors may run more quickly (i.e. have a lower duration) than you observed previously and than when network throttling is enabled again in the future. No monitor configurations have been changed, but the network throttling settings are ignored at the moment.
+====
+// end::known-issue-156798[]
 
 [float]
 [[breaking-changes-8.8.0]]
@@ -68,7 +96,7 @@ The project monitor API for Synthetics in Elastic Observability has been removed
 *Impact* +
 In 8.8.0 and later, an error appears when you use the project monitor API.
 ====
-      
+
 [discrete]
 [[breaking-147985]]
 .Changes the privileges for alerts and cases
@@ -78,7 +106,25 @@ In 8.8.0 and later, an error appears when you use the project monitor API.
 The privileges for attaching alerts to cases has changed. For more information, refer to {kibana-pull}147985[#147985].
 
 *Impact* +
-To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html[{kib} privileges] and link:https://www.elastic.co/guide/en/kibana/current/setup-cases.html[Configure access to cases]. 
+To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html[{kib} privileges] and link:https://www.elastic.co/guide/en/kibana/current/setup-cases.html[Configure access to cases].
+====
+
+[discrete]
+[[breaking-157234]]
+.New alerts will be generated for Synthetics monitors
+[%collapsible]
+====
+*Details* +
+All monitor status alerts for the Synthetics app that are active at the time of upgrading will be resolved. New alerts will be created automatically. Refer to {kibana-pull}157234[#157234].
+====
+
+[discrete]
+[[breaking-156324]]
+.New Synthetics errors for monitors running on private locations
+[%collapsible]
+====
+*Details* +
+All Synthetics errors that are in progress for private locations at the time the stack is upgrading will be resolved. A new error state will take its place. Refer to {kibana-pull}156324[#156324].
 ====
 // end::notable-breaking-changes[]
 
@@ -93,7 +139,7 @@ To review the breaking changes in previous versions, refer to the following:
 The following functionality is deprecated in 8.8.0, and will be removed in 9.0.0.
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
 you make the necessary updates after you upgrade to 8.8.0.
-      
+
 [discrete]
 [[deprecation-154275]]
 .Deprecates ephemeral Task Manager settings
@@ -111,19 +157,19 @@ For more information, refer to {kibana-pull}154275[#154275].
 *Impact* +
 To improve task execution resiliency, remove the deprecated settings from the `kibana.yml` file. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/task-manager-settings-kb.html[Task Manager settings in {kib}].
 ====
-      
+
 [discrete]
 [[deprecation-154010]]
 .Deprecates monitor schedules
 [%collapsible]
 ====
 *Details* +
-Synthetics and Uptime monitor schedules and zip URL fields are deprecated. For more information, refer to {kibana-pull}154010[#154010] and {kibana-pull}154952[#154952].
+Synthetics now only accepts the following scheduling options for your monitors: every 1, 3, 5, 10, 15, 20, 30, 60, 120, 240 minutes. Other choices that existed previously have been deprecated. For more information, refer to {kibana-pull}154010[#154010] and {kibana-pull}154952[#154952].
 
 *Impact* +
-When you create monitors in Uptime Monitor Management and the Synthetics app, unsupported schedules are automatically transfered to the nearest supported schedule. To use zip URLs, use project monitors.
+Monitors that were using a scheduling option that is no longer valid have been automatically updated to use the nearest value from the new list of options.
 ====
-      
+
 [discrete]
 [[deprecation-152236]]
 .Deprecates Agent reassign API PUT endpoint
@@ -135,7 +181,7 @@ The PUT endpoint for the agent reassign API is deprecated. For more information,
 *Impact* +
 Use the POST endpoint for the agent reassign API.
 ====
-      
+
 [discrete]
 [[deprecation-151564]]
 .Deprecates `total` in `/agent_status` Fleet API
@@ -150,7 +196,7 @@ The `/agent_status` Fleet API now returns the following statuses:
 * `all` &mdash; All active and inactive
 * `active` &mdash; All active
 ====
-      
+
 [discrete]
 [[deprecation-149506]]
 .Deprecates Elastic Synthetics integration
@@ -160,9 +206,9 @@ The `/agent_status` Fleet API now returns the following statuses:
 The Elastic Synthetics integration is deprecated. For more information, refer to {kibana-pull}149506[#149506].
 
 *Impact* +
-To monitor endpoints, pages, and user journeys, go to **{observability}** -> **Synthetics (beta)**. 
+To monitor endpoints, pages, and user journeys, go to **{observability}** -> **Synthetics (beta)**.
 ====
-      
+
 [float]
 [[features-8.8.0]]
 === Features
@@ -344,6 +390,13 @@ Machine Learning::
 Management::
 * Adds timezone support for Transforms date histogram pivot configuration {kibana-pull}155535[#155535]
 * Adds more system indices to store internal data when you upgrade to 8.8.0 {kibana-pull}154888[#154888]
++
+These files include:
++
+** `.kibana_alerting_cases`
+** `.kibana_analytics`
+** `.kibana_security_solution`
+** `.kibana_ingest`
 * Adds improvements for supporting counter fields in Transforms {kibana-pull}154171[#154171]
 * Adds `_schedule_now` action to transform list {kibana-pull}153545[#153545]
 * Adds link to Discover from Index Management so users can directly look at documents of their indices {kibana-pull}152640[#152640]
@@ -480,8 +533,6 @@ Uptime::
 [[release-notes-8.7.1]]
 == {kib} 8.7.1
 
-coming::[8.7.1]
-
 Review the following information about the {kib} 8.7.1 release.
 
 [float]
@@ -586,7 +637,7 @@ Before you upgrade to 8.7.0, review the breaking changes, then mitigate the impa
 `lens:useFieldExistenceSampling` has been removed from *Advanced Settings*. The setting allowed you to enable document sampling to determine the fields that are displayed in *Lens*. For more information, refer to {kibana-pull}149482[#149482].
 
 *Impact* +
-In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the fields that are displayed in *Lens*. 
+In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the fields that are displayed in *Lens*.
 ====
 
 [discrete]
@@ -600,7 +651,7 @@ In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the 
 *Impact* +
 In 7.14.0 and later, the new aggregation-based pie chart visualization is available by default. For more information, check link:https://www.elastic.co/guide/en/kibana/current/add-aggregation-based-visualization-panels.html[Aggregation-based].
 ====
-      
+
 [discrete]
 [[breaking-147616]]
 .Removes the current_upgrades endpoint
@@ -612,7 +663,7 @@ The `api/fleet/current_upgrades` endpoint has been removed. For more information
 *Impact* +
 When you upgrade to 8.7.0, use the `/action_status` endpoint.
 ====
-      
+
 [discrete]
 [[breaking-147199]]
 .Removes the preconfiguration API route
@@ -1091,6 +1142,18 @@ For each {kibana-ref}/xpack-spaces.html[space], complete the following to change
 . Enter `100`, then click *Save changes*.
 ====
 
+[discrete]
+[[breaking-158338]]
+.CSV reports use PIT instead of Scroll
+[%collapsible]
+====
+*Details* +
+CSV reports now use PIT instead of Scroll. Previously generated CSV reports that used an index alias with alias-only privileges, but without privileges on the alias referenced-indices will no longer generate. For more information, refer to {kibana-pull}158338[#158338].
+
+*Impact* +
+To generate CSV reports, grant `read` privileges to the underlying indices.
+====
+
 To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.5/release-notes-8.5.0.html#breaking-changes-8.5.0[8.5.0] | {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
@@ -1516,9 +1579,9 @@ Before you upgrade to 8.5.0, review the breaking changes, then mitigate the impa
 To make bulk action responses consistent, returns `actionId` instead of agent ids with `success: True` or `success: False` results. For more information, refer to {kibana-pull}141757[#141757].
 
 *Impact* +
-When you use `FleetBulkResponse`, you now receive only `actionId` responses. 
+When you use `FleetBulkResponse`, you now receive only `actionId` responses.
 ====
-      
+
 [discrete]
 [[breaking-139431]]
 .Removes filter validation for ad-hoc data views
@@ -1530,7 +1593,7 @@ Filters associated with unknown data views, such as deleted data views, are no l
 *Impact* +
 Filters associated with unknown data views now display a warning message instead of being automatically disabled.
 ====
-      
+
 [discrete]
 [[breaking-138677]]
 .Removes the `package_policies` field from the agent policy saved object
@@ -1546,7 +1609,7 @@ The agent policy saved object no longer includes the `package_policies` field.
 To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
-      
+
 [float]
 [[features-8.5.0]]
 === Features
@@ -2011,21 +2074,21 @@ Before you upgrade to 8.4.0, review the breaking changes, then mitigate the impa
 [%collapsible]
 ====
 *Details* +
-When you configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI. 
+When you configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI.
 
 For more information, refer to {kibana-pull}135669[#135669].
 
 *Impact* +
 To configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` on the Fleet UI, avoid configuring the settings in kibana.yml.
 ====
-      
+
 [discrete]
 [[breaking-134336]]
 .Removes the legacy charts library
 [%collapsible]
 ====
 *Details* +
-The legacy implementation of the *Timelion* visualization charts library has been removed. All *Timelion* visualizations now use the elastic-charts library, which was introduced in 7.15.0. 
+The legacy implementation of the *Timelion* visualization charts library has been removed. All *Timelion* visualizations now use the elastic-charts library, which was introduced in 7.15.0.
 
 For more information, refer to {kibana-pull}134336[#134336].
 
@@ -2049,14 +2112,14 @@ you make the necessary updates after you upgrade to 8.4.0.
 [%collapsible]
 ====
 *Details* +
-The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version. 
+The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version.
 
 For more information, refer to {kibana-pull}136422[#136422].
 
 *Impact* +
 To authenticate interactive users via a web browser, use <<kibana-authentication,another authentication method>>. Use API keys only for programmatic access to {kib} and {es}.
 ====
-      
+
 [float]
 [[features-8.4.0]]
 === Features
@@ -2127,7 +2190,7 @@ For more information about the features introduced in 8.4.0, refer to <<whats-ne
 === Enhancements and bug fixes
 
 For detailed information about the 8.4.0 release, review the enhancements and bug fixes.
-      
+
 [float]
 [[enhancement-v8.4.0]]
 === Enhancements
@@ -2506,7 +2569,7 @@ In 8.3.0 and 8.3.1, there is a known issue where alerting rules that were create
 ----
 
 *Impact* +
-If you have upgraded to 8.3.0 or 8.3.1, and your alerting rules fail, reset the rules by disabling, then re-enabling them. When you disable, then re-enable your alerting rules, {kib} generates a new API key using the credentials of the user that manages the rules. 
+If you have upgraded to 8.3.0 or 8.3.1, and your alerting rules fail, reset the rules by disabling, then re-enabling them. When you disable, then re-enable your alerting rules, {kib} generates a new API key using the credentials of the user that manages the rules.
 
 To disable, then re-enable your alerting rules:
 
@@ -2579,7 +2642,7 @@ example, you will need to go to *{stack-manage-app} > {rac-ui}*, multi-select
 the failed rules, click on **Manage rules > Disable** and then click on **Manage
 rules > Enable**. Disabling and re-enabling the rule will generate a new API key
 using the credentials of the user performing these actions and reset the rule
-state. For more details about API key authorization, refer to 
+state. For more details about API key authorization, refer to
 <<alerting-authorization>>.
 
 Example error message::
@@ -3963,9 +4026,9 @@ The `console.ssl` setting has been removed. For more information, refer to {kiba
 Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
 ====
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
-<<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> |
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
@@ -4028,7 +4091,7 @@ For information about the features introduced in 8.0.0, refer to <<whats-new,Wha
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
-To review the features in previous versions, refer to the following: 
+To review the features in previous versions, refer to the following:
 
 <<features-8.0.0-rc2,8.0.0-rc2>> | <<features-8.0.0-rc1,8.0.0-rc1>> | <<features-8.0.0-beta1,8.0.0-beta1>> | <<features-8.0.0-alpha2,8.0.0-alpha2>>
 
@@ -4091,9 +4154,9 @@ In production, you are no longer able to use the `elastic` superuser to authenti
 When you configure `elasticsearch.username: elastic`, {kib} fails.
 ====
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
-<<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> |
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
@@ -4196,7 +4259,7 @@ The endpoint is now split into two separate endpoints:
  }
 --
 ====
-      
+
 [discrete]
 [[breaking-119945]]
 .Removes APM jobs from Machine Learning
@@ -4227,7 +4290,7 @@ To complete the migration, re enable plugins or delete documents from the index 
 [%collapsible]
 ====
 *Details* +
-On the Logs and Metrics UIs, references to the following API and saved object deprecated fields have been removed: 
+On the Logs and Metrics UIs, references to the following API and saved object deprecated fields have been removed:
 
 * `timestamp`
 * `tiebreaker`
@@ -4241,9 +4304,9 @@ For more information, refer to {kibana-pull}116821[#116821] and {kibana-pull}115
 When you upgrade to 8.0.0, you are unable to use references to the deprecated fields.
 ====
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
-<<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> |
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
@@ -4309,7 +4372,7 @@ For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
 
 ====
 
-To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>.
 
 
 [float]
@@ -4453,14 +4516,14 @@ Review the {kib} 8.0.0-beta1 changes, then use the <<upgrade-assistant,Upgrade A
 
 Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[alerting-breaking-changes-8.0.0-beta1]]
-==== Alerting 
-      
+==== Alerting
+
 [discrete]
 [[breaking-114558]]
 .Removes `xpack.task_manager.index`
@@ -4555,7 +4618,7 @@ Before you upgrade, make the following changes in kibana.yml:
 The *Dimming opacity* setting in *Advanced Settings* has been removed. For more information, refer to {kibana-pull}111704[#111704].
 
 *Impact* +
-When you upgrade to 8.0.0, you are no longer able to configure the dimming opactiy for visualizations. 
+When you upgrade to 8.0.0, you are no longer able to configure the dimming opactiy for visualizations.
 ====
 
 [discrete]
@@ -4567,7 +4630,7 @@ When you upgrade to 8.0.0, you are no longer able to configure the dimming opact
 In *TSVB*, custom Less stylesheets have been removed. For more information, refer to {kibana-pull}110985[#110985].
 
 *Impact* +
-Existing less stylesheets are automatically converted to CSS stylesheets. 
+Existing less stylesheets are automatically converted to CSS stylesheets.
 ====
 
 [discrete]
@@ -4619,7 +4682,7 @@ Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-refere
 [float]
 [[machine-learning-breaking-changes-8.0.0-beta1]]
 ==== Machine learning
-      
+
 [discrete]
 [[breaking-115444]]
 .Grants access to machine learning features when base privileges are used
@@ -4650,7 +4713,7 @@ Install the on-prem version of the <<maps-connect-to-ems,Elastic Maps Service>>,
 
 [float]
 [[operations-breaking-changes-8.0.0-beta1]]
-==== Operations 
+==== Operations
 
 [discrete]
 [[breaking-111535]]
@@ -4666,8 +4729,8 @@ Replace the `CONFIG_PATH` environment variable with `KBN_PATH_CONF`, and replace
 
 [float]
 [[platform-breaking-changes-8.0.0-beta1]]
-==== Platform 
-      
+==== Platform
+
 [discrete]
 [[breaking-114379]]
 .Removes supports for csp.rules configuration
@@ -4774,7 +4837,7 @@ The legacy `optimize.*` settings have been removed. If your configuration uses t
 For more information, refer to {kibana-pull}113296[#113296].
 
 *Impact* +
-To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. For more details, refer to {kibana-pull}73154[#73154]. 
+To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. For more details, refer to {kibana-pull}73154[#73154].
 ====
 
 [discrete]
@@ -4819,7 +4882,7 @@ The `kibana.index`, `xpack.reporting.index`, and `xpack.task_manager.index` sett
 *Impact* +
 Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<xpack-spaces,spaces>>, export your <<managing-saved-objects, saved objects>> from a tenant into the default space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
 ====
-  
+
 [discrete]
 [[breaking-112305]]
 .Removes legacy logging
@@ -4829,20 +4892,20 @@ Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<
 The logging configuration and log output format has changed. For more information, refer to {kibana-pull}112305[#112305].
 
 *Impact* +
-Use the new <<logging-configuration, logging system configuration>>. 
+Use the new <<logging-configuration, logging system configuration>>.
 ====
 
 [float]
 [[reporting-breaking-changes-8.0.0-beta1]]
 ==== Reporting
-      
+
 [discrete]
 [[breaking-114216]]
 .Removes reporting settings
 [%collapsible]
 ====
 *Details* +
-The following settings have been removed: 
+The following settings have been removed:
 
 * `xpack.reporting.capture.concurrency`
 
@@ -4860,7 +4923,7 @@ Before you upgrade to 8.0.0, remove the settings from kibana.yml.
 
 [float]
 [[rest-api-breaking-changes-8.0.0-beta1]]
-==== REST API 
+==== REST API
 
 [discrete]
 [[breaking-114730]]
@@ -4896,8 +4959,8 @@ Audit logs will be written to the default location in the new ECS format. To cha
 
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
-To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
-  
+To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>.
+
 [float]
 [[features-8.0.0-beta1]]
 === Features
@@ -4976,7 +5039,7 @@ To review the breaking changes in the previous version, refer to <<breaking-chan
 *Impact* +
 To retrieve the {kib} status in the previous format, use `GET /api/status?v7format=true`.
 ====
-      
+
 [discrete]
 [[breaking-110738]]
 .Removes support for legacy exports
@@ -4988,7 +5051,7 @@ In {kib} 8.0.0 and later, the legacy format from {kib} 6.x is unsupported. For m
 *Impact* +
 Using the user interface to import saved objects is restricted to `.ndjson` format imports.
 ====
-      
+
 [discrete]
 [[breaking-109896]]
 .Removes `map.regionmap.*`
@@ -5002,11 +5065,11 @@ If you have maps that use `map.regionmap` layers:
 
 . Remove the `map.regionmap` layer.
 
-. To recreate the choropleth layer, use <<import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}. 
+. To recreate the choropleth layer, use <<import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}.
 
-. Create a choropleth layer from the indexed vector data. 
+. Create a choropleth layer from the indexed vector data.
 ====
-      
+
 [discrete]
 [[breaking-109798]]
 .Removes `kibana.defaultAppId`
@@ -5018,7 +5081,7 @@ The deprecated `kibana.defaultAppId` setting in kibana.yml, which is also availa
 *Impact* +
 When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To configure the default route for users when they enter a space, use the <<defaultroute,`defaultRoute`>> in *Advanced Settings*.
 ====
-      
+
 [discrete]
 [[breaking-109350]]
 .Removes `courier:batchSearches`
@@ -5030,7 +5093,7 @@ The deprecated `courier:batchSearches` setting in *Advanced Settings* has been r
 *Impact* +
 When you upgrade, the `courier:batchSearches` setting will no longer be available.
 ====
-      
+
 [discrete]
 [[breaking-108111]]
 .Removes `xpack.task_manager.index`
@@ -5042,7 +5105,7 @@ The deprecated `xpack.task_manager.index` setting in kibana.yml has been removed
 *Impact* +
 When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
 ====
-      
+
 [discrete]
 [[breaking-108103]]
 .Removes dashboard-only mode
@@ -5054,7 +5117,7 @@ The legacy dashboard-only mode has been removed. For more information, refer to 
 *Impact* +
 To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to <<kibana-feature-privileges,{kib} privileges>>.
 ====
-     
+
 [discrete]
 [[breaking-105979]]
 .Removes `xpack.maps.showMapVisualizationTypes`
@@ -5073,8 +5136,8 @@ When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana
 
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
-To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
-      
+To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>.
+
 [float]
 [[features-8.0.0-alpha2]]
 === Features
@@ -5082,7 +5145,7 @@ The 8.0.0-alpha2 release adds the following new and notable feature.
 
 Security::
 * Adds the interactive setup mode {kibana-pull}106881[#106881]
-      
+
 [float]
 [[enhancement-v8.0.0-alpha2]]
 === Enhancements
@@ -5102,7 +5165,7 @@ Review the {kib} 8.0.0-alpha1 changes, then use the <<upgrade-assistant,Upgrade 
 [[breaking-changes-8.0.0-alpha1]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigate the impact to your application. 
+Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigate the impact to your application.
 
 [float]
 [[enterprise-search-change]]
@@ -5133,7 +5196,7 @@ Enable X-Pack Security.
 Time-based interval index patterns were deprecated in 5.x. In 6.x, you could no longer create time-based interval index patterns, but they continued to function as expected. Support for these index patterns has been removed in 8.0. For more information, refer to {kibana-pull}35173[#35173]
 
 *Impact* +
-You must migrate your time_based index patterns to a wildcard pattern. For example, logstash-*. 
+You must migrate your time_based index patterns to a wildcard pattern. For example, logstash-*.
 ====
 
 [float]
@@ -5151,7 +5214,7 @@ After you extract an archive, the output directory no longer includes the target
 *Impact* +
 To use the new folder, update the configuration management tools and automation.
 ====
-      
+
 [discrete]
 [[breaking-90511]]
 .Removed default support for TLS v1.0 and v1.1
@@ -5163,7 +5226,7 @@ The default support for TLS v1.0 and v1.1 has been removed. For more information
 *Impact* +
 To enable support, set `--tls-min-1.0` in the `node.options` configuration file. To locate the configuration file, go to the kibana/config folder or any other configuration with the `KBN_PATH_CONF` environment variable. For example, if you are using a Debian-based system, the configuration file is located in /etc/kibana.
 ====
-           
+
 [discrete]
 [[breaking-74424]]
 .Removed support for sysv init
@@ -5175,7 +5238,7 @@ All supported operating systems use systemd service files. Any system that doesn
 *Impact* +
 If your installation uses .deb or .rpm packages with SysV, migrate to systemd.
 ====
-       
+
 [discrete]
 [[breaking-42353]]
 .Disabled response logging as a default
@@ -5211,7 +5274,7 @@ logging:
 [float]
 [[reporting-changes-8.0.0-alpha1]]
 ==== Reporting changes
-      
+
 [discrete]
 [[breaking-52539]]
 .Legacy job parameters are no longer supported
@@ -5237,7 +5300,7 @@ If you use POST URL snippets to automatically generate PDF reports, regenerate t
 The `/api/security/v1/saml` route has been removed and is reflected in the kibana.yml `server.xsrf.whitelist` setting, {es}, and the Identity Provider SAML settings. For more information, refer to {kibana-pull}47929[#47929]
 
 *Impact* +
-Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 when the `/api/security/saml/callback` route breaking change is reverted. 
+Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 when the `/api/security/saml/callback` route breaking change is reverted.
 ====
 
 [discrete]
@@ -5255,10 +5318,10 @@ To enable support for legacy browsers, set `csp.strict: false` in kibana.yml. To
 [float]
 [[settings-changes-8.0.0-alpha1]]
 ==== Settings changes
-      
+
 [discrete]
 [[breaking-106061]]
-.Use new session timeout defaults 
+.Use new session timeout defaults
 [%collapsible]
 ====
 *Details* +
@@ -5304,8 +5367,8 @@ Use the `xpack.security.authc.saml.realm` and `xpack.security.authc.providers` s
 The `logging.useUTC` setting has been removed. For more information, refer to {kibana-pull}22696[#22696]
 
 *Impact* +
-The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.  
-====  
+The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.
+====
 
 [discrete]
 [[breaking-32049]]
@@ -5336,7 +5399,7 @@ Systems that don't have `service` aliased to use kibana.service are unable to us
 *Impact* +
 If your system doesn't have `service` aliased to use kibana.service, use `systemctl start kibana.service`.
 ====
-      
+
 [discrete]
 [[deprecation-33603]]
 .Removed `xpack:defaultAdminEmail` setting

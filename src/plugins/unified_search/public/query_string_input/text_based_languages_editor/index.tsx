@@ -7,6 +7,7 @@
  */
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { SQLLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -108,7 +109,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { uiSettings } = kibana.services;
+  const { theme } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -118,7 +119,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(errors?.length),
     isCodeEditorExpandedFocused
   );
-  const isDark = uiSettings.get('theme:darkMode');
+  const isDark: boolean = useObservable(theme.theme$, { darkMode: false }).darkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);

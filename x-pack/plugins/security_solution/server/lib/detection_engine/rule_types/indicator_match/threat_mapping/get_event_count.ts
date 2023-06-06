@@ -28,6 +28,7 @@ export const getEventList = async ({
   runtimeMappings,
   exceptionFilter,
   eventListConfig,
+  indexFields,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -44,6 +45,7 @@ export const getEventList = async ({
     filters,
     index,
     exceptionFilter,
+    fields: indexFields,
   });
 
   const { searchResult } = await singleSearchAfter({
@@ -77,6 +79,7 @@ export const getEventCount = async ({
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
+  indexFields,
 }: EventCountOptions): Promise<number> => {
   const queryFilter = getQueryFilter({
     query,
@@ -84,6 +87,7 @@ export const getEventCount = async ({
     filters,
     index,
     exceptionFilter,
+    fields: indexFields,
   });
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
     index,

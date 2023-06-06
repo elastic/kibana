@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[8.8.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -211,7 +209,8 @@ image::images/highlights-case-activity.png[The Activity tab in a case in {stack-
 ==== Case attachments
 
 You can now attach files to cases for better investigation processes.
-With the new capability you can upload indicators of compromise (IOCs) and other files to support alert and case triage. For more information, check <<add-case-files>>.
+With the new capability, you can upload indicators of compromise (IOCs)
+and other files to support alert and case triage. For more information, check <<add-case-files>>.
 
 [discrete]
 === Per-user dark mode

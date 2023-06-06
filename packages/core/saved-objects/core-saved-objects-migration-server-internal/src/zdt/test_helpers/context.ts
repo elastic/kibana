@@ -40,6 +40,7 @@ export const createContextMock = (
       algorithm: 'zdt',
       batchSize: 1000,
       maxBatchSizeBytes: new ByteSizeValue(1e8),
+      maxReadBatchSizeBytes: new ByteSizeValue(1e6),
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,
@@ -54,6 +55,7 @@ export const createContextMock = (
     typeRegistry,
     serializer: serializerMock.create(),
     deletedTypes: ['deleted-type'],
+    batchSize: 1000,
     discardCorruptObjects: false,
     ...parts,
   };

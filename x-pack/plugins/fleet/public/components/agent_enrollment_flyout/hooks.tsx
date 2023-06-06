@@ -13,12 +13,13 @@ import {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
 
 import type { K8sMode } from './types';
 
 // Packages that requires custom elastic-agent manifest
-const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
+const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_DEFEND_PACKAGE]);
 
 export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   const [agentPolicyWithPackagePolicies, setAgentPolicy] = useState<AgentPolicy | null>(null);

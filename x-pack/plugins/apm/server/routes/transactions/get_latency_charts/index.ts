@@ -10,10 +10,14 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import {
+  ApmDocumentType,
+  ApmServiceTransactionDocumentType,
+} from '../../../../common/document_type';
 import {
   FAAS_ID,
   SERVICE_NAME,
+  TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
@@ -72,7 +76,10 @@ function searchLatency({
   });
 
   const transactionDurationField =
-    getDurationFieldForTransactions(documentType);
+    documentType === ApmDocumentType.ServiceTransactionMetric &&
+    latencyAggregationType !== LatencyAggregationType.avg
+      ? TRANSACTION_DURATION_HISTOGRAM
+      : getDurationFieldForTransactions(documentType);
 
   const params = {
     apm: {

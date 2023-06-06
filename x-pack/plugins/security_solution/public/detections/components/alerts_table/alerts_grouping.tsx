@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
 import type { GroupOption } from '@kbn/securitysolution-grouping';
@@ -21,6 +20,7 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
@@ -36,7 +36,7 @@ export interface AlertsTableComponentProps {
   hasIndexWrite: boolean;
   loading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
