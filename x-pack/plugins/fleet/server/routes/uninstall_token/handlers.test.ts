@@ -85,14 +85,14 @@ describe('getUninstallTokensHandler', () => {
     });
   });
 
-  it('should return generic internal error when uninstallTokenService throws error', async () => {
+  it('should return internal error when uninstallTokenService throws error', async () => {
     getAllTokensMock.mockRejectedValue(Error('something happened'));
 
     await getUninstallTokensHandler(context, request, response);
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
-      body: { message: 'Failed to get uninstall tokens.' },
+      body: { message: 'something happened' },
     });
   });
 

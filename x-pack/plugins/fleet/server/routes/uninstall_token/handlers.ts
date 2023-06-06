@@ -11,6 +11,7 @@ import { appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
 import type { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
+import { defaultFleetErrorHandler } from '../../errors';
 
 export const getUninstallTokensHandler: FleetRequestHandler<
   unknown,
@@ -35,10 +36,7 @@ export const getUninstallTokensHandler: FleetRequestHandler<
     }
 
     return response.ok({ body });
-  } catch {
-    return response.customError({
-      statusCode: 500,
-      body: { message: 'Failed to get uninstall tokens.' },
-    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
   }
 };
