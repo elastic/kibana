@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
@@ -181,24 +183,26 @@ export const EngineIndices: React.FC = () => {
           <EuiCallOut
             color="warning"
             iconType="warning"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title',
-              {
-                defaultMessage: hasAllUnreachableIndices
-                  ? 'All of your indices are unavailable.'
-                  : 'Some of your indices are unavailable.',
-              }
-            )}
+            title={
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title"
+                defaultMessage="{title} of your indices are unavailable."
+                values={{
+                  title: hasAllUnreachableIndices ? 'All' : 'Some',
+                }}
+              />
+            }
           >
             <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
-                {
-                  defaultMessage: hasAllUnreachableIndices
-                    ? 'Your search application has no reachable indices, Add some indices and check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.'
-                    : 'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
-                }
-              )}
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description"
+                defaultMessage="{description} for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application."
+                values={{
+                  description: hasAllUnreachableIndices
+                    ? 'Your search application has no reachable indices, Add some indices and check '
+                    : 'Some data might be unreachable from this search application. Check',
+                }}
+              />
             </p>
           </EuiCallOut>
           <EuiSpacer />
