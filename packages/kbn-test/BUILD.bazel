@@ -87,7 +87,6 @@ TYPES_DEPS = [
   "@npm//@jest/types",
   "@npm//axios",
   "@npm//elastic-apm-node",
-  "@npm//expect",
   "@npm//del",
   "@npm//form-data",
   "@npm//globby",
