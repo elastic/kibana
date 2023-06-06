@@ -10,12 +10,12 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core
 import { ProfilingPlugin } from './plugin';
 
 const packageInputSchema = schema.object({
-  host: schema.string(),
+  host: schema.maybe(schema.string()),
   secret_token: schema.maybe(schema.string()),
-  tls_enabled: schema.boolean(),
-  tls_supported_protocols: schema.arrayOf(schema.string()),
-  tls_certificate_path: schema.string(),
-  tls_key_path: schema.string(),
+  tls_enabled: schema.maybe(schema.boolean()),
+  tls_supported_protocols: schema.maybe(schema.arrayOf(schema.string())),
+  tls_certificate_path: schema.maybe(schema.string()),
+  tls_key_path: schema.maybe(schema.string()),
 });
 
 const configSchema = schema.object({

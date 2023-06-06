@@ -11,6 +11,20 @@ import { getVarsFor } from './fleet_policies';
 const secretTokenRegex = /^[a-zA-Z0-9]+$/;
 
 describe('getVarsFor', () => {
+  it('returns secret_token when package input is not provided', () => {
+    const config: PackageInputType = {};
+
+    const { secret_token: secretToken, ...result } = getVarsFor({
+      config,
+      includeSecretToken: true,
+    });
+    expect(secretToken?.type).toBe('text');
+    expect(secretToken?.value).toBeDefined();
+    expect(secretToken?.value).toBeDefined();
+    expect(secretTokenRegex.test(secretToken?.value)).toBeTruthy();
+    expect(result).toEqual({});
+  });
+
   it('returns the vars object for the keys defined plus secret token', () => {
     const config: PackageInputType = {
       host: 'example.com',
