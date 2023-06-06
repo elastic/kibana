@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import {
@@ -19,6 +19,8 @@ import {
   Settings,
   XYChartElementEvent,
   XYBrushEvent,
+  RectAnnotation,
+  LineAnnotation,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
@@ -63,6 +65,9 @@ interface DocumentCountChartProps {
   isBrushCleared: boolean;
   /* Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  barColorOverride?: string;
+  barHighlightColorOverride?: string;
 }
 
 const SPEC_ID = 'document_count';
@@ -109,6 +114,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   chartPointsSplitLabel,
   isBrushCleared,
   autoAnalysisStart,
+  annotations,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -324,6 +332,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const baselineBadgeMarginLeft =
     (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
 
+  const barColor = barColorOverride ? [barColorOverride] : undefined;
+  const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
+
   return (
     <>
       {isBrushVisible && (
@@ -405,6 +416,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               yAccessors={['value']}
               data={adjustedChartPoints}
               timeZone={timeZone}
+              color={barColor}
               yNice
             />
           )}
@@ -418,7 +430,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               yAccessors={['value']}
               data={adjustedChartPointsSplit}
               timeZone={timeZone}
-              color={['orange']}
+              color={barHighlightColor}
               yNice
             />
           )}
@@ -436,6 +448,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               />
             </>
           )}
+          {annotations}
         </Chart>
       </div>
     </>

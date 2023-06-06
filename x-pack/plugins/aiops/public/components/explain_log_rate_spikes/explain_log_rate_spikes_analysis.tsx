@@ -85,6 +85,8 @@ interface ExplainLogRateSpikesAnalysisProps {
   searchQuery: estypes.QueryDslQueryContainer;
   /** Sample probability to be applied to random sampler aggregations */
   sampleProbability: number;
+  barColorOverride?: string;
+  barHighlightColorOverride?: string;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -94,6 +96,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   windowParameters,
   searchQuery,
   sampleProbability,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -369,6 +373,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       ) : null}
       {showSpikeAnalysisTable && !groupResults ? (
@@ -378,6 +384,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       ) : null}
     </div>

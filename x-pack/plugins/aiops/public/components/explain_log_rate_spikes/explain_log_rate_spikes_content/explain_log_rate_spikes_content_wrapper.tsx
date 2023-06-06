@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { ReactElement, type FC } from 'react';
 import { pick } from 'lodash';
 import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RectAnnotation, LineAnnotation } from '@elastic/charts';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -44,6 +45,10 @@ export interface ExplainLogRateSpikesContentWrapperProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Optional additional chart annotations */
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  barColorOverride?: string;
+  barHighlightColorOverride?: string;
 }
 
 export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentWrapperProps> = ({
@@ -53,6 +58,9 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
+  annotations,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   if (!dataView) return null;
 
@@ -95,6 +103,9 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
+                  annotations={annotations}
+                  barColorOverride={barColorOverride}
+                  barHighlightColorOverride={barHighlightColorOverride}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

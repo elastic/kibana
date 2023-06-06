@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState, ReactElement, type FC } from 'react';
 
+import { RectAnnotation, LineAnnotation } from '@elastic/charts';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,9 @@ export interface DocumentCountContentProps {
   sampleProbability: number;
   windowParameters?: WindowParameters;
   incomingInitialAnalysisStart?: number | WindowParameters;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  barColorOverride?: string;
+  barHighlightColorOverride?: string;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -46,6 +50,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   sampleProbability,
   windowParameters,
   incomingInitialAnalysisStart,
+  annotations,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
@@ -133,6 +140,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           chartPointsSplitLabel={documentCountStatsSplitLabel}
           isBrushCleared={isBrushCleared}
           autoAnalysisStart={initialAnalysisStart}
+          annotations={annotations}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       )}
     </>
