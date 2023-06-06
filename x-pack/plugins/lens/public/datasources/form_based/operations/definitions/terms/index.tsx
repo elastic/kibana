@@ -63,6 +63,9 @@ export function supportsRarityRanking(field?: IndexPatternField) {
 export function supportsSignificantRanking(field?: IndexPatternField) {
   return field?.esTypes?.some((esType) => esType === 'keyword');
 }
+function isRareOrSignificant(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
+  return orderBy.type === 'rare' || orderBy.type === 'significant';
+}
 export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -161,10 +164,7 @@ export const termsOperation: OperationDefinition<
     return ret;
   },
   canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    if (
-      targetColumn.params.orderBy.type === 'rare' ||
-      targetColumn.params.orderBy.type === 'significant'
-    ) {
+    if (isRareOrSignificant(targetColumn.params.orderBy)) {
       return false;
     }
     // collect the fields from the targetColumn
@@ -945,10 +945,7 @@ The top values of a specified field ranked by the chosen metric.
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
               defaultMessage: 'Rank direction',
             })}
-            isDisabled={
-              currentColumn.params.orderBy.type === 'rare' ||
-              currentColumn.params.orderBy.type === 'significant'
-            }
+            isDisabled={isRareOrSignificant(currentColumn.params.orderBy)}
             options={[
               {
                 id: `${idPrefix}asc`,
@@ -1023,8 +1020,7 @@ The top values of a specified field ranked by the chosen metric.
                 disabled={
                   !currentColumn.params.otherBucket ||
                   indexPattern.getFieldByName(currentColumn.sourceField)?.type !== 'string' ||
-                  currentColumn.params.orderBy.type === 'rare' ||
-                  currentColumn.params.orderBy.type === 'significant'
+                  isRareOrSignificant(currentColumn.params.orderBy)
                 }
                 data-test-subj="indexPattern-terms-missing-bucket"
                 checked={Boolean(currentColumn.params.missingBucket)}
@@ -1051,10 +1047,7 @@ The top values of a specified field ranked by the chosen metric.
                 compressed
                 data-test-subj="indexPattern-terms-other-bucket"
                 checked={Boolean(currentColumn.params.otherBucket)}
-                disabled={
-                  currentColumn.params.orderBy.type === 'rare' ||
-                  currentColumn.params.orderBy.type === 'significant'
-                }
+                disabled={isRareOrSignificant(currentColumn.params.orderBy)}
                 onChange={(e: EuiSwitchEvent) =>
                   paramEditorUpdater(
                     updateColumnParam({
