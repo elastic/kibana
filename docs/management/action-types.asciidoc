@@ -83,6 +83,10 @@ a| <<gen-ai-action-type,Generative AI>>
 
 | Send a request to OpenAI.
 
+a| <<d3security-action-type,D3 Security>>
+
+| Send a request to D3 Security.
+
 |===
 
 [NOTE]

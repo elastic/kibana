@@ -161,6 +161,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
         // readOnly is boolean flag
+        'input_control_vis.readOnly (any)',
         'vis_type_gauge.readOnly (any)',
         'vis_type_heatmap.readOnly (any)',
         'vis_type_metric.readOnly (any)',
