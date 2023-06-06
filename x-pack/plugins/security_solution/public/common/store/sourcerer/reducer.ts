@@ -14,10 +14,11 @@ import {
   setSignalIndexName,
   setDataView,
   setDataViewLoading,
+  sourcererInitialized,
 } from './actions';
 import type { SourcererModel } from './model';
 import { initDataView, initialSourcererState, SourcererScopeName } from './model';
-import { validateSelectedPatterns } from './helpers';
+import { validateSelectedPatterns, getScopePatternListSelection } from './helpers';
 
 export type SourcererState = SourcererModel;
 
@@ -95,4 +96,53 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       dv.id === dataView.id ? { ...dv, ...dataView } : dv
     ),
   }))
+  .case(sourcererInitialized, (state, { defaultDataView, kibanaDataViews, signalIndexName }) => {
+    const initialPatterns = {
+      [SourcererScopeName.default]: getScopePatternListSelection(
+        defaultDataView,
+        SourcererScopeName.default,
+        signalIndexName,
+        true
+      ),
+      [SourcererScopeName.detections]: getScopePatternListSelection(
+        defaultDataView,
+        SourcererScopeName.detections,
+        signalIndexName,
+        true
+      ),
+      [SourcererScopeName.timeline]: getScopePatternListSelection(
+        defaultDataView,
+        SourcererScopeName.timeline,
+        signalIndexName,
+        true
+      ),
+    };
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        [SourcererScopeName.default]: {
+          ...state.sourcererScopes.default,
+          selectedDataViewId: defaultDataView.id,
+          loading: false,
+          selectedPatterns: initialPatterns[SourcererScopeName.default],
+        },
+        [SourcererScopeName.detections]: {
+          ...state.sourcererScopes.detections,
+          selectedDataViewId: defaultDataView.id,
+          loading: false,
+          selectedPatterns: initialPatterns[SourcererScopeName.detections],
+        },
+        [SourcererScopeName.timeline]: {
+          ...state.sourcererScopes.timeline,
+          selectedDataViewId: defaultDataView.id,
+          loading: false,
+          selectedPatterns: initialPatterns[SourcererScopeName.timeline],
+        },
+      },
+      defaultDataView,
+      kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
+      signalIndexName,
+    };
+  })
   .build();

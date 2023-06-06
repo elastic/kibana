@@ -37,3 +37,11 @@ export interface SelectedDataViewPayload {
   shouldValidateSelectedPatterns?: boolean;
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');
+
+export const appInitialized = actionCreator('APP_INITIALIZED');
+
+export const sourcererInitialized = actionCreator<{
+  defaultDataView: SourcererDataView;
+  kibanaDataViews: SourcererDataView[];
+  signalIndexName: string;
+}>('SOURCERER_INITIALIZED');
