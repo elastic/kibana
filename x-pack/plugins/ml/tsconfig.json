@@ -93,5 +93,6 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-data-frame-analytics-utils",
     "@kbn/ml-kibana-theme",
+    "@kbn/core-ui-settings-browser-mocks",
   ],
 }
