@@ -271,7 +271,6 @@ export const TimeSeries = ({
             y0AccessorFormat,
             tickFormat,
           },
-          sortIndex
         ) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
@@ -300,7 +299,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
                 tickFormat={tickFormat}
@@ -327,7 +325,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
                 tickFormat={tickFormat}
