@@ -10,6 +10,7 @@ import { ChatCompletionRequestMessage, CreateChatCompletionResponse } from 'open
 import { Readable } from 'stream';
 import { format } from 'url';
 import { AzureOpenAIConfig } from './config';
+import { pipeStreamingResponse } from './pipe_streaming_response';
 import { IOpenAIClient } from './types';
 
 export class AzureOpenAIClient implements IOpenAIClient {
@@ -42,9 +43,7 @@ export class AzureOpenAIClient implements IOpenAIClient {
         }
       );
 
-      response.headers['Content-Type'] = 'uncompressable/response';
-
-      return response.data;
+      return pipeStreamingResponse(response);
     },
   };
 }

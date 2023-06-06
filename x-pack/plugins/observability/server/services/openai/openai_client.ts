@@ -13,6 +13,7 @@ import {
 } from 'openai';
 import type { OpenAIConfig } from './config';
 import type { IOpenAIClient } from './types';
+import { pipeStreamingResponse } from './pipe_streaming_response';
 
 export class OpenAIClient implements IOpenAIClient {
   private readonly client: OpenAIApi;
@@ -29,12 +30,16 @@ export class OpenAIClient implements IOpenAIClient {
     create: (messages: ChatCompletionRequestMessage[]) => Promise<CreateChatCompletionResponse>;
   } = {
     create: async (messages) => {
-      const response = await this.client.createChatCompletion({
-        messages,
-        model: this.config.model,
-      });
+      const response = await this.client.createChatCompletion(
+        {
+          messages,
+          model: this.config.model,
+          stream: true,
+        },
+        { responseType: 'stream' }
+      );
 
-      return response.data;
+      return pipeStreamingResponse(response);
     },
   };
 }
