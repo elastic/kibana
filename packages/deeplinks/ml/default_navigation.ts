@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { i18n } from '@kbn/i18n';
 
 import type { NodeDefinitionWithChildren } from '@kbn/shared-ux-chrome-navigation';
 
 import type { DeepLinkId } from './deep_links';
 
 export type NavigationID =
-  | 'sharedux:ml'
+  | 'rootNav:ml'
   | 'root'
   | 'anomaly_detection'
   | 'data_frame_analytics'
@@ -22,8 +23,10 @@ export type NavigationID =
 export type MlNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, NavigationID>;
 
 export const defaultNavigation: MlNodeDefinition = {
-  id: 'sharedux:ml',
-  title: 'Machine learning',
+  id: 'rootNav:ml',
+  title: i18n.translate('deeplinks.ml.machineLearning', {
+    defaultMessage: 'Machine learning',
+  }),
   icon: 'indexMapping',
   children: [
     {
@@ -39,11 +42,15 @@ export const defaultNavigation: MlNodeDefinition = {
       ],
     },
     {
-      title: 'Anomaly detection',
+      title: i18n.translate('deeplinks.ml.anomalyDetection', {
+        defaultMessage: 'Anomaly Detection',
+      }),
       id: 'anomaly_detection',
       children: [
         {
-          title: 'Jobs',
+          title: i18n.translate('deeplinks.ml.jobs', {
+            defaultMessage: 'Jobs',
+          }),
           link: 'ml:anomalyDetection',
         },
         {
@@ -59,7 +66,9 @@ export const defaultNavigation: MlNodeDefinition = {
     },
     {
       id: 'data_frame_analytics',
-      title: 'Data frame analytics',
+      title: i18n.translate('deeplinks.ml.dataFrameAnalytics', {
+        defaultMessage: 'Data frame analytics',
+      }),
       children: [
         {
           title: 'Jobs',
@@ -75,7 +84,9 @@ export const defaultNavigation: MlNodeDefinition = {
     },
     {
       id: 'model_management',
-      title: 'Model management',
+      title: i18n.translate('deeplinks.ml.modelManagement', {
+        defaultMessage: 'Model management',
+      }),
       children: [
         {
           link: 'ml:nodesOverview',
@@ -87,24 +98,34 @@ export const defaultNavigation: MlNodeDefinition = {
     },
     {
       id: 'data_visualizer',
-      title: 'Data visualizer',
+      title: i18n.translate('deeplinks.ml.dataVisualizer', {
+        defaultMessage: 'Data visualizer',
+      }),
       children: [
         {
-          title: 'File',
+          title: i18n.translate('deeplinks.ml.file', {
+            defaultMessage: 'File',
+          }),
           link: 'ml:fileUpload',
         },
         {
-          title: 'Data view',
+          title: i18n.translate('deeplinks.ml.dataView', {
+            defaultMessage: 'Data view',
+          }),
           link: 'ml:indexDataVisualizer',
         },
       ],
     },
     {
       id: 'aiops_labs',
-      title: 'AIOps labs',
+      title: i18n.translate('deeplinks.ml.aiopsLabs', {
+        defaultMessage: 'AIOps labs',
+      }),
       children: [
         {
-          title: 'Explain log rate spikes',
+          title: i18n.translate('deeplinks.ml.explainLogRateSpikes', {
+            defaultMessage: 'Explain log rate spikes',
+          }),
           link: 'ml:explainLogRateSpikes',
         },
         {
