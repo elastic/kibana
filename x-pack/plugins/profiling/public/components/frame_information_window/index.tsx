@@ -97,7 +97,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
         <EuiFlexItem>
           <KeyValueList rows={informationRows} />
         </EuiFlexItem>
-        {coPilotService.isEnabled() && promptParams ? (
+        {coPilotService?.isEnabled() && promptParams ? (
           <>
             <EuiFlexItem>
               <CoPilotPrompt

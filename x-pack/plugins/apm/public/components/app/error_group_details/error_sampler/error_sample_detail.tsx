@@ -23,12 +23,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CoPilotPromptId } from '@kbn/observability-plugin/common';
-import { CoPilotPrompt, useCoPilot } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
@@ -51,13 +49,8 @@ import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_i
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import {
-  ErrorTab,
-  ErrorTabKey,
-  exceptionStacktraceTab,
-  getTabs,
-  logStacktraceTab,
-} from './error_tabs';
+import { ErrorSampleCoPilotPrompt } from './error_sample_co_pilot_prompt';
+import { ErrorTab, ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
@@ -112,9 +105,6 @@ export function ErrorSampleDetails({
 
   const { kuery } = query;
 
-  const [logStacktrace, setLogStacktrace] = useState('');
-  const [exceptionStacktrace, setExceptionStacktrace] = useState('');
-
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
   const loadingErrorData = isPending(errorFetchStatus);
   const isLoading = loadingErrorSamplesData || loadingErrorData;
@@ -145,20 +135,6 @@ export function ErrorSampleDetails({
       },
     });
   }, [error, transaction, uiActions]);
-
-  const coPilot = useCoPilot();
-
-  const promptParams = useMemo(() => {
-    return {
-      serviceName: error.service.name,
-      languageName: error.service.language?.name ?? '',
-      runtimeName: error.service.runtime?.name ?? '',
-      runtimeVersion: error.service.runtime?.version ?? '',
-      transactionName: transaction?.transaction.name ?? '',
-      logStacktrace,
-      exceptionStacktrace,
-    };
-  }, [error, transaction, logStacktrace, exceptionStacktrace]);
 
   if (!error && errorSampleIds?.length === 0 && isSucceded) {
     return (
@@ -360,22 +336,7 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
-      {coPilot.isEnabled() && promptParams ? (
-        <>
-          <EuiFlexItem>
-            <CoPilotPrompt
-              coPilot={coPilot}
-              title={i18n.translate(
-                'xpack.apm.errorGroupDetails.explainErrorTitle',
-                { defaultMessage: "What's this error?" }
-              )}
-              promptId={CoPilotPromptId.ApmExplainError}
-              params={promptParams}
-            />
-          </EuiFlexItem>
-          <EuiSpacer size="s" />
-        </>
-      ) : undefined}
+      <ErrorSampleCoPilotPrompt error={error} transaction={transaction} />
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {
@@ -402,33 +363,13 @@ export function ErrorSampleDetails({
       {isLoading || !error ? (
         <EuiSkeletonText lines={3} data-test-sub="loading-content" />
       ) : (
-        <TabContent error={error} currentTab={currentTab} />
+        <ErrorSampleDetailTabContent error={error} currentTab={currentTab} />
       )}
-      <div
-        ref={(next) => {
-          setLogStacktrace(next?.innerText ?? '');
-        }}
-        style={{ display: 'none' }}
-      >
-        {error.error.log?.message && (
-          <TabContent error={error} currentTab={logStacktraceTab} />
-        )}
-      </div>
-      <div
-        ref={(next) => {
-          setExceptionStacktrace(next?.innerText ?? '');
-        }}
-        style={{ display: 'none' }}
-      >
-        {error.error.exception?.length && (
-          <TabContent error={error} currentTab={exceptionStacktraceTab} />
-        )}
-      </div>
     </EuiPanel>
   );
 }
 
-function TabContent({
+export function ErrorSampleDetailTabContent({
   error,
   currentTab,
 }: {

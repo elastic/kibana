@@ -11,11 +11,8 @@ import { CoPilotContext } from '../context/co_pilot_context';
 export function useCoPilot() {
   const coPilotService = useContext(CoPilotContext);
 
-  if (!coPilotService) {
-    throw new Error(
-      `CoPilot context was not found. Did you wrap your application in <CoPilotContextProvider/>?`
-    );
-  }
+  // Ideally we throw, but we can't guarantee coPilotService being available
+  // in some embedded contexts
 
   return coPilotService;
 }
