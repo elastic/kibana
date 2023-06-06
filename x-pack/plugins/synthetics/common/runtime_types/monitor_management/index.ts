@@ -16,4 +16,4 @@ export * from './synthetics_private_locations';
 export * from './synthetics_overview_status';
 export * from './synthetics_params';
 export * from './filters';
-export { MonitorQueryableFields } from './query_fields';
+export type { MonitorQueryableFields } from './query_fields';
