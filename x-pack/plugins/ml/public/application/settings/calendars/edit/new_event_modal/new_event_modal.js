@@ -24,14 +24,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import moment from 'moment';
-import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { generateTempId } from '../utils';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 const VALID_DATE_STRING_LENGTH = 19;
+const INLINE_DATE_PICKER_RANGE_WIDTH = 553;
 
 export class NewEventModal extends Component {
   static propTypes = {
@@ -208,12 +210,15 @@ export class NewEventModal extends Component {
         <EuiSpacer size="s" />
         <EuiFormRow fullWidth>
           <EuiDatePickerRange
-            fullWidth
-            iconType={false}
+            inline
+            css={css`
+              @media (min-width: ${INLINE_DATE_PICKER_RANGE_WIDTH}px) {
+                inline-size: ${INLINE_DATE_PICKER_RANGE_WIDTH}px;
+                max-inline-size: 100%;
+              }
+            `}
             startDateControl={
               <EuiDatePicker
-                fullWidth
-                inline
                 selected={startDate}
                 onChange={this.handleChangeStart}
                 startDate={startDate}
@@ -231,8 +236,6 @@ export class NewEventModal extends Component {
             }
             endDateControl={
               <EuiDatePicker
-                fullWidth
-                inline
                 selected={endDate}
                 onChange={this.handleChangeEnd}
                 startDate={startDate}
