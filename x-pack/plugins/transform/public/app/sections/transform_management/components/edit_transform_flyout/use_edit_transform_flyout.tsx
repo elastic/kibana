@@ -82,6 +82,24 @@ export interface FormSection {
 
 type EditTransformFlyoutSectionsState = Record<EditTransformFormSections, FormSection>;
 
+// The reducers and utility functions in this file provide the following features:
+// - getDefaultState()
+//   Sets up the initial form state. It supports overrides to apply a pre-existing configuration.
+//   The implementation of this function is the only one that's specifically required to define
+//   the features of the transform edit form. All other functions are generic and could be reused
+//   in the future for other forms.
+//
+// - formReducerFactory() / formFieldReducer()
+//   These nested reducers take care of updating and validating the form state.
+//
+// - applyFormStateToTransformConfig() (iterates over getUpdateValue())
+//   Once a user hits the update button, these functions take care of extracting the information
+//   necessary to create the update request. They take into account whether a field needs to
+//   be included at all in the request (for example, if it hadn't been changed).
+//   The code is also able to identify relationships/dependencies between form fields.
+//   For example, if the `pipeline` field was changed, it's necessary to make the `index`
+//   field part of the request, otherwise the update would fail.
+
 // Note on the form validation and input components used:
 // All inputs use `EuiFieldText` which means all form values will be treated as strings.
 // This means we cast other formats like numbers coming from the transform config to strings,
