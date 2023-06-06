@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState, type FC } from 'react';
+import type { Moment } from 'moment';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiEmptyPrompt, EuiHorizontalRule, EuiResizableContainer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Dictionary } from '@kbn/ml-url-state';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
-import type { Moment } from 'moment';
 import { useData } from '../../../hooks/use_data';
+
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
-import { ExplainLogRateSpikesAnalysis } from '../explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../../spike_analysis_table/spike_analysis_table_row_provider';
+
+import { ExplainLogRateSpikesAnalysis } from '../explain_log_rate_spikes_analysis';
 
 const DEFAULT_SEARCH_QUERY = { match_all: {} };
 
@@ -47,6 +50,8 @@ export interface ExplainLogRateSpikesContentProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  barColorOverride?: string;
+  barHighlightColorOverride?: string;
 }
 
 export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> = ({
@@ -55,6 +60,8 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
   initialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
@@ -114,6 +121,8 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
                 sampleProbability={sampleProbability}
                 windowParameters={windowParameters}
                 incomingInitialAnalysisStart={initialAnalysisStart}
+                barColorOverride={barColorOverride}
+                barHighlightColorOverride={barHighlightColorOverride}
               />
             )}
             <EuiHorizontalRule />
@@ -134,6 +143,8 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
                 windowParameters={windowParameters}
                 searchQuery={esSearchQuery}
                 sampleProbability={sampleProbability}
+                barColorOverride={barColorOverride}
+                barHighlightColorOverride={barHighlightColorOverride}
               />
             )}
             {windowParameters === undefined && (
