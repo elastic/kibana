@@ -176,7 +176,8 @@ export const TimeSeries = ({
         type={
           tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
             ? TooltipType.Follow
-            : TooltipType.VerticalCursor}
+            : TooltipType.VerticalCursor
+        }
         boundary={document.getElementById('app-fixed-viewport') ?? undefined}
         headerFormatter={tooltipFormatter}
       />
@@ -250,28 +251,26 @@ export const TimeSeries = ({
       })}
 
       {series.map(
-        (
-          {
-            id,
-            seriesId,
-            label,
-            bars,
-            lines,
-            data,
-            hideInLegend,
-            truncateLegend,
-            xScaleType,
-            yScaleType,
-            groupId,
-            color,
-            isSplitByTerms,
-            stack,
-            points,
-            y1AccessorFormat,
-            y0AccessorFormat,
-            tickFormat,
-          },
-        ) => {
+        ({
+          id,
+          seriesId,
+          label,
+          bars,
+          lines,
+          data,
+          hideInLegend,
+          truncateLegend,
+          xScaleType,
+          yScaleType,
+          groupId,
+          color,
+          isSplitByTerms,
+          stack,
+          points,
+          y1AccessorFormat,
+          y0AccessorFormat,
+          tickFormat,
+        }) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
