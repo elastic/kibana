@@ -163,14 +163,6 @@ export class Fetch {
 
     try {
       response = await window.fetch(request);
-
-      if (fetchOptions.rawResponse) {
-        return {
-          fetchOptions,
-          request,
-          response,
-        };
-      }
     } catch (err) {
       throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
@@ -178,7 +170,9 @@ export class Fetch {
     const contentType = response.headers.get('Content-Type') || '';
 
     try {
-      if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
+      if (fetchOptions.rawResponse) {
+        body = null;
+      } else if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
         body = await response.json();

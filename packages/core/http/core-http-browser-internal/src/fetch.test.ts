@@ -874,7 +874,7 @@ describe('Fetch', () => {
       });
 
       expect(response.response).toBeInstanceOf(Response);
-      expect(response.body).toEqual(undefined);
+      expect(response.body).toEqual(null);
 
       const body = await response.response?.json();
 
