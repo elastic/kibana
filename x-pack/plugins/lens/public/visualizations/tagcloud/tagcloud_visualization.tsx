@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
@@ -79,6 +80,8 @@ export const getTagcloudVisualization = ({
   },
 
   getSuggestions: suggestions,
+
+  triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state) {
     return (

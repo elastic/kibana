@@ -15,7 +15,6 @@ import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import {
   getColumnByAccessor,
-  getAccessor,
   getFormatByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatService } from '../format_service';
@@ -153,6 +152,13 @@ export const TagCloudChart = ({
       const termsBucketId = getColumnByAccessor(bucket, visData.columns)!.id;
       const clickedValue = elements[0][0].text;
 
+      const columnIndex = visData.columns.findIndex(
+        (col) => col.id === termsBucketId
+      );
+      if (columnIndex < 0) {
+        return;
+      }
+
       const rowIndex = visData.rows.findIndex((row) => {
         const formattedValue = bucketFormatter
           ? bucketFormatter.convert(row[termsBucketId], 'text')
@@ -170,7 +176,7 @@ export const TagCloudChart = ({
           data: [
             {
               table: visData,
-              column: getAccessor(bucket),
+              column: columnIndex,
               row: rowIndex,
             },
           ],
