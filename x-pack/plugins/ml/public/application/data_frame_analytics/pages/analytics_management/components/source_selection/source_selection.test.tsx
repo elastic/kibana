@@ -182,7 +182,6 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     mockGetDataViewAndSavedSearch.mockImplementationOnce(() => {
       return {
         dataView: {
-          // @ts-expect-error fields should not be empty
           fields: [],
           title: 'my_remote_cluster:index-pattern-title',
         },
