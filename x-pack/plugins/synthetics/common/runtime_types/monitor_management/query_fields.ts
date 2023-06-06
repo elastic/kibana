@@ -9,6 +9,7 @@ import { ConfigKey } from '../../constants/monitor_management';
 
 const MonitorQueryableFieldsLiterals = schema.oneOf([
   schema.literal(ConfigKey.MONITOR_QUERY_ID),
+  schema.literal(ConfigKey.CONFIG_ID),
   schema.literal(ConfigKey.NAME),
   schema.literal(ConfigKey.JOURNEY_ID),
   schema.literal(ConfigKey.LOCATIONS),

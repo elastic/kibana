@@ -4,33 +4,56 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
+
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useMonitorList } from '../components/monitors_page/hooks/use_monitor_list';
+import { useDebounce } from 'react-use';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+
+import { ConfigKey } from '../../../../common/constants/monitor_management';
+import { fetchMonitorsWithSpecificFields, MonitorListPageState } from '../state';
 
 export const useMonitorName = ({ search = '' }: { search?: string }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { syntheticsMonitors, loading } = useMonitorList(search);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
+  useDebounce(() => setDebouncedSearch(search), 500, [search]);
+
+  const { loading, data: monitors } = useFetcher(async () => {
+    const pageState: MonitorListPageState = {
+      pageIndex: 0,
+      pageSize: 10,
+      sortField: `${ConfigKey.NAME}.keyword`,
+      sortOrder: 'asc',
+      query: debouncedSearch,
+    };
+    const fetchedResult = await fetchMonitorsWithSpecificFields(pageState, [
+      ConfigKey.CONFIG_ID,
+      ConfigKey.NAME,
+      ConfigKey.LOCATIONS,
+    ]);
+
+    return (fetchedResult?.monitors ?? []).map((monitor) => ({
+      label: monitor.attributes.name,
+      key: monitor.attributes.config_id,
+      locationIds: monitor.attributes.locations.map((location) => location.id),
+    }));
+  }, [debouncedSearch]);
 
   return useMemo(() => {
+    const searchPattern = search.replace(/\s/g, '').toLowerCase();
     const nameAlreadyExists = Boolean(
-      syntheticsMonitors?.some(
-        (monitor) => monitor.name.trim().toLowerCase() === search && monitorId !== monitor.config_id
+      (monitors ?? []).some(
+        (monitor) =>
+          monitorId !== monitor.key &&
+          monitor.label.replace(/\s/g, '').toLowerCase() === searchPattern
       )
     );
 
-    const values = syntheticsMonitors.map((monitor) => ({
-      label: monitor.name as string,
-      key: monitor.config_id,
-      locationIds: monitor.locations.map((location) => location.id),
-    }));
-
     return {
-      loading,
+      loading: loading || debouncedSearch !== search, // Also keep busy while waiting for debounce
       nameAlreadyExists,
-      validName: nameAlreadyExists ? '' : search,
-      values: values.filter((val) => val.key !== monitorId),
+      values: (monitors ?? []).filter((val) => val.key !== monitorId),
     };
-  }, [loading, monitorId, syntheticsMonitors, search]);
+  }, [loading, monitorId, monitors, search, debouncedSearch]);
 };

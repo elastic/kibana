@@ -17,8 +17,8 @@ import {
   SyntheticsMonitor,
   MonitorFiltersResult,
   ManagementListPartialMonitorsResultCodec,
+  MonitorQueryableFields,
 } from '../../../../../common/runtime_types';
-import { MonitorQueryableFields } from '../../../../../common/runtime_types/monitor_management/query_fields';
 import { apiService } from '../../../../utils/api_service';
 
 import { MonitorListPageState } from './models';
