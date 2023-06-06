@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiCodeBlock,
+  EuiSkeletonRectangle,
+  EuiSpacer,
+  EuiSteps,
+  EuiText,
+} from '@elastic/eui';
 import { Buffer } from 'buffer';
 import { flatten, zip } from 'lodash';
 import React, { useState } from 'react';
-import {
-  EuiText,
-  EuiButton,
-  EuiSpacer,
-  EuiButtonGroup,
-  EuiCodeBlock,
-  EuiSteps,
-  EuiSkeletonRectangle,
-} from '@elastic/eui';
+import { useWizard } from '.';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
-import { useWizard } from '.';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { ApiKeyBanner } from './api_key_banner';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
@@ -40,9 +41,22 @@ export function InstallElasticAgent() {
     goBack();
   }
 
-  const { data: installShipperSetup, status: installShipperSetupStatus } =
-    useFetcher((callApi) => {
-      if (CurrentStep === InstallElasticAgent) {
+  const { data: monitoringRole } = useFetcher((callApi) => {
+    return callApi(
+      'GET /internal/observability_onboarding/custom_logs/privileges'
+    );
+  }, []);
+
+  const {
+    data: installShipperSetup,
+    status: installShipperSetupStatus,
+    error,
+  } = useFetcher(
+    (callApi) => {
+      if (
+        CurrentStep === InstallElasticAgent &&
+        monitoringRole?.hasPrivileges
+      ) {
         return callApi(
           'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
           {
@@ -60,18 +74,26 @@ export function InstallElasticAgent() {
           }
         );
       }
-    }, []);
+    },
+    [monitoringRole],
+    { showToastOnError: false }
+  );
 
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent && installShipperSetup) {
+      if (
+        CurrentStep === InstallElasticAgent &&
+        installShipperSetup?.apiKeyEncoded
+      ) {
+        const options = {
+          headers: {
+            authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
+          },
+        };
+
         return callApi(
           'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
-          {
-            headers: {
-              authorization: `ApiKey ${installShipperSetup.apiKeyEncoded}`,
-            },
-          }
+          installShipperSetup?.apiKeyEncoded ? options : {}
         );
       }
     },
@@ -92,6 +114,16 @@ export function InstallElasticAgent() {
             interface.
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
+        <ApiKeyBanner
+          payload={installShipperSetup}
+          status={
+            monitoringRole?.hasPrivileges
+              ? installShipperSetupStatus
+              : 'noPrivileges'
+          }
+          error={error}
+        />
         <EuiSpacer size="m" />
         <EuiSteps
           steps={[

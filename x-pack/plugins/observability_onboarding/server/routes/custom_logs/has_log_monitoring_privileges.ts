@@ -24,7 +24,7 @@ export async function hasLogMonitoringPrivileges(
   });
 
   const hasPrivileges =
-    cluster.monitor && every(index, ['auto_configure', 'create_doc']);
+    cluster.monitor && every(index, { auto_configure: true, create_doc: true });
 
   return hasPrivileges;
 }
