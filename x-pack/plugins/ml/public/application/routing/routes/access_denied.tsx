@@ -8,8 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '../../../locator';
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
+import { createPath, MlRoute, PageProps } from '../router';
 import { Page } from '../../access_denied';
 
 const breadcrumbs = [
@@ -30,11 +29,5 @@ export const accessDeniedRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {});
-
-  return (
-    <PageLoader context={context}>
-      <Page />
-    </PageLoader>
-  );
+  return <Page />;
 };
