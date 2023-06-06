@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-export * from './rule/latest';
+export * from './rule_response/latest';
 export * from './create_rule/latest';
-export * from './validation/validate_duration/latest';
-export * from './validation/validate_hours/latest';
-export * from './validation/validate_timezone/latest';
-export * from './validation/validate_notify_when/latest';
+export * from '../../api_schemas/validation/validate_duration/latest';
+export * from '../../api_schemas/validation/validate_hours/latest';
+export * from '../../api_schemas/validation/validate_timezone/latest';
+export * from '../../api_schemas/validation/validate_notify_when/latest';
 
-export * as ruleV1 from './rule/v1';
+export * as ruleV1 from './rule_response/v1';
 export * as createRuleV1 from './create_rule/v1';
-export * as validateDurationV1 from './validation/validate_duration/v1';
-export * as validateHoursV1 from './validation/validate_hours/v1';
-export * as validateTimezoneV1 from './validation/validate_timezone/v1';
-export * as validateNotifyWhenTypeV1 from './validation/validate_notify_when/v1';
+export * as validateDurationV1 from '../../api_schemas/validation/validate_duration/v1';
+export * as validateHoursV1 from '../../api_schemas/validation/validate_hours/v1';
+export * as validateTimezoneV1 from '../../api_schemas/validation/validate_timezone/v1';
+export * as validateNotifyWhenTypeV1 from '../../api_schemas/validation/validate_notify_when/v1';

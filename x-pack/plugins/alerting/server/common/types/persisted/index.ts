@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './persisted';
-export * from './domain_objects';
+export * from './rule';

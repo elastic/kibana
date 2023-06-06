@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './persisted';
-export * from './domain_objects';
+export type { RuleParams, RuleResponse, PublicRuleResponse } from './v1';

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { ruleV1 } from '../..';
+import { ruleResponseSchemasV1 } from '../..';
 
-export function validateNotifyWhenType(notifyWhen: string) {
-  if (Object.values(ruleV1.RuleNotifyWhen).includes(notifyWhen as ruleV1.RuleNotifyWhen)) {
+export function validateNotifyWhen(notifyWhen: string) {
+  if (
+    Object.values(ruleResponseSchemasV1.RuleNotifyWhen).includes(
+      notifyWhen as ruleResponseSchemasV1.RuleNotifyWhen
+    )
+  ) {
     return;
   }
   return `string is not a valid RuleNotifyWhenType: ${notifyWhen}`;

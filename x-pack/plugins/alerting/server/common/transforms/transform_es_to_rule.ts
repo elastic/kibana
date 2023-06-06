@@ -9,10 +9,10 @@ import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
 import { getRuleSnoozeEndTime } from '../../lib';
 import { RawRule, PartialRule } from '../../types';
-import { Rule, Monitoring, RuleExecutionStatusValues, RuleParams } from '../../../common/types/api';
-import { RuleAttributes } from '../../common/types';
+import { Rule, Monitoring, RuleExecutionStatusValues, RuleParams } from '../types';
+import { RuleAttributes } from '../types/persisted';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
+import { injectReferencesIntoActions, injectReferencesIntoParams } from '../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 
 const INITIAL_LAST_RUN_METRICS = {

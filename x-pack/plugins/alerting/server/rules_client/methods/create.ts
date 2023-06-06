@@ -19,22 +19,22 @@ import {
   extractReferences,
   validateActions,
   addGeneratedActionValues,
-  transformRuleToEs,
-  transformEsToRule,
-  transformRuleToPublicRule,
 } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { Rule, RuleParams, SanitizedRule } from '../../common/types';
 import {
-  Rule,
-  RuleParams,
-  SanitizedRule,
+  transformRuleToEs,
+  transformEsToRule,
+  transformRuleToPublicRule,
+} from '../../common/transforms';
+import {
   notifyWhenSchema,
   actionAlertsFilterSchema,
   validateDuration,
-} from '../../../common/types/api';
-import { RuleAttributes } from '../../common/types';
+} from '../../../common/api_schemas';
+import { RuleAttributes } from '../../common/types/persisted';
 
 const createRuleDataSchema = schema.object({
   name: schema.string(),

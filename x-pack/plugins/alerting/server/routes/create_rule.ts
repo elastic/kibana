@@ -8,15 +8,17 @@
 import { omit } from 'lodash';
 import { RuleTypeDisabledError } from '../lib';
 import {
-  rewriteRule,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
 } from './lib';
 import { BASE_ALERTING_API_PATH } from '../types';
 import { RouteOptions } from '.';
+import { createRuleSchemasV1 } from '../../common/api_schemas';
 import { ruleV1, createRuleV1 } from '../../common/types/api';
+import { SanitizedRule, RuleParams } from '../common/types';
 import type { CreateRuleData } from '../rules_client/methods/create';
+import { transformPublicRuleToResponse } from '../common/transforms';
 
 export const rewriteActionsReq = (
   actions: createRuleV1.CreateRuleAction[]
@@ -56,14 +58,16 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
       validate: {
-        body: createRuleV1.createBodySchema,
-        params: createRuleV1.createParamsSchema,
+        body: createRuleSchemasV1.createBodySchema,
+        params: createRuleSchemasV1.createParamsSchema,
       },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+
+          // Assert versioned inputs
           const createRuleData: createRuleV1.CreateRuleRequestBody = req.body;
           const params: createRuleV1.CreateRuleRequestParams = req.params;
 
@@ -74,14 +78,14 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: ruleV1.SanitizedRule<ruleV1.RuleParams> =
-              await rulesClient.create<ruleV1.RuleParams>({
-                data: rewriteBodyReq(createRuleData),
-                options: { id: params?.id },
-              });
+            const createdRule: SanitizedRule<RuleParams> = await rulesClient.create<RuleParams>({
+              data: rewriteBodyReq(createRuleData),
+              options: { id: params?.id },
+            });
 
+            // Assert versioned response type
             const response: createRuleV1.CreateRuleResponse<ruleV1.RuleParams> = {
-              body: rewriteRule<ruleV1.RuleParams>(createdRule),
+              body: transformPublicRuleToResponse<ruleV1.RuleParams>(createdRule),
             };
 
             return res.ok(response);

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export enum RuleNotifyWhen {
   CHANGE = 'onActionGroupChange',
@@ -13,7 +12,7 @@ export enum RuleNotifyWhen {
   THROTTLE = 'onThrottleInterval',
 }
 
-export enum RuleLastRunOutcomes {
+export enum RuleLastRunOutcomeValues {
   SUCCEEDED = 'succeeded',
   WARNING = 'warning',
   FAILED = 'failed',
@@ -44,120 +43,9 @@ export enum RuleExecutionStatusWarningReason {
   MAX_ALERTS = 'maxAlerts',
 }
 
-export type RuleParams = TypeOf<typeof ruleParamsSchema>;
-
-export type Rule<Params extends RuleParams = never> = Omit<TypeOf<typeof ruleSchema>, 'params'> & {
-  params: Params;
-};
-
-export type PublicRule<Params extends RuleParams = never> = Omit<
-  Rule<Params>,
-  'monitoring' | 'mapped_params' | 'snoozeSchedule' | 'activeSnoozes'
->;
-
-export type RRule = TypeOf<typeof rRuleSchema>;
-
-export type SnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
-
-export type RuleExecutionStatus = TypeOf<typeof ruleExecutionStatusSchema>;
-
-export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
-
-export type Monitoring = TypeOf<typeof monitoringSchema>;
-
-export type AlertsFilter = TypeOf<typeof actionAlertsFilterSchema>;
-
-export type Action = TypeOf<typeof actionSchema>;
-
-export type ActionFrequency = TypeOf<typeof actionFrequencySchema>;
-
-export type NormalizedAction = Omit<Action, 'actionTypeId'>;
-
-// Sanitized types for HTTP response
-export type SanitizedRule<Params extends RuleParams = never> = Omit<
-  Rule<Params>,
-  'apiKey' | 'actions'
-> & {
-  actions: SanitizedAction[];
-};
-
-export type SanitizedAction = Omit<Action, 'alertsFilter'> & {
-  alertsFilter?: SanitizedAlertsFilter;
-};
-
-interface SanitizedAlertsFilter {
-  query?: Omit<AlertsFilter['query'], 'dsl'>;
-  timeframe?: AlertsFilter['timeframe'];
-}
-
-// Rule response of all rule endpoints, this type is sanitized and the
-// keys are converted to snake case
-export type RuleResponse<Params extends RuleParams = never> = Omit<
-  SanitizedRule<Params>,
-  | 'actions'
-  | 'alertTypeId'
-  | 'scheduledTaskId'
-  | 'createdBy'
-  | 'updatedBy'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'apiKeyOwner'
-  | 'apiKeyCreatedByUser'
-  | 'notifyWhen'
-  | 'muteAll'
-  | 'mutedInstanceIds'
-  | 'snoozeSchedule'
-  | 'lastRun'
-  | 'nextRun'
-  | 'executionStatus'
-> & {
-  rule_type_id: SanitizedRule['alertTypeId'];
-  scheduled_task_id: SanitizedRule['scheduledTaskId'];
-  snooze_schedule: SanitizedRule['snoozeSchedule'];
-  created_by: SanitizedRule['createdBy'];
-  updated_by: SanitizedRule['updatedBy'];
-  created_at: SanitizedRule['createdAt'];
-  updated_at: SanitizedRule['updatedBy'];
-  api_key_owner: SanitizedRule['apiKeyOwner'];
-  notify_when: SanitizedRule['notifyWhen'];
-  mute_all: SanitizedRule['muteAll'];
-  muted_alert_ids: SanitizedRule['mutedInstanceIds'];
-  execution_status: Omit<RuleExecutionStatus, 'lastExecutionDate' | 'lastDuration'> & {
-    last_execution_date: RuleExecutionStatus['lastExecutionDate'];
-    last_duration: RuleExecutionStatus['lastDuration'];
-  };
-  actions: ActionResponse[];
-  last_run?: Omit<RuleLastRun, 'alertsCount' | 'outcomeMsg' | 'outcomeOrder'> & {
-    alerts_count: RuleLastRun['alertsCount'];
-    outcome_msg: RuleLastRun['outcomeMsg'];
-    outcome_order: RuleLastRun['outcomeOrder'];
-  };
-  next_run?: SanitizedRule['nextRun'];
-  api_key_created_by_user?: SanitizedRule['apiKeyCreatedByUser'];
-};
-
-export type PublicRuleResponse = Omit<
-  RuleResponse,
-  'monitoring' | 'mapped_params' | 'snooze_schedule' | 'active_snoozes'
->;
-
-export type ActionResponse = Omit<
-  SanitizedAction,
-  'alertsFilter' | 'frequency' | 'actionTypeId'
-> & {
-  alerts_filter?: SanitizedAction['alertsFilter'];
-  connector_type_id: SanitizedAction['actionTypeId'];
-  frequency?: Omit<ActionFrequency, 'notifyWhen'> & {
-    notify_when: ActionFrequency['notifyWhen'];
-  };
-};
-
-/**
- * Rule related schemas
- */
-const ruleParamsSchema = schema.recordOf(schema.string(), schema.any());
-const actionParamsSchema = schema.recordOf(schema.string(), schema.any());
-const mappedParamsSchema = schema.recordOf(schema.string(), schema.any());
+export const ruleParamsSchema = schema.recordOf(schema.string(), schema.any());
+export const actionParamsSchema = schema.recordOf(schema.string(), schema.any());
+export const mappedParamsSchema = schema.recordOf(schema.string(), schema.any());
 
 const notifyWhenSchema = schema.oneOf([
   schema.literal(RuleNotifyWhen.CHANGE),
@@ -171,7 +59,7 @@ const intervalScheduleSchema = schema.object({
 
 const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
-  notifyWhen: notifyWhenSchema,
+  notify_when: notifyWhenSchema,
   throttle: schema.nullable(schema.string()),
 });
 
@@ -186,7 +74,6 @@ const actionAlertsFilterSchema = schema.object({
           state$: schema.maybe(schema.object({ store: schema.string() })),
         })
       ),
-      dsl: schema.maybe(schema.string()),
     })
   ),
   timeframe: schema.maybe(
@@ -215,13 +102,13 @@ const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   id: schema.string(),
-  actionTypeId: schema.string(),
+  connector_type_id: schema.string(),
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
-  alertsFilter: schema.maybe(actionAlertsFilterSchema),
+  alerts_filter: schema.maybe(actionAlertsFilterSchema),
 });
 
-const ruleExecutionStatusSchema = schema.object({
+export const ruleExecutionStatusSchema = schema.object({
   status: schema.oneOf([
     schema.literal(RuleExecutionStatusValues.OK),
     schema.literal(RuleExecutionStatusValues.ACTIVE),
@@ -230,8 +117,8 @@ const ruleExecutionStatusSchema = schema.object({
     schema.literal(RuleExecutionStatusValues.PENDING),
     schema.literal(RuleExecutionStatusValues.UNKNOWN),
   ]),
-  lastExecutionDate: schema.string(),
-  lastDuration: schema.maybe(schema.number()),
+  last_execution_date: schema.string(),
+  last_duration: schema.maybe(schema.number()),
   error: schema.maybe(
     schema.object({
       reason: schema.oneOf([
@@ -258,13 +145,13 @@ const ruleExecutionStatusSchema = schema.object({
   ),
 });
 
-const ruleLastRunSchema = schema.object({
+export const ruleLastRunSchema = schema.object({
   outcome: schema.oneOf([
-    schema.literal(RuleLastRunOutcomes.SUCCEEDED),
-    schema.literal(RuleLastRunOutcomes.WARNING),
-    schema.literal(RuleLastRunOutcomes.FAILED),
+    schema.literal(RuleLastRunOutcomeValues.SUCCEEDED),
+    schema.literal(RuleLastRunOutcomeValues.WARNING),
+    schema.literal(RuleLastRunOutcomeValues.FAILED),
   ]),
-  outcomeOrder: schema.maybe(schema.number()),
+  outcome_order: schema.maybe(schema.number()),
   warning: schema.maybe(
     schema.nullable(
       schema.oneOf([
@@ -281,8 +168,8 @@ const ruleLastRunSchema = schema.object({
       ])
     )
   ),
-  outcomeMsg: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
-  alertsCount: schema.object({
+  outcome_msg: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
+  alerts_count: schema.object({
     active: schema.maybe(schema.nullable(schema.number())),
     new: schema.maybe(schema.nullable(schema.number())),
     recovered: schema.maybe(schema.nullable(schema.number())),
@@ -290,7 +177,7 @@ const ruleLastRunSchema = schema.object({
   }),
 });
 
-const monitoringSchema = schema.object({
+export const monitoringSchema = schema.object({
   run: schema.object({
     history: schema.arrayOf(
       schema.object({
@@ -320,7 +207,7 @@ const monitoringSchema = schema.object({
   }),
 });
 
-const rRuleSchema = schema.object({
+export const rRuleSchema = schema.object({
   dtstart: schema.string(),
   tzid: schema.string(),
   freq: schema.maybe(
@@ -366,37 +253,65 @@ const snoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const ruleSchema = schema.object({
+export const ruleResponseSchema = schema.object({
   id: schema.string(),
   enabled: schema.boolean(),
   name: schema.string(),
   tags: schema.arrayOf(schema.string()),
-  alertTypeId: schema.string(),
+  rule_type_id: schema.string(),
   consumer: schema.string(),
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
-  scheduledTaskId: schema.maybe(schema.string()),
-  createdBy: schema.nullable(schema.string()),
-  updatedBy: schema.nullable(schema.string()),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
-  apiKey: schema.nullable(schema.string()),
-  apiKeyOwner: schema.nullable(schema.string()),
-  apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+  scheduled_task_id: schema.maybe(schema.string()),
+  created_by: schema.nullable(schema.string()),
+  updated_by: schema.nullable(schema.string()),
+  created_at: schema.string(),
+  updated_at: schema.string(),
+  api_key_owner: schema.nullable(schema.string()),
+  api_key_created_by_user: schema.maybe(schema.nullable(schema.boolean())),
   throttle: schema.maybe(schema.nullable(schema.string())),
-  muteAll: schema.boolean(),
-  notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
-  mutedInstanceIds: schema.arrayOf(schema.string()),
-  executionStatus: ruleExecutionStatusSchema,
+  mute_all: schema.boolean(),
+  notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
+  muted_alert_ids: schema.arrayOf(schema.string()),
+  execution_status: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
-  snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
-  activeSnoozes: schema.maybe(schema.arrayOf(schema.string())),
-  isSnoozedUntil: schema.maybe(schema.nullable(schema.string())),
-  lastRun: schema.maybe(schema.nullable(ruleLastRunSchema)),
-  nextRun: schema.maybe(schema.nullable(schema.string())),
+  snooze_schedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
+  active_snoozes: schema.maybe(schema.arrayOf(schema.string())),
+  is_snoozed_until: schema.maybe(schema.nullable(schema.string())),
+  last_run: schema.maybe(schema.nullable(ruleLastRunSchema)),
+  next_run: schema.maybe(schema.nullable(schema.string())),
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
-  viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
+  view_in_app_relative_url: schema.maybe(schema.nullable(schema.string())),
+});
+
+export const publicRuleResponseSchema = schema.object({
+  id: schema.string(),
+  enabled: schema.boolean(),
+  name: schema.string(),
+  tags: schema.arrayOf(schema.string()),
+  rule_type_id: schema.string(),
+  consumer: schema.string(),
+  schedule: intervalScheduleSchema,
+  actions: schema.arrayOf(actionSchema),
+  params: ruleParamsSchema,
+  scheduled_task_id: schema.maybe(schema.string()),
+  created_by: schema.nullable(schema.string()),
+  updated_by: schema.nullable(schema.string()),
+  created_at: schema.string(),
+  updated_at: schema.string(),
+  api_key_owner: schema.nullable(schema.string()),
+  api_key_created_by_user: schema.maybe(schema.nullable(schema.boolean())),
+  throttle: schema.maybe(schema.nullable(schema.string())),
+  mute_all: schema.boolean(),
+  notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
+  muted_alert_ids: schema.arrayOf(schema.string()),
+  execution_status: ruleExecutionStatusSchema,
+  is_snoozed_until: schema.maybe(schema.nullable(schema.string())),
+  last_run: schema.maybe(schema.nullable(ruleLastRunSchema)),
+  next_run: schema.maybe(schema.nullable(schema.string())),
+  revision: schema.number(),
+  running: schema.maybe(schema.nullable(schema.boolean())),
 });

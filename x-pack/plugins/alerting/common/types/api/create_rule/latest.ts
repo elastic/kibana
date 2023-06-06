@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './v1';
+export type {
+  CreateRuleAction,
+  CreateRuleActionFrequency,
+  CreateRuleRequestParams,
+  CreateRuleRequestBody,
+  CreateRuleResponse,
+} from './v1';

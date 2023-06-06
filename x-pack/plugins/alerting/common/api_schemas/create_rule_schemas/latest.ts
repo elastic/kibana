@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export * from './v1';
+export {
+  notifyWhenSchema,
+  actionFrequencySchema,
+  actionAlertsFilterSchema,
+  actionSchema,
+  createBodySchema,
+  createParamsSchema,
+} from './v1';

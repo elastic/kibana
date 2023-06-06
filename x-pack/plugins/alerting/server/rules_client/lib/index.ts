@@ -19,6 +19,3 @@ export { migrateLegacyActions } from './siem_legacy_actions/migrate_legacy_actio
 export { formatLegacyActions } from './siem_legacy_actions/format_legacy_actions';
 export { addGeneratedActionValues } from './add_generated_action_values';
 export { incrementRevision } from './increment_revision';
-export { transformRuleToEs } from './transform_rule_to_es';
-export { transformEsToRule } from './transform_es_to_rule';
-export { transformRuleToPublicRule } from './transform_rule_to_public_rule';
