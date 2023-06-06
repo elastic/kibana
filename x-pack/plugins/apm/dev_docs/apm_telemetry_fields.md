@@ -12,20 +12,20 @@
 | `cloud.region.items` | An array of the top 10 cloud regions in terms of document count. Example: [us-west1, us-central1] |
 | `host.os.platform.items` | An array of the top 10 operating system platforms in terms of document count. Example: [linux, win32] |
 | `counts.transaction.1d` | Total number of transaction documents within the last day |
-| `counts.transaction.all` | The total number of transaction documents overall |
+| `counts.transaction.all` | Total number of transaction documents overall |
 | `counts.span.1d` | Total number of span documents within the last day |
-| `counts.span.all` | The total number of span documents overall |
+| `counts.span.all` | Total number of span documents overall |
 | `counts.error.1d` | Total number of error documents within the last day |
-| `counts.error.all` | The total number of error documents overall |
+| `counts.error.all` | Total number of error documents overall |
 | `counts.metric.1d` | Total number of metric documents within the last day |
-| `counts.metric.all` | The total number of metric documents overall |
+| `counts.metric.all` | Total number of metric documents overall |
 | `counts.onboarding.1d` | Total number of onboarding documents within the last day |
-| `counts.onboarding.all` | The total number of onboarding documents overall |
-| `counts.agent_configuration.all` | The total number of apm-agent-configuration documents overall |
-| `counts.max_transaction_groups_per_service.1d` | The total number of distinct transaction groups for the top service for the last last 24 hours |
-| `counts.max_error_groups_per_service.1d` | The total number of distinct error groups for the top service for the last last 24 hours |
+| `counts.onboarding.all` | Total number of onboarding documents overall |
+| `counts.agent_configuration.all` | Total number of apm-agent-configuration documents overall |
+| `counts.max_transaction_groups_per_service.1d` | Total number of distinct transaction groups for the top service for the last last 24 hours |
+| `counts.max_error_groups_per_service.1d` | Total number of distinct error groups for the top service for the last last 24 hours |
 | `counts.traces.1d` | Total number of trace documents within the last day |
-| `counts.traces.all` | The total number of trace documents overall |
+| `counts.traces.all` | Total number of trace documents overall |
 | `cardinality.client.geo.country_iso_code.rum.1d` | Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs. |
 | `retainment.span.ms` | Represent the time difference in milliseconds between the current date and the date when the span document was recorded |
 | `retainment.transaction.ms` | Represent the time difference in milliseconds between the current date and the date when the transaction document was recorded |
@@ -33,11 +33,11 @@
 | `retainment.metric.ms` | Represent the time difference in milliseconds between the current date and the date when the metric document was recorded |
 | `retainment.onboarding.ms` | Represent the time difference in milliseconds between the current date and the date when the onboarding document was recorded |
 | `integrations.ml.all_jobs_count` | Total number of anomaly detection jobs associated with the jobs apm-*, *-high_mean_response_time |
-| `indices.traces.shards.total` | The total number of shards |
-| `indices.traces.all.total.docs.count` | The total number of transaction and span documents overall |
+| `indices.traces.shards.total` | Total number of shards |
+| `indices.traces.all.total.docs.count` | Total number of transaction and span documents overall |
 | `indices.traces.all.total.store.size_in_bytes` | Size of the index in byte units. |
-| `indices.shards.total` | The total number of shards |
-| `indices.all.total.docs.count` | The total number of all documents overall |
+| `indices.shards.total` | Total number of shards |
+| `indices.all.total.docs.count` | Total number of all documents overall |
 | `indices.all.total.store.size_in_bytes` | Size of the index in byte units. |
 | `service_groups.kuery_fields.items` | An array of up to 500 unique fields used to create the service groups. Example  [service.language.name, service.name]  |
 | `service_groups.total` | Total number of service groups retrived from the saved object across all spaces |
