@@ -13,6 +13,10 @@ import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/d
 import { HostsPageObject } from '../../security_solution_ftr/page_objects/hosts';
 import { EndpointResponderPageObjects } from './endpoint_responder';
 import { TimelinePageObject } from '../../security_solution_ftr/page_objects/timeline';
+import { EndpointPolicyPageProvider } from './policy_page';
+import { TrustedAppsPageProvider } from './trusted_apps_page';
+import { FleetIntegrations } from './fleet_integrations_page';
+import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -23,4 +27,8 @@ export const pageObjects = {
   timeline: TimelinePageObject,
   hosts: HostsPageObject,
   responder: EndpointResponderPageObjects,
+  policy: EndpointPolicyPageProvider,
+  trustedApps: TrustedAppsPageProvider,
+  artifactEntriesList: ArtifactEntriesListPageProvider,
+  fleetIntegrations: FleetIntegrations,
 };

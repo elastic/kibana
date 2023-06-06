@@ -373,8 +373,8 @@ enabled:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
-  - x-pack/test/security_solution_endpoint/config.ts
-  - x-pack/test/security_solution_endpoint_configuration/config.ts
+  - x-pack/test/security_solution_endpoint/endpoint.config.ts
+  - x-pack/test/security_solution_endpoint/integrations.config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts

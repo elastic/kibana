@@ -22,10 +22,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     pageObjects,
-    testFiles: [resolve(__dirname, './apps/endpoint')],
+    testFiles: [resolve(__dirname, './apps/integrations')],
     dockerServers: createEndpointDockerConfig(),
     junit: {
-      reportName: 'X-Pack Endpoint Configuration Functional Tests',
+      reportName: 'X-Pack Endpoint Integrations Functional Tests',
     },
     services,
     apps: {
