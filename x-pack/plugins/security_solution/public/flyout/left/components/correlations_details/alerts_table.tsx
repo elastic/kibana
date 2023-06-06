@@ -46,6 +46,9 @@ export const columns = [
 ];
 
 export interface AlertsTableProps {
+  /**
+  * Ids of alerts to display in the table
+  */
   alertIds: string[];
   /**
   * Data test subject string for testing
