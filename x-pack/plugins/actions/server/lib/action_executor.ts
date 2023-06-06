@@ -67,7 +67,7 @@ export interface ExecuteOptions<Source = unknown> {
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
-  taskConfig: TaskConfig;
+  taskConfig?: TaskConfig;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -491,7 +491,7 @@ interface ValidateActionOpts {
   secrets: unknown;
   rawAction: RawAction;
   isPreconfigured?: boolean;
-  taskConfig: TaskConfig;
+  taskConfig?: TaskConfig;
 }
 
 function validateAction(
@@ -521,7 +521,7 @@ function validateAction(
         secrets,
       });
     }
-    if (taskConfig.skip.enabled) {
+    if (taskConfig?.skip.enabled) {
       validateRawAction({ isPreconfigured, rawAction });
     }
 
