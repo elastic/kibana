@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { LinkId, AppId, DeepLinkId } from './deep_links';
+export {
+  defaultNavigation,
+  type DevToolsNodeDefinition,
+  type NavigationID,
+} from './default_navigation';

@@ -16,9 +16,3 @@ export {
 } from './constants';
 
 export type { AppId, LinkId, DeepLinkId } from './deep_links';
-
-export {
-  defaultNavigation,
-  type NavigationID,
-  type DevToolsNodeDefinition,
-} from './default_navigation';

@@ -8,10 +8,4 @@
 
 export { DASHBOARD_APP_ID, DISCOVER_APP_ID, VISUALIZE_APP_ID } from './constants';
 
-export {
-  defaultNavigation,
-  type NavigationID,
-  type AnalyticsNodeDefinition,
-} from './default_navigation';
-
 export type { AppId, DeepLinkId } from './deep_links';

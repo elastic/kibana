@@ -11,12 +11,12 @@ import { cloneDeep } from 'lodash';
 import {
   defaultNavigation as analytics,
   type AnalyticsNodeDefinition,
-} from '@kbn/deeplinks-analytics';
-import { defaultNavigation as ml, type MlNodeDefinition } from '@kbn/deeplinks-ml';
+} from '@kbn/default-nav-analytics';
+import { defaultNavigation as ml, type MlNodeDefinition } from '@kbn/default-nav-ml';
 import {
   defaultNavigation as devtools,
   type DevToolsNodeDefinition,
-} from '@kbn/deeplinks-devtools';
+} from '@kbn/default-nav-devtools';
 
 import type { NavigationGroupPreset } from '../types';
 import type { ManagementNodeDefinition } from './types';

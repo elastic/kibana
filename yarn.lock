@@ -4059,6 +4059,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/default-nav-analytics@link:packages/default-nav/analytics":
+  version "0.0.0"
+  uid ""
+
+"@kbn/default-nav-devtools@link:packages/default-nav/devtools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/default-nav-ml@link:packages/default-nav/ml":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-cli-errors@link:packages/kbn-dev-cli-errors":
   version "0.0.0"
   uid ""

@@ -7,8 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { NodeDefinitionWithChildren } from '@kbn/core-chrome-browser';
-
-import type { DeepLinkId } from './deep_links';
+import type { DeepLinkId } from '@kbn/deeplinks-ml';
 
 export type NavigationID =
   | 'rootNav:ml'

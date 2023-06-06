@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { LinkId, AppId, DeepLinkId } from './deep_links';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/default-nav/ml'],
+};
