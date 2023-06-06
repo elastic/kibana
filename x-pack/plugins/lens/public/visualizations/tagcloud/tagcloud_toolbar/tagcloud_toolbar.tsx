@@ -100,8 +100,8 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
             <EuiFormRow
               display="columnCompressed"
               label={i18n.translate('xpack.lens.label.tagcloud.showLabel', {
-                  defaultMessage: 'Show label',
-                })}
+                defaultMessage: 'Show label',
+              })}
             >
               <EuiSwitch
                 checked={props.state.showLabel}
