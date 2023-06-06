@@ -98,12 +98,10 @@ export default function ({ getService }: FtrProviderContext) {
         const monitorsWithAllFields = respAllFields.body.monitors.map(
           ({ attributes }: { attributes: MonitorFields }) => attributes
         );
-        const idsAndNames = monitorsWithAllFields.map(
-          ({ id, name }: { attributes: Partial<MonitorFields> }) => ({
-            id,
-            name,
-          })
-        );
+        const idsAndNames = monitorsWithAllFields.map(({ id, name }: Partial<MonitorFields>) => ({
+          id,
+          name,
+        }));
         const monitorsAttribsWithSpecificFields = respSpecificFieldsOnly.body.monitors.map(
           ({ attributes }: { attributes: Partial<MonitorFields> }) => attributes
         );
@@ -186,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resultMonitorIds = resp.body.monitors
           .map(({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id)
-          .filter((id, index, arr) => arr.indexOf(id) === index); // Filter only unique
+          .filter((id: string, index: number, arr: string[]) => arr.indexOf(id) === index); // Filter only unique
         expect(resultMonitorIds.length).eql(2);
         expect(resultMonitorIds).eql([customHeartbeatId0, customHeartbeatId1]);
       });
