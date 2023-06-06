@@ -44,7 +44,7 @@ export class SyntheticsServices {
 
   async enableMonitorManagedViaApi() {
     try {
-      await axios.post(this.kibanaUrl + '/internal/uptime/service/enablement', undefined, {
+      await axios.put(this.kibanaUrl + '/internal/uptime/service/enablement', undefined, {
         auth: { username: 'elastic', password: 'changeme' },
         headers: { 'kbn-xsrf': 'true' },
       });
