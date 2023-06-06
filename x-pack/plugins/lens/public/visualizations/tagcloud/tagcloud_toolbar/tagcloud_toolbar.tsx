@@ -104,6 +104,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
               })}
             >
               <EuiSwitch
+                label=""
                 checked={props.state.showLabel}
                 onChange={(event: EuiSwitchEvent) => {
                   props.setState({
