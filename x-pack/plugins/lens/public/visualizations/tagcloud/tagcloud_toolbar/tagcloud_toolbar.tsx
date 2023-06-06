@@ -92,7 +92,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
                 onChange={(event: ChangeEvent<HTMLSelectElement>) => {
                   props.setState({
                     ...props.state,
-                    orientation: e.target.value as $Values<typeof Orientation>,
+                    orientation: event.target.value as $Values<typeof Orientation>,
                   });
                 }}
               />
