@@ -10,7 +10,8 @@
       "share"
     ],
     "optionalPlugins": [
-      "home"
+      "home",
+      "cloudChatProvider"
     ],
     "requiredBundles": [
       "kibanaReact",

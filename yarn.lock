@@ -3003,6 +3003,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-chat-provider-plugin@link:x-pack/plugins/cloud_integrations/cloud_chat_provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-data-migration-plugin@link:x-pack/plugins/cloud_integrations/cloud_data_migration":
   version "0.0.0"
   uid ""

@@ -6,11 +6,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { CloudChatPlugin } from './plugin';
+import { CloudChatProviderPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new CloudChatPlugin(initializerContext);
+  return new CloudChatProviderPlugin(initializerContext);
 }
 
-export { Chat } from './components';
-export type { CloudChatPluginStart } from './plugin';
+export type { CloudChatProviderPluginSetup, CloudChatProviderPluginStart } from './plugin';
