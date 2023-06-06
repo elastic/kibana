@@ -21,5 +21,6 @@ jest.doMock('@kbn/config', () => ({
 jest.doMock('./root', () => ({
   Root: jest.fn(() => ({
     shutdown: jest.fn(),
+    logger: { get: () => ({ info: jest.fn(), debug: jest.fn() }) },
   })),
 }));

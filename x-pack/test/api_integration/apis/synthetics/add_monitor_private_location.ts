@@ -13,9 +13,9 @@ import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('does not add a monitor if there is an error in creating integration', async () => {
       const newMonitor = { ...httpMonitorJson };
 
-      const invalidName = '[] -  invalid name';
+      const invalidName = '!@#$%^&*()_++[\\-\\]- wow';
 
       newMonitor.locations.push({
         id: testFleetPolicyID,
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.body).eql({
         statusCode: 500,
         message:
-          'YAMLException: end of the stream or a document separator is expected at line 3, column 10:\n    name: [] -  invalid name\n             ^',
+          'YAMLException: unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w,"\n                                     ^',
         error: 'Internal Server Error',
       });
 

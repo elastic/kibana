@@ -65,6 +65,7 @@ export class Plugin implements InfraClientPluginClass {
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
+
     this.inventoryViews = new InventoryViewsService();
     this.logViews = new LogViewsService({
       messageFields:

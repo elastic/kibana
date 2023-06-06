@@ -8,13 +8,13 @@
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
 import {
-  SyncStatus,
   ConnectorStatus,
+  DisplayType,
   FieldType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
-  DisplayType,
+  SyncStatus,
 } from '../../../../common/types/connectors';
 
 import {
@@ -128,6 +128,8 @@ export const connectorIndex: ConnectorViewIndex = {
     index_name: 'connector',
     is_native: false,
     language: 'en',
+    last_access_control_sync_scheduled_at: null,
+    last_access_control_sync_status: SyncStatus.COMPLETED,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,
@@ -244,6 +246,8 @@ export const crawlerIndex: CrawlerViewIndex = {
     index_name: 'crawler',
     is_native: true,
     language: 'en',
+    last_access_control_sync_scheduled_at: null,
+    last_access_control_sync_status: SyncStatus.COMPLETED,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,

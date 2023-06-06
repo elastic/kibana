@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { isString } from 'lodash';
+import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { GetCaseUsersResponse, User, UserWithProfileInfo } from '../../../common/api';
-import { GetCaseUsersResponseRt } from '../../../common/api';
+import { decodeOrThrow, GetCaseUsersResponseRt } from '../../../common/api';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -101,7 +102,7 @@ export const getUsers = async (
       reporter: reporterResponse[0],
     };
 
-    return GetCaseUsersResponseRt.encode(results);
+    return decodeOrThrow(GetCaseUsersResponseRt)(results);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case users case id: ${caseId}: ${error}`,
@@ -137,9 +138,25 @@ const getUserInformation = (
       full_name: userProfile?.user.full_name ?? userInfo?.full_name ?? null,
       username: userProfile?.user.username ?? userInfo?.username ?? null,
     },
-    avatar: userProfile?.data.avatar,
+    avatar: getUserProfileAvatar(userProfile?.data.avatar),
     uid: userProfile?.uid ?? uid ?? userInfo?.profile_uid,
   };
+};
+
+const getUserProfileAvatar = (
+  avatar?: UserProfileAvatarData | undefined
+): UserWithProfileInfo['avatar'] | undefined => {
+  if (!avatar) {
+    return avatar;
+  }
+
+  const res = {
+    ...(isString(avatar.initials) ? { initials: avatar.initials } : {}),
+    ...(isString(avatar.color) ? { color: avatar.color } : {}),
+    ...(isString(avatar.imageUrl) ? { imageUrl: avatar.imageUrl } : {}),
+  };
+
+  return res;
 };
 
 const removeAllFromSet = (originalSet: Set<string>, values: string[]) => {

@@ -51,6 +51,7 @@ describe('migrationsStateActionMachine', () => {
       algorithm: 'v2',
       batchSize: 1000,
       maxBatchSizeBytes: new ByteSizeValue(1e8),
+      maxReadBatchSizeBytes: new ByteSizeValue(536870888),
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,

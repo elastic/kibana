@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
@@ -59,13 +59,13 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const testMonitors = [
         projectMonitors.monitors[0],
-        { ...secondMonitor, name: '[] - invalid name' },
+        { ...secondMonitor, name: '!@#$%^&*()_++[\\-\\]- wow name' },
       ];
       try {
         const body = await monitorTestService.addProjectMonitors(project, testMonitors);
         expect(body.createdMonitors.length).eql(1);
         expect(body.failedMonitors[0].reason).eql(
-          'end of the stream or a document separator is expected at line 3, column 10:\n    name: [] - invalid name\n             ^'
+          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
         );
       } finally {
         await Promise.all([
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(editedBody.createdMonitors.length).eql(0);
         expect(editedBody.updatedMonitors.length).eql(2);
 
-        testMonitors[1].name = '[] - invalid name';
+        testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
 
         const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
         expect(editedBodyError.createdMonitors.length).eql(0);
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
           'Failed to update journey: test-id-2'
         );
         expect(editedBodyError.failedMonitors[0].reason).eql(
-          'end of the stream or a document separator is expected at line 3, column 10:\n    name: [] - invalid name\n             ^'
+          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
         );
       } finally {
         await Promise.all([
