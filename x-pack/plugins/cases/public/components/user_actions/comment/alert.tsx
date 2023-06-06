@@ -64,7 +64,7 @@ const getSingleAlertUserAction = ({
       username: (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
-      className: 'comment-alert',
+      eventColor: 'subdued',
       event: (
         <SingleAlertCommentEvent
           actionId={userAction.id}
@@ -122,7 +122,7 @@ const getMultipleAlertsUserAction = ({
       username: (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
-      className: 'comment-alert',
+      eventColor: 'subdued',
       event: (
         <MultipleAlertsCommentEvent
           actionId={userAction.id}

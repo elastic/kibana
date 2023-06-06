@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
-import type { RollupFields } from '../../../../common/types/fields';
+import type { RollupFields } from '@kbn/ml-anomaly-utils';
 
 export interface RollupJob {
   job_id: string;
