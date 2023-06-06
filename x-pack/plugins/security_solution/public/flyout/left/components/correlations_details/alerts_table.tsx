@@ -47,7 +47,10 @@ export const columns = [
 
 export interface AlertsTableProps {
   alertIds: string[];
-  'data-test-subj'?: string;
+  /**
+  * Data test subject string for testing
+  */
+  ['data-test-subj']?: string;
 }
 
 /**
