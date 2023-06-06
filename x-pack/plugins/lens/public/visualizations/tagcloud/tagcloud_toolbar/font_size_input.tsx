@@ -39,13 +39,14 @@ export function FontSizeInput(props: Props) {
   return (
     <EuiDualRange
       id="tagCloudFontSizeSlider"
-      min={5}
+      min={1}
       max={120}
       step={1}
       value={fontSize}
       onChange={(value) => {
         setFontSize(value as [number, number]);
       }}
+      showLabels
       aria-label={i18n.translate('xpack.lens.label.tagcloud.fontSizeLabel', {
         defaultMessage: 'Font size',
       })}

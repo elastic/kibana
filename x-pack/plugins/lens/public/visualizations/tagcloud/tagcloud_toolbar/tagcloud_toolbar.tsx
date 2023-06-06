@@ -12,12 +12,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiRadioGroup,
+  EuiSelect,
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
@@ -31,20 +31,20 @@ import { FontSizeInput } from './font_size_input';
 
 const ORIENTATION_OPTIONS = [
   {
-    id: Orientation.SINGLE,
-    label: i18n.translate('xpack.lens.label.tagcloud.orientation.single', {
+    value: Orientation.SINGLE,
+    text: i18n.translate('xpack.lens.label.tagcloud.orientation.single', {
       defaultMessage: 'Single',
     }),
   },
   {
-    id: Orientation.RIGHT_ANGLED,
-    label: i18n.translate('xpack.lens.label.tagcloud.orientation.rightAngled', {
+    value: Orientation.RIGHT_ANGLED,
+    text: i18n.translate('xpack.lens.label.tagcloud.orientation.rightAngled', {
       defaultMessage: 'Right angled',
     }),
   },
   {
-    id: Orientation.MULTIPLE,
-    label: i18n.translate('xpack.lens.label.tagcloud.orientation.multiple', {
+    value: Orientation.MULTIPLE,
+    text: i18n.translate('xpack.lens.label.tagcloud.orientation.multiple', {
       defaultMessage: 'Multiple',
     }),
   },
@@ -86,22 +86,24 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
                 defaultMessage: 'Orientation',
               })}
             >
-              <EuiRadioGroup
+              <EuiSelect
                 options={ORIENTATION_OPTIONS}
-                idSelected={props.state.orientation}
-                onChange={(id) => {
+                value={props.state.orientation}
+                onChange={(event: ChangeEvent<HTMLSelectElement>) => {
                   props.setState({
                     ...props.state,
-                    orientation: id as $Values<typeof Orientation>,
+                    orientation: e.target.value as $Values<typeof Orientation>,
                   });
                 }}
               />
             </EuiFormRow>
-            <EuiFormRow>
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.label.tagcloud.showLabel', {
+            <EuiFormRow
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.label.tagcloud.showLabel', {
                   defaultMessage: 'Show label',
                 })}
+            >
+              <EuiSwitch
                 checked={props.state.showLabel}
                 onChange={(event: EuiSwitchEvent) => {
                   props.setState({
