@@ -11,6 +11,7 @@ pageLoadAssetSize:
   charts: 55000
   cloud: 21076
   cloudChat: 19894
+  cloudChatProvider: 17114
   cloudDataMigration: 19170
   cloudDefend: 18697
   cloudExperiments: 59358
