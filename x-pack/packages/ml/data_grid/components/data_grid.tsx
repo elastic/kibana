@@ -35,9 +35,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { euiDataGridStyle, euiDataGridToolbarSettings, INDEX_STATUS } from '../lib/common';
 import { UseIndexDataReturnType } from '../lib/types';
 
-// TODO Fix row hovering + bar highlighting
-// import { hoveredRow$ } from './column_chart';
-
 const cssOverride = css({
   '.euiDataGridRowCell--boolean': { textTransform: 'none' },
   // Overrides to align the sorting arrow, actions icon and the column header when no chart is available,
@@ -106,13 +103,6 @@ export const DataGrid: FC<Props> = memo(
       visibleColumns,
       trailingControlColumns,
     } = props;
-    // TODO Fix row hovering + bar highlighting
-    // const getRowProps = (item: DataGridItem) => {
-    //   return {
-    //     onMouseOver: () => hoveredRow$.next(item),
-    //     onMouseLeave: () => hoveredRow$.next(null),
-    //   };
-    // };
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
