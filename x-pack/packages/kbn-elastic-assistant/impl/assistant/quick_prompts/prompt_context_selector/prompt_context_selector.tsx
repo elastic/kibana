@@ -77,8 +77,7 @@ export const PromptContextSelector: React.FC<Props> = React.memo(
       return (
         <span className={contentClassName}>
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-          &nbsp;
-          <span>{`(${value?.category})`}</span>
+          <span>{` / (${value?.category})`}</span>
         </span>
       );
     };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
@@ -33,7 +33,7 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput }) => {
-  const { basePromptContexts, baseQuickPrompts, nameSpace } = useAssistantContext();
+  const { basePromptContexts, baseQuickPrompts, nameSpace, promptContexts } = useAssistantContext();
 
   // Local storage for all quick prompts, prefixed by assistant nameSpace
   const [localStorageQuickPrompts, setLocalStorageQuickPrompts] = useLocalStorage(
@@ -41,6 +41,20 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
     baseQuickPrompts
   );
   const [quickPrompts, setQuickPrompts] = useState(localStorageQuickPrompts ?? []);
+
+  const contextFilteredQuickPrompts = useMemo(() => {
+    const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
+    return quickPrompts.filter((quickPrompt) => {
+      // Return quick prompt as match if it has no categories, otherwise ensure category exists in registered prompt contexts
+      if (quickPrompt.categories == null || quickPrompt.categories.length === 0) {
+        return true;
+      } else {
+        return quickPrompt.categories.some((category) => {
+          return registeredPromptContextTitles.includes(category);
+        });
+      }
+    });
+  }, [quickPrompts, promptContexts]);
 
   // Overflow state
   const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
@@ -67,7 +81,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
   );
   return (
     <QuickPromptsFlexGroup gutterSize="s" alignItems="center">
-      {quickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
+      {contextFilteredQuickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
         <EuiFlexItem key={index} grow={false}>
           <EuiBadge
             color={badge.color}
@@ -78,7 +92,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
           </EuiBadge>
         </EuiFlexItem>
       ))}
-      {quickPrompts.length > COUNT_BEFORE_OVERFLOW && (
+      {contextFilteredQuickPrompts.length > COUNT_BEFORE_OVERFLOW && (
         <EuiFlexItem grow={false}>
           <EuiPopover
             button={
@@ -94,7 +108,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
             anchorPosition="rightUp"
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              {quickPrompts.slice(COUNT_BEFORE_OVERFLOW).map((badge, index) => (
+              {contextFilteredQuickPrompts.slice(COUNT_BEFORE_OVERFLOW).map((badge, index) => (
                 <EuiFlexItem key={index} grow={false}>
                   <EuiBadge
                     color={badge.color}
