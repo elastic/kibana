@@ -85,23 +85,12 @@ const testVisTypeAliases: VisTypeAlias[] = [
   },
 ];
 
-storiesOf('components/WorkpadHeader/EditorMenu', module)
-  .add('default', () => (
-    <EditorMenu
-      factories={testFactories}
-      promotedVisTypes={testVisTypes}
-      visTypeAliases={testVisTypeAliases}
-      createNewVisType={() => action('createNewVisType')}
-      createNewEmbeddable={() => action('createNewEmbeddable')}
-    />
-  ))
-  .add('dark mode', () => (
-    <EditorMenu
-      factories={testFactories}
-      isDarkThemeEnabled
-      promotedVisTypes={testVisTypes}
-      visTypeAliases={testVisTypeAliases}
-      createNewVisType={() => action('createNewVisType')}
-      createNewEmbeddable={() => action('createNewEmbeddable')}
-    />
-  ));
+storiesOf('components/WorkpadHeader/EditorMenu', module).add('default', () => (
+  <EditorMenu
+    factories={testFactories}
+    promotedVisTypes={testVisTypes}
+    visTypeAliases={testVisTypeAliases}
+    createNewVisType={() => action('createNewVisType')}
+    createNewEmbeddable={() => action('createNewEmbeddable')}
+  />
+));
