@@ -120,11 +120,11 @@ export interface CloudLinkDefinition extends CloudLinkProps {
  *
  * A group root item definition.
  */
-export interface GroupDefinition extends NodeDefinition<any> {
+export interface GroupDefinition extends NodeDefinition<AppDeepLinkId, string> {
   type: 'navGroup';
   /** Flag to indicate if the group is initially collapsed or not. */
   defaultIsCollapsed?: boolean;
-  children?: NonEmptyArray<NodeDefinition<any>>;
+  children?: NonEmptyArray<NodeDefinition<AppDeepLinkId, string>>;
   preset?: NavigationGroupPreset;
 }
 
