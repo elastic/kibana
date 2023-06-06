@@ -73,7 +73,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance }: RunContext) {
+  public create({ taskInstance, taskConfig }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -143,15 +143,16 @@ export class TaskRunnerFactory {
         }
 
         if (
+          taskConfig.skip.enabled &&
           executorResult.status === 'error' &&
           executorResult.message?.includes(validationErrorPrefix)
         ) {
-          logger.debug(
+          logger.warn(
             `Task Runner has skipped executing the Action (${actionId}) as it has invalid params.`
           );
           return {
             state: taskInstance.state,
-            runAt: taskInstance.runAt,
+            schedule: { interval: taskConfig.skip.delay },
           };
         }
 

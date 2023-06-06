@@ -80,6 +80,12 @@ const alertsService = alertsServiceMock.create();
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
+  const mockedTaskConfig = {
+    skip: {
+      enabled: false,
+      delay: '3s',
+    },
+  };
   let alertingEventLoggerInitializer: RuleContextOpts;
 
   beforeAll(() => {
@@ -192,12 +198,13 @@ describe('Task Runner Cancel', () => {
   });
 
   test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution', async () => {
-    const taskRunner = new TaskRunner(
+    const taskRunner = new TaskRunner({
       ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      taskInstance: mockedTaskInstance,
+      taskConfig: mockedTaskConfig,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -287,15 +294,16 @@ describe('Task Runner Cancel', () => {
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
-    const taskRunner = new TaskRunner(
+    const taskRunner = new TaskRunner({
       ruleType,
-      mockedTaskInstance,
-      {
+      taskInstance: mockedTaskInstance,
+      taskConfig: mockedTaskConfig,
+      context: {
         ...taskRunnerFactoryInitializerParams,
         cancelAlertsOnRuleTimeout: false,
       },
-      inMemoryMetrics
-    );
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -355,12 +363,13 @@ describe('Task Runner Cancel', () => {
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
-    const taskRunner = new TaskRunner(
-      updatedRuleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+    const taskRunner = new TaskRunner({
+      ruleType: updatedRuleType,
+      taskInstance: mockedTaskInstance,
+      taskConfig: mockedTaskConfig,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -416,12 +425,13 @@ describe('Task Runner Cancel', () => {
         return { state: {} };
       }
     );
-    const taskRunner = new TaskRunner(
+    const taskRunner = new TaskRunner({
       ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      taskInstance: mockedTaskInstance,
+      taskConfig: mockedTaskConfig,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();

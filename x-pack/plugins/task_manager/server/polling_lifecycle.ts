@@ -128,6 +128,7 @@ export class TaskPollingLifecycle {
       taskStore,
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
+      taskConfig: this.config.task,
       definitions,
       unusedTypes,
       logger: this.logger,
@@ -209,6 +210,7 @@ export class TaskPollingLifecycle {
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
+      taskConfig: this.config.task,
     });
   };
 

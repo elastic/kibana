@@ -73,6 +73,12 @@ taskDefinitions.registerTaskDefinitions({
 const mockApmTrans = {
   end: jest.fn(),
 };
+const mockedTaskConfig = {
+  skip: {
+    enabled: false,
+    delay: '3s',
+  },
+};
 
 describe('TaskClaiming', () => {
   beforeEach(() => {
@@ -124,6 +130,7 @@ describe('TaskClaiming', () => {
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
       getCapacity: () => 10,
+      taskConfig: mockedTaskConfig,
     });
 
     expect(taskManagerLogger.info).toHaveBeenCalledTimes(1);
@@ -178,6 +185,7 @@ describe('TaskClaiming', () => {
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
+        taskConfig: mockedTaskConfig,
         ...taskClaimingOpts,
       });
 
@@ -1020,6 +1028,12 @@ if (doc['task.runAt'].size()!=0) {
                 return 10;
             }
           },
+          taskConfig: {
+            skip: {
+              enabled: true,
+              delay: '3s',
+            },
+          },
         },
         hits: [
           [
@@ -1311,6 +1325,7 @@ if (doc['task.runAt'].size()!=0) {
         taskStore,
         maxAttempts: 2,
         getCapacity,
+        taskConfig: mockedTaskConfig,
       });
 
       return { taskManagerId, runAt, taskClaiming };

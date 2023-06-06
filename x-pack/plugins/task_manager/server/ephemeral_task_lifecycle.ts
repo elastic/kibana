@@ -184,6 +184,7 @@ export class EphemeralTaskLifecycle {
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
       executionContext: this.executionContext,
+      taskConfig: this.config.task,
     });
   };
 }

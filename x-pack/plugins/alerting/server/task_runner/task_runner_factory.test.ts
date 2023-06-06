@@ -33,6 +33,7 @@ import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
+import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -67,6 +68,9 @@ let fakeTimer: sinon.SinonFakeTimers;
 
 describe('Task Runner Factory', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
+  const mockedTaskConfig: TaskConfig = {
+    skip_invalid: { enabled: false, reschedule_delay: '3s', max_attempt: 10 },
+  };
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -137,7 +141,14 @@ describe('Task Runner Factory', () => {
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
+      factory.create(
+        ruleType,
+        {
+          taskInstance: mockedTaskInstance,
+          taskConfig: mockedTaskConfig,
+        },
+        inMemoryMetrics
+      )
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 

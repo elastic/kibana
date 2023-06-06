@@ -52,7 +52,7 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isRetryableError, isUnrecoverableError } from './errors';
-import type { EventLoopDelayConfig } from '../config';
+import type { EventLoopDelayConfig, TaskConfig } from '../config';
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
@@ -103,6 +103,7 @@ type Opts = {
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
+  taskConfig: TaskConfig;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -151,6 +152,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
+  private readonly taskConfig: TaskConfig;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -174,6 +176,7 @@ export class TaskManagerRunner implements TaskRunner {
     executionContext,
     usageCounter,
     eventLoopDelayConfig,
+    taskConfig,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -187,6 +190,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
+    this.taskConfig = taskConfig;
   }
 
   /**
@@ -299,6 +303,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance.task,
+      taskConfig: this.taskConfig,
     });
 
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
@@ -378,6 +383,7 @@ export class TaskManagerRunner implements TaskRunner {
     try {
       const { taskInstance } = await this.beforeMarkRunning({
         taskInstance: this.instance.task,
+        taskConfig: this.taskConfig,
       });
 
       const attempts = taskInstance.attempts + 1;

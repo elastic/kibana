@@ -13,6 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
 import { isValidationError } from '../lib/error_with_reason';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -82,6 +83,32 @@ interface StackTraceLog {
   stackTrace?: string;
 }
 
+interface TaskRunnerConstructorParams<
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  RuleState extends RuleTypeState,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
+> {
+  ruleType: NormalizedRuleType<
+    Params,
+    ExtractedParams,
+    RuleState,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >;
+  taskInstance: ConcreteTaskInstance;
+  taskConfig: TaskConfig;
+  context: TaskRunnerContext;
+  inMemoryMetrics: InMemoryMetrics;
+}
+
 export class TaskRunner<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -95,6 +122,7 @@ export class TaskRunner<
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: RuleTaskInstance;
+  private readonly taskConfig: TaskConfig;
   private ruleConsumer: string | null;
   private ruleType: NormalizedRuleType<
     Params,
@@ -120,21 +148,22 @@ export class TaskRunner<
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
 
-  constructor(
-    ruleType: NormalizedRuleType<
-      Params,
-      ExtractedParams,
-      RuleState,
-      State,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
-    >,
-    taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext,
-    inMemoryMetrics: InMemoryMetrics
-  ) {
+  constructor({
+    ruleType,
+    taskInstance,
+    taskConfig,
+    context,
+    inMemoryMetrics,
+  }: TaskRunnerConstructorParams<
+    Params,
+    ExtractedParams,
+    RuleState,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >) {
     this.context = context;
     const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
     this.logger = context.logger.get(loggerId);
@@ -142,6 +171,7 @@ export class TaskRunner<
     this.ruleType = ruleType;
     this.ruleConsumer = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    this.taskConfig = taskConfig;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
@@ -714,7 +744,7 @@ export class TaskRunner<
   }
 
   private shouldSkipRun(err: Error) {
-    return isValidationError(err);
+    return this.taskConfig.skip.enabled && isValidationError(err);
   }
 
   async run(): Promise<RuleTaskRunResult> {
@@ -723,7 +753,6 @@ export class TaskRunner<
       startedAt,
       state: originalState,
       schedule: taskSchedule,
-      runAt: originalRunAt,
     } = this.taskInstance;
 
     this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
@@ -753,12 +782,12 @@ export class TaskRunner<
       schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       if (this.shouldSkipRun(err)) {
-        this.logger.debug(
+        this.logger.warn(
           `Task Runner has skipped executing the Rule (${ruleId}) as it has invalid params.`
         );
         return {
           state: originalState,
-          runAt: originalRunAt,
+          schedule: { interval: this.taskConfig.skip.delay },
         };
       }
       stateWithMetrics = asErr(err);

@@ -40,6 +40,7 @@ import {
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
+import { TaskConfig } from '../config';
 
 export interface TaskClaimingOpts {
   logger: Logger;
@@ -49,6 +50,7 @@ export interface TaskClaimingOpts {
   maxAttempts: number;
   excludedTaskTypes: string[];
   getCapacity: (taskType?: string) => number;
+  taskConfig: TaskConfig;
 }
 
 export interface OwnershipClaimingOpts {
@@ -108,6 +110,7 @@ export class TaskClaiming {
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
+  private readonly taskConfig: TaskConfig;
 
   /**
    * Constructs a new TaskStore.
@@ -125,6 +128,7 @@ export class TaskClaiming {
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
+    this.taskConfig = opts.taskConfig;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -224,7 +228,9 @@ export class TaskClaiming {
                 initialCapacity
               );
 
-              const filteredDocs = this.removeDocsWithUnknownParams(docs);
+              const filteredDocs = this.taskConfig.skip.enabled
+                ? this.removeDocsWithUnknownParams(docs)
+                : docs;
 
               return { stats, docs: filteredDocs, timing: stopTaskTimer() };
             })

@@ -39,6 +39,12 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "task": Object {
+          "skip": Object {
+            "delay": "3s",
+            "enabled": true,
+          },
+        },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
@@ -91,6 +97,12 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "task": Object {
+          "skip": Object {
+            "delay": "3s",
+            "enabled": true,
+          },
+        },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
@@ -146,6 +158,12 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "task": Object {
+          "skip": Object {
+            "delay": "3s",
+            "enabled": true,
+          },
+        },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
