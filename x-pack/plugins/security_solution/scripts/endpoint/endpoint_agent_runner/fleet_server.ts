@@ -198,6 +198,7 @@ export const startFleetServerWithDocker = async ({
     log,
     localhostRealIp,
     elastic: { url: elasticUrl, isLocalhost: isElasticOnLocalhost },
+    fleetServer: { port: fleetServerPort },
     kbnClient,
     options: { version },
   } = getRuntimeServices();
@@ -206,7 +207,7 @@ export const startFleetServerWithDocker = async ({
   log.indent(4);
 
   const esURL = new URL(elasticUrl);
-  const containerName = `dev-fleet-server.${esURL.hostname}`;
+  const containerName = `dev-fleet-server.${fleetServerPort}`;
   let esUrlWithRealIp: string = elasticUrl;
 
   if (isElasticOnLocalhost) {
@@ -248,7 +249,7 @@ export const startFleetServerWithDocker = async ({
       `FLEET_SERVER_POLICY=${policyId}`,
 
       '--publish',
-      '8220:8220',
+      `${fleetServerPort}:8220`,
 
       `docker.elastic.co/beats/elastic-agent:${version}`,
     ];
@@ -265,7 +266,7 @@ export const startFleetServerWithDocker = async ({
 (This is ok if one was not running already)`);
       });
 
-    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
+    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:${fleetServerPort}`);
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
