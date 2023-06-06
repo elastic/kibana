@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingPlugin } from './plugin';
 
-const commonConfigSchema = schema.object({
+const integrationConfigSchema = schema.object({
   host: schema.string(),
   secret_token: schema.maybe(schema.string()),
   tls_enabled: schema.boolean(),
@@ -22,8 +22,8 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   config: schema.maybe(
     schema.object({
-      simbolizer: commonConfigSchema,
-      collector: commonConfigSchema,
+      simbolizer: integrationConfigSchema,
+      collector: integrationConfigSchema,
     })
   ),
   elasticsearch: schema.maybe(
@@ -36,7 +36,7 @@ const configSchema = schema.object({
 });
 
 export type ProfilingConfig = TypeOf<typeof configSchema>;
-export type ConfigType = TypeOf<typeof commonConfigSchema>;
+export type IntegrationConfigType = TypeOf<typeof integrationConfigSchema>;
 
 // plugin config
 export const config: PluginConfigDescriptor<ProfilingConfig> = {

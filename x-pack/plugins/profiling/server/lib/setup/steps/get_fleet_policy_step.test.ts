@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ConfigType } from '../../..';
+import { IntegrationConfigType } from '../../..';
 import { getVarsFor } from './get_fleet_policy_step';
 
 describe('getVarsFor', () => {
   it('returns the vars object for the keys defined plus secret token', () => {
-    const config: ConfigType = {
+    const config: IntegrationConfigType = {
       host: 'example.com',
       tls_enabled: true,
       tls_supported_protocols: ['foo', 'bar'],
@@ -31,7 +31,7 @@ describe('getVarsFor', () => {
   });
 
   it('discards secret_token defined and generate a new one', () => {
-    const config: ConfigType = {
+    const config: IntegrationConfigType = {
       host: 'example.com',
       tls_enabled: true,
       tls_supported_protocols: ['foo', 'bar'],

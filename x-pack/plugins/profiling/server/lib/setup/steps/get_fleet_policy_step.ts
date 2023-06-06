@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { merge, omit } from 'lodash';
-import { ConfigType } from '../../..';
+import { IntegrationConfigType } from '../../..';
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
 import { getApmPolicy } from './get_apm_policy';
 
@@ -51,15 +51,15 @@ export function generateSecretToken() {
   return result;
 }
 
-export function getVarsFor(config: ConfigType) {
-  const configKeys = Object.keys(config) as Array<keyof ConfigType>;
+export function getVarsFor(config: IntegrationConfigType) {
+  const configKeys = Object.keys(config) as Array<keyof IntegrationConfigType>;
   const hasSecretToken = configKeys.some((key) => key === 'secret_token');
   if (!hasSecretToken) {
     configKeys.push('secret_token');
   }
 
   return configKeys.reduce<
-    Partial<Record<keyof ConfigType, { type: 'text' | 'bool'; value: any }>>
+    Partial<Record<keyof IntegrationConfigType, { type: 'text' | 'bool'; value: any }>>
   >((acc, currKey) => {
     const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
     const type = typeof value === 'boolean' ? 'bool' : 'text';
