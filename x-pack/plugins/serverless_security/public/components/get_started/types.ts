@@ -28,13 +28,11 @@ export interface Badge {
 
 export interface Step {
   badges: Badge[];
-  done?: boolean;
   description?: string[];
   id: string;
   splitPanel?: React.ReactNode;
   title: string;
   timeInMinutes?: number;
-  icon: EuiIconProps;
 }
 
 export interface Card {
@@ -54,11 +52,17 @@ export enum TogglePanelId {
 
 export interface TogglePanelReducer {
   activeSections: Set<TogglePanelId>;
+  finishedSteps: Record<string, Set<string>>;
 }
 
 export interface TogglePanelAction {
   type: 'toggleSection';
   payload: { section: TogglePanelId };
+}
+
+export interface ToggleStepAction {
+  type: 'addFinishStep';
+  payload: { cardId: string; stepId: string };
 }
 
 export interface Switch {

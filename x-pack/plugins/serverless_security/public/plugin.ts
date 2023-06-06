@@ -45,9 +45,10 @@ export class ServerlessSecurityPlugin
     startDeps: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
     const { securitySolution, serverless } = startDeps;
+    const storage = securitySolution.getStorage();
 
     securitySolution.setIsSidebarEnabled(false);
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps, storage));
     serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
 
     return {};

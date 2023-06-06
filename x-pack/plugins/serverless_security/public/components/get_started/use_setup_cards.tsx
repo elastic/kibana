@@ -9,109 +9,11 @@ import { EuiSpacer, EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { Card, Section, TogglePanelId } from './types';
-import * as i18n from './translations';
-import respond from './images/respond.svg';
-import protect from './images/protect.svg';
-import step from './images/step.svg';
+import { Card, TogglePanelId } from './types';
+
 import { CardItem } from './card_item';
 
-const ActiveConditions = {
-  anyCondition: [TogglePanelId.Analytics, TogglePanelId.Cloud, TogglePanelId.Endpoint],
-  analyticsToggled: [TogglePanelId.Analytics],
-  cloudToggled: [TogglePanelId.Cloud],
-  endpointToggled: [TogglePanelId.Endpoint],
-};
-
-const sections: Section[] = [
-  {
-    id: 'getSetUp',
-    title: i18n.GET_SET_UP_TITLE,
-    cards: [
-      {
-        title: i18n.INTRODUCTION_TITLE,
-        icon: { type: 'securityApp', size: 'xl' },
-        id: 'introduction',
-        activeConditions: ActiveConditions.anyCondition,
-        steps: [
-          {
-            id: 'watchOverviewVideo',
-            icon: { type: step, size: 'm' },
-            title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
-            description: [
-              i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
-              i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION2,
-              i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION3,
-            ],
-            done: false,
-            splitPanel: (
-              <iframe
-                allowFullScreen
-                className="vidyard_iframe"
-                frameBorder="0"
-                height="100%"
-                referrerPolicy="no-referrer"
-                sandbox="allow-scripts allow-same-origin"
-                scrolling="no"
-                src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-                title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
-                width="100%"
-              />
-            ),
-            timeInMinutes: 3,
-            badges: [
-              { id: 'analytics', name: i18n.PRODUCT_BADGE_ANALYTICS },
-              { id: 'cloud', name: i18n.PRODUCT_BADGE_CLOUD },
-              { id: 'edr', name: i18n.PRODUCT_BADGE_EDR },
-            ],
-          },
-        ],
-      },
-      {
-        icon: { type: 'agentApp', size: 'xl' },
-        title: i18n.BRING_IN_YOUR_DATA_TITLE,
-        id: 'bringInYourData',
-        activeConditions: ActiveConditions.anyCondition,
-      },
-      {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
-        id: 'activateAndCreateRules',
-        activeConditions: ActiveConditions.anyCondition,
-      },
-      {
-        icon: { type: protect, size: 'xl' },
-        title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-        id: 'protectYourEnvironmentInRuntime',
-        activeConditions: [...ActiveConditions.cloudToggled, ...ActiveConditions.endpointToggled],
-      },
-    ],
-  },
-  {
-    id: 'getMoreFromElasticSecurity',
-    title: i18n.GET_MORE_TITLE,
-    cards: [
-      {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.MASTER_THE_INVESTIGATION_TITLE,
-        id: 'masterTheInvestigationsWorkflow',
-        activeConditions: ActiveConditions.anyCondition,
-      },
-      {
-        icon: { type: respond, size: 'xl' },
-        title: i18n.RESPOND_TO_THREATS_TITLE,
-        id: 'respondToThreatsWithAutomation',
-        activeConditions: ActiveConditions.anyCondition,
-      },
-      {
-        icon: { type: 'spacesApp', size: 'xl' },
-        title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
-        id: 'optimizeYourWorkspace',
-        activeConditions: ActiveConditions.anyCondition,
-      },
-    ],
-  },
-];
+import { sections } from './sections';
 
 export const useSetUpCardSections = ({
   euiTheme,
@@ -121,15 +23,23 @@ export const useSetUpCardSections = ({
   shadow?: string;
 }) => {
   const setUpCards = useCallback(
-    (cards: Card[] | undefined, activeSections: Set<TogglePanelId>) =>
+    (
+      cards: Card[] | undefined,
+      activeSections: Set<TogglePanelId>,
+      onStepClicked: (params: { stepId: string; cardId: string }) => void,
+      finishedSteps: Record<string, Set<string>>
+    ) =>
       cards?.reduce<React.ReactNode[]>((acc, cardItem) => {
         if (cardItem?.activeConditions?.some((condition) => activeSections.has(condition))) {
+          const stepsDone = finishedSteps[cardItem.id] ?? 0;
           const timeInMins =
             cardItem?.steps?.reduce(
-              (totalMin, { timeInMinutes }) => (totalMin += timeInMinutes ?? 0),
+              (totalMin, { timeInMinutes, id: stepId }) =>
+                (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
               0
             ) ?? 0;
-          const stepsLeft = cardItem?.steps?.filter(({ done }) => !done).length ?? 0;
+          const stepsLeft = (cardItem?.steps?.length ?? 0) - (stepsDone?.size ?? 0);
+
           acc.push(
             <EuiFlexItem key={cardItem.id}>
               <CardItem
@@ -138,6 +48,8 @@ export const useSetUpCardSections = ({
                 cardItem={cardItem}
                 shadow={shadow}
                 euiTheme={euiTheme}
+                onStepClicked={onStepClicked}
+                finishedSteps={finishedSteps}
               />
             </EuiFlexItem>
           );
@@ -148,10 +60,19 @@ export const useSetUpCardSections = ({
   );
 
   const setUpSections = useCallback(
-    (activeSections: Set<TogglePanelId>) =>
+    (
+      activeSections: Set<TogglePanelId>,
+      addFinishedStep: (params: { stepId: string; cardId: string }) => void,
+      finishedSteps: Record<string, Set<string>>
+    ) =>
       activeSections.size > 0
-        ? sections.reduce<React.ReactNode[]>((acc, section) => {
-            const cardNodes = setUpCards(section.cards, activeSections);
+        ? sections.reduce<React.ReactNode[]>((acc, currentSection) => {
+            const cardNodes = setUpCards(
+              currentSection.cards,
+              activeSections,
+              addFinishedStep,
+              finishedSteps
+            );
             if (cardNodes && cardNodes.length > 0) {
               acc.push(
                 <EuiPanel
@@ -164,10 +85,10 @@ export const useSetUpCardSections = ({
                   css={css`
                     margin: ${euiTheme.size.l} 0;
                   `}
-                  key={section.id}
+                  key={currentSection.id}
                 >
                   <EuiTitle size="xxs">
-                    <span>{section.title}</span>
+                    <span>{currentSection.title}</span>
                   </EuiTitle>
                   <EuiSpacer size="m" />
                   <EuiFlexGroup

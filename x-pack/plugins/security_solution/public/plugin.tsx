@@ -316,6 +316,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       setGetStartedPage: (getStartedComponent) => {
         this.getStartedComponent$.next(getStartedComponent);
       },
+      getStorage: () => this.storage,
     };
   }
 

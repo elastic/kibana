@@ -21,12 +21,14 @@ import * as i18n from './translations';
 import { CardStep } from './card_step';
 
 const CardItemComponent: React.FC<{
+  cardItem: Card;
+  euiTheme: EuiThemeComputed;
+  shadow?: string;
   stepsLeft: number;
   timeInMins: number;
-  cardItem: Card;
-  shadow?: string;
-  euiTheme: EuiThemeComputed;
-}> = ({ stepsLeft, timeInMins, shadow, cardItem, euiTheme }) => {
+  onStepClicked: (params: { stepId: string; cardId: string }) => void;
+  finishedSteps: Record<string, Set<string>>;
+}> = ({ stepsLeft, timeInMins, shadow, cardItem, euiTheme, onStepClicked, finishedSteps }) => {
   const [expandCard, setExpandCard] = useState(false);
   const toggleCard = useCallback(
     (e) => {
@@ -83,8 +85,8 @@ const CardItemComponent: React.FC<{
                     line-height: ${euiTheme.base * 2}px;
                   `}
                 >
-                  {stepsLeft && <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>}
-                  {timeInMins && <span> • {i18n.STEP_TIME_MIN(timeInMins)}</span>}
+                  {stepsLeft > 0 && <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>}
+                  {timeInMins > 0 && <span> • {i18n.STEP_TIME_MIN(timeInMins)}</span>}
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -93,7 +95,15 @@ const CardItemComponent: React.FC<{
         {expandCard && cardItem?.steps && (
           <EuiFlexItem>
             {cardItem?.steps?.map((step) => {
-              return <CardStep key={step.id} step={step} />;
+              return (
+                <CardStep
+                  key={step.id}
+                  cardId={cardItem.id}
+                  step={step}
+                  onStepClicked={onStepClicked}
+                  finishedStepsByCard={finishedSteps[cardItem.id]}
+                />
+              );
             })}
           </EuiFlexItem>
         )}

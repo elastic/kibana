@@ -17,34 +17,47 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
-import { Step } from './types';
 
-const CardStepComponent: React.FC<{ step: Step }> = ({ step }) => {
+import { Step } from './types';
+import step from './images/step.svg';
+
+const CardStepComponent: React.FC<{
+  cardId: string;
+  step: Step;
+  onStepClicked: (params: { stepId: string; cardId: string }) => void;
+  finishedStepsByCard: Set<string>;
+}> = ({
+  cardId,
+  step: { id, title, badges, description, splitPanel },
+  onStepClicked,
+  finishedStepsByCard,
+}) => {
   const [expandStep, setExpandStep] = useState(false);
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
       setExpandStep(!expandStep);
+      onStepClicked({ stepId: id, cardId });
     },
-    [expandStep]
+    [cardId, expandStep, id, onStepClicked]
   );
   return (
     <EuiPanel color="plain" grow={false} hasShadow={false} borderRadius="none" paddingSize="l">
       <EuiFlexGroup
         gutterSize="s"
-        onClick={toggleStep}
         css={css`
           cursor: pointer;
         `}
+        onClick={toggleStep}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon {...step.icon} />
+          <EuiIcon type={finishedStepsByCard.has(id) ? 'checkInCircleFilled' : step} size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <strong>
-            {step.title}
-            {step.badges.map((badge) => (
-              <EuiBadge key={`${step.id}-badge-${badge.id}`} color="hollow">
+            {title}
+            {badges.map((badge) => (
+              <EuiBadge key={`${id}-badge-${badge.id}`} color="hollow">
                 {badge.name}
               </EuiBadge>
             ))}
@@ -59,7 +72,7 @@ const CardStepComponent: React.FC<{ step: Step }> = ({ step }) => {
           <EuiIcon size="s" type={expandStep ? 'arrowDown' : 'arrowRight'} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {expandStep && (step.description || step.splitPanel) && (
+      {expandStep && (description || splitPanel) && (
         <EuiSplitPanel.Outer
           direction="row"
           color="plain"
@@ -67,19 +80,19 @@ const CardStepComponent: React.FC<{ step: Step }> = ({ step }) => {
           hasShadow={false}
           borderRadius="none"
         >
-          {step.description && (
+          {description && (
             <EuiSplitPanel.Inner>
               <EuiSpacer size="s" />
               <EuiText size="s">
-                {step.description?.map((desc, index) => (
-                  <p key={`${step.id}-description-${index}`} className="eui-displayBlock">
+                {description?.map((desc, index) => (
+                  <p key={`${id}-description-${index}`} className="eui-displayBlock">
                     {desc}
                   </p>
                 ))}
               </EuiText>
             </EuiSplitPanel.Inner>
           )}
-          {step.splitPanel && <EuiSplitPanel.Inner>{step.splitPanel}</EuiSplitPanel.Inner>}
+          {splitPanel && <EuiSplitPanel.Inner paddingSize="none">{splitPanel}</EuiSplitPanel.Inner>}
         </EuiSplitPanel.Outer>
       )}
     </EuiPanel>

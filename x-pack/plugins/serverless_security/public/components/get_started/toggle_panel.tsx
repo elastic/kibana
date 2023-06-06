@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 
-import { Switch, TogglePanelAction, TogglePanelId, TogglePanelReducer } from './types';
+import {
+  Switch,
+  TogglePanelAction,
+  TogglePanelId,
+  TogglePanelReducer,
+  ToggleStepAction,
+} from './types';
 import * as i18n from './translations';
 import { ProductSwitch } from './product_switch';
 import { useSetUpCardSections } from './use_setup_cards';
+import { useStorage } from './use_storage';
+import { useKibana } from '../../services';
 
-const reducer = (state: TogglePanelReducer, action: TogglePanelAction) => {
+const reducer = (state: TogglePanelReducer, action: TogglePanelAction | ToggleStepAction) => {
   if (action.type === 'toggleSection') {
-    if (state.activeSections.has(action.payload.section)) {
-      state.activeSections.delete(action.payload.section);
+    if (state.activeSections.has(action.payload?.section)) {
+      state.activeSections.delete(action.payload?.section);
     } else {
-      state.activeSections.add(action.payload.section);
+      state.activeSections.add(action.payload?.section);
     }
 
     return {
@@ -28,23 +36,74 @@ const reducer = (state: TogglePanelReducer, action: TogglePanelAction) => {
       activeSections: new Set([...state.activeSections]),
     };
   }
+
+  if (action.type === 'addFinishStep') {
+    state.finishedSteps[action.payload.cardId].add(action.payload.stepId);
+    return {
+      ...state,
+      finishedSteps: {
+        ...state.finishedSteps,
+        [action.payload.cardId]: new Set([...state.finishedSteps[action.payload.cardId]]),
+      },
+    };
+  }
   return state;
 };
 
-const initialState: TogglePanelReducer = { activeSections: new Set<TogglePanelId>() };
-
 const TogglePanelComponent = () => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { storage },
+  } = useKibana();
   const shadow = useEuiShadow('s');
+  const {
+    getAllFinishedStepsFromStorage,
+    getActiveProductsFromStorage,
+    toggleActiveProductsInStorage,
+    addFinishedStepToStorage,
+  } = useStorage(storage);
+  const finishedStepsInitialStates = useMemo(() => {
+    const finishedSteps = getAllFinishedStepsFromStorage();
+    return Object.entries(finishedSteps).reduce<Record<string, Set<string>>>(
+      (acc, [key, value]) => {
+        if (value) {
+          acc[key] = new Set([...Object.keys(value)]);
+        }
+        return acc;
+      },
+      {}
+    );
+  }, [getAllFinishedStepsFromStorage]);
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const activeSectionsInitialStates = useMemo(() => {
+    const activeSections = getActiveProductsFromStorage();
+    return Object.keys(activeSections).reduce((acc, key) => {
+      if (activeSections[key]) {
+        acc.add(key);
+      }
+      return acc;
+    }, new Set<TogglePanelId>());
+  }, [getActiveProductsFromStorage]);
+
+  const [state, dispatch] = useReducer(reducer, {
+    activeSections: activeSectionsInitialStates,
+    finishedSteps: finishedStepsInitialStates,
+  });
   const { setUpSections } = useSetUpCardSections({ euiTheme, shadow });
-  const sections = setUpSections(state.activeSections);
-  const onProductSwitchChanged = useCallback(
-    (item: Switch) => {
-      dispatch({ type: 'toggleSection', payload: { section: item.id } });
+  const onStepClicked = useCallback(
+    ({ stepId, cardId }: { stepId: string; cardId: string }) => {
+      dispatch({ type: 'addFinishStep', payload: { stepId, cardId } });
+      addFinishedStepToStorage(cardId, stepId);
     },
-    [dispatch]
+    [addFinishedStepToStorage]
+  );
+  const sectionNodes = setUpSections(state.activeSections, onStepClicked, state.finishedSteps);
+  const onProductSwitchChanged = useCallback(
+    (section: Switch) => {
+      dispatch({ type: 'toggleSection', payload: { section: section.id } });
+      toggleActiveProductsInStorage(section.id);
+    },
+    [toggleActiveProductsInStorage]
   );
 
   return (
@@ -64,7 +123,7 @@ const TogglePanelComponent = () => {
         grow={1}
       >
         {state.activeSections.size > 0 ? (
-          sections
+          sectionNodes
         ) : (
           <EuiEmptyPrompt
             iconType="magnifyWithExclamation"
