@@ -22,8 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
@@ -184,25 +182,45 @@ export const EngineIndices: React.FC = () => {
             color="warning"
             iconType="warning"
             title={
-              <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title"
-                defaultMessage="{title} of your indices are unavailable."
-                values={{
-                  title: hasAllUnreachableIndices ? 'All' : 'Some',
-                }}
-              />
+              hasAllUnreachableIndices ? (
+                <>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.indices.allUnknownIndicesCallout.title',
+                    { defaultMessage: 'All of your indices are unavailable.' }
+                  )}
+                </>
+              ) : (
+                <>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.indices.someUnknownIndicesCallout.title',
+                    { defaultMessage: 'Some of your indices are unavailable.' }
+                  )}
+                </>
+              )
             }
           >
             <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description"
-                defaultMessage="{description} for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application."
-                values={{
-                  description: hasAllUnreachableIndices
-                    ? 'Your search application has no reachable indices, Add some indices and check '
-                    : 'Some data might be unreachable from this search application. Check',
-                }}
-              />
+              {hasAllUnreachableIndices ? (
+                <>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.indices.AllUnknownIndicesCallout.description',
+                    {
+                      defaultMessage:
+                        'Your search application has no reachable indices, Add some indices and check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
+                    }
+                  )}
+                </>
+              ) : (
+                <>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.indices.SomeUnknownIndicesCallout.description',
+                    {
+                      defaultMessage:
+                        'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
+                    }
+                  )}
+                </>
+              )}
             </p>
           </EuiCallOut>
           <EuiSpacer />
