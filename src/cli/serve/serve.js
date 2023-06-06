@@ -20,6 +20,8 @@ import { readKeystore } from '../keystore/read_keystore';
 /** @type {ServerlessProjectMode[]} */
 const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
 
+const isNotEmpty = _.negate(_.isEmpty);
+
 /**
  * @param {Record<string, unknown>} opts
  * @returns {ServerlessProjectMode | true | null}
@@ -305,8 +307,13 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
+    const cliConfigs = opts.config || [];
+    const envConfigs = getEnvConfigs();
+    const defaultConfig = getConfigPath();
+
+    const configs = [cliConfigs, envConfigs, [defaultConfig]].find(isNotEmpty);
+
     const unknownOptions = this.getUnknownOptions();
-    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
     const serverlessMode = getServerlessProjectMode(opts);
 
     if (serverlessMode) {
