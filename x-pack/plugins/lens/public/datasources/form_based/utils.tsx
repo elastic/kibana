@@ -101,7 +101,8 @@ export function isColumnInvalid(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined
+  dateRange: DateRange | undefined,
+  targetBars: number
 ) {
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
@@ -111,7 +112,9 @@ export function isColumnInvalid(
   const referencesHaveErrors =
     true &&
     'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern, dateRange).filter(Boolean).length);
+    Boolean(
+      getReferencesErrors(layer, column, indexPattern, dateRange, targetBars).filter(Boolean).length
+    );
 
   const operationErrorMessages =
     operationDefinition &&
@@ -120,7 +123,8 @@ export function isColumnInvalid(
       columnId,
       indexPattern,
       dateRange,
-      operationDefinitionMap
+      operationDefinitionMap,
+      targetBars
     );
 
   // it looks like this is just a back-stop since we prevent
@@ -138,7 +142,8 @@ function getReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined
+  dateRange: DateRange | undefined,
+  targetBars: number
 ) {
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
@@ -148,7 +153,8 @@ function getReferencesErrors(
       referenceId,
       indexPattern,
       dateRange,
-      operationDefinitionMap
+      operationDefinitionMap,
+      targetBars
     );
   });
 }

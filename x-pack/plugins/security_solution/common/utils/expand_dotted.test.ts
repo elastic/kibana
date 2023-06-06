@@ -98,4 +98,40 @@ describe('Expand Dotted', () => {
     const simpleDottedObj: string[] = ['hello'];
     expect(expandDottedObject(simpleDottedObj)).toEqual(simpleDottedObj);
   });
+  it('if array has 1 item, it should be taken out of array if expandDottedObject second argument is true', () => {
+    const complexDottedObj = {
+      'kibana.test.1': 'the spice must flow',
+      'kibana.test.2': ['a', 'b', 'c', 'd'],
+      'kibana.test.3': null,
+      'kibana.test.4': ['a'],
+    };
+    expect(expandDottedObject(complexDottedObj, true)).toEqual({
+      kibana: {
+        test: {
+          1: 'the spice must flow',
+          2: ['a', 'b', 'c', 'd'],
+          3: null,
+          4: 'a',
+        },
+      },
+    });
+  });
+  it('if array has 1 item, it should still return an array if expandDottedObject second argument is not set (default)', () => {
+    const complexDottedObj = {
+      'kibana.test.1': 'the spice must flow',
+      'kibana.test.2': ['a', 'b', 'c', 'd'],
+      'kibana.test.3': null,
+      'kibana.test.4': ['a'],
+    };
+    expect(expandDottedObject(complexDottedObj)).toEqual({
+      kibana: {
+        test: {
+          1: 'the spice must flow',
+          2: ['a', 'b', 'c', 'd'],
+          3: null,
+          4: ['a'],
+        },
+      },
+    });
+  });
 });
