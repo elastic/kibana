@@ -99,11 +99,11 @@ export interface IndexViewValues {
   isSyncing: boolean;
   isWaitingForSync: boolean;
   lastUpdated: string | null;
-  localSyncNowValue: boolean; // holds local value after update so UI updates correctly
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
   resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
+  syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
 }
 
 export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
@@ -211,19 +211,18 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
   }),
   path: ['enterprise_search', 'content', 'index_view_logic'],
   reducers: {
-    localSyncNowValue: [
-      false,
-      {
-        fetchIndexApiSuccess: (_, index) =>
-          isConnectorIndex(index) ? index.connector.sync_now : false,
-        startSyncApiSuccess: () => true,
-      },
-    ],
     recheckIndexLoading: [
       false,
       {
         recheckIndex: () => true,
         resetRecheckIndexLoading: () => false,
+      },
+    ],
+    syncTriggeredLocally: [
+      false,
+      {
+        fetchIndexApiSuccess: () => false,
+        startSyncApiSuccess: () => true,
       },
     ],
   },
@@ -306,8 +305,9 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         indexData?.has_in_progress_syncs || syncStatus === SyncStatus.IN_PROGRESS,
     ],
     isWaitingForSync: [
-      () => [selectors.fetchIndexApiData, selectors.localSyncNowValue],
-      (data, localSyncNowValue) => data?.connector?.sync_now || localSyncNowValue,
+      () => [selectors.indexData, selectors.syncTriggeredLocally],
+      (indexData: FetchIndexApiResponse | null, syncTriggeredLocally: boolean) =>
+        indexData?.has_pending_syncs || syncTriggeredLocally || false,
     ],
     lastUpdated: [() => [selectors.fetchIndexApiData], (data) => getLastUpdated(data)],
     pipelineData: [

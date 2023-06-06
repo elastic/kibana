@@ -1,0 +1,51 @@
+# @kbn-doc-linker partial
+
+required:
+  - windowSize
+  - windowUnit
+  - threshold
+  - environment
+  - aggregationType
+properties:
+  serviceName:
+    type: string
+    description: The service name from APM
+  transactionType:
+    type: string
+    description: The transaction type from APM
+  transactionName:
+    type: string
+    description: The transaction name from APM
+  windowSize:
+    type: number
+    description: The window size
+    example: 6
+  windowUnit:
+    type: string
+    description: ç
+    enum:
+      - "m"
+      - "h"
+      - "d"
+  environment:
+    type: string
+  threshold:
+    type: number
+    description: The latency threshold value
+  groupBy:
+    type: array
+    default: ["service.name", "service.environment", "transaction.type"]
+    uniqueItems: true
+    items:
+      type: string
+      enum:
+        - "service.name"
+        - "service.environment"
+        - "transaction.type"
+        - "transaction.name"
+  aggregationType:
+    type: string
+    enum:
+      - avg
+      - 95th
+      - 99th

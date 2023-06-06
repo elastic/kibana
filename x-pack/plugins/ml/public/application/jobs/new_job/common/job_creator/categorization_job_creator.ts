@@ -7,9 +7,14 @@
 
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  type Field,
+  type Aggregation,
+  mlCategory,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, mlCategory } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import {
@@ -19,7 +24,6 @@ import {
   DEFAULT_RARE_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
-import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import {
   CategorizationAnalyzer,
   CategoryFieldExample,

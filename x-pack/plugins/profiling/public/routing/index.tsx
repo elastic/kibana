@@ -9,15 +9,15 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../common/flamegraph';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
-import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../common/flamegraph';
-import { FlameGraphsView } from '../components/flame_graphs_view';
-import { FunctionsView } from '../components/functions_view';
 import { RedirectTo } from '../components/redirect_to';
-import { RouteBreadcrumb } from '../components/route_breadcrumb';
-import { StackTracesView } from '../components/stack_traces_view';
-import { NoDataPage } from '../components/no_data_page';
+import { FlameGraphsView } from '../views/flame_graphs_view';
+import { FunctionsView } from '../views/functions_view';
+import { NoDataView } from '../views/no_data_view';
+import { StackTracesView } from '../views/stack_traces_view';
+import { RouteBreadcrumb } from './route_breadcrumb';
 
 const routes = {
   '/': {
@@ -34,7 +34,7 @@ const routes = {
     children: {
       '/add-data-instructions': {
         element: (
-          <NoDataPage
+          <NoDataView
             subTitle={i18n.translate('xpack.profiling.addDataTitle', {
               defaultMessage: 'Select an option below to deploy the host-agent.',
             })}
