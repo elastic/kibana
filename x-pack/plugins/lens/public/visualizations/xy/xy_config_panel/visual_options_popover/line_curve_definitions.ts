@@ -18,20 +18,20 @@ export interface LineCurveDefinitions {
 export const lineCurveDefinitions: LineCurveDefinitions[] = [
   {
     type: XYCurveTypes.LINEAR,
-    title: i18n.translate('xpack.lens.lineCurve.linear', {
-      defaultMessage: 'Linear',
+    title: i18n.translate('xpack.lens.lineCurve.straight', {
+      defaultMessage: 'Straight',
     }),
-    description: i18n.translate('xpack.lens.lineCurveDescription.linear', {
-      defaultMessage: 'Linear connection between points',
+    description: i18n.translate('xpack.lens.lineCurveDescription.straight', {
+      defaultMessage: 'Straight line between points',
     }),
   },
   {
     type: XYCurveTypes.CURVE_MONOTONE_X,
-    title: i18n.translate('xpack.lens.lineCurve.interpolation', {
-      defaultMessage: 'Interpolation',
+    title: i18n.translate('xpack.lens.lineCurve.smooth', {
+      defaultMessage: 'Smooth',
     }),
-    description: i18n.translate('xpack.lens.lineCurveDescription.interpolation', {
-      defaultMessage: 'Smooth connection between points',
+    description: i18n.translate('xpack.lens.lineCurveDescription.smooth', {
+      defaultMessage: 'Smoothed line between points',
     }),
   },
   {
@@ -40,7 +40,7 @@ export const lineCurveDefinitions: LineCurveDefinitions[] = [
       defaultMessage: 'Step',
     }),
     description: i18n.translate('xpack.lens.lineCurveDescription.step', {
-      defaultMessage: 'Step after connection between points',
+      defaultMessage: 'Stepped line between points',
     }),
   },
 ];
