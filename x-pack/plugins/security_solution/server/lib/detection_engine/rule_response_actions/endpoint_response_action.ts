@@ -14,25 +14,24 @@ import type { RuleResponseEndpointAction } from '../../../../common/detection_en
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
-  { alerts: filteredAlerts }: ResponseActionAlerts
+  { alerts }: ResponseActionAlerts
 ) => {
   const { comment, command } = responseAction.params;
   const commonData = {
     comment,
     command,
-    rule_id: filteredAlerts[0][ALERT_RULE_UUID],
-    rule_name: filteredAlerts[0][ALERT_RULE_NAME],
+    rule_id: alerts[0][ALERT_RULE_UUID],
+    rule_name: alerts[0][ALERT_RULE_NAME],
   };
-  const agentIds = uniq(map(filteredAlerts, 'agent.id'));
-  const alertIds = map(filteredAlerts, '_id');
+  const agentIds = uniq(map(alerts, 'agent.id'));
+  const alertIds = map(alerts, '_id');
 
-  const hosts = filteredAlerts.reduce((acc: Record<string, string>, alert) => {
+  const hosts = alerts.reduce<Record<string, string>>((acc, alert) => {
     if (alert.agent?.name && !acc[alert.agent.id]) {
       acc[alert.agent.id] = alert.agent.name;
     }
     return acc;
   }, {});
-
   return Promise.all(
     each(agentIds, async (agent) =>
       endpointAppContextService.getActionCreateService().createActionFromAlert({

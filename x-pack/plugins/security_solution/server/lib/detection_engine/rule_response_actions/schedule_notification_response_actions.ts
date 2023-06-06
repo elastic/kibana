@@ -25,9 +25,7 @@ export const getScheduleNotificationResponseActionsService =
     endpointAppContextService,
   }: ScheduleNotificationResponseActionsService) =>
   ({ signals, responseActions }: ScheduleNotificationActions) => {
-    const filteredAlerts = (signals as Alert[]).filter(
-      (alert) => alert.agent?.id
-    ) as AlertWithAgent[];
+    const alerts = (signals as Alert[]).filter((alert) => alert.agent?.id) as AlertWithAgent[];
 
     each(responseActions, (responseAction) => {
       if (
@@ -35,12 +33,12 @@ export const getScheduleNotificationResponseActionsService =
         osqueryCreateActionService
       ) {
         osqueryResponseAction(responseAction, osqueryCreateActionService, {
-          alerts: filteredAlerts,
+          alerts,
         });
       }
       if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
         endpointResponseAction(responseAction, endpointAppContextService, {
-          alerts: filteredAlerts,
+          alerts,
         });
       }
     });
