@@ -40,7 +40,7 @@ import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { asNumber } from '../utils/formatters/as_number';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { StackFrameSummary } from './stack_frame_summary';
-import { getTracesViewRouteParams } from './stack_traces_view/utils';
+import { getTracesViewRouteParams } from '../views/stack_traces_view/utils';
 
 export interface SubChartProps {
   index: number;
