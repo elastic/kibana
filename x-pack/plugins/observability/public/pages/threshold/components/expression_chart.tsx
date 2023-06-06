@@ -19,7 +19,9 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { first, last } from 'lodash';
+import moment from 'moment';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   MetricsExplorerAggregation,
@@ -39,7 +41,6 @@ import {
   LoadingState,
   NoDataState,
   TIME_LABELS,
-  tooltipProps,
   getChartTheme,
 } from './criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from './criterion_preview_chart/threshold_annotations';
@@ -195,7 +196,10 @@ export function ExpressionChart({
           />
           <Settings
             onPointerUpdate={handleCursorUpdate}
-            tooltip={tooltipProps}
+            tooltip={{
+              headerFormatter: ({ value }) =>
+                moment(value).format(uiSettings.get(UI_SETTINGS.DATE_FORMAT)),
+            }}
             externalPointerEvents={{
               tooltip: { visible: true },
             }}
