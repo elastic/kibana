@@ -32,6 +32,7 @@ import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -48,6 +49,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     riskEntity: RiskScoreEntity;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
+  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   const queryId = useMemo(
     () =>
       riskEntity === RiskScoreEntity.host
@@ -127,6 +129,10 @@ const RiskDetailsTabBodyComponent: React.FC<
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
+
+  if (RiskScoreUpsell) {
+    return <RiskScoreUpsell />;
+  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (
