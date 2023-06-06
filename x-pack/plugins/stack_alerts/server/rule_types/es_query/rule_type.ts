@@ -129,7 +129,13 @@ export function getRuleType(
   const actionVariableEsqlQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextEsqlQueryLabel',
     {
-      defaultMessage: 'Serialized ESQL query field used to fetch the documents from Elasticsearch.',
+      defaultMessage: 'ESQL query field used to fetch data from Elasticsearch.',
+    }
+  );
+  const actionVariableAlertIdLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextAlertIdLabel',
+    {
+      defaultMessage: 'The string field path used to group alerts.',
     }
   );
 
@@ -164,9 +170,10 @@ export function getRuleType(
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
         { name: 'searchConfiguration', description: actionVariableSearchConfigurationLabel },
-        { name: 'esqlQuery', description: actionVariableEsqlQueryLabel },
         { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'index', description: actionVariableContextIndexLabel },
+        { name: 'esqlQuery', description: actionVariableEsqlQueryLabel },
+        { name: 'alertId', description: actionVariableAlertIdLabel },
       ],
     },
     useSavedObjectReferences: {

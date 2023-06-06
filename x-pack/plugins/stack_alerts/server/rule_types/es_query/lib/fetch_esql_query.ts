@@ -6,12 +6,15 @@
  */
 
 import { entries } from 'lodash';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView, DataViewsContract, getTime } from '@kbn/data-plugin/common';
 import { parseAggregationResults, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlyEsqlQueryRuleParams } from '../types';
+import { getSmallerDataViewSpec } from './fetch_search_source_query';
 
 export type EsqlDocument = Record<string, string | null>;
 
@@ -53,6 +56,7 @@ export async function fetchEsqlQuery({
   params,
   latestTimestamp,
   services,
+  spacePrefix,
 }: FetchEsqlQueryOpts) {
   const { logger, scopedClusterClient, dataViews } = services;
   const esClient = scopedClusterClient.asCurrentUser;
@@ -72,8 +76,19 @@ export async function fetchEsqlQuery({
     body: query,
   });
 
+  const link = await generateLink(
+    params.esqlQuery,
+    response.columns.map((c) => c.name),
+    services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
+    services.dataViews,
+    dataView,
+    dateStart,
+    dateEnd,
+    spacePrefix
+  );
+
   return {
-    link: '', // TODO
+    link,
     numMatches: Number(2),
     parsedResults: parseAggregationResults({
       isCountAgg: false,
@@ -92,12 +107,12 @@ export async function fetchEsqlQuery({
   };
 }
 
-function getEsqlQuery(
+const getEsqlQuery = (
   index: DataView,
   params: OnlyEsqlQueryRuleParams,
   latestTimestamp: string | undefined,
   alertLimit?: number
-) {
+) => {
   const timeFieldName = index.timeFieldName;
 
   if (!timeFieldName) {
@@ -169,7 +184,7 @@ function getEsqlQuery(
     dateStart,
     dateEnd,
   };
-}
+};
 
 const toEsResult = (results: EsqlTable, alertId?: string) => {
   const documentsGrouping = results.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
@@ -212,4 +227,37 @@ const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDoc
 
     return acc;
   }, {});
+};
+
+export const generateLink = async (
+  query: AggregateQuery,
+  columns: string[],
+  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
+  dataViews: DataViewsContract,
+  dataViewToUpdate: DataView,
+  dateStart: string,
+  dateEnd: string,
+  spacePrefix: string
+) => {
+  // make new adhoc data view
+  const newDataView = await dataViews.create({
+    ...dataViewToUpdate.toSpec(false),
+    version: undefined,
+    id: undefined,
+  });
+
+  const redirectUrlParams: DiscoverAppLocatorParams = {
+    dataViewSpec: getSmallerDataViewSpec(newDataView),
+    query,
+    timeRange: { from: dateStart, to: dateEnd },
+    isAlertResults: true,
+    columns,
+  };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
+  const [start, end] = redirectUrl.split('/app');
+
+  return start + spacePrefix + '/app' + end;
 };

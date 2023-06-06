@@ -124,6 +124,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         aggType: params.aggType,
@@ -167,6 +168,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: [],
       link,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         isRecovered: true,
