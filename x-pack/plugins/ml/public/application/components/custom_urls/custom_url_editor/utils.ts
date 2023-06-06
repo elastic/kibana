@@ -17,11 +17,12 @@ import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
+  DEFAULT_RESULTS_FIELD,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 

@@ -12,7 +12,9 @@ import {
   type ISavedObjectTypeRegistry,
   type SavedObjectsType,
   MAIN_SAVED_OBJECT_INDEX,
+  ALL_SAVED_OBJECT_INDICES,
 } from '@kbn/core-saved-objects-server';
+import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
 import {
   clearLog,
   startElasticsearch,
@@ -80,6 +82,7 @@ describe('split .kibana index into multiple system indices', () => {
           types: updatedTypeRegistry.getAllTypes(),
           kibanaIndex: '.kibana',
           logFilePath,
+          defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
         });
 
       const { runMigrations, client } = await migratorTestKitFactory();
@@ -201,6 +204,7 @@ describe('split .kibana index into multiple system indices', () => {
             "enterprise_search_telemetry",
             "epm-packages",
             "epm-packages-assets",
+            "event-annotation-group",
             "event_loop_delays_daily",
             "exception-list",
             "exception-list-agnostic",
@@ -373,8 +377,8 @@ describe('split .kibana index into multiple system indices', () => {
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
-            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.`,
-            `[${index}] MARK_VERSION_INDEX_READY -> DONE.`,
+            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC.`,
+            `[${index}] MARK_VERSION_INDEX_READY_SYNC -> DONE.`,
             `[${index}] Migration completed after`,
           ],
           { ordered: true }
@@ -392,7 +396,6 @@ describe('split .kibana index into multiple system indices', () => {
       const { runMigrations } = await migratorTestKitFactory();
       await clearLog(logFilePath);
       await runMigrations();
-
       const logs = await parseLogFile(logFilePath);
       expect(logs).not.toContainLogEntries(['REINDEX', 'CREATE', 'UPDATE_TARGET_MAPPINGS']);
     });
@@ -404,6 +407,7 @@ describe('split .kibana index into multiple system indices', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/157510
+  // This test takes too long. Can be manually executed to verify the correct behavior.
   describe.skip('when multiple Kibana migrators run in parallel', () => {
     it('correctly migrates 7.7.2_xpack_100k_obj.zip archive', async () => {
       esServer = await startElasticsearch({
@@ -412,15 +416,29 @@ describe('split .kibana index into multiple system indices', () => {
       const esClient = await getEsClient();
 
       const breakdownBefore = await getAggregatedTypesCountAllIndices(esClient);
-      expect(breakdownBefore).toMatchSnapshot('before migration');
+      expect(breakdownBefore).toEqual({
+        '.kibana': {
+          'apm-telemetry': 1,
+          config: 1,
+          dashboard: 52994,
+          'index-pattern': 1,
+          search: 1,
+          space: 1,
+          'ui-metric': 5,
+          visualization: 53004,
+        },
+        '.kibana_task_manager': {
+          task: 5,
+        },
+      });
 
       for (let i = 0; i < PARALLEL_MIGRATORS; ++i) {
         await clearLog(Path.join(__dirname, `dot_kibana_split_instance_${i}.log`));
       }
 
       const testKits = await Promise.all(
-        new Array(PARALLEL_MIGRATORS)
-          .fill({
+        new Array(PARALLEL_MIGRATORS).fill(true).map((_, index) =>
+          getKibanaMigratorTestKit({
             settings: {
               migrations: {
                 discardUnknownObjects: currentVersion,
@@ -429,13 +447,10 @@ describe('split .kibana index into multiple system indices', () => {
             },
             kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
             types: typeRegistry.getAllTypes(),
+            defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+            logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
           })
-          .map((config, index) =>
-            getKibanaMigratorTestKit({
-              ...config,
-              logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
-            })
-          )
+        )
       );
 
       const results = await Promise.all(testKits.map((testKit) => testKit.runMigrations()));
@@ -445,9 +460,30 @@ describe('split .kibana index into multiple system indices', () => {
           .every((result) => result.status === 'migrated' || result.status === 'patched')
       ).toEqual(true);
 
+      await esClient.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+
       const breakdownAfter = await getAggregatedTypesCountAllIndices(esClient);
-      expect(breakdownAfter).toMatchSnapshot('after migration');
-    });
+      expect(breakdownAfter).toEqual({
+        '.kibana': {
+          'apm-telemetry': 1,
+          config: 1,
+          space: 1,
+          'ui-metric': 5,
+        },
+        '.kibana_alerting_cases': {},
+        '.kibana_analytics': {
+          dashboard: 52994,
+          'index-pattern': 1,
+          search: 1,
+          visualization: 53004,
+        },
+        '.kibana_ingest': {},
+        '.kibana_security_solution': {},
+        '.kibana_task_manager': {
+          task: 5,
+        },
+      });
+    }, 1200000);
 
     afterEach(async () => {
       await esServer?.stop();

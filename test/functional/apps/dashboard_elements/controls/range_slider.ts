@@ -15,10 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
+  const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -229,6 +230,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardControls.rangeSliderGetDualRangeAttribute(secondId, 'disabled')
         ).to.be('true');
         expect((await testSubjects.getVisibleText('rangeSlider__helpText')).length).to.be.above(0);
+      });
+    });
+
+    describe('interaction', async () => {
+      it('Malformed query throws an error', async () => {
+        await queryBar.setQuery('AvgTicketPrice <= 300 error');
+        await queryBar.submitQuery();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('control-frame-error');
+      });
+
+      it('Can recover from malformed query error', async () => {
+        await queryBar.setQuery('AvgTicketPrice <= 300');
+        await queryBar.submitQuery();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('control-frame-error');
+      });
+
+      it('Applies dashboard query to range slider control', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderWaitForLoading();
+        await dashboardControls.validateRange('placeholder', firstId, '100', '300');
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
       });
     });
   });

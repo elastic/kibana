@@ -14,7 +14,7 @@ import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/consta
 import { EndpointAuthorizationError, NotFoundError } from '../../errors';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import type { FleetFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { FleetFromHostFileClientInterface } from '@kbn/fleet-plugin/server';
 
 jest.mock('../../services');
 
@@ -67,16 +67,15 @@ describe('Response Action file info API', () => {
 
   describe('Route handler', () => {
     let fileInfoHandler: ReturnType<typeof getActionFileInfoRouteHandler>;
-    let fleetFilesClientMock: jest.Mocked<FleetFileClientInterface>;
+    let fleetFilesClientMock: jest.Mocked<FleetFromHostFileClientInterface>;
 
     beforeEach(async () => {
       fileInfoHandler = getActionFileInfoRouteHandler(apiTestSetup.endpointAppContextMock);
 
       validateActionIdMock.mockImplementation(async () => {});
 
-      fleetFilesClientMock = (await apiTestSetup.endpointAppContextMock.service.getFleetFilesClient(
-        'from-host'
-      )) as jest.Mocked<FleetFileClientInterface>;
+      fleetFilesClientMock =
+        (await apiTestSetup.endpointAppContextMock.service.getFleetFromHostFilesClient()) as jest.Mocked<FleetFromHostFileClientInterface>;
     });
 
     it('should error if action ID is invalid', async () => {
