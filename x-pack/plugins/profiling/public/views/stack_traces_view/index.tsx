@@ -14,11 +14,11 @@ import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
-import { AsyncComponent } from '../async_component';
-import { ChartGrid } from '../chart_grid';
-import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
-import { StackedBarChart } from '../stacked_bar_chart';
+import { AsyncComponent } from '../../components/async_component';
+import { ChartGrid } from '../../components/chart_grid';
+import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
+import { StackedBarChart } from '../../components/stacked_bar_chart';
 import { getStackTracesTabs } from './get_stack_traces_tabs';
 import { getTracesViewRouteParams } from './utils';
 
