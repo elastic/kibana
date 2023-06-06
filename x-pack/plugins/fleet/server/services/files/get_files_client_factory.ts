@@ -8,7 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LoggerFactory } from '@kbn/core/server';
 
+import { FILE_STORAGE_INTEGRATION_INDEX_NAMES } from '../../../common/constants';
+
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
+
+import { FleetFilesClientError } from '../../errors';
 
 import { FleetToHostFilesClient } from './client_to_host';
 
@@ -27,6 +31,12 @@ export const getFilesClientFactory = ({
 }: GetFilesClientFactoryParams): FilesClientFactory => {
   return {
     fromHost: (packageName) => {
+      if (!FILE_STORAGE_INTEGRATION_INDEX_NAMES[packageName]?.fromHost) {
+        throw new FleetFilesClientError(
+          `Integration name [${packageName}] does not have access to files received from host`
+        );
+      }
+
       return new FleetFromHostFilesClient(
         esClient,
         logger.get('fleetFiles', packageName),
@@ -36,6 +46,12 @@ export const getFilesClientFactory = ({
     },
 
     toHost: (packageName, maxFileBytes) => {
+      if (!FILE_STORAGE_INTEGRATION_INDEX_NAMES[packageName]?.toHost) {
+        throw new FleetFilesClientError(
+          `Integration name [${packageName}] does not have access to files for delivery to host`
+        );
+      }
+
       return new FleetToHostFilesClient(
         esClient,
         logger.get('fleetFiles', packageName),
