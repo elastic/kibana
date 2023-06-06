@@ -178,14 +178,26 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       break;
     }
 
-    if (aggResults.length === 0) {
-      return { items: [], total: 0, page, perPage };
+    const firstItemsIndexInPage = (page - 1) * perPage;
+    const isCurrentPageEmpty = firstItemsIndexInPage >= aggResults.length;
+    if (isCurrentPageEmpty) {
+      return { items: [], total: aggResults.length, page, perPage };
     }
 
+    const getCreatedAt = (soBucket: UninstallTokenSOAggregationBucket) =>
+      new Date(soBucket.latest.hits.hits[0]._source?.created_at ?? Date.now()).getTime();
+
+    // sort buckets by  { created_at: 'desc' }
+    // this is done with `slice()` instead of ES, because
+    // 1) the query below doesn't support pagination, so we need to slice the IDs here,
+    // 2) the query above doesn't support bucket sorting based on sub aggregation, see this:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#_ordering_by_a_sub_aggregation
+    aggResults.sort((a, b) => getCreatedAt(b) - getCreatedAt(a));
+
     const filter: string = aggResults
-      .filter(({ latest }) => latest?.hits?.hits?.at(0)?._id)
+      .slice((page - 1) * perPage, page * perPage)
       .map(({ latest }) => {
-        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${latest?.hits?.hits?.at(0)?._id}"`;
+        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${latest.hits.hits[0]._id}"`;
       })
       .join(' or ');
 
@@ -193,19 +205,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
         {
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-          perPage,
+          perPage: SO_SEARCH_LIMIT,
           filter,
         }
       );
     let tokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
 
-    let currentPage = 1;
     for await (const result of tokensFinder.find()) {
-      if (currentPage === page) {
-        tokenObjects = result.saved_objects;
-        break;
-      }
-      currentPage++;
+      tokenObjects = result.saved_objects;
+      break;
     }
     tokensFinder.close();
 
