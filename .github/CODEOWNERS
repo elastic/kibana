@@ -67,6 +67,7 @@ packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
+x-pack/plugins/cloud_integrations/cloud_chat_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboarding
 x-pack/plugins/cloud_defend @elastic/sec-cloudnative-integrations
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
