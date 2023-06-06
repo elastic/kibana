@@ -12,10 +12,6 @@ import { isEqual } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { parse, stringify } from 'query-string';
 
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
-import { parseUrlQueryParams } from './utils';
-import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
-
 import type {
   FilterOptions,
   PartialFilterOptions,
@@ -24,6 +20,11 @@ import type {
   PartialQueryParams,
   ParsedUrlQueryParams,
 } from '../../../common/ui/types';
+
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
+import { parseUrlQueryParams } from './utils';
+import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
+import { SORT_ORDER_VALUES } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 export const getQueryParamsLocalStorageKey = (appId: string) => {
@@ -64,6 +65,15 @@ const getQueryParams = (
   result.page = params.page ?? urlParams.page ?? DEFAULT_QUERY_PARAMS.page;
 
   return result;
+};
+
+const validateQueryParams = (queryParams: QueryParams): QueryParams => {
+  queryParams.perPage = Math.min(queryParams.perPage, 100);
+
+  if (!SORT_ORDER_VALUES.includes(queryParams.sortOrder))
+    queryParams.sortOrder = DEFAULT_QUERY_PARAMS.sortOrder;
+
+  return queryParams;
 };
 
 const getFilterOptions = (
@@ -128,11 +138,11 @@ export function useAllCasesState(
 
       const parsedUrlParams: ParsedUrlQueryParams = parse(location.search);
       const urlParams: PartialQueryParams = parseUrlQueryParams(parsedUrlParams);
-      const newQueryParams: QueryParams = getQueryParams(
-        params,
-        urlParams,
-        localStorageQueryParams
-      );
+
+      let newQueryParams: QueryParams = getQueryParams(params, urlParams, localStorageQueryParams);
+
+      newQueryParams = validateQueryParams(newQueryParams);
+
       const newLocalStorageQueryParams = {
         perPage: newQueryParams.perPage,
         sortField: newQueryParams.sortField,

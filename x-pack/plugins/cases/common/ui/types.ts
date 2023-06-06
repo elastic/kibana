@@ -110,6 +110,8 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
+export const SORT_ORDER_VALUES: Array<SortingParams['sortOrder']> = ['asc', 'desc'];
+
 export interface SortingParams {
   sortField: SortFieldCase;
   sortOrder: 'asc' | 'desc';
