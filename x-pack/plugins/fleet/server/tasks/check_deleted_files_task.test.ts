@@ -96,7 +96,10 @@ describe('check deleted files task', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({
+        taskInstance,
+        taskConfig: { skip: { enabled: false, delay: '3s' } },
+      });
       return taskRunner.run();
     };
 
