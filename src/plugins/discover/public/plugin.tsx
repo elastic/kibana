@@ -72,11 +72,8 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import {
-  CustomizationCallback,
-  createProfileRegistry,
-  createCustomizeFunction,
-} from './customizations';
+import type { CustomizationCallback } from './customizations';
+import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')

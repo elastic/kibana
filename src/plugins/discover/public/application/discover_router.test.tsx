@@ -15,7 +15,7 @@ import { CustomDiscoverRoutes, DiscoverRouter, DiscoverRoutes } from './discover
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
-import { createProfileRegistry } from '../customizations';
+import { createProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 import { NotFoundRoute } from './not_found';
 

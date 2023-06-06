@@ -16,7 +16,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
-import { createCustomizationService, DiscoverCustomizationService } from '../../customizations';
+import {
+  createCustomizationService,
+  DiscoverCustomizationService,
+} from '../../customizations/customization_service';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
