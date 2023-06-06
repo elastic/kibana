@@ -269,7 +269,7 @@ export class SavedObjectsService
       this.logger.info('!!!!!!!About to start migrations!!!!!!!');
       // Pretend to be busy...
       await new Promise((res) => {
-        setTimeout(res, 10_000);
+        setTimeout(res, 1_000 * 60 * 5);
       });
 
       throw new Error('!!!!!FAKE FAILURE!!!!!');
