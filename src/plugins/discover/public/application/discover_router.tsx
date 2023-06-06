@@ -19,7 +19,8 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import type { CustomizationCallback, DiscoverProfileRegistry } from '../customizations';
+import type { CustomizationCallback } from '../customizations';
+import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 
 interface DiscoverRoutesProps {

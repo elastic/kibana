@@ -16,11 +16,8 @@ import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
-import type {
-  DiscoverCustomizationId,
-  SearchBarCustomization,
-  TopNavCustomization,
-} from '../../../../customizations';
+import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
+import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 
 setHeaderActionMenuMounter(jest.fn());
 
