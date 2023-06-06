@@ -219,7 +219,9 @@ export function getPossibleFunctions(
   available.forEach((a) => {
     if (a.operationMetaData.dataType === 'number' && !a.operationMetaData.isBucketed) {
       possibleOperationNames.push(
-        ...a.operations.filter((o) => o.type !== 'managedReference').map((o) => o.operationType)
+        ...a.operations
+          .filter((o) => o.type !== 'managedReference' || o.usedInMath)
+          .map((o) => o.operationType)
       );
     }
   });
@@ -607,7 +609,7 @@ function getSignaturesForFunction(
         }
       : null;
 
-    const functionLabel = getFunctionSignatureLabel(name, operationDefinitionMap, firstParam);
+    const functionLabel = getFunctionSignatureLabel(name, operationDefinitionMap);
     const documentation = getOperationTypeHelp(name, operationDefinitionMap);
     if ('operationParams' in def && def.operationParams) {
       return [
