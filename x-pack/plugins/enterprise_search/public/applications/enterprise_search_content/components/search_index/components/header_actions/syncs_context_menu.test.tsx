@@ -77,7 +77,7 @@ describe('SyncsContextMenu', () => {
       .find(EuiContextMenuPanel)
       .find(EuiResizeObserver)
       .find(EuiContextMenuItem);
-    expect(menuItems).toHaveLength(3);
+    expect(menuItems).toHaveLength(1);
 
     const lastButton = menuItems.at(2);
 
@@ -100,7 +100,7 @@ describe('SyncsContextMenu', () => {
       .find(EuiContextMenuPanel)
       .find(EuiResizeObserver)
       .find(EuiContextMenuItem);
-    expect(menuItems).toHaveLength(4);
+    expect(menuItems).toHaveLength(2);
 
     const firstButton = menuItems.get(0);
 
