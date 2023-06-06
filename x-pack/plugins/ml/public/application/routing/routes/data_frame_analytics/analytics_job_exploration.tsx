@@ -6,17 +6,14 @@
  */
 
 import React, { FC } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import { useUrlState } from '@kbn/ml-url-state';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
+import { basicResolvers } from '../../resolvers';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { basicResolvers } from '../../resolvers';
+import { createPath, MlRoute, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
@@ -25,7 +22,7 @@ export const analyticsJobExplorationRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: createPath(ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   title: i18n.translate('xpack.ml.dataFrameAnalytics.exploration.docTitle', {
     defaultMessage: 'Results Explorer',
   }),
@@ -40,14 +37,8 @@ export const analyticsJobExplorationRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    basicResolvers(deps)
-  );
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
 
   const [globalState] = useUrlState('_g');
   const jobId: string = globalState?.ml.jobId;

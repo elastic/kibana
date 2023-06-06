@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { cacheDataViewsContract, loadSavedSearches } from '../util/index_utils';
-import { checkFullLicense } from '../license';
-import { checkGetJobsCapabilitiesResolver } from '../capabilities/check_capabilities';
+import { loadSavedSearches } from '../util/index_utils';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
 
@@ -19,19 +16,8 @@ export interface ResolverResults {
   [name: string]: any;
 }
 
-interface BasicResolverDependencies {
-  dataViewsContract: DataViewsContract;
-  redirectToMlAccessDeniedPage: () => Promise<void>;
-}
-
-export const basicResolvers = ({
-  dataViewsContract,
-  redirectToMlAccessDeniedPage,
-}: BasicResolverDependencies): Resolvers => ({
-  checkFullLicense,
+export const basicResolvers = (): Resolvers => ({
   getMlNodeCount,
   loadMlServerInfo,
-  cacheDataViewsContract: () => cacheDataViewsContract(dataViewsContract),
-  checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
   loadSavedSearches,
 });

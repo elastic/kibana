@@ -6,20 +6,14 @@
  */
 
 import React, { FC } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
-
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { checkBasicLicense } from '../../../license';
-import { cacheDataViewsContract } from '../../../util/index_utils';
-import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 
 enum MODE {
   NEW_JOB,
@@ -188,25 +182,17 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
     },
   } = useMlKibana();
 
-  const { redirectToMlAccessDeniedPage } = deps;
-
   const newJobResolvers = {
-    ...basicResolvers(deps),
+    ...basicResolvers(),
     preConfiguredJobRedirect: () =>
       preConfiguredJobRedirect(deps.dataViewsContract, basePath.get(), navigateToUrl),
   };
-  const dataVizResolvers = {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-  };
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
+  const { context } = useRouteResolver(
+    mode === MODE.NEW_JOB ? 'full' : 'basic',
+    // TODO check if this capability is actually needed for the data fiz
+    ['canGetJobs'],
+    mode === MODE.NEW_JOB ? newJobResolvers : {}
   );
   return (
     <PageLoader context={context}>
