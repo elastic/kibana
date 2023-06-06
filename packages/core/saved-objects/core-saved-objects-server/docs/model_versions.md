@@ -27,7 +27,7 @@ For our managed offering however, where we're planning on decoupling deployments
 (deploying more often, so more than once per stack release), it would have been an issue, as it wouldn't have been possible
 to add a new migration in-between 2 stack versions.
 
-<img src="mv_img_1.png" alt="multiple migration per stack version schema">
+<img src="./assets/mv_img_1.png" alt="multiple migration per stack version schema">
 
 We needed a way to decouple SO versioning from the stack versioning to support this, and model versions do by design.
 
