@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
-import { useRouteBreadcrumb } from './contexts/route_breadcrumbs_context/use_route_breadcrumb';
+import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { useRouteBreadcrumb } from '../components/contexts/route_breadcrumbs_context/use_route_breadcrumb';
 
 export const RouteBreadcrumb = ({
   title,

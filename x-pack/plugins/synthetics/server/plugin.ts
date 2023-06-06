@@ -20,7 +20,6 @@ import { initSyntheticsServer } from './server';
 import { initUptimeServer } from './legacy_uptime/uptime_server';
 import { uptimeFeature } from './feature';
 import {
-  KibanaTelemetryAdapter,
   UptimeCorePluginsSetup,
   UptimeCorePluginsStart,
   UptimeServerSetup,
@@ -101,11 +100,6 @@ export class Plugin implements PluginType {
     initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
 
     registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
-
-    KibanaTelemetryAdapter.registerUsageCollector(
-      plugins.usageCollection,
-      () => this.savedObjectsClient
-    );
 
     return {
       ruleRegistry: ruleDataClient,

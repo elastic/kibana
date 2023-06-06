@@ -37,8 +37,8 @@ import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alertin
 import { Query, BoolQuery } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import { fromQuery, toQuery } from '../../utils/url';
 import {
   defaultTimeRange,
@@ -66,7 +66,6 @@ import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import type { AlertStatus } from '../../../common/typings';
-import type { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
@@ -87,7 +86,7 @@ export function RuleDetailsPage() {
     share: {
       url: { locators },
     },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
