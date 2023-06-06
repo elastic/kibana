@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useMemo, useCallback, CSSProperties } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
 import memoize from 'memoize-one';
 import { i18n } from '@kbn/i18n';
@@ -54,7 +54,7 @@ const currentDocumentSelector = (s: PreviewState) => s.documents[s.currentIdx];
 
 interface RowProps {
   index: number;
-  style: CSSProperties;
+  style: React.CSSProperties;
   data: { filteredFields: DocumentField[]; toggleIsPinned: PreviewController['togglePinnedField'] };
 }
 
@@ -218,7 +218,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
         <VirtualList
           className="eui-scrollBar"
           style={{ overflowX: 'hidden' }}
-          width={'100%'}
+          width="100%"
           height={listHeight}
           itemData={itemData}
           itemCount={filteredFields.length}

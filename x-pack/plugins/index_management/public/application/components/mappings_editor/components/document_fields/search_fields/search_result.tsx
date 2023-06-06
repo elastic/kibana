@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import VirtualList from 'react-virtualized/dist/commonjs/List';
-import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
+import React from 'react';
+import { FixedSizeList as VirtualList, areEqual } from 'react-window';
+import memoize from 'memoize-one';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,6 +23,39 @@ interface Props {
 
 const ITEM_HEIGHT = 64;
 
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    result: Props['result'];
+    status: Props['documentFieldsState']['status'];
+    fieldToEdit: Props['documentFieldsState']['fieldToEdit'];
+  };
+}
+
+const Row = React.memo<RowProps>(({ data, index, style }) => {
+  // Data passed to List as "itemData" is available as props.data
+  const { fieldToEdit, result, status } = data;
+  const item = result[index];
+
+  return (
+    <div key={item.field.id} style={style}>
+      <SearchResultItem
+        item={item}
+        areActionButtonsVisible={status === 'idle'}
+        isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
+        isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
+      />
+    </div>
+  );
+}, areEqual);
+
+const createItemData = memoize((result, status, fieldToEdit) => ({
+  result,
+  status,
+  fieldToEdit,
+}));
+
 export const SearchResult = React.memo(
   ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
     const dispatch = useDispatch();
@@ -32,23 +65,7 @@ export const SearchResult = React.memo(
       dispatch({ type: 'search:update', value: '' });
     };
 
-    const rowRenderer = useCallback(
-      ({ index, style }) => {
-        const item = result[index];
-
-        return (
-          <div key={item.field.id} style={style}>
-            <SearchResultItem
-              item={item}
-              areActionButtonsVisible={status === 'idle'}
-              isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
-              isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
-            />
-          </div>
-        );
-      },
-      [fieldToEdit, result, status]
-    );
+    const itemData = createItemData(result, status, fieldToEdit);
 
     return result.length === 0 ? (
       <EuiEmptyPrompt
@@ -72,20 +89,17 @@ export const SearchResult = React.memo(
         }
       />
     ) : (
-      <AutoSizer disableHeight>
-        {({ width }) => (
-          <VirtualList
-            data-test-subj="mappingsEditorSearchResult"
-            style={{ overflowX: 'hidden', ...virtualListStyle }}
-            width={width}
-            height={listHeight}
-            rowCount={result.length}
-            rowHeight={ITEM_HEIGHT}
-            overscanRowCount={4}
-            rowRenderer={rowRenderer}
-          />
-        )}
-      </AutoSizer>
+      <VirtualList
+        data-test-subj="mappingsEditorSearchResult"
+        style={{ overflowX: 'hidden', ...virtualListStyle }}
+        width="100%"
+        height={listHeight}
+        itemData={itemData}
+        itemCount={result.length}
+        itemSize={ITEM_HEIGHT}
+      >
+        {Row}
+      </VirtualList>
     );
   }
 );
