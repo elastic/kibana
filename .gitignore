@@ -22,6 +22,7 @@ target
 *.log
 types.eslint.config.js
 __tmp__
+.buildkite/scripts/node_publish/nodejs_build/workdir
 
 # Ignore example plugin builds
 /examples/*/build

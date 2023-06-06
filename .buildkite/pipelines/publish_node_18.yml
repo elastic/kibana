@@ -1,0 +1,6 @@
+steps:
+  - command: .buildkite/scripts/node_publish/publish_node_18.sh
+    label: Build and upload custom node 18 build
+    agents:
+      queue: kibana-default
+    timeout_in_minutes: 20
