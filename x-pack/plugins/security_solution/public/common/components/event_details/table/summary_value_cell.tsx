@@ -47,7 +47,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
         <SecurityCellActions
           field={{
             name: data.field,
-            value: values && values.length > 0 ? values[0] : '',
+            value: values,
             type: data.type,
             aggregatable: fieldFromBrowserField?.aggregatable,
           }}
