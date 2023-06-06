@@ -27,6 +27,5 @@
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
-    "@kbn/ui-theme",
   ]
 }
