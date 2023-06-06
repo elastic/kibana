@@ -8,7 +8,7 @@
 import { QUERY_INPUT } from '../screens/indicators';
 
 /**
- * Nvigate to specific page in indicators table
+ * Navigate to specific page in indicators table
  */
 export const navigateToIndicatorsTablePage = (index: number) => {
   cy.get(`[data-test-subj="pagination-button-${index}"]`).click();

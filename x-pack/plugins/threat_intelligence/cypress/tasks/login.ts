@@ -19,10 +19,6 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/co
 import type { ROLES } from './privileges';
 
 const LOGIN_API_ENDPOINT = '/internal/security/login';
-const LOGOUT_URL = '/logout';
-
-export const hostDetailsUrl = (hostName: string) =>
-  `/app/security/hosts/${hostName}/authentications`;
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -127,33 +123,6 @@ export const postRoleAndUser = (role: ROLES) => {
   // post the user associated with the role to elasticsearch
   cy.exec(`bash ${detectionsUserScriptPath} ${detectionsUserJsonPath}`, {
     env,
-  });
-};
-
-export const deleteRoleAndUser = (role: ROLES) => {
-  const env = getCurlScriptEnvVars();
-  const detectionsUserDeleteScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/delete_detections_user.sh`;
-
-  // delete the role
-  cy.exec(`bash ${detectionsUserDeleteScriptPath}`, {
-    env,
-  });
-};
-
-export const loginWithUser = (user: User) => {
-  cy.request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: user.username,
-        password: user.password,
-      },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    method: 'POST',
-    url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
   });
 };
 
@@ -301,61 +270,6 @@ export const getEnvAuth = (): User => {
 
     return user;
   }
-};
-
-/**
- * Authenticates with Kibana, visits the specified `url`, and waits for the
- * Kibana global nav to be displayed before continuing
- */
-export const loginAndWaitForPage = (
-  url: string,
-  role?: ROLES,
-  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void
-) => {
-  login(role);
-  cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
-    {
-      onBeforeLoad(win) {
-        if (onBeforeLoadCallback) {
-          onBeforeLoadCallback(win);
-        }
-      },
-    }
-  );
-  cy.get('[data-test-subj="headerGlobalNav"]');
-};
-export const waitForPage = (url: string) => {
-  cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
-  );
-  cy.get('[data-test-subj="headerGlobalNav"]');
-};
-
-export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  login(role);
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
-};
-
-export const loginWithUserAndWaitForPage = (url: string, user: User) => {
-  loginWithUser(user);
-  cy.visit(constructUrlWithUser(user, url));
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
-};
-
-export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
-  loginAndWaitForPage(hostDetailsUrl(hostName));
-  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
-};
-
-export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
-};
-
-export const logout = () => {
-  cy.visit(LOGOUT_URL);
 };
 
 export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {

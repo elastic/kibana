@@ -6,10 +6,6 @@
  */
 
 import { recurse } from 'cypress-recurse';
-import {
-  CREATE_NEW_TIMELINE,
-  TIMELINE_SETTINGS_ICON,
-} from '@kbn/security-solution-plugin/cypress/screens/timeline';
 import { openBarchartPopoverMenu } from './common';
 import {
   CLOSE_TIMELINE_BTN,
@@ -109,12 +105,4 @@ export const investigateInTimelineFromTable = () => {
  */
 export const investigateInTimelineFromFlyout = () => {
   cy.get(FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM).should('exist').first().click();
-};
-
-export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
-  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
 };

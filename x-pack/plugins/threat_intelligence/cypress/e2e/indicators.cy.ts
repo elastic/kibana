@@ -58,11 +58,8 @@ const URL_WITH_CONTRADICTORY_FILTERS =
 
 describe('Invalid Indicators', () => {
   describe('verify the grid loads even with missing fields', () => {
-    before(() => {
-      esArchiverLoad('threat_intelligence/invalid_indicators_data');
-    });
-
     beforeEach(() => {
+      esArchiverLoad('threat_intelligence/invalid_indicators_data');
       login();
       visit(THREAT_INTELLIGENCE);
     });
@@ -112,11 +109,8 @@ describe('Invalid Indicators', () => {
   });
 
   describe('verify the grid loads even with missing mappings and missing fields', () => {
-    before(() => {
-      esArchiverLoad('threat_intelligence/missing_mappings_indicators_data');
-    });
-
     beforeEach(() => {
+      esArchiverLoad('threat_intelligence/missing_mappings_indicators_data');
       login();
       visit(THREAT_INTELLIGENCE);
     });
@@ -189,11 +183,8 @@ describe('Indicators', () => {
       cy.get(`${FILTERS_GLOBAL_CONTAINER} ${TIME_RANGE_PICKER}`).should('exist');
 
       cy.get(`${FIELD_SELECTOR}`).should('exist');
-    });
 
-    it('should show the indicator flyout on ioc click', () => {
-      // Just to know that the data is loaded. This will be replaced with some better mechanism.
-      cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 1-25 of');
+      cy.log('should show the indicator flyout on ioc click');
 
       openFlyout(1);
 
@@ -219,7 +210,9 @@ describe('Indicators', () => {
       visit(THREAT_INTELLIGENCE);
     });
 
-    it('should narrow the results to url indicators when respective KQL search is executed', () => {
+    it('should handle all search actions', () => {
+      cy.log('should narrow the results to url indicators when respective KQL search is executed');
+
       enterQuery('threat.indicator.type: "url"{enter}');
 
       // Check if query results are narrowed after search
@@ -231,28 +224,22 @@ describe('Indicators', () => {
       cy.get(INDICATOR_TYPE_CELL).should('not.contain.text', 'url');
 
       clearQuery();
-    });
 
-    it('should go to the 2nd page', () => {
+      cy.log('should go to the 2nd page');
+
       navigateToIndicatorsTablePage(1);
 
       cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 26-50 of');
-    });
 
-    it('should go to page 1 when search input is cleared', () => {
+      cy.log('should go to page 1 when search input is cleared');
       cy.get(QUERY_INPUT).should('exist').focus();
       cy.get(QUERY_INPUT).clear();
       cy.get(QUERY_INPUT).type('{enter}');
 
       cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 1-25 of');
-    });
 
-    it('should reload the data when refresh button is pressed', () => {
+      cy.log('should reload the data when refresh button is pressed');
       cy.intercept(/bsearch/).as('search');
-
-      cy.get(REFRESH_BUTTON).should('exist').click();
-
-      cy.wait('@search');
 
       cy.get(REFRESH_BUTTON).should('exist').click();
 
@@ -267,13 +254,15 @@ describe('Indicators', () => {
       waitForPageToBeLoaded();
     });
 
-    it('should not display the table when contradictory filters are set', () => {
+    it('should handle no match search criterie', () => {
+      cy.log('not display the table when contradictory filters are set');
+
       cy.get(FLYOUT_TABLE).should('not.exist');
 
       cy.get(EMPTY_STATE).should('exist').and('contain.text', 'No results');
-    });
 
-    it('should have the default selected field, then update when user selects', () => {
+      cy.log('have the default selected field, then update when user selects');
+
       const threatFeedName = 'threat.feed.name';
       cy.get(`${FIELD_SELECTOR_INPUT}`).eq(0).should('have.text', threatFeedName);
 

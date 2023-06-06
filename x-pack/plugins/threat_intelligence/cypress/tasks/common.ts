@@ -7,7 +7,6 @@
 
 import {
   MANAGE_NAVIGATION_ITEMS,
-  SECURITY_SOLUTION_NAVBAR_CASES_ITEM,
   SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM,
   SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM,
   UPDATE_STATUS,
@@ -36,13 +35,6 @@ export const navigateToBlocklist = () => {
  */
 export const navigateToThreatIntelligence = () => {
   cy.get(SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM).click();
-};
-
-/**
- * Navigate to Cases screen via the Security Solution navbar
- */
-export const navigateToCases = () => {
-  cy.get(SECURITY_SOLUTION_NAVBAR_CASES_ITEM).click();
 };
 
 /**
@@ -96,5 +88,6 @@ export const waitForViewToBeUpdated = () => {
  * Open barchart 3-dot popover menu
  */
 export const openBarchartPopoverMenu = () => {
+  cy.get(BARCHART_POPOVER_BUTTON).first().scrollIntoView();
   cy.get(BARCHART_POPOVER_BUTTON).should('exist').first().click();
 };

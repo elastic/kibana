@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { openBarchartPopoverMenu } from './common';
 import {
   QUERY_BAR,
   QUERY_BAR_MENU_REMOVE_ALL_FILTERS_BUTTON,
@@ -29,6 +30,7 @@ import {
  * Filter in value by clicking on the menu item within barchart popover
  */
 export const filterInFromBarChartLegend = () => {
+  openBarchartPopoverMenu();
   cy.get(BARCHART_FILTER_IN_BUTTON).should('exist').click();
 };
 
@@ -36,6 +38,7 @@ export const filterInFromBarChartLegend = () => {
  * Filter out value by clicking on the menu item within barchart popover
  */
 export const filterOutFromBarChartLegend = () => {
+  openBarchartPopoverMenu();
   cy.get(BARCHART_FILTER_OUT_BUTTON).should('exist').click();
 };
 
@@ -70,7 +73,10 @@ export const filterOutFromTableCell = () => {
  * Clears all filters within KQL bar
  */
 export const clearKQLBar = () => {
+  cy.get(QUERY_BAR).scrollIntoView();
   cy.get(QUERY_BAR).within(() => cy.get(QUERY_BAR_MENU).click());
+
+  cy.get(QUERY_BAR_MENU_REMOVE_ALL_FILTERS_BUTTON).scrollIntoView();
   cy.get(QUERY_BAR_MENU_REMOVE_ALL_FILTERS_BUTTON).click();
 };
 
