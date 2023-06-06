@@ -34,7 +34,7 @@ import {
 function throwNotFoundIfApmSchemaNotAvailable(
   featureFlags: ApmFeatureFlags
 ): void {
-  if (!featureFlags.schemaAvailable) {
+  if (!featureFlags.fleetMigrationAvailable) {
     throw Boom.notFound();
   }
 }
@@ -140,6 +140,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   ): Promise<{
     cloudApmPackagePolicy: PackagePolicy;
   }> => {
+    throwNotFoundIfApmSchemaNotAvailable(resources.featureFlags);
     const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 

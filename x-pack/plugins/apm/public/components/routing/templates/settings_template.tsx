@@ -46,7 +46,9 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const agentConfigurationAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.AgentConfigurationAvailable
   );
-  const schemaAvailable = useApmFeatureFlag(ApmFeatureFlagName.SchemaAvailable);
+  const schemaAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.FleetMigrationAvailable
+  );
   const indicesAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.ConfigurableIndicesAvailable
   );
