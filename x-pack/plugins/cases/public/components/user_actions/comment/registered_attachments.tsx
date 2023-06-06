@@ -48,29 +48,28 @@ type BuilderArgs<C, R> = Pick<
 };
 
 /**
- * Provides a render function for attachment type
+ * Provides a render function for attachment type.
+ * memoize uses the first argument as the caching key.
+ * The argument is intentionally declared and unused to
+ * be able for TS to warn us in case we forgot to provide one.
  */
-const getAttachmentRenderer = (cachingKey: string) =>
-  memoize(
-    () => {
-      let AttachmentElement: React.ReactElement;
+const getAttachmentRenderer = memoize((cachingKey: string) => {
+  let AttachmentElement: React.ReactElement;
 
-      const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
-        if (!attachmentViewObject.children) return;
+  const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
+    if (!attachmentViewObject.children) return;
 
-        if (!AttachmentElement) {
-          AttachmentElement = React.createElement(attachmentViewObject.children, props);
-        } else {
-          AttachmentElement = React.cloneElement(AttachmentElement, props);
-        }
+    if (!AttachmentElement) {
+      AttachmentElement = React.createElement(attachmentViewObject.children, props);
+    } else {
+      AttachmentElement = React.cloneElement(AttachmentElement, props);
+    }
 
-        return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
-      };
+    return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
+  };
 
-      return renderCallback;
-    },
-    () => cachingKey
-  );
+  return renderCallback;
+});
 
 export const createRegisteredAttachmentUserActionBuilder = <
   C extends CommentResponse,
@@ -124,7 +123,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
 
-    const renderer = getAttachmentRenderer(userAction.id)();
+    const renderer = getAttachmentRenderer(userAction.id);
     const actions = attachmentViewObject.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
