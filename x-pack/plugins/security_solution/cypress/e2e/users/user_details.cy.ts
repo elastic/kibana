@@ -21,7 +21,7 @@ import {
 import { USER_COLUMN } from '../../screens/alerts';
 
 describe('user details flyout', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     login();
   });
