@@ -35,12 +35,9 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const { featureIds = [] } = request.query;
-        let start = new Date().getTime();
         const indices = await alertsClient.getAuthorizedAlertsIndices(
           Array.isArray(featureIds) ? featureIds : [featureIds]
         );
-        console.log('security', new Date().getTime() - start);
-        start = new Date().getTime();
         const o11yIndices =
           indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
         if (o11yIndices.length === 0) {
@@ -57,7 +54,6 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
-        console.log('fetch browserfields', new Date().getTime() - start);
         return response.ok({
           body: fields,
         });
