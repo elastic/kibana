@@ -11,13 +11,7 @@ import { Logger } from '@kbn/logging';
 import { ProfilingConfig } from '../..';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
-export interface ProfilingSetupStep {
-  name: string;
-  init: () => Promise<void>;
-  hasCompleted: () => Promise<boolean>;
-}
-
-export interface ProfilingSetupStepFactoryOptions {
+export interface ProfilingSetupOptions {
   client: ProfilingESClient;
   soClient: SavedObjectsClientContract;
   packagePolicyClient: PackagePolicyClient;
