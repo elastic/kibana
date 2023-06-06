@@ -2,7 +2,6 @@
   "search_application.post_behavioral_analytics_event": {
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/post-analytics-collection-event.html",
     "patterns": [
-      "_application/analytics/{collection_name}/event/{event_type}",
       "_application/analytics/{collection_name}/event/click",
       "_application/analytics/{collection_name}/event/page_view",
       "_application/analytics/{collection_name}/event/search"
