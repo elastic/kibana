@@ -1791,7 +1791,7 @@ describe('migrations v2 model', () => {
 
       test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);
@@ -2052,7 +2052,7 @@ describe('migrations v2 model', () => {
       });
       test('DONE_REINDEXING_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);
@@ -2971,10 +2971,10 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.none as Option.None,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY', () => {
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const newState = model(createNewTargetState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -2988,7 +2988,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS resets the retry count and delay', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const testState = {
           ...createNewTargetState,
@@ -2997,7 +2997,7 @@ describe('migrations v2 model', () => {
         };
 
         const newState = model(testState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });

@@ -15,7 +15,6 @@ import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
-import type { ObservabilityAppServices } from '../../../application/types';
 import type { TopAlert } from '../../../typings/alerts';
 
 export interface HeaderActionsProps {
@@ -29,7 +28,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { rule, reloadRule } = useFetchRule({
     http,

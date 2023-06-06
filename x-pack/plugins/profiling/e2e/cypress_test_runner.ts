@@ -41,6 +41,9 @@ export async function cypressTestRunner({
     auth: `${username}:${password}`,
   });
 
+  // Ensure Fleet setup is complete
+  await axios.post(`${kibanaUrlWithAuth}/api/fleet/setup`, {}, { headers: { 'kbn-xsrf': true } });
+
   const profilingResources = await axios.get<{ has_setup: boolean; has_data: boolean }>(
     `${kibanaUrlWithAuth}/api/profiling/v1/setup/es_resources`,
     { headers: { 'kbn-xsrf': true } }
