@@ -167,6 +167,14 @@ const configSchema = schema.object(
       }
     ),
     restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
+    version: schema.object({
+      // Which handler resolution algo to use: "newest" or "oldest"
+      handlerResolution: schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
+        defaultValue: 'oldest',
+      }),
+      // Whether we enforce version checks on client requests
+      strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+    }),
   },
   {
     validate: (rawConfig) => {
