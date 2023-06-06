@@ -50,6 +50,12 @@ describe('rule_loader', () => {
     spaceId,
     ruleTypeRegistry,
     alertingEventLogger,
+    taskConfig: {
+      skip: {
+        enabled: false,
+        delay: '3s',
+      },
+    },
   };
 
   beforeEach(() => {
@@ -191,6 +197,12 @@ describe('rule_loader', () => {
           ...DefaultLoadRuleParams,
           context,
           paramValidator: undefined,
+          taskConfig: {
+            skip: {
+              enabled: true,
+              delay: '3s',
+            },
+          },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         '"[name]: expected value of type [string] but got [undefined]"'

@@ -71,6 +71,12 @@ const pluginInitializerContextParams = {
     warn_threshold: 5000,
   },
   worker_utilization_running_average_window: 5,
+  task: {
+    skip: {
+      enabled: false,
+      delay: '3s',
+    },
+  },
 };
 
 describe('TaskManagerPlugin', () => {

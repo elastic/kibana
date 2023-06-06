@@ -132,6 +132,7 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
             ...getSource(references, source),
+            taskConfig,
           });
         } catch (e) {
           logger.error(`Action '${actionId}' failed: ${e.message}`);

@@ -36,6 +36,12 @@ import {
 
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
+const mockedTaskConfig = {
+  skip: {
+    enabled: false,
+    delay: '3s',
+  },
+};
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -1685,6 +1691,7 @@ describe('TaskManagerRunner', () => {
         monitor: true,
         warn_threshold: 5000,
       },
+      taskConfig: mockedTaskConfig,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

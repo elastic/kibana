@@ -14,6 +14,12 @@ import { JsonValue } from '@kbn/utility-types';
 beforeEach(() => {
   jest.resetAllMocks();
 });
+const mockedTaskConfig = {
+  skip: {
+    enabled: false,
+    delay: '3s',
+  },
+};
 
 describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
@@ -50,6 +56,7 @@ describe('createMonitoringStatsStream', () => {
       warn_threshold: 5000,
     },
     worker_utilization_running_average_window: 5,
+    task: mockedTaskConfig,
   };
 
   it('returns the initial config used to configure Task Manager', async () => {

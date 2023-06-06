@@ -13,6 +13,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
 import {
   validateParams,
   validateConfig,
@@ -66,6 +67,7 @@ export interface ExecuteOptions<Source = unknown> {
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
+  taskConfig: TaskConfig;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -100,6 +102,7 @@ export class ActionExecutor {
     consumer,
     relatedSavedObjects,
     actionExecutionId,
+    taskConfig,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -160,6 +163,7 @@ export class ActionExecutor {
               secrets,
               rawAction,
               isPreconfigured,
+              taskConfig,
             },
             { configurationUtilities }
           );
@@ -487,6 +491,7 @@ interface ValidateActionOpts {
   secrets: unknown;
   rawAction: RawAction;
   isPreconfigured?: boolean;
+  taskConfig: TaskConfig;
 }
 
 function validateAction(
@@ -498,6 +503,7 @@ function validateAction(
     secrets,
     rawAction,
     isPreconfigured = false,
+    taskConfig,
   }: ValidateActionOpts,
   validatorServices: ValidatorServices
 ) {
@@ -515,7 +521,9 @@ function validateAction(
         secrets,
       });
     }
-    validateRawAction({ isPreconfigured, rawAction });
+    if (taskConfig.skip.enabled) {
+      validateRawAction({ isPreconfigured, rawAction });
+    }
 
     return { validatedParams, validatedConfig, validatedSecrets };
   } catch (err) {

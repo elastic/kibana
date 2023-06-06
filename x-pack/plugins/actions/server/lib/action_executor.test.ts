@@ -36,6 +36,12 @@ const executeParams = {
   executionId: '123abc',
   request: {} as KibanaRequest,
   actionExecutionId: '2',
+  taskConfig: {
+    skip: {
+      enabled: false,
+      delay: '3s',
+    },
+  },
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
@@ -878,7 +884,10 @@ describe('action executor', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-    const result = await actionExecutor.execute(executeParams);
+    const result = await actionExecutor.execute({
+      ...executeParams,
+      taskConfig: { skip: { enabled: true, delay: '3s' } },
+    });
 
     expect(result).toEqual({
       actionId: '1',

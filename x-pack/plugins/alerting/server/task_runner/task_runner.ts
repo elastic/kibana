@@ -627,6 +627,7 @@ export class TaskRunner<
         spaceId,
         context: this.context,
         ruleTypeRegistry: this.ruleTypeRegistry,
+        taskConfig: this.taskConfig,
       });
       this.alertingEventLogger.start(runDate);
       this.alertingEventLogger.setRuleName(ruleData.rule.name);
