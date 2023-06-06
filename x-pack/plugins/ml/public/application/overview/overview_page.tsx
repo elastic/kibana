@@ -9,7 +9,7 @@ import React, { FC, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { checkPermission } from '../capabilities/check_capabilities';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
@@ -25,9 +25,9 @@ import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 
 export const OverviewPage: FC = () => {
   const serverless = useIsServerless();
-  const canViewMlNodes = checkPermission('canViewMlNodes');
+  const [canViewMlNodes, canCreateJob] = usePermissionCheck(['canViewMlNodes', 'canCreateJob']);
 
-  const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
+  const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
   const {
     services: { docLinks },
   } = useMlKibana();

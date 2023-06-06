@@ -21,7 +21,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 
 import { firstValueFrom } from 'rxjs';
-import { mlCapabilities } from './capabilities/check_capabilities';
+import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -58,12 +58,14 @@ export function isServerless() {
  */
 export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
   const httpService = new HttpService(httpStart);
+  const mlApiServices = mlApiServicesProvider(httpService);
+
   return {
     httpService,
-    mlApiServices: mlApiServicesProvider(httpService),
+    mlApiServices,
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     isServerless,
-    mlCapabilities,
+    mlCapabilities: new MlCapabilitiesService(mlApiServices),
   };
 }
 

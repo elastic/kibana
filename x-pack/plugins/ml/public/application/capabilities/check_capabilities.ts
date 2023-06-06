@@ -6,23 +6,59 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, timer, from } from 'rxjs';
+import { distinctUntilChanged, retry, switchMap, tap } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
-import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
+import {
+  MlCapabilities,
+  getDefaultCapabilities,
+  MlCapabilitiesKey,
+} from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import type { MlApiServices } from '../services/ml_api_service';
+import { type MlApiServices, ml } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
+const CAPABILITIES_REFRESH_INTERVAL = 60000;
+
 export class MlCapabilitiesService {
+  private _isLoading$ = new BehaviorSubject<boolean>(true);
+
+  /**
+   * Updates on manual request, e.g. in the route resolver.
+   * @private
+   */
+  private _updateRequested$ = new BehaviorSubject<number>(Date.now());
+
   private _capabilities$ = new BehaviorSubject<MlCapabilities>(getDefaultCapabilities());
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
+
+  constructor(private readonly mlApiServices: MlApiServices) {
+    this.init();
+  }
+
+  private init() {
+    const subscription = combineLatest([
+      this._updateRequested$,
+      timer(0, CAPABILITIES_REFRESH_INTERVAL),
+    ])
+      .pipe(
+        tap(() => {
+          this._isLoading$.next(true);
+        }),
+        switchMap(() => from(this.mlApiServices.checkMlCapabilities())),
+        retry({ delay: CAPABILITIES_REFRESH_INTERVAL })
+      )
+      .subscribe((results) => {
+        this._capabilities$.next(results.capabilities);
+        this._isLoading$.next(false);
+      });
+  }
 
   public getCapabilities(): MlCapabilities {
     return this._capabilities$.getValue();
@@ -31,20 +67,26 @@ export class MlCapabilitiesService {
   public updateCapabilities(update: MlCapabilities) {
     this._capabilities$.next(update);
   }
+
+  public refreshCapabilities() {
+    this._updateRequested$.next(Date.now());
+  }
 }
 
 /**
  * TODO should be initialized in getMlGlobalServices
  * Temp solution to make it work with the current setup.
  */
-export const mlCapabilities = new MlCapabilitiesService();
+export const mlCapabilities = new MlCapabilitiesService(ml);
 
 /**
  * Check the privilege type and the license to see whether a user has permission to access a feature.
  *
  * @param capability
  */
-export function usePermissionCheck(capability: keyof MlCapabilities) {
+export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesKey[]>(
+  capability: T
+): T extends MlCapabilitiesKey ? boolean : boolean[] {
   const {
     services: {
       mlServices: { mlCapabilities: mlCapabilitiesService },
@@ -52,11 +94,15 @@ export function usePermissionCheck(capability: keyof MlCapabilities) {
   } = useMlKibana();
 
   const licenseHasExpired = hasLicenseExpired();
+
   const capabilities = useObservable(
     mlCapabilitiesService.capabilities$,
     mlCapabilitiesService.getCapabilities()
   );
-  return capabilities[capability] && !licenseHasExpired;
+
+  return Array.isArray(capability)
+    ? capability.map((c) => capabilities[c] && !licenseHasExpired)
+    : capabilities[capability] && !licenseHasExpired;
 }
 
 export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {

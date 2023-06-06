@@ -67,10 +67,10 @@ export interface PageDependencies {
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
-export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
+export const PageLoader: FC<{ context: MlContextValue | null }> = ({ context, children }) => {
   return (
     <EuiSkeletonText lines={10} isLoading={context === null}>
-      <MlContext.Provider value={context}>{children}</MlContext.Provider>
+      <MlContext.Provider value={context!}>{children}</MlContext.Provider>
     </EuiSkeletonText>
   );
 };

@@ -30,7 +30,7 @@ export class MlLicense {
   private _isTrialLicense: boolean = false;
 
   public setup(license$: Observable<ILicense>, callback?: (lic: MlLicense) => void) {
-    this._licenseSubscription = license$.subscribe(async (license) => {
+    this._licenseSubscription = license$.subscribe((license) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
       this._license = license;

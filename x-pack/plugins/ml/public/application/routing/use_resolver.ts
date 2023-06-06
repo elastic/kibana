@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { parse } from 'query-string';
+import { MlCapabilitiesKey } from '../../../common/types/capabilities';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { getSavedSearch } from '../util/dependency_cache';
 import {
   getDataViewById,
@@ -18,9 +22,131 @@ import {
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import type { ResolverResults, Resolvers } from './resolvers';
 import type { MlContextValue } from '../contexts/ml';
-import { useNotifications } from '../contexts/kibana';
+import { useMlKibana, useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/locator';
+
+/**
+ * Resolves required dependencies for landing on the page
+ * @param license
+ * @param requiredCapabilities
+ */
+export const useRouteResolver = (
+  license: 'full' | 'basic',
+  requiredCapabilities: MlCapabilitiesKey[],
+  customResolvers?: Resolvers
+): { context: MlContextValue | null; results: ResolverResults } => {
+  const [context, setContext] = useState<MlContextValue | null>(null);
+  const [results, setResults] = useState<any>(null);
+
+  const location = useLocation();
+  const { index: dataViewId, savedSearchId } = parse(location.search, {
+    sort: false,
+  }) as { index: string; savedSearchId: string };
+
+  const {
+    services: {
+      mlServices: { mlCapabilities },
+      uiSettings,
+      data: { dataViews },
+    },
+  } = useMlKibana();
+
+  useEffect(
+    function refreshCapabilitiesOnMount() {
+      mlCapabilities.refreshCapabilities();
+    },
+    [mlCapabilities]
+  );
+
+  // Check if the user has all required permissions
+  const capabilitiesResults = usePermissionCheck(requiredCapabilities);
+
+  /**
+   * Resolve data view or saved search if exist in the URL.
+   */
+  const resolveDataSource = useCallback(async () => {
+    if (dataViewId === '') {
+      throw new Error(
+        i18n.translate('xpack.ml.useResolver.errorIndexPatternIdEmptyString', {
+          defaultMessage: 'dataViewId must not be empty string.',
+        })
+      );
+    }
+
+    let dataViewAndSavedSearch: DataViewAndSavedSearch = {
+      savedSearch: null,
+      dataView: null,
+    };
+    let savedSearch = null;
+
+    if (savedSearchId !== undefined) {
+      savedSearch = await getSavedSearch().get(savedSearchId);
+      dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
+    } else if (dataViewId !== undefined) {
+      dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
+    }
+
+    const { savedSearch: deprecatedSavedSearchObj, dataView } = dataViewAndSavedSearch;
+
+    const { combinedQuery } = createSearchItems(
+      uiSettings,
+      dataView !== null ? dataView : undefined,
+      deprecatedSavedSearchObj
+    );
+
+    return {
+      combinedQuery,
+      currentDataView: dataView,
+      deprecatedSavedSearchObj,
+      selectedSavedSearch: savedSearch,
+    };
+  }, [dataViewId, savedSearchId, uiSettings]);
+
+  const resolveCustomResolvers = useCallback(async () => {
+    if (!customResolvers) return;
+
+    const funcNames = Object.keys(customResolvers); // Object.entries gets this wrong?!
+    const funcs = Object.values(customResolvers); // Object.entries gets this wrong?!
+    const tempResults = funcNames.reduce((p, c) => {
+      p[c] = {};
+      return p;
+    }, {} as ResolverResults);
+    const res = await Promise.all(funcs.map((r) => r()));
+    res.forEach((r, i) => (tempResults[funcNames[i]] = r));
+
+    return res;
+  }, [customResolvers]);
+
+  if (capabilitiesResults.some((v) => v === false)) {
+    // Redirect to access denied
+    // return '';
+  }
+
+  useEffect(
+    function resolveOnMount() {
+      Promise.all([resolveDataSource(), resolveCustomResolvers()])
+        .then(([partialContext, customResults]) => {
+          setResults(customResults);
+
+          setContext({
+            ...partialContext,
+            dataViewsContract: dataViews,
+            kibanaConfig: uiSettings,
+          } as MlContextValue);
+        })
+        .catch((e) => {
+          // TODO add error handling
+          console.log(e, '___e___');
+        });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+    // [dataViews, uiSettings, resolveDataSource, resolveCustomResolvers]
+  );
+
+  return { context, results };
+};
 
 /**
  * Hook to resolve route specific requirements
