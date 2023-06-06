@@ -22,7 +22,7 @@ export const useRootNavLink = (linkId: SecurityPageName): NavigationLink | undef
   return useNavLinks().find(({ id }) => id === linkId);
 };
 
-const findLinkWithId = (
+export const findLinkWithId = (
   linkId: SecurityPageName,
   navLinks: NavigationLink[]
 ): NavigationLink | undefined => {

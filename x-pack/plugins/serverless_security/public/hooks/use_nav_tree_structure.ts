@@ -7,79 +7,83 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { useRootNavLink } from './use_nav_links';
+import { NavigationLink } from '@kbn/security-solution-plugin/public/common/links';
+import { useNavLinks } from './use_nav_links';
 
-type NavTreeStructureLinks = Array<Omit<NavTreeStructure, 'links'>>;
-type NavTreeStructure =
+export type NavTreeStructure =
   | {
       id: SecurityPageName;
       appId?: undefined;
       label?: undefined;
-      links?: NavTreeStructureLinks;
+      /**
+       * When defined it overrides the default links for the page
+       */
+      links?: NavTreeStructure[];
     }
   | {
       id?: undefined;
       appId: 'dev_tools' | 'discover' | 'ml' | 'fleet';
       label: string;
-      links?: NavTreeStructureLinks;
+      /**
+       * When defined it overrides the default links for the page
+       */
+      links?: NavTreeStructure[];
     };
 
+export const getNavTreeStructure = (navLinks: NavigationLink[]): NavTreeStructure[] => {
+  return [
+    {
+      id: SecurityPageName.dashboards,
+    },
+    {
+      id: SecurityPageName.alerts,
+    },
+    {
+      id: SecurityPageName.cloudSecurityPostureFindings,
+    },
+    {
+      id: SecurityPageName.case,
+    },
+    {
+      id: SecurityPageName.timelines,
+    },
+    {
+      id: SecurityPageName.threatIntelligenceIndicators,
+    },
+    {
+      id: SecurityPageName.exploreLanding,
+    },
+    {
+      appId: 'fleet',
+      label: 'Assets',
+    },
+    {
+      id: SecurityPageName.rules,
+      links: [],
+    },
+    {
+      appId: 'ml',
+      label: 'Machine Learning',
+    },
+    {
+      appId: 'dev_tools',
+      label: 'Dev Tools',
+    },
+    {
+      id: SecurityPageName.landing,
+    },
+    {
+      id: SecurityPageName.administration,
+    },
+  ];
+};
 /**
  * It return the basic information of the navigation tree structure.
  * It must be enhanced with extra information before used by UI components.
  */
 export const useNavTreeStructure = (): NavTreeStructure[] => {
-  const dashboards = useRootNavLink(SecurityPageName.dashboards);
-  const explore = useRootNavLink(SecurityPageName.exploreLanding);
+  const navLinks = useNavLinks();
+  const result = useMemo(() => getNavTreeStructure(navLinks), [navLinks]);
 
-  return useMemo(
-    () => [
-      {
-        id: SecurityPageName.dashboards,
-        links: [...[...(dashboards?.links?.map(({ id }) => ({ id })) ?? [])]],
-      },
-      {
-        id: SecurityPageName.alerts,
-      },
-      {
-        id: SecurityPageName.cloudSecurityPostureFindings,
-      },
-      {
-        id: SecurityPageName.case,
-      },
-      {
-        appId: 'discover',
-        label: 'Investigation',
-      },
-      {
-        id: SecurityPageName.threatIntelligenceIndicators,
-      },
-      {
-        id: SecurityPageName.exploreLanding,
-        links: [...[...(explore?.links?.map(({ id }) => ({ id })) ?? [])]],
-      },
-      {
-        appId: 'fleet',
-        label: 'Assets',
-      },
-      {
-        id: SecurityPageName.rules,
-      },
-      {
-        appId: 'ml',
-        label: 'Machine Learning',
-      },
-      {
-        appId: 'dev_tools',
-        label: 'Dev Tools',
-      },
-      {
-        id: SecurityPageName.landing,
-      },
-      {
-        id: SecurityPageName.administration,
-      },
-    ],
-    [dashboards, explore]
-  );
+  return result;
 };

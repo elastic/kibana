@@ -28,7 +28,7 @@ export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['soluti
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
 
   useBreadcrumbs({
-    isEnabled: true, // TODO: use isSidebarEnabled$ when serverless breadcrumb is ready
+    isEnabled: !!isSidebarEnabled,
   });
 
   if (!isSidebarEnabled) {

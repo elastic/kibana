@@ -6,6 +6,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { NavigationLink } from '@kbn/security-solution-plugin/public/common/links';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { getSecurityGetStartedComponent } from './components/get_started';
 import { getSecuritySideNavComponent } from './components/side_navigation';
 import {
@@ -16,6 +18,8 @@ import {
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './components/upselling';
+import { getNavTreeStructure, NavTreeStructure } from './hooks/use_nav_tree_structure';
+import { findLinkWithId } from './hooks/use_nav_links';
 
 export class ServerlessSecurityPlugin
   implements
@@ -49,9 +53,51 @@ export class ServerlessSecurityPlugin
     securitySolution.setIsSidebarEnabled(false);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
     serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
+    securitySolution.getNavLinks$().subscribe((navLinks) => {
+      serverless.setNavigation({
+        homeRef: '/security',
+        // TODO wait for `projectNavigationTree` to be available in the API
+        projectNavigationTree: getProjectNavigationTree(navLinks),
+      });
+    });
 
     return {};
   }
 
   public stop() {}
 }
+
+/**
+ * Returns all the the navigation tree, including external links.
+ * It will be used to automatically generate breadcrumbs.
+ */
+export const getProjectNavigationTree = (
+  navLinks: NavigationLink[],
+  navTreeStructure?: NavTreeStructure[]
+  // TODO import `ProjectNavigationTreeDefinition` when it is available
+): ProjectNavigationTreeDefinition[] => {
+  const navTree = navTreeStructure ?? getNavTreeStructure(navLinks);
+  return navTree.reduce<ProjectNavigationTreeDefinition>((items, { id, appId, links, label }) => {
+    if (appId) {
+      items.push({
+        link: appId,
+        title: label,
+      });
+      return items;
+    }
+
+    items.push({
+      link: id,
+      children: links
+        ? getProjectNavigationTree(navLinks, links) // overwrites default nav links for the page
+        : getNavLinkChildren(id, navLinks), // inherits default nav links for the page
+    });
+
+    return items;
+  }, []);
+};
+
+const getNavLinkChildren = (navId: SecurityPageName, navLinks: NavigationLink[]) => {
+  const navLink = findLinkWithId(navId, navLinks);
+  return navLink?.links?.map(({ id }) => ({ id }));
+};

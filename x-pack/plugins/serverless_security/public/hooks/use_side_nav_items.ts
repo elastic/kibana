@@ -10,8 +10,9 @@ import { matchPath, useLocation } from 'react-router-dom';
 import { partition } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import { NavigationLink } from '@kbn/security-solution-plugin/public/common/links';
 import { useKibana } from '../services';
-import { useGetLinkProps } from './use_link_props';
+import { GetLinkProps, useGetLinkProps } from './use_link_props';
 import { useNavTreeStructure } from './use_nav_tree_structure';
 import { useFindNavLink } from './use_nav_links';
 
@@ -59,7 +60,7 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
           items.push({
             id: appId,
             label,
-            href: getUrlForApp(appId),
+            ...getLinkProps({ appId }),
           });
           return items;
         }
@@ -82,56 +83,50 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
             label: navLink.title,
             ...getLinkProps({ deepLinkId: navLink.id }),
             ...(navLink.categories?.length && { categories: navLink.categories }),
+
+            // Overwrites navLinks definition with customized subLinks
             ...(links?.length && {
-              items: links.reduce<SolutionSideNavItem[]>((acc, current) => {
-                const navLinkChild = id ? findNavLink(id) : undefined;
+              items: links.reduce<SolutionSideNavItem[]>((acc, child) => {
+                const navLinkChild = child.id ? findNavLink(child.id) : undefined;
 
                 if (navLinkChild && !navLinkChild.disabled) {
-                  acc.push({
-                    id: navLinkChild.id,
-                    label: navLinkChild.title,
-                    description: navLinkChild.description,
-                    isBeta: navLinkChild.isBeta,
-                    betaOptions: navLinkChild.betaOptions,
-                    ...getLinkProps({ deepLinkId: navLinkChild.id }),
-                  });
+                  acc.push(navLink2SolutionSideNavItem(navLinkChild, getLinkProps));
                 }
                 return acc;
               }, []),
+            }),
+
+            ...(!links && {
+              items: navLink.links
+                ? navLink.links.reduce<SolutionSideNavItem[]>((acc, navLinkChild) => {
+                    if (navLinkChild && !navLinkChild.disabled) {
+                      acc.push(navLink2SolutionSideNavItem(navLinkChild, getLinkProps));
+                    }
+                    return acc;
+                  }, [])
+                : undefined,
             }),
           });
         }
         return items;
       }, []),
-    [findNavLink, getLinkProps, getUrlForApp, navTreeStructure]
+    [findNavLink, getLinkProps, navTreeStructure]
   );
 
-  const sideNavItems = useAddExternalSideNavItems(securitySideNavItems);
-
-  return sideNavItems;
+  return securitySideNavItems;
 };
 
-/**
- * @param securitySideNavItems the sideNavItems for Security pages
- * @returns sideNavItems with Security and external links
- */
-const useAddExternalSideNavItems = (securitySideNavItems: SolutionSideNavItem[]) => {
-  const sideNavItemsWithExternals = useMemo(
-    () => [
-      ...securitySideNavItems,
-      // TODO: add external links. e.g.:
-      // {
-      //   id: 'ml',
-      //   label: 'Machine Learning Jobs',
-      //   ...getLinkProps({ appId: 'ml', path: '/jobs' }),
-      //   links: [...]
-      // },
-    ],
-    [securitySideNavItems]
-  );
-
-  return sideNavItemsWithExternals;
-};
+const navLink2SolutionSideNavItem = (
+  navLink: NavigationLink,
+  getLinkProps: GetLinkProps
+): SolutionSideNavItem => ({
+  id: navLink.id,
+  label: navLink.title,
+  description: navLink.description,
+  isBeta: navLink.isBeta,
+  betaOptions: navLink.betaOptions,
+  ...getLinkProps({ deepLinkId: navLink.id }),
+});
 
 /**
  * Partitions the sideNavItems into main and footer SideNavItems
