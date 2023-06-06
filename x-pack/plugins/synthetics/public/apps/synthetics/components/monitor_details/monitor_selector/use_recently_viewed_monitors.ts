@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ConfigKey } from '../../../../../../common/runtime_types';
-import { fetchMonitorsWithSpecificFields, MonitorListPageState } from '../../../state';
+import { fetchMonitorManagementList, MonitorListPageState } from '../../../state';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 const HISTORY_LENGTH = 5;
@@ -70,17 +70,15 @@ export const useRecentlyViewedMonitors = () => {
         sortOrder: 'asc',
         monitorQueryIds: monitorQueryIdsToFetch,
       };
-      const fetchedResult = await fetchMonitorsWithSpecificFields(pageState, [
-        ConfigKey.MONITOR_QUERY_ID,
-        ConfigKey.NAME,
-        ConfigKey.LOCATIONS,
-      ]);
+      const fetchedResult = await fetchMonitorManagementList(pageState);
 
       if (fetchedResult?.monitors?.length) {
         const persistedOrderHash = monitorQueryIdsToFetch.reduce(
           (acc, cur, index) => ({ ...acc, [cur]: index }),
           {} as Record<string, number>
         );
+
+        // Reorder fetched monitors as per the persisted order
         const fetchedMonitorsInPersistedOrder = [...fetchedResult?.monitors].sort(
           (a, b) => persistedOrderHash[a.attributes.id] - persistedOrderHash[b.attributes.id]
         );

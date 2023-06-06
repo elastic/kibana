@@ -8,7 +8,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
-import { MonitorQueryableFieldsSchema } from '../../common/runtime_types/monitor_management/query_fields';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
@@ -25,7 +24,6 @@ export const QuerySchema = schema.object({
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
-  fields: MonitorQueryableFieldsSchema,
   tags: StringOrArraySchema,
   monitorTypes: StringOrArraySchema,
   locations: StringOrArraySchema,
@@ -63,7 +61,8 @@ export const SEARCH_FIELDS = [
 ];
 
 export const getMonitors = async (
-  context: RouteContext<MonitorsQuery>
+  context: RouteContext<MonitorsQuery>,
+  { fields }: { fields?: string[] } = {}
 ): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
   const {
     perPage = 50,
@@ -75,7 +74,6 @@ export const getMonitors = async (
     monitorTypes,
     locations,
     filter = '',
-    fields,
     searchAfter,
     projects,
     schedules,
@@ -92,7 +90,6 @@ export const getMonitors = async (
     monitorQueryIds,
     context,
   });
-  const fieldsArray = fields && !Array.isArray(fields) ? [fields] : fields;
 
   const findParams = {
     type: syntheticsMonitorType,
@@ -104,7 +101,7 @@ export const getMonitors = async (
     search: query ? `${query}*` : undefined,
     filter: filterStr,
     searchAfter,
-    fields: fieldsArray,
+    fields,
   };
 
   return context.savedObjectsClient.find(findParams);

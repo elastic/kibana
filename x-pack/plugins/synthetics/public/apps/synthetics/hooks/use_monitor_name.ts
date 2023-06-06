@@ -11,7 +11,7 @@ import { useDebounce } from 'react-use';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 
 import { ConfigKey } from '../../../../common/constants/monitor_management';
-import { fetchMonitorsWithSpecificFields, MonitorListPageState } from '../state';
+import { fetchMonitorManagementList, MonitorListPageState } from '../state';
 
 export const useMonitorName = ({ search = '' }: { search?: string }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -27,11 +27,7 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
       sortOrder: 'asc',
       query: debouncedSearch,
     };
-    const fetchedResult = await fetchMonitorsWithSpecificFields(pageState, [
-      ConfigKey.CONFIG_ID,
-      ConfigKey.NAME,
-      ConfigKey.LOCATIONS,
-    ]);
+    const fetchedResult = await fetchMonitorManagementList(pageState);
 
     return (fetchedResult?.monitors ?? []).map((monitor) => ({
       label: monitor.attributes.name,

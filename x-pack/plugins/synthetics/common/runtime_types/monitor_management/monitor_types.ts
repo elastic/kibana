@@ -354,22 +354,12 @@ export const HeartbeatConfigCodec = t.intersection([
   }),
 ]);
 
-export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
-  EncryptedSyntheticsMonitorCodec,
-  t.interface({ id: t.string }),
-]);
-
-// TODO: Remove EncryptedSyntheticsMonitorWithIdCodec (as well as SyntheticsMonitorWithIdCodec if possible) along with respective TypeScript types in favor of EncryptedSyntheticsSavedMonitorCodec
 export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
-
-export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
-  typeof EncryptedSyntheticsMonitorWithIdCodec
->;
 
 export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
 
@@ -405,22 +395,6 @@ export const MonitorManagementListResultCodec = t.type({
 });
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
-
-export const ManagementListPartialMonitorsResultCodec = t.type({
-  ...MonitorManagementListResultCodec.props,
-  monitors: t.array(
-    t.intersection([
-      t.interface({
-        id: t.string,
-        attributes: t.partial({}),
-      }),
-      t.partial({
-        updated_at: t.string,
-        created_at: t.string,
-      }),
-    ])
-  ),
-});
 
 export const MonitorOverviewItemCodec = t.intersection([
   t.interface({

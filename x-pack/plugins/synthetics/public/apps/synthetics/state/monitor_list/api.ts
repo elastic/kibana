@@ -16,8 +16,6 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitor,
   MonitorFiltersResult,
-  ManagementListPartialMonitorsResultCodec,
-  MonitorQueryableFields,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
@@ -51,19 +49,6 @@ export const fetchMonitorManagementList = async (
     API_URLS.SYNTHETICS_MONITORS,
     params,
     MonitorManagementListResultCodec
-  );
-};
-
-export const fetchMonitorsWithSpecificFields = async (
-  pageState: MonitorListPageState,
-  fields: MonitorQueryableFields
-): Promise<MonitorManagementListResult> => {
-  const params = toMonitorManagementListQueryArgs(pageState);
-
-  return await apiService.get(
-    API_URLS.SYNTHETICS_MONITORS,
-    { ...params, fields },
-    ManagementListPartialMonitorsResultCodec
   );
 };
 

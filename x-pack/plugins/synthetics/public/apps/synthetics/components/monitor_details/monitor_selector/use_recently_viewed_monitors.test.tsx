@@ -11,7 +11,7 @@ import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import * as localStorageModule from 'react-use/lib/useLocalStorage';
-import { fetchMonitorsWithSpecificFields } from '../../../state';
+import { fetchMonitorManagementList } from '../../../state';
 
 import * as useMonitorQueryModule from '../hooks/use_monitor_query_id';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
@@ -20,7 +20,7 @@ import { MONITOR_ROUTE } from '../../../../../../common/constants';
 
 jest.mock('../../../state', () => ({
   ...jest.requireActual('../../../state'),
-  fetchMonitorsWithSpecificFields: jest.fn(),
+  fetchMonitorManagementList: jest.fn(),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
@@ -86,7 +86,7 @@ describe('useRecentlyViewedMonitors', () => {
         locations: [],
       },
     };
-    (fetchMonitorsWithSpecificFields as jest.Mock).mockReturnValue({
+    (fetchMonitorManagementList as jest.Mock).mockReturnValue({
       monitors: [fetchedMonitor],
     });
 

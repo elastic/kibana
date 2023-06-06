@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { fetchMonitorsWithSpecificFields } from '../state';
+import { fetchMonitorManagementList } from '../state';
 import { useMonitorName } from './use_monitor_name';
 
 jest.mock('react-router-dom', () => ({
@@ -16,7 +16,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../state', () => ({
   ...jest.requireActual('../state'),
-  fetchMonitorsWithSpecificFields: jest.fn(),
+  fetchMonitorManagementList: jest.fn(),
 }));
 
 describe('useMonitorName', () => {
@@ -48,7 +48,7 @@ describe('useMonitorName', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (fetchMonitorsWithSpecificFields as jest.Mock).mockResolvedValue({
+    (fetchMonitorManagementList as jest.Mock).mockResolvedValue({
       monitors: testMonitors,
     });
   });
