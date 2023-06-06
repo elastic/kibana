@@ -79,7 +79,7 @@ With network throttling being disabled, your monitors may run more quickly (i.e.
 
 // tag::known-issue-120[]
 [discrete]
-.Alert summary failures when migrating to 8.8.0 from 8.6 or earlier
+.Alert failures when migrating to 8.8.0 from 8.6 or earlier
 [%collapsible]
 ====
 *Details* +
