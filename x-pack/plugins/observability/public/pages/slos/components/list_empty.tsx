@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function SloListEmpty() {
+export function ListEmpty() {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.observability.slo.list.emptyTitle', {

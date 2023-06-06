@@ -8,9 +8,9 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloListItems as Component, Props } from './slo_list_items';
-import { sloList } from '../../../data/slo/slo';
+import { sloList } from '../../../../data/slo/slo';
 
 export default {
   component: Component,

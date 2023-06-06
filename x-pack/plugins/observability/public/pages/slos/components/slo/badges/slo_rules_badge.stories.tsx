@@ -10,8 +10,8 @@ import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
-import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
+import { SloRule } from '../../../../../hooks/slo/use_fetch_rules_for_slo';
+import { KibanaReactStorybookDecorator } from '../../../../../utils/kibana_react.storybook_decorator';
 import { SloRulesBadge as Component, Props } from './slo_rules_badge';
 
 export default {

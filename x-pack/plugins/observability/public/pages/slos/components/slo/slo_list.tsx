@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { useIsMutating } from '@tanstack/react-query';
 
-import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import {
   FilterType,
   SloListSearchFilterSortBar,

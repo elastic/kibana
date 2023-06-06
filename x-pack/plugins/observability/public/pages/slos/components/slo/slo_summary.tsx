@@ -10,9 +10,9 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { useKibana } from '../../../utils/kibana_react';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { useKibana } from '../../../../utils/kibana_react';
+import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { SloSparkline } from './slo_sparkline';
 
 export interface Props {

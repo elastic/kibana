@@ -8,12 +8,12 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
-} from '../../../data/slo/historical_summary_data';
-import { buildSlo } from '../../../data/slo/slo';
+} from '../../../../data/slo/historical_summary_data';
+import { buildSlo } from '../../../../data/slo/slo';
 import { SloSummary as Component, Props } from './slo_summary';
 
 export default {

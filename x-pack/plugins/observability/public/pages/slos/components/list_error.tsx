@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function SloListError() {
+export function ListError() {
   return (
     <EuiEmptyPrompt
       iconType="warning"

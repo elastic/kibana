@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import {
   SloListSearchFilterSortBar as Component,
   SloListSearchFilterSortBarProps,

@@ -8,13 +8,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
-import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
+import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
+import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
+import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
 import { SloListItem } from './slo_list_item';
-import { SloListEmpty } from './slo_list_empty';
-import { SloListError } from './slo_list_error';
+import { ListEmpty } from '../list_empty';
+import { ListError } from '../list_error';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -33,10 +33,10 @@ export function SloListItems({ sloList, loading, error }: Props) {
   const { mutate: deleteSlo } = useDeleteSlo();
 
   if (!loading && !error && sloList.length === 0) {
-    return <SloListEmpty />;
+    return <ListEmpty />;
   }
   if (!loading && error) {
-    return <SloListError />;
+    return <ListError />;
   }
 
   const handleDelete = (slo: SLOWithSummaryResponse) => {

@@ -22,23 +22,23 @@ import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { useCapabilities } from '../../../hooks/slo/use_capabilities';
-import { useKibana } from '../../../utils/kibana_react';
-import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
-import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
+import { useCapabilities } from '../../../../hooks/slo/use_capabilities';
+import { useKibana } from '../../../../utils/kibana_react';
+import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
+import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
 import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloBadges } from './badges/slo_badges';
 import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,
-} from '../../slo_edit/helpers/process_slo_form_values';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
-import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../config/paths';
-import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import type { RulesParams } from '../../../locators/rules';
+} from '../../../slo_edit/helpers/process_slo_form_values';
+import { SLO_BURN_RATE_RULE_ID } from '../../../../../common/constants';
+import { rulesLocatorID, sloFeatureId } from '../../../../../common';
+import { paths } from '../../../../config/paths';
+import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
+import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import type { RulesParams } from '../../../../locators/rules';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;

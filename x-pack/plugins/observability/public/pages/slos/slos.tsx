@@ -5,29 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-
-import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useLicense } from '../../hooks/use_license';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-import { SloList } from './components/slo_list';
-import { AutoRefreshButton } from './components/auto_refresh_button';
-import { HeaderTitle } from './components/header_title';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { paths } from '../../config/paths';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useLicense } from '../../hooks/use_license';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
+import { AutoRefreshButton } from './components/auto_refresh_button';
+import { CompositeSloList } from './components/composite_slo/composite_slo_list';
+import { HeaderTitle } from './components/header_title';
+import { SloList } from './components/slo/slo_list';
 
 const SLO_TAB = 'slo';
 const COMPOSITE_SLO_TAB = 'composite_slo';
@@ -95,11 +87,7 @@ export function SlosPage() {
       content: (
         <Fragment>
           <EuiSpacer size="l" />
-          <EuiFlexGroup direction="column" gutterSize="xl">
-            <EuiFlexItem>
-              <EuiText>Composite slo</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <CompositeSloList autoRefresh={isAutoRefreshing} />
         </Fragment>
       ),
     },

@@ -24,7 +24,7 @@ import {
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
-} from '../../../utils/slo/labels';
+} from '../../../../utils/slo/labels';
 
 export interface SloListSearchFilterSortBarProps {
   loading: boolean;

@@ -11,8 +11,8 @@ import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-sc
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
 import React from 'react';
-import { toMomentUnitOfTime } from '../../../../utils/slo/duration';
-import { toDurationLabel } from '../../../../utils/slo/labels';
+import { toMomentUnitOfTime } from '../../../../../utils/slo/duration';
+import { toDurationLabel } from '../../../../../utils/slo/labels';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
