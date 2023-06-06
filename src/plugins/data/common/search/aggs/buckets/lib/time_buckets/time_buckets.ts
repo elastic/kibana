@@ -18,6 +18,7 @@ import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
   EsInterval,
+  wrapMomentPrecision,
 } from './calc_es_interval';
 import { autoInterval } from '../../_interval_options';
 
@@ -275,10 +276,9 @@ export class TimeBuckets {
 
       const prettyUnits = moment.normalizeUnits(esInterval.unit) as moment.unitOfTime.Base;
 
-      const durationDescription = moment
-        .duration(esInterval.value, prettyUnits)
-        .locale(i18n.getLocale())
-        .humanize();
+      const durationDescription = wrapMomentPrecision(() =>
+        moment.duration(esInterval.value, prettyUnits).locale(i18n.getLocale()).humanize()
+      );
 
       return Object.assign(interval, {
         description: durationDescription,
