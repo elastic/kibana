@@ -11,6 +11,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../../types';
@@ -41,9 +42,21 @@ export const bootstrapDependencies = (
       path: 'mockedAlertsLocator > getLocation',
     })),
   } as any as LocatorPublic<AlertsLocatorParams>;
+  const share = {
+    url: {
+      locators: {
+        get: () => alertsLocator,
+      },
+    },
+  } as any as SharePluginSetup;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server = { router, config: {}, basePath, alertsLocator } as UptimeServerSetup;
+  const server = {
+    router,
+    config: {},
+    basePath,
+    share,
+  } as UptimeServerSetup;
   const plugins: UptimeCorePluginsSetup = customPlugins as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };

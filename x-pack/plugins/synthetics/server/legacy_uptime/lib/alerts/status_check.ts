@@ -15,7 +15,13 @@ import { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
+import {
+  alertsLocatorID,
+  AlertsLocatorParams,
+  formatDurationFromTimeUnitChar,
+  TimeUnitChar,
+} from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { UptimeAlertTypeFactory } from './types';
 import {
@@ -366,7 +372,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       timerangeCount,
       timerangeUnit,
     } = rawParams;
-    const { alertsLocator, basePath } = server;
+    const { share, basePath } = server;
+    const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
+      share.url.locators.get(alertsLocatorID);
     const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
       scopedClusterClient.asCurrentUser

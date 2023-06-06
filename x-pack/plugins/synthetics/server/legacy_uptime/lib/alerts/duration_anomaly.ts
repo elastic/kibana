@@ -16,6 +16,8 @@ import {
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { getSeverityType, type MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import { alertsLocatorID, AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { UptimeEsClient } from '../lib';
 import {
@@ -139,7 +141,9 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
       savedObjectsClient,
       scopedClusterClient.asCurrentUser
     );
-    const { alertsLocator, basePath } = server;
+    const { share, basePath } = server;
+    const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
+      share.url.locators.get(alertsLocatorID);
 
     const { anomalies } =
       (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt as string)) ??

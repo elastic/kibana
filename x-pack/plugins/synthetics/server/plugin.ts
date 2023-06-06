@@ -14,7 +14,6 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
@@ -84,7 +83,7 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
-      alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
+      share: plugins.share,
     } as UptimeServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);

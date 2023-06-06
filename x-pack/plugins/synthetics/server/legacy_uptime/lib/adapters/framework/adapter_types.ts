@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   SavedObjectsClientContract,
@@ -63,6 +61,7 @@ export interface UptimeServerSetup {
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  share: SharePluginSetup;
   stackVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
@@ -70,7 +69,6 @@ export interface UptimeServerSetup {
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }
 
 export interface UptimeCorePluginsSetup {
