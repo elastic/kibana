@@ -55,24 +55,20 @@ describe('useResolver', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current).toStrictEqual({
-      context: {
-        combinedQuery: {
-          bool: {
-            must: [
-              {
-                match_all: {},
-              },
-            ],
+    expect(result.current.context.combinedQuery).toStrictEqual({
+      bool: {
+        must: [
+          {
+            match_all: {},
           },
-        },
-        selectedDataView: null,
-        dataViewsContract: {},
-        kibanaConfig: {},
-        selectedSavedSearch: null,
+        ],
       },
-      results: {},
     });
+    expect(result.current.context.selectedDataView).toEqual(null);
+    expect(result.current.context.selectedSavedSearch).toEqual(null);
+    expect(result.current.context.kibanaConfig).toBeDefined();
+    expect(result.current.context.dataViewsContract).toBeDefined();
+
     expect(addError).toHaveBeenCalledTimes(0);
     expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
   });

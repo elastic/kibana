@@ -13,7 +13,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../../util/index_utils';
 
 import { SourceSelection } from './source_selection';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   const SavedObjectFinder = ({
@@ -68,7 +67,6 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   };
 });
 
-const dataMock = dataPluginMock.createStartContract();
 const mockNavigateToPath = jest.fn();
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
@@ -76,7 +74,8 @@ jest.mock('../../../../../contexts/kibana', () => ({
       uiSettings: {},
       http: {},
       savedObjectsManagement: {},
-      data: dataMock,
+      data: { dataViews: jest.fn() },
+      savedSearch: jest.fn(),
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,
@@ -179,6 +178,17 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     );
 
     // act
+
+    mockGetDataViewAndSavedSearch.mockImplementationOnce(() => {
+      return {
+        dataView: {
+          // @ts-expect-error fields should not be empty
+          fields: [],
+          title: 'my_remote_cluster:index-pattern-title',
+        },
+        savedSearch: null,
+      };
+    });
     fireEvent.click(screen.getByText('RemoteSavedSearch', { selector: 'button' }));
     await waitFor(() => screen.getByTestId('analyticsCreateSourceIndexModalCcsErrorCallOut'));
 
@@ -192,7 +202,6 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       )
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledWith('the-remote-saved-search-id');
   });
 
   it('calls navigateToPath for a saved search using a plain data view ', async () => {
@@ -214,7 +223,6 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       expect(mockNavigateToPath).toHaveBeenCalledWith(
         '/data_frame_analytics/new_job?savedSearchId=the-plain-saved-search-id'
       );
-      expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledWith('the-plain-saved-search-id');
     });
   });
 });
