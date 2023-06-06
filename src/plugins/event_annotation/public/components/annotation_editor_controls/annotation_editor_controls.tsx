@@ -26,7 +26,7 @@ import type { FieldOptionValue } from '@kbn/visualization-ui-components/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import moment from 'moment';
-import { htmlIdGenerator } from '@elastic/eui/src/services/accessibility/html_id_generator';
+import { htmlIdGenerator } from '@elastic/eui';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   AvailableAnnotationIcon,
