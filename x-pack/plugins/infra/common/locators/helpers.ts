@@ -62,7 +62,7 @@ export const getLocationToDiscover = async ({
   const [, plugins, pluginStart] = await core.getStartServices();
   const { discover } = plugins;
   const { logViews } = pluginStart;
-  const resolvedLogView = await logViews.client.getResolvedLogView(logView as LogViewReference);
+  const resolvedLogView = await logViews.client.getResolvedLogView(logView);
 
   const discoverParams: DiscoverAppLocatorParams = {
     ...(timeRange ? { from: timeRange.startTime, to: timeRange.endTime } : {}),
