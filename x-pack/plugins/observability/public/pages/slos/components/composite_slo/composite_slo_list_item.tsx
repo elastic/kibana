@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useState } from 'react';
+import React from 'react';
 import { CompositeSloBadges } from './badges/composite_slo_badges';
 import { CompositeSloSummary } from './composite_slo_summary';
 
@@ -25,12 +17,6 @@ export interface CompositeSloListItemProps {
 }
 
 export function CompositeSloListItem({ compositeSlo, onConfirmDelete }: CompositeSloListItemProps) {
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-
-  const handleClickActions = () => {
-    setIsActionsPopoverOpen(!isActionsPopoverOpen);
-  };
-
   return (
     <EuiPanel data-test-subj="sloItem" hasBorder hasShadow={false}>
       <EuiFlexGroup responsive={false} alignItems="center">
@@ -52,29 +38,6 @@ export function CompositeSloListItem({ compositeSlo, onConfirmDelete }: Composit
               {compositeSlo.summary ? <CompositeSloSummary compositeSlo={compositeSlo} /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-
-        {/* ACTIONS */}
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            anchorPosition="downLeft"
-            button={
-              <EuiButtonIcon
-                aria-label="Actions"
-                color="text"
-                disabled={!compositeSlo.summary}
-                display="empty"
-                iconType="boxesVertical"
-                size="s"
-                onClick={handleClickActions}
-              />
-            }
-            panelPaddingSize="m"
-            closePopover={handleClickActions}
-            isOpen={isActionsPopoverOpen}
-          >
-            <EuiContextMenuPanel size="m" items={[]} />
-          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
