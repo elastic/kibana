@@ -18,6 +18,5 @@ export interface OsqueryActionResultProps {
   ruleName?: string[];
   ecsData?: Ecs | null;
   actionId: string;
-  queryId: string;
   startDate: string;
 }

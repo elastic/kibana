@@ -33,14 +33,12 @@ export const ResponseActionsResults = React.memo(
       (action: LogsEndpointActionWithHosts | LogsOsqueryAction) => {
         if (isOsquery(action)) {
           const actionId = action.action_id;
-          const queryId = action.queries[0].id;
           const startDate = action['@timestamp'];
 
           return (
             <OsqueryResult
               key={actionId}
               actionId={actionId}
-              queryId={queryId}
               startDate={startDate}
               ruleName={ruleName}
               ecsData={ecsData}
