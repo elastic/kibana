@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body.isPartial).to.be(false);
         expect(resp.body.isRunning).to.be(false);
         expect(resp.body).to.have.property('rawResponse');
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
       it('should return 200 if terminated early', async () => {
@@ -69,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body.isPartial).to.be(false);
         expect(resp.body.isRunning).to.be(false);
         expect(resp.body.rawResponse.terminated_early).to.be(true);
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
       it('should return 404 when if no strategy is provided', async () => {
@@ -102,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         verifyErrorResponse(resp.body, 404);
         expect(resp.body.message).to.contain('banana not found');
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
       it('should return 400 with illegal ES argument', async () => {
@@ -171,6 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
         verifyErrorResponse(resp.body, 400);
         expect(resp.body.message).to.contain("Search strategy es doesn't support cancellations");
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
     });
   });

@@ -41,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body).to.have.property('isPartial');
         expect(resp.body).to.have.property('isRunning');
         expect(resp.body).to.have.property('rawResponse');
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
       it('should fetch search results by id', async () => {
@@ -66,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp2.body).to.have.property('isPartial');
         expect(resp2.body).to.have.property('isRunning');
         expect(resp2.body).to.have.property('rawResponse');
+        expect(resp2.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
     });
 
