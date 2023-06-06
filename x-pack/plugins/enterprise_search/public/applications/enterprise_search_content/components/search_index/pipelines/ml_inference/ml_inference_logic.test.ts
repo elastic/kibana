@@ -40,6 +40,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
     step: AddInferencePipelineSteps.Configuration,
   },
   createErrors: [],
+  existingPipeline: undefined,
   existingInferencePipelines: [],
   formErrors: {
     modelID: 'Field is required.',
