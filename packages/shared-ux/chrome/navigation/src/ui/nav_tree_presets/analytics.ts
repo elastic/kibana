@@ -8,7 +8,7 @@
 
 import type { NodeDefinitionWithChildren } from '.';
 
-export type ID = 'sharedux:analytics' | 'root' | 'discover' | 'dashboard' | 'visualize';
+export type ID = 'sharedux:analytics' | 'root' | 'discover' | 'dashboard' | 'visualize_library';
 
 export const analytics: NodeDefinitionWithChildren<ID> = {
   // Make sure we have a unique id otherwise it might override a custom id from the project
@@ -20,16 +20,19 @@ export const analytics: NodeDefinitionWithChildren<ID> = {
       id: 'root',
       children: [
         {
-          id: 'discover',
           title: 'Discover',
+          id: 'discover',
+          href: '/app/discover',
         },
         {
-          id: 'dashboard',
           title: 'Dashboard',
+          id: 'dashboard',
+          href: '/app/dashboards',
         },
         {
-          id: 'visualize',
-          title: 'Visualize library',
+          id: 'visualize_library',
+          title: 'Visualize Library',
+          href: '/app/visualize',
         },
       ],
     },

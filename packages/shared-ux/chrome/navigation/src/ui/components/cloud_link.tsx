@@ -7,7 +7,7 @@
  */
 import { EuiCollapsibleNavGroup, EuiLink } from '@elastic/eui';
 import React, { FC } from 'react';
-import { getI18nStrings } from '../../i18n_strings';
+import { getI18nStrings } from '../i18n_strings';
 
 const i18nTexts = getI18nStrings();
 

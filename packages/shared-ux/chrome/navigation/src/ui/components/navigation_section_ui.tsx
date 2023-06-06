@@ -14,16 +14,16 @@ import {
   EuiSideNavItemType,
   EuiText,
 } from '@elastic/eui';
-import type { BasePathService, NavigateToUrlFn } from '../../../../types/internal';
-import { navigationStyles as styles } from '../../../styles';
-import { useNavigation as useServices } from '../../../services';
+import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
+import { navigationStyles as styles } from '../../styles';
+import { useNavigation as useServices } from '../../services';
 import { ChromeProjectNavigationNodeEnhanced } from '../types';
 
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNodeEnhanced,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
 ): EuiSideNavItemType<unknown> => {
-  const href = item.deepLink?.href;
+  const href = item.deepLink?.href ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
 
   return {

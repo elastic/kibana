@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { NavigationKibanaProvider, NavigationProvider } from './src/services';
+export { Navigation } from './components';
 
-export { DefaultNavigation, getPresets, Navigation } from './src/ui';
+export { DefaultNavigation } from './default_navigation';
+
+export { getPresets } from './nav_tree_presets';
 
 export type {
   CloudLinkDefinition,
@@ -19,12 +21,4 @@ export type {
   ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
-} from './src/ui';
-
-export type {
-  ChromeNavigation,
-  ChromeNavigationViewModel,
-  NavigationServices,
-  ChromeNavigationNode,
-  ChromeNavigationNodeViewModel,
 } from './types';
