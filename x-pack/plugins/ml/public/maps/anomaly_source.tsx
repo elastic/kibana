@@ -24,6 +24,7 @@ import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { GeoJsonWithMeta } from '@kbn/maps-plugin/public';
 import type { IField } from '@kbn/maps-plugin/public';
 import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
 import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
@@ -48,6 +49,7 @@ export class AnomalySource implements IVectorSource {
   static mlResultsService: MlApiServices['results'];
   static canGetJobs: boolean;
   static mlLocator?: LocatorPublic<SerializableRecord>;
+  static timefilter?: TimefilterContract;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
     if (typeof descriptor.jobId !== 'string') {
@@ -203,10 +205,17 @@ export class AnomalySource implements IVectorSource {
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     let explorerLink: string | undefined;
+
     try {
       explorerLink = await AnomalySource.mlLocator?.getUrl({
         page: ML_PAGES.ANOMALY_EXPLORER,
-        pageState: { jobIds: [this._descriptor.jobId] },
+        pageState: {
+          jobIds: [this._descriptor.jobId],
+          timeRange: {
+            ...(AnomalySource.timefilter?.getTime() || {}),
+            mode: 'absolute',
+          },
+        },
       });
     } catch (error) {
       // ignore error if unable to get link
