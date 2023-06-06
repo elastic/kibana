@@ -7,10 +7,10 @@
 
 import type { HttpFetchQuery } from '@kbn/core/public';
 
-// Deprecation - will be replaced by a "narrow" set of parameters
 /**
  * @deprecated
  */
+// Deprecation - will be replaced by a "narrow" set of parameters
 export interface ListWithKuery extends HttpFetchQuery {
   page?: number;
   perPage?: number;
