@@ -62,14 +62,10 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INTEGRATIONS_PLUGIN_ID,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-  getFileMetadataIndexName,
-  getFileDataIndexName,
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
-import { FleetFromHostFilesClient } from './services/files/client_from_host';
-
-import type { FleetFromHostFileClientInterface } from './services/files/types';
+import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -130,8 +126,7 @@ import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
-import type { FleetToHostFileClientInterface } from './services/files/types';
-import { FleetToHostFilesClient } from './services/files/client_to_host';
+import type { FilesClientFactory } from './services/files/types';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -231,28 +226,7 @@ export interface FleetStartContract {
    * @param type
    * @param maxSizeBytes
    */
-  createFilesClient: Readonly<{
-    /**
-     * Client to interact with files that will be sent to a host.
-     * @param packageName
-     * @param maxSizeBytes
-     */
-    toHost: (
-      /** The integration package name */
-      packageName: string,
-      /** Max file size allow to be created (in bytes) */
-      maxSizeBytes?: number
-    ) => FleetToHostFileClientInterface;
-
-    /**
-     * Client to interact with files that were sent from the host
-     * @param packageName
-     */
-    fromHost: (
-      /** The integration package name */
-      packageName: string
-    ) => FleetFromHostFileClientInterface;
-  }>;
+  createFilesClient: Readonly<FilesClientFactory>;
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
@@ -604,26 +578,12 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
-      createFilesClient: Object.freeze({
-        fromHost: (packageName) => {
-          return new FleetFromHostFilesClient(
-            core.elasticsearch.client.asInternalUser,
-            this.initializerContext.logger.get('fleetFiles', packageName),
-            getFileMetadataIndexName(packageName),
-            getFileDataIndexName(packageName)
-          );
-        },
-
-        toHost: (packageName, maxFileBytes) => {
-          return new FleetToHostFilesClient(
-            core.elasticsearch.client.asInternalUser,
-            this.initializerContext.logger.get('fleetFiles', packageName),
-            getFileMetadataIndexName(packageName, true),
-            getFileDataIndexName(packageName, true),
-            maxFileBytes
-          );
-        },
-      }),
+      createFilesClient: Object.freeze(
+        getFilesClientFactory({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.initializerContext.logger,
+        })
+      ),
       messageSigningService,
       uninstallTokenService,
     };
