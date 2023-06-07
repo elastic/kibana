@@ -44,7 +44,7 @@ import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe('Rule Exceptions workflows from Alert', () => {
-  const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+  const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception List Item';
   const newRule = getNewRule();
   before(() => {
@@ -95,7 +95,7 @@ describe('Rule Exceptions workflows from Alert', () => {
     // Closed alert should appear in table
     goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(ALERTS_COUNT).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+    cy.get(ALERTS_COUNT).should('have.text', `${EXPECTED_NUMBER_OF_ALERTS}`);
 
     // Remove the exception and load an event that would have matched that exception
     // to show that said exception now starts to show up again

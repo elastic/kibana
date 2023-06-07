@@ -16,6 +16,7 @@ import {
   createSharedExceptionList,
   editExceptionLisDetails,
   linkSharedListToRulesFromListDetails,
+  saveLinkedRules,
   validateSharedListLinkedRules,
   waitForExceptionListDetailToBeLoaded,
 } from '../../../../tasks/exceptions_table';
@@ -24,7 +25,6 @@ import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
   EXCEPTION_LIST_DETAILS_LINK_RULES_BTN,
-  MANAGE_RULES_SAVE,
 } from '../../../../screens/exceptions';
 
 const LIST_NAME = 'My exception list';
@@ -117,7 +117,8 @@ describe('Exception list detail page', () => {
     // Link the first two Rules
     linkSharedListToRulesFromListDetails(2);
 
-    cy.get(MANAGE_RULES_SAVE).first().click();
+    // Save the 2 linked Rules
+    saveLinkedRules();
 
     const linkedRulesNames = ['Rule to link to shared list', 'New Rule Test'];
 

@@ -85,7 +85,7 @@ export const linkRulesToExceptionList = (listId: string, ruleSwitch: number = 0)
     .click();
   cy.get(EXCEPTIONS_TABLE_LINK_RULES_BTN).first().click();
   cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
-  cy.get(MANAGE_RULES_SAVE).first().click();
+  saveLinkedRules();
 };
 
 export const deleteExceptionListWithoutRuleReferenceByListId = (listId: string) => {
@@ -224,6 +224,10 @@ export const linkSharedListToRulesFromListDetails = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
     clickOnLinkRulesByRuleRowOrderInListDetail(i);
   }
+};
+
+export const saveLinkedRules = () => {
+  cy.get(MANAGE_RULES_SAVE).first().click();
 };
 
 export const validateSharedListLinkedRules = (
