@@ -28,7 +28,7 @@ export interface RuleTagsAggregationResult {
   tags: {
     after_key?: {
       tags: string;
-    },
+    };
     buckets: Array<{
       key: {
         tags: string;
