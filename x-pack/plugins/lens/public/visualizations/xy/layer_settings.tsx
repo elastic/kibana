@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import type { VisualizationLayerSettingsProps } from '../../types';
 import type { XYState } from './types';
 import { isAnnotationsLayer } from './visualization_helpers';
@@ -26,28 +25,15 @@ export function LayerSettings({
     return null;
   }
   return (
-    <EuiFormRow
-      display="columnCompressedSwitch"
-      label={i18n.translate('xpack.lens.xyChart.ignoreGlobalFilters', {
-        defaultMessage: 'Use global filters',
-      })}
-    >
-      <EuiSwitch
-        label={i18n.translate('xpack.lens.xyChart.ignoreGlobalFilters', {
-          defaultMessage: 'Use global filters',
-        })}
-        showLabel={false}
-        checked={!layer.ignoreGlobalFilters}
-        data-test-subj="lnsXY-layerSettings-ignoreGlobalFilters"
-        onChange={() => {
-          const layerIndex = state.layers.findIndex((l) => l === layer);
-          const newLayer = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
-          const newLayers = [...state.layers];
-          newLayers[layerIndex] = newLayer;
-          setState({ ...state, layers: newLayers });
-        }}
-        compressed
-      />
-    </EuiFormRow>
+    <IgnoreGlobalFilterRowControl
+      checked={!layer.ignoreGlobalFilters}
+      onChange={() => {
+        const layerIndex = state.layers.findIndex((l) => l === layer);
+        const newLayer = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
+        const newLayers = [...state.layers];
+        newLayers[layerIndex] = newLayer;
+        setState({ ...state, layers: newLayers });
+      }}
+    />
   );
 }

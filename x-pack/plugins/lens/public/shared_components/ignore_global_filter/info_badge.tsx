@@ -7,16 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { InfoBadge } from '../../shared_components/info_badges/info_badge';
+import { InfoBadge } from '../info_badges/info_badge';
 import { FramePublicAPI, VisualizationInfo } from '../../types';
-import { XYAnnotationLayerConfig } from './types';
 
 export function IgnoredGlobalFiltersEntries({
   layers,
   visualizationInfo,
   dataViews,
 }: {
-  layers: XYAnnotationLayerConfig[];
+  layers: Array<{ layerId: string; indexPatternId: string }>;
   visualizationInfo: VisualizationInfo;
   dataViews: FramePublicAPI['dataViews'];
 }) {
@@ -27,8 +26,8 @@ export function IgnoredGlobalFiltersEntries({
         const layerInfo = visualizationInfo.layers.find(({ layerId }) => layerId === layer.layerId);
         const layerTitle =
           layerInfo?.label ||
-          i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-            defaultMessage: 'Annotations',
+          i18n.translate('xpack.lens.layerTitle.fallbackLabel', {
+            defaultMessage: 'Layer',
           });
         const layerPalette = layerInfo?.palette;
         return (
