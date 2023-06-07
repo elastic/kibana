@@ -710,10 +710,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     getDefaultDescription: ({ field, target_field: targetField }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.reroute', {
         defaultMessage: 'Routes a document to another target index or data stream',
-        values: {
-          field,
-          target_field: targetField,
-        },
       }),
   },
   script: {
