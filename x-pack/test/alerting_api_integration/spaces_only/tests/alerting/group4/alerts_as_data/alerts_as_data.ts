@@ -17,6 +17,7 @@ import {
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
+  TaskManagerDoc,
 } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,7 +27,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
-  type PatternFiringAlert = Alert;
+  type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
@@ -82,6 +83,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // Query for alerts
       const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
 
+      // Get alert state from task document
+      let state: any = await getTaskState(ruleId);
+      expect(state.alertInstances.alertA.state.patternIndex).to.equal(0);
+      expect(state.alertInstances.alertB.state.patternIndex).to.equal(0);
+      expect(state.alertInstances.alertC.state.patternIndex).to.equal(0);
+
       // After the first run, we should have 3 alert docs for the 3 active alerts
       expect(alertDocsRun1.length).to.equal(3);
 
@@ -91,6 +98,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
         // Each doc should have active status and default action group id
         expect(source.kibana.alert.action_group).to.equal('default');
+
+        // patternIndex should be 0 for the first run
+        expect(source.patternIndex).to.equal(0);
 
         // alert UUID should equal doc id
         expect(source.kibana.alert.uuid).to.equal(alertDocsRun1[i]._id);
@@ -116,12 +126,15 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         (doc) => doc._source!.kibana.alert.instance.id === 'alertA'
       );
       const alertADocRun1 = alertDoc!._source!;
+      expect(alertADocRun1.instancePattern).to.eql(pattern.alertA);
 
       alertDoc = alertDocsRun1.find((doc) => doc._source!.kibana.alert.instance.id === 'alertB');
       const alertBDocRun1 = alertDoc!._source!;
+      expect(alertBDocRun1.instancePattern).to.eql(pattern.alertB);
 
       alertDoc = alertDocsRun1.find((doc) => doc._source!.kibana.alert.instance.id === 'alertC');
       const alertCDocRun1 = alertDoc!._source!;
+      expect(alertCDocRun1.instancePattern).to.eql(pattern.alertC);
 
       // --------------------------
       // RUN 2 - 2 recovered (alertB, alertC), 1 ongoing (alertA)
@@ -139,6 +152,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Query for alerts
       const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
+
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.alertA.state.patternIndex).to.equal(1);
+      expect(state.alertInstances.alertB).to.be(undefined);
+      expect(state.alertInstances.alertC).to.be(undefined);
 
       // After the second run, we should have 3 alert docs
       expect(alertDocsRun2.length).to.equal(3);
@@ -159,8 +178,11 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // status is still active; duration is updated; no end time
       alertDoc = alertDocsRun2.find((doc) => doc._source!.kibana.alert.instance.id === 'alertA');
       const alertADocRun2 = alertDoc!._source!;
+      expect(alertADocRun2.instancePattern).to.eql(pattern.alertA);
       // uuid is the same
       expect(alertADocRun2.kibana.alert.uuid).to.equal(alertADocRun1.kibana.alert.uuid);
+      // patternIndex should be 1 for the second run
+      expect(alertADocRun2.patternIndex).to.equal(1);
       expect(alertADocRun2.kibana.alert.action_group).to.equal('default');
       // start time should be defined and the same as prior run
       expect(alertADocRun2.kibana.alert.start).to.match(timestampPattern);
@@ -183,6 +205,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const alertBDocRun2 = alertDoc!._source!;
       // action group should be set to recovered
       expect(alertBDocRun2.kibana.alert.action_group).to.be('recovered');
+      expect(alertBDocRun2.instancePattern).to.eql(alertBDocRun1.instancePattern);
+      expect(alertBDocRun2.patternIndex).to.be(alertBDocRun1.patternIndex);
       // uuid is the same
       expect(alertBDocRun2.kibana.alert.uuid).to.equal(alertBDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
@@ -208,6 +232,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const alertCDocRun2 = alertDoc!._source!;
       // action group should be set to recovered
       expect(alertCDocRun2.kibana.alert.action_group).to.be('recovered');
+      expect(alertCDocRun2.instancePattern).to.eql(alertCDocRun1.instancePattern);
+      expect(alertCDocRun2.patternIndex).to.be(alertCDocRun1.patternIndex);
       // uuid is the same
       expect(alertCDocRun2.kibana.alert.uuid).to.equal(alertCDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
@@ -244,6 +270,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // Query for alerts
       const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
 
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.alertA.state.patternIndex).to.equal(2);
+      expect(state.alertInstances.alertB).to.be(undefined);
+      expect(state.alertInstances.alertC.state.patternIndex).to.equal(2);
+
       // After the third run, we should have 4 alert docs
       // The docs for "alertA" and "alertB" should not have been updated
       // There should be two docs for "alertC", one for the first active -> recovered span
@@ -256,9 +288,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // status is still active; duration is updated; no end time
       alertDoc = alertDocsRun3.find((doc) => doc._source!.kibana.alert.instance.id === 'alertA');
       const alertADocRun3 = alertDoc!._source!;
+      expect(alertADocRun3.instancePattern).to.eql(pattern.alertA);
       // uuid is the same as previous runs
       expect(alertADocRun3.kibana.alert.uuid).to.equal(alertADocRun2.kibana.alert.uuid);
       expect(alertADocRun3.kibana.alert.uuid).to.equal(alertADocRun1.kibana.alert.uuid);
+      // patternIndex should be 2 for the third run
+      expect(alertADocRun3.patternIndex).to.equal(2);
       expect(alertADocRun3.kibana.alert.action_group).to.equal('default');
       // start time should be defined and the same as prior runs
       expect(alertADocRun3.kibana.alert.start).to.match(timestampPattern);
@@ -305,9 +340,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const alertCDocRun3 = alertCDocs.find(
         (doc) => doc._source!.kibana.alert.rule.execution?.uuid === executionUuid
       )!._source!;
+      expect(alertCDocRun3.instancePattern).to.eql(pattern.alertC);
       // uuid is the different from prior run]
       expect(alertCDocRun3.kibana.alert.uuid).not.to.equal(alertCDocRun2.kibana.alert.uuid);
       expect(alertCDocRun3.kibana.alert.action_group).to.equal('default');
+      // patternIndex should be 2 for the third run
+      expect(alertCDocRun3.patternIndex).to.equal(2);
       // start time should be defined and different from the prior run
       expect(alertCDocRun3.kibana.alert.start).to.match(timestampPattern);
       expect(alertCDocRun3.kibana.alert.start).not.to.equal(alertCDocRun2.kibana.alert.start);
@@ -358,6 +396,15 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       body: { query: { match_all: {} } },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
+  }
+
+  async function getTaskState(ruleId: string) {
+    const task = await es.get<TaskManagerDoc>({
+      id: `task:${ruleId}`,
+      index: '.kibana_task_manager',
+    });
+
+    return JSON.parse(task._source!.task.state);
   }
 
   async function waitForEventLogDocs(
