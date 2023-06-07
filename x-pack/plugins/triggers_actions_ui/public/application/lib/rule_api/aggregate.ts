@@ -12,7 +12,12 @@ import {
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
 import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
-import { LoadRuleAggregationsProps, LoadRuleTagsProps, rewriteBodyRes, rewriteTagsBodyRes } from './aggregate_helpers';
+import {
+  LoadRuleAggregationsProps,
+  LoadRuleTagsProps,
+  rewriteBodyRes,
+  rewriteTagsBodyRes,
+} from './aggregate_helpers';
 
 // TODO: https://github.com/elastic/kibana/issues/131682
 export async function loadRuleTags({
@@ -30,7 +35,7 @@ export async function loadRuleTags({
         after: after ? JSON.stringify(after) : undefined,
         ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
         max_tags: 10,
-      }
+      },
     }
   );
   return rewriteTagsBodyRes(res);
