@@ -437,7 +437,7 @@ export type FieldSpec = DataViewFieldBase & {
   /**
    * set if field is a TSDB metric field
    */
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
 
   // not persisted
 
