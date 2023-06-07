@@ -31,6 +31,12 @@ export function searchHitToAgent(
         acc[key] = {
           api_key_id: val.api_key_id,
           type: val.type,
+          to_retire_api_key_ids: val.to_retire_api_key_ids
+            ? val.to_retire_api_key_ids.map((item) => ({
+                id: item.id,
+                retired_at: item.retired_at,
+              }))
+            : undefined,
         };
         return acc;
       }, {} as OutputMap)
