@@ -7,6 +7,18 @@
 
 import { ProfilingESField } from './elasticsearch';
 
+export interface ProfilingStatusResponse {
+  profiling: {
+    enabled: boolean;
+  };
+  resource_management: {
+    enabled: boolean;
+  };
+  resources: {
+    created: boolean;
+  };
+}
+
 interface ProfilingEvents {
   [key: string]: number;
 }

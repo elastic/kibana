@@ -29,13 +29,10 @@ import {
   type MlKibanaUrlConfig,
   type MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import {
-  formatHumanReadableDateTimeSeconds,
-  timeFormatter,
-} from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';

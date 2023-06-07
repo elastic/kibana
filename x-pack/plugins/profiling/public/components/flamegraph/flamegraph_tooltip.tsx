@@ -22,7 +22,7 @@ import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
-import { CPULabelWithHint } from '../shared/cpu_label_with_hint';
+import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
 
 interface Props {

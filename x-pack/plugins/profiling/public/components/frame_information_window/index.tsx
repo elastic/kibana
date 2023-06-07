@@ -6,7 +6,9 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { useCoPilot, CoPilotPrompt } from '@kbn/observability-plugin/public';
+import React, { useMemo } from 'react';
+import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '../../../common/profiling';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
@@ -31,6 +33,17 @@ export interface Props {
 }
 
 export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samplingRate }: Props) {
+  const coPilotService = useCoPilot();
+
+  const promptParams = useMemo(() => {
+    return frame?.functionName && frame?.exeFileName
+      ? {
+          functionName: frame?.functionName,
+          library: frame?.exeFileName,
+        }
+      : undefined;
+  }, [frame?.functionName, frame?.exeFileName]);
+
   if (!frame) {
     return (
       <FrameInformationPanel>
@@ -87,6 +100,30 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
         <EuiFlexItem>
           <KeyValueList rows={informationRows} />
         </EuiFlexItem>
+        {coPilotService?.isEnabled() && promptParams ? (
+          <>
+            <EuiFlexItem>
+              <CoPilotPrompt
+                coPilot={coPilotService}
+                promptId={CoPilotPromptId.ProfilingExplainFunction}
+                params={promptParams}
+                title={i18n.translate('xpack.profiling.frameInformationWindow.explainFunction', {
+                  defaultMessage: 'Explain function',
+                })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CoPilotPrompt
+                coPilot={coPilotService}
+                promptId={CoPilotPromptId.ProfilingOptimizeFunction}
+                params={promptParams}
+                title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
+                  defaultMessage: 'Optimize function',
+                })}
+              />
+            </EuiFlexItem>
+          </>
+        ) : undefined}
         {symbolStatus !== FrameSymbolStatus.SYMBOLIZED && (
           <EuiFlexItem>
             <MissingSymbolsCallout frameType={frame.frameType} />

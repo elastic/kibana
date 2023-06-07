@@ -161,6 +161,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
         // readOnly is boolean flag
+        'input_control_vis.readOnly (any)',
         'vis_type_gauge.readOnly (any)',
         'vis_type_heatmap.readOnly (any)',
         'vis_type_metric.readOnly (any)',
@@ -241,6 +242,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.spaces.maxSpaces (number)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
@@ -251,6 +253,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
+        'xpack.observability.coPilot.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
