@@ -84,6 +84,7 @@ export const transformNewCase = ({
   updated_at: null,
   updated_by: null,
   assignees: dedupAssignees(newCase.assignees) ?? [],
+  category: null,
 });
 
 export const transformCases = ({

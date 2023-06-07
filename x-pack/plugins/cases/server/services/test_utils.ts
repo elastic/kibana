@@ -134,6 +134,7 @@ export const basicESCaseFields: CasePersistedAttributes = {
   assignees: [],
   total_alerts: -1,
   total_comments: -1,
+  category: null,
 };
 
 export const basicCaseFields: CaseAttributes = {
@@ -164,6 +165,7 @@ export const basicCaseFields: CaseAttributes = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  category: null,
 };
 
 export const createCaseSavedObjectResponse = ({

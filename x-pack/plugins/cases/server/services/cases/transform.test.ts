@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import {
   createCaseSavedObjectResponse,
   createESJiraConnector,
@@ -553,6 +555,14 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ status: undefined }).attributes).not.toHaveProperty(
         'status'
       );
+    });
+
+    it('returns the default value for category when it is undefined', () => {
+      const CaseSOResponseWithoutCategory = omit(createCaseSavedObjectResponse(), 'category');
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe(null);
     });
   });
 });
