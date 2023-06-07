@@ -9,8 +9,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { ConfigKey } from '../../../../../../common/runtime_types';
-import { fetchMonitorManagementList, MonitorListPageState } from '../../../state';
+import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../../../state';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 const HISTORY_LENGTH = 5;
@@ -63,14 +62,12 @@ export const useRecentlyViewedMonitors = () => {
       monitorQueryIdsToFetch.length &&
       JSON.stringify([...monitorQueryIdsToFetch].sort()) !== fetchedMonitorQueryIdsSnap
     ) {
-      const pageState: MonitorListPageState = {
-        pageIndex: 0,
-        pageSize: HISTORY_LENGTH,
-        sortField: `${ConfigKey.NAME}.keyword`,
-        sortOrder: 'asc',
-        monitorQueryIds: monitorQueryIdsToFetch,
-      };
-      const fetchedResult = await fetchMonitorManagementList(pageState);
+      const fetchedResult = await fetchMonitorManagementList(
+        getMonitorListPageStateWithDefaults({
+          pageSize: HISTORY_LENGTH,
+          monitorQueryIds: monitorQueryIdsToFetch,
+        })
+      );
 
       if (fetchedResult?.monitors?.length) {
         const persistedOrderHash = monitorQueryIdsToFetch.reduce(

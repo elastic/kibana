@@ -10,8 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useDebounce } from 'react-use';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 
-import { ConfigKey } from '../../../../common/constants/monitor_management';
-import { fetchMonitorManagementList, MonitorListPageState } from '../state';
+import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../state';
 
 export const useMonitorName = ({ search = '' }: { search?: string }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -20,14 +19,9 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
   useDebounce(() => setDebouncedSearch(search), 500, [search]);
 
   const { loading, data: monitors } = useFetcher(async () => {
-    const pageState: MonitorListPageState = {
-      pageIndex: 0,
-      pageSize: 10,
-      sortField: `${ConfigKey.NAME}.keyword`,
-      sortOrder: 'asc',
-      query: debouncedSearch,
-    };
-    const fetchedResult = await fetchMonitorManagementList(pageState);
+    const fetchedResult = await fetchMonitorManagementList(
+      getMonitorListPageStateWithDefaults({ query: debouncedSearch })
+    );
 
     return (fetchedResult?.monitors ?? []).map((monitor) => ({
       label: monitor.attributes.name,
