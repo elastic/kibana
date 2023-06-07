@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ObservabilityLogsPlugin } from './plugin';
+import { DiscoverLogExplorerPlugin } from './plugin';
 
 export function plugin() {
-  return new ObservabilityLogsPlugin();
+  return new DiscoverLogExplorerPlugin();
 }
 
-export type { ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart } from './types';
+export type { DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart } from './types';

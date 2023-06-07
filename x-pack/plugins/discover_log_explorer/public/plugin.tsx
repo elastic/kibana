@@ -6,12 +6,12 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { OBSERVABILITY_LOGS_PROFILE_ID } from '../common';
+import { DISCOVER_LOG_EXPLORER_PROFILE_ID } from '../common';
 import { createLazyCustomDataStreamSelector } from './customizations';
 import { DataStreamsService } from './services/data_streams';
-import { ObservabilityLogsClientPluginClass, ObservabilityLogsStartDeps } from './types';
+import { DiscoverLogExplorerClientPluginClass, DiscoverLogExplorerStartDeps } from './types';
 
-export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginClass {
+export class DiscoverLogExplorerPlugin implements DiscoverLogExplorerClientPluginClass {
   private dataStreamsService: DataStreamsService;
 
   constructor() {
@@ -20,7 +20,7 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
 
   public setup() {}
 
-  public start(core: CoreStart, plugins: ObservabilityLogsStartDeps) {
+  public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover } = plugins;
 
     const dataStreamsService = this.dataStreamsService.start({
@@ -32,7 +32,7 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
     };
 
     discover.customize(
-      OBSERVABILITY_LOGS_PROFILE_ID,
+      DISCOVER_LOG_EXPLORER_PROFILE_ID,
       async ({ customizations, stateContainer }) => {
         /**
          * Replace the DataViewPicker with a custom `DataStreamSelector` to pick integrations streams

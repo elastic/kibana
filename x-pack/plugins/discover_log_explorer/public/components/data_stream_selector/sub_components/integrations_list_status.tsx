@@ -41,7 +41,7 @@ export const IntegrationsListStatus = ({
         titleSize="s"
         body={
           <FormattedMessage
-            id="xpack.observabilityLogs.dataStreamSelector.noIntegrationsError"
+            id="xpack.discoverLogExplorer.dataStreamSelector.noIntegrationsError"
             defaultMessage="An {error} occurred while getting your integrations. Please retry."
             values={{
               error: (
