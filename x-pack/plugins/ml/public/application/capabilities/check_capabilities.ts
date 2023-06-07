@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, combineLatest, timer, from } from 'rxjs';
+import { BehaviorSubject, combineLatest, timer, from, type Subscription } from 'rxjs';
 import { distinctUntilChanged, retry, switchMap, tap } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,7 +19,7 @@ import {
   MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import { type MlApiServices, ml } from '../services/ml_api_service';
+import { type MlApiServices } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
@@ -38,12 +38,14 @@ export class MlCapabilitiesService {
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
+  private _subscription: Subscription | undefined;
+
   constructor(private readonly mlApiServices: MlApiServices) {
     this.init();
   }
 
   private init() {
-    const subscription = combineLatest([
+    this._subscription = combineLatest([
       this._updateRequested$,
       timer(0, CAPABILITIES_REFRESH_INTERVAL),
     ])
@@ -57,6 +59,11 @@ export class MlCapabilitiesService {
       .subscribe((results) => {
         this._capabilities$.next(results.capabilities);
         this._isLoading$.next(false);
+
+        /**
+         * To support legacy use of {@link checkPermission}
+         */
+        _capabilities = results.capabilities;
       });
   }
 
@@ -71,13 +78,13 @@ export class MlCapabilitiesService {
   public refreshCapabilities() {
     this._updateRequested$.next(Date.now());
   }
-}
 
-/**
- * TODO should be initialized in getMlGlobalServices
- * Temp solution to make it work with the current setup.
- */
-export const mlCapabilities = new MlCapabilitiesService(ml);
+  public destroy() {
+    if (this._subscription) {
+      this._subscription.unsubscribe();
+    }
+  }
+}
 
 /**
  * Check the privilege type and the license to see whether a user has permission to access a feature.
@@ -110,7 +117,6 @@ export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiS
     checkMlCapabilities()
       .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
         // Loop through all capabilities to ensure they are all set to true.
         const isManageML = Object.values(_capabilities).every((p) => p === true);
 
@@ -133,7 +139,6 @@ export function checkGetJobsCapabilitiesResolver(
     getCapabilities()
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
         // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
         // all other functionality is controlled by the return capabilities object.
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
@@ -160,7 +165,6 @@ export function checkCreateJobsCapabilitiesResolver(
     getCapabilities()
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
         // allow the promise to resolve as the separate license check will redirect then user to
         // a basic feature
@@ -187,7 +191,6 @@ export function checkFindFileStructurePrivilegeResolver(
     getCapabilities()
       .then(async ({ capabilities }) => {
         _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
         // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
         // all other functionality is controlled by the return _capabilities object
         if (_capabilities.canFindFileStructure) {
