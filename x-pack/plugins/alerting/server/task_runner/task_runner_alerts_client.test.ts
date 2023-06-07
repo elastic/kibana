@@ -42,13 +42,13 @@ import {
   mockedRuleTypeSavedObject,
   ruleType,
   RULE_NAME,
-  SAVED_OBJECT,
   generateRunnerResult,
   RULE_ACTIONS,
   generateSavedObjectParams,
   mockTaskInstance,
   DATE_1970,
   DATE_1970_5_MIN,
+  mockedRawRuleSO,
 } from './fixtures';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -109,6 +109,12 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
 
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
+  const mockTaskConfig = {
+    skip: {
+      delay: 3000,
+      enabled: false,
+    },
+  };
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -240,22 +246,23 @@ describe('Task Runner', () => {
       hasReachedAlertLimit: false,
       triggeredActionsStatus: 'complete',
     });
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      taskConfig: mockTaskConfig,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
 
@@ -332,24 +339,25 @@ describe('Task Runner', () => {
       .spyOn(alertsService, 'getContextInitializationPromise')
       .mockResolvedValue({ result: true });
 
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      {
+      taskConfig: mockTaskConfig,
+      context: {
         ...taskRunnerFactoryInitializerParams,
         alertsService,
       },
-      inMemoryMetrics
-    );
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
 
@@ -447,18 +455,19 @@ describe('Task Runner', () => {
       }
     );
 
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      mockedTaskInstance,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: mockedTaskInstance,
+      taskConfig: mockTaskConfig,
+      context: {
         ...taskRunnerFactoryInitializerParams,
         alertsService,
       },
-      inMemoryMetrics
-    );
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
 
     expect(ruleType.executor).toHaveBeenCalledTimes(1);
@@ -540,22 +549,23 @@ describe('Task Runner', () => {
       hasReachedAlertLimit: false,
       triggeredActionsStatus: 'complete',
     });
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      taskConfig: mockTaskConfig,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
 
@@ -623,22 +633,23 @@ describe('Task Runner', () => {
       hasReachedAlertLimit: false,
       triggeredActionsStatus: 'complete',
     });
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      { ...taskRunnerFactoryInitializerParams, alertsService: null },
-      inMemoryMetrics
-    );
+      taskConfig: mockTaskConfig,
+      context: { ...taskRunnerFactoryInitializerParams, alertsService: null },
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
 
