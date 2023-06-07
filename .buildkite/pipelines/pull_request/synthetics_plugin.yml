@@ -6,7 +6,7 @@ steps:
     depends_on: build
     timeout_in_minutes: 60
     artifact_paths:
-      - 'x-pack/plugins/synthetics/e2e/synthetics/.journeys/**/*'
+      - 'x-pack/plugins/synthetics/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'
