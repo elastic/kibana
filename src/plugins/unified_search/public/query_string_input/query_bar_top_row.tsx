@@ -63,6 +63,10 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
     }),
+  getDisabledDatePickerLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
+      defaultMessage: 'All time',
+    }),
 };
 
 const getWrapperWithTooltip = (
@@ -419,14 +423,22 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderDatePicker()) {
         return null;
       }
-      let isDisabled = props.isDisabled;
+      let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
       let enableTooltip = false;
       // On text based mode the datepicker is always on when the user has unsaved changes.
       // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field
       if (Boolean(isQueryLangSelected) && !props.isDirty) {
         const adHocDataview = props.indexPatterns?.[0];
         if (adHocDataview && typeof adHocDataview !== 'string') {
-          isDisabled = !Boolean(adHocDataview.timeFieldName);
+          if (!adHocDataview.timeFieldName) {
+            isDisabled = {
+              display: (
+                <span data-test-subj="kbnQueryBar-datePicker-disabled">
+                  {strings.getDisabledDatePickerLabel()}
+                </span>
+              ),
+            };
+          }
           enableTooltip = !Boolean(adHocDataview.timeFieldName);
         }
       }
