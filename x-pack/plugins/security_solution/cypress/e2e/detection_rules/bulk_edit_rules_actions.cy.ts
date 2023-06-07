@@ -15,7 +15,7 @@ import {
 } from '../../screens/rules_bulk_edit';
 import { actionFormSelector } from '../../screens/common/rule_actions';
 
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import type { RuleActionCustomFrequency } from '../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
@@ -73,7 +73,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
     cleanKibana();
     login();
     deleteAlertsAndRules();
-    //deleteConnectors();
+    // deleteConnectors();
     deleteAllConnectors();
     esArchiverResetKibana();
 
