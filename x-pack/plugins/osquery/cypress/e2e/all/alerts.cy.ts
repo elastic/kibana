@@ -145,7 +145,7 @@ describe('Alert Event Details', () => {
       cy.contains('Save changes').click();
       cy.getBySel('response-actions-error')
         .within(() => {
-          cy.contains(' Pack is a required field');
+          cy.contains('Pack is a required field');
         })
         .should('exist');
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {

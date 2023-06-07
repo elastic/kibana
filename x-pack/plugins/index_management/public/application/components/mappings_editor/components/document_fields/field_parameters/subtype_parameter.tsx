@@ -85,7 +85,13 @@ export const SubTypeParameter = ({
                     : filterTypesForNonRootFields(subTypeOptions!)
                 }
                 selectedOptions={subTypeField.value as ComboBoxOption[]}
-                onChange={subTypeField.setValue}
+                onChange={(value) => {
+                  if (value.length === 0) {
+                    // Don't allow clearing the type. One must always be selected
+                    return;
+                  }
+                  subTypeField.setValue(value);
+                }}
                 isClearable={false}
                 data-test-subj="fieldSubType"
               />
