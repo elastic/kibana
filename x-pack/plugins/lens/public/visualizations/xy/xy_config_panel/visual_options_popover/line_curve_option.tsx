@@ -26,8 +26,8 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
   return enabled ? (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.translate('xpack.lens.xyChart.curveStyleLabel', {
-        defaultMessage: 'Curve lines',
+      label={i18n.translate('xpack.lens.xyChart.lineInterpolationLabel', {
+        defaultMessage: 'Line interpolation',
       })}
     >
       <EuiSuperSelect

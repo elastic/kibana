@@ -21202,7 +21202,6 @@
     "xpack.lens.xyChart.axisSide.top": "顶部",
     "xpack.lens.xyChart.bottomAxisDisabledHelpText": "此设置仅在启用底轴时应用。",
     "xpack.lens.xyChart.bottomAxisLabel": "底轴",
-    "xpack.lens.xyChart.curveStyleLabel": "曲线",
     "xpack.lens.xyChart.defaultAnnotationLabel": "事件",
     "xpack.lens.xyChart.defaultRangeAnnotationLabel": "事件范围",
     "xpack.lens.xyChart.endValuesLabel": "结束值",
