@@ -207,6 +207,8 @@ const getCspmAccountsStats = (
 ): CspmAccountsStats[] => {
   const accounts = aggregatedResourcesStats.accounts.buckets;
 
+  const postureType = getPostureTypeFromPackagePolicy(packagePolicy);
+
   const cspmAccountsStats = accounts.map((account) => ({
     account_id: account.key,
     latest_findings_doc_count: account.doc_count,
@@ -226,7 +228,7 @@ const getCspmAccountsStats = (
   }));
   logger.info('CSPM telemetry: accounts stats was sent');
 
-  return cspmAccountsStats;
+  return { postureType, ...cspmAccountsStats };
 };
 
 export const getAccountsStats = async (

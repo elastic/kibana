@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { type TypeOf, schema } from '@kbn/config-schema';
-import { Benchmark } from '../types';
 
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
