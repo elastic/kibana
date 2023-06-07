@@ -82,15 +82,6 @@ export type EventAnnotationConfig =
   | RangeEventAnnotationConfig
   | QueryPointEventAnnotationConfig;
 
-export interface EventAnnotationGroupAttributes {
-  title: string;
-  description: string;
-  tags: string[];
-  ignoreGlobalFilters: boolean;
-  annotations: EventAnnotationConfig[];
-  dataViewSpec?: DataViewSpec;
-}
-
 export interface EventAnnotationGroupConfig {
   annotations: EventAnnotationConfig[];
   indexPatternId: string;

@@ -15,7 +15,7 @@ import {
 
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '../common/constants';
-import { EventAnnotationGroupAttributes } from '../common/types';
+import { EventAnnotationGroupSavedObjectAttributes } from '../common/content_management';
 
 export function setupSavedObjects(coreSetup: CoreSetup) {
   coreSetup.savedObjects.registerType({
@@ -27,7 +27,8 @@ export function setupSavedObjects(coreSetup: CoreSetup) {
       icon: 'flag',
       defaultSearchField: 'title',
       importableAndExportable: true,
-      getTitle: (obj: { attributes: EventAnnotationGroupAttributes }) => obj.attributes.title,
+      getTitle: (obj: { attributes: EventAnnotationGroupSavedObjectAttributes }) =>
+        obj.attributes.title,
     },
     migrations: () => {
       const dataViewMigrations = DataViewPersistableStateService.getAllMigrations();
