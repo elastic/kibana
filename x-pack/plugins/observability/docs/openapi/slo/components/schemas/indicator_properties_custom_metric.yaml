@@ -1,4 +1,4 @@
-title: Custom metric indicator type definition
+title: Custom metric
 required:
   - type
   - params

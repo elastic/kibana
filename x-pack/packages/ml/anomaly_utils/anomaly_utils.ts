@@ -18,8 +18,6 @@ import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_
 
 /**
  * Enum of entity field types
- * @export
- * @enum {number}
  */
 export enum ML_ENTITY_FIELD_TYPE {
   BY = 'by',
@@ -29,7 +27,6 @@ export enum ML_ENTITY_FIELD_TYPE {
 
 /**
  * Custom enum of entity field operations
- * @type {{ readonly ADD: "+"; readonly REMOVE: "-"; }}
  */
 export const ML_ENTITY_FIELD_OPERATIONS = {
   ADD: '+',
@@ -38,37 +35,28 @@ export const ML_ENTITY_FIELD_OPERATIONS = {
 
 /**
  * Union type of entity field operations
- * @export
- * @typedef {MlEntityFieldOperation}
  */
 export type MlEntityFieldOperation =
   typeof ML_ENTITY_FIELD_OPERATIONS[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
 
 /**
  * Interface of an entity field
- * @export
- * @interface MlEntityField
- * @typedef {MlEntityField}
  */
 export interface MlEntityField {
   /**
    * The field name
-   * @type {string}
    */
   fieldName: string;
   /**
    * The field value
-   * @type {(string | number | undefined)}
    */
   fieldValue: string | number | undefined;
   /**
    * Optional field type
-   * @type {?ML_ENTITY_FIELD_TYPE}
    */
   fieldType?: ML_ENTITY_FIELD_TYPE;
   /**
    * Optional entity field operation
-   * @type {?MlEntityFieldOperation}
    */
   operation?: MlEntityFieldOperation;
 }

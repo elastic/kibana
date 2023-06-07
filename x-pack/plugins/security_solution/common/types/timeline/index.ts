@@ -36,6 +36,7 @@ export enum TimelineTabs {
   pinned = 'pinned',
   eql = 'eql',
   session = 'session',
+  securityAssistant = 'securityAssistant',
 }
 
 /*
