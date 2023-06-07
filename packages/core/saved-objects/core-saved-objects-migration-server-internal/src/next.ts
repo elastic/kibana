@@ -260,10 +260,13 @@ export const nextActionMap = (
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
     MARK_VERSION_INDEX_READY_SYNC: (state: MarkVersionIndexReady) =>
       pipe(
+        // First, we wait for all the migrators involved in a relocation to reach this point.
         Actions.synchronizeMigrators<Actions.AliasAction[]>({
           waitGroup: updateRelocationAliases,
           payload: state.versionIndexReadyActions.value,
         }),
+        // Then, all migrators will try to update all aliases (from all indices). Only the first one will succeed.
+        // The others will receive alias_not_found_exception and cause MARK_VERSION_INDEX_READY_CONFLICT (that's acceptable).
         TaskEither.chainW(({ data }) =>
           Actions.updateAliases({ client, aliasActions: data.flat() })
         )
