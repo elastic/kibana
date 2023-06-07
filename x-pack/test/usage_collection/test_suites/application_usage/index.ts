@@ -27,10 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       }
       try {
-        const enabledAppIds = Object.keys(applicationUsageSchema).filter(
-          // Profiling is currently disabled by default as it's in closed beta
-          (appId) => appId !== 'profiling'
-        );
+        const enabledAppIds = Object.keys(applicationUsageSchema);
         expect(enabledAppIds.sort()).to.eql(appIds.sort());
       } catch (err) {
         err.message = `Application Usage's schema is not up-to-date with the actual registered apps. Please update it at src/plugins/kibana_usage_collection/server/collectors/application_usage/schema.ts.\n${err.message}`;

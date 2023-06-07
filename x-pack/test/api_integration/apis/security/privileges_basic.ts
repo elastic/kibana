@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
             generalCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
+            profiling: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],

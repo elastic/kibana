@@ -120,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
             'maintenanceWindow',
             'maps',
             'osquery',
+            'profiling',
             'rulesSettings',
             'uptime',
             'siem',
