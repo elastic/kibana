@@ -19,15 +19,8 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
-import {
-  getCurrentTime,
-  getExpectedVersionProperties,
-  getSavedObjectFromSource,
-  isFoundGetResponse,
-  rawDocExistsInNamespace,
-} from './utils';
+import { getCurrentTime, getExpectedVersionProperties } from './utils';
 import { ApiExecutionContext } from './types';
 import { PreflightCheckNamespacesResult } from './helpers';
 
@@ -38,29 +31,6 @@ export interface PerformUpdateParams<T = unknown> {
   options: SavedObjectsUpdateOptions<T>;
 }
 
-/**
- *
- * @param id: id of the ocument to be updated
- * @param type: SO type
- * @param attributes: SO attributes of the serialized document
- * @param options: Update options
- * @returns updated doc
- * @remarks To achieve BWC (support migration & modelVersions) we have to perform a `client-side` update.
- * Update achieved by fetching doc, make updates locally (in the repo) and send the new version of the doc to ES to index.
- * We had to change to a client-side update because `update` operations are effectively partial updates, restricting visibility into a SO as a whole.
- * @TODO: slowly refactor and move/update code as we work through the new flow:
-  - Check type exists
-  - MOVED FROM calling to fetch namespaces: Fetch doc (docs) before namespace check
-  - Migrate docs to latest version docMigrator
-        REAFCTOR: update remaining method code to work
-  - Do checks for namespace stuff
-        REAFCTOR: update remaining method code to work
-  - Make changes/updates in the repo!
-        REAFCTOR: update remaining method code to work
-  - NEW: Check validity of new doc against schema (now supported because we have the whole document)
-        REAFCTOR: update remaining method code to work
-  - Post to ES for upsert (use index API for complete doc replacement.
- */
 export const performUpdate = async <T>(
   { id, type, attributes, options }: PerformUpdateParams<T>,
   {
@@ -83,85 +53,21 @@ export const performUpdate = async <T>(
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
-  // start of downward compatible update work
-  const {
-    version,
-    references,
-    upsert,
-    refresh = DEFAULT_REFRESH_SETTING,
-    retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
-    migrationVersionCompatibility,
-  } = options; // we only need this right now.
-
   if (!allowedTypes.includes(type)) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
   if (!id) {
     throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
   }
-  // start of new flow for downward compat update get doc before namespace checks
+
   const {
-    body: originalBody,
-    statusCode,
-    headers,
-  } = await client.get<SavedObjectsRawDocSource>(
-    {
-      id: serializer.generateRawId(namespace, type, id),
-      index: commonHelper.getIndexForType(type),
-    },
-    { ignore: [404], meta: true }
-  );
-  const indexNotFound = statusCode === 404;
-  // check if we have the elasticsearch header when index is not found and, if we do, ensure it is from Elasticsearch
-  if (indexNotFound && !isSupportedEsServer(headers)) {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-  }
+    version,
+    references,
+    upsert,
+    refresh = DEFAULT_REFRESH_SETTING,
+    retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
+  } = options;
 
-  const objectNotFound =
-    !isFoundGetResponse(originalBody) ||
-    indexNotFound ||
-    !rawDocExistsInNamespace(registry, originalBody, namespace);
-
-  if (objectNotFound) {
-    // see "404s from missing index" above
-    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-  }
-  const document = getSavedObjectFromSource<T>(registry, type, id, originalBody, {
-    migrationVersionCompatibility,
-  });
-  let migratedDoc: SavedObject<T>;
-  try {
-    migratedDoc = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
-  } catch (error) {
-    throw SavedObjectsErrorHelpers.decorateGeneralError(
-      error,
-      'Failed to migrate document to the latest version.'
-    );
-  }
-  // we now have the full document that is updated to the current version and can do the namespace checks using the id and type from that.
-  // the document has namespaces that includes the original namespace converted from default.
-  const docNamespaces = document.namespaces; // will be '*' if assigned to all, is multi-namespace type and shared to all
-  const { id: docId, type: docType, attributes: docAttrib } = migratedDoc;
-
-  // const {
-  //   version,
-  //   references,
-  //   upsert,
-  //   refresh = DEFAULT_REFRESH_SETTING,
-  //   retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
-  // } = options;
-
-  // do internal namespaces check using the migrated doc we have
-  // START
-  let docPreflightResult: PreflightCheckNamespacesResult | undefined;
-  if (registry.isMultiNamespace(docType))
-    docPreflightResult = await preflightHelper.internalPreflightCheckNamespaces({
-      type: docType,
-      initialNamespaces: docNamespaces, // may not include namespace
-      docExists: !!document,
-    });
-
-  // END
   let preflightResult: PreflightCheckNamespacesResult | undefined;
   if (registry.isMultiNamespace(type)) {
     preflightResult = await preflightHelper.preflightCheckNamespaces({
