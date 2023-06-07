@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -63,9 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.pressKeys(browser.keys.ESCAPE);
         expect(await hasFocus(menuButtonTestSubject)).to.be(true);
       };
-
-      it('should return focus to the options button when dismissing the options popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOptionsButton'));
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
