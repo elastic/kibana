@@ -20246,7 +20246,9 @@
         "parentPluginId": "fleet",
         "id": "def-common.ListWithKuery",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ListWithKuery",
         "description": [],
         "signature": [
@@ -20267,8 +20269,9 @@
           }
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/common.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "fleet",
