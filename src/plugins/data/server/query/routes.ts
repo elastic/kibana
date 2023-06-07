@@ -157,7 +157,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           200: {
             body: schema.object({
               total: schema.number(),
-              queries: schema.arrayOf(responseCreateSchema),
+              savedQueries: schema.arrayOf(responseCreateSchema),
             }),
           },
         },
@@ -185,7 +185,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           200: {
             body: schema.object({
               total: schema.number(),
-              queries: schema.arrayOf(responseCreateSchema),
+              savedQueries: schema.arrayOf(responseCreateSchema),
             }),
           },
         },

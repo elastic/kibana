@@ -10,9 +10,9 @@ import type { SerializableRecord } from '@kbn/utility-types';
 
 /*
  * These types are used to define the shape of the response from the saved query API
+ * separate but similar to other types to draw attention to REST api return changes
  */
 
-// @ts-expect-error
 interface MatchAllFilterMetaRestResponse extends FilterMetaRestResponse, SerializableRecord {
   field: string;
   formattedValue: string;
@@ -93,13 +93,14 @@ type FilterMetaRestResponse = {
 
 type FilterStateStoreRestResponse = 'appState' | 'globalState';
 
-interface FilterRestResponse {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type FilterRestResponse = {
   $state?: {
     store: FilterStateStoreRestResponse;
   };
   meta: FilterMetaRestResponse;
   query?: Record<string, any>;
-}
+};
 
 interface RefreshIntervalRestResponse {
   pause: boolean;
