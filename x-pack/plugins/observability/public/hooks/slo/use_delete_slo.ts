@@ -37,22 +37,19 @@ export function useDeleteSlo() {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries(sloKeys.lists());
 
-        const latestFetchSloListRequest = (
+        const latestQueriesData = (
           queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) || []
         ).at(0);
-
-        const [queryKey, data] = latestFetchSloListRequest || [];
+        const [queryKey, data] = latestQueriesData || [];
 
         const optimisticUpdate = {
           ...data,
-          results: data?.results.filter((result) => result.id !== slo.id),
-          total: data?.total && data.total - 1,
+          results: data?.results?.filter((result) => result.id !== slo.id) ?? [],
+          total: data?.total ? data.total - 1 : 0,
         };
 
         // Optimistically update to the new value
-        if (queryKey) {
-          queryClient.setQueryData(queryKey, optimisticUpdate);
-        }
+        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
 
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
