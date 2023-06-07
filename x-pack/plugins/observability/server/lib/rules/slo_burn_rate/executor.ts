@@ -133,7 +133,7 @@ async function findSloOrCompositeSlo(
 ): Promise<SloORCompositeSlo> {
   const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
   try {
-    return sloRepository.findById(id);
+    return await sloRepository.findById(id);
   } catch (e) {
     const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
     const compositeSlo = await compositeSloRepository.findById(id);
