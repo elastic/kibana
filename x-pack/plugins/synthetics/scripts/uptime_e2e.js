@@ -12,4 +12,4 @@ const path = require('path');
 
 const e2eDir = path.join(__dirname, '../e2e');
 
-executeSyntheticsRunner(e2eDir, './synthetics/synthetics_run.ts');
+executeSyntheticsRunner(e2eDir, './uptime/synthetics_run.ts');

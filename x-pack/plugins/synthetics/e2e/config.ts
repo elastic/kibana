@@ -13,8 +13,6 @@ const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
 const SERVICE_USERNAME = 'xpack.uptime.service.username';
 
-const { watch } = argv;
-
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../../test/common/config.js')
@@ -44,7 +42,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
-      sourceArgs: watch
+      sourceArgs: process.env.WATCH_ENABLED
         ? []
         : [...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'), '--no-watch'],
       serverArgs: [
@@ -54,7 +52,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--elasticsearch.ignoreVersionMismatch=${process.env.CI ? 'false' : 'true'}`,
+        // `--elasticsearch.ignoreVersionMismatch=${process.env.CI ? 'false' : 'true'}`,
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',

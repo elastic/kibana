@@ -6,4 +6,8 @@
     "outDir": "target/types",
     "types": [ "node"],
   },
+  "kbn_references": [
+    "@kbn/observability-plugin/e2e",
+    "@kbn/test",
+  ],
 }
