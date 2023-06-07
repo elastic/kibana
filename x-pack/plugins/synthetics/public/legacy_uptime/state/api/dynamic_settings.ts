@@ -6,10 +6,10 @@
  */
 
 import {
-  DynamicSettingsType,
+  DynamicSettingsCodec,
   DynamicSettings,
   DynamicSettingsSaveResponse,
-  DynamicSettingsSaveType,
+  DynamicSettingsSaveCodec,
 } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
@@ -21,11 +21,11 @@ interface SaveApiRequest {
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
-  return await apiService.get(apiPath, undefined, DynamicSettingsType);
+  return await apiService.get(apiPath, undefined, DynamicSettingsCodec);
 };
 
 export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
-  return await apiService.post(apiPath, settings, DynamicSettingsSaveType);
+  return await apiService.post(apiPath, settings, DynamicSettingsSaveCodec);
 };
