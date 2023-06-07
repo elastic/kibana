@@ -37,7 +37,8 @@ import {
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
-import { timelineSelectors, timelineActions } from '../../timelines/store/timeline';
+import { timelineSelectors } from '../../timelines/store/timeline';
+import * as timelineActions from '../../timelines/store/timeline/actions';
 import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { inputsSelectors } from './inputs';
 import type { SubPluginsInitReducer } from './reducer';
