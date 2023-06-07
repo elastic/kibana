@@ -102,8 +102,8 @@ describe('createConnectorDocument', () => {
       },
       scheduling: {
         access_control: { enabled: false, interval: '0 0 0 * * ?' },
-        incremental: { enabled: false, interval: '0 0 0 * * ?' },
         full: { enabled: false, interval: '0 0 0 * * ?' },
+        incremental: { enabled: false, interval: '0 0 0 * * ?' },
       },
       service_type: null,
       status: ConnectorStatus.CREATED,
@@ -200,7 +200,11 @@ describe('createConnectorDocument', () => {
         reduce_whitespace: true,
         run_ml_inference: false,
       },
-      scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+      scheduling: {
+        access_control: { enabled: false, interval: '0 0 0 * * ?' },
+        full: { enabled: false, interval: '0 0 0 * * ?' },
+        incremental: { enabled: false, interval: '0 0 0 * * ?' },
+      },
       service_type: null,
       status: ConnectorStatus.CREATED,
       sync_now: false,

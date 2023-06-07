@@ -100,7 +100,11 @@ describe('recreateConnectorDocument lib function', () => {
         last_synced: null,
         name: 'indexName',
         pipeline: null,
-        scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+        scheduling: {
+          access_control: { enabled: false, interval: '0 0 0 * * ?' },
+          full: { enabled: false, interval: '0 0 0 * * ?' },
+          incremental: { enabled: false, interval: '0 0 0 * * ?' },
+        },
         service_type: 'elastic-crawler',
         status: ConnectorStatus.CONFIGURED,
         sync_now: false,
