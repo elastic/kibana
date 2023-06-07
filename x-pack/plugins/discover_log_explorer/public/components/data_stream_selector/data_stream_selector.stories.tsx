@@ -17,7 +17,7 @@ import { DataStreamSelectorProps, DataStreamsSelectorSearchParams } from './type
 
 const meta: Meta<typeof DataStreamSelector> = {
   component: DataStreamSelector,
-  title: 'observability_logs/DataStreamSelector',
+  title: 'discover_log_explorer/DataStreamSelector',
   decorators: [(wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>],
   argTypes: {
     dataStreamsError: {

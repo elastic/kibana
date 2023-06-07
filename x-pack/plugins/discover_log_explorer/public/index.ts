@@ -10,10 +10,10 @@ import './index.scss';
 =======
 >>>>>>> 389778b70c6 (feat(observability-logs): try discover customization)
 
-import { ObservabilityLogsPlugin } from './plugin';
+import { DiscoverLogExplorerPlugin } from './plugin';
 
 export function plugin() {
-  return new ObservabilityLogsPlugin();
+  return new DiscoverLogExplorerPlugin();
 }
 
-export type { ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart } from './types';
+export type { DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart } from './types';

@@ -51,7 +51,7 @@ export const DataStreamsList = ({
         titleSize="s"
         body={
           <FormattedMessage
-            id="xpack.observabilityLogs.dataStreamSelector.noDataStreamsError"
+            id="xpack.discoverLogExplorer.dataStreamSelector.noDataStreamsError"
             defaultMessage="An {error} occurred while getting your data streams. Please retry."
             values={{
               error: (

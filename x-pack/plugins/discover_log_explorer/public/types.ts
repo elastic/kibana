@@ -8,16 +8,16 @@ import { Plugin } from '@kbn/core/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DataStreamsServiceStart } from './services/data_streams';
 
-export type ObservabilityLogsPluginSetup = void;
-export interface ObservabilityLogsPluginStart {
+export type DiscoverLogExplorerPluginSetup = void;
+export interface DiscoverLogExplorerPluginStart {
   dataStreamsService: DataStreamsServiceStart;
 }
 
-export interface ObservabilityLogsStartDeps {
+export interface DiscoverLogExplorerStartDeps {
   discover: DiscoverStart;
 }
 
-export type ObservabilityLogsClientPluginClass = Plugin<
-  ObservabilityLogsPluginSetup,
-  ObservabilityLogsPluginStart
+export type DiscoverLogExplorerClientPluginClass = Plugin<
+  DiscoverLogExplorerPluginSetup,
+  DiscoverLogExplorerPluginStart
 >;

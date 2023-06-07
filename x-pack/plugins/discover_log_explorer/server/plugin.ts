@@ -7,11 +7,11 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart } from './types';
+import { DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart } from './types';
 import { defineRoutes } from './routes';
 
-export class ObservabilityLogsPlugin
-  implements Plugin<ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart>
+export class DiscoverLogExplorerPlugin
+  implements Plugin<DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart>
 {
   private readonly logger: Logger;
 
@@ -20,7 +20,7 @@ export class ObservabilityLogsPlugin
   }
 
   public setup(core: CoreSetup) {
-    this.logger.debug('observabilityLogs: Setup');
+    this.logger.debug('discoverLogExplorer: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
@@ -30,7 +30,7 @@ export class ObservabilityLogsPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('observabilityLogs: Started');
+    this.logger.debug('discoverLogExplorer: Started');
     return {};
   }
 

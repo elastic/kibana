@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export const OBSERVABILITY_LOGS_PROFILE_ID = 'observability-logs';
-
-/**
- * Exporting versioned APIs types
- */
-export * from './latest';
-export * as dataStreamsV1 from './data_streams/v1';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DiscoverLogExplorerPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DiscoverLogExplorerPluginStart {}
