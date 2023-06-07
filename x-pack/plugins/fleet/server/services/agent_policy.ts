@@ -398,7 +398,10 @@ class AgentPolicyService {
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
     try {
-      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+        ...baseFindParams,
+        filter,
+      });
     } catch (e) {
       const isBadRequest = e.output?.statusCode === 400;
       const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');
@@ -847,7 +850,8 @@ class AgentPolicyService {
         fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
       }
 
-      return [...acc, fleetServerPolicy];
+      acc.push(fleetServerPolicy);
+      return acc;
     }, [] as FleetServerPolicy[]);
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
@@ -876,7 +880,8 @@ class AgentPolicyService {
           return acc;
         }
 
-        return [...acc, value];
+        acc.push(value);
+        return acc;
       }, [] as BulkResponseItem[]);
 
       logger.debug(

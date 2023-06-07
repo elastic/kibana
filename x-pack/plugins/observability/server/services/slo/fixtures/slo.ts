@@ -18,6 +18,7 @@ import {
   DurationUnit,
   Indicator,
   KQLCustomIndicator,
+  MetricCustomIndicator,
   SLO,
   StoredSLO,
 } from '../../../domain/models';
@@ -63,6 +64,29 @@ export const createKQLCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createMetricCustomIndicator = (
+  params: Partial<MetricCustomIndicator['params']> = {}
+): Indicator => ({
+  type: 'sli.metric.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      metrics: [
+        { name: 'A', aggregation: 'sum', field: 'total' },
+        { name: 'B', aggregation: 'sum', field: 'processed' },
+      ],
+      equation: 'A - B',
+    },
+    total: {
+      metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
+      equation: 'A',
+    },
     timestampField: 'log_timestamp',
     ...params,
   },
@@ -138,7 +162,7 @@ export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO 
   return createSLO({
     timeWindow: {
       duration: oneWeek(),
-      isCalendar: true,
+      type: 'calendarAligned',
     },
     ...params,
   });

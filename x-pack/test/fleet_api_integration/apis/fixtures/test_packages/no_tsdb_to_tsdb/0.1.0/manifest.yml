@@ -1,0 +1,17 @@
+format_version: 1.0.0
+name: no_tsdb_to_tsdb
+title: Test package where tsdb is enabled in a newer version
+description: Test package where tsdb is enabled in a newer version
+version: 0.1.0
+categories: []
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'

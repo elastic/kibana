@@ -31,6 +31,7 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
 import { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
@@ -109,6 +110,7 @@ export function FormulaEditor({
   dateHistogramInterval,
   hasData,
   dateRange,
+  uiSettings,
 }: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
   hasData: boolean;
@@ -356,7 +358,8 @@ export function FormulaEditor({
                   id,
                   indexPattern,
                   dateRange,
-                  visibleOperationsMap
+                  visibleOperationsMap,
+                  uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
                 );
                 if (messages) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);
@@ -862,7 +865,7 @@ export function FormulaEditor({
                       buttonProps={{
                         color: 'text',
                         className: 'lnsFormula__editorHelp lnsFormula__editorHelp--overlay',
-                        'data-test-subj': 'unifiedTextLangEditor-documentation',
+                        'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'xpack.lens.formula.editorHelpInlineShowToolTip',
                           {

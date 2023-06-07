@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -205,9 +205,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
     const { body, status } = await supertest
-      .get(`/api/ml/modules/recognize/${indexPattern}`)
+      .get(`/internal/ml/modules/recognize/${indexPattern}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;

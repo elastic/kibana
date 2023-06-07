@@ -17,10 +17,6 @@ import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timeline
 import { getTimeline } from '../../objects/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-before(() => {
-  login();
-});
-
 describe('Overview Page', () => {
   before(() => {
     cleanKibana();
@@ -28,6 +24,7 @@ describe('Overview Page', () => {
   });
 
   beforeEach(() => {
+    login();
     visit(OVERVIEW_URL);
   });
 
@@ -77,6 +74,7 @@ describe('Overview page with no data', () => {
   });
 
   it('Splash screen should be here', () => {
+    login();
     visit(OVERVIEW_URL);
     cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
   });

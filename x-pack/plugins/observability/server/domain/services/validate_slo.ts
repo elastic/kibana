@@ -23,6 +23,10 @@ import { SLO } from '../models';
  * @param slo {SLO}
  */
 export function validateSLO(slo: SLO) {
+  if (!isValidId(slo.id)) {
+    throw new IllegalArgumentError('Invalid id');
+  }
+
   if (!isValidTargetNumber(slo.objective.target)) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
@@ -68,6 +72,12 @@ function validateSettings(slo: SLO) {
   if (!isValidSyncDelaySettings(slo.settings.syncDelay)) {
     throw new IllegalArgumentError('Invalid settings.sync_delay');
   }
+}
+
+function isValidId(id: string): boolean {
+  const MIN_ID_LENGTH = 8;
+  const MAX_ID_LENGTH = 36;
+  return MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
 }
 
 function isValidTargetNumber(value: number): boolean {

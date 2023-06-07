@@ -42,6 +42,14 @@ __tmp__
 /x-pack/test/*/screenshots/visual_regression_gallery.html
 /x-pack/test/functional/apps/*/*/reporting/reports/failure
 
+# Ignore the same artifacts in x-pack/test_serverless
+/x-pack/test_serverless/*/failure_debug
+/x-pack/test_serverless/*/screenshots/diff
+/x-pack/test_serverless/*/screenshots/failure
+/x-pack/test_serverless/*/screenshots/session
+/x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
+/x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
+
 /html_docs
 .eslintcache
 /plugins/
@@ -84,6 +92,7 @@ npm-debug.log*
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
+x-pack/plugins/apm/scripts/apm-diagnostics*.json
 
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
@@ -122,3 +131,4 @@ fleet-server.yml
 **/.synthetics/
 **/.journeys/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
+

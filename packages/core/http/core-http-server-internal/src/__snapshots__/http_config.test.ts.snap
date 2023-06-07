@@ -56,6 +56,16 @@ Object {
     "enabled": false,
   },
   "customResponseHeaders": Object {},
+  "eluMonitor": Object {
+    "enabled": true,
+    "logging": Object {
+      "enabled": false,
+      "threshold": Object {
+        "ela": 250,
+        "elu": 0.15,
+      },
+    },
+  },
   "host": "localhost",
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {

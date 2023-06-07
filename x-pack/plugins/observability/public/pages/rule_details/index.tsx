@@ -37,13 +37,14 @@ import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alertin
 import { Query, BoolQuery } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import { fromQuery, toQuery } from '../../utils/url';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
-import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
+import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
@@ -55,7 +56,6 @@ import {
   SEARCH_BAR_URL_STORAGE_KEY,
 } from './constants';
 import { RuleDetailsPathParams, TabId } from './types';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { PageTitle } from './components';
@@ -66,7 +66,6 @@ import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import type { AlertStatus } from '../../../common/typings';
-import type { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
@@ -87,7 +86,7 @@ export function RuleDetailsPage() {
     share: {
       url: { locators },
     },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();

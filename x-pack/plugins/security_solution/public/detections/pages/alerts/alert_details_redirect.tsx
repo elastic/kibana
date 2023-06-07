@@ -17,6 +17,9 @@ import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants'
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
 import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { resolveFlyoutParams } from './utils';
+import { FLYOUT_URL_PARAM } from '../../../flyout/url/use_sync_flyout_state_with_url';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
@@ -54,14 +57,6 @@ export const AlertDetailsRedirect = () => {
     },
   });
 
-  const flyoutString = encode({
-    panelView: 'eventDetail',
-    params: {
-      eventId: alertId,
-      indexName: index,
-    },
-  });
-
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
   const statusPageFilter: FilterItemObj = {
@@ -73,7 +68,21 @@ export const AlertDetailsRedirect = () => {
 
   const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));
 
-  const url = `${ALERTS_PATH}?${URL_PARAM_KEY.appQuery}=${kqlAppQuery}&${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.pageFilter}=${pageFiltersQuery}&${URL_PARAM_KEY.eventFlyout}=${flyoutString}`;
+  const currentFlyoutParams = searchParams.get(FLYOUT_URL_PARAM);
+
+  const isSecurityFlyoutEnabled = useIsExperimentalFeatureEnabled('securityFlyoutEnabled');
+
+  const urlParams = new URLSearchParams({
+    [URL_PARAM_KEY.appQuery]: kqlAppQuery,
+    [URL_PARAM_KEY.timerange]: timerange,
+    [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
+    [URL_PARAM_KEY.eventFlyout]: resolveFlyoutParams(
+      { index, alertId, isSecurityFlyoutEnabled },
+      currentFlyoutParams
+    ),
+  });
+
+  const url = `${ALERTS_PATH}?${urlParams.toString()}`;
 
   return <Redirect to={url} />;
 };

@@ -28,8 +28,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { withTheme } from '@kbn/kibana-react-plugin/common';
-import { useLinkProps } from '@kbn/observability-plugin/public';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { useSorting } from '../../../../../../../hooks/use_sorting';

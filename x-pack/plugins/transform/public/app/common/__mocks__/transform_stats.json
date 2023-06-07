@@ -97,7 +97,9 @@
           },
           "timestamp_millis" : 1568021396011
         },
-        "operations_behind" : 21139495
+        "operations_behind" : 21139495,
+        "changes_last_detected_at": 1568021396000,
+        "last_search_time": 1568021396000
       }
     },
     {
@@ -123,7 +125,7 @@
           "checkpoint" : 1,
           "timestamp_millis" : 1568021396011
         },
-        "operations_behind" : 0
+        "changes_last_detected_at": 1568021396011
       }
     }
   ]
