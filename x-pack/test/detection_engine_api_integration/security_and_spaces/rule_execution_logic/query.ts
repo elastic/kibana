@@ -1014,12 +1014,12 @@ export default ({ getService }: FtrProviderContext) => {
             alert_suppression: {
               group_by: ['host.name'],
               duration: {
-                value: 3,
+                value: 2,
                 unit: 'h',
               },
             },
             from: 'now-1h',
-            interval: '1h',
+            interval: '2h',
           };
 
           const { previewId } = await previewRule({
@@ -1042,12 +1042,12 @@ export default ({ getService }: FtrProviderContext) => {
                 value: 'host-0',
               },
             ],
-            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
             [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
-            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
-            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 11,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
           });
         });
 
