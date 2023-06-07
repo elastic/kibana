@@ -6245,7 +6245,7 @@
       },
       "update_rule_request": {
         "title": "Update rule request",
-        "description": "The update rule API request body varies depending on the type of rule and actions.",
+        "description": "The update rule API request body varies depending on the type of rule and actions.\n",
         "type": "object",
         "required": [
           "name",
