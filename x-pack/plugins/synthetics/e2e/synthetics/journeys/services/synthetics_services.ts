@@ -26,7 +26,7 @@ export class SyntheticsServices {
 
   async getMonitor(monitorId: string): Promise<SyntheticsMonitor | null> {
     try {
-      const { data } = await this.requester.request<{ attributes: SyntheticsMonitor }>({
+      const { data } = await this.requester.request({
         description: 'get monitor by id',
         path: API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
         query: {
@@ -34,7 +34,7 @@ export class SyntheticsServices {
         },
         method: 'GET',
       });
-      return data?.attributes;
+      return (data as { attributes: SyntheticsMonitor })?.attributes;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
