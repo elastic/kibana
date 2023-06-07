@@ -129,9 +129,16 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow>
-            <EuiCallOut title="Beta feature" color="warning" iconType="beaker">
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.engines.createEngine.featureCallOut.title',
+                { defaultMessage: 'Beta feature' }
+              )}
+              color="warning"
+              iconType="beaker"
+            >
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engines.createEngine.technicalPreviewCallOut.title"
+                id="xpack.enterpriseSearch.content.engines.createEngine.featureCallOut.description"
                 defaultMessage="This functionality is in beta and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in beta are not subject to the support SLA of official GA features."
               />
             </EuiCallOut>
