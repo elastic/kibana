@@ -17,7 +17,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
   options: { tags: [] },
   async handler(resources): Promise<string> {
     const { core, plugins, request } = resources;
-    const { apiKeyId, apiKey } = getAuthenticationAPIKey(request);
+    const authApiKey = getAuthenticationAPIKey(request);
 
     const coreStart = await core.start();
     const savedObjectsClient =
@@ -37,7 +37,9 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       customConfigurations: savedState?.state.customConfigurations,
       logFilePaths: savedState?.state.logFilePaths,
       namespace: savedState?.state.namespace,
-      apiKey: `${apiKeyId}:${apiKey}`,
+      apiKey: authApiKey
+        ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}`
+        : '$API_KEY',
       esHost,
       logfileId: `custom-logs-${Date.now()}`,
     });

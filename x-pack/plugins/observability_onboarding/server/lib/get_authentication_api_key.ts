@@ -10,6 +10,16 @@ import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 
 export const getAuthenticationAPIKey = (request: KibanaRequest) => {
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+  if (!authorizationHeader) {
+    throw new Error('Authorization header is missing');
+  }
+
+  // If we don't perform this check we could end up exposing user password because this will return
+  // something similar to username:password when we are using basic authentication
+  if (authorizationHeader.scheme.toLowerCase() !== 'apikey') {
+    return null;
+  }
+
   if (authorizationHeader && authorizationHeader.credentials) {
     const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
       .toString()
@@ -19,5 +29,4 @@ export const getAuthenticationAPIKey = (request: KibanaRequest) => {
       apiKey: apiKey[1],
     };
   }
-  throw new Error('Authorization header is missing');
 };

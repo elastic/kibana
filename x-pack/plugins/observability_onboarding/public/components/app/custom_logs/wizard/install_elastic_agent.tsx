@@ -41,10 +41,23 @@ export function InstallElasticAgent() {
     goBack();
   }
 
-  const { data: monitoringRole } = useFetcher((callApi) => {
-    return callApi(
-      'GET /internal/observability_onboarding/custom_logs/privileges'
-    );
+  const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
+    (callApi) => {
+      if (CurrentStep === InstallElasticAgent) {
+        return callApi(
+          'GET /internal/observability_onboarding/custom_logs/privileges'
+        );
+      }
+    },
+    []
+  );
+
+  const { data: setup } = useFetcher((callApi) => {
+    if (CurrentStep === InstallElasticAgent) {
+      return callApi(
+        'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+      );
+    }
   }, []);
 
   const {
@@ -58,7 +71,7 @@ export function InstallElasticAgent() {
         monitoringRole?.hasPrivileges
       ) {
         return callApi(
-          'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
+          'POST /internal/observability_onboarding/custom_logs/save',
           {
             params: {
               body: {
@@ -75,16 +88,12 @@ export function InstallElasticAgent() {
         );
       }
     },
-    [monitoringRole],
-    { showToastOnError: false }
+    [monitoringRole?.hasPrivileges]
   );
 
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (
-        CurrentStep === InstallElasticAgent &&
-        installShipperSetup?.apiKeyEncoded
-      ) {
+      if (CurrentStep === InstallElasticAgent) {
         const options = {
           headers: {
             authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
@@ -97,7 +106,7 @@ export function InstallElasticAgent() {
         );
       }
     },
-    [installShipperSetup?.apiKeyId, installShipperSetup?.apiKeyEncoded]
+    [installShipperSetup?.apiKeyEncoded]
   );
 
   const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
@@ -115,15 +124,18 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <ApiKeyBanner
-          payload={installShipperSetup}
-          status={
-            monitoringRole?.hasPrivileges
-              ? installShipperSetupStatus
-              : 'noPrivileges'
-          }
-          error={error}
-        />
+        {monitoringRoleStatus !== FETCH_STATUS.NOT_INITIATED &&
+          monitoringRoleStatus !== FETCH_STATUS.LOADING && (
+            <ApiKeyBanner
+              payload={installShipperSetup}
+              status={
+                monitoringRole?.hasPrivileges
+                  ? installShipperSetupStatus
+                  : 'noPrivileges'
+              }
+              error={error}
+            />
+          )}
         <EuiSpacer size="m" />
         <EuiSteps
           steps={[
@@ -159,25 +171,14 @@ export function InstallElasticAgent() {
                     }
                   />
                   <EuiSpacer size="m" />
-                  <EuiSkeletonRectangle
-                    isLoading={
-                      installShipperSetupStatus === FETCH_STATUS.LOADING
-                    }
-                    contentAriaLabel="Command to install elastic agent"
-                    width="100%"
-                    height={80}
-                    borderRadius="s"
-                  >
-                    <EuiCodeBlock language="bash" isCopyable>
-                      {getInstallShipperCommand({
-                        elasticAgentPlatform,
-                        apiKeyEncoded,
-                        apiEndpoint: installShipperSetup?.apiEndpoint,
-                        scriptDownloadUrl:
-                          installShipperSetup?.scriptDownloadUrl,
-                      })}
-                    </EuiCodeBlock>
-                  </EuiSkeletonRectangle>
+                  <EuiCodeBlock language="bash" isCopyable>
+                    {getInstallShipperCommand({
+                      elasticAgentPlatform,
+                      apiKeyEncoded,
+                      apiEndpoint: setup?.apiEndpoint,
+                      scriptDownloadUrl: setup?.scriptDownloadUrl,
+                    })}
+                  </EuiCodeBlock>
                 </>
               ),
             },
@@ -197,7 +198,7 @@ export function InstallElasticAgent() {
                   </EuiText>
                   <EuiSpacer size="m" />
                   <EuiSkeletonRectangle
-                    isLoading={yamlConfigStatus === FETCH_STATUS.LOADING}
+                    isLoading={yamlConfigStatus === FETCH_STATUS.NOT_INITIATED}
                     contentAriaLabel="Elastic agent yaml configuration"
                     width="100%"
                     height={300}

@@ -42,9 +42,41 @@ const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
-const createApiKeyRoute = createObservabilityOnboardingServerRoute({
+const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   endpoint:
-    'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
+    'GET /internal/observability_onboarding/custom_logs/install_shipper_setup',
+  options: { tags: [] },
+  async handler(resources): Promise<{
+    apiEndpoint: string;
+    scriptDownloadUrl: string;
+    esHost: string;
+  }> {
+    const { core, plugins } = resources;
+    const coreStart = await core.start();
+    const scriptDownloadUrl = getKibanaUrl(
+      coreStart,
+      '/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh'
+    );
+    const apiEndpoint = getKibanaUrl(
+      coreStart,
+      '/api/observability_onboarding/custom_logs'
+    );
+
+    const [esHost] = getESHosts({
+      cloudSetup: plugins.cloud.setup,
+      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
+    });
+
+    return {
+      apiEndpoint,
+      scriptDownloadUrl,
+      esHost,
+    };
+  },
+});
+
+const createApiKeyRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
   options: { tags: [] },
   params: t.type({
     body: t.type({
@@ -55,9 +87,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   async handler(resources): Promise<{
     apiKeyId: string;
     apiKeyEncoded: string;
-    apiEndpoint: string;
-    scriptDownloadUrl: string;
-    esHost: string;
   }> {
     const {
       context,
@@ -65,18 +94,9 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
         body: { name, state },
       },
       core,
-      plugins,
       request,
     } = resources;
     const coreStart = await core.start();
-    const scriptDownloadUrl = getKibanaUrl(
-      coreStart,
-      '/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh'
-    );
-    const apiEndpoint = getKibanaUrl(
-      coreStart,
-      '/api/observability_onboarding/custom_logs'
-    );
     const {
       elasticsearch: { client },
     } = await context.core;
@@ -84,10 +104,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       client.asCurrentUser,
       name
     );
-    const [esHost] = getESHosts({
-      cloudSetup: plugins.cloud.setup,
-      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
-    });
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
@@ -100,9 +116,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     return {
       apiKeyId, // key the status off this
       apiKeyEncoded,
-      apiEndpoint,
-      scriptDownloadUrl,
-      esHost,
     };
   },
 });
@@ -128,7 +141,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       request,
       core,
     } = resources;
-    const { apiKeyId } = getAuthenticationAPIKey(request);
+    const authApiKey = getAuthenticationAPIKey(request);
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
@@ -136,7 +149,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     const savedObservabilityOnboardingState =
       await getObservabilityOnboardingState({
         savedObjectsClient,
-        apiKeyId,
+        apiKeyId: authApiKey?.apiKeyId as string,
       });
 
     if (!savedObservabilityOnboardingState) {
@@ -150,7 +163,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       savedObservabilityOnboardingState;
     await saveObservabilityOnboardingState({
       savedObjectsClient,
-      apiKeyId,
+      apiKeyId: authApiKey?.apiKeyId as string,
       observabilityOnboardingState: {
         ...observabilityOnboardingState,
         progress: {
@@ -270,6 +283,7 @@ const deleteStatesRoute = createObservabilityOnboardingServerRoute({
 
 export const customLogsRouteRepository = {
   ...logMonitoringPrivilegesRoute,
+  ...installShipperSetupRoute,
   ...createApiKeyRoute,
   ...stepProgressUpdateRoute,
   ...getStateRoute,
