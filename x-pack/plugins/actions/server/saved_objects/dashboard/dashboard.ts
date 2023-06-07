@@ -23,6 +23,7 @@ export const getGenAiDashboard = (spaceId: string): SavedObject<DashboardAttribu
     attributes: {
       description: 'Displays OpenAI token consumption per Kibana user',
       kibanaSavedObjectMeta: {
+        searchSourceJSON:
           '{"query":{"query":"kibana.saved_objects: { type_id  : \\".gen-ai\\" } ","language":"kuery"},"filter":[]}',
       },
       optionsJSON:
