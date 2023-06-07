@@ -13,15 +13,15 @@ import { ProductId, Switch } from './types';
 
 const switches: Switch[] = [
   {
-    id: ProductId.Analytics,
+    id: ProductId.analytics,
     label: i18n.ANALYTICS_SWITCH_LABEL,
   },
   {
-    id: ProductId.Cloud,
+    id: ProductId.cloud,
     label: i18n.CLOUD_SWITCH_LABEL,
   },
   {
-    id: ProductId.Endpoint,
+    id: ProductId.endpoint,
     label: i18n.ENDPOINT_SWITCH_LABEL,
   },
 ];

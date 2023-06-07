@@ -82,7 +82,7 @@ export const GET_SET_UP_TITLE = i18n.translate(
 export const INTRODUCTION_TITLE = i18n.translate(
   'xpack.serverlessSecurity.getStarted.togglePanel.introduction.title',
   {
-    defaultMessage: 'Introduction',
+    defaultMessage: 'introduction',
   }
 );
 

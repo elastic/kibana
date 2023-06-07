@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import progress from './images/progress.svg';
 import invite from './images/invite.svg';
-import { Section } from './types';
+import { HeaderSection } from './types';
 import {
   WELCOME_PANEL_PROJECT_CREATED_TITLE,
   WELCOME_PANEL_PROJECT_CREATED_DESCRIPTION,
@@ -19,7 +19,7 @@ import {
   WELCOME_PANEL_PROGRESS_TRACKER_TITLE,
 } from './translations';
 
-const headerCards: Section[] = [
+const headerCards: HeaderSection[] = [
   {
     icon: { type: 'checkInCircleFilled', color: '#00BFB3' },
     title: WELCOME_PANEL_PROJECT_CREATED_TITLE,

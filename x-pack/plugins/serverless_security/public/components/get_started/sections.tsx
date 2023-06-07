@@ -6,31 +6,38 @@
  */
 import React from 'react';
 
-import { Section, ProductId, SectionId } from './types';
+import {
+  Section,
+  ProductId,
+  SectionId,
+  GetMoreFromElasticSecurityCardId,
+  GetSetUpCardId,
+  IntroductionSteps,
+} from './types';
 import * as i18n from './translations';
 import respond from './images/respond.svg';
 import protect from './images/protect.svg';
 
 export const ActiveConditions = {
-  anyCondition: [ProductId.Analytics, ProductId.Cloud, ProductId.Endpoint],
-  analyticsToggled: [ProductId.Analytics],
-  cloudToggled: [ProductId.Cloud],
-  endpointToggled: [ProductId.Endpoint],
+  anyCondition: [ProductId.analytics, ProductId.cloud, ProductId.endpoint],
+  analyticsToggled: [ProductId.analytics],
+  cloudToggled: [ProductId.cloud],
+  endpointToggled: [ProductId.endpoint],
 };
 
 export const sections: Section[] = [
   {
-    id: SectionId.GetSetUp,
+    id: SectionId.getSetUp,
     title: i18n.GET_SET_UP_TITLE,
     cards: [
       {
         title: i18n.INTRODUCTION_TITLE,
         icon: { type: 'securityApp', size: 'xl' },
-        id: 'introduction',
+        id: GetSetUpCardId.introduction,
         activeConditions: ActiveConditions.anyCondition,
         steps: [
           {
-            id: 'watchOverviewVideo',
+            id: IntroductionSteps.watchOverviewVideo,
             title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
             description: [
               i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
@@ -63,43 +70,43 @@ export const sections: Section[] = [
       {
         icon: { type: 'agentApp', size: 'xl' },
         title: i18n.BRING_IN_YOUR_DATA_TITLE,
-        id: 'bringInYourData',
+        id: GetSetUpCardId.bringInYourData,
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: 'advancedSettingsApp', size: 'xl' },
         title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
-        id: 'activateAndCreateRules',
+        id: GetSetUpCardId.activateAndCreateRules,
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: protect, size: 'xl' },
         title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-        id: 'protectYourEnvironmentInRuntime',
+        id: GetSetUpCardId.protectYourEnvironmentInRuntime,
         activeConditions: [...ActiveConditions.cloudToggled, ...ActiveConditions.endpointToggled],
       },
     ],
   },
   {
-    id: SectionId.GetMoreFromElasticSecurity,
+    id: SectionId.getMoreFromElasticSecurity,
     title: i18n.GET_MORE_TITLE,
     cards: [
       {
         icon: { type: 'advancedSettingsApp', size: 'xl' },
         title: i18n.MASTER_THE_INVESTIGATION_TITLE,
-        id: 'masterTheInvestigationsWorkflow',
+        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: respond, size: 'xl' },
         title: i18n.RESPOND_TO_THREATS_TITLE,
-        id: 'respondToThreatsWithAutomation',
+        id: GetMoreFromElasticSecurityCardId.respondToThreats,
         activeConditions: ActiveConditions.anyCondition,
       },
       {
         icon: { type: 'spacesApp', size: 'xl' },
         title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
-        id: 'optimizeYourWorkspace',
+        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
         activeConditions: ActiveConditions.anyCondition,
       },
     ],

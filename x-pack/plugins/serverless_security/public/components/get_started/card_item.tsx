@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { Card } from './types';
+import { Card, CardId, StepId } from './types';
 import * as i18n from './translations';
 import { CardStep } from './card_step';
 
@@ -26,8 +26,8 @@ const CardItemComponent: React.FC<{
   shadow?: string;
   stepsLeft: number;
   timeInMins: number;
-  onStepClicked: (params: { stepId: string; cardId: string }) => void;
-  finishedSteps: Record<string, Set<string>>;
+  onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+  finishedSteps: Record<CardId, Set<StepId>>;
 }> = ({ stepsLeft, timeInMins, shadow, cardItem, euiTheme, onStepClicked, finishedSteps }) => {
   const [expandCard, setExpandCard] = useState(false);
   const toggleCard = useCallback(

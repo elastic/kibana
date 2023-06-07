@@ -13,12 +13,18 @@ export type GetStartedComponentProps = {};
 
 export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
 
-export interface Section {
-  cards?: Card[];
+export interface HeaderSection {
+  description?: string;
+  icon: EuiIconProps;
   id: string;
   title: string;
-  icon?: EuiIconProps;
+}
+export interface Section {
+  cards?: Card[];
   description?: string;
+  icon?: EuiIconProps;
+  id: SectionId;
+  title: string;
 }
 
 export interface Badge {
@@ -26,51 +32,77 @@ export interface Badge {
   id: string;
 }
 
+export type StepId = IntroductionSteps;
+
 export interface Step {
   badges: Badge[];
   description?: string[];
-  id: string;
+  id: StepId;
   splitPanel?: React.ReactNode;
   title: string;
   timeInMinutes?: number;
 }
 
+export type CardId = GetSetUpCardId | GetMoreFromElasticSecurityCardId;
+
 export interface Card {
   activeConditions?: ProductId[];
   description?: string | React.ReactNode;
   icon?: EuiIconProps;
-  id: string;
+  id: CardId;
   steps?: Step[];
   title: string;
 }
 
 export enum ProductId {
-  Analytics = 'analytics',
-  Cloud = 'cloud',
-  Endpoint = 'endpoint',
+  analytics = 'analytics',
+  cloud = 'cloud',
+  endpoint = 'endpoint',
 }
 
 export enum SectionId {
-  GetSetUp = 'getSetUp',
-  GetMoreFromElasticSecurity = 'getMoreFromElasticSecurity',
+  getSetUp = 'getSetUp',
+  getMoreFromElasticSecurity = 'getMoreFromElasticSecurity',
+}
+
+export enum GetSetUpCardId {
+  activateAndCreateRules = 'activateAndCreateRules',
+  bringInYourData = 'bringInYourData',
+  introduction = 'introduction',
+  protectYourEnvironmentInRuntime = 'protectYourEnvironmentInRuntime',
+}
+
+export enum IntroductionSteps {
+  watchOverviewVideo = 'watchOverviewVideo',
+}
+
+export enum GetMoreFromElasticSecurityCardId {
+  masterTheInvestigationsWorkflow = 'masterTheInvestigationsWorkflow',
+  optimizeYourWorkSpace = 'optimizeYourWorkSpace',
+  respondToThreats = 'respondToThreats',
 }
 
 export interface TogglePanelReducer {
   activeSections: Set<ProductId>;
-  finishedSteps: Record<string, Set<string>>;
+  finishedSteps: Record<CardId, Set<StepId>>;
 }
 
 export interface TogglePanelAction {
-  type: 'toggleSection';
+  type: GetStartedPageActions.ToggleSection;
   payload: { section: ProductId };
 }
 
 export interface ToggleStepAction {
-  type: 'addFinishStep';
-  payload: { cardId: string; stepId: string };
+  type: GetStartedPageActions.AddFinishedStep;
+  payload: { cardId: CardId; stepId: StepId };
 }
 
 export interface Switch {
   id: ProductId;
   label: string;
+}
+
+export enum GetStartedPageActions {
+  AddFinishedStep = 'addFinishedStep',
+  ToggleSection = 'toggleSection',
 }

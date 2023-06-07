@@ -16,6 +16,9 @@ import {
   ProductId,
   TogglePanelReducer,
   ToggleStepAction,
+  GetStartedPageActions,
+  StepId,
+  CardId,
 } from './types';
 import * as i18n from './translations';
 import { ProductSwitch } from './product_switch';
@@ -24,7 +27,7 @@ import { useStorage } from './use_storage';
 import { useKibana } from '../../services';
 
 const reducer = (state: TogglePanelReducer, action: TogglePanelAction | ToggleStepAction) => {
-  if (action.type === 'toggleSection') {
+  if (action.type === GetStartedPageActions.ToggleSection) {
     if (state.activeSections.has(action.payload?.section)) {
       state.activeSections.delete(action.payload?.section);
     } else {
@@ -37,7 +40,7 @@ const reducer = (state: TogglePanelReducer, action: TogglePanelAction | ToggleSt
     };
   }
 
-  if (action.type === 'addFinishStep') {
+  if (action.type === GetStartedPageActions.AddFinishedStep) {
     if (!state.finishedSteps[action.payload.cardId]) {
       state.finishedSteps[action.payload.cardId] = new Set();
     }
@@ -67,21 +70,19 @@ const TogglePanelComponent = () => {
   } = useStorage(storage);
   const finishedStepsInitialStates = useMemo(() => {
     const finishedSteps = getAllFinishedStepsFromStorage();
-    return Object.entries(finishedSteps).reduce<Record<string, Set<string>>>(
-      (acc, [key, value]) => {
-        if (value) {
-          acc[key] = new Set([...Object.keys(value)]);
-        }
-        return acc;
-      },
-      {}
-    );
+    return Object.entries(finishedSteps).reduce((acc, [key, value]) => {
+      if (value) {
+        acc[key] = new Set([...Object.keys(value)]);
+      }
+      return acc;
+    }, {} as Record<string, Set<string>>);
   }, [getAllFinishedStepsFromStorage]);
 
   const activeSectionsInitialStates = useMemo(() => {
-    const activeSections = getActiveProductsFromStorage();
-    return Object.keys(activeSections).reduce((acc, key) => {
-      if (activeSections[key]) {
+    const activeProducts = getActiveProductsFromStorage();
+    const activeProductIds = [ProductId.analytics, ProductId.cloud, ProductId.endpoint];
+    return activeProductIds.reduce((acc, key) => {
+      if (activeProducts[key]) {
         acc.add(key);
       }
       return acc;
@@ -90,12 +91,12 @@ const TogglePanelComponent = () => {
 
   const [state, dispatch] = useReducer(reducer, {
     activeSections: activeSectionsInitialStates,
-    finishedSteps: finishedStepsInitialStates,
+    finishedSteps: finishedStepsInitialStates as Record<CardId, Set<StepId>>,
   });
   const { setUpSections } = useSetUpCardSections({ euiTheme, shadow });
   const onStepClicked = useCallback(
-    ({ stepId, cardId }: { stepId: string; cardId: string }) => {
-      dispatch({ type: 'addFinishStep', payload: { stepId, cardId } });
+    ({ stepId, cardId }: { stepId: StepId; cardId: CardId }) => {
+      dispatch({ type: GetStartedPageActions.AddFinishedStep, payload: { stepId, cardId } });
       addFinishedStepToStorage(cardId, stepId);
     },
     [addFinishedStepToStorage]
@@ -103,7 +104,7 @@ const TogglePanelComponent = () => {
   const sectionNodes = setUpSections(state.activeSections, onStepClicked, state.finishedSteps);
   const onProductSwitchChanged = useCallback(
     (section: Switch) => {
-      dispatch({ type: 'toggleSection', payload: { section: section.id } });
+      dispatch({ type: GetStartedPageActions.ToggleSection, payload: { section: section.id } });
       toggleActiveProductsInStorage(section.id);
     },
     [toggleActiveProductsInStorage]

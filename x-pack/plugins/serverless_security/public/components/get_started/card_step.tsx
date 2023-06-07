@@ -18,14 +18,14 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
 
-import { Step } from './types';
+import { CardId, Step, StepId } from './types';
 import step from './images/step.svg';
 
 const CardStepComponent: React.FC<{
-  cardId: string;
+  cardId: CardId;
   step: Step;
-  onStepClicked: (params: { stepId: string; cardId: string }) => void;
-  finishedStepsByCard: Set<string>;
+  onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+  finishedStepsByCard: Set<StepId>;
 }> = ({
   cardId,
   step: { id: stepId, title, badges, description, splitPanel },

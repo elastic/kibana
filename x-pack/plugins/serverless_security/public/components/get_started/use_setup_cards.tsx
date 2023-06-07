@@ -9,7 +9,7 @@ import { EuiSpacer, EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { Card, ProductId } from './types';
+import { Card, CardId, ProductId, StepId } from './types';
 
 import { CardItem } from './card_item';
 
@@ -26,8 +26,8 @@ export const useSetUpCardSections = ({
     (
       cards: Card[] | undefined,
       activeSections: Set<ProductId>,
-      onStepClicked: (params: { stepId: string; cardId: string }) => void,
-      finishedSteps: Record<string, Set<string>>
+      onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void,
+      finishedSteps: Record<CardId, Set<StepId>>
     ) =>
       cards?.reduce<React.ReactNode[]>((acc, cardItem) => {
         if (cardItem?.activeConditions?.some((condition) => activeSections.has(condition))) {
@@ -62,8 +62,8 @@ export const useSetUpCardSections = ({
   const setUpSections = useCallback(
     (
       activeSections: Set<ProductId>,
-      addFinishedStep: (params: { stepId: string; cardId: string }) => void,
-      finishedSteps: Record<string, Set<string>>
+      addFinishedStep: (params: { stepId: StepId; cardId: CardId }) => void,
+      finishedSteps: Record<CardId, Set<StepId>>
     ) =>
       activeSections.size > 0
         ? sections.reduce<React.ReactNode[]>((acc, currentSection) => {
@@ -109,5 +109,5 @@ export const useSetUpCardSections = ({
     [euiTheme.size.base, euiTheme.size.l, setUpCards]
   );
 
-  return { setUpCards, setUpSections };
+  return { setUpSections };
 };
