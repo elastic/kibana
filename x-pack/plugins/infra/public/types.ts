@@ -92,6 +92,7 @@ export interface InfraClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
+  kibanaVersion?: string;
   lens: LensPublicStart;
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;

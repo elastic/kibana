@@ -11,6 +11,7 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -24,10 +25,24 @@ import { HostContainer } from './components/hosts_container';
 import { ExperimentalBadge } from '../../../components/experimental_badge';
 import { NoRemoteCluster } from '../../../components/empty_states';
 
-const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
+const HOSTS_FEEDBACK_LINK =
+  ' https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
+const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
+
+const getHostFeedbackURL = (kibanaVersion?: string) => {
+  const url = new URL(HOSTS_FEEDBACK_LINK);
+  if (kibanaVersion) {
+    url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
+  }
+
+  return url.href;
+};
 
 export const HostsPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
+  const {
+    services: { kibanaVersion },
+  } = useKibanaContextForPlugin();
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
@@ -77,7 +92,7 @@ export const HostsPage = () => {
             rightSideItems: [
               <EuiButton
                 data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
-                href={HOSTS_FEEDBACK_LINK}
+                href={getHostFeedbackURL(kibanaVersion)}
                 target="_blank"
                 color="warning"
                 iconType="editorComment"
