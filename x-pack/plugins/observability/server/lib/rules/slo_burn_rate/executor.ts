@@ -63,7 +63,6 @@ async function fetchSLIDataFrom(
   if (sloSchema.is(slo)) {
     return sliClient.fetchSLIDataFrom(slo, lookbackWindows);
   }
-  const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
   const compositeSliClient = new DefaultCompositeSLIClient(sliClient);
   return compositeSliClient.fetchSLIDataFrom(slo, lookbackWindows);
 }
@@ -134,7 +133,7 @@ async function findSloOrCompositeSlo(
 ): Promise<SloORCompositeSlo> {
   const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
   try {
-    return await sloRepository.findById(id);
+    return sloRepository.findById(id);
   } catch (e) {
     const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
     const compositeSlo = await compositeSloRepository.findById(id);
