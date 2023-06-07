@@ -169,6 +169,10 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   DELETE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
 };
 
+export const UNINSTALL_TOKEN_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
+};
+
 // Agents setup API routes
 export const AGENTS_SETUP_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/agents/setup`,
