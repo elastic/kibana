@@ -11,7 +11,8 @@ import { LicenseType } from '@kbn/licensing-plugin/server';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
-import { sloFeatureId } from '../../../../common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { AlertsLocatorParams, sloFeatureId } from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -43,7 +44,8 @@ type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
 
 export function sloBurnRateRuleType(
   createLifecycleRuleExecutor: CreateLifecycleExecutor,
-  basePath: IBasePath
+  basePath: IBasePath,
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
   return {
     id: SLO_BURN_RATE_RULE_ID,
@@ -61,7 +63,7 @@ export function sloBurnRateRuleType(
     producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
-    executor: createLifecycleRuleExecutor(getRuleExecutor({ basePath })),
+    executor: createLifecycleRuleExecutor(getRuleExecutor({ basePath, alertsLocator })),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
@@ -71,6 +73,7 @@ export function sloBurnRateRuleType(
         { name: 'longWindow', description: windowActionVariableDescription },
         { name: 'shortWindow', description: windowActionVariableDescription },
         { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        { name: 'alertDetailsUrl', description: alertDetailsUrlActionVariableDescription },
         { name: 'sloId', description: sloIdActionVariableDescription },
         { name: 'sloName', description: sloNameActionVariableDescription },
       ],
@@ -115,6 +118,14 @@ export const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.viewInAppUrlDescription',
   {
     defaultMessage: 'The url to the SLO details page to help with further investigation.',
+  }
+);
+
+export const alertDetailsUrlActionVariableDescription = i18n.translate(
+  'xpack.observability.slo.alerting.alertDetailsUrlDescription',
+  {
+    defaultMessage:
+      'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
   }
 );
 

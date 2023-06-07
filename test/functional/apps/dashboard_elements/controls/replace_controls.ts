@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -31,14 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardControls.controlEditorSave();
   };
 
-  const replaceWithOptionsList = async (controlId: string) => {
-    await changeFieldType(controlId, 'sound.keyword', OPTIONS_LIST_CONTROL);
+  const replaceWithOptionsList = async (controlId: string, field: string) => {
+    await changeFieldType(controlId, field, OPTIONS_LIST_CONTROL);
     await testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
     await dashboardControls.verifyControlType(controlId, 'optionsList-control');
   };
 
-  const replaceWithRangeSlider = async (controlId: string) => {
-    await changeFieldType(controlId, 'weightLbs', RANGE_SLIDER_CONTROL);
+  const replaceWithRangeSlider = async (controlId: string, field: string) => {
+    await changeFieldType(controlId, field, RANGE_SLIDER_CONTROL);
     await retry.try(async () => {
       await dashboardControls.rangeSliderWaitForLoading();
       await dashboardControls.verifyControlType(controlId, 'range-slider-control');
@@ -76,8 +77,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
-      it('with range slider', async () => {
-        await replaceWithRangeSlider(controlId);
+      it('with range slider - default title', async () => {
+        await replaceWithRangeSlider(controlId, 'weightLbs');
+        const titles = await dashboardControls.getAllControlTitles();
+        expect(titles[0]).to.be('weightLbs');
+      });
+
+      it('with options list - custom title', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.controlEditorSetTitle('Custom title');
+        await dashboardControls.controlEditorSave();
+
+        await replaceWithRangeSlider(controlId, 'weightLbs');
+        const titles = await dashboardControls.getAllControlTitles();
+        expect(titles[0]).to.be('Custom title');
       });
     });
 
@@ -97,8 +110,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
-      it('with options list', async () => {
-        await replaceWithOptionsList(controlId);
+      it('with options list - default title', async () => {
+        await replaceWithOptionsList(controlId, 'sound.keyword');
+        const titles = await dashboardControls.getAllControlTitles();
+        expect(titles[0]).to.be('sound.keyword');
+      });
+
+      it('with options list - custom title', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.controlEditorSetTitle('Custom title');
+        await dashboardControls.controlEditorSave();
+
+        await replaceWithOptionsList(controlId, 'sound.keyword');
+        const titles = await dashboardControls.getAllControlTitles();
+        expect(titles[0]).to.be('Custom title');
       });
     });
   });

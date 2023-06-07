@@ -7500,7 +7500,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { name?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<never>; } & ",
+          " & { params?: { query?: { name?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7522,7 +7522,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7544,7 +7544,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7575,6 +7575,8 @@
           "; weight: ",
           "NumberC",
           "; }>>; timeWindow: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -7586,19 +7588,49 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>; budgetingMethod: ",
+          "<\"rolling\">; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; type: ",
+          "LiteralC",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
           "<\"occurrences\">, ",
           "LiteralC",
           "<\"timeslices\">]>; objective: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; tags: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timesliceTarget: ",
+          "NumberC",
+          "; timesliceWindow: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; }>]>; tags: ",
           "ArrayC",
           "<",
           "StringC",
@@ -7618,7 +7650,23 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: { target: number; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<never>; } & ",
+          "; type: \"rolling\"; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; type: \"calendarAligned\"; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }) | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7635,6 +7683,8 @@
           "<{ name: ",
           "StringC",
           "; timeWindow: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -7646,19 +7696,49 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>; budgetingMethod: ",
+          "<\"rolling\">; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; type: ",
+          "LiteralC",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
           "<\"occurrences\">, ",
           "LiteralC",
           "<\"timeslices\">]>; objective: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; compositeMethod: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timesliceTarget: ",
+          "NumberC",
+          "; timesliceWindow: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; }>]>; compositeMethod: ",
           "LiteralC",
           "<\"weightedAverage\">; sources: ",
           "ArrayC",
@@ -7694,7 +7774,23 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
+          "; type: \"rolling\"; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7724,7 +7820,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -7920,9 +8016,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>, ",
+          "<\"rolling\">; }>, ",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -7934,9 +8030,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isCalendar: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>]>; budgetingMethod: ",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -8004,7 +8100,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; } | { duration: ",
+          "; type: \"rolling\"; } | { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -8012,7 +8108,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isCalendar: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          "; type: \"calendarAligned\"; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -8036,7 +8132,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
+          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8058,7 +8154,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8098,7 +8194,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          " & { params?: { query?: { name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8356,9 +8452,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>, ",
+          "<\"rolling\">; }>, ",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -8370,9 +8466,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isCalendar: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>]>; budgetingMethod: ",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -8444,7 +8540,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; } | { duration: ",
+          "; type: \"rolling\"; } | { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -8452,7 +8548,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          "; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -8568,7 +8664,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { name?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<never>; } & ",
+          " & { params?: { query?: { name?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8590,7 +8686,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8612,7 +8708,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<never>; } & ",
+          " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8643,6 +8739,8 @@
           "; weight: ",
           "NumberC",
           "; }>>; timeWindow: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -8654,19 +8752,49 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>; budgetingMethod: ",
+          "<\"rolling\">; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; type: ",
+          "LiteralC",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
           "<\"occurrences\">, ",
           "LiteralC",
           "<\"timeslices\">]>; objective: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; tags: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timesliceTarget: ",
+          "NumberC",
+          "; timesliceWindow: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; }>]>; tags: ",
           "ArrayC",
           "<",
           "StringC",
@@ -8686,7 +8814,23 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: { target: number; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<never>; } & ",
+          "; type: \"rolling\"; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; type: \"calendarAligned\"; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }) | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8703,6 +8847,8 @@
           "<{ name: ",
           "StringC",
           "; timeWindow: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -8714,19 +8860,49 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>; budgetingMethod: ",
+          "<\"rolling\">; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; type: ",
+          "LiteralC",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
           "<\"occurrences\">, ",
           "LiteralC",
           "<\"timeslices\">]>; objective: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; compositeMethod: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timesliceTarget: ",
+          "NumberC",
+          "; timesliceWindow: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; }>]>; compositeMethod: ",
           "LiteralC",
           "<\"weightedAverage\">; sources: ",
           "ArrayC",
@@ -8762,7 +8938,23 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
+          "; type: \"rolling\"; } | { duration: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          "; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          " | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8792,7 +8984,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -8988,9 +9180,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>, ",
+          "<\"rolling\">; }>, ",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -9002,9 +9194,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isCalendar: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>]>; budgetingMethod: ",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9072,7 +9264,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; } | { duration: ",
+          "; type: \"rolling\"; } | { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -9080,7 +9272,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isCalendar: boolean; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          "; type: \"calendarAligned\"; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -9104,7 +9296,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
+          " | undefined; } | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9126,7 +9318,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9166,7 +9358,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          " & { params?: { query?: { name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9424,9 +9616,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isRolling: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>, ",
+          "<\"rolling\">; }>, ",
           "TypeC",
           "<{ duration: ",
           "Type",
@@ -9438,9 +9630,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; isCalendar: ",
+          ", string, unknown>; type: ",
           "LiteralC",
-          "<boolean>; }>]>; budgetingMethod: ",
+          "<\"calendarAligned\">; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9512,7 +9704,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; } | { duration: ",
+          "; type: \"rolling\"; } | { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -9520,7 +9712,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          "; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -11754,6 +11946,59 @@
     "functions": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.asDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "asDuration",
+        "description": [
+          "\nConverts value and returns it formatted - 00 unit"
+        ],
+        "signature": [
+          "(value: ",
+          "Maybe",
+          "<number>, { defaultValue = NOT_AVAILABLE_LABEL, extended }: FormatterOptions) => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "Maybe",
+              "<number>"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asDuration.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ defaultValue = NOT_AVAILABLE_LABEL, extended }",
+            "description": [],
+            "signature": [
+              "FormatterOptions"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.asPercent",
         "type": "Function",
         "tags": [],
@@ -11875,6 +12120,207 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getAlertDetailsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertDetailsUrl",
+        "description": [],
+        "signature": [
+          "(basePath: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          },
+          ", spaceId: string, alertUuid: string | null) => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IBasePath",
+                "text": "IBasePath"
+              }
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertDetailsUrl.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertUuid",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getAlertUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertUrl",
+        "description": [],
+        "signature": [
+          "(alertUuid: string | null, spaceId: string, startedAt: string, alertsLocator?: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.AlertsLocatorParams",
+            "text": "AlertsLocatorParams"
+          },
+          "> | undefined, publicBaseUrl?: string | undefined) => Promise<string>"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertUuid",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$3",
+            "type": "string",
+            "tags": [],
+            "label": "startedAt",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "alertsLocator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "common",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-common.AlertsLocatorParams",
+                "text": "AlertsLocatorParams"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getAlertUrl.$5",
+            "type": "string",
+            "tags": [],
+            "label": "publicBaseUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/alerting/alert_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

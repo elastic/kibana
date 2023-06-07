@@ -65,6 +65,7 @@ import {
   DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
+  TOASTER_CLOSE_ICON,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -569,6 +570,10 @@ export const cancelConfirmationModal = () => {
 
 export const clickErrorToastBtn = () => {
   cy.get(TOASTER_ERROR_BTN).click();
+};
+
+export const closeErrorToast = () => {
+  cy.get(TOASTER_CLOSE_ICON).click();
 };
 
 export const goToEditRuleActionsSettingsOf = (name: string) => {
