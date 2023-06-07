@@ -7,31 +7,38 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import { indexPatterns } from '@kbn/data-plugin/public';
-import { JoinExpression } from './join_expression';
+import { SpatialJoinExpression } from './spatial_join_expression';
+import { TermJoinExpression } from './term_join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
 import {
+  AbstractESJoinSourceDescriptor,
   AggDescriptor,
+  ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
+  JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
-import { ILayer } from '../../../../classes/layers/layer';
 
 import { getIndexPatternService } from '../../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import type { JoinField } from '../join_editor';
+import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
+import {
+  isSpatialSourceComplete,
+  isTermSourceComplete,
+} from '../../../../classes/sources/join_sources';
 
 interface Props {
-  join: JoinDescriptor;
-  layer: ILayer;
-  onChange: (joinDescriptor: JoinDescriptor) => void;
+  join: Partial<JoinDescriptor>;
+  onChange: (joinDescriptor: Partial<JoinDescriptor>) => void;
   onRemove: () => void;
   leftFields: JoinField[];
   leftSourceName: string;
@@ -45,6 +52,7 @@ interface State {
 
 export class Join extends Component<Props, State> {
   private _isMounted = false;
+  private _nextIndexPatternId: string | undefined;
 
   state: State = {
     rightFields: [],
@@ -66,6 +74,7 @@ export class Join extends Component<Props, State> {
       return;
     }
 
+    this._nextIndexPatternId = indexPatternId;
     let indexPattern;
     try {
       indexPattern = await getIndexPatternService().get(indexPatternId);
@@ -78,7 +87,7 @@ export class Join extends Component<Props, State> {
       return;
     }
 
-    if (!this._isMounted) {
+    if (!this._isMounted || this._nextIndexPatternId !== indexPatternId) {
       return;
     }
 
@@ -95,40 +104,25 @@ export class Join extends Component<Props, State> {
     });
   };
 
-  _onRightSourceChange = (indexPatternId: string) => {
-    this.setState({
-      rightFields: [],
-      loadError: undefined,
-    });
-    this._loadRightFields(indexPatternId);
-    const { term, ...restOfRight } = this.props.join.right as ESTermSourceDescriptor;
-    this.props.onChange({
-      leftField: this.props.join.leftField,
-      right: {
-        ...restOfRight,
-        indexPatternId,
-        type: SOURCE_TYPES.ES_TERM_SOURCE,
-      } as ESTermSourceDescriptor,
-    });
-  };
+  _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
+    const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>)
+      .indexPatternId;
+    if (this.state.indexPattern?.id !== indexPatternId) {
+      this.setState({
+        indexPattern: undefined,
+        rightFields: [],
+        loadError: undefined,
+      });
+      if (indexPatternId) {
+        this._loadRightFields(indexPatternId);
+      }
+    }
 
-  _onRightFieldChange = (term?: string) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
-        ...this.props.join.right,
-        term,
-      } as ESTermSourceDescriptor,
-    });
-  };
-
-  _onRightSizeChange = (size: number) => {
-    this.props.onChange({
-      leftField: this.props.join.leftField,
-      right: {
-        ...this.props.join.right,
-        size,
-      } as ESTermSourceDescriptor,
+        ...sourceDescriptor,
+      },
     });
   };
 
@@ -138,7 +132,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         metrics,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -148,7 +142,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         whereQuery,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -158,7 +152,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         applyGlobalQuery,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -168,20 +162,61 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         applyGlobalTime,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
   render() {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
-    const right = _.get(join, 'right', {}) as ESTermSourceDescriptor;
-    const rightSourceName = indexPattern ? indexPattern.getName() : right.indexPatternId;
-    const isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
+    const right = (join?.right ?? {}) as Partial<AbstractESJoinSourceDescriptor>;
+
+    let isJoinConfigComplete = false;
+    let joinExpression;
+    if (right.type === SOURCE_TYPES.ES_TERM_SOURCE) {
+      isJoinConfigComplete =
+        join.leftField !== undefined &&
+        isTermSourceComplete(right as Partial<ESTermSourceDescriptor>);
+      joinExpression = (
+        <TermJoinExpression
+          leftSourceName={leftSourceName}
+          leftValue={join.leftField}
+          leftFields={leftFields}
+          onLeftFieldChange={this._onLeftFieldChange}
+          sourceDescriptor={right as Partial<ESTermSourceDescriptor>}
+          onSourceDescriptorChange={this._onRightSourceDescriptorChange}
+          rightFields={rightFields}
+        />
+      );
+    } else if (isSpatialJoin(this.props.join)) {
+      isJoinConfigComplete =
+        join.leftField !== undefined &&
+        isSpatialSourceComplete(right as Partial<ESDistanceSourceDescriptor>);
+      joinExpression = (
+        <SpatialJoinExpression
+          sourceDescriptor={right as Partial<ESDistanceSourceDescriptor>}
+          onSourceDescriptorChange={this._onRightSourceDescriptorChange}
+        />
+      );
+    } else {
+      joinExpression = (
+        <EuiText size="s">
+          <p>
+            <EuiTextColor color="warning">
+              {i18n.translate('xpack.maps.layerPanel.join.joinExpression.noEditorMsg', {
+                defaultMessage: 'Unable to edit {type} join.',
+                values: { type: right.type },
+              })}
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      );
+    }
 
     let metricsExpression;
     let globalFilterCheckbox;
     let globalTimeCheckbox;
+
     if (isJoinConfigComplete) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
@@ -234,22 +269,7 @@ export class Join extends Component<Props, State> {
     return (
       <div className="mapJoinItem">
         <EuiFlexGroup className="mapJoinItem__inner" responsive={false} wrap={true} gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <JoinExpression
-              leftSourceName={leftSourceName}
-              leftValue={join.leftField}
-              leftFields={leftFields}
-              onLeftFieldChange={this._onLeftFieldChange}
-              rightSourceIndexPatternId={right.indexPatternId}
-              rightSourceName={rightSourceName}
-              onRightSourceChange={this._onRightSourceChange}
-              rightValue={right.term}
-              rightSize={right.size}
-              rightFields={rightFields}
-              onRightFieldChange={this._onRightFieldChange}
-              onRightSizeChange={this._onRightSizeChange}
-            />
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{joinExpression}</EuiFlexItem>
 
           {metricsExpression}
 

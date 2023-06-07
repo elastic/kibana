@@ -12,10 +12,8 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  HeaderMenuPortal,
-  InspectorContextProvider,
-} from '@kbn/observability-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';

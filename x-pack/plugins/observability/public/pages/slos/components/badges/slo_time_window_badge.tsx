@@ -20,7 +20,6 @@ export interface Props {
 }
 
 export function SloTimeWindowBadge({ slo }: Props) {
-  const duration = Number(slo.timeWindow.duration.slice(0, -1));
   const unit = slo.timeWindow.duration.slice(-1);
   if ('isRolling' in slo.timeWindow) {
     return (
@@ -38,15 +37,11 @@ export function SloTimeWindowBadge({ slo }: Props) {
 
   const unitMoment = toMomentUnitOfTime(unit);
   const now = moment.utc();
-  const startTime = moment.utc(slo.timeWindow.calendar.startTime);
-  const differenceInUnit = now.diff(startTime, unitMoment);
 
-  const periodStart = startTime
-    .clone()
-    .add(Math.floor(differenceInUnit / duration) * duration, unitMoment);
-  const periodEnd = periodStart.clone().add(duration, unitMoment);
+  const periodStart = now.clone().startOf(unitMoment!);
+  const periodEnd = now.clone().endOf(unitMoment!);
 
-  const totalDurationInDays = periodEnd.diff(periodStart, 'days');
+  const totalDurationInDays = periodEnd.diff(periodStart, 'days') + 1;
   const elapsedDurationInDays = now.diff(periodStart, 'days') + 1;
 
   return (

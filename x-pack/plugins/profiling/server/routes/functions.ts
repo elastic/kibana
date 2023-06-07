@@ -12,8 +12,8 @@ import { createTopNFunctions } from '../../common/functions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getStackTraces } from './get_stacktraces';
 import { createCommonFilter } from './query';
+import { searchStackTraces } from './search_stacktraces';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -52,13 +52,13 @@ export function registerTopNFunctionsSearchRoute({
         });
 
         const t0 = Date.now();
-        const { stackTraceEvents, stackTraces, executables, stackFrames } = await getStackTraces({
-          context,
-          logger,
-          client: profilingElasticsearchClient,
-          filter,
-          sampleSize: targetSampleSize,
-        });
+        const { stackTraceEvents, stackTraces, executables, stackFrames } = await searchStackTraces(
+          {
+            client: profilingElasticsearchClient,
+            filter,
+            sampleSize: targetSampleSize,
+          }
+        );
         logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
 
         const t1 = Date.now();

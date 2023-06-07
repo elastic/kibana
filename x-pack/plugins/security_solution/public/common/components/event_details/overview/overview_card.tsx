@@ -94,7 +94,7 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
       <ActionWrapper>
         <SecurityCellActions
           field={{
-            value: enrichedFieldInfo?.values ? enrichedFieldInfo?.values[0] : '',
+            value: enrichedFieldInfo.data.field,
             ...browserFieldToFieldSpec(
               enrichedFieldInfo.fieldFromBrowserField,
               enrichedFieldInfo.data

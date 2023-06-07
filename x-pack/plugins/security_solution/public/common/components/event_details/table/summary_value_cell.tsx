@@ -47,7 +47,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
       {scopeId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
         <SecurityCellActions
           field={{
-            value: values && values.length > 0 ? values[0] : '',
+            value: values,
             ...browserFieldToFieldSpec(fieldFromBrowserField, data),
           }}
           triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}

@@ -62,8 +62,14 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INTEGRATIONS_PLUGIN_ID,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  getFileMetadataIndexName,
+  getFileDataIndexName,
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+import { FleetFromHostFilesClient } from './services/files/client_from_host';
+
+import type { FleetFromHostFileClientInterface } from './services/files/types';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -124,6 +130,8 @@ import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
+import type { FleetToHostFileClientInterface } from './services/files/types';
+import { FleetToHostFilesClient } from './services/files/client_to_host';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -216,6 +224,35 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  /**
+   * Create a Fleet Files client instance
+   * @param packageName
+   * @param type
+   * @param maxSizeBytes
+   */
+  createFilesClient: Readonly<{
+    /**
+     * Client to interact with files that will be sent to a host.
+     * @param packageName
+     * @param maxSizeBytes
+     */
+    toHost: (
+      /** The integration package name */
+      packageName: string,
+      /** Max file size allow to be created (in bytes) */
+      maxSizeBytes?: number
+    ) => FleetToHostFileClientInterface;
+
+    /**
+     * Client to interact with files that were sent from the host
+     * @param packageName
+     */
+    fromHost: (
+      /** The integration package name */
+      packageName: string
+    ) => FleetFromHostFileClientInterface;
+  }>;
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
@@ -567,6 +604,27 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      createFilesClient: Object.freeze({
+        fromHost: (packageName) => {
+          return new FleetFromHostFilesClient(
+            core.elasticsearch.client.asInternalUser,
+            this.initializerContext.logger.get('fleetFiles', packageName),
+            getFileMetadataIndexName(packageName),
+            getFileDataIndexName(packageName)
+          );
+        },
+
+        toHost: (packageName, maxFileBytes) => {
+          return new FleetToHostFilesClient(
+            core.elasticsearch.client.asInternalUser,
+            this.initializerContext.logger.get('fleetFiles', packageName),
+            // FIXME:PT define once we have new index patterns (defend workflows team issue #6553)
+            getFileMetadataIndexName(packageName),
+            getFileDataIndexName(packageName),
+            maxFileBytes
+          );
+        },
+      }),
       messageSigningService,
       uninstallTokenService,
     };

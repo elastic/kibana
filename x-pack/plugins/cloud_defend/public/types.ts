@@ -104,13 +104,13 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   containerImageFullName: {
     type: 'stringArray',
     pattern:
-      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$',
     patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
   containerImageName: {
     type: 'stringArray',
-    pattern: '^[a-z0-9]+$',
+    pattern: '^([a-z0-9]+(?:[._-][a-z0-9]+)*)$',
     not: ['containerImageFullName'],
   },
   containerImageTag: { type: 'stringArray' },
@@ -134,7 +134,7 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
     selectorType: 'file',
     type: 'stringArray',
     maxValueBytes: 255,
-    pattern: '^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$',
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
     patternError: i18n.errorInvalidTargetFilePath,
   },
   ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
@@ -143,7 +143,7 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
     selectorType: 'process',
     type: 'stringArray',
     not: ['processName'],
-    pattern: '^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$',
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
     patternError: i18n.errorInvalidProcessExecutable,
   },
   processName: {

@@ -16,10 +16,10 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
-import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
-import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
+import { StoryProvidersComponent } from '../../../../mocks/story_providers';
+import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
 import { IndicatorsBarChartWrapper } from './wrapper';
-import { Aggregation, ChartSeries } from '../../services';
+import { Aggregation, ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 export default {
   component: IndicatorsBarChartWrapper,

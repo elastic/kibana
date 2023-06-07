@@ -43,7 +43,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
-import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { getNetworkDetailsPageFilter } from '../../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
@@ -245,7 +245,7 @@ const NetworkDetailsComponent: React.FC = () => {
               </>
             )}
 
-            <TabNavigationWithBreadcrumbs
+            <TabNavigation
               navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}
             />
             <EuiSpacer />

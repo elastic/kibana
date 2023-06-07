@@ -54,7 +54,7 @@ export const fetcher = async (context: CollectorFetchContext) => {
         },
         by_calendar_aligned_duration: {
           ...acc.by_calendar_aligned_duration,
-          ...('calendar' in so.attributes.timeWindow && {
+          ...('isCalendar' in so.attributes.timeWindow && {
             [so.attributes.timeWindow.duration]:
               (acc.by_calendar_aligned_duration[so.attributes.timeWindow.duration] ?? 0) + 1,
           }),
