@@ -63,10 +63,25 @@ export const cli = () => {
 
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+
+      const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+        ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+        : 1;
+        const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+          ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+          : 0
+
+
+      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern, chunksTotal, chunkIndex);
 
       if (!files?.length) {
-        throw new Error('No files found');
+        const specString = JSON.stringify(spec);
+        throw new Error(
+          `No files found.
+Spec: ${specString}
+chunksTotal: ${chunksTotal}
+chunkIndex: ${chunkIndex}`
+         );
       }
 
       const esPorts: number[] = [9200, 9220];
