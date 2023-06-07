@@ -307,7 +307,7 @@ export class AlertsClient<
     const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex];
     if (alertsToIndex.length > 0) {
       try {
-        await esClient.bulk({
+        const response = await esClient.bulk({
           refresh: 'wait_for',
           index: this.indexTemplateAndPattern.alias,
           require_alias: true,
@@ -329,6 +329,19 @@ export class AlertsClient<
             ])
           ),
         });
+
+        // If there were individual indexing errors, they will be returned in the success response
+        if (response && response.errors) {
+          const errorsInResponse = (response.items ?? [])
+            .map((item) => (item && item.index && item.index.error ? item.index.error : null))
+            .filter((item) => item != null);
+
+          this.options.logger.error(
+            `Error writing ${errorsInResponse.length} out of ${
+              alertsToIndex.length
+            } alerts - ${JSON.stringify(errorsInResponse)}`
+          );
+        }
       } catch (err) {
         this.options.logger.error(
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} - ${err.message}`

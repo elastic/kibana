@@ -934,6 +934,77 @@ describe('Alerts Client', () => {
       expect(clusterClient.bulk).not.toHaveBeenCalled();
     });
 
+    test('should log if bulk indexing fails for some alerts', async () => {
+      clusterClient.bulk.mockResponseOnce({
+        took: 1,
+        errors: true,
+        items: [
+          {
+            index: {
+              _index: '.internal.alerts-test.alerts-default-000001',
+              status: 400,
+              error: {
+                type: 'action_request_validation_exception',
+                reason: 'Validation Failed: 1: index is missing;2: type is missing;',
+              },
+            },
+          },
+          {
+            index: {
+              _index: '.internal.alerts-test.alerts-default-000002',
+              _id: '1',
+              _version: 1,
+              result: 'created',
+              _shards: {
+                total: 2,
+                successful: 1,
+                failed: 0,
+              },
+              status: 201,
+              _seq_no: 0,
+              _primary_term: 1,
+            },
+          },
+        ],
+      });
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 2 new alerts
+      const alertExecutorService = alertsClient.factory();
+      alertExecutorService.create('1').scheduleActions('default');
+      alertExecutorService.create('2').scheduleActions('default');
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      expect(clusterClient.bulk).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error writing 1 out of 2 alerts - [{\"type\":\"action_request_validation_exception\",\"reason\":\"Validation Failed: 1: index is missing;2: type is missing;\"}]`
+      );
+    });
+
     test('should log and swallow error if bulk indexing throws error', async () => {
       clusterClient.bulk.mockImplementation(() => {
         throw new Error('fail');
