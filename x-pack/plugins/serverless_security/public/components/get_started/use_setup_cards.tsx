@@ -43,6 +43,7 @@ export const useSetUpCardSections = ({
           acc.push(
             <EuiFlexItem key={cardItem.id}>
               <CardItem
+                data-test-subj={cardItem.id}
                 stepsLeft={stepsLeft}
                 timeInMins={timeInMins}
                 cardItem={cardItem}

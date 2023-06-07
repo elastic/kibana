@@ -9,8 +9,8 @@ import { useCallback, useMemo } from 'react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CardId, ProductId, StepId } from './types';
 
-const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
-const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
+export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
+export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
 
 export const useStorage = (storage: Storage) => {
   const addFinishedStepToStorage = useCallback(

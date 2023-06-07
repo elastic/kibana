@@ -9,9 +9,10 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { useStorage } from './use_storage';
-let data = {};
+import { CardId, GetSetUpCardId, IntroductionSteps, ProductId, StepId } from './types';
+let data: Record<string, unknown> = {};
 const mockStorage = {
-  get: jest.fn((key) => data[key]),
+  get: jest.fn((key: string) => data[key]),
   set: jest.fn((key, value) => {
     data[key] = value;
   }),
@@ -42,14 +43,16 @@ describe('useStorage', () => {
     const { result } = renderHook(() => useStorage(mockStorage));
 
     act(() => {
-      const activeProducts = result.current.toggleActiveProductsInStorage('product1');
-      expect(activeProducts).toEqual({ product1: true });
-      expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', { product1: true });
+      const activeProducts = result.current.toggleActiveProductsInStorage(ProductId.analytics);
+      expect(activeProducts).toEqual({ [ProductId.analytics]: true });
+      expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', {
+        [ProductId.analytics]: true,
+      });
     });
 
     act(() => {
-      mockStorage.set('ACTIVE_PRODUCTS', { product1: true });
-      const activeProducts = result.current.toggleActiveProductsInStorage('product1');
+      mockStorage.set('ACTIVE_PRODUCTS', { [ProductId.analytics]: true });
+      const activeProducts = result.current.toggleActiveProductsInStorage(ProductId.analytics);
       expect(activeProducts).toEqual({});
       expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', {});
     });
@@ -59,14 +62,23 @@ describe('useStorage', () => {
     const { result } = renderHook(() => useStorage(mockStorage));
 
     act(() => {
-      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId('card1');
+      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId(
+        GetSetUpCardId.introduction
+      );
       expect(finishedSteps).toEqual({});
     });
 
     act(() => {
-      mockStorage.set('FINISHED_STEPS', { card1: { step1: true, step2: true } });
-      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId('card1');
-      expect(finishedSteps).toEqual({ step1: true, step2: true });
+      mockStorage.set('FINISHED_STEPS', {
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
+      });
+      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId(
+        GetSetUpCardId.introduction
+      );
+      expect(finishedSteps).toEqual({ [IntroductionSteps.watchOverviewVideo]: true, step2: true });
     });
   });
 
@@ -80,12 +92,18 @@ describe('useStorage', () => {
 
     act(() => {
       mockStorage.set('FINISHED_STEPS', {
-        card1: { step1: true, step2: true },
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
         card2: { step3: true },
       });
       const allFinishedSteps = result.current.getAllFinishedStepsFromStorage();
       expect(allFinishedSteps).toEqual({
-        card1: { step1: true, step2: true },
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
         card2: { step3: true },
       });
     });
@@ -95,38 +113,25 @@ describe('useStorage', () => {
     const { result } = renderHook(() => useStorage(mockStorage));
 
     act(() => {
-      result.current.addFinishedStepToStorage('card1', 'step1');
-      expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', { card1: { step1: true } });
-    });
-
-    act(() => {
-      mockStorage.set('FINISHED_STEPS', { card1: { step1: true } });
-      result.current.addFinishedStepToStorage('card1', 'step2');
+      result.current.addFinishedStepToStorage(
+        GetSetUpCardId.introduction,
+        IntroductionSteps.watchOverviewVideo
+      );
       expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
-        card1: { step1: true, step2: true },
-      });
-    });
-  });
-
-  it('should toggle active products in storage', () => {
-    const { result } = renderHook(() => useStorage(mockStorage));
-
-    act(() => {
-      mockStorage.get.mockReturnValueOnce({ analytics: true, cloud: true });
-      result.current.toggleActiveProductsInStorage('endpoint');
-      expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', {
-        analytics: true,
-        cloud: true,
-        endpoint: true,
+        [GetSetUpCardId.introduction]: { [IntroductionSteps.watchOverviewVideo]: true },
       });
     });
 
     act(() => {
-      mockStorage.get.mockReturnValueOnce({ analytics: true, cloud: true, endpoint: true });
-      result.current.toggleActiveProductsInStorage('analytics');
-      expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', {
-        cloud: true,
-        endpoint: true,
+      mockStorage.set('FINISHED_STEPS', {
+        [GetSetUpCardId.introduction]: { [IntroductionSteps.watchOverviewVideo]: true },
+      });
+      result.current.addFinishedStepToStorage(GetSetUpCardId.introduction, 'step2' as StepId);
+      expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
       });
     });
   });
@@ -135,20 +140,28 @@ describe('useStorage', () => {
     const { result } = renderHook(() => useStorage(mockStorage));
 
     act(() => {
-      mockStorage.get.mockReturnValueOnce({
-        card1: { step1: true, step2: true },
+      (mockStorage.get as jest.Mock).mockReturnValueOnce({
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
         card2: { step3: true },
       });
-      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId('card1');
-      expect(finishedSteps).toEqual({ step1: true, step2: true });
+      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId(
+        GetSetUpCardId.introduction
+      );
+      expect(finishedSteps).toEqual({ [IntroductionSteps.watchOverviewVideo]: true, step2: true });
     });
 
     act(() => {
-      mockStorage.get.mockReturnValueOnce({
-        card1: { step1: true, step2: true },
+      (mockStorage.get as jest.Mock).mockReturnValueOnce({
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
         card2: { step3: true },
       });
-      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId('card2');
+      const finishedSteps = result.current.getFinishedStepsFromStorageByCardId('card2' as CardId);
       expect(finishedSteps).toEqual({ step3: true });
     });
   });
@@ -157,21 +170,27 @@ describe('useStorage', () => {
     const { result } = renderHook(() => useStorage(mockStorage));
 
     act(() => {
-      mockStorage.get.mockReturnValueOnce({
-        card1: { step1: true, step2: true },
+      (mockStorage.get as jest.Mock).mockReturnValueOnce({
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
         card2: { step3: true },
         card3: { step4: true },
       });
       const allFinishedSteps = result.current.getAllFinishedStepsFromStorage();
       expect(allFinishedSteps).toEqual({
-        card1: { step1: true, step2: true },
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
         card2: { step3: true },
         card3: { step4: true },
       });
     });
 
     act(() => {
-      mockStorage.get.mockReturnValueOnce({});
+      (mockStorage.get as jest.Mock).mockReturnValueOnce({});
       const allFinishedSteps = result.current.getAllFinishedStepsFromStorage();
       expect(allFinishedSteps).toEqual({});
     });
@@ -181,15 +200,29 @@ describe('useStorage', () => {
     const { result } = renderHook(() => useStorage(mockStorage));
 
     act(() => {
-      mockStorage.get.mockReturnValueOnce({ card1: { step1: true, step2: true } });
-      result.current.removeFinishedStep('card1', 'step1');
-      expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', { card1: { step2: true } });
+      (mockStorage.get as jest.Mock).mockReturnValueOnce({
+        [GetSetUpCardId.introduction]: {
+          [IntroductionSteps.watchOverviewVideo]: true,
+          step2: true,
+        },
+      });
+      result.current.removeFinishedStep(
+        GetSetUpCardId.introduction,
+        IntroductionSteps.watchOverviewVideo
+      );
+      expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
+        [GetSetUpCardId.introduction]: { step2: true },
+      });
     });
 
     act(() => {
-      mockStorage.get.mockReturnValueOnce({ card1: { step2: true } });
-      result.current.removeFinishedStep('card1', 'step2');
-      expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', { card1: {} });
+      (mockStorage.get as jest.Mock).mockReturnValueOnce({
+        [GetSetUpCardId.introduction]: { step2: true },
+      });
+      result.current.removeFinishedStep(GetSetUpCardId.introduction, 'step2' as StepId);
+      expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
+        [GetSetUpCardId.introduction]: {},
+      });
     });
   });
 });
