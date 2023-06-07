@@ -8,7 +8,13 @@
 
 import _ from 'lodash';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, toggleFilterNegated } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  toggleFilterNegated,
+  buildPhraseFilter,
+} from '@kbn/es-query';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -76,37 +82,46 @@ export const createFilter = async (
   columnIndex: number,
   rowIndex: number
 ) => {
-  if (
-    !table ||
-    !table.columns ||
-    !table.columns[columnIndex] ||
-    !table.columns[columnIndex].meta ||
-    table.columns[columnIndex].meta.source !== 'esaggs' ||
-    !table.columns[columnIndex].meta.sourceParams?.indexPatternId
-  ) {
+  if (!table || !table.columns || !table.columns[columnIndex] || !table.columns[columnIndex].meta) {
     return;
   }
   const column = table.columns[columnIndex];
-  const { indexPatternId, ...aggConfigParams } = table.columns[columnIndex].meta
-    .sourceParams as any;
-  const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
-    await getIndexPatterns().get(indexPatternId),
-    [aggConfigParams as AggConfigSerialized]
-  );
-  const aggConfig = aggConfigsInstance.aggs[0];
+  const aggConfigParams = table.columns[columnIndex].meta.sourceParams as any;
+
   let filter: Filter[] = [];
   const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-  if (value === null || value === undefined || !aggConfig.isFilterable()) {
+  if (value === null || value === undefined) {
     return;
   }
-  if (
-    (aggConfig.type.name === 'terms' || aggConfig.type.name === 'multi_terms') &&
-    aggConfig.params.otherBucket
-  ) {
-    const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
-    filter = aggConfig.createFilter(value, { terms });
+
+  if (aggConfigParams && aggConfigParams.indexPatternId) {
+    const { indexPatternId, ...restParams } = aggConfigParams;
+    const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
+      await getIndexPatterns().get(indexPatternId),
+      [restParams as AggConfigSerialized]
+    );
+    const aggConfig = aggConfigsInstance.aggs[0];
+    if (!aggConfig.isFilterable()) {
+      return;
+    }
+
+    if (
+      (aggConfig.type.name === 'terms' || aggConfig.type.name === 'multi_terms') &&
+      aggConfig.params.otherBucket
+    ) {
+      const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
+      filter = aggConfig.createFilter(value, { terms });
+    } else {
+      filter = aggConfig.createFilter(value);
+    }
   } else {
-    filter = aggConfig.createFilter(value);
+    filter = [
+      buildPhraseFilter({ name: column.name, type: column.meta.type }, value, {
+        id: undefined,
+        fields: [],
+        title: '',
+      }),
+    ];
   }
 
   if (!filter) {
