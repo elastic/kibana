@@ -27,12 +27,12 @@ export interface GuideCardsProps {
   guidesState: GuideState[];
 }
 export const GuideCards = (props: GuideCardsProps) => {
-  const groupedGuideCards= groupBy(guideCards, 'solution')
+  const groupedGuideCards = groupBy(guideCards, 'solution');
 
   return (
     <EuiFlexGroup>
-      { keys(groupedGuideCards).map((groupedGuideCard, groupIndex) => {
-        const cards = groupedGuideCards[groupedGuideCard]
+      {keys(groupedGuideCards).map((groupedGuideCard, groupIndex) => {
+        const cards = groupedGuideCards[groupedGuideCard];
         return (
           <EuiFlexItem key={groupIndex}>
             <EuiFlexGroup direction="column" alignItems="center">
@@ -44,7 +44,7 @@ export const GuideCards = (props: GuideCardsProps) => {
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-        )
+        );
       })}
     </EuiFlexGroup>
   );
