@@ -426,6 +426,7 @@ function getExpressionForLayer(
           timeFields: allDateHistogramFields,
           probability: getSamplingValue(layer),
           samplerSeed: seedrandom(searchSessionId).int32(),
+          ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
         }).toAst(),
         {
           type: 'function',

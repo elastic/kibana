@@ -542,6 +542,9 @@ describe('IndexPattern Data Source', () => {
                     "type": "expression",
                   },
                 ],
+                "ignoreGlobalFilters": Array [
+                  false,
+                ],
                 "index": Array [
                   Object {
                     "chain": Array [
