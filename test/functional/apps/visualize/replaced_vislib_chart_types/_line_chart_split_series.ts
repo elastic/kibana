@@ -202,13 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
-        const expectedLabels = [
-          '0',
-          '2,000',
-          '4,000',
-          '6,000',
-          '8,000',
-        ];
+        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
