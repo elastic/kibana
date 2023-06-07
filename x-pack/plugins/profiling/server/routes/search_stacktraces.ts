@@ -102,7 +102,7 @@ export function decodeStackTraceResponse(response: StackTraceResponse) {
     stackFrames,
     executables,
     totalFrames: response.total_frames,
-    samplingRate: 0.008, //response.sampling_rate,
+    samplingRate: response.sampling_rate,
   };
 }
 
