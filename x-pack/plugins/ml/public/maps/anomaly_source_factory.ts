@@ -7,9 +7,9 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { SOURCE_TYPES } from '@kbn/maps-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
@@ -19,16 +19,13 @@ export class AnomalySourceFactory {
   public readonly type = SOURCE_TYPES.ES_ML_ANOMALIES;
 
   constructor(
-    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
-    private canGetJobs: boolean
-  ) {
-    this.canGetJobs = canGetJobs;
-  }
+    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  ) {}
 
   private async getServices(): Promise<{
     mlResultsService: MlApiServices['results'];
     mlLocator?: LocatorPublic<SerializableRecord>;
-    timefilter?: TimefilterContract;
+    timefilter: TimefilterContract;
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
     const { mlApiServicesProvider } = await import('../application/services/ml_api_service');
@@ -45,7 +42,6 @@ export class AnomalySourceFactory {
     const { mlResultsService, mlLocator, timefilter } = await this.getServices();
     const { AnomalySource } = await import('./anomaly_source');
     AnomalySource.mlResultsService = mlResultsService;
-    AnomalySource.canGetJobs = this.canGetJobs;
     AnomalySource.mlLocator = mlLocator;
     AnomalySource.timefilter = timefilter;
     return AnomalySource;
