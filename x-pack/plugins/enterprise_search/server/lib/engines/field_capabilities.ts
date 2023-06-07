@@ -24,7 +24,7 @@ export const fetchEngineFieldCapabilities = async (
 
   const availableIndicesList = await availableIndices(client, indices);
 
-  if (Array.isArray(availableIndicesList) && !availableIndicesList.length) {
+  if (!availableIndicesList.length) {
     return {
       fields: [],
       name,
