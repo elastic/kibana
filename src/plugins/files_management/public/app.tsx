@@ -9,7 +9,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
 

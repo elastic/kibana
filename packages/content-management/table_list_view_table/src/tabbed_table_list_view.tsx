@@ -14,7 +14,7 @@ import type {
   TableListProps,
   TableListViewProps,
   UserContentCommonSchema,
-} from './table_list_view';
+} from './table_list_view_table';
 
 export type TableListTabParentProps<T extends UserContentCommonSchema = UserContentCommonSchema> =
   Pick<TableListProps<T>, 'onFetchSuccess' | 'setPageDataTestSubject'>;

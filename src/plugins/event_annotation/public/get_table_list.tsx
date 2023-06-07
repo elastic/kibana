@@ -12,7 +12,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import {
   type TableListTabParentProps,
   TableListViewKibanaProvider,
-} from '@kbn/content-management-table-list';
+} from '@kbn/content-management-table-list-view-table';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';

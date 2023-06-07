@@ -19,10 +19,10 @@ import { DashboardListing, DashboardListingProps } from './dashboard_listing';
  * need to ensure we're passing down the correct props, but the table list view itself doesn't need to be rendered
  * in our tests because it is covered in its package.
  */
-import { TableListView } from '@kbn/content-management-table-list';
-// import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
-jest.mock('@kbn/content-management-table-list', () => {
-  const originalModule = jest.requireActual('@kbn/content-management-table-list');
+import { TableListView } from '@kbn/content-management-table-list-view';
+// import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view';
+jest.mock('@kbn/content-management-table-list-view-table', () => {
+  const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
   return {
     __esModule: true,
     ...originalModule,

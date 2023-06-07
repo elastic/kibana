@@ -11,10 +11,16 @@ import Chance from 'chance';
 import moment from 'moment';
 import { action } from '@storybook/addon-actions';
 
-import { Params, getStoryArgTypes, getStoryServices } from './mocks';
-
-import { TableListView as Component, UserContentCommonSchema } from './table_list_view';
-import { TableListViewProvider } from './services';
+import {
+  TableListViewProvider,
+  UserContentCommonSchema,
+} from '@kbn/content-management-table-list-view-table';
+import {
+  Params,
+  getStoryArgTypes,
+  getStoryServices,
+} from '@kbn/content-management-table-list-view-table/src/mocks';
+import { TableListView as Component } from './table_list_view';
 
 import mdx from '../README.mdx';
 

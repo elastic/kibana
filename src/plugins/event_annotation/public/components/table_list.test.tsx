@@ -12,7 +12,10 @@ import {
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
 } from './table_list';
-import { TableList, UserContentCommonSchema } from '@kbn/content-management-table-list';
+import {
+  TableListViewTable,
+  type UserContentCommonSchema,
+} from '@kbn/content-management-table-list-view-table';
 import { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -98,7 +101,7 @@ describe('annotation list view', () => {
     const searchQuery = 'My Search Query';
     const references = [{ id: 'first_id', type: 'sometype' }];
     const referencesToExclude = [{ id: 'second_id', type: 'sometype' }];
-    wrapper.find(TableList).prop('findItems')(searchQuery, {
+    wrapper.find(TableListViewTable).prop('findItems')(searchQuery, {
       references,
       referencesToExclude,
     });
@@ -115,13 +118,13 @@ describe('annotation list view', () => {
     it('prevent deleting when user is missing perms', () => {
       wrapper.setProps({ visualizeCapabilities: { delete: false } });
 
-      expect(wrapper.find(TableList).prop('deleteItems')).toBeUndefined();
+      expect(wrapper.find(TableListViewTable).prop('deleteItems')).toBeUndefined();
     });
 
     it('deletes groups using the service', () => {
-      expect(wrapper.find(TableList).prop('deleteItems')).toBeDefined();
+      expect(wrapper.find(TableListViewTable).prop('deleteItems')).toBeDefined();
 
-      wrapper.find(TableList).prop('deleteItems')!([
+      wrapper.find(TableListViewTable).prop('deleteItems')!([
         {
           id: 'some-id-1',
           references: [
@@ -166,15 +169,17 @@ describe('annotation list view', () => {
     it('prevents editing when user is missing perms', () => {
       wrapper.setProps({ visualizeCapabilities: { save: false } });
 
-      expect(wrapper.find(TableList).prop('deleteItems')).toBeUndefined();
+      expect(wrapper.find(TableListViewTable).prop('deleteItems')).toBeUndefined();
     });
 
     it('edits existing group', async () => {
       expect(wrapper.find(GroupEditorFlyout).exists()).toBeFalsy();
-      const initialBouncerValue = wrapper.find(TableList).prop('refreshListBouncer');
+      const initialBouncerValue = wrapper.find(TableListViewTable).prop('refreshListBouncer');
 
       act(() => {
-        wrapper.find(TableList).prop('editItem')!({ id: '1234' } as UserContentCommonSchema);
+        wrapper.find(TableListViewTable).prop('editItem')!({
+          id: '1234',
+        } as UserContentCommonSchema);
       });
 
       // wait one tick to give promise time to settle
@@ -198,12 +203,16 @@ describe('annotation list view', () => {
       );
 
       expect(wrapper.find(GroupEditorFlyout).exists()).toBeFalsy();
-      expect(wrapper.find(TableList).prop('refreshListBouncer')).not.toBe(initialBouncerValue); // (should refresh list)
+      expect(wrapper.find(TableListViewTable).prop('refreshListBouncer')).not.toBe(
+        initialBouncerValue
+      ); // (should refresh list)
     });
 
     it('opens editor when title is clicked', async () => {
       act(() => {
-        wrapper.find(TableList).prop('onClickTitle')!({ id: '1234' } as UserContentCommonSchema);
+        wrapper.find(TableListViewTable).prop('onClickTitle')!({
+          id: '1234',
+        } as UserContentCommonSchema);
       });
 
       await new Promise((resolve) => setTimeout(resolve, 0));

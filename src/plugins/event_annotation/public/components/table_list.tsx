@@ -7,7 +7,10 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { TableList, TableListTabParentProps } from '@kbn/content-management-table-list';
+import {
+  TableListViewTable,
+  TableListTabParentProps,
+} from '@kbn/content-management-table-list-view-table';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
@@ -111,7 +114,7 @@ export const EventAnnotationGroupTableList = ({
 
   return (
     <>
-      <TableList<EventAnnotationGroupContent>
+      <TableListViewTable<EventAnnotationGroupContent>
         refreshListBouncer={refreshListBouncer}
         tableCaption={i18n.translate('eventAnnotation.tableList.listTitle', {
           defaultMessage: 'Annotation Library',

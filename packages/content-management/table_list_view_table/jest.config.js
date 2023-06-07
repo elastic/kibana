@@ -6,19 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  TableListView,
-  TabbedTableListView,
-  TableList,
-  TableListViewProvider,
-  TableListViewKibanaProvider,
-} from './src';
-
-export type {
-  UserContentCommonSchema,
-  TableListTab,
-  TableListTabParentProps,
-  RowActions,
-} from './src';
-
-export type { TableListViewKibanaDependencies } from './src/services';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/content-management/table_list_view_table'],
+};

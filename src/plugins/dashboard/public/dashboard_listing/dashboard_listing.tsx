@@ -10,11 +10,11 @@ import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import React, { PropsWithChildren, useCallback, useState } from 'react';
 
 import {
-  TableListView,
-  TableListViewKibanaDependencies,
+  type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
   type UserContentCommonSchema,
-} from '@kbn/content-management-table-list';
+} from '@kbn/content-management-table-list-view-table';
+import { TableListView } from '@kbn/content-management-table-list-view';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { State, UserContentCommonSchema } from './table_list_view';
+import type { State, UserContentCommonSchema } from './table_list_view_table';
 import type { Action } from './actions';
 
 export function getReducer<T extends UserContentCommonSchema>() {

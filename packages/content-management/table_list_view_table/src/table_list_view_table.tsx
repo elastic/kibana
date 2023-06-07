@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  useReducer,
-  useCallback,
-  useEffect,
-  useRef,
-  useMemo,
-  ReactNode,
-  useState,
-} from 'react';
+import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -57,11 +49,11 @@ interface ContentEditorConfig
   enabled?: boolean;
 }
 
-export interface TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> {
+export interface TableListViewTableProps<
+  T extends UserContentCommonSchema = UserContentCommonSchema
+> {
   entityName: string;
   entityNamePlural: string;
-  title: string;
-  description?: string;
   listingLimit: number;
   initialFilter?: string;
   initialPageSize: number;
@@ -81,7 +73,6 @@ export interface TableListViewProps<T extends UserContentCommonSchema = UserCont
    * Currently only the "delete" ite action can be disabled.
    */
   rowItemActions?: (obj: T) => RowActions | undefined;
-  children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
     refs?: {
@@ -107,11 +98,7 @@ export interface TableListViewProps<T extends UserContentCommonSchema = UserCont
    * Name for the column containing the "title" value.
    */
   titleColumnName?: string;
-  /**
-   * Additional actions (buttons) to be placed in the page header.
-   * @note only the first two values will be used.
-   */
-  additionalRightSideActions?: ReactNode[];
+
   /**
    * This assumes the content is already wrapped in an outer PageTemplate component.
    * @note Hack! This is being used as a workaround so that this page can be rendered in the Kibana management UI
@@ -119,37 +106,13 @@ export interface TableListViewProps<T extends UserContentCommonSchema = UserCont
    */
   withoutPageTemplateWrapper?: boolean;
   contentEditor?: ContentEditorConfig;
-}
 
-export type TableListProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
-  TableListViewProps<T>,
-  | 'entityName'
-  | 'entityNamePlural'
-  | 'initialFilter'
-  | 'headingId'
-  | 'initialPageSize'
-  | 'listingLimit'
-  | 'urlStateEnabled'
-  | 'customTableColumn'
-  | 'emptyPrompt'
-  | 'findItems'
-  | 'createItem'
-  | 'editItem'
-  | 'deleteItems'
-  | 'getDetailViewLink'
-  | 'onClickTitle'
-  | 'id'
-  | 'rowItemActions'
-  | 'contentEditor'
-  | 'titleColumnName'
-  | 'withoutPageTemplateWrapper'
-  | 'showEditActionForItem'
-> & {
+  // TODO are these used?
   tableCaption: string;
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
-};
+}
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
@@ -280,7 +243,7 @@ const tableColumnMetadata = {
   },
 } as const;
 
-function TableListComp<T extends UserContentCommonSchema>({
+function TableListViewTableComp<T extends UserContentCommonSchema>({
   tableCaption,
   entityName,
   entityNamePlural,
@@ -306,7 +269,7 @@ function TableListComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
-}: TableListProps<T>) {
+}: TableListViewTableProps<T>) {
   setPageDataTestSubject(`${entityName}LandingPage`);
 
   if (!getDetailViewLink && !onClickTitle) {
@@ -1023,86 +986,6 @@ function TableListComp<T extends UserContentCommonSchema>({
   );
 }
 
-export const TableList = React.memo(TableListComp) as typeof TableListComp;
-
-export const TableListView = <T extends UserContentCommonSchema>({
-  title,
-  description,
-  entityName,
-  entityNamePlural,
-  initialFilter,
-  headingId,
-  initialPageSize,
-  listingLimit,
-  urlStateEnabled = true,
-  customTableColumn,
-  emptyPrompt,
-  findItems,
-  createItem,
-  editItem,
-  deleteItems,
-  getDetailViewLink,
-  onClickTitle,
-  rowItemActions,
-  id: listingId,
-  contentEditor,
-  children,
-  titleColumnName,
-  additionalRightSideActions,
-  withoutPageTemplateWrapper,
-}: TableListViewProps<T>) => {
-  const PageTemplate = withoutPageTemplateWrapper
-    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
-    : KibanaPageTemplate;
-
-  const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
-  const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
-
-  return (
-    <PageTemplate panelled data-test-subj={pageDataTestSubject}>
-      <KibanaPageTemplate.Header
-        pageTitle={<span id={headingId}>{title}</span>}
-        description={description}
-        rightSideItems={additionalRightSideActions?.slice(0, 2)}
-        data-test-subj="top-nav"
-      />
-      <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
-        {/* Any children passed to the component */}
-        {children}
-
-        <TableList
-          tableCaption={title}
-          entityName={entityName}
-          entityNamePlural={entityNamePlural}
-          initialFilter={initialFilter}
-          headingId={headingId}
-          initialPageSize={initialPageSize}
-          listingLimit={listingLimit}
-          urlStateEnabled={urlStateEnabled}
-          customTableColumn={customTableColumn}
-          emptyPrompt={emptyPrompt}
-          findItems={findItems}
-          createItem={createItem}
-          editItem={editItem}
-          deleteItems={deleteItems}
-          rowItemActions={rowItemActions}
-          getDetailViewLink={getDetailViewLink}
-          onClickTitle={onClickTitle}
-          id={listingId}
-          contentEditor={contentEditor}
-          titleColumnName={titleColumnName}
-          withoutPageTemplateWrapper={withoutPageTemplateWrapper}
-          onFetchSuccess={() => {
-            if (!hasInitialFetchReturned) {
-              setHasInitialFetchReturned(true);
-            }
-          }}
-          setPageDataTestSubject={setPageDataTestSubject}
-        />
-      </KibanaPageTemplate.Section>
-    </PageTemplate>
-  );
-};
-
-// eslint-disable-next-line import/no-default-export
-export default TableListView;
+export const TableListViewTable = React.memo(
+  TableListViewTableComp
+) as typeof TableListViewTableComp;

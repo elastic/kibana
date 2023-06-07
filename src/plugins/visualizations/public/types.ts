@@ -16,7 +16,7 @@ import {
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
-import { TableListTab } from '@kbn/content-management-table-list';
+import type { TableListTab } from '@kbn/content-management-table-list-view-table';
 import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
 import type { VisParams, SerializedVis } from '../common';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';

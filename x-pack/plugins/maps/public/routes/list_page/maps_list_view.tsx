@@ -9,8 +9,8 @@ import React, { useCallback, memo, useEffect } from 'react';
 import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { TableListView } from '@kbn/content-management-table-list';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 
 import type { MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';

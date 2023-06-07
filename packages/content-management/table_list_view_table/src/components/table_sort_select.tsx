@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { State } from '../table_list_view';
+import { State } from '../table_list_view_table';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;

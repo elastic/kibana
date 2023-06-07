@@ -28,7 +28,7 @@ import type {
   State as TableListViewState,
   TableListProps,
   UserContentCommonSchema,
-} from '../table_list_view';
+} from '../table_list_view_table';
 import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';

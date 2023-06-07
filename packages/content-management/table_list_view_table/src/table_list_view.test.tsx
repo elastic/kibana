@@ -22,7 +22,7 @@ import TableListView, {
   TableListProps,
   UserContentCommonSchema,
   type TableListViewProps,
-} from './table_list_view';
+} from './table_list_view_table';
 
 const mockUseEffect = useEffect;
 

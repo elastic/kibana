@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { useContentClient } from '@kbn/content-management-plugin/public';
 import React from 'react';
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
