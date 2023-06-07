@@ -343,13 +343,14 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
           );
         case ExceptionListTypeEnum.RULE_DEFAULT: {
-          const populatedException = getPrepopulatedRuleExceptionWithHighlightFields(
+          const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
             alertData,
-            exceptionItemName
-          );
-
-          setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
-          setInitialExceptionItems([populatedException]);
+            exceptionItemName,
+          });
+          if (populatedException) {
+            setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
+            setInitialExceptionItems([populatedException]);
+          }
         }
       }
     }

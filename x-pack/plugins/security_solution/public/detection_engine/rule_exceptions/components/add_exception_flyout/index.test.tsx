@@ -594,6 +594,7 @@ describe('When the add exception modal is opened', () => {
         );
       });
 
+      // TODO Add tests for populating the exception conditions and comment
       it('should render the close single alert checkbox', () => {
         expect(
           wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()

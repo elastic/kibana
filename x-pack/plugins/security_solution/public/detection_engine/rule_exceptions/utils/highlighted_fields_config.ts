@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const highlightedFieldsPrefixToExclude = ['kibana.alert.rule', 'signal.rule', 'rule.name'];
+export const highlightedFieldsPrefixToExclude = ['kibana.alert.rule', 'signal.rule', 'rule'];
 
 export const getKibanaAlertIdField = (id: string) => `kibana.alert.${id}`;
 

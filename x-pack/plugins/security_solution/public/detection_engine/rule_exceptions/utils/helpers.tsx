@@ -883,8 +883,7 @@ export const enrichSharedExceptions = (
 };
 
 /**
- * Creates new Rule exception item, fills it with
- * new condition ANDED together from the alert highlighted fields
+ * Creates new Rule exception item with passed in entries
  */
 export const buildRuleExceptionWithConditions = ({
   name,
@@ -917,8 +916,8 @@ export const buildExceptionEntriesFromAlertFields = ({
     if (fieldValue)
       acc.push({
         field: fieldKey,
-        operator: 'included' as const,
-        type: 'match' as const,
+        operator: 'included',
+        type: 'match',
         value: fieldValue,
       });
     return acc;
@@ -930,12 +929,18 @@ export const buildExceptionEntriesFromAlertFields = ({
  * @param exceptionItemName The name of the Exception Item
  * @returns A new Rule Exception Item with the highlighted fields as entries,
  */
-export const getPrepopulatedRuleExceptionWithHighlightFields = (
-  alertData: AlertData,
-  exceptionItemName: string
-) => {
+export const getPrepopulatedRuleExceptionWithHighlightFields = ({
+  alertData,
+  exceptionItemName,
+}: {
+  alertData: AlertData;
+  exceptionItemName: string;
+}): ExceptionsBuilderExceptionItem | null => {
   const highlightedFields = getAlertHighlightedFields(alertData);
+  if (!highlightedFields.length) return null;
+
   const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
+  if (!exceptionEntries.length) return null;
 
   return buildRuleExceptionWithConditions({
     name: exceptionItemName,

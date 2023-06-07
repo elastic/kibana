@@ -25,7 +25,13 @@ import {
   retrieveAlertOsTypes,
   filterIndexPatterns,
   getCodeSignatureValue,
+  buildRuleExceptionWithConditions,
+  buildExceptionEntriesFromAlertFields,
+  filterHighlightedFields,
+  getPrepopulatedRuleExceptionWithHighlightFields,
+  getAlertHighlightedFields,
 } from './helpers';
+import * as mockHelpers from './helpers';
 import type { AlertData, Flattened } from './types';
 import type {
   EntriesArray,
@@ -44,7 +50,6 @@ import {
   ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
-
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
@@ -1470,6 +1475,388 @@ describe('Exception helpers', () => {
           value: '0987',
         },
       ]);
+    });
+  });
+
+  describe('Auto-populate Rule Exceptions with Alert highlighted fields', () => {
+    const name = 'Exception name';
+    const alertData = {
+      'kibana.alert.rule.category': 'Custom Query Rule',
+      'kibana.alert.rule.consumer': 'siem',
+      'kibana.alert.rule.execution.uuid': '28b687e3-8e16-48aa-91b8-bf044d366c2d',
+      '@timestamp': '2023-06-05T11:11:32.870Z',
+      agent: {
+        id: 'f4f86e7c-29bd-4655-b7d0-a3d08ad0c322',
+        type: 'endpoint',
+      },
+      process: {
+        parent: {
+          pid: 1,
+        },
+        group_leader: {
+          name: 'fake leader',
+          entity_id: 'ubi00k5f1o',
+        },
+        name: 'malware writer',
+        pid: 2,
+        entity_id: 'ycrj6wvrt4',
+        executable: 'C:/malware.exe',
+        hash: {
+          sha1: 'fake sha1',
+          sha256: 'fake sha256',
+          md5: 'fake md5',
+        },
+      },
+      'event.agent_id_status': 'auth_metadata_missing',
+      'event.sequence': 57,
+      'event.ingested': '2023-06-05T11:10:27Z',
+      'event.code': 'malicious_file',
+      'event.kind': 'signal',
+      'event.module': 'endpoint',
+      'event.action': 'deletion',
+      'event.id': 'c3b60ce3-6569-4136-854a-f0cc9f546339',
+      'event.category': 'malware',
+      'event.type': 'creation',
+      'event.dataset': 'endpoint',
+      'kibana.alert.rule.exceptions_list': [
+        {
+          id: 'endpoint_list',
+          list_id: 'endpoint_list',
+          namespace_type: 'agnostic',
+          type: 'endpoint',
+        },
+      ],
+
+      _id: 'b9edb05a090729be2077b99304542d6844973843dec43177ac618f383df44a6d',
+    };
+    const expectedHighlightedFields = [
+      {
+        id: 'host.name',
+      },
+      {
+        id: 'agent.id',
+        overrideField: 'agent.status',
+        label: 'Agent status',
+      },
+      {
+        id: 'user.name',
+      },
+      {
+        id: 'cloud.provider',
+      },
+      {
+        id: 'cloud.region',
+      },
+      {
+        id: 'process.executable',
+      },
+      {
+        id: 'process.name',
+      },
+      {
+        id: 'file.path',
+      },
+      {
+        id: 'kibana.alert.threshold_result.cardinality.field',
+        label: 'Event Cardinality',
+      },
+    ];
+    const operator = 'included' as const;
+    const type = 'match' as const;
+    const exceptionEntries = [
+      {
+        field: 'host.name',
+        operator,
+        type,
+        value: 'Host-yxnnos4lo3',
+      },
+      {
+        field: 'agent.id',
+        operator,
+        type,
+        value: 'f4f86e7c-29bd-4655-b7d0-a3d08ad0c322',
+      },
+      {
+        field: 'user.name',
+        operator,
+        type,
+        value: 'c09uzcpj0c',
+      },
+      {
+        field: 'process.executable',
+        operator,
+        type,
+        value: 'C:/malware.exe',
+      },
+      {
+        field: 'file.path',
+        operator,
+        type,
+        value: 'C:/fake_malware.exe',
+      },
+
+      {
+        field: 'process.name',
+        operator,
+        type,
+        value: 'malware writer',
+      },
+    ];
+    const defaultAlertData = {
+      '@timestamp': '',
+      _id: '',
+    };
+    const expectedExceptionEntries = [
+      {
+        field: 'agent.id',
+        operator: 'included',
+        type: 'match',
+        value: 'f4f86e7c-29bd-4655-b7d0-a3d08ad0c322',
+      },
+      {
+        field: 'process.executable',
+        operator: 'included',
+        type: 'match',
+        value: 'C:/malware.exe',
+      },
+      { field: 'process.name', operator: 'included', type: 'match', value: 'malware writer' },
+    ];
+    describe('buildRuleExceptionWithConditions', () => {
+      it('should build conditions, name and namespace for exception correctly', () => {
+        const exception = buildRuleExceptionWithConditions({ name, exceptionEntries });
+        expect(exception.entries).toEqual(
+          expect.arrayContaining([
+            {
+              field: 'host.name',
+              id: '123',
+              operator: 'included',
+              type: 'match',
+              value: 'Host-yxnnos4lo3',
+            },
+            {
+              field: 'agent.id',
+              id: '123',
+              operator: 'included',
+              type: 'match',
+              value: 'f4f86e7c-29bd-4655-b7d0-a3d08ad0c322',
+            },
+            {
+              field: 'user.name',
+              id: '123',
+              operator: 'included',
+              type: 'match',
+              value: 'c09uzcpj0c',
+            },
+            {
+              field: 'process.executable',
+              id: '123',
+              operator: 'included',
+              type: 'match',
+              value: 'C:/malware.exe',
+            },
+          ])
+        );
+        expect(exception.name).toEqual(name);
+        expect(exception.namespace_type).toEqual('single');
+      });
+    });
+    describe('buildExceptionEntriesFromAlertFields', () => {
+      it('should return empty entries if highlightedFields values are empty', () => {
+        const entries = buildExceptionEntriesFromAlertFields({ highlightedFields: [], alertData });
+        expect(entries).toEqual([]);
+      });
+      it('should return empty entries if alertData values are empty', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: expectedHighlightedFields,
+          alertData: defaultAlertData,
+        });
+        expect(entries).toEqual([]);
+      });
+      it('should build exception entries from only the fields that have values in the alertData', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: expectedHighlightedFields,
+          alertData,
+        });
+        expect(entries).toEqual(expectedExceptionEntries);
+      });
+    });
+
+    describe('filterHighlightedFields', () => {
+      const prefixesToExclude = ['agent', 'cloud'];
+      it('should not filter any field if no prefixes passed ', () => {
+        const filteredFields = filterHighlightedFields(expectedHighlightedFields, []);
+        expect(filteredFields).toEqual(expectedHighlightedFields);
+      });
+      it('should not filter any field if no fields passed ', () => {
+        const filteredFields = filterHighlightedFields([], prefixesToExclude);
+        expect(filteredFields).toEqual([]);
+      });
+      it('should filter out the passed prefixes successfully', () => {
+        const filteredFields = filterHighlightedFields(
+          expectedHighlightedFields,
+          prefixesToExclude
+        );
+        expect(filteredFields).not.toEqual(
+          expect.arrayContaining([
+            {
+              id: 'agent.id',
+              overrideField: 'agent.status',
+              label: 'Agent status',
+            },
+            {
+              id: 'cloud.provider',
+            },
+            {
+              id: 'cloud.region',
+            },
+          ])
+        );
+      });
+    });
+    describe('getAlertHighlightedFields', () => {
+      const baseGeneratedAlertHighlightedFields = [
+        {
+          id: 'host.name',
+        },
+        {
+          id: 'agent.id',
+          label: 'Agent status',
+          overrideField: 'agent.status',
+        },
+        {
+          id: 'user.name',
+        },
+        {
+          id: 'cloud.provider',
+        },
+        {
+          id: 'cloud.region',
+        },
+        {
+          id: 'orchestrator.cluster.id',
+        },
+        {
+          id: 'orchestrator.cluster.name',
+        },
+        {
+          id: 'container.image.name',
+        },
+        {
+          id: 'container.image.tag',
+        },
+        {
+          id: 'orchestrator.namespace',
+        },
+        {
+          id: 'orchestrator.resource.parent.type',
+        },
+        {
+          id: 'orchestrator.resource.type',
+        },
+        {
+          id: 'process.executable',
+        },
+        {
+          id: 'file.path',
+        },
+      ];
+      const allHighlightFields = [
+        ...baseGeneratedAlertHighlightedFields,
+        {
+          id: 'file.name',
+        },
+        {
+          id: 'file.hash.sha256',
+        },
+        {
+          id: 'file.directory',
+        },
+        {
+          id: 'process.name',
+        },
+        {
+          id: 'file.Ext.quarantine_path',
+          label: 'Quarantined file path',
+          overrideField: 'quarantined.path',
+        },
+      ];
+      it('should return the highlighted fields correctly when eventCode, eventCategory and RuleType are in the alertData', () => {
+        const res = getAlertHighlightedFields(alertData);
+        expect(res).toEqual(allHighlightFields);
+      });
+      it('should return highlighted fields without the file.Ext.quarantine_path when "event.code" is not in the alertData', () => {
+        const alertDataWithoutEventCode = { ...alertData, 'event.code': null };
+        const res = getAlertHighlightedFields(alertDataWithoutEventCode);
+        expect(res).toEqual([
+          ...baseGeneratedAlertHighlightedFields,
+          {
+            id: 'file.name',
+          },
+          {
+            id: 'file.hash.sha256',
+          },
+          {
+            id: 'file.directory',
+          },
+          {
+            id: 'process.name',
+          },
+        ]);
+      });
+      it('should return highlighted fields without the file and process props when "event.category" is not in the alertData', () => {
+        const alertDataWithoutEventCategory = { ...alertData, 'event.category': null };
+        const res = getAlertHighlightedFields(alertDataWithoutEventCategory);
+        expect(res).toEqual([
+          ...baseGeneratedAlertHighlightedFields,
+          {
+            id: 'file.Ext.quarantine_path',
+            label: 'Quarantined file path',
+            overrideField: 'quarantined.path',
+          },
+        ]);
+      });
+      it('should return all highlighted fields even when the "kibana.alert.rule.type" is not in the alertData', () => {
+        const alertDataWithoutEventCategory = { ...alertData, 'kibana.alert.rule.type': null };
+        const res = getAlertHighlightedFields(alertDataWithoutEventCategory);
+        expect(res).toEqual(allHighlightFields);
+      });
+      it('should return all highlighted fields when there are no fields to be filtered out', () => {
+        jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
+
+        const res = getAlertHighlightedFields(alertData);
+        expect(res).toEqual(allHighlightFields);
+      });
+    });
+    describe('getPrepopulatedRuleExceptionWithHighlightFields', () => {
+      it('should not create any exception and return null if there are no highlighted fields', () => {
+        jest.spyOn(mockHelpers, 'getAlertHighlightedFields').mockReturnValue([]);
+
+        const res = getPrepopulatedRuleExceptionWithHighlightFields({
+          alertData: defaultAlertData,
+          exceptionItemName: '',
+        });
+        expect(res).toBe(null);
+      });
+      it('should not create any exception and return null if there are exception entries generated', () => {
+        jest.spyOn(mockHelpers, 'buildExceptionEntriesFromAlertFields').mockReturnValue([]);
+
+        const res = getPrepopulatedRuleExceptionWithHighlightFields({
+          alertData: defaultAlertData,
+          exceptionItemName: '',
+        });
+        expect(res).toBe(null);
+      });
+      it('should create a new exception and populate its entries with the highlighted fields', () => {
+        const exception = getPrepopulatedRuleExceptionWithHighlightFields({
+          alertData,
+          exceptionItemName: name,
+        });
+
+        expect(exception?.entries).toEqual(
+          expectedExceptionEntries.map((entry) => ({ ...entry, id: '123' }))
+        );
+        expect(exception?.name).toEqual(name);
+      });
     });
   });
 });
