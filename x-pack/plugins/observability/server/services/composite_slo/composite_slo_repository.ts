@@ -19,7 +19,11 @@ export interface CompositeSLORepository {
   save(compositeSlo: CompositeSLO, options?: { throwOnConflict: boolean }): Promise<CompositeSLO>;
   deleteById(id: string): Promise<void>;
   findById(id: string): Promise<CompositeSLO>;
-  find(sort: Sort, pagination: Pagination): Promise<Paginated<CompositeSLO>>;
+  find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<CompositeSLO>>;
+}
+
+export interface Criteria {
+  name?: string;
 }
 
 export interface Pagination {
@@ -121,12 +125,19 @@ export class KibanaSavedObjectsCompositeSLORepository implements CompositeSLORep
     return toCompositeSLO(response.saved_objects[0].attributes);
   }
 
-  async find(sort: Sort, pagination: Pagination): Promise<Paginated<CompositeSLO>> {
+  async find(
+    criteria: Criteria,
+    sort: Sort,
+    pagination: Pagination
+  ): Promise<Paginated<CompositeSLO>> {
+    const { search, searchFields } = buildSearch(criteria);
     const { sortField, sortOrder } = buildSortQuery(sort);
     const response = await this.soClient.find<StoredCompositeSLO>({
       type: SO_COMPOSITE_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
+      search,
+      searchFields,
       sortField,
       sortOrder,
     });
@@ -153,6 +164,17 @@ function toCompositeSLO(storedCompositeSlo: StoredCompositeSLO): CompositeSLO {
   );
 }
 
+function buildSearch(criteria: Criteria): {
+  search: string | undefined;
+  searchFields: string[] | undefined;
+} {
+  if (!criteria.name) {
+    return { search: undefined, searchFields: undefined };
+  }
+
+  return { search: addWildcardsIfAbsent(criteria.name), searchFields: ['name'] };
+}
+
 function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'desc' } {
   let sortField: string;
   switch (sort.field) {
@@ -166,4 +188,18 @@ function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'de
     sortField,
     sortOrder: sort.direction === SortDirection.Desc ? 'desc' : 'asc',
   };
+}
+
+const WILDCARD_CHAR = '*';
+function addWildcardsIfAbsent(value: string): string {
+  let updatedValue = value;
+  if (updatedValue.substring(0, 1) !== WILDCARD_CHAR) {
+    updatedValue = `${WILDCARD_CHAR}${updatedValue}`;
+  }
+
+  if (value.substring(value.length - 1) !== WILDCARD_CHAR) {
+    updatedValue = `${updatedValue}${WILDCARD_CHAR}`;
+  }
+
+  return updatedValue;
 }
