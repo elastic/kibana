@@ -46,6 +46,8 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.8.1]]
 == {kib} 8.8.1
 
+coming::[8.8.1]
+
 Review the following information about the {kib} 8.8.1 release.
 
 [float]
