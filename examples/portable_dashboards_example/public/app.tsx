@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import React, { useMemo } from 'react';
 import { useAsync } from 'react-use/lib';
 import { Router, Redirect, Switch } from 'react-router-dom';
-import { CompatRouter, useNavigate } from 'react-router-dom-v5-compat';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
