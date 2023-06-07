@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { resolve } from 'path';
 import { format as formatUrl } from 'url';
+
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 
@@ -26,6 +29,9 @@ export default async () => {
 
     kbnTestServer: {
       buildArgs: [],
+      env: {
+        KBN_PATH_CONF: resolve(REPO_ROOT, 'config'),
+      },
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
         `--server.port=${kbnTestConfig.getPort()}`,
