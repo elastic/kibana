@@ -110,7 +110,7 @@ describe('remove890Indices migration', () => {
   };
 
   it("removes the synthetics-* index if it's in the indices settings", () => {
-    const doc = makeSettings('heartbeat-8*,something_else');
+    const doc = makeSettings('heartbeat-8*,synthetics-*,something_else');
     const result = remove890Indices(doc, context);
     expect(result).toEqual({
       ...doc,
