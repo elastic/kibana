@@ -16,16 +16,7 @@
     "**/*.ts",
     "**/*.tsx"
   ],
-  "kbn_references": [
-    "@kbn/core-application-browser",
-    "@kbn/core-http-browser",
-    "@kbn/shared-ux-storybook-mock",
-    "@kbn/i18n",
-    "@kbn/core-chrome-browser",
-    "@kbn/default-nav-analytics",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-devtools"
-  ],
+  "kbn_references": [],
   "exclude": [
     "target/**/*"
   ]
