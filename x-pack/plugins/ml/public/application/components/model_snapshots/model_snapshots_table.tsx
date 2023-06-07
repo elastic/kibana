@@ -15,7 +15,7 @@ import {
   EuiInMemoryTable,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-
+import { timeFormatter } from '@kbn/ml-date-utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
@@ -26,7 +26,6 @@ import {
   CombinedJobWithStats,
   ModelSnapshot,
 } from '../../../../common/types/anomaly_detection_jobs';
-import { timeFormatter } from '../../../../common/util/date_utils';
 
 interface Props {
   job: CombinedJobWithStats;

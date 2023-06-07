@@ -23,8 +23,20 @@ export const NEXT_LABEL: string = i18n.translate('xpack.serverlessSearch.next', 
   defaultMessage: 'Next',
 });
 
+export const REQUIRED_LABEL: string = i18n.translate('xpack.serverlessSearch.required', {
+  defaultMessage: 'Required',
+});
+
 export const OPTIONAL_LABEL: string = i18n.translate('xpack.serverlessSearch.optional', {
   defaultMessage: 'Optional',
+});
+
+export const ENABLED_LABEL: string = i18n.translate('xpack.serverlessSearch.enabled', {
+  defaultMessage: 'Enabled',
+});
+
+export const DISABLED_LABEL: string = i18n.translate('xpack.serverlessSearch.disabled', {
+  defaultMessage: 'Disabled',
 });
 
 export const INVALID_JSON_ERROR: string = i18n.translate(

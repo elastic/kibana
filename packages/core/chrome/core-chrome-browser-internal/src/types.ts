@@ -10,6 +10,8 @@ import type {
   ChromeProjectNavigation,
   ChromeStart,
   SideNavComponent,
+  ChromeProjectBreadcrumb,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
@@ -50,5 +52,18 @@ export interface InternalChromeStart extends ChromeStart {
      * @remarks Has no effect if the chrome style is not `project`.
      */
     setSideNavComponent(component: SideNavComponent | null): void;
+
+    /**
+     * Set project breadcrumbs
+     *
+     * @param breadcrumbs
+     * @param params.absolute If true, If true, the breadcrumbs will replace the defaults, otherwise they will be appended to the default ones. false by default.
+     *
+     * @remarks Has no effect if the chrome style is not `project` or if setNavigation was not called
+     */
+    setBreadcrumbs(
+      breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
+      params?: Partial<ChromeSetProjectBreadcrumbsParams>
+    ): void;
   };
 }
