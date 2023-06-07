@@ -23,7 +23,7 @@ const getThresholdExplorerViewTitle = (savedObject: SavedObject<unknown>) =>
 export const threshold: SavedObjectsType = {
   name: thresholdExplorerViewSavedObjectName,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   management: {
     defaultSearchField: 'name',
     displayName: 'threshold explorer view',
