@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -111,6 +111,7 @@ export function Chart({
   onFilter,
   onBrushEnd,
 }: ChartProps) {
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const {
     showChartOptionsPopover,
     chartRef,
@@ -221,6 +222,7 @@ export function Chart({
     lensAttributes: lensAttributesContext.attributes,
     isPlainRecord,
   });
+  const LensSaveModalComponent = services.lens.SaveModalComponent;
 
   return (
     <EuiFlexGroup
@@ -270,6 +272,27 @@ export function Chart({
                       onSuggestionChange={onSuggestionChange}
                     />
                   </EuiFlexItem>
+                )}
+                {isPlainRecord && (
+                  <>
+                    <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                      <EuiToolTip
+                        content={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                          defaultMessage: 'Save visualization',
+                        })}
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="save"
+                          onClick={() => setIsSaveModalVisible(true)}
+                          data-test-subj="unifiedHistogramSaveVisualization"
+                          aria-label={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                            defaultMessage: 'Save visualization',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </>
                 )}
                 {onEditVisualization && (
                   <EuiFlexItem grow={false} css={chartToolButtonCss}>
@@ -353,6 +376,14 @@ export function Chart({
           </section>
           {appendHistogram}
         </EuiFlexItem>
+      )}
+      {isSaveModalVisible && lensAttributesContext.attributes && (
+        <LensSaveModalComponent
+          initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
+          onSave={() => {}}
+          onClose={() => setIsSaveModalVisible(false)}
+          isSaveable={false}
+        />
       )}
     </EuiFlexGroup>
   );
