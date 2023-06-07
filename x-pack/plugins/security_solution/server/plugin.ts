@@ -167,7 +167,9 @@ export class Plugin implements ISecuritySolutionPlugin {
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
     });
 
-    this.riskEngineDataClient.initializeResources({});
+    if(experimentalFeatures.riskScoringPersistence) {
+      this.riskEngineDataClient.initializeResources({});
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
