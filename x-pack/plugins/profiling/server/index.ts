@@ -9,8 +9,19 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingPlugin } from './plugin';
 
+const packageInputSchema = schema.object({
+  host: schema.maybe(schema.string()),
+  secret_token: schema.maybe(schema.string()),
+  tls_enabled: schema.maybe(schema.boolean()),
+  tls_supported_protocols: schema.maybe(schema.arrayOf(schema.string())),
+  tls_certificate_path: schema.maybe(schema.string()),
+  tls_key_path: schema.maybe(schema.string()),
+});
+
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  symbolizer: schema.maybe(packageInputSchema),
+  collector: schema.maybe(packageInputSchema),
   elasticsearch: schema.maybe(
     schema.object({
       hosts: schema.string(),
@@ -21,6 +32,7 @@ const configSchema = schema.object({
 });
 
 export type ProfilingConfig = TypeOf<typeof configSchema>;
+export type PackageInputType = TypeOf<typeof packageInputSchema>;
 
 // plugin config
 export const config: PluginConfigDescriptor<ProfilingConfig> = {

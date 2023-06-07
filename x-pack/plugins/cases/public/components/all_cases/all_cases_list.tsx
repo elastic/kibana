@@ -17,16 +17,16 @@ import type {
   FilterOptions,
   CasesUI,
 } from '../../../common/ui/types';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import type { EuiBasicTableOnChange, Solution } from './types';
+
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
-import type { CasesOwners } from '../../client/helpers/can_use_cases';
-
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
-import type { EuiBasicTableOnChange, Solution } from './types';
-
+import { CASES_TABLE_PERPAGE_VALUES } from './types';
 import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
@@ -224,7 +224,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         pageIndex: queryParams.page - 1,
         pageSize: queryParams.perPage,
         totalItemCount: data.total ?? 0,
-        pageSizeOptions: [10, 25, 50, 100],
+        pageSizeOptions: CASES_TABLE_PERPAGE_VALUES,
       }),
       [data, queryParams]
     );

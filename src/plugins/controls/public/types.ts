@@ -21,7 +21,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import { ControlInput } from '../common/types';
+import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
 import { ControlsServiceType } from './services/controls/types';
 
 export interface CommonControlOutput {
@@ -72,6 +72,12 @@ export interface DataControlField {
 
 export interface DataControlFieldRegistry {
   [fieldName: string]: DataControlField;
+}
+
+export interface DataControlEditorChanges {
+  input: Partial<DataControlInput>;
+  width?: ControlWidth;
+  grow?: boolean;
 }
 
 /**
