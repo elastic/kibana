@@ -6,14 +6,52 @@
  * Side Public License, v 1.
  */
 
-import { MONITORING_APP_ID } from './constants';
+import {
+  MONITORING_APP_ID,
+  INTEGRATIONS_APP_ID,
+  FLEET_APP_ID,
+  OSQUERY_APP_ID,
+  MANAGEMENT_APP_ID,
+} from './constants';
 
 // Monitoring
 export type MonitoringAppId = typeof MONITORING_APP_ID;
-export type MonitoringId = 'xxx';
-export type MonitoringDeepLinkId = MonitoringAppId | `${MonitoringAppId}:${LinkId}`;
+export type MonitoringDeepLinkId = MonitoringAppId;
+
+// Integrations
+export type IntegrationsAppId = typeof INTEGRATIONS_APP_ID;
+export type FleetAppId = typeof FLEET_APP_ID;
+export type OsQueryAppId = typeof OSQUERY_APP_ID;
+export type IntegrationsDeepLinkId = IntegrationsAppId | FleetAppId | OsQueryAppId;
+
+// Management
+export type ManagementAppId = typeof MANAGEMENT_APP_ID;
+export type ManagementId =
+  | 'cross_cluster_replication'
+  | 'index_lifecycle_management'
+  | 'index_management'
+  | 'ingest_pipelines'
+  | 'pipelines'
+  | 'remote_clusters'
+  | 'rollup_jobs'
+  | 'snapshot_restore'
+  | 'transform'
+  // Alerts and insights
+  | 'cases'
+  | 'jobsListLink'
+  | 'triggersActions'
+  | 'triggersActionsConnectors'
+  | 'reporting'
+  | 'watcher'
+  // Kibana
+  | 'dataViews'
+  | 'objects'
+  | 'tags'
+  | 'spaces'
+  | 'settings';
+export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
 
 // Combined
-export type AppId = MonitoringAppId;
-export type LinkId = MonitoringId;
-export type DeepLinkId = MonitoringDeepLinkId;
+export type AppId = MonitoringAppId | IntegrationsAppId | ManagementAppId;
+export type LinkId = ManagementId;
+export type DeepLinkId = MonitoringDeepLinkId | IntegrationsDeepLinkId | ManagementDeepLinkId;

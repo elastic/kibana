@@ -7,3 +7,7 @@
  */
 
 export const MONITORING_APP_ID = 'monitoring';
+export const INTEGRATIONS_APP_ID = 'integrations';
+export const FLEET_APP_ID = 'fleet';
+export const OSQUERY_APP_ID = 'osquery';
+export const MANAGEMENT_APP_ID = 'management';
