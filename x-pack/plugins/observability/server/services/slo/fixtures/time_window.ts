@@ -11,26 +11,26 @@ import { oneWeek, sevenDays, sixHours, thirtyDays } from './duration';
 export function sixHoursRolling(): TimeWindow {
   return {
     duration: sixHours(),
-    isRolling: true,
+    type: 'rolling',
   };
 }
 
 export function sevenDaysRolling(): RollingTimeWindow {
   return {
     duration: sevenDays(),
-    isRolling: true,
+    type: 'rolling',
   };
 }
 export function thirtyDaysRolling(): RollingTimeWindow {
   return {
     duration: thirtyDays(),
-    isRolling: true,
+    type: 'rolling',
   };
 }
 
 export function weeklyCalendarAligned(): TimeWindow {
   return {
     duration: oneWeek(),
-    isCalendar: true,
+    type: 'calendarAligned',
   };
 }
