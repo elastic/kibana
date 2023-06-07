@@ -9,6 +9,7 @@ export const OBSERVABILITY_BASE_PATH = '/app/observability';
 export const ALERT_PAGE_LINK = `${OBSERVABILITY_BASE_PATH}/alerts`;
 export const RULES_PAGE_LINK = `${ALERT_PAGE_LINK}/rules`;
 export const SLOS_PAGE_LINK = `${OBSERVABILITY_BASE_PATH}/slos`;
+export const COMPOSITE_SLOS_PAGE_LINK = `${OBSERVABILITY_BASE_PATH}/composite_slos`;
 
 export const paths = {
   observability: {
@@ -22,6 +23,9 @@ export const paths = {
     sloCreate: `${SLOS_PAGE_LINK}/create`,
     sloEdit: (sloId: string) => `${SLOS_PAGE_LINK}/edit/${encodeURI(sloId)}`,
     sloDetails: (sloId: string) => `${SLOS_PAGE_LINK}/${encodeURI(sloId)}`,
+    compositeSloCreate: `${COMPOSITE_SLOS_PAGE_LINK}/create`,
+    compositeSloEdit: (compositeSloId: string) =>
+      `${COMPOSITE_SLOS_PAGE_LINK}/edit/${encodeURI(compositeSloId)}`,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',
