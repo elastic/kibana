@@ -52,6 +52,7 @@ export function agentStatusCheckInstruction({
 }) {
   let status: EuiStepStatus = 'incomplete';
   let statusCallout = <></>;
+  // Explicit false check required as this value can be null initially. API returns true/false based on data present
   if (agentStatus === false) {
     status = 'warning';
     statusCallout = <AgentStatusWarningCallout />;
