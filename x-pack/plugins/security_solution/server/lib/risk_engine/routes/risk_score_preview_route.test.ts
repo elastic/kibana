@@ -147,5 +147,53 @@ describe('POST risk_engine/preview route', () => {
         );
       });
     });
+
+    describe('weights', () => {
+      it('uses the specified weights when provided', async () => {
+        const request = buildRequest({
+          weights: [
+            {
+              type: RiskWeightTypes.riskCategory,
+              value: RiskCategories.alerts,
+              host: 0.1,
+              user: 0.2,
+            },
+          ],
+        });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+          expect.objectContaining({
+            weights: [
+              {
+                type: RiskWeightTypes.riskCategory,
+                value: RiskCategories.alerts,
+                host: 0.1,
+                user: 0.2,
+              },
+            ],
+          })
+        );
+      });
+
+      it('rejects weight values outside the 0-1 range', async () => {
+        const request = buildRequest({
+          weights: [
+            {
+              type: RiskWeightTypes.riskCategory,
+              value: RiskCategories.alerts,
+              host: 1.1,
+            },
+          ],
+        });
+
+        const result = await server.validate(request);
+        expect(result.badRequest).toHaveBeenCalledWith(
+          'Invalid value "1.1" supplied to "weights,host"'
+        );
+      });
+    });
   });
 });
