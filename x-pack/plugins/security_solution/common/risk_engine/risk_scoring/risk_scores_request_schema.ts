@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { NumberBetweenZeroAndOneInclusive } from '@kbn/securitysolution-io-ts-types';
 import { DataViewId } from '../../detection_engine/rule_schema';
 
 const afterKey = t.record(t.string, t.string);
@@ -30,8 +31,8 @@ export const riskScoresRequestSchema = t.exact(
       t.intersection([
         t.partial({
           value: t.string,
-          host: t.number,
-          user: t.number,
+          host: NumberBetweenZeroAndOneInclusive,
+          user: NumberBetweenZeroAndOneInclusive,
         }),
         t.exact(
           t.type({
