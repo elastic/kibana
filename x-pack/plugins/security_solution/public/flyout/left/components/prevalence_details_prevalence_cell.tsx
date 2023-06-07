@@ -7,8 +7,9 @@
 
 import type { VFC } from 'react';
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import {
+  PREVALENCE_DETAILS_PREVALENCE_CELL_ERROR_TEST_ID,
   PREVALENCE_DETAILS_PREVALENCE_CELL_LOADING_TEST_ID,
   PREVALENCE_DETAILS_PREVALENCE_CELL_VALUE_TEST_ID,
 } from './test_ids';
@@ -70,7 +71,13 @@ export const PrevalenceDetailsPrevalenceCell: VFC<PrevalenceDetailsPrevalenceCel
 
   const prevalence = aggregationCount / uniqueCount;
   if (aggregationError || uniqueError || !isFinite(prevalence)) {
-    return null;
+    return (
+      <EuiIcon
+        data-test-subj={PREVALENCE_DETAILS_PREVALENCE_CELL_ERROR_TEST_ID}
+        type="error"
+        color="danger"
+      />
+    );
   }
 
   return (

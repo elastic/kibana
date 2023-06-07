@@ -31,17 +31,17 @@ const panelContextValue = {
 } as unknown as LeftPanelContext;
 
 describe('PrevalenceDetails', () => {
-  (useFetchFieldValuePairByEventType as jest.Mock).mockReturnValue({
+  jest.mocked(useFetchFieldValuePairByEventType).mockReturnValue({
     loading: false,
     error: false,
     count: 1,
   });
-  (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
+  jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
     loading: false,
     error: false,
     count: 1,
   });
-  (useFetchUniqueByField as jest.Mock).mockReturnValue({
+  jest.mocked(useFetchUniqueByField).mockReturnValue({
     loading: false,
     error: false,
     count: 1,
@@ -69,7 +69,7 @@ describe('PrevalenceDetails', () => {
   });
 
   it('should render the error message if no highlighted fields', () => {
-    (getSummaryRows as jest.Mock).mockReturnValue(undefined);
+    jest.mocked(getSummaryRows).mockReturnValue([]);
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={panelContextValue}>

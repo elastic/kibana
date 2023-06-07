@@ -66,11 +66,11 @@ describe('useThreatIntelligenceDetails', () => {
     jest.mocked(useLeftPanelContext).mockReturnValue({
       indexName: 'test-index',
       eventId: 'test-event-id',
-      getFieldsData: () => {},
+      getFieldsData: () => null,
       dataFormattedForFieldBrowser: null,
       scopeId: 'test-scope-id',
       browserFields: null,
-      data: {
+      searchHit: {
         _id: 'testId',
         _index: 'testIndex',
       },

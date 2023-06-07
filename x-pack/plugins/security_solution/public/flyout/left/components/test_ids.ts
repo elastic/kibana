@@ -33,10 +33,14 @@ export const PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID =
 export const PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID = `${PREFIX}PrevalenceDetailsTable` as const;
 export const PREVALENCE_DETAILS_COUNT_CELL_LOADING_TEST_ID =
   `${PREFIX}PrevalenceDetailsCountCellLoading` as const;
+export const PREVALENCE_DETAILS_COUNT_CELL_ERROR_TEST_ID =
+  `${PREFIX}PrevalenceDetailsCountCellError` as const;
 export const PREVALENCE_DETAILS_COUNT_CELL_VALUE_TEST_ID =
   `${PREFIX}PrevalenceDetailsCountCellValue` as const;
 export const PREVALENCE_DETAILS_PREVALENCE_CELL_LOADING_TEST_ID =
   `${PREFIX}PrevalenceDetailsPrevalenceCellLoading` as const;
+export const PREVALENCE_DETAILS_PREVALENCE_CELL_ERROR_TEST_ID =
+  `${PREFIX}PrevalenceDetailsPrevalenceCellError` as const;
 export const PREVALENCE_DETAILS_PREVALENCE_CELL_VALUE_TEST_ID =
   `${PREFIX}PrevalenceDetailsPrevalenceCellValue` as const;
 

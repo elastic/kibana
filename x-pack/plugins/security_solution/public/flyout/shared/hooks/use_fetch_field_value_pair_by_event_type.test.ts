@@ -43,7 +43,7 @@ describe('useFetchFieldValuePairByEventType', () => {
       data: { search: jest.fn() },
     },
   });
-  (useDeepEqualSelector as jest.Mock).mockReturnValue({ to: '', from: '' });
+  jest.mocked(useDeepEqualSelector).mockReturnValue({ to: '', from: '' });
   (useGlobalTime as jest.Mock).mockReturnValue({ to: '', from: '' });
 
   it('should return loading true while data is being fetched', () => {

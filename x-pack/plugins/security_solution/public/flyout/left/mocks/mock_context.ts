@@ -40,7 +40,7 @@ export const mockContextValue: LeftPanelContext = {
   browserFields: null,
   dataFormattedForFieldBrowser: null,
   getFieldsData: mockGetFieldsData,
-  data: {
+  searchHit: {
     _id: 'testId',
     _index: 'testIndex',
   },

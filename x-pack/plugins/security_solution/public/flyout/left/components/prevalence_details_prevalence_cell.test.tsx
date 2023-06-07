@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import {
+  PREVALENCE_DETAILS_PREVALENCE_CELL_ERROR_TEST_ID,
   PREVALENCE_DETAILS_PREVALENCE_CELL_LOADING_TEST_ID,
   PREVALENCE_DETAILS_PREVALENCE_CELL_VALUE_TEST_ID,
 } from './test_ids';
@@ -25,12 +26,12 @@ const aggregationField = 'aggregationField';
 
 describe('PrevalenceDetailsAlertCountCell', () => {
   it('should show loading spinner when useFetchFieldValuePairWithAggregation loading', () => {
-    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
       loading: true,
       error: false,
       count: 0,
     });
-    (useFetchUniqueByField as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchUniqueByField).mockReturnValue({
       loading: false,
       error: false,
       count: 0,
@@ -49,12 +50,12 @@ describe('PrevalenceDetailsAlertCountCell', () => {
   });
 
   it('should show loading spinner when useFetchUniqueByField loading', () => {
-    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
       loading: false,
       error: false,
       count: 0,
     });
-    (useFetchUniqueByField as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchUniqueByField).mockReturnValue({
       loading: true,
       error: false,
       count: 0,
@@ -73,18 +74,18 @@ describe('PrevalenceDetailsAlertCountCell', () => {
   });
 
   it('should return null if useFetchFieldValuePairWithAggregation errors out', () => {
-    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
       loading: false,
       error: true,
       count: 0,
     });
-    (useFetchUniqueByField as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchUniqueByField).mockReturnValue({
       loading: false,
       error: false,
       count: 0,
     });
 
-    const { container } = render(
+    const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         field={field}
         values={values}
@@ -93,22 +94,22 @@ describe('PrevalenceDetailsAlertCountCell', () => {
       />
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(PREVALENCE_DETAILS_PREVALENCE_CELL_ERROR_TEST_ID)).toBeInTheDocument();
   });
 
   it('should return null if useFetchUniqueByField errors out', () => {
-    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
       loading: false,
       error: false,
       count: 0,
     });
-    (useFetchUniqueByField as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchUniqueByField).mockReturnValue({
       loading: false,
       error: true,
       count: 0,
     });
 
-    const { container } = render(
+    const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         field={field}
         values={values}
@@ -117,22 +118,22 @@ describe('PrevalenceDetailsAlertCountCell', () => {
       />
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(PREVALENCE_DETAILS_PREVALENCE_CELL_ERROR_TEST_ID)).toBeInTheDocument();
   });
 
   it('should return null if prevalence is infinite', () => {
-    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
       loading: false,
       error: false,
       count: 0,
     });
-    (useFetchUniqueByField as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchUniqueByField).mockReturnValue({
       loading: false,
       error: false,
       count: 0,
     });
 
-    const { container } = render(
+    const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         field={field}
         values={values}
@@ -141,16 +142,16 @@ describe('PrevalenceDetailsAlertCountCell', () => {
       />
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(PREVALENCE_DETAILS_PREVALENCE_CELL_ERROR_TEST_ID)).toBeInTheDocument();
   });
 
   it('should show prevalence value', () => {
-    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
       loading: false,
       error: false,
       count: 1,
     });
-    (useFetchUniqueByField as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchUniqueByField).mockReturnValue({
       loading: false,
       error: false,
       count: 1,

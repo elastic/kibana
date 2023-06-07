@@ -120,43 +120,35 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
 export const PrevalenceDetails: React.FC = () => {
   const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useLeftPanelContext();
 
-  const summaryRows = useMemo(
-    () =>
-      getSummaryRows({
-        browserFields: browserFields || {},
-        data: dataFormattedForFieldBrowser || [],
-        eventId,
-        scopeId,
-        isReadOnly: false,
-      }),
-    [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]
-  );
+  const data = useMemo(() => {
+    const summaryRows = getSummaryRows({
+      browserFields: browserFields || {},
+      data: dataFormattedForFieldBrowser || [],
+      eventId,
+      scopeId,
+      isReadOnly: false,
+    });
 
-  const getCellRenderFields = (summaryRow: AlertSummaryRow): PrevalenceDetailsTableCell => ({
-    field: summaryRow.description.data.field,
-    values: summaryRow.description.values || [],
-    scopeId,
-  });
+    const getCellRenderFields = (summaryRow: AlertSummaryRow): PrevalenceDetailsTableCell => ({
+      field: summaryRow.description.data.field,
+      values: summaryRow.description.values || [],
+      scopeId,
+    });
 
-  const data = (summaryRows || []).map((summaryRow) => {
-    const fields = getCellRenderFields(summaryRow);
-    return {
-      type: summaryRow.description.data.field,
-      name: summaryRow.description.values,
-      alertCount: fields,
-      docCount: fields,
-      hostPrevalence: fields,
-      userPrevalence: fields,
-    };
-  });
+    return (summaryRows || []).map((summaryRow) => {
+      const fields = getCellRenderFields(summaryRow);
+      return {
+        type: summaryRow.description.data.field,
+        name: summaryRow.description.values,
+        alertCount: fields,
+        docCount: fields,
+        hostPrevalence: fields,
+        userPrevalence: fields,
+      };
+    });
+  }, [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]);
 
-  if (
-    !eventId ||
-    !dataFormattedForFieldBrowser ||
-    !browserFields ||
-    !summaryRows ||
-    summaryRows.length === 0
-  ) {
+  if (!eventId || !dataFormattedForFieldBrowser || !browserFields || !data || data.length === 0) {
     return (
       <EuiEmptyPrompt
         iconType="error"

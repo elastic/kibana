@@ -12,6 +12,7 @@ import {
   useFetchFieldValuePairByEventType,
 } from '../../shared/hooks/use_fetch_field_value_pair_by_event_type';
 import {
+  PREVALENCE_DETAILS_COUNT_CELL_ERROR_TEST_ID,
   PREVALENCE_DETAILS_COUNT_CELL_LOADING_TEST_ID,
   PREVALENCE_DETAILS_COUNT_CELL_VALUE_TEST_ID,
 } from './test_ids';
@@ -29,7 +30,7 @@ const type = {
 
 describe('PrevalenceDetailsAlertCountCell', () => {
   it('should show loading spinner', () => {
-    (useFetchFieldValuePairByEventType as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairByEventType).mockReturnValue({
       loading: true,
       error: false,
       count: 0,
@@ -42,22 +43,22 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     expect(getByTestId(PREVALENCE_DETAILS_COUNT_CELL_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should return null', () => {
-    (useFetchFieldValuePairByEventType as jest.Mock).mockReturnValue({
+  it('should return error icon', () => {
+    jest.mocked(useFetchFieldValuePairByEventType).mockReturnValue({
       loading: false,
       error: true,
       count: 0,
     });
 
-    const { container } = render(
+    const { getByTestId } = render(
       <PrevalenceDetailsCountCell field={field} values={values} scopeId={scopeId} type={type} />
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(PREVALENCE_DETAILS_COUNT_CELL_ERROR_TEST_ID)).toBeInTheDocument();
   });
 
   it('should show count value with eventKind undefined', () => {
-    (useFetchFieldValuePairByEventType as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairByEventType).mockReturnValue({
       loading: false,
       error: false,
       count: 1,
@@ -72,7 +73,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
   });
 
   it('should show count value with eventKind passed via props', () => {
-    (useFetchFieldValuePairByEventType as jest.Mock).mockReturnValue({
+    jest.mocked(useFetchFieldValuePairByEventType).mockReturnValue({
       loading: false,
       error: false,
       count: 1,

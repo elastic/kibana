@@ -36,11 +36,11 @@ export interface EventType {
 
 export interface UseFetchFieldValuePairByEventTypeParams {
   /**
-   * Highlighted field
+   * The field name
    */
   field: string;
   /**
-   * Highlighted field value
+   * The field values
    */
   values: string[];
   /**
