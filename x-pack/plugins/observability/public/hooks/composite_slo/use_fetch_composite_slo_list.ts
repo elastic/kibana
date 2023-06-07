@@ -62,14 +62,17 @@ export function useFetchCompositeSloList({
       queryKey: compositeSloKeys.list({ name, page, sortBy }),
       queryFn: async ({ signal }) => {
         try {
-          const response = await http.get<FindCompositeSLOResponse>(`/api/observability/slos`, {
-            query: {
-              ...(page && { page }),
-              ...(name && { name }),
-              ...(sortBy && { sortBy }),
-            },
-            signal,
-          });
+          const response = await http.get<FindCompositeSLOResponse>(
+            `/api/observability/composite_slos`,
+            {
+              query: {
+                ...(page && { page }),
+                ...(name && { name }),
+                ...(sortBy && { sortBy }),
+              },
+              signal,
+            }
+          );
 
           return response;
         } catch (error) {

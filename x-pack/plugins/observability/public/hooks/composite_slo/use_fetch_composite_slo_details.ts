@@ -11,9 +11,9 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { GetCompositeSLOResponse, CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
-import { sloKeys } from './query_key_factory';
+import { compositeSloKeys } from './query_key_factory';
 
 export interface UseFetchSloDetailsResponse {
   isInitialLoading: boolean;
@@ -21,15 +21,15 @@ export interface UseFetchSloDetailsResponse {
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  slo: SLOWithSummaryResponse | null | undefined;
+  slo: CompositeSLOWithSummaryResponse | null | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<GetSLOResponse | null | undefined, unknown>>;
+  ) => Promise<QueryObserverResult<GetCompositeSLOResponse | null | undefined, unknown>>;
 }
 
 const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
-export function useFetchSloDetails({
+export function useFetchCompositeSloDetails({
   sloId,
   shouldRefetch,
 }: {
@@ -40,13 +40,16 @@ export function useFetchSloDetails({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: sloKeys.detail(sloId),
+      queryKey: compositeSloKeys.detail(sloId),
       queryFn: async ({ signal }) => {
         try {
-          const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
-            query: {},
-            signal,
-          });
+          const response = await http.get<GetCompositeSLOResponse>(
+            `/api/observability/composite_slos/${sloId}`,
+            {
+              query: {},
+              signal,
+            }
+          );
 
           return response;
         } catch (error) {

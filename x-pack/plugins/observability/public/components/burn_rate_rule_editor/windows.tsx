@@ -15,7 +15,7 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
-import { SLOResponse } from '@kbn/slo-schema';
+import { CompositeSLOResponse, SLOResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { v4 } from 'uuid';
@@ -33,7 +33,7 @@ import {
 import { WindowResult } from './validation';
 
 interface WindowProps extends WindowSchema {
-  slo?: SLOResponse;
+  slo?: SLOResponse | CompositeSLOResponse;
   onChange: (windowDef: WindowSchema) => void;
   onDelete: (id: string) => void;
   disableDelete: boolean;
@@ -47,7 +47,10 @@ const ACTION_GROUP_OPTIONS = [
   { value: LOW_PRIORITY_ACTION.id, text: LOW_PRIORITY_ACTION.name },
 ];
 
-export const calculateMaxBurnRateThreshold = (longWindow: Duration, slo?: SLOResponse) => {
+export const calculateMaxBurnRateThreshold = (
+  longWindow: Duration,
+  slo?: SLOResponse | CompositeSLOResponse
+) => {
   return slo
     ? Math.floor(toMinutes(toDuration(slo.timeWindow.duration)) / toMinutes(longWindow))
     : Infinity;
@@ -193,7 +196,7 @@ const getErrorBudgetExhaustionText = (formattedHours: string) =>
   });
 
 export const createNewWindow = (
-  slo?: SLOResponse,
+  slo?: SLOResponse | CompositeSLOResponse,
   partialWindow: Partial<WindowSchema> = {}
 ): WindowSchema => {
   const longWindow = partialWindow.longWindow || { value: 1, unit: 'h' };
@@ -211,7 +214,7 @@ export const createNewWindow = (
 interface WindowsProps {
   windows: WindowSchema[];
   onChange: (windows: WindowSchema[]) => void;
-  slo?: SLOResponse;
+  slo?: SLOResponse | CompositeSLOResponse;
   errors: WindowResult[];
   totalNumberOfWindows?: number;
 }

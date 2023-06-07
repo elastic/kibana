@@ -9,17 +9,22 @@
 import * as t from 'io-ts';
 
 import { dateType } from './common';
-import { budgetingMethodSchema, objectiveSchema, sloIdSchema, tagsSchema } from './slo';
+import { budgetingMethodSchema, objectiveSchema, sloIdSchema, sloSchema, tagsSchema } from './slo';
 import { timeWindowSchema } from './time_window';
 
 const compositeSloIdSchema = t.string;
 
 const weightedAverageCompositeMethodSchema = t.literal('weightedAverage');
-const weightedAverageSourceSchema = t.type({
-  id: sloIdSchema,
-  revision: t.number,
-  weight: t.number,
-});
+const weightedAverageSourceSchema = t.intersection([
+  t.type({
+    id: sloIdSchema,
+    revision: t.number,
+    weight: t.number,
+  }),
+  t.partial({
+    slo: sloSchema,
+  }),
+]);
 
 const compositeSloSchema = t.type({
   id: compositeSloIdSchema,

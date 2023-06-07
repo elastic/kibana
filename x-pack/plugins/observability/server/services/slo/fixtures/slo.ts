@@ -14,6 +14,7 @@ import { SO_SLO_TYPE } from '../../../saved_objects';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
+  CompositeSLO,
   Duration,
   DurationUnit,
   Indicator,
@@ -109,6 +110,21 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   enabled: true,
 };
 
+const defaultCompositeSLO: Omit<CompositeSLO, 'id' | 'createdAt' | 'updatedAt'> = {
+  name: 'irrelevant',
+  timeWindow: sevenDaysRolling(),
+  sources: [
+    { id: 'slo-1', revision: 1, weight: 3 },
+    { id: 'slo-2', revision: 1, weight: 1 },
+  ],
+  budgetingMethod: 'occurrences',
+  compositeMethod: 'weightedAverage',
+  objective: {
+    target: 0.999,
+  },
+  tags: ['critical', 'k8s'],
+};
+
 const defaultCreateSloParams: CreateSLOParams = {
   name: 'irrelevant',
   description: 'irrelevant',
@@ -140,6 +156,17 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
     ...defaultSLO,
     id: uuidv1(),
     revision: 1,
+    createdAt: now,
+    updatedAt: now,
+    ...params,
+  });
+};
+
+export const createCompositeSLO = (params: Partial<CompositeSLO> = {}): CompositeSLO => {
+  const now = new Date();
+  return cloneDeep({
+    ...defaultCompositeSLO,
+    id: uuidv1(),
     createdAt: now,
     updatedAt: now,
     ...params,

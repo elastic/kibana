@@ -7,9 +7,10 @@
 
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { SLOResponse } from '@kbn/slo-schema';
+import { CompositeSLOResponse, SLOResponse } from '@kbn/slo-schema';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { SloSelector } from './slo_selector';
@@ -21,6 +22,9 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
+import { useFetchCompositeSloDetails } from '../../hooks/composite_slo/use_fetch_composite_slo_details';
+
+type CombinedSloResponse = SLOResponse | CompositeSLOResponse;
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
@@ -28,20 +32,33 @@ type Props = Pick<
 > &
   ValidationBurnRateRuleResult;
 
+function useFetchEitherSloDetails({ sloId }: { sloId: string }) {
+  const { isLoading, slo } = useFetchSloDetails({
+    sloId,
+  });
+  const { isLoading: isLoadingCompositeSlo, slo: compositeSlo } = useFetchCompositeSloDetails({
+    sloId,
+  });
+  return {
+    isLoading: isLoading && isLoadingCompositeSlo,
+    slo: slo || compositeSlo,
+  };
+}
+
 export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
-  const { isLoading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails({
+  const { isLoading: loadingInitialSlo, slo: initialSlo } = useFetchEitherSloDetails({
     sloId: ruleParams?.sloId,
   });
 
-  const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
+  const [selectedSlo, setSelectedSlo] = useState<CombinedSloResponse | undefined>(undefined);
 
   useEffect(() => {
-    const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
+    const hasInitialSlo = !loadingInitialSlo && initialSlo != null;
     setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
   }, [loadingInitialSlo, initialSlo, setRuleParams]);
 
-  const onSelectedSlo = (slo: SLOResponse | undefined) => {
+  const onSelectedSlo = (slo: CombinedSloResponse | undefined) => {
     setSelectedSlo(slo);
     setRuleParams('sloId', slo?.id);
   };
@@ -94,13 +111,23 @@ export function BurnRateRuleEditor(props: Props) {
   return (
     <>
       <EuiTitle size="xs">
-        <h5>Choose a SLO to monitor</h5>
+        <h5>
+          <FormattedMessage
+            id="xpack.observability.slo.rules.sloSelectorTitle"
+            defaultMessage="Choose a SLO to monitor"
+          />
+        </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
-        <h5>Define multiple burn rate windows</h5>
+        <h5>
+          <FormattedMessage
+            id="xpack.observability.slo.rules.burnRateTitle"
+            defaultMessage="Define multiple burn rate windows"
+          />
+        </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <Windows

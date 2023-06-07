@@ -14,14 +14,16 @@ import {
 } from '@kbn/rule-data-utils';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
-import { IBasePath } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { memoize, last, upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { sloSchema } from '@kbn/slo-schema';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
-import { Duration, SLO, toDurationUnit } from '../../../domain/models';
+import { CompositeSLO, Duration, SLO, toDurationUnit } from '../../../domain/models';
 import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
 import { computeBurnRate } from '../../../domain/services';
 import {
@@ -39,11 +41,39 @@ import {
   MEDIUM_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
 } from '../../../../common/constants';
+import { KibanaSavedObjectsCompositeSLORepository } from '../../../services/composite_slo';
+import { DefaultCompositeSLIClient } from '../../../services/composite_slo/sli_client';
+import { CompositeSLOSourceRevisionMismatch, SLONotFound } from '../../../errors';
 
 const SHORT_WINDOW = 'SHORT_WINDOW';
 const LONG_WINDOW = 'LONG_WINDOW';
 
-async function evaluateWindow(slo: SLO, summaryClient: DefaultSLIClient, windowDef: WindowSchema) {
+interface LookbackWindow {
+  name: string;
+  duration: Duration;
+}
+
+async function fetchSLIDataFrom(
+  slo: SloORCompositeSlo,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  lookbackWindows: LookbackWindow[]
+) {
+  const sliClient = new DefaultSLIClient(esClient);
+  if (sloSchema.is(slo)) {
+    return sliClient.fetchSLIDataFrom(slo, lookbackWindows);
+  }
+  const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
+  const compositeSliClient = new DefaultCompositeSLIClient(sliClient);
+  return compositeSliClient.fetchSLIDataFrom(slo, lookbackWindows);
+}
+
+async function evaluateWindow(
+  slo: SloORCompositeSlo,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  windowDef: WindowSchema
+) {
   const longWindowDuration = new Duration(
     windowDef.longWindow.value,
     toDurationUnit(windowDef.longWindow.unit)
@@ -53,9 +83,9 @@ async function evaluateWindow(slo: SLO, summaryClient: DefaultSLIClient, windowD
     toDurationUnit(windowDef.shortWindow.unit)
   );
 
-  const sliData = await summaryClient.fetchSLIDataFrom(slo, [
-    { name: LONG_WINDOW, duration: longWindowDuration.add(slo.settings.syncDelay) },
-    { name: SHORT_WINDOW, duration: shortWindowDuration.add(slo.settings.syncDelay) },
+  const sliData = await fetchSLIDataFrom(slo, soClient, esClient, [
+    { name: LONG_WINDOW, duration: longWindowDuration },
+    { name: SHORT_WINDOW, duration: shortWindowDuration },
   ]);
 
   const longWindowBurnRate = computeBurnRate(slo, sliData[LONG_WINDOW]);
@@ -75,9 +105,14 @@ async function evaluateWindow(slo: SLO, summaryClient: DefaultSLIClient, windowD
   };
 }
 
-async function evaluate(slo: SLO, summaryClient: DefaultSLIClient, params: BurnRateRuleParams) {
+async function evaluate(
+  slo: SloORCompositeSlo,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  params: BurnRateRuleParams
+) {
   const evalWindow = memoize(async (windowDef: WindowSchema) =>
-    evaluateWindow(slo, summaryClient, windowDef)
+    evaluateWindow(slo, soClient, esClient, windowDef)
   );
   for (const windowDef of params.windows) {
     const result = await evalWindow(windowDef);
@@ -89,6 +124,37 @@ async function evaluate(slo: SLO, summaryClient: DefaultSLIClient, params: BurnR
   // for the recovery context. Since evalWindow is memoized, it shouldn't make
   // and additional call to evaulateWindow.
   return await evalWindow(last(params.windows) as WindowSchema);
+}
+
+type SloORCompositeSlo = SLO | CompositeSLO;
+
+async function findSloOrCompositeSlo(
+  soClient: SavedObjectsClientContract,
+  id: string
+): Promise<SloORCompositeSlo> {
+  const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
+  try {
+    return await sloRepository.findById(id);
+  } catch (e) {
+    const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const compositeSlo = await compositeSloRepository.findById(id);
+    const sourceSlos = await sloRepository.findAllByIds(
+      compositeSlo.sources.map((source) => source.id)
+    );
+    const sourcesWithSlo = compositeSlo.sources.map((source) => {
+      const sourceSlo = sourceSlos.find((subject) => subject.id === source.id);
+      if (!sourceSlo) {
+        throw new SLONotFound(`SLO [${source.id}] not found`);
+      }
+      if (sourceSlo.revision !== source.revision) {
+        throw new CompositeSLOSourceRevisionMismatch(
+          `SLO [${source.id}] revision is ${sourceSlo.revision} when it should be ${source.revision}`
+        );
+      }
+      return { ...source, slo: sourceSlo };
+    });
+    return { ...compositeSlo, sources: sourcesWithSlo };
+  }
 }
 
 export const getRuleExecutor = ({
@@ -127,15 +193,13 @@ export const getRuleExecutor = ({
       getAlertUuid,
     } = services;
 
-    const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
-    const summaryClient = new DefaultSLIClient(esClient.asCurrentUser);
-    const slo = await sloRepository.findById(params.sloId);
+    const slo = await findSloOrCompositeSlo(soClient, params.sloId);
 
-    if (!slo.enabled) {
+    if (sloSchema.is(slo) && !slo.enabled) {
       return { state: {} };
     }
 
-    const result = await evaluate(slo, summaryClient, params);
+    const result = await evaluate(slo, soClient, esClient.asInternalUser, params);
 
     if (result) {
       const {
@@ -163,7 +227,8 @@ export const getRuleExecutor = ({
           windowDef
         );
 
-        const alertId = `alert-${slo.id}-${slo.revision}`;
+        const revision = sloSchema.is(slo) ? slo.revision : 1;
+        const alertId = `alert-${slo.id}-${revision}`;
         const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(alertId);
         const alertDetailsUrl = await getAlertUrl(
@@ -193,7 +258,7 @@ export const getRuleExecutor = ({
             [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
             [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
             [SLO_ID_FIELD]: slo.id,
-            [SLO_REVISION_FIELD]: slo.revision,
+            [SLO_REVISION_FIELD]: revision,
           },
         });
 
@@ -204,7 +269,8 @@ export const getRuleExecutor = ({
       const { getRecoveredAlerts } = alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
       for (const recoveredAlert of recoveredAlerts) {
-        const alertId = `alert-${slo.id}-${slo.revision}`;
+        const revision = sloSchema.is(slo) ? slo.revision : 1;
+        const alertId = `alert-${slo.id}-${revision}`;
         const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(alertId);
         const alertDetailsUrl = await getAlertUrl(

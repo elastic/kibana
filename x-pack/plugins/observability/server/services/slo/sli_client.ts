@@ -17,6 +17,7 @@ import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } fro
 import { assertNever } from '@kbn/std';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
+import { computeSLI } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 
@@ -43,9 +44,9 @@ export class DefaultSLIClient implements SLIClient {
     slo: SLO,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>> {
-    const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
-      a.duration.isShorterThan(b.duration) ? 1 : -1
-    );
+    const sortedLookbackWindows = [...lookbackWindows]
+      .map((win) => ({ ...win, duration: win.duration.add(slo.settings.syncDelay) }))
+      .sort((a, b) => (a.duration.isShorterThan(b.duration) ? 1 : -1));
     const longestLookbackWindow = sortedLookbackWindows[0];
     const longestDateRange = toDateRange({
       duration: longestLookbackWindow.duration,
@@ -174,6 +175,7 @@ function handleWindowedResult(
       good,
       total,
       dateRange: { from: new Date(bucket.from_as_string!), to: new Date(bucket.to_as_string!) },
+      sli: computeSLI(good, total),
     };
   }
 

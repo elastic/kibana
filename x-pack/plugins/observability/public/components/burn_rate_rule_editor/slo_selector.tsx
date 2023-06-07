@@ -7,16 +7,22 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOResponse } from '@kbn/slo-schema';
+import {
+  CompositeSLOResponse,
+  FindCompositeSLOResponse,
+  FindSLOResponse,
+  SLOResponse,
+} from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchCompositeSloList } from '../../hooks/composite_slo/use_fetch_composite_slo_list';
 
 interface Props {
-  initialSlo?: SLOResponse;
+  initialSlo?: SLOResponse | CompositeSLOResponse;
   errors?: string[];
-  onSelected: (slo: SLOResponse | undefined) => void;
+  onSelected: (slo: SLOResponse | CompositeSLOResponse | undefined) => void;
 }
 
 function SloSelector({ initialSlo, onSelected, errors }: Props) {
@@ -24,6 +30,9 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { isLoading, sloList } = useFetchSloList({ name: searchValue });
+  const { isLoading: isCompositeLoading, sloList: compositeSloList } = useFetchCompositeSloList({
+    name: searchValue,
+  });
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
@@ -31,17 +40,22 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   }, [initialSlo]);
 
   useEffect(() => {
-    const isLoadedWithData = !isLoading && sloList !== undefined;
+    const isLoadedWithData =
+      !isLoading && sloList !== undefined && !isCompositeLoading && compositeSloList !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? sloList.results.map((slo) => ({ value: slo.id, label: slo.name }))
+      ? createSloOptions(sloList, compositeSloList)
       : [];
     setOptions(opts);
-  }, [isLoading, sloList]);
+  }, [compositeSloList, isCompositeLoading, isLoading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedOptions(opts);
+    const results = [
+      ...((sloList && sloList.results) || []),
+      ...((compositeSloList && compositeSloList.results) || []),
+    ];
     const selectedSlo =
-      opts.length === 1 ? sloList?.results.find((slo) => slo.id === opts[0].value) : undefined;
+      opts.length === 1 ? results.find((slo) => slo.id === opts[0].value) : undefined;
     onSelected(selectedSlo);
   };
 
@@ -79,6 +93,39 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
 const rowLabel = i18n.translate('xpack.observability.slo.rules.sloSelector.rowLabel', {
   defaultMessage: 'SLO',
 });
+
+function createSloOptions(sloList: FindSLOResponse, compositeSloList: FindCompositeSLOResponse) {
+  const options = [];
+  const sloOptions = sloList.results.map((slo) => ({ value: slo.id, label: slo.name }));
+  const compositeSloOptions = compositeSloList.results.map((slo) => ({
+    value: slo.id,
+    label: slo.name,
+  }));
+  if (sloOptions.length > 0 && compositeSloOptions.length > 0) {
+    options.push({
+      label: i18n.translate(
+        'xpack.observability.slo.rules.sloSelector.compositeSloOptionsListLabel',
+        {
+          defaultMessage: 'Composite SLOs',
+        }
+      ),
+      options: compositeSloOptions,
+    });
+    options.push({
+      label: i18n.translate('xpack.observability.slo.rules.sloSelector.sloOptionsListLabel', {
+        defaultMessage: 'SLOs',
+      }),
+      options: sloOptions,
+    });
+  }
+  if (sloOptions.length > 0 && compositeSloOptions.length === 0) {
+    return sloOptions;
+  }
+  if (sloOptions.length === 0 && compositeSloOptions.length > 0) {
+    return compositeSloOptions;
+  }
+  return options;
+}
 
 export { SloSelector };
 export type { Props as SloSelectorProps };

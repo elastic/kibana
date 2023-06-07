@@ -105,6 +105,7 @@ const findCompositeSLOResponseSchema = t.type({
   results: t.array(compositeSLOWithSummaryResponseSchema),
 });
 
+type CompositeSLOResponse = t.OutputOf<typeof compositeSLOResponseSchema>;
 type CreateCompositeSLOInput = t.OutputOf<typeof createCompositeSLOParamsSchema.props.body>; // Raw payload sent by the frontend
 type CreateCompositeSLOParams = t.TypeOf<typeof createCompositeSLOParamsSchema.props.body>; // Parsed payload used by the backend
 type CreateCompositeSLOResponse = t.OutputOf<typeof createCompositeSLOResponseSchema>; // Raw response sent to the frontend
@@ -118,6 +119,8 @@ type UpdateCompositeSLOInput = t.OutputOf<typeof updateCompositeSLOParamsSchema.
 type UpdateCompositeSLOParams = t.TypeOf<typeof updateCompositeSLOParamsSchema.props.body>;
 type UpdateCompositeSLOResponse = t.OutputOf<typeof updateCompositeSLOResponseSchema>;
 
+type CompositeSLOWithSummaryResponse = t.OutputOf<typeof compositeSLOWithSummaryResponseSchema>;
+
 export {
   compositeSLOResponseSchema,
   createCompositeSLOParamsSchema,
@@ -130,6 +133,8 @@ export {
 };
 
 export type {
+  CompositeSLOResponse,
+  CompositeSLOWithSummaryResponse,
   CreateCompositeSLOInput,
   CreateCompositeSLOParams,
   CreateCompositeSLOResponse,

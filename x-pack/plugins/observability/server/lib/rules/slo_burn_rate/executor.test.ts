@@ -33,8 +33,8 @@ import {
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import type { AlertsLocatorParams } from '../../../../common';
 import { getRuleExecutor } from './executor';
-import { createSLO } from '../../../services/slo/fixtures/slo';
-import { SLO, StoredSLO } from '../../../domain/models';
+import { createSLO, createCompositeSLO } from '../../../services/slo/fixtures/slo';
+import { CompositeSLO, SLO, StoredCompositeSLO, StoredSLO } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
@@ -46,8 +46,8 @@ import {
 } from './types';
 import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
 import { SLONotFound } from '../../../errors';
-import { SO_SLO_TYPE } from '../../../saved_objects';
-import { sloSchema } from '@kbn/slo-schema';
+import { SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from '../../../saved_objects';
+import { compositeSloSchema, sloSchema } from '@kbn/slo-schema';
 import {
   ALERT_ACTION,
   ALERT_ACTION_ID,
@@ -77,6 +77,23 @@ function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLO>
       id: slo.id,
       attributes: sloSchema.encode(slo),
       type: SO_SLO_TYPE,
+      references: [],
+      score: 1,
+    })),
+  };
+}
+
+function createFindResponseForComposite(
+  sloList: CompositeSLO[]
+): SavedObjectsFindResponse<StoredCompositeSLO> {
+  return {
+    page: 1,
+    per_page: 25,
+    total: sloList.length,
+    saved_objects: sloList.map((slo) => ({
+      id: slo.id,
+      attributes: compositeSloSchema.encode(slo),
+      type: SO_COMPOSITE_SLO_TYPE,
       references: [],
       score: 1,
     })),
@@ -357,6 +374,342 @@ describe('BurnRateRuleExecutor', () => {
 
       await executor({
         params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
+
+      expect(alertWithLifecycleMock).not.toBeCalled();
+      expect(alertMock.setContext).toBeCalledWith(
+        expect.objectContaining({
+          longWindow: { burnRate: 0.9, duration: '6h' },
+          shortWindow: { burnRate: 0.9, duration: '30m' },
+          burnRateThreshold: 1,
+          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        })
+      );
+      expect(alertsLocatorMock.getLocation).toBeCalledWith({
+        baseUrl: 'https://kibana.dev',
+        kuery: 'kibana.alert.uuid: "mockedAlertUuid"',
+        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
+        spaceId: 'irrelevant',
+      });
+    });
+  });
+
+  describe('composite slo', () => {
+    it('throws when a source slo is not found', async () => {
+      const slo1 = createSLO({ id: 'slo-1', objective: { target: 0.9 } });
+      const slo2 = createSLO({ id: 'slo-2', objective: { target: 0.9 } });
+      const compositeSlo = createCompositeSLO({
+        id: 'composite-1',
+        objective: { target: 0.9 },
+        sources: [
+          { id: slo1.id, revision: slo1.revision, weight: 3 },
+          { id: slo2.id, revision: slo2.revision, weight: 1 },
+        ],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponseForComposite([compositeSlo]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo1]));
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+
+      await expect(
+        executor({
+          params: someRuleParamsWithWindows({ sloId: compositeSlo.id }),
+          startedAt: new Date(),
+          services: servicesMock,
+          executionId: 'irrelevant',
+          logger: loggerMock,
+          previousStartedAt: null,
+          rule: {} as SanitizedRuleConfig,
+          spaceId: 'irrelevant',
+          state: {},
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        })
+      ).rejects.toThrowError(`SLO [${slo2.id}] not found`);
+    });
+
+    it('throws when a source slo revision does not match', async () => {
+      const slo1 = createSLO({ id: 'slo-1', objective: { target: 0.9 } });
+      const slo2 = createSLO({ id: 'slo-2', objective: { target: 0.9 }, revision: 2 });
+      const compositeSlo = createCompositeSLO({
+        id: 'composite-1',
+        objective: { target: 0.9 },
+        sources: [
+          { id: slo1.id, revision: slo1.revision, weight: 3 },
+          { id: slo2.id, revision: 1, weight: 1 },
+        ],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponseForComposite([compositeSlo]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo1, slo2]));
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+
+      await expect(
+        executor({
+          params: someRuleParamsWithWindows({ sloId: compositeSlo.id }),
+          startedAt: new Date(),
+          services: servicesMock,
+          executionId: 'irrelevant',
+          logger: loggerMock,
+          previousStartedAt: null,
+          rule: {} as SanitizedRuleConfig,
+          spaceId: 'irrelevant',
+          state: {},
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        })
+      ).rejects.toThrowError(`SLO [${slo2.id}] revision is ${slo2.revision} when it should be 1`);
+    });
+
+    it('does not schedule an alert when long windows burn rates are below the threshold', async () => {
+      const slo1 = createSLO({ id: 'slo-1', objective: { target: 0.9 } });
+      const slo2 = createSLO({ id: 'slo-2', objective: { target: 0.9 } });
+      const compositeSlo = createCompositeSLO({
+        id: 'composite-1',
+        objective: { target: 0.9 },
+        sources: [
+          { id: slo1.id, revision: slo1.revision, weight: 3 },
+          { id: slo2.id, revision: slo2.revision, weight: 1 },
+        ],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponseForComposite([compositeSlo]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo1, slo2]));
+      esClientMock.search.mockResolvedValueOnce(generateEsResponse(slo1, 2.1, 1.9));
+      esClientMock.search.mockResolvedValueOnce(generateEsResponse(slo2, 2.1, 1.9));
+      esClientMock.search.mockResolvedValueOnce(generateEsResponse(slo1, 1.1, 0.9));
+      esClientMock.search.mockResolvedValueOnce(generateEsResponse(slo2, 1.1, 0.9));
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: compositeSlo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
+
+      expect(alertWithLifecycleMock).not.toBeCalled();
+    });
+
+    it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
+      const slo1 = createSLO({ id: 'slo-1', objective: { target: 0.9 } });
+      const slo2 = createSLO({ id: 'slo-2', objective: { target: 0.9 } });
+      const compositeSlo = createCompositeSLO({
+        id: 'composite-1',
+        objective: { target: 0.9 },
+        sources: [
+          { id: slo1.id, revision: slo1.revision, weight: 3 },
+          { id: slo2.id, revision: slo2.revision, weight: 1 },
+        ],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponseForComposite([compositeSlo]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo1, slo2]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 1.9, 2.1));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 0.9, 1.1));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 1.9, 2.1));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 0.9, 1.1));
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: compositeSlo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
+
+      expect(alertWithLifecycleMock).not.toBeCalled();
+    });
+
+    it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
+      const slo1 = createSLO({ id: 'slo-1', objective: { target: 0.9 } });
+      const slo2 = createSLO({ id: 'slo-2', objective: { target: 0.9 } });
+      const compositeSlo = createCompositeSLO({
+        id: 'composite-1',
+        objective: { target: 0.9 },
+        sources: [
+          { id: slo1.id, revision: slo1.revision, weight: 3 },
+          { id: slo2.id, revision: slo2.revision, weight: 1 },
+        ],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponseForComposite([compositeSlo]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo1, slo2]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 2, 2));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 2, 2));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 2, 2));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 2, 2));
+      const alertMock: Partial<Alert> = {
+        scheduleActions: jest.fn(),
+        replaceState: jest.fn(),
+      };
+      alertWithLifecycleMock.mockImplementation(() => alertMock as any);
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+
+      const executor = getRuleExecutor({
+        basePath: basePathMock,
+        alertsLocator: alertsLocatorMock,
+      });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: compositeSlo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
+
+      expect(alertWithLifecycleMock).toBeCalledWith({
+        id: `alert-${compositeSlo.id}-1`,
+        fields: {
+          [ALERT_REASON]:
+            'CRITICAL: The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 2,
+          [ALERT_EVALUATION_VALUE]: 2,
+          [SLO_ID_FIELD]: compositeSlo.id,
+          [SLO_REVISION_FIELD]: 1,
+        },
+      });
+      expect(alertMock.scheduleActions).toBeCalledWith(
+        ALERT_ACTION.id,
+        expect.objectContaining({
+          longWindow: { burnRate: 2, duration: '1h' },
+          shortWindow: { burnRate: 2, duration: '5m' },
+          burnRateThreshold: 2,
+          reason:
+            'CRITICAL: The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
+          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        })
+      );
+      expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
+      expect(alertsLocatorMock.getLocation).toBeCalledWith({
+        baseUrl: 'https://kibana.dev',
+        kuery: 'kibana.alert.uuid: "mockedAlertUuid"',
+        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
+        spaceId: 'irrelevant',
+      });
+    });
+
+    it('schedules an alert when both windows of second window definition burn rate have reached the threshold', async () => {
+      const slo1 = createSLO({ id: 'slo-1', objective: { target: 0.9 } });
+      const slo2 = createSLO({ id: 'slo-2', objective: { target: 0.9 } });
+      const compositeSlo = createCompositeSLO({
+        id: 'composite-1',
+        objective: { target: 0.9 },
+        sources: [
+          { id: slo1.id, revision: slo1.revision, weight: 3 },
+          { id: slo2.id, revision: slo2.revision, weight: 1 },
+        ],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponseForComposite([compositeSlo]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo1, slo2]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 1.5, 1.5));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 1.5, 1.5));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 1.5, 1.5));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 1.5, 1.5));
+      const alertMock: Partial<Alert> = {
+        scheduleActions: jest.fn(),
+        replaceState: jest.fn(),
+      };
+      alertWithLifecycleMock.mockImplementation(() => alertMock as any);
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: compositeSlo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
+
+      expect(alertWithLifecycleMock).toBeCalledWith({
+        id: `alert-${compositeSlo.id}-1`,
+        fields: {
+          [ALERT_REASON]:
+            'HIGH: The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 1,
+          [ALERT_EVALUATION_VALUE]: 1.5,
+          [SLO_ID_FIELD]: compositeSlo.id,
+          [SLO_REVISION_FIELD]: 1,
+        },
+      });
+      expect(alertMock.scheduleActions).toBeCalledWith(
+        HIGH_PRIORITY_ACTION_ID,
+        expect.objectContaining({
+          longWindow: { burnRate: 1.5, duration: '6h' },
+          shortWindow: { burnRate: 1.5, duration: '30m' },
+          burnRateThreshold: 1,
+          reason:
+            'HIGH: The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
+        })
+      );
+      expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
+    });
+
+    it('sets the context on the recovered alerts using the last window', async () => {
+      const slo1 = createSLO({ id: 'slo-1', objective: { target: 0.9 } });
+      const slo2 = createSLO({ id: 'slo-2', objective: { target: 0.9 } });
+      const compositeSlo = createCompositeSLO({
+        id: 'composite-1',
+        objective: { target: 0.9 },
+        sources: [
+          { id: slo1.id, revision: slo1.revision, weight: 3 },
+          { id: slo2.id, revision: slo2.revision, weight: 1 },
+        ],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponseForComposite([compositeSlo]));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo1, slo2]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 0.9, 0.9));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 0.9, 0.9));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo1, 0.9, 0.9));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo2, 0.9, 0.9));
+      const alertMock: Partial<Alert> = {
+        setContext: jest.fn(),
+      };
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [alertMock] as any });
+
+      const executor = getRuleExecutor({
+        basePath: basePathMock,
+        alertsLocator: alertsLocatorMock,
+      });
+
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: compositeSlo.id }),
         startedAt: new Date(),
         services: servicesMock,
         executionId: 'irrelevant',
