@@ -193,7 +193,7 @@ export interface FleetServerAgentComponentUnit {
   };
 }
 
-interface FleetServerAgentComponent {
+export interface FleetServerAgentComponent {
   id: string;
   type: string;
   status: FleetServerAgentComponentStatus;
