@@ -44,7 +44,6 @@ import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common'
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
-import { sloRuleFieldMap } from './lib/rules/slo_burn_rate/field_map';
 import { OpenAIService } from './services/openai';
 import { threshold } from './saved_objects/threshold';
 
