@@ -31,6 +31,60 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllExceptions(supertest, log);
       });
 
+      // SDH came up where this route was creating a new item when updating
+      // by item_id, ensuring that's no longer the case
+      it('should not create a new item on update', async () => {
+        // create a simple exception list
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListMinimalSchemaMock())
+          .expect(200);
+
+        // create a simple exception list item
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListItemMinimalSchemaMock())
+          .expect(200);
+
+        const { body: foundExceptions } = await supertest
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(foundExceptions.total).to.eql(1);
+
+        // update a exception list item's name
+        const updatedList: UpdateExceptionListItemSchema = {
+          ...getUpdateMinimalExceptionListItemSchemaMock(),
+          name: 'some other name',
+        };
+
+        await supertest
+          .put(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedList)
+          .expect(200);
+
+        const { body: foundExceptionsAfterUpdate } = await supertest
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(foundExceptionsAfterUpdate.total).to.eql(1);
+      });
+
       it('should update a single exception list item property of name using an id', async () => {
         // create a simple exception list
         await supertest
