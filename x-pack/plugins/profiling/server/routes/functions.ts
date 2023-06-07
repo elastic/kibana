@@ -52,7 +52,8 @@ export function registerTopNFunctionsSearchRoute({
         });
 
         const t0 = Date.now();
-        const { stackTraceEvents, stackTraces, executables, stackFrames } = await searchStackTraces(
+        const { stackTraceEvents, stackTraces, executables, stackFrames, samplingRate } = 
+          await searchStackTraces(
           {
             client: profilingElasticsearchClient,
             filter,
@@ -69,7 +70,8 @@ export function registerTopNFunctionsSearchRoute({
             stackFrames,
             executables,
             startIndex,
-            endIndex
+            endIndex,
+            samplingRate,
           );
         });
         logger.info(`creating topN functions took ${Date.now() - t1} ms`);

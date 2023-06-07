@@ -49,7 +49,7 @@ export function registerFlameChartSearchRoute({
         const totalSeconds = timeTo - timeFrom;
 
         const t0 = Date.now();
-        const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
+        const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
           await searchStackTraces({
             client: profilingElasticsearchClient,
             filter,
@@ -64,12 +64,13 @@ export function registerFlameChartSearchRoute({
             stackTraces,
             stackFrames,
             executables,
-            totalFrames
+            totalFrames,
+            samplingRate
           );
           logger.info(`creating callee tree took ${Date.now() - t1} ms`);
 
           const t2 = Date.now();
-          const fg = createBaseFlameGraph(tree, totalSeconds);
+          const fg = createBaseFlameGraph(tree, samplingRate, totalSeconds);
           logger.info(`creating flamegraph took ${Date.now() - t2} ms`);
 
           return fg;

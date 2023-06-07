@@ -25,6 +25,7 @@ export function getImpactRows({
   countExclusive: number;
   totalSamples: number;
   totalSeconds: number;
+  isApproximate: boolean;
 }) {
   const {
     percentage,

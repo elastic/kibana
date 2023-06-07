@@ -30,7 +30,7 @@ export interface Props {
   totalSeconds: number;
 }
 
-export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Props) {
+export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samplingRate }: Props) {
   if (!frame) {
     return (
       <FrameInformationPanel>
@@ -71,6 +71,9 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
     sourceLine,
   });
 
+  // Are the results sampled? If yes, prepend a '~'.
+  const prependString = ((samplingRate ?? 1.0) == 1.0) ? '' : '~';
+
   const impactRows = getImpactRows({
     countInclusive,
     countExclusive,
@@ -101,7 +104,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KeyValueList rows={impactRows} />
+              <KeyValueList rows={impactRows} prependString={prependString} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

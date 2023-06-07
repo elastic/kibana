@@ -43,6 +43,7 @@ export interface StackTraceResponse {
   ['stack_frames']?: ProfilingStackFrames;
   ['executables']?: ProfilingExecutables;
   ['total_frames']: number;
+  ['sampling_rate']: number;
 }
 
 export enum StackTracesDisplayOption {
