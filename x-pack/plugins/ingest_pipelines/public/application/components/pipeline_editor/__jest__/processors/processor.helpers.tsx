@@ -202,6 +202,8 @@ type TestSubject =
   | 'nonChildrenField.input'
   | 'precisionField.input'
   | 'patternDefinitionsField'
+  | 'pipelineNameField.input'
+  | 'ignoreMissingPipelineSwitch.input'
   | 'destinationField.input'
   | 'datasetField.input'
   | 'namespaceField.input';
