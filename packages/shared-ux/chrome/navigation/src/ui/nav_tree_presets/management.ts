@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-
-import type { NodeDefinitionWithChildren } from '../types';
+import type { AppDeepLinkId, NodeDefinitionWithChildren } from '@kbn/core-chrome-browser';
 
 export type ID =
   | 'sharedux:management'
