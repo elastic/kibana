@@ -146,11 +146,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       security.user.delete('global_hosts_read_privileges_user'),
     ]);
 
-  const returnFrom = async (currentPath: string, timeout = 2000) =>
+  const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
-      const currentUrl = await browser.getCurrentUrl();
       await browser.goBack();
-      return !!currentUrl.match(currentPath);
+      const currentUrl = await browser.getCurrentUrl();
+      return !!currentUrl.match(path);
     });
 
   describe('Hosts View', function () {
@@ -290,7 +290,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'app/uptime/?search=host.name%3A%20%22Jennys-MBP.fritz.box%22%20OR%20host.ip%3A%20%22192.168.1.79%22'
         );
 
-        await returnFrom('app/uptime');
+        await returnTo(HOSTS_VIEW_PATH);
       });
 
       it('should navigate to APM services after click', async () => {
@@ -300,7 +300,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'http://localhost:5620/app/apm/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22&rangeFrom=2023-03-28T18%3A20%3A00.000Z&rangeTo=2023-03-28T18%3A21%3A00.000Z&offset=1d'
         );
 
-        await returnFrom('app/apm/services');
+        await returnTo(HOSTS_VIEW_PATH);
       });
 
       it('should render processes tab and with Total Value summary', async () => {
