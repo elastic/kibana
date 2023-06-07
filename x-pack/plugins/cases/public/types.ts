@@ -24,10 +24,11 @@ import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 import type {
-  Case,
-  CasesBulkGetRequestCertainFields,
-  CasesBulkGetResponseCertainFields,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
@@ -63,18 +64,19 @@ export interface CasesPluginSetup {
 }
 
 export interface CasesPluginStart {
+  apm?: ApmBase;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  files: FilesStart;
-  licensing?: LicensingPluginStart;
-  lens: LensPublicStart;
-  storage: Storage;
-  triggersActionsUi: TriggersActionsStart;
   features: FeaturesPluginStart;
+  files: FilesStart;
+  lens: LensPublicStart;
+  licensing?: LicensingPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  apm?: ApmBase;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  storage: Storage;
+  triggersActionsUi: TriggersActionsStart;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -106,10 +108,7 @@ export interface CasesUiStart {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<CasesFindResponseUI>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
-      bulkGet: <Field extends keyof Case = keyof Case>(
-        params: CasesBulkGetRequestCertainFields<Field>,
-        signal?: AbortSignal
-      ) => Promise<CasesBulkGetResponseCertainFields<Field>>;
+      bulkGet: (params: CasesBulkGetRequest, signal?: AbortSignal) => Promise<CasesBulkGetResponse>;
     };
   };
   ui: {

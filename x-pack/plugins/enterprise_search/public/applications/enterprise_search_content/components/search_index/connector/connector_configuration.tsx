@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
@@ -43,7 +44,7 @@ import { SearchIndexTabId } from '../search_index';
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
-import { CONNECTORS } from './constants';
+import { BETA_CONNECTORS, CONNECTORS } from './constants';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
@@ -63,6 +64,13 @@ export const ConnectorConfiguration: React.FC = () => {
   const docsUrl = CONNECTORS.find(
     ({ serviceType }) => serviceType === index.connector.service_type
   )?.docsUrl;
+
+  // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
+  const isBeta =
+    !index.connector.service_type ||
+    Boolean(
+      BETA_CONNECTORS.find(({ serviceType }) => serviceType === index.connector.service_type)
+    );
 
   return (
     <>
@@ -123,7 +131,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.thirdParagraph"
-                          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Enterprise Search."
+                          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Enterprise Search. The service type will determine which type of data source the connector is configured for."
                           values={{
                             link: (
                               <EuiLink
@@ -149,7 +157,8 @@ export const ConnectorConfiguration: React.FC = () => {
 `
                             : ''
                         }connector_id: "${index.connector.id}"
-            `}
+service_type: "${index.connector.service_type || 'changeme'}"
+`}
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">
@@ -378,6 +387,11 @@ export const ConnectorConfiguration: React.FC = () => {
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
+            {isBeta ? (
+              <EuiFlexItem>
+                <BetaConnectorCallout />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

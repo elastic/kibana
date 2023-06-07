@@ -93,6 +93,7 @@ export async function onSaveSearch({
   onSaveCb?: () => void;
 }) {
   const { uiSettings, savedObjectsTagging } = services;
+  const dataView = state.internalState.getState().dataView;
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -161,6 +162,7 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
+      isTimeBased={dataView?.isTimeBased() ?? false}
       services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
@@ -175,6 +177,7 @@ export async function onSaveSearch({
 }
 
 const SaveSearchObjectModal: React.FC<{
+  isTimeBased: boolean;
   services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
@@ -184,6 +187,7 @@ const SaveSearchObjectModal: React.FC<{
   onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
   onClose: () => void;
 }> = ({
+  isTimeBased,
   services,
   title,
   description,
@@ -194,7 +198,9 @@ const SaveSearchObjectModal: React.FC<{
   onClose,
 }) => {
   const { savedObjectsTagging } = services;
-  const [timeRestore, setTimeRestore] = useState<boolean>(savedTimeRestore || false);
+  const [timeRestore, setTimeRestore] = useState<boolean>(
+    (isTimeBased && savedTimeRestore) || false
+  );
   const [currentTags, setCurrentTags] = useState(tags);
 
   const onModalSave = (params: OnSaveProps) => {
@@ -214,7 +220,7 @@ const SaveSearchObjectModal: React.FC<{
     />
   ) : undefined;
 
-  const timeSwitch = (
+  const timeSwitch = isTimeBased ? (
     <EuiFormRow
       helpText={
         <FormattedMessage
@@ -235,7 +241,7 @@ const SaveSearchObjectModal: React.FC<{
         }
       />
     </EuiFormRow>
-  );
+  ) : null;
 
   const options = tagSelector ? (
     <>

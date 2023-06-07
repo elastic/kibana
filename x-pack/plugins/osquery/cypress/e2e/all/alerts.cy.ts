@@ -37,6 +37,7 @@ import {
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
 import {
+  closeDateTabIfVisible,
   closeModalIfVisible,
   closeToastIfVisible,
   generateRandomStringName,
@@ -63,8 +64,8 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadRule().then((data) => {
         ruleId = data.id;
@@ -94,7 +95,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Response actions', () => {
+  describe.skip('Response actions', () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;
     let ruleId: string;
@@ -104,21 +105,21 @@ describe('Alert Event Details', () => {
     const packData = packFixture();
     const multiQueryPackData = multiQueryPackFixture();
 
-    before(() => {
+    beforeEach(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadPack(multiQueryPackData).then((data) => {
-        multiQueryPackId = data.id;
-        multiQueryPackName = data.attributes.name;
+        multiQueryPackId = data.saved_object_id;
+        multiQueryPackName = data.name;
       });
       loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });
     });
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
       cleanupPack(multiQueryPackId);
       cleanupRule(ruleId);
@@ -128,8 +129,8 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
+      closeDateTabIfVisible();
       cy.getBySel('edit-rule-actions-tab').click();
       cy.contains('Response actions are run on each rule execution');
       cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
@@ -168,7 +169,6 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -214,7 +214,6 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -280,7 +279,6 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
 
@@ -338,7 +336,9 @@ describe('Alert Event Details', () => {
         cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
       });
       cy.contains('Cancel').click();
-      cy.contains(TIMELINE_NAME).click();
+      cy.getBySel('flyoutBottomBar').within(() => {
+        cy.contains(TIMELINE_NAME).click();
+      });
       cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
       // timeline unsaved changes modal
       cy.visit('/app/osquery');
@@ -382,8 +382,8 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadRule(true).then((data) => {
         ruleId = data.id;

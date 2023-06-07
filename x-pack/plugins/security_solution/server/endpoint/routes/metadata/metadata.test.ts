@@ -15,21 +15,19 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { registerEndpointRoutes } from '.';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
 import type { EndpointAppContextServiceStartContract } from '../../endpoint_app_context_services';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import {
@@ -111,10 +109,8 @@ describe('test endpoint routes', () => {
       .agentPolicy as jest.Mocked<AgentPolicyServiceInterface>;
 
     registerEndpointRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
+      ...createMockEndpointAppContext(),
       service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     });
   });
 

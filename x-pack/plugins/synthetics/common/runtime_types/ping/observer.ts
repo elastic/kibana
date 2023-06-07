@@ -11,6 +11,7 @@ export const ObserverCodec = t.partial({
   hostname: t.string,
   ip: t.array(t.string),
   mac: t.array(t.string),
+  name: t.union([t.string, t.undefined]),
   geo: t.partial({
     name: t.string,
     continent_name: t.string,

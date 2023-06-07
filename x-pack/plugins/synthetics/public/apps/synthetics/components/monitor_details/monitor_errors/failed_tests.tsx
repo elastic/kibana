@@ -42,7 +42,7 @@ export const MonitorFailedTests = ({
   return (
     <>
       <ExploratoryViewEmbeddable
-        id="failedTestsLineSeries"
+        id={'failedTestsLineSeries'}
         customHeight={'120px'}
         reportType="heatmap"
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}

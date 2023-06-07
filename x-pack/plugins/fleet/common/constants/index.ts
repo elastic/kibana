@@ -22,6 +22,8 @@ export * from './authz';
 export * from './file_storage';
 export * from './message_signing_keys';
 export * from './locators';
+export * from './secrets';
+export * from './uninstall_token';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -161,7 +161,7 @@ export const Expression: React.FC<Props> = (props) => {
     }
   }, [metadata, derivedIndexPattern, defaultExpression, source, space]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (isLoadingMLCapabilities) return <EuiLoadingContent lines={10} />;
+  if (isLoadingMLCapabilities) return <EuiSkeletonText lines={10} />;
   if (!hasInfraMLCapabilities) return <SubscriptionSplashPrompt />;
 
   return (

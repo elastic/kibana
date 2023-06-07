@@ -7,6 +7,7 @@
  */
 
 import * as rt from 'io-ts';
+import { toNumberRt } from '../to_number_rt';
 
 export interface InRangeBrand {
   readonly InRange: unique symbol;
@@ -21,3 +22,7 @@ export const inRangeRt = (start: number, end: number) =>
     // refinement of the number type
     'InRange' // name of this codec
   );
+
+export const inRangeFromStringRt = (start: number, end: number) => {
+  return toNumberRt.pipe(inRangeRt(start, end));
+};

@@ -57,7 +57,9 @@ function GroupSelection(props: GroupSelectionProps) {
         [
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
-        ],
+        ].filter((visDefinition) => {
+          return !visDefinition.disableCreate;
+        }),
         ['promotion', 'title'],
         ['asc', 'asc']
       ),
@@ -90,7 +92,9 @@ function GroupSelection(props: GroupSelectionProps) {
         <div className="visNewVisDialogGroupSelection__footer">
           <EuiSpacer size="l" />
           <EuiFlexGrid columns={2}>
-            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).length > 0 && (
+            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).filter((visDefinition) => {
+              return !visDefinition.disableCreate;
+            }).length > 0 && (
               <EuiFlexItem>
                 <EuiCard
                   titleSize="xs"
@@ -215,8 +219,9 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
-  // hide the experimental visualization if lab mode is not enabled
-  if (!showExperimental && visType.stage === 'experimental') {
+  // hide both the hidden visualizations and, if lab mode is not enabled, the experimental visualizations
+  // TODO: Remove the showExperimental logic as part of https://github.com/elastic/kibana/issues/152833
+  if (visType.disableCreate || (!showExperimental && visType.stage === 'experimental')) {
     return null;
   }
   return (

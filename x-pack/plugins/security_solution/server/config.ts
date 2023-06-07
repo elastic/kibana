@@ -123,6 +123,14 @@ export const configSchema = schema.object({
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
+
+  /**
+   * The Max number of Bytes allowed for the `upload` endpoint response action
+   */
+  maxUploadResponseActionFileBytes: schema.number({
+    defaultValue: 26214400, // 25MB,
+    max: 104857600, // 100MB,
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

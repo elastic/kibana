@@ -29,6 +29,7 @@ import type {
   ChromeUserBanner,
   ChromeStyle,
   ChromeProjectNavigation,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { SideNavComponent as ISideNavComponent } from '@kbn/core-chrome-browser';
@@ -177,11 +178,32 @@ export class ChromeService {
     };
 
     const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
+      const chromeStyle = chromeStyle$.getValue();
+      if (chromeStyle !== 'project') {
+        // Helps ensure callers go through the serverless plugin to get here.
+        throw new Error(
+          `Invalid ChromeStyle value of "${chromeStyle}". setProjectSideNavComponent requires ChromeStyle set to "project".`
+        );
+      }
       projectNavigation.setProjectSideNavComponent(component);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
+      const chromeStyle = chromeStyle$.getValue();
+      if (chromeStyle !== 'project') {
+        // Helps ensure callers go through the serverless plugin to get here.
+        throw new Error(
+          `Invalid ChromeStyle value of "${chromeStyle}". setProjectNavigation requires ChromeStyle set to "project".`
+        );
+      }
       projectNavigation.setProjectNavigation(config);
+    };
+
+    const setProjectBreadcrumbs = (
+      breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
+      params?: ChromeSetProjectBreadcrumbsParams
+    ) => {
+      projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
     };
 
     const isIE = () => {
@@ -233,9 +255,11 @@ export class ChromeService {
         // }
 
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
+        // const projectNavigation$ = projectNavigation.getProjectNavigation$();
 
         const ProjectHeaderWithNavigation = () => {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
+          // const projectNavigationConfig = useObservable(projectNavigation$, undefined);
 
           let SideNavComponent: ISideNavComponent = () => null;
 
@@ -247,6 +271,13 @@ export class ChromeService {
                 : ProjectSideNavigation;
           }
 
+          // if projectNavigation wasn't set fallback to the default breadcrumbs
+          // TODO: Uncommented when we support the project navigation config
+          // const projectBreadcrumbs$ = projectNavigationConfig
+          //   ? projectNavigation.getProjectBreadcrumbs$()
+          //   : breadcrumbs$;
+          const projectBreadcrumbs$ = breadcrumbs$;
+
           return (
             <ProjectHeader
               {...{
@@ -254,7 +285,7 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$,
               }}
               actionMenu$={application.currentActionMenu$}
-              breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+              breadcrumbs$={projectBreadcrumbs$.pipe(takeUntil(this.stop$))}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
               helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
               navControlsRight$={navControls.getRight$()}
@@ -376,6 +407,7 @@ export class ChromeService {
       project: {
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
+        setBreadcrumbs: setProjectBreadcrumbs,
       },
     };
   }

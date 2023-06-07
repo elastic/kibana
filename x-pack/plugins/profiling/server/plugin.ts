@@ -57,6 +57,7 @@ export class ProfilingPlugin
         dependencies: {
           start: depsStart,
           setup: deps,
+          config,
         },
         services: {
           createProfilingEsClient: ({

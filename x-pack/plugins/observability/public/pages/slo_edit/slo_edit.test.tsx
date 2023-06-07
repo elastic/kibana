@@ -24,19 +24,21 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config/paths';
 import { SloEditPage } from './slo_edit';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_update_slo');
 jest.mock('../../hooks/slo/use_fetch_apm_suggestions');
+jest.mock('../../hooks/slo/use_capabilities');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -51,6 +53,7 @@ const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
+const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
@@ -121,6 +124,10 @@ describe('SLO Edit Page', () => {
 
   describe('when the incorrect license is found', () => {
     beforeEach(() => {
+      useCapabilitiesMock.mockReturnValue({
+        hasWriteCapabilities: true,
+        hasReadCapabilities: true,
+      });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
     });
 
@@ -161,7 +168,54 @@ describe('SLO Edit Page', () => {
 
   describe('when the correct license is found', () => {
     beforeEach(() => {
+      useCapabilitiesMock.mockReturnValue({
+        hasWriteCapabilities: true,
+        hasReadCapabilities: true,
+      });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+    });
+
+    describe('with no write permission', () => {
+      beforeEach(() => {
+        useCapabilitiesMock.mockReturnValue({
+          hasWriteCapabilities: false,
+          hasReadCapabilities: true,
+        });
+      });
+
+      it('redirects to the slo list page', async () => {
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+
+        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+
+        useFetchIndicesMock.mockReturnValue({
+          isLoading: false,
+          indices: [{ name: 'some-index' }],
+        });
+
+        useCreateSloMock.mockReturnValue({
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+          mutate: jest.fn(),
+          mutateAsync: jest.fn(),
+        });
+
+        useUpdateSloMock.mockReturnValue({
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+          mutate: jest.fn(),
+          mutateAsync: jest.fn(),
+        });
+
+        render(<SloEditPage />);
+
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      });
     });
 
     describe('when no sloId route param is provided', () => {
@@ -284,7 +338,7 @@ describe('SLO Edit Page', () => {
                   },
                   "timeWindow": Object {
                     "duration": "7d",
-                    "isRolling": true,
+                    "type": "rolling",
                   },
                 },
               ],
@@ -397,7 +451,6 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
         expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
           slo.indicator.params.index!
         );
@@ -509,7 +562,6 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
         expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
           slo.indicator.params.index!
         );

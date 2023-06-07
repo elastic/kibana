@@ -11,7 +11,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
@@ -146,7 +146,7 @@ export const MonitorLocationSelect = ({
     return (
       <EuiDescriptionList
         compressed={compressed}
-        listItems={[{ title: LOCATION_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+        listItems={[{ title: LOCATION_LABEL, description: <EuiSkeletonText lines={1} /> }]}
       />
     );
   }

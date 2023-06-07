@@ -7,7 +7,7 @@ pageLoadAssetSize:
   banners: 17946
   bfetch: 22837
   canvas: 1066647
-  cases: 175000
+  cases: 180000
   charts: 55000
   cloud: 21076
   cloudChat: 19894
@@ -38,8 +38,9 @@ pageLoadAssetSize:
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 35741
+  essSecurity: 16573
   esUiShared: 326654
-  eventAnnotation: 20500
+  eventAnnotation: 22000
   exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
@@ -95,7 +96,7 @@ pageLoadAssetSize:
   newsfeed: 42228
   observability: 95000
   observabilityOnboarding: 19573
-  observabilityShared: 36643
+  observabilityShared: 52256
   osquery: 107090
   painlessLab: 179748
   presentationUtil: 58834
@@ -116,9 +117,9 @@ pageLoadAssetSize:
   security: 65433
   securitySolution: 66738
   serverless: 16573
-  serverlessObservability: 16582
-  serverlessSearch: 20555
-  serverlessSecurity: 41807
+  serverlessObservability: 30000
+  serverlessSearch: 45934
+  serverlessSecurity: 66019
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032
@@ -128,6 +129,7 @@ pageLoadAssetSize:
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
+  textBasedLanguages: 37000
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007
