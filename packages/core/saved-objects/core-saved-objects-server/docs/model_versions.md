@@ -124,7 +124,7 @@ const myType: SavedObjectsType = {
 };
 ```
 
-**Note:** Having multiple changes of the same type for a given version is supported bu design 
+**Note:** Having multiple changes of the same type for a given version is supported by design 
         to allow merging different sources (to prepare for an eventual higher-level API)
 
 *This definition would be perfectly valid:*
