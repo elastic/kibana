@@ -17,13 +17,13 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
+  TooltipProps,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { TooltipValue } from '@elastic/charts';
 import moment from 'moment';
 import { Maybe } from '../../../../../typings/common';
 import { Coordinate } from '../../../../../typings/timeseries';
@@ -69,12 +69,12 @@ export function ChartPreview({
 
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
-  const tooltipProps = {
-    headerFormatter: (tooltipValue: TooltipValue) => {
+  const tooltipProps: TooltipProps = {
+    headerFormatter: ({ value }) => {
       const dateFormat =
         (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) ||
         DEFAULT_DATE_FORMAT;
-      return moment(tooltipValue.value).format(dateFormat);
+      return moment(value).format(dateFormat);
     },
   };
 
