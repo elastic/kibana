@@ -11,6 +11,8 @@ import { promisify } from 'util';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 
+import { isEmpty, sortBy } from 'lodash';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { ListResult } from '../../../common/types';
@@ -84,55 +86,95 @@ export const createArtifact = async (
   return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
 };
 
+// Max length in bytes for artifacts batch
+const MAX_LENGTH_BYTES = 2_000;
+
+// Function to split artifacts in batches depending on the encoded_size value.
+const generateArtifactBatches = (
+  artifacts: NewArtifact[],
+  maxLengthBytes: number = MAX_LENGTH_BYTES
+): {
+  batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>>;
+  artifactsEsResponse: Artifact[];
+} => {
+  const batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>> = [];
+  const artifactsEsResponse: Artifact[] = [];
+  let artifactsBatchLengthInBytes = 0;
+  const sortedArtifacts = sortBy(artifacts, 'encodedSize');
+
+  sortedArtifacts.forEach((artifact, index) => {
+    const esArtifactResponse = esSearchHitToArtifact({
+      _id: uniqueIdFromArtifact(artifact),
+      _source: newArtifactToElasticsearchProperties(artifacts[index]),
+    });
+    const esArtifact = newArtifactToElasticsearchProperties(artifact);
+    const bulkOperation = {
+      create: {
+        _id: uniqueIdFromArtifact(artifact),
+      },
+    };
+
+    // Before adding the next artifact to the current batch, check if it can be added depending on the batch size limit.
+    // If there is no artifact yet added to the current batch, we add it anyway ignoring the batch limit as the batch size has to be > 0.
+    if (artifact.encodedSize + artifactsBatchLengthInBytes >= maxLengthBytes) {
+      artifactsBatchLengthInBytes = 0;
+      // Use non sorted artifacts array to preserve the artifacts order in the response
+      artifactsEsResponse.push(esArtifactResponse);
+
+      batches.push([bulkOperation, esArtifact]);
+    } else {
+      // Case it's the first one
+      if (isEmpty(batches)) {
+        batches.push([]);
+      }
+      // Adds the next artifact to the current batch and increases the batch size count with the artifact size.
+      artifactsBatchLengthInBytes += artifact.encodedSize;
+      // Use non sorted artifacts array to preserve the artifacts order in the response
+      artifactsEsResponse.push(esArtifactResponse);
+
+      batches[batches.length - 1].push(bulkOperation, esArtifact);
+    }
+  });
+
+  return { batches, artifactsEsResponse };
+};
+
 export const bulkCreateArtifacts = async (
   esClient: ElasticsearchClient,
   artifacts: NewArtifact[],
   refresh = false
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
-  const { ids, newArtifactsData } = artifacts.reduce<{
-    ids: string[];
-    newArtifactsData: ArtifactElasticsearchProperties[];
-  }>(
-    (acc, artifact) => {
-      acc.ids.push(uniqueIdFromArtifact(artifact));
-      acc.newArtifactsData.push(newArtifactToElasticsearchProperties(artifact));
-      return acc;
-    },
-    { ids: [], newArtifactsData: [] }
-  );
-
-  const body = ids.flatMap((id, index) => [
-    {
-      create: {
-        _id: id,
-      },
-    },
-    newArtifactsData[index],
-  ]);
-
-  const res = await withPackageSpan('Bulk create fleet artifacts', () =>
-    esClient.bulk({
-      index: FLEET_SERVER_ARTIFACTS_INDEX,
-      body,
-      refresh,
-    })
-  );
-  if (res.errors) {
-    const nonConflictErrors = res.items.reduce<Error[]>((acc, item) => {
-      if (item.create?.status !== 409) {
-        acc.push(new Error(item.create?.error?.reason));
-      }
-      return acc;
-    }, []);
-    if (nonConflictErrors.length > 0) {
-      return { errors: nonConflictErrors };
+  const { batches, artifactsEsResponse } = generateArtifactBatches(artifacts);
+  const nonConflictErrors = [];
+  for (let batchN = 0; batchN < batches.length; batchN++) {
+    // Generate a bulk create for the current batch of artifacts
+    const res = await withPackageSpan(`Bulk create fleet artifacts batch [${batchN}]`, () =>
+      esClient.bulk({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        body: batches[batchN],
+        refresh,
+      })
+    );
+    // Track errors of the bulk create action
+    if (res.errors) {
+      nonConflictErrors.push(
+        ...res.items.reduce<Error[]>((acc, item) => {
+          if (item.create?.status !== 409) {
+            acc.push(new Error(item.create?.error?.reason));
+          }
+          return acc;
+        }, [])
+      );
     }
   }
 
+  // If any non conflict error, it returns only the errors
+  if (nonConflictErrors.length > 0) {
+    return { errors: nonConflictErrors };
+  }
+
   return {
-    artifacts: ids.map((id, index) =>
-      esSearchHitToArtifact({ _id: id, _source: newArtifactsData[index] })
-    ),
+    artifacts: artifactsEsResponse,
   };
 };
 

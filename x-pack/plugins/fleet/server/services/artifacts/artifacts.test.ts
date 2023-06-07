@@ -150,6 +150,144 @@ describe('When using the artifacts services', () => {
       });
     });
 
+    it('should create and return a single big artifact', async () => {
+      const { ...generatedArtifact } = generateArtifactMock({ encodedSize: 1_500 });
+      const newBigArtifact = generatedArtifact;
+
+      const { artifacts } = await bulkCreateArtifacts(esClientMock, [newBigArtifact]);
+      const artifact = artifacts![0];
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        refresh: false,
+        body: [
+          {
+            create: {
+              _id: `${artifact.packageName}:${artifact.identifier}-${artifact.decodedSha256}`,
+            },
+          },
+          {
+            ...newArtifactToElasticsearchProperties(newBigArtifact),
+            created: expect.any(String),
+          },
+        ],
+      });
+
+      expect(artifact).toEqual({
+        ...newBigArtifact,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+    });
+
+    it('should create and return a multiple big artifacts', async () => {
+      const { ...generatedArtifact1 } = generateArtifactMock({ encodedSize: 1_500 });
+      const newBigArtifact1 = generatedArtifact1;
+      const { ...generatedArtifact2 } = generateArtifactMock({ encodedSize: 500 });
+      const newBigArtifact2 = generatedArtifact2;
+      const { ...generatedArtifact3 } = generateArtifactMock({ encodedSize: 233 });
+      const newBigArtifact3 = generatedArtifact3;
+      const { ...generatedArtifact4 } = generateArtifactMock({ encodedSize: 2_500 });
+      const newBigArtifact4 = generatedArtifact4;
+
+      const { artifacts } = await bulkCreateArtifacts(esClientMock, [
+        newBigArtifact1,
+        newBigArtifact2,
+        newBigArtifact3,
+        newBigArtifact4,
+      ]);
+      const artifact1 = artifacts![0];
+      const artifact2 = artifacts![1];
+      const artifact3 = artifacts![2];
+      const artifact4 = artifacts![3];
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(3);
+
+      expect(esClientMock.bulk).toHaveBeenNthCalledWith(1, {
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        refresh: false,
+        body: [
+          {
+            create: {
+              _id: `${artifact3.packageName}:${artifact3.identifier}-${artifact3.decodedSha256}`,
+            },
+          },
+          {
+            ...newArtifactToElasticsearchProperties(newBigArtifact3),
+            created: expect.any(String),
+          },
+          {
+            create: {
+              _id: `${artifact2.packageName}:${artifact2.identifier}-${artifact2.decodedSha256}`,
+            },
+          },
+          {
+            ...newArtifactToElasticsearchProperties(newBigArtifact2),
+            created: expect.any(String),
+          },
+        ],
+      });
+
+      expect(esClientMock.bulk).toHaveBeenNthCalledWith(2, {
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        refresh: false,
+        body: [
+          {
+            create: {
+              _id: `${artifact1.packageName}:${artifact1.identifier}-${artifact1.decodedSha256}`,
+            },
+          },
+          {
+            ...newArtifactToElasticsearchProperties(newBigArtifact1),
+            created: expect.any(String),
+          },
+        ],
+      });
+
+      expect(esClientMock.bulk).toHaveBeenNthCalledWith(3, {
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        refresh: false,
+        body: [
+          {
+            create: {
+              _id: `${artifact4.packageName}:${artifact4.identifier}-${artifact4.decodedSha256}`,
+            },
+          },
+          {
+            ...newArtifactToElasticsearchProperties(newBigArtifact4),
+            created: expect.any(String),
+          },
+        ],
+      });
+
+      expect(artifact1).toEqual({
+        ...newBigArtifact1,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+      expect(artifact2).toEqual({
+        ...newBigArtifact2,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+      expect(artifact3).toEqual({
+        ...newBigArtifact3,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+      expect(artifact4).toEqual({
+        ...newBigArtifact4,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+    });
+
+    it('should create and return none artifact when none provided', async () => {
+      await bulkCreateArtifacts(esClientMock, []);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(0);
+    });
+
     it('should ignore 409 errors from elasticsearch', async () => {
       esClientMock.bulk.mockResolvedValue({
         errors: true,
