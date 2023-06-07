@@ -22,13 +22,11 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiTableFieldDataColumnType,
-  EuiScreenReaderOnly,
+  EuiEmptyPrompt,
   EuiFlexItem,
   EuiFormRow,
-  EuiFlexGroup,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiEmptyPrompt,
+  EuiScreenReaderOnly,
+  EuiSwitch,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { WindowParameters } from '@kbn/aiops-utils';
@@ -38,6 +36,7 @@ import { Query } from '@kbn/es-query';
 import { ProgressControls } from '@kbn/aiops-components';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { UseTableState, useTableState } from '../log_categorization/category_table/use_table_state';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
@@ -197,6 +196,10 @@ const dataDriftedNoLabel = i18n.translate('xpack.aiops.dataDrift.driftDetectedNo
   defaultMessage: 'No',
 });
 
+const showOnlyDriftedFieldsOptionLabel = i18n.translate(
+  'xpack.aiops.dataDrift.showOnlyDriftedFieldsOptionLabel',
+  { defaultMessage: 'Show only fields with data drifted' }
+);
 // Data drift view
 export const DataDriftView = ({
   windowParameters,
@@ -211,7 +214,7 @@ export const DataDriftView = ({
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
 }) => {
-  const [toggleIdSelected, setToggleIdSelected] = useState('off');
+  const [showDataDriftedOnly, setShowDataDriftedOnly] = useState(false);
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
@@ -276,15 +279,13 @@ export const DataDriftView = ({
   const filteredData = useMemo(() => {
     if (!result?.data) return [];
 
-    switch (toggleIdSelected) {
-      case 'aiopsDataDriftedYesFilterButton':
+    switch (showDataDriftedOnly) {
+      case true:
         return result.data.filter((d) => d.driftDetected === true);
-      case 'aiopsDataDriftedNoFilterButton':
-        return result.data.filter((d) => d.driftDetected === false);
       default:
         return result.data;
     }
-  }, [result.data, toggleIdSelected]);
+  }, [result.data, showDataDriftedOnly]);
 
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<Feature>(
     filteredData ?? [],
@@ -299,8 +300,8 @@ export const DataDriftView = ({
     [currentAnalysisWindowParameters, windowParameters]
   );
 
-  const onGroupResultsToggle = (optionId: string) => {
-    setToggleIdSelected(optionId);
+  const onShowDataDriftedOnlyToggle = (e: EuiSwitchEvent) => {
+    setShowDataDriftedOnly(e.target.checked);
     setPageIndex(0);
   };
 
@@ -342,35 +343,17 @@ export const DataDriftView = ({
       >
         <EuiFlexItem grow={false}>
           <EuiFormRow display="columnCompressedSwitch">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFilterGroup>
-                <EuiFilterButton
-                  hasActiveFilters={toggleIdSelected !== 'off'}
-                  onClick={onGroupResultsToggle.bind(null, 'off')}
-                >
-                  <FormattedMessage
-                    id="xpack.aiops.dataDrift.showOnlyDriftedFieldsOptionLabel"
-                    defaultMessage="Show only fields with data drifted"
-                  />
-                </EuiFilterButton>
-                <EuiFilterButton
-                  withNext
-                  hasActiveFilters={toggleIdSelected === 'aiopsDataDriftedYesFilterButton'}
-                  onClick={onGroupResultsToggle.bind(null, 'aiopsDataDriftedYesFilterButton')}
-                >
-                  Yes
-                </EuiFilterButton>
-                <EuiFilterButton
-                  hasActiveFilters={toggleIdSelected === 'aiopsDataDriftedNoFilterButton'}
-                  onClick={onGroupResultsToggle.bind(null, 'aiopsDataDriftedNoFilterButton')}
-                >
-                  No
-                </EuiFilterButton>
-              </EuiFilterGroup>
-            </EuiFlexGroup>
+            <EuiSwitch
+              label={showOnlyDriftedFieldsOptionLabel}
+              aria-label={showOnlyDriftedFieldsOptionLabel}
+              checked={showDataDriftedOnly}
+              onChange={onShowDataDriftedOnlyToggle}
+              compressed
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </ProgressControls>
+      {result.error ? <EuiEmptyPrompt color="danger">{result.error}</EuiEmptyPrompt> : null}
 
       {filteredData ? (
         <DataDriftOverviewTable

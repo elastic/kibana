@@ -34,6 +34,8 @@ export interface DocumentCountContentProps {
   sampleProbability: number;
   windowParameters?: WindowParameters;
   incomingInitialAnalysisStart?: number | WindowParameters;
+  baselineLabel?: string;
+  deviationLabel?: string;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -46,6 +48,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   sampleProbability,
   windowParameters,
   incomingInitialAnalysisStart,
+  ...docCountChartProps
 }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
@@ -133,6 +136,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           chartPointsSplitLabel={documentCountStatsSplitLabel}
           isBrushCleared={isBrushCleared}
           autoAnalysisStart={initialAnalysisStart}
+          {...docCountChartProps}
         />
       )}
     </>

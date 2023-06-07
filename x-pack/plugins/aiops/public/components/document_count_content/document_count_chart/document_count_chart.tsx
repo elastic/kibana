@@ -63,6 +63,8 @@ interface DocumentCountChartProps {
   isBrushCleared: boolean;
   /* Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
+  baselineLabel?: string;
+  deviationLabel?: string;
 }
 
 const SPEC_ID = 'document_count';
@@ -109,6 +111,8 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   chartPointsSplitLabel,
   isBrushCleared,
   autoAnalysisStart,
+  baselineLabel,
+  deviationLabel,
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -330,18 +334,24 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
-                defaultMessage: 'Baseline',
-              })}
+              label={
+                baselineLabel ??
+                i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
+                  defaultMessage: 'Baseline',
+                })
+              }
               marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
               timestampFrom={windowParameters.baselineMin}
               timestampTo={windowParameters.baselineMax}
               width={BADGE_WIDTH}
             />
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
-                defaultMessage: 'Deviation',
-              })}
+              label={
+                deviationLabel ??
+                i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
+                  defaultMessage: 'Deviation',
+                })
+              }
               marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
               timestampFrom={windowParameters.deviationMin}
               timestampTo={windowParameters.deviationMax}

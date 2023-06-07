@@ -17,12 +17,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
+import { PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
 import { useSearch } from '../../hooks/use_search';
 import { DataDriftView } from './data_drift_view';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -36,37 +35,10 @@ import {
 
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { SearchPanel } from '../search_panel';
-import type { GroupTableItem } from '../spike_analysis_table/types';
-import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 import { PageHeader } from '../page_header';
-
-// import { DataDriftDetectionAnalysis } from './explain_log_rate_spikes_analysis';
-
-function getDocumentCountStatsSplitLabel(
-  significantTerm?: SignificantTerm,
-  group?: GroupTableItem
-) {
-  if (significantTerm) {
-    return `${significantTerm?.fieldName}:${significantTerm?.fieldValue}`;
-  } else if (group) {
-    return i18n.translate('xpack.aiops.spikeAnalysisPage.documentCountStatsSplitGroupLabel', {
-      defaultMessage: 'Selected group',
-    });
-  }
-}
-
 export const DataDriftDetectionPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
-
-  const {
-    currentSelectedSignificantTerm,
-    currentSelectedGroup,
-    setPinnedSignificantTerm,
-    setPinnedGroup,
-    setSelectedSignificantTerm,
-    setSelectedGroup,
-  } = useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
@@ -167,10 +139,6 @@ export const DataDriftDetectionPage: FC = () => {
 
   function clearSelection() {
     setWindowParameters(undefined);
-    setPinnedSignificantTerm(null);
-    setPinnedGroup(null);
-    setSelectedSignificantTerm(null);
-    setSelectedGroup(null);
   }
 
   return (
@@ -196,13 +164,11 @@ export const DataDriftDetectionPage: FC = () => {
                   clearSelectionHandler={clearSelection}
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={documentCountStatsCompare}
-                  documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-                    currentSelectedSignificantTerm,
-                    currentSelectedGroup
-                  )}
                   totalCount={totalCount}
                   sampleProbability={sampleProbability}
                   windowParameters={windowParameters}
+                  baselineLabel={REFERENCE_LABEL}
+                  deviationLabel={PRODUCTION_LABEL}
                 />
               </EuiPanel>
             </EuiFlexItem>

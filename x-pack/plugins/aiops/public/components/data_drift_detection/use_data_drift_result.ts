@@ -15,6 +15,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
 import { merge } from 'lodash';
 import { cloneDeep } from 'lodash';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getDefaultQuery, SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
@@ -264,12 +265,17 @@ const processDataDriftResult = (
   });
 };
 
-const getDataDriftQuery = (
-  type: 'reference' | 'production',
-  searchQuery?: Query['query'],
-  datetimeField?: string,
-  timeRange?: TimeRange
-) => {
+const getDataDriftQuery = ({
+  runtimeFields,
+  searchQuery,
+  datetimeField,
+  timeRange,
+}: {
+  runtimeFields: MappingRuntimeFields;
+  searchQuery?: Query['query'];
+  datetimeField?: string;
+  timeRange?: TimeRange;
+}) => {
   let rangeFilter;
   if (timeRange && datetimeField !== undefined && isPopulatedObject(timeRange, ['start', 'end'])) {
     rangeFilter = {
@@ -281,13 +287,17 @@ const getDataDriftQuery = (
       },
     };
   }
-  const query = cloneDeep(searchQuery);
+  const query = cloneDeep(searchQuery ?? getDefaultQuery());
+
   if (isPopulatedObject(query, ['match_all'])) {
     delete query.match_all;
   }
-  const refDataQuery = rangeFilter
-    ? { query: merge({}, query, { bool: { filter: [rangeFilter] } }) }
-    : { query };
+  const refDataQuery: { query: Query['query']; runtime_mappings?: MappingRuntimeFields } =
+    rangeFilter ? { query: merge({}, query, { bool: { filter: [rangeFilter] } }) } : { query };
+
+  if (runtimeFields) {
+    refDataQuery.runtime_mappings = runtimeFields;
+  }
   return refDataQuery;
 };
 
@@ -335,12 +345,14 @@ export const useFetchDataDriftResult = ({
         const referenceIndex = currentDataView?.getIndexPattern();
         const productionIndex = referenceIndex;
 
-        const refDataQuery = getDataDriftQuery(
-          'reference',
-          searchQuery ?? getDefaultQuery(),
-          currentDataView?.timeFieldName,
-          timeRanges?.reference
-        );
+        const runtimeFields = currentDataView?.getRuntimeMappings();
+
+        const refDataQuery = getDataDriftQuery({
+          searchQuery,
+          datetimeField: currentDataView?.timeFieldName,
+          runtimeFields,
+          timeRange: timeRanges?.reference,
+        });
 
         try {
           const baselineRequest = {
@@ -380,6 +392,7 @@ export const useFetchDataDriftResult = ({
           }
 
           const baselineResponse = await dataSearch(baselineRequest, signal);
+
           setLoaded(0.25);
 
           if (!baselineResponse?.aggregations) {
@@ -391,12 +404,12 @@ export const useFetchDataDriftResult = ({
             return;
           }
 
-          const prodDataQuery = getDataDriftQuery(
-            'production',
-            searchQuery ?? getDefaultQuery(),
-            currentDataView?.timeFieldName,
-            timeRanges?.production
-          );
+          const prodDataQuery = getDataDriftQuery({
+            searchQuery,
+            datetimeField: currentDataView?.timeFieldName,
+            runtimeFields,
+            timeRange: timeRanges?.production,
+          });
 
           const driftedRequest = {
             index: productionIndex,
@@ -538,25 +551,6 @@ export const useFetchDataDriftResult = ({
             dataSearch(productionHistogramRequest, signal),
             dataSearch(referenceHistogramRequest, signal),
           ]);
-          if (!productionHistogramResponse.aggregations) {
-            setResult({
-              data: undefined,
-              status: FETCH_STATUS.FAILURE,
-              error: `Unable to fetch histogram data from ${productionIndex}`,
-            });
-            return;
-          }
-
-          if (!referenceHistogramResponse.aggregations) {
-            setResult({
-              data: undefined,
-              status: FETCH_STATUS.FAILURE,
-              error: `Unable to fetch histogram data from ${referenceIndex}`,
-            });
-            return;
-          }
-
-          // retrieve aggregation results from driftedResp for different fields and add to data
 
           const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
           for (const { field, type } of fields) {

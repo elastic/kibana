@@ -18,7 +18,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { DataDriftDetectionPage } from './data_drift_page';
-import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
@@ -53,13 +52,11 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <SpikeAnalysisTableRowStateProvider>
-            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <DataDriftDetectionPage />
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </SpikeAnalysisTableRowStateProvider>
+          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <DataDriftDetectionPage />
+            </DatePickerContextProvider>
+          </StorageContextProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>
