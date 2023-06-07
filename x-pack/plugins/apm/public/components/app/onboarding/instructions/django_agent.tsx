@@ -15,11 +15,19 @@ import {
   AgentInstructions,
 } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
+import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createDjangoAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    apiKeyDetails,
+    checkAgentStatus,
+    agentStatus,
+    agentStatusLoading,
+  } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.onboarding.django.install.title', {
@@ -86,5 +94,10 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
         </>
       ),
     },
+    agentStatusCheckInstruction({
+      checkAgentStatus,
+      agentStatus,
+      agentStatusLoading,
+    }),
   ];
 };

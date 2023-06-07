@@ -67,4 +67,7 @@ export interface AgentInstructions {
   apmServerUrl: string;
   apiKeyDetails?: AgentApiDetails;
   secretToken?: string;
+  checkAgentStatus: () => void;
+  agentStatus?: boolean;
+  agentStatusLoading: boolean;
 }

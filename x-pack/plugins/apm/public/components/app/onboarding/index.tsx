@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
@@ -25,6 +25,8 @@ export function Onboarding() {
     error: false,
   });
   const [apiKeyLoading, setApiKeyLoading] = useState(false);
+  const [agentStatus, setAgentStatus] = useState<boolean>();
+  const [agentStatusLoading, setAgentStatusLoading] = useState(false);
   const { services } = useKibana<ApmPluginStartDeps>();
   const { config } = useApmPluginContext();
   const { docLinks, observabilityShared } = services;
@@ -34,7 +36,7 @@ export function Onboarding() {
 
   const baseUrl = docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
 
-  const createAgentKey = useCallback(async () => {
+  const createAgentKey = async () => {
     try {
       setApiKeyLoading(true);
       const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
@@ -69,7 +71,24 @@ export function Onboarding() {
     } finally {
       setApiKeyLoading(false);
     }
-  }, []);
+  };
+
+  const checkAgentStatus = async () => {
+    try {
+      setAgentStatusLoading(true);
+      const agentStatusCheck = await callApmApi(
+        'GET /internal/apm/agent_status',
+        {
+          signal: null,
+        }
+      );
+      setAgentStatus(agentStatusCheck.status);
+    } catch (error) {
+      setAgentStatus(false);
+    } finally {
+      setAgentStatusLoading(false);
+    }
+  };
 
   const instructionsExists = instructions.length > 0;
 
@@ -81,13 +100,23 @@ export function Onboarding() {
         {
           baseUrl,
           config,
+          checkAgentStatus,
+          agentStatus,
+          agentStatusLoading,
         },
         apiKeyLoading,
         agentApiKey,
         createAgentKey
       ),
     ]);
-  }, [agentApiKey, baseUrl, config, createAgentKey, apiKeyLoading]);
+  }, [
+    agentApiKey,
+    baseUrl,
+    config,
+    apiKeyLoading,
+    agentStatus,
+    agentStatusLoading,
+  ]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (

@@ -29,9 +29,15 @@ export function serverlessInstructions(
   {
     baseUrl,
     config,
+    checkAgentStatus,
+    agentStatus,
+    agentStatusLoading,
   }: {
     baseUrl: string;
     config: ConfigSchema;
+    checkAgentStatus: () => void;
+    agentStatus?: boolean;
+    agentStatusLoading: boolean;
   },
   apiKeyLoading: boolean,
   apiKeyDetails: AgentApiKey,
@@ -43,6 +49,9 @@ export function serverlessInstructions(
   const commonOptions: AgentInstructions = {
     baseUrl,
     apmServerUrl: config.managedServiceUrl,
+    checkAgentStatus,
+    agentStatus,
+    agentStatusLoading,
     apiKeyDetails: {
       ...apiKeyDetails,
       displayApiKeySuccessCallout,
