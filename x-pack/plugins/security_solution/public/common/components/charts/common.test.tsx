@@ -17,7 +17,7 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  useThemes,
 } from './common';
 
 jest.mock('../../lib/kibana');
@@ -171,7 +171,7 @@ describe('checkIfAllValuesAreZero', () => {
 
   describe('useTheme', () => {
     it('merges our spacing with the default theme', () => {
-      const { result } = renderHook(() => useTheme());
+      const { result } = renderHook(() => useThemes());
 
       expect(result.current).toEqual(
         expect.objectContaining({ chartMargins: expect.objectContaining({ top: 4, bottom: 0 }) })
@@ -179,10 +179,10 @@ describe('checkIfAllValuesAreZero', () => {
     });
 
     it('returns a different theme depending on user settings', () => {
-      const { result: defaultResult } = renderHook(() => useTheme());
+      const { result: defaultResult } = renderHook(() => useThemes());
       (useUiSetting as jest.Mock).mockImplementation(() => true);
 
-      const { result: darkResult } = renderHook(() => useTheme());
+      const { result: darkResult } = renderHook(() => useThemes());
 
       expect(defaultResult.current).not.toMatchObject(darkResult.current);
     });

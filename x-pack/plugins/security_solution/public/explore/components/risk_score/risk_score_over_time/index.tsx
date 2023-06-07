@@ -21,7 +21,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { chartDefaultSettings, useTheme } from '../../../../common/components/charts/common';
+import { chartDefaultSettings, useThemes } from '../../../../common/components/charts/common';
 import { useTimeZone } from '../../../../common/lib/kibana';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -86,8 +86,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
     []
   );
 
-  const theme = useTheme();
-
+  const { baseTheme, theme } = useThemes();
   const graphData = useMemo(
     () =>
       riskScore
@@ -146,7 +145,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                   ) : (
                     <Chart>
                       <Tooltip headerFormatter={headerFormatter} />
-                      <Settings {...chartDefaultSettings} theme={theme} />
+                      <Settings {...chartDefaultSettings} baseTheme={baseTheme} theme={theme} />
                       <Axis
                         id="bottom"
                         position={Position.Bottom}

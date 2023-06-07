@@ -84,7 +84,8 @@ interface Props {
   height?: number;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   setSelectedTabId: (tabId: string) => void;
-  theme: Theme;
+  theme: PartialTheme;
+  baseTheme: Theme;
 }
 
 const EcsSummaryDonutChartComponent: React.FC<Props> = ({
@@ -94,6 +95,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
   partitionedFieldMetadata,
   setSelectedTabId,
   theme,
+  baseTheme,
 }) => {
   const summaryData = useMemo(
     () => getSummaryData(partitionedFieldMetadata),
@@ -163,7 +165,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
           </DonutTextWrapper>
 
           <Chart size={height}>
-            <Settings baseTheme={theme} onElementClick={onElementClick} theme={donutTheme} />
+            <Settings baseTheme={baseTheme} onElementClick={onElementClick} theme={[donutTheme, theme]} />
             <Partition
               data={summaryData}
               id="ecs-summary-donut-chart"

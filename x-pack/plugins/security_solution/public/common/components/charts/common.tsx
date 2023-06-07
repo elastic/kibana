@@ -15,6 +15,7 @@ import type {
   BrushEndListener,
   AxisStyle,
   BarSeriesStyle,
+  Theme,
 } from '@elastic/charts';
 import { DARK_THEME, LIGHT_THEME, Position } from '@elastic/charts';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -111,7 +112,7 @@ const theme: PartialTheme = {
     barsPadding: 0.05,
   },
 };
-export const useTheme = (): Pick<SettingsProps, 'baseTheme' | 'theme'> => {
+export const useThemes = (): { baseTheme: Theme, theme: PartialTheme } => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
   const baseTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
@@ -121,10 +122,9 @@ export const useTheme = (): Pick<SettingsProps, 'baseTheme' | 'theme'> => {
   };
 };
 
-export const chartDefaultSettings = {
+export const chartDefaultSettings: SettingsProps = {
   rotation: chartDefaultRotation,
   rendering: chartDefaultRendering,
-  animatedData: false,
   showLegend: false,
   showLegendExtra: false,
   debug: false,
