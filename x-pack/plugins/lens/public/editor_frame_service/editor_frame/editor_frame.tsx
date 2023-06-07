@@ -178,6 +178,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
+                nowProvider={props.plugins.data.nowProvider}
               />
             </ErrorBoundary>
           )
