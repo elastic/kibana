@@ -308,7 +308,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
         const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
 
-        expect(url.pathname).to.eql('/app/apm/');
+        expect(url.pathname).to.eql('/app/apm/services');
         expect(query).to.contain(environment);
         expect(query).to.contain(kuery);
         expect(query).to.contain(rangeFrom);
