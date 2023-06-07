@@ -85,3 +85,5 @@ export {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
+
+export { CoPilotPromptId, coPilotPrompts } from './co_pilot';

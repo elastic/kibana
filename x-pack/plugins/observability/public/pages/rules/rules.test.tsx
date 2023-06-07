@@ -43,6 +43,9 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       },
       thresholdRule: { enabled: false },
     },
+    coPilot: {
+      enabled: false,
+    },
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,

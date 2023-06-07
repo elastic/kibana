@@ -38,6 +38,9 @@ const defaultConfig: ConfigSchema = {
     },
     thresholdRule: { enabled: false },
   },
+  coPilot: {
+    enabled: false,
+  },
 };
 
 const queryClient = new QueryClient({

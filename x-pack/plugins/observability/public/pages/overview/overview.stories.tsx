@@ -87,6 +87,9 @@ const withCore = makeDecorator({
         },
         thresholdRule: { enabled: false },
       },
+      coPilot: {
+        enabled: false,
+      },
     };
 
     return (
