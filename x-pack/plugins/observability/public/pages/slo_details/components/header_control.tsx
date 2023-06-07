@@ -16,7 +16,7 @@ import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 import {
@@ -253,7 +253,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
       {!!slo && isRuleFlyoutVisible ? (
         <AddRuleFlyout
           consumer={sloFeatureId}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           canChangeTrigger={false}
           onClose={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}

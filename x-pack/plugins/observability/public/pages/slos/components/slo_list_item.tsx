@@ -33,7 +33,7 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
@@ -271,7 +271,7 @@ export function SloListItem({
         <AddRuleFlyout
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
           onSave={handleSavedRule}
           onClose={() => {

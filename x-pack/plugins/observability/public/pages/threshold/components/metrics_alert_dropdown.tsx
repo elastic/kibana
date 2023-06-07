@@ -150,7 +150,7 @@ export function MetricsAlertDropdown() {
             iconSide={'right'}
             iconType={'arrowDown'}
             onClick={togglePopover}
-            data-test-subj="infrastructure-alerts-and-rules"
+            data-test-subj="thresholdRulestructure-alerts-and-rules"
           >
             <FormattedMessage
               id="xpack.observability.threshold.rule.alertsButton"

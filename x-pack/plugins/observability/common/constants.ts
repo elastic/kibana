@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SLO_BURN_RATE_RULE_ID = 'slo.rules.burnRate';
+export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 export const ALERT_STATUS_ALL = 'all';
 export const ALERTS_URL_STORAGE_KEY = '_a';

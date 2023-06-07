@@ -13,7 +13,7 @@ import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  SLO_BURN_RATE_RULE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 import { validateMetricThreshold } from '../pages/threshold/components/validation';
@@ -24,7 +24,7 @@ export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
   observabilityRuleTypeRegistry.register({
-    id: SLO_BURN_RATE_RULE_ID,
+    id: SLO_BURN_RATE_RULE_TYPE_ID,
     description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
       defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
     }),

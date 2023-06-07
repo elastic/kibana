@@ -77,7 +77,7 @@ export function MetricRowWithCount({
             )}
           >
             <EuiSelect
-              data-test-subj="infraMetricRowWithCountSelect"
+              data-test-subj="thresholdRuleMetricRowWithCountSelect"
               compressed
               options={aggOptions}
               value={agg}

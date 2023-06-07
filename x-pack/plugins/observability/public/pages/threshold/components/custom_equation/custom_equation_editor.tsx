@@ -166,7 +166,7 @@ export function CustomEquationEditor({
       {metricRows}
       <EuiFlexGroup>
         <EuiButtonEmpty
-          data-test-subj="infraCustomEquationEditorAddAggregationFieldButton"
+          data-test-subj="thresholdRuleCustomEquationEditorAddAggregationFieldButton"
           color={'primary'}
           flush={'left'}
           size="xs"
@@ -191,7 +191,7 @@ export function CustomEquationEditor({
             error={[errors.equation]}
           >
             <EuiFieldText
-              data-test-subj="infraCustomEquationEditorFieldText"
+              data-test-subj="thresholdRuleCustomEquationEditorFieldText"
               isInvalid={errors.equation != null}
               compressed
               fullWidth
@@ -207,7 +207,7 @@ export function CustomEquationEditor({
         <EuiFlexItem>
           <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
             <EuiFieldText
-              data-test-subj="infraCustomEquationEditorFieldText"
+              data-test-subj="thresholdRuleCustomEquationEditorFieldText"
               compressed
               fullWidth
               value={label}

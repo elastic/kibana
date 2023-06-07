@@ -85,10 +85,10 @@ export class AutocompleteField extends React.Component<
             placeholder={placeholder}
             value={value}
             aria-label={ariaLabel}
-            data-test-subj="infraSearchField"
+            data-test-subj="thresholdRuleSearchField"
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
-            <SuggestionsPanel data-test-subj="infraSuggestionsPanel">
+            <SuggestionsPanel data-test-subj="thresholdRuleSuggestionsPanel">
               {suggestions.map((suggestion, suggestionIndex) => (
                 <SuggestionItem
                   key={suggestion.text}

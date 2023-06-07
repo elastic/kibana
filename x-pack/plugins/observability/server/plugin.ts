@@ -42,7 +42,7 @@ import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_o
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
-import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { threshold } from './saved_objects/threshold';
 
@@ -181,7 +181,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: [SLO_BURN_RATE_RULE_ID],
+      alerting: [SLO_BURN_RATE_RULE_TYPE_ID],
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -193,10 +193,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              all: [SLO_BURN_RATE_RULE_ID],
+              all: [SLO_BURN_RATE_RULE_TYPE_ID],
             },
             alert: {
-              all: [SLO_BURN_RATE_RULE_ID],
+              all: [SLO_BURN_RATE_RULE_TYPE_ID],
             },
           },
           ui: ['read', 'write'],
@@ -211,10 +211,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              read: [SLO_BURN_RATE_RULE_ID],
+              read: [SLO_BURN_RATE_RULE_TYPE_ID],
             },
             alert: {
-              read: [SLO_BURN_RATE_RULE_ID],
+              read: [SLO_BURN_RATE_RULE_TYPE_ID],
             },
           },
           ui: ['read'],

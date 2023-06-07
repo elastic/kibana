@@ -260,7 +260,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       values={{
                         documentationLink: (
                           <EuiLink
-                            data-test-subj="infraExpressionRowLearnHowToAddMoreDataLink"
+                            data-test-subj="thresholdRuleExpressionRowLearnHowToAddMoreDataLink"
                             href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
                             target="BLANK"
                           >
@@ -283,7 +283,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 <EuiSpacer size={'xs'} />
                 <StyledExpressionRow>
                   <EuiButtonEmpty
-                    data-test-subj="infraExpressionRowAddWarningThresholdButton"
+                    data-test-subj="thresholdRuleExpressionRowAddWarningThresholdButton"
                     color={'primary'}
                     flush={'left'}
                     size="xs"

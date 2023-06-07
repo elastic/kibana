@@ -105,7 +105,7 @@ export function MetricRowWithAgg({
             isInvalid={isAggInvalid}
           >
             <EuiSelect
-              data-test-subj="infraMetricRowWithAggSelect"
+              data-test-subj="thresholdRuleMetricRowWithAggSelect"
               compressed
               options={aggOptions}
               value={aggType}

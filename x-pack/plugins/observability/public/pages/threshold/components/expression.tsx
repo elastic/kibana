@@ -45,14 +45,13 @@ type Props = Omit<
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
 >;
 
-const defaultExpression = {
+export const defaultExpression = {
   aggType: Aggregators.AVERAGE,
   comparator: Comparator.GT,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
-export { defaultExpression };
 
 export function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata } = props;
@@ -333,7 +332,7 @@ export function Expressions(props: Props) {
       <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
-          data-test-subj="infraExpressionsAddConditionButton"
+          data-test-subj="thresholdRuleExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
@@ -408,7 +407,7 @@ export function Expressions(props: Props) {
           />
         )) || (
           <EuiFieldSearch
-            data-test-subj="infraExpressionsFieldSearch"
+            data-test-subj="thresholdRuleExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
             value={ruleParams.filterQueryText}
             fullWidth
@@ -453,7 +452,7 @@ export function Expressions(props: Props) {
                 groupCount: redundantFilterGroupBy.length,
                 filteringAndGroupingLink: (
                   <EuiLink
-                    data-test-subj="infraExpressionsTheDocsLink"
+                    data-test-subj="thresholdRuleExpressionsTheDocsLink"
                     href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
                   >
                     {i18n.translate(
