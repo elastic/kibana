@@ -65,10 +65,10 @@ describe('toDateRange', () => {
 function aCalendarTimeWindow(duration: Duration): TimeWindow {
   return {
     duration,
-    isCalendar: true,
+    type: 'calendarAligned',
   };
 }
 
 function aRollingTimeWindow(duration: Duration): TimeWindow {
-  return { duration, isRolling: true };
+  return { duration, type: 'rolling' };
 }
