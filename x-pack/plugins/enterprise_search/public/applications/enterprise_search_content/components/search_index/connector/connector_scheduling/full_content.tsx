@@ -107,7 +107,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                     [type]: { enabled: e.target.checked, interval: scheduling[type].interval },
                   },
                 });
-                setHasChanges(true);
+                setHasChanges(type);
               }}
             />
           }

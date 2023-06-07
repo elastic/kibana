@@ -31,10 +31,12 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
   scheduling,
   onSave,
   onReset,
+  type,
 }) => {
   const { status } = useValues(UpdateConnectorSchedulingApiLogic);
-  const { hasChanges } = useValues(ConnectorSchedulingLogic);
-  const { setHasChanges } = useActions(ConnectorSchedulingLogic);
+  const { hasFullSyncChanges, hasAccessSyncChanges, hasIncrementalSyncChanges } =
+    useValues(ConnectorSchedulingLogic);
+  const { clearHasChanges, setHasChanges } = useActions(ConnectorSchedulingLogic);
   const [newInterval, setNewInterval] = useState(scheduling.interval);
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
   const [simpleCron, setSimpleCron] = useState<{
@@ -44,6 +46,12 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
     expression: scheduling.interval ?? '',
     frequency: scheduling.interval ? cronToFrequency(scheduling.interval) : 'HOUR',
   });
+  const hasChanges =
+    type === SyncJobType.FULL
+      ? hasFullSyncChanges
+      : type === SyncJobType.INCREMENTAL
+      ? hasIncrementalSyncChanges
+      : hasAccessSyncChanges;
 
   return (
     <EuiFlexGroup direction="column">
@@ -65,7 +73,7 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
             });
             setFieldToPreferredValueMap(newFieldToPreferredValueMap);
             setNewInterval(expression);
-            setHasChanges(true);
+            setHasChanges(type);
           }}
           frequencyBlockList={['MINUTE']}
         />
@@ -82,7 +90,7 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
                   expression: scheduling.interval ?? '',
                   frequency: scheduling.interval ? cronToFrequency(scheduling.interval) : 'HOUR',
                 });
-                setHasChanges(false);
+                clearHasChanges(type);
                 if (onReset) {
                   onReset();
                 }
