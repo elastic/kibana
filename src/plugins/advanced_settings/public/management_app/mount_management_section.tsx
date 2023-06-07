@@ -43,10 +43,9 @@ const readOnlyBadge = {
   iconType: 'glasses',
 };
 
-const redirectUrl = ({
-  match,
-  location,
-}: RouteChildrenProps<{ [QUERY]: string }>): LocationDescriptor => {
+type RedirectUrlProps = RouteChildrenProps<{ [QUERY]: string }>;
+
+const redirectUrl = ({ match, location }: RedirectUrlProps): LocationDescriptor => {
   const search = url.addQueryParam(location.search, QUERY, match?.params[QUERY]);
 
   return {
@@ -82,7 +81,9 @@ export async function mountManagementSection(
           <CompatRouter>
             <Switch>
               {/* TODO: remove route param (`query`) in 7.13 */}
-              <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
+              <Route path={`/:${QUERY}`}>
+                {(props: RedirectUrlProps) => <Redirect to={redirectUrl(props)} />}
+              </Route>
               <Route path="/">
                 <Settings
                   history={params.history}
