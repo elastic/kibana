@@ -91,22 +91,24 @@ const StorageTreemapComponent: React.FC<Props> = ({
   patternRollups,
   patterns,
   theme,
-  baseTheme
+  baseTheme,
 }: Props) => {
-  const fillColor = useMemo(() => theme?.background?.color ?? baseTheme.background.color, [theme?.background?.color, baseTheme.background.color]);
+  const fillColor = useMemo(
+    () => theme?.background?.color ?? baseTheme.background.color,
+    [theme?.background?.color, baseTheme.background.color]
+  );
 
   const treemapTheme = useMemo<PartialTheme>(
-    () =>
-      ({
-        partition: {
-          fillLabel: { valueFont: { fontWeight: 700 } },
-          idealFontSizeJump: 1.15,
-          maxFontSize: 16,
-          minFontSize: 4,
-          sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
-          sectorLineWidth: 1.5,
-        },
-      }),
+    () => ({
+      partition: {
+        fillLabel: { valueFont: { fontWeight: 700 } },
+        idealFontSizeJump: 1.15,
+        maxFontSize: 16,
+        minFontSize: 4,
+        sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
+        sectorLineWidth: 1.5,
+      },
+    }),
     [fillColor]
   );
 

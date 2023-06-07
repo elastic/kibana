@@ -162,10 +162,7 @@ export const DonutChart = ({
   title,
   totalCount,
 }: DonutChartProps) => {
-  const {
-    baseTheme,
-    theme,
-  } = useThemes();
+  const { baseTheme, theme } = useThemes();
 
   const onElementClicked: ElementClickListener = useCallback(
     (event) => {
@@ -198,7 +195,11 @@ export const DonutChart = ({
           <DonutChartEmpty size={height} />
         ) : (
           <Chart size={height}>
-            <Settings theme={[donutTheme, theme]} baseTheme={baseTheme} onElementClick={onElementClicked} />
+            <Settings
+              theme={[donutTheme, theme]}
+              baseTheme={baseTheme}
+              onElementClick={onElementClicked}
+            />
             <Partition
               id="donut-chart"
               data={data}

@@ -165,7 +165,11 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
           </DonutTextWrapper>
 
           <Chart size={height}>
-            <Settings baseTheme={baseTheme} onElementClick={onElementClick} theme={[donutTheme, theme]} />
+            <Settings
+              baseTheme={baseTheme}
+              onElementClick={onElementClick}
+              theme={[donutTheme, theme]}
+            />
             <Partition
               data={summaryData}
               id="ecs-summary-donut-chart"

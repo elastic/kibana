@@ -7,7 +7,8 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { Chart, BarSeries, Axis, Position, ScaleType, Settings, SettingsProps } from '@elastic/charts';
+import type { SettingsProps } from '@elastic/charts';
+import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import { v4 as uuidv4 } from 'uuid';

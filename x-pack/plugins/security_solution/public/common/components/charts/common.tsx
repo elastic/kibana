@@ -112,7 +112,7 @@ const theme: PartialTheme = {
     barsPadding: 0.05,
   },
 };
-export const useThemes = (): { baseTheme: Theme, theme: PartialTheme } => {
+export const useThemes = (): { baseTheme: Theme; theme: PartialTheme } => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
   const baseTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
