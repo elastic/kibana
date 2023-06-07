@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const INDICATORS_URL = '/app/security/indicators';
+import { createContext } from 'react';
+import { type CoPilotService } from '../../typings/co_pilot';
+
+export const CoPilotContext = createContext<CoPilotService | undefined>(undefined);
+
+export const CoPilotContextProvider = CoPilotContext.Provider;
