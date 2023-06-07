@@ -31,9 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllExceptions(supertest, log);
       });
 
-      // SDH came up where this route was creating a new item when updating
-      // by item_id, ensuring that's no longer the case
-      it('should not create a new item on update', async () => {
+      it('updates an item via its item_id without side effects', async () => {
         // create a simple exception list
         await supertest
           .post(EXCEPTION_LIST_URL)
@@ -48,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getCreateExceptionListItemMinimalSchemaMock())
           .expect(200);
 
-        const { body: foundExceptions } = await supertest
+        const { body: items } = await supertest
           .get(
             `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
               getCreateExceptionListMinimalSchemaMock().list_id
@@ -58,21 +56,23 @@ export default ({ getService }: FtrProviderContext) => {
           .send()
           .expect(200);
 
-        expect(foundExceptions.total).to.eql(1);
+        expect(items.total).to.eql(1);
+        const [item] = items.data;
+        const expectedId = item.id;
+        const expectedItemId = item.item_id;
 
-        // update a exception list item's name
-        const updatedList: UpdateExceptionListItemSchema = {
+        // update an exception list item's name, specifying its item_id
+        const updatePayload: UpdateExceptionListItemSchema = {
           ...getUpdateMinimalExceptionListItemSchemaMock(),
           name: 'some other name',
         };
-
         await supertest
           .put(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
-          .send(updatedList)
+          .send(updatePayload)
           .expect(200);
 
-        const { body: foundExceptionsAfterUpdate } = await supertest
+        const { body: itemsAfterUpdate } = await supertest
           .get(
             `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
               getCreateExceptionListMinimalSchemaMock().list_id
@@ -82,7 +82,78 @@ export default ({ getService }: FtrProviderContext) => {
           .send()
           .expect(200);
 
-        expect(foundExceptionsAfterUpdate.total).to.eql(1);
+        // Validate that we have a single exception item with the expected properties
+        expect(itemsAfterUpdate.total).to.eql(1);
+        const [updatedItem] = itemsAfterUpdate.data;
+        expect(updatedItem.name).to.eql('some other name');
+        expect(updatedItem.id?.length).to.be.greaterThan(0);
+        expect(updatedItem.id).to.equal(expectedId);
+        expect(updatedItem.item_id?.length).to.be.greaterThan(0);
+        expect(updatedItem.item_id).to.equal(expectedItemId);
+      });
+
+      it('updates an item via its id without side effects', async () => {
+        // create a simple exception list
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListMinimalSchemaMock())
+          .expect(200);
+
+        // create a simple exception list item
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListItemMinimalSchemaMock())
+          .expect(200);
+
+        const { body: items } = await supertest
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(items.total).to.eql(1);
+        const [item] = items.data;
+        const expectedId = item.id;
+        const expectedItemId = item.item_id;
+
+        // update an exception list item's name, specifying its id
+        const { item_id: _, ...updateItemWithoutItemId } =
+          getUpdateMinimalExceptionListItemSchemaMock();
+        const updatePayload: UpdateExceptionListItemSchema = {
+          ...updateItemWithoutItemId,
+          name: 'some other name',
+          id: expectedId,
+        };
+        await supertest
+          .put(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatePayload)
+          .expect(200);
+
+        const { body: itemsAfterUpdate } = await supertest
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // Validate that we have a single exception item with the expected properties
+        expect(itemsAfterUpdate.total).to.eql(1);
+        const [updatedItem] = itemsAfterUpdate.data;
+        expect(updatedItem.name).to.eql('some other name');
+        expect(updatedItem.id?.length).to.be.greaterThan(0);
+        expect(updatedItem.id).to.equal(expectedId);
+        expect(updatedItem.item_id?.length).to.be.greaterThan(0);
+        expect(updatedItem.item_id).to.equal(expectedItemId);
       });
 
       it('should update a single exception list item property of name using an id', async () => {
