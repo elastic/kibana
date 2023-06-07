@@ -24,7 +24,6 @@ import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { GeoJsonWithMeta } from '@kbn/maps-plugin/public';
 import type { IField } from '@kbn/maps-plugin/public';
 import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
 import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
@@ -48,7 +47,6 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 export class AnomalySource implements IVectorSource {
   static mlResultsService: MlApiServices['results'];
   static mlLocator?: LocatorPublic<SerializableRecord>;
-  static timefilter: TimefilterContract;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
     if (typeof descriptor.jobId !== 'string') {
@@ -201,8 +199,9 @@ export class AnomalySource implements IVectorSource {
   isBoundsAware(): boolean {
     return false;
   }
-
-  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
+  // TODO: update to 'DataFilters' type once maps changes passing the argument is merged
+  // @ts-ignore
+  async getImmutableProperties(dataFilters: any): Promise<ImmutableSourceProperty[]> {
     let explorerLink: string | undefined;
 
     try {
@@ -210,10 +209,7 @@ export class AnomalySource implements IVectorSource {
         page: ML_PAGES.ANOMALY_EXPLORER,
         pageState: {
           jobIds: [this._descriptor.jobId],
-          timeRange: {
-            ...(AnomalySource.timefilter?.getTime() || {}),
-            mode: 'absolute',
-          },
+          timeRange: dataFilters.timeRange,
         },
       });
     } catch (error) {
