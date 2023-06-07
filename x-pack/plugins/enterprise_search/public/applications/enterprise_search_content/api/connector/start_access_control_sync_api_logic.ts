@@ -9,11 +9,9 @@ import { i18n } from '@kbn/i18n';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
-import { CrawlRequestOverrides } from '../../components/search_index/crawler/crawler_logic';
 
 export interface StartAccessControlSyncArgs {
   connectorId: string;
-  nextSyncConfig?: CrawlRequestOverrides;
 }
 
 export const startAccessControlSync = async ({ connectorId }: StartAccessControlSyncArgs) => {
