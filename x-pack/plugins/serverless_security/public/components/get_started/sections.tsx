@@ -6,21 +6,21 @@
  */
 import React from 'react';
 
-import { Section, TogglePanelId } from './types';
+import { Section, ProductId, SectionId } from './types';
 import * as i18n from './translations';
 import respond from './images/respond.svg';
 import protect from './images/protect.svg';
 
 export const ActiveConditions = {
-  anyCondition: [TogglePanelId.Analytics, TogglePanelId.Cloud, TogglePanelId.Endpoint],
-  analyticsToggled: [TogglePanelId.Analytics],
-  cloudToggled: [TogglePanelId.Cloud],
-  endpointToggled: [TogglePanelId.Endpoint],
+  anyCondition: [ProductId.Analytics, ProductId.Cloud, ProductId.Endpoint],
+  analyticsToggled: [ProductId.Analytics],
+  cloudToggled: [ProductId.Cloud],
+  endpointToggled: [ProductId.Endpoint],
 };
 
 export const sections: Section[] = [
   {
-    id: 'getSetUp',
+    id: SectionId.GetSetUp,
     title: i18n.GET_SET_UP_TITLE,
     cards: [
       {
@@ -81,7 +81,7 @@ export const sections: Section[] = [
     ],
   },
   {
-    id: 'getMoreFromElasticSecurity',
+    id: SectionId.GetMoreFromElasticSecurity,
     title: i18n.GET_MORE_TITLE,
     cards: [
       {

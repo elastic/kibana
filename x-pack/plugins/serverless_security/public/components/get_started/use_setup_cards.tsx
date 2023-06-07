@@ -9,7 +9,7 @@ import { EuiSpacer, EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { Card, TogglePanelId } from './types';
+import { Card, ProductId } from './types';
 
 import { CardItem } from './card_item';
 
@@ -25,13 +25,13 @@ export const useSetUpCardSections = ({
   const setUpCards = useCallback(
     (
       cards: Card[] | undefined,
-      activeSections: Set<TogglePanelId>,
+      activeSections: Set<ProductId>,
       onStepClicked: (params: { stepId: string; cardId: string }) => void,
       finishedSteps: Record<string, Set<string>>
     ) =>
       cards?.reduce<React.ReactNode[]>((acc, cardItem) => {
         if (cardItem?.activeConditions?.some((condition) => activeSections.has(condition))) {
-          const stepsDone = finishedSteps[cardItem.id] ?? 0;
+          const stepsDone = finishedSteps[cardItem.id] ?? new Set();
           const timeInMins =
             cardItem?.steps?.reduce(
               (totalMin, { timeInMinutes, id: stepId }) =>
@@ -61,7 +61,7 @@ export const useSetUpCardSections = ({
 
   const setUpSections = useCallback(
     (
-      activeSections: Set<TogglePanelId>,
+      activeSections: Set<ProductId>,
       addFinishedStep: (params: { stepId: string; cardId: string }) => void,
       finishedSteps: Record<string, Set<string>>
     ) =>

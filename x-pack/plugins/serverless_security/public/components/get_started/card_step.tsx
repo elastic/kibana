@@ -28,19 +28,20 @@ const CardStepComponent: React.FC<{
   finishedStepsByCard: Set<string>;
 }> = ({
   cardId,
-  step: { id, title, badges, description, splitPanel },
+  step: { id: stepId, title, badges, description, splitPanel },
   onStepClicked,
-  finishedStepsByCard,
+  finishedStepsByCard = new Set(),
 }) => {
   const [expandStep, setExpandStep] = useState(false);
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
       setExpandStep(!expandStep);
-      onStepClicked({ stepId: id, cardId });
+      onStepClicked({ stepId, cardId });
     },
-    [cardId, expandStep, id, onStepClicked]
+    [cardId, expandStep, onStepClicked, stepId]
   );
+
   return (
     <EuiPanel color="plain" grow={false} hasShadow={false} borderRadius="none" paddingSize="l">
       <EuiFlexGroup
@@ -51,13 +52,13 @@ const CardStepComponent: React.FC<{
         onClick={toggleStep}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={finishedStepsByCard.has(id) ? 'checkInCircleFilled' : step} size="m" />
+          <EuiIcon type={finishedStepsByCard.has(stepId) ? 'checkInCircleFilled' : step} size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <strong>
             {title}
             {badges.map((badge) => (
-              <EuiBadge key={`${id}-badge-${badge.id}`} color="hollow">
+              <EuiBadge key={`${stepId}-badge-${badge.id}`} color="hollow">
                 {badge.name}
               </EuiBadge>
             ))}
@@ -85,7 +86,7 @@ const CardStepComponent: React.FC<{
               <EuiSpacer size="s" />
               <EuiText size="s">
                 {description?.map((desc, index) => (
-                  <p key={`${id}-description-${index}`} className="eui-displayBlock">
+                  <p key={`${stepId}-description-${index}`} className="eui-displayBlock">
                     {desc}
                   </p>
                 ))}

@@ -7,24 +7,30 @@
 
 import { useCallback, useMemo } from 'react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { sections } from './sections';
-import { TogglePanelId } from './types';
+import { ProductId } from './types';
+
+const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
+const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
 
 export const useStorage = (storage: Storage) => {
   const addFinishedStepToStorage = useCallback(
     (cardId: string, stepId: string) => {
-      const card = storage.get(cardId) ?? {};
+      const finishedSteps: Record<string, Record<string, boolean> | undefined> =
+        storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+      const card = finishedSteps[cardId] ?? {};
       if (!card[stepId]) {
         card[stepId] = true;
-        storage.set(cardId, card);
-        return card;
+        storage.set(FINISHED_STEPS_STORAGE_KEY, {
+          finishedSteps: { ...finishedSteps, [cardId]: card },
+        });
       }
     },
     [storage]
   );
   const getFinishedStepsFromStorageByCardId = useCallback(
     (cardId: string) => {
-      const card = storage.get(cardId) ?? {};
+      const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+      const card = finishedSteps[cardId] ?? {};
       return card;
     },
     [storage]
@@ -32,38 +38,34 @@ export const useStorage = (storage: Storage) => {
   return useMemo(
     () => ({
       getActiveProductsFromStorage: () => {
-        const activeProducts: Record<TogglePanelId, boolean> = storage.get('activeProducts');
+        const activeProducts: Record<ProductId, boolean> = storage.get(ACTIVE_PRODUCTS_STORAGE_KEY);
         return activeProducts ?? {};
       },
-      toggleActiveProductsInStorage: (sectionId: TogglePanelId) => {
-        const activeProducts = storage.get('activeProducts') ?? {};
+      toggleActiveProductsInStorage: (sectionId: ProductId) => {
+        const activeProducts = storage.get(ACTIVE_PRODUCTS_STORAGE_KEY) ?? {};
         if (!activeProducts[sectionId]) {
           activeProducts[sectionId] = true;
         } else {
           delete activeProducts[sectionId];
         }
-        storage.set('activeProducts', activeProducts);
+        storage.set(ACTIVE_PRODUCTS_STORAGE_KEY, activeProducts);
         return activeProducts;
       },
       getFinishedStepsFromStorageByCardId,
       getAllFinishedStepsFromStorage: () => {
-        return sections.reduce<Record<string, Set<string>>>((acc, { cards }) => {
-          if (cards) {
-            cards?.every((card) => {
-              acc[card.id] = getFinishedStepsFromStorageByCardId(card.id);
-            });
-          }
-          return acc;
-        }, {});
+        const allFinishedSteps: Record<string, Record<string, boolean>> = storage.get(
+          FINISHED_STEPS_STORAGE_KEY
+        ) ?? {};
+        return allFinishedSteps;
       },
       addFinishedStepToStorage,
       removeFinishedStep: (cardId: string, stepId: string) => {
-        const card = storage.get(cardId) ?? {};
+        const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+        const card = finishedSteps[cardId] ?? {};
         if (card[stepId]) {
           delete card[stepId];
-          storage.set(cardId, card);
-          return card;
         }
+        storage.set(FINISHED_STEPS_STORAGE_KEY, finishedSteps);
       },
     }),
     [addFinishedStepToStorage, getFinishedStepsFromStorageByCardId, storage]

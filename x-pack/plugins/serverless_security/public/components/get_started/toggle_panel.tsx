@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import {
   Switch,
   TogglePanelAction,
-  TogglePanelId,
+  ProductId,
   TogglePanelReducer,
   ToggleStepAction,
 } from './types';
@@ -38,6 +38,9 @@ const reducer = (state: TogglePanelReducer, action: TogglePanelAction | ToggleSt
   }
 
   if (action.type === 'addFinishStep') {
+    if (!state.finishedSteps[action.payload.cardId]) {
+      state.finishedSteps[action.payload.cardId] = new Set();
+    }
     state.finishedSteps[action.payload.cardId].add(action.payload.stepId);
     return {
       ...state,
@@ -82,7 +85,7 @@ const TogglePanelComponent = () => {
         acc.add(key);
       }
       return acc;
-    }, new Set<TogglePanelId>());
+    }, new Set<ProductId>());
   }, [getActiveProductsFromStorage]);
 
   const [state, dispatch] = useReducer(reducer, {

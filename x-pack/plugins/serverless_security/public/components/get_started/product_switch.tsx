@@ -9,26 +9,26 @@ import { EuiPanel, EuiSwitch, EuiText, EuiThemeComputed, EuiTitle } from '@elast
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import * as i18n from './translations';
-import { TogglePanelId, Switch } from './types';
+import { ProductId, Switch } from './types';
 
 const switches: Switch[] = [
   {
-    id: TogglePanelId.Analytics,
+    id: ProductId.Analytics,
     label: i18n.ANALYTICS_SWITCH_LABEL,
   },
   {
-    id: TogglePanelId.Cloud,
+    id: ProductId.Cloud,
     label: i18n.CLOUD_SWITCH_LABEL,
   },
   {
-    id: TogglePanelId.Endpoint,
+    id: ProductId.Endpoint,
     label: i18n.ENDPOINT_SWITCH_LABEL,
   },
 ];
 
 const ProductSwitchComponent: React.FC<{
   onProductSwitchChanged: (item: Switch) => void;
-  activeSections: Set<TogglePanelId>;
+  activeSections: Set<ProductId>;
   shadow?: string;
   euiTheme: EuiThemeComputed;
 }> = ({ onProductSwitchChanged, activeSections, euiTheme, shadow = '' }) => {

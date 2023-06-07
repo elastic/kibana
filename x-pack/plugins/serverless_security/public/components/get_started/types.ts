@@ -36,7 +36,7 @@ export interface Step {
 }
 
 export interface Card {
-  activeConditions?: TogglePanelId[];
+  activeConditions?: ProductId[];
   description?: string | React.ReactNode;
   icon?: EuiIconProps;
   id: string;
@@ -44,20 +44,25 @@ export interface Card {
   title: string;
 }
 
-export enum TogglePanelId {
+export enum ProductId {
   Analytics = 'analytics',
   Cloud = 'cloud',
   Endpoint = 'endpoint',
 }
 
+export enum SectionId {
+  GetSetUp = 'getSetUp',
+  GetMoreFromElasticSecurity = 'getMoreFromElasticSecurity',
+}
+
 export interface TogglePanelReducer {
-  activeSections: Set<TogglePanelId>;
+  activeSections: Set<ProductId>;
   finishedSteps: Record<string, Set<string>>;
 }
 
 export interface TogglePanelAction {
   type: 'toggleSection';
-  payload: { section: TogglePanelId };
+  payload: { section: ProductId };
 }
 
 export interface ToggleStepAction {
@@ -66,6 +71,6 @@ export interface ToggleStepAction {
 }
 
 export interface Switch {
-  id: TogglePanelId;
+  id: ProductId;
   label: string;
 }
