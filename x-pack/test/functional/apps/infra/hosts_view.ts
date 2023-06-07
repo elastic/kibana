@@ -146,8 +146,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       security.user.delete('global_hosts_read_privileges_user'),
     ]);
 
-  const returnFrom = async (currentPath: string) =>
-    retry.waitFor('returned to hosts view', async () => {
+  const returnFrom = async (currentPath: string, timeout = 2000) =>
+    retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       const currentUrl = await browser.getCurrentUrl();
       await browser.goBack();
       return !!currentUrl.match(currentPath);
