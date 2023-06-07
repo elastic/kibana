@@ -73,17 +73,17 @@ export const GuideCard = ({
   const progress = getProgressLabel(guideState);
 
   const cardCss = css`
-  position: relative;
-  min-height: 140px;
-  width: 380px;
-  @media (max-width: ${euiTheme.breakpoint.s}px) {
-    max-width: 335px;
-  }
-  @media (min-width: 768px) and (max-width: 1210px) {
-    max-width: 230px;
-    height: 175px;
-  }
-`;
+    position: relative;
+    min-height: 140px;
+    width: 380px;
+    @media (max-width: ${euiTheme.breakpoint.s}px) {
+      max-width: 335px;
+    }
+    @media (min-width: 768px) and (max-width: 1210px) {
+      max-width: 230px;
+      height: 175px;
+    }
+  `;
 
   return (
     <EuiCard
@@ -105,7 +105,12 @@ export const GuideCard = ({
             </EuiTextColor>
           )}
           {isComplete && (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} justifyContent="center">
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              justifyContent="center"
+            >
               <EuiFlexItem grow={false}>
                 <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
               </EuiFlexItem>
