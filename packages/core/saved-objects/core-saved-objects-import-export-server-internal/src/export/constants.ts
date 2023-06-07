@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsImporter, SavedObjectsImportError } from './import';
-export { SavedObjectsExporter, SavedObjectsExportError } from './export';
+/**
+ * Token used for the `type` option when exporting by type
+ * to specify that all (importable and exportable) types should be exported.
+ */
+export const EXPORT_ALL_TYPES_TOKEN = '*';
