@@ -5,14 +5,10 @@
  * 2.0.
  */
 
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import React, { FC } from 'react';
 
-import {
-  expandLiteralStrings,
-  XJsonMode,
-  EuiCodeEditor,
-  EuiCodeEditorProps,
-} from '../../../shared_imports';
+import { expandLiteralStrings, XJsonMode, EuiCodeEditorProps } from '../../../shared_imports';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
@@ -22,8 +18,6 @@ interface JobEditorProps {
   width?: string;
   mode?: typeof EDITOR_MODE[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
-  syntaxChecking?: boolean;
-  theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
 }
 export const JsonEditor: FC<JobEditorProps> = ({
@@ -32,8 +26,6 @@ export const JsonEditor: FC<JobEditorProps> = ({
   width = '100%',
   mode = EDITOR_MODE.JSON,
   readOnly = false,
-  syntaxChecking = true,
-  theme = 'textmate',
   onChange = () => {},
 }) => {
   if (mode === EDITOR_MODE.XJSON) {
@@ -41,20 +33,15 @@ export const JsonEditor: FC<JobEditorProps> = ({
   }
 
   return (
-    <EuiCodeEditor
+    <CodeEditor
       value={value}
       width={width}
       height={height}
-      mode={mode}
-      readOnly={readOnly}
-      wrapEnabled={true}
-      showPrintMargin={false}
-      theme={theme}
-      editorProps={{ $blockScrolling: true }}
-      setOptions={{
-        useWorker: syntaxChecking,
+      languageId={mode}
+      options={{
         tabSize: 2,
-        useSoftTabs: true,
+        readOnly,
+        automaticLayout: true,
       }}
       onChange={onChange}
     />
