@@ -117,6 +117,26 @@ If you have upgraded to 8.8.0 and your alerting rules fail, upgrade to 8.8.1.
 ====
 // end::known-issue-120[]
 
+// tag::known-issue-158447[]
+[discrete]
+.Incorrect attachments are added to cases
+[%collapsible]
+====
+*Details* +
+When you attach {ml} visualizations, OsQuery, or Indicators of Compromise (IoCs) to a case, each attachment has its own view which renders in the *Activity* tab.
+For these attachments, a bug was introduced in 8.8.0:
+
+. If you add two different attachments on a case, the view will be the same for both.
+. If you add one attachment to one case and another to a different case, in the second case you will view the attachment of the first case.
+
+Alerts are not affected.
+
+*Impact* +
+There are no mitigations for the first scenario, other than upgrading to 8.8.1.
+For the second scenario, refreshing the case fixes the issue.
+====
+// end::known-issue-158447[]
+
 [float]
 [[breaking-changes-8.8.0]]
 === Breaking changes
