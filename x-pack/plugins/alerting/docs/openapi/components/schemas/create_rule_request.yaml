@@ -30,6 +30,17 @@ properties:
     type: object
     description: The parameters for the rule.
     additionalProperties: true
+    oneOf:
+      - $ref: '../../../../../apm/server/routes/alerts/rule_types/docs/params_property_apm_anomaly.yaml'
+      - $ref: '../../../../../apm/server/routes/alerts/rule_types/docs/params_property_apm_error_count.yaml'
+      - $ref: '../../../../../apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_duration.yaml'
+      - $ref: '../../../../../apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_error_rate.yaml'
+      - $ref: '../../../../../infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
+      - $ref: '../../../../../infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
+      - $ref: '../../../../../infra/server/lib/alerting/docs/params_property_log_threshold.yaml'
+      - $ref: '../../../../../observability/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
+      - $ref: '../../../../../synthetics/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_monitor_status.yaml'
+      - $ref: '../../../../../synthetics/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_uptime_tls.yaml'
   rule_type_id:
     type: string
     description: >
