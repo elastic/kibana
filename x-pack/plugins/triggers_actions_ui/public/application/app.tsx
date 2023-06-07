@@ -117,7 +117,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
         />
-        <Route
+        <Route<{ alertId: string }>
           exact
           path={legacyRouteToRuleDetails}
           render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
