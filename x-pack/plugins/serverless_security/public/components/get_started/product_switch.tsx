@@ -51,6 +51,7 @@ const ProductSwitchComponent: React.FC<{
 
   return (
     <EuiPanel
+      data-test-subj="product-switch"
       color="plain"
       element="div"
       grow={false}

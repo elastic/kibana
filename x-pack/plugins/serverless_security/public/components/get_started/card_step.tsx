@@ -52,7 +52,11 @@ const CardStepComponent: React.FC<{
         onClick={toggleStep}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={finishedStepsByCard.has(stepId) ? 'checkInCircleFilled' : step} size="m" />
+          <EuiIcon
+            data-test-subj={`${stepId}-icon`}
+            type={finishedStepsByCard.has(stepId) ? 'checkInCircleFilled' : step}
+            size="m"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <strong>
