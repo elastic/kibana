@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { DEV_TOOLS_APP_ID, deepLinkIds } from './constants';
+export { MONITORING_APP_ID } from './constants';
 
 export type { AppId, LinkId, DeepLinkId } from './deep_links';

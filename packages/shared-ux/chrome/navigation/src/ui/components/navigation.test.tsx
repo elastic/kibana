@@ -132,8 +132,8 @@ describe('<Navigation />', () => {
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 {/* Title from deeplink */}
-                <Navigation.Item id="item1" link="item1" />
-                <Navigation.Item id="item2" link="item1" title="Overwrite deeplink title" />
+                <Navigation.Item<any> id="item1" link="item1" />
+                <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
                 <Navigation.Item id="item3" title="Title in props" />
                 <Navigation.Item id="item4">Title in children</Navigation.Item>
               </Navigation.Group>
@@ -225,9 +225,9 @@ describe('<Navigation />', () => {
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 {/* Title from deeplink */}
-                <Navigation.Item id="item1" link="item1" />
+                <Navigation.Item<any> id="item1" link="item1" />
                 {/* Should not appear */}
-                <Navigation.Item id="unknownLink" link="unknown" title="Should NOT be there" />
+                <Navigation.Item<any> id="unknownLink" link="unknown" title="Should NOT be there" />
               </Navigation.Group>
             </Navigation.Group>
           </Navigation>
@@ -297,7 +297,7 @@ describe('<Navigation />', () => {
           <Navigation homeRef="https://elastic.co">
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
-                <Navigation.Item link="item1">
+                <Navigation.Item<any> link="item1">
                   <div data-test-subj="my-custom-element">Custom element</div>
                 </Navigation.Item>
                 <Navigation.Item id="item2" title="Children prop">

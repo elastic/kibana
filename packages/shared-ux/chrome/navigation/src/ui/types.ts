@@ -15,7 +15,7 @@ import type {
 
 import type { CloudLinkProps, RecentlyAccessedProps } from './components';
 
-type NonEmptyArray<T> = [T, ...T[]];
+export type NonEmptyArray<T> = [T, ...T[]];
 
 /**
  * @public
@@ -23,7 +23,11 @@ type NonEmptyArray<T> = [T, ...T[]];
  * A navigation node definition with its unique id, title, path in the tree and optional deep link.
  * Those are the props that can be passed to the Navigation.Group and Navigation.Item components.
  */
-export interface NodeProps extends Omit<NodeDefinition, 'children'> {
+export interface NodeProps<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   /**
    * Children of the node. For Navigation.Item (only) it allows a function to be set.
    * This function will receive the ChromeProjectNavigationNode object
@@ -36,7 +40,11 @@ export interface NodeProps extends Omit<NodeDefinition, 'children'> {
  *
  * Internally we enhance the Props passed to the Navigation.Item component.
  */
-export interface NodePropsEnhanced extends NodeProps {
+export interface NodePropsEnhanced<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenId extends string = Id
+> extends NodeProps<LinkId, Id, ChildrenId> {
   /**
    * This function correspond to the same "itemRender" function that can be passed to
    * the EuiSideNavItemType (see navigation_section_ui.tsx)

@@ -30,7 +30,7 @@ import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ChromeNavigationViewModel, NavigationServices } from '../../types';
 import { Navigation } from './components';
-import { ProjectNavigationDefinition } from './types';
+import type { NonEmptyArray, ProjectNavigationDefinition } from './types';
 import { getPresets } from './nav_tree_presets';
 
 const storybookMock = new NavigationStorybookMock();
@@ -252,9 +252,9 @@ const navigationDefinition: ProjectNavigationDefinition = {
           ...child,
           children: child.children?.filter((item) => {
             // Hide discover and dashboard
-            return item.id !== 'discover' && item.id !== 'dashboard';
+            return item.link !== 'discover' && item.link !== 'dashboard';
           }),
-        })),
+        })) as NonEmptyArray<any>,
       },
     ],
     footer: [
@@ -333,7 +333,7 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
             defaultIsCollapsed={false}
           >
             <Navigation.Group id="root">
-              <Navigation.Item id="item1" link="item1" />
+              <Navigation.Item<any> id="item1" link="item1" />
               <Navigation.Item id="item2" title="Alerts">
                 {(navNode) => {
                   return (

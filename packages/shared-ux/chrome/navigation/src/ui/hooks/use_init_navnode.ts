@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import {
+  AppDeepLinkId,
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -20,7 +24,11 @@ import {
 } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
-function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
+function getIdFromNavigationNode<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenId extends string = Id
+>({ id: _id, link, title }: NodeProps<LinkId, Id, ChildrenId>): string {
   const id = _id ?? link;
 
   if (!id) {
@@ -38,9 +46,13 @@ function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNav
   return true;
 }
 
-function createInternalNavNode(
+function createInternalNavNode<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenId extends string = Id
+>(
   id: string,
-  _navNode: NodePropsEnhanced,
+  _navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
   deepLinks: Readonly<ChromeNavLink[]>,
   path: string[] | null
 ): ChromeProjectNavigationNodeEnhanced | null {
@@ -64,7 +76,13 @@ function createInternalNavNode(
   };
 }
 
-export const useInitNavNode = (node: NodePropsEnhanced) => {
+export const useInitNavNode = <
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = LinkId,
+  ChildrenId extends string = Id
+>(
+  node: NodePropsEnhanced<LinkId, Id, ChildrenId>
+) => {
   /**
    * Map of children nodes
    */
