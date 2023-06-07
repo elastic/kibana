@@ -67,12 +67,15 @@ export const cli = () => {
       const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
         ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
         : 1;
-        const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-          ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-          : 0
+      const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+        ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+        : 0;
 
-
-      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern, chunksTotal, chunkIndex);
+      const files = retrieveIntegrations(
+        spec ? [spec] : cypressConfigFile?.e2e?.specPattern,
+        chunksTotal,
+        chunkIndex
+      );
 
       if (!files?.length) {
         const specString = JSON.stringify(spec);
@@ -81,7 +84,7 @@ export const cli = () => {
 Spec: ${specString}
 chunksTotal: ${chunksTotal}
 chunkIndex: ${chunkIndex}`
-         );
+        );
       }
 
       const esPorts: number[] = [9200, 9220];
