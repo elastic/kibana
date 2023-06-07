@@ -37,6 +37,11 @@ processingCommand
     | sortCommand
     | statsCommand
     | whereCommand
+    | mvExpandCommand
+    ;
+
+mvExpandCommand
+    : MV_EXPAND qualifiedNames
     ;
 
 whereCommand
@@ -135,6 +140,7 @@ sourceIdentifier
 functionExpressionArgument
    : qualifiedName
    | string
+   | number
    ;
 
 mathFunctionExpressionArgument

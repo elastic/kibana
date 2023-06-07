@@ -61,7 +61,10 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             savedObject.attributes.ecs_mapping = convertECSMappingToObject(ecs_mapping);
           }
 
-          return savedObject;
+          return {
+            ...savedObject.attributes,
+            saved_object_id: savedObject.id,
+          };
         });
 
         return response.ok({

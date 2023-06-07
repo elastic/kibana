@@ -199,7 +199,6 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
     savedSearchId,
     deps.config,
     deps.dataViewsContract,
-    deps.getSavedSearchDeps,
     {
       ...basicResolvers(deps),
       privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),

@@ -43,7 +43,8 @@
       "controls",
       "dataViews",
       "savedObjectsManagement",
-      "expressions"
+      "expressions",
+      "stackConnectors"
     ],
     "optionalPlugins": [
       "cloudExperiments",

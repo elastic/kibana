@@ -65,6 +65,7 @@ export interface TextBasedLanguagesEditorProps {
   onTextLangQuerySubmit: () => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
+  detectTimestamp?: boolean;
   errors?: Error[];
   isDisabled?: boolean;
   isDarkMode?: boolean;
@@ -107,6 +108,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onTextLangQuerySubmit,
   expandCodeEditor,
   isCodeEditorExpanded,
+  detectTimestamp = false,
   errors,
   isDisabled,
   isDarkMode,
@@ -363,8 +365,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [language, documentationSections]);
 
   const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
-    useCallback(() => {
-      return dataViews.getTitles();
+    useCallback(async () => {
+      const indices = await dataViews.getIndices({
+        showAllIndices: false,
+        pattern: '*',
+        isRollupIndex: () => false,
+      });
+      return indices.map((i) => i.name);
     }, [dataViews]);
 
   const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
@@ -614,6 +621,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         errors={editorErrors}
                         onErrorClick={onErrorClick}
                         refreshErrors={onTextLangQuerySubmit}
+                        detectTimestamp={detectTimestamp}
                       />
                     )}
                   </div>
@@ -696,6 +704,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           errors={editorErrors}
           onErrorClick={onErrorClick}
           refreshErrors={onTextLangQuerySubmit}
+          detectTimestamp={detectTimestamp}
         />
       )}
       {isCodeEditorExpanded && (

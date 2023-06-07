@@ -68,6 +68,13 @@ Array [
             />
           </button>
         </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+          />
+        </div>
       </div>
     </div>
   </div>,
@@ -181,7 +188,15 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
-        />
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>

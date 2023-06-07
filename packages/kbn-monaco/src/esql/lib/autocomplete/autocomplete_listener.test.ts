@@ -38,7 +38,7 @@ describe('autocomplete_listener', () => {
     testSuggestions('f', ['from']);
     testSuggestions('from ', ['SourceIdentifier']);
     testSuggestions('from a,', ['SourceIdentifier']);
-    testSuggestions('from a, b ', ['|']);
+    testSuggestions('from a, b ', ['SourceIdentifier']);
   });
 
   describe('where', () => {
@@ -105,6 +105,11 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | limit 4 ', ['|']);
   });
 
+  describe('mv_expand', () => {
+    testSuggestions('from a | mv_expand ', ['FieldIdentifier']);
+    testSuggestions('from a | mv_expand a ', ['|']);
+  });
+
   describe('stats', () => {
     testSuggestions('from a | stats ', ['var0']);
     testSuggestions('from a | stats a ', ['=']);
@@ -115,6 +120,7 @@ describe('autocomplete_listener', () => {
       'sum',
       'count',
       'count_distinct',
+      'percentile',
       'FieldIdentifier',
     ]);
     testSuggestions('from a | stats a=b', ['|', 'by']);
@@ -142,8 +148,16 @@ describe('autocomplete_listener', () => {
       'starts_with',
       'split',
       'to_string',
+      'to_boolean',
+      'to_datetime',
+      'to_double',
+      'to_integer',
+      'to_long',
+      'to_ip',
+      'to_version',
       'date_format',
       'date_trunc',
+      'date_parse',
       'auto_bucket',
       'is_finite',
       'is_infinite',

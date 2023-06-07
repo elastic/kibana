@@ -48,11 +48,11 @@ Test services and page objects from `x-pack/test/[api_integration|functional]`
 are available for reuse.
 
 Serverless specific services and page objects are implemented in
-`x-pack/test_serverless/[api_integration|functional]` only and may not be added
+`x-pack/test_serverless/[api_integration|functional|shared]` only and may not be added
 to or make modifications in `x-pack/test`.
 
 With this helper method reuse, we have to avoid name clashes and go with the
-following namesapces:
+following namespaces:
 
 | project       | namespace for helper methods |
 | ------------- | ---------------------------- |
@@ -64,9 +64,9 @@ following namesapces:
 ### Adding Serverless Tests
 
 As outlined above, serverless tests are separated from stateful tests (except
-the reuse helper methods), which includes a separate base configuration. All
-tests that should run in an serverless environment have to be added here in
-`x-pack/test_serverless`.
+the reuse of helper methods), which includes a new base configuration. All
+tests that should run in a serverless environment have to be added to, in the 
+`x-pack/test_serverless` directory.
 
 Tests in this area should be clearly designed for the serverless environment,
 particularly when it comes to timing for API requests and UI interaction.

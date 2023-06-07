@@ -20,7 +20,7 @@ import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 
 // Paths that must skip the no data screen
-const bypassNoDataScreenPaths = ['/settings'];
+const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 
 /*
  * This template contains:

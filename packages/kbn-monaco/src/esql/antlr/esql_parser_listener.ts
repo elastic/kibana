@@ -12,6 +12,7 @@ import { SingleStatementContext } from "./esql_parser";
 import { QueryContext } from "./esql_parser";
 import { SourceCommandContext } from "./esql_parser";
 import { ProcessingCommandContext } from "./esql_parser";
+import { MvExpandCommandContext } from "./esql_parser";
 import { WhereCommandContext } from "./esql_parser";
 import { WhereBooleanExpressionContext } from "./esql_parser";
 import { BooleanExpressionContext } from "./esql_parser";
@@ -162,6 +163,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProcessingCommand?: (ctx: ProcessingCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.mvExpandCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterMvExpandCommand?: (ctx: MvExpandCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mvExpandCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitMvExpandCommand?: (ctx: MvExpandCommandContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.whereCommand`.

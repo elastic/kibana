@@ -12,6 +12,7 @@ import {
   buildFieldsDefinitions,
   buildSourcesDefinitions,
 } from '../autocomplete/autocomplete_definitions/dynamic_commands';
+import { pipeDefinition } from '../autocomplete/autocomplete_definitions';
 
 import type {
   AutocompleteCommandDefinition,
@@ -45,6 +46,9 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
           dynamicItems = buildSourcesDefinitions(
             (await this.callbacks?.getSourceIdentifiers?.(ctx)) ?? []
           );
+          if (!ctx.word && ctx.userDefinedVariables.sourceIdentifiers.length) {
+            dynamicItems = [pipeDefinition];
+          }
         }
 
         if (suggestion === DynamicAutocompleteItem.FieldIdentifier) {

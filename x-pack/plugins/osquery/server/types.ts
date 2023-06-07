@@ -13,7 +13,6 @@ import type {
 } from '@kbn/data-plugin/server';
 
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
@@ -34,7 +33,6 @@ export interface OsqueryPluginSetup {
 export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {
-  usageCollection?: UsageCollectionSetup;
   actions: ActionsPlugin['setup'];
   cases: CasesSetup;
   data: DataPluginSetup;

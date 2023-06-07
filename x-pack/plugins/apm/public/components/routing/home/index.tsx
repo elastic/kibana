@@ -96,7 +96,7 @@ export const DependenciesOperationsTitle = i18n.translate(
   }
 );
 
-export const home = {
+export const homeRoute = {
   '/': {
     element: (
       <ApmTimeRangeMetadataContextProvider>
@@ -214,6 +214,7 @@ export const home = {
           },
         },
       },
+
       ...dependencies,
       ...legacyBackends,
       ...storageExplorer,
