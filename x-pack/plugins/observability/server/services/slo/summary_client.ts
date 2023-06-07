@@ -7,11 +7,18 @@
 
 import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
-import { toDateRange } from '../../domain/services/date_range';
+import {
+  calendarAlignedTimeWindowSchema,
+  Duration,
+  occurrencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+  toMomentUnitOfTime,
+} from '@kbn/slo-schema';
+import moment from 'moment';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DateRange, SLO, SLOId, Summary } from '../../domain/models';
-import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
+import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
+import { toDateRange } from '../../domain/services/date_range';
 
 export interface SummaryClient {
   fetchSummary(sloList: SLO[]): Promise<Record<SLOId, Summary>>;
@@ -21,12 +28,12 @@ export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetchSummary(sloList: SLO[]): Promise<Record<SLOId, Summary>> {
-    const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
-      (acc, slo) => ({ [slo.id]: toDateRange(slo.timeWindow), ...acc }),
-      {}
-    );
+    const dateRangeBySlo = sloList.reduce<Record<SLOId, DateRange>>((acc, slo) => {
+      acc[slo.id] = toDateRange(slo.timeWindow);
+      return acc;
+    }, {});
     const searches = sloList.flatMap((slo) => [
-      { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+      { index: SLO_DESTINATION_INDEX_PATTERN },
       generateSearchQuery(slo, dateRangeBySlo[slo.id]),
     ]);
 
@@ -45,12 +52,31 @@ export class DefaultSummaryClient implements SummaryClient {
       const good = aggregations?.good?.value ?? 0;
       const total = aggregations?.total?.value ?? 0;
 
-      const sliValue = computeSLI({ good, total });
-      const errorBudget = computeErrorBudget(slo, {
-        dateRange: dateRangeBySlo[slo.id],
-        good,
-        total,
-      });
+      const sliValue = computeSLI(good, total);
+      const initialErrorBudget = 1 - slo.objective.target;
+      let errorBudget;
+
+      if (
+        calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+        timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+      ) {
+        const totalSlices = computeTotalSlicesFromDateRange(
+          dateRangeBySlo[slo.id],
+          slo.objective.timesliceWindow!
+        );
+        const consumedErrorBudget =
+          sliValue < 0 ? 0 : (total - good) / (totalSlices * initialErrorBudget);
+
+        errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
+      } else {
+        const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+        errorBudget = toErrorBudget(
+          initialErrorBudget,
+          consumedErrorBudget,
+          calendarAlignedTimeWindowSchema.is(slo.timeWindow)
+        );
+      }
+
       summaryBySlo[slo.id] = {
         sliValue,
         errorBudget,
@@ -60,6 +86,14 @@ export class DefaultSummaryClient implements SummaryClient {
 
     return summaryBySlo;
   }
+}
+
+function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
+  const dateRangeDurationInUnit = moment(dateRange.to).diff(
+    dateRange.from,
+    toMomentUnitOfTime(timesliceWindow.unit)
+  );
+  return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }
 
 function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearchBody {

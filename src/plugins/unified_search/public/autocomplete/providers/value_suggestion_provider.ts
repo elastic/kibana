@@ -65,7 +65,7 @@ export const setupValueSuggestionProvider = (
     ) => {
       usageCollector?.trackRequest();
       return core.http
-        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<T>(`/internal/kibana/suggestions/values/${index}`, {
           method: 'POST',
           body: JSON.stringify({
             query,
@@ -75,6 +75,7 @@ export const setupValueSuggestionProvider = (
             method,
           }),
           signal,
+          version: '1',
         })
         .then((r) => {
           usageCollector?.trackResult();

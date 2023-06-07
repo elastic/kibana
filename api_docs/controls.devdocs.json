@@ -411,6 +411,54 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.updateInputAndReinitialize",
+            "type": "Function",
+            "tags": [],
+            "label": "updateInputAndReinitialize",
+            "description": [],
+            "signature": [
+              "(newInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">) => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.updateInputAndReinitialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newInput",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.setLastUsedDataViewId",
             "type": "Function",
             "tags": [],
@@ -1851,7 +1899,7 @@
             "signature": [
               "{ deselectOption: (payload: string) => void; setSearchString: (payload: string) => void; setAllowExpensiveQueries: (payload: boolean) => void; setPopoverOpen: (payload: boolean) => void; setSort: (payload: Partial<",
               "OptionsListSortingType",
-              ">) => void; selectExists: (payload: boolean) => void; selectOption: (payload: string) => void; replaceSelection: (payload: string) => void; clearSelections: (payload: unknown) => void; setExclude: (payload: boolean) => void; clearValidAndInvalidSelections: (payload: unknown) => void; setValidAndInvalidSelections: (payload: { validSelections: string[]; invalidSelections: string[]; }) => void; setLoading: (payload: boolean) => void; setField: (payload: ",
+              ">) => void; selectExists: (payload: boolean) => void; selectOption: (payload: string) => void; replaceSelection: (payload: string) => void; clearSelections: (payload: unknown) => void; setExclude: (payload: boolean) => void; clearValidAndInvalidSelections: (payload: unknown) => void; setValidAndInvalidSelections: (payload: { validSelections: string[]; invalidSelections: string[]; }) => void; setErrorMessage: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setField: (payload: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2041,38 +2089,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddable.onFatalError",
-            "type": "Function",
-            "tags": [],
-            "label": "onFatalError",
-            "description": [],
-            "signature": [
-              "(e: Error) => void"
-            ],
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.OptionsListEmbeddable.onFatalError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "e",
-                "description": [],
-                "signature": [
-                  "Error"
-                ],
-                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           },
           {
@@ -2978,7 +2994,7 @@
                 "section": "def-common.FieldSpec",
                 "text": "FieldSpec"
               },
-              " | undefined) => void; setDataViewId: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setMinMax: (payload: { min: string; max: string; }) => void; publishFilters: (payload: ",
+              " | undefined) => void; setDataViewId: (payload: string | undefined) => void; setErrorMessage: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setMinMax: (payload: { min: string; max: string; }) => void; publishFilters: (payload: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4750,6 +4766,21 @@
         "children": [
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.searchTechnique",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "searchTechnique",
+            "description": [],
+            "signature": [
+              "OptionsListSearchTechnique",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.sort",
             "type": "Object",
             "tags": [],
@@ -4863,6 +4894,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.hideSort",
             "type": "CompoundType",
             "tags": [],
@@ -4884,20 +4929,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.placeholder",
-            "type": "string",
-            "tags": [],
-            "label": "placeholder",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -6540,6 +6571,21 @@
         "children": [
           {
             "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.searchTechnique",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "searchTechnique",
+            "description": [],
+            "signature": [
+              "OptionsListSearchTechnique",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.sort",
             "type": "Object",
             "tags": [],
@@ -6653,6 +6699,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.hideSort",
             "type": "CompoundType",
             "tags": [],
@@ -6674,20 +6734,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.placeholder",
-            "type": "string",
-            "tags": [],
-            "label": "placeholder",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,

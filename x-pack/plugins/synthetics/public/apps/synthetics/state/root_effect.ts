@@ -13,6 +13,7 @@ import { executeEsQueryEffect } from './elasticsearch';
 import {
   fetchAlertConnectorsEffect,
   fetchDynamicSettingsEffect,
+  fetchLocationMonitorsEffect,
   setDynamicSettingsEffect,
 } from './settings/effects';
 import { syncGlobalParamsEffect } from './settings';
@@ -24,6 +25,7 @@ import {
   enableMonitorAlertEffect,
   fetchMonitorListEffect,
   upsertMonitorEffect,
+  fetchMonitorFiltersEffect,
 } from './monitor_list';
 import { fetchMonitorOverviewEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
@@ -35,6 +37,7 @@ export const rootEffect = function* root(): Generator {
   yield all([
     fork(fetchSyntheticsEnablementEffect),
     fork(upsertMonitorEffect),
+    fork(fetchMonitorFiltersEffect),
     fork(fetchServiceLocationsEffect),
     fork(fetchMonitorListEffect),
     fork(fetchSyntheticsMonitorEffect),
@@ -45,6 +48,7 @@ export const rootEffect = function* root(): Generator {
     fork(fetchPingStatusesEffect),
     fork(fetchAgentPoliciesEffect),
     fork(fetchDynamicSettingsEffect),
+    fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
     fork(fetchAlertConnectorsEffect),
     fork(syncGlobalParamsEffect),

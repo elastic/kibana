@@ -85,6 +85,13 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loading: false,
     loaded: false,
+    monitorFilterOptions: {
+      monitorTypes: [],
+      tags: [],
+      locations: [],
+      projects: [],
+      schedules: [],
+    },
   },
   overview: {
     pageState: {
@@ -123,6 +130,7 @@ export const mockState: SyntheticsAppState = {
   },
   dynamicSettings: {
     loading: false,
+    locationMonitors: [],
   },
   defaultAlerting: {
     loading: false,
