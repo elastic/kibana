@@ -12,7 +12,7 @@ import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    dataFilters: getDataFilters(state),    
+    dataFilters: getDataFilters(state),
   };
 }
 

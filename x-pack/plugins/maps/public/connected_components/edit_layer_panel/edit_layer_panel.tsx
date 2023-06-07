@@ -189,9 +189,7 @@ export class EditLayerPanel extends Component<Props, State> {
 
   _renderSourceDetails() {
     return !this.props.selectedLayer || isLayerGroup(this.props.selectedLayer) ? null : (
-      <SourceDetails
-        source={this.props.selectedLayer.getSource()}
-      />
+      <SourceDetails source={this.props.selectedLayer.getSource()} />
     );
   }
 

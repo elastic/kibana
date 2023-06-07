@@ -6,13 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiAccordion,
-  EuiLink,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiAccordion, EuiLink, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataFilters } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource } from '../../../classes/sources/source';
@@ -29,13 +23,12 @@ export function SourceDetails(props: Props) {
   useEffect(() => {
     let ignore = false;
     setIsLoading(true);
-    props.source.getImmutableProperties(props.dataFilters)
-      .then((nextSourceProperties) => {
-        if (!ignore) {
-          setSourceProperties(nextSourceProperties);
-          setIsLoading(false);
-        }
-      });
+    props.source.getImmutableProperties(props.dataFilters).then((nextSourceProperties) => {
+      if (!ignore) {
+        setSourceProperties(nextSourceProperties);
+        setIsLoading(false);
+      }
+    });
 
     return () => {
       ignore = true;
@@ -51,31 +44,25 @@ export function SourceDetails(props: Props) {
         })}
       >
         <EuiSpacer size="xs" />
-        <EuiSkeletonText
-          lines={3}
-          size="s"
-          isLoading={isLoading}
-        >
+        <EuiSkeletonText lines={3} size="s" isLoading={isLoading}>
           <EuiText color="subdued" size="s">
-            {sourceProperties.map(
-              ({ label, value, link }: ImmutableSourceProperty) => {
-                return (
-                  <p key={label} className="mapLayerPanel__sourceDetail">
-                    <strong>{label}</strong> {
-                      link
-                      ? <EuiLink href={link} target="_blank">
-                          {value}
-                        </EuiLink>
-                      : <span>{value}</span>
-                    }
-                  </p>
-                );
-              }
-            )}
+            {sourceProperties.map(({ label, value, link }: ImmutableSourceProperty) => {
+              return (
+                <p key={label} className="mapLayerPanel__sourceDetail">
+                  <strong>{label}</strong>{' '}
+                  {link ? (
+                    <EuiLink href={link} target="_blank">
+                      {value}
+                    </EuiLink>
+                  ) : (
+                    <span>{value}</span>
+                  )}
+                </p>
+              );
+            })}
           </EuiText>
         </EuiSkeletonText>
       </EuiAccordion>
     </div>
   );
-
 }
