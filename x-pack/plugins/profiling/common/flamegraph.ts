@@ -10,16 +10,6 @@ import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
 
-export enum FlameGraphComparisonMode {
-  Absolute = 'absolute',
-  Relative = 'relative',
-}
-
-export enum FlameGraphNormalizationMode {
-  Scale = 'scale',
-  Time = 'time',
-}
-
 export interface BaseFlameGraph {
   Size: number;
   Edges: number[][];

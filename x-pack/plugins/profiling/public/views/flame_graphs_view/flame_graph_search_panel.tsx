@@ -6,20 +6,24 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../../common/flamegraph';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { PrimaryAndComparisonSearchBar } from '../../components/primary_and_comparison_search_bar';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
 import { DifferentialComparisonMode } from './differential_comparison_mode';
-import { FlameGraphNormalizationOptions, NormalizationMenu } from './normalization_menu';
+import {
+  ComparisonMode,
+  NormalizationMode,
+  NormalizationOptions,
+} from '../../components/normalization_menu';
+import { NormalizationMenu } from './normalization_menu';
 
 interface Props {
   isDifferentialView: boolean;
-  comparisonMode: FlameGraphComparisonMode;
-  normalizationMode: FlameGraphNormalizationMode;
-  normalizationOptions: FlameGraphNormalizationOptions;
+  comparisonMode: ComparisonMode;
+  normalizationMode: NormalizationMode;
+  normalizationOptions: NormalizationOptions;
 }
 
 export function FlameGraphSearchPanel({
@@ -32,7 +36,7 @@ export function FlameGraphSearchPanel({
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
 
-  function onChangeComparisonMode(nextComparisonMode: FlameGraphComparisonMode) {
+  function onChangeComparisonMode(nextComparisonMode: ComparisonMode) {
     if (!('comparisonRangeFrom' in query)) {
       return;
     }
@@ -41,24 +45,24 @@ export function FlameGraphSearchPanel({
       path,
       query: {
         ...query,
-        ...(nextComparisonMode === FlameGraphComparisonMode.Absolute
+        ...(nextComparisonMode === ComparisonMode.Absolute
           ? {
-              comparisonMode: FlameGraphComparisonMode.Absolute,
+              comparisonMode: ComparisonMode.Absolute,
               normalizationMode,
             }
-          : { comparisonMode: FlameGraphComparisonMode.Relative }),
+          : { comparisonMode: ComparisonMode.Relative }),
       },
     });
   }
 
   function onChangeNormalizationMode(
-    nextNormalizationMode: FlameGraphNormalizationMode,
-    options: FlameGraphNormalizationOptions
+    nextNormalizationMode: NormalizationMode,
+    options: NormalizationOptions
   ) {
     profilingRouter.push(routePath, {
       path: routePath,
       query:
-        nextNormalizationMode === FlameGraphNormalizationMode.Scale
+        nextNormalizationMode === NormalizationMode.Scale
           ? {
               ...query,
               baseline: options.baselineScale,
@@ -82,7 +86,7 @@ export function FlameGraphSearchPanel({
               comparisonMode={comparisonMode}
               onChange={onChangeComparisonMode}
             />
-            {comparisonMode === FlameGraphComparisonMode.Absolute && (
+            {comparisonMode === ComparisonMode.Absolute && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
                   <EuiFlexItem grow={false}>

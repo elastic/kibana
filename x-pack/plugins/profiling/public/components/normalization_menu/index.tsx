@@ -25,35 +25,41 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { FlameGraphNormalizationMode } from '../../../common/flamegraph';
 
-export interface FlameGraphNormalizationOptions {
+export interface NormalizationOptions {
   baselineScale: number;
   baselineTime: number;
   comparisonScale: number;
   comparisonTime: number;
 }
 
-interface Props {
-  mode: FlameGraphNormalizationMode;
-  options: FlameGraphNormalizationOptions;
-  onChange: (mode: FlameGraphNormalizationMode, options: FlameGraphNormalizationOptions) => void;
+export enum ComparisonMode {
+  Absolute = 'absolute',
+  Relative = 'relative',
 }
 
-const SCALE_LABEL = i18n.translate('xpack.profiling.flameGraphNormalizationMenu.scale', {
+export enum NormalizationMode {
+  Scale = 'scale',
+  Time = 'time',
+}
+
+interface Props {
+  mode: NormalizationMode;
+  options: NormalizationOptions;
+  onChange: (mode: NormalizationMode, options: NormalizationOptions) => void;
+}
+
+const SCALE_LABEL = i18n.translate('xpack.profiling.normalizationMenu.scale', {
   defaultMessage: 'Scale factor',
 });
 
-const TIME_LABEL = i18n.translate('xpack.profiling.flameGraphNormalizationMenu.time', {
+const TIME_LABEL = i18n.translate('xpack.profiling.normalizationMenu.time', {
   defaultMessage: 'Time',
 });
 
-const NORMALIZE_BY_LABEL = i18n.translate(
-  'xpack.profiling.flameGraphNormalizationMenu.normalizeBy',
-  {
-    defaultMessage: 'Normalize by',
-  }
-);
+const NORMALIZE_BY_LABEL = i18n.translate('xpack.profiling.normalizationMenu.normalizeBy', {
+  defaultMessage: 'Normalize by',
+});
 
 export function NormalizationMenu(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -72,7 +78,7 @@ export function NormalizationMenu(props: Props) {
   }, [props.mode, props.options]);
 
   const { baseline, comparison } =
-    mode === FlameGraphNormalizationMode.Time
+    mode === NormalizationMode.Time
       ? { comparison: options.comparisonTime, baseline: options.baselineTime }
       : { comparison: options.comparisonScale, baseline: options.baselineScale };
 
@@ -110,7 +116,7 @@ export function NormalizationMenu(props: Props) {
               padding: '0 16px',
             }}
           >
-            {props.mode === FlameGraphNormalizationMode.Scale ? SCALE_LABEL : TIME_LABEL}
+            {props.mode === NormalizationMode.Scale ? SCALE_LABEL : TIME_LABEL}
           </EuiFlexItem>
         </EuiFormControlLayout>
       }
@@ -129,24 +135,18 @@ export function NormalizationMenu(props: Props) {
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem>
                   <span>
-                    {i18n.translate(
-                      'xpack.profiling.flameGraphNormalizationMenu.normalizeByTimeTooltip',
-                      {
-                        defaultMessage:
-                          'Select Normalize by Scale factor and set your Baseline and Comparison scale factors to compare a set of machines of different sizes. For example, you can compare a deployment of 10% of machines to a deployment of 90% of machines.',
-                      }
-                    )}
+                    {i18n.translate('xpack.profiling.normalizationMenu.normalizeByTimeTooltip', {
+                      defaultMessage:
+                        'Select Normalize by Scale factor and set your Baseline and Comparison scale factors to compare a set of machines of different sizes. For example, you can compare a deployment of 10% of machines to a deployment of 90% of machines.',
+                    })}
                   </span>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <span>
-                    {i18n.translate(
-                      'xpack.profiling.flameGraphNormalizationMenu.normalizeByScaleTooltip',
-                      {
-                        defaultMessage:
-                          'Select Normalize by Time to compare a set of machines across different time periods. For example, if you compare the last hour to the last 24 hours, the shorter timeframe (1 hour) is multiplied to match the longer timeframe (24 hours).',
-                      }
-                    )}
+                    {i18n.translate('xpack.profiling.normalizationMenu.normalizeByScaleTooltip', {
+                      defaultMessage:
+                        'Select Normalize by Time to compare a set of machines across different time periods. For example, if you compare the last hour to the last 24 hours, the shorter timeframe (1 hour) is multiplied to match the longer timeframe (24 hours).',
+                    })}
                   </span>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -160,19 +160,19 @@ export function NormalizationMenu(props: Props) {
         buttonSize="compressed"
         isFullWidth
         onChange={(id, value) => {
-          setMode(id as FlameGraphNormalizationMode);
+          setMode(id as NormalizationMode);
         }}
-        legend={i18n.translate('xpack.profiling.flameGraphNormalizationMode.selectModeLegend', {
+        legend={i18n.translate('xpack.profiling.normalizationMode.selectModeLegend', {
           defaultMessage: 'Select a normalization mode for the flamegraph',
         })}
         idSelected={mode}
         options={[
           {
-            id: FlameGraphNormalizationMode.Scale,
+            id: NormalizationMode.Scale,
             label: SCALE_LABEL,
           },
           {
-            id: FlameGraphNormalizationMode.Time,
+            id: NormalizationMode.Time,
             label: TIME_LABEL,
           },
         ]}
@@ -195,14 +195,14 @@ export function NormalizationMenu(props: Props) {
           id={baselineScaleFactorInputId}
           value={baseline}
           onChange={(e) => {
-            if (mode === FlameGraphNormalizationMode.Scale) {
+            if (mode === NormalizationMode.Scale) {
               setOptions((prevOptions) => ({
                 ...prevOptions,
                 baselineScale: e.target.valueAsNumber,
               }));
             }
           }}
-          disabled={mode === FlameGraphNormalizationMode.Time}
+          disabled={mode === NormalizationMode.Time}
         />
       </EuiFormControlLayout>
       <EuiSpacer size="m" />
@@ -223,14 +223,14 @@ export function NormalizationMenu(props: Props) {
           id={comparisonScaleFactorInputId}
           value={comparison}
           onChange={(e) => {
-            if (mode === FlameGraphNormalizationMode.Scale) {
+            if (mode === NormalizationMode.Scale) {
               setOptions((prevOptions) => ({
                 ...prevOptions,
                 comparisonScale: e.target.valueAsNumber,
               }));
             }
           }}
-          disabled={mode === FlameGraphNormalizationMode.Time}
+          disabled={mode === NormalizationMode.Time}
         />
       </EuiFormControlLayout>
       <EuiSpacer size="m" />

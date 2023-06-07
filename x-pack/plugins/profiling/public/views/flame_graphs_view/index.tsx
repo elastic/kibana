@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React, { useState } from 'react';
-import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../../common/flamegraph';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -20,7 +19,11 @@ import { FlameGraph } from '../../components/flamegraph';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
 import { FlameGraphSearchPanel } from './flame_graph_search_panel';
-import { FlameGraphNormalizationOptions } from './normalization_menu';
+import {
+  ComparisonMode,
+  NormalizationMode,
+  NormalizationOptions,
+} from '../../components/normalization_menu';
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
@@ -37,13 +40,12 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   );
 
   const comparisonKuery = 'comparisonKuery' in query ? query.comparisonKuery : '';
-  const comparisonMode =
-    'comparisonMode' in query ? query.comparisonMode : FlameGraphComparisonMode.Absolute;
+  const comparisonMode = 'comparisonMode' in query ? query.comparisonMode : ComparisonMode.Absolute;
 
-  const normalizationMode: FlameGraphNormalizationMode = get(
+  const normalizationMode: NormalizationMode = get(
     query,
     'normalizationMode',
-    FlameGraphNormalizationMode.Time
+    NormalizationMode.Time
   );
 
   const baselineScale: number = get(query, 'baseline', 1);
@@ -58,7 +60,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   const baselineTime = 1;
   const comparisonTime = totalSeconds / totalComparisonSeconds;
 
-  const normalizationOptions: FlameGraphNormalizationOptions = {
+  const normalizationOptions: NormalizationOptions = {
     baselineScale,
     baselineTime,
     comparisonScale,
@@ -146,6 +148,8 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
     return <RedirectTo pathname="/flamegraphs/flamegraph" />;
   }
 
+  const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
+
   return (
     <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={true}>
       <EuiFlexGroup direction="column">
@@ -164,16 +168,8 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
               primaryFlamegraph={data?.primaryFlamegraph}
               comparisonFlamegraph={data?.comparisonFlamegraph}
               comparisonMode={comparisonMode}
-              baseline={
-                normalizationMode === FlameGraphNormalizationMode.Time
-                  ? baselineTime
-                  : baselineScale
-              }
-              comparison={
-                normalizationMode === FlameGraphNormalizationMode.Time
-                  ? comparisonTime
-                  : comparisonScale
-              }
+              baseline={isNormalizedByTime ? baselineTime : baselineScale}
+              comparison={isNormalizedByTime ? comparisonTime : comparisonScale}
               showInformationWindow={showInformationWindow}
               toggleShowInformationWindow={toggleShowInformationWindow}
             />

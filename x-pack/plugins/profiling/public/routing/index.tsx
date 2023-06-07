@@ -9,9 +9,9 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../common/flamegraph';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
 import { FlameGraphsView } from '../views/flame_graphs_view';
 import { FunctionsView } from '../views/functions_view';
@@ -117,14 +117,14 @@ const routes = {
                       comparisonRangeTo: t.string,
                       comparisonKuery: t.string,
                       comparisonMode: t.union([
-                        t.literal(FlameGraphComparisonMode.Absolute),
-                        t.literal(FlameGraphComparisonMode.Relative),
+                        t.literal(ComparisonMode.Absolute),
+                        t.literal(ComparisonMode.Relative),
                       ]),
                     }),
                     t.partial({
                       normalizationMode: t.union([
-                        t.literal(FlameGraphNormalizationMode.Scale),
-                        t.literal(FlameGraphNormalizationMode.Time),
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
                       ]),
                       baseline: toNumberRt,
                       comparison: toNumberRt,
@@ -133,8 +133,8 @@ const routes = {
                 }),
                 defaults: {
                   query: {
-                    comparisonMode: FlameGraphComparisonMode.Absolute,
-                    normalizationMode: FlameGraphNormalizationMode.Time,
+                    comparisonMode: ComparisonMode.Absolute,
+                    normalizationMode: NormalizationMode.Time,
                   },
                 },
               },
