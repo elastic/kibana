@@ -43,7 +43,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   },
   timeWindow: {
     duration: '30d',
-    isRolling: true,
+    type: 'rolling',
   },
   objective: { target: 0.98 },
   budgetingMethod: 'occurrences',
