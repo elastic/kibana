@@ -151,7 +151,7 @@ export class TaskRunnerFactory {
           logger.warn(
             `Task Runner has skipped executing the Action (${actionId}) as it has invalid params.`
           );
-          return { skip: true };
+          return { state: taskInstance.state, skip: true };
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
