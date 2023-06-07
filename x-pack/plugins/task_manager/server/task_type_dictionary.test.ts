@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { RunContext, TaskDefinition } from './task';
 import { mockLogger } from './test_utils';
 import {
-  sanitizeAndAugmentTaskDefinitions,
+  sanitizeTaskDefinitions,
   TaskDefinitionRegistry,
   TaskTypeDictionary,
 } from './task_type_dictionary';
@@ -55,10 +55,10 @@ describe('taskTypeDictionary', () => {
     definitions = new TaskTypeDictionary(mockLogger());
   });
 
-  describe('sanitizeAndAugmentTaskDefinitions', () => {});
+  describe('sanitizeTaskDefinitions', () => {});
   it('provides tasks with defaults', () => {
     const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
-    const result = sanitizeAndAugmentTaskDefinitions(taskDefinitions);
+    const result = sanitizeTaskDefinitions(taskDefinitions);
 
     expect(result).toMatchInlineSnapshot(`
       Array [
@@ -111,7 +111,7 @@ describe('taskTypeDictionary', () => {
         },
       };
 
-      return sanitizeAndAugmentTaskDefinitions(taskDefinitions);
+      return sanitizeTaskDefinitions(taskDefinitions);
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
@@ -138,7 +138,7 @@ describe('taskTypeDictionary', () => {
         },
       };
 
-      return sanitizeAndAugmentTaskDefinitions(taskDefinitions);
+      return sanitizeTaskDefinitions(taskDefinitions);
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
@@ -165,7 +165,7 @@ describe('taskTypeDictionary', () => {
         },
       };
 
-      return sanitizeAndAugmentTaskDefinitions(taskDefinitions);
+      return sanitizeTaskDefinitions(taskDefinitions);
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(

@@ -146,7 +146,7 @@ export class TaskTypeDictionary {
     }
 
     try {
-      for (const definition of sanitizeAndAugmentTaskDefinitions(taskDefinitions)) {
+      for (const definition of sanitizeTaskDefinitions(taskDefinitions)) {
         this.definitions.set(definition.type, definition);
       }
     } catch (e) {
@@ -161,20 +161,8 @@ export class TaskTypeDictionary {
  *
  * @param taskDefinitions - The Kibana task definitions dictionary
  */
-export function sanitizeAndAugmentTaskDefinitions(
-  taskDefinitions: TaskDefinitionRegistry
-): TaskDefinition[] {
-  return Object.entries(taskDefinitions).map(([type, rawDefinition]): TaskDefinition => {
-    const validatedDefinition = taskDefinitionSchema.validate({
-      type,
-      ...rawDefinition,
-    });
-    return {
-      ...validatedDefinition,
-      createTaskRunner: rawDefinition.createTaskRunner,
-      // validatedDefinition contains Record<string, ...> and we want Record<number, ...>
-      // so reverting to rawDefinition.
-      stateSchemaByVersion: rawDefinition.stateSchemaByVersion,
-    };
+export function sanitizeTaskDefinitions(taskDefinitions: TaskDefinitionRegistry): TaskDefinition[] {
+  return Object.entries(taskDefinitions).map(([type, rawDefinition]) => {
+    return taskDefinitionSchema.validate({ type, ...rawDefinition }) as TaskDefinition;
   });
 }
