@@ -1764,9 +1764,10 @@ describe('migrations v2 model', () => {
 
       describe('if the migrator source index did NOT exist', () => {
         test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
-            'synchronized_successfully' as const
-          );
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
           const newState = model(state, res);
           expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
         });
@@ -1774,9 +1775,10 @@ describe('migrations v2 model', () => {
 
       describe('if the migrator source index did exist', () => {
         test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
-            'synchronized_successfully' as const
-          );
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
           const newState = model(
             {
               ...state,
@@ -2044,9 +2046,10 @@ describe('migrations v2 model', () => {
       };
 
       test('DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK if synchronization succeeds', () => {
-        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.right(
-          'synchronized_successfully' as const
-        );
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+          type: 'synchronization_successful' as const,
+          data: [],
+        });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
       });
@@ -2948,6 +2951,24 @@ describe('migrations v2 model', () => {
           res
         ) as PostInitState;
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+
+      test('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC if mustRelocateDocuments === true', () => {
+        const versionIndexReadyActions = Option.some([
+          { add: { index: 'kibana-index', alias: 'my-alias' } },
+        ]);
+
+        const newState = model(
+          {
+            ...сheckVersionIndexReadyActionsState,
+            mustRelocateDocuments: true,
+            versionIndexReadyActions,
+          },
+          res
+        ) as PostInitState;
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY_SYNC');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
