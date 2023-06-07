@@ -167,7 +167,7 @@ describe('addMiddlewareToChain', () => {
             "m3": true,
             "taskConfig": Object {
               "skip": Object {
-                "delay": "3s",
+                "delay": 3000,
                 "enabled": false,
               },
             },
