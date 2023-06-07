@@ -358,6 +358,72 @@ describe('processAlerts', () => {
       expect(activeAlert2State.end).not.toBeDefined();
     });
 
+    test('preserves changes to other state fields', () => {
+      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+      const existingAlerts = {
+        '2': existingAlert1,
+        '3': existingAlert2,
+      };
+      existingAlerts['2'].replaceState({
+        stateField1: 'xyz',
+        start: '1969-12-30T00:00:00.000Z',
+        duration: 33000,
+      });
+      existingAlerts['3'].replaceState({
+        anotherState: true,
+        start: '1969-12-31T07:34:00.000Z',
+        duration: 23532,
+      });
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '1': newAlert,
+      };
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['2']
+        .scheduleActions('default' as never, { foo: '1' })
+        .replaceState({ stateField1: 'abc' });
+      updatedAlerts['3']
+        .scheduleActions('default' as never, { foo: '2' })
+        .replaceState({ anotherState: false });
+
+      const { activeAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
+      });
+
+      expect(activeAlerts).toEqual({
+        '1': updatedAlerts['1'],
+        '2': updatedAlerts['2'],
+        '3': updatedAlerts['3'],
+      });
+
+      const activeAlert1State = activeAlerts['2'].getState();
+      const activeAlert2State = activeAlerts['3'].getState();
+
+      expect(activeAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
+      expect(activeAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
+
+      expect(activeAlert1State.stateField1).toEqual('abc');
+      expect(activeAlert2State.anotherState).toEqual(false);
+
+      expect(activeAlert1State.duration).toEqual('172800000000000');
+      expect(activeAlert2State.duration).toEqual('59160000000000');
+
+      expect(activeAlert1State.end).not.toBeDefined();
+      expect(activeAlert2State.end).not.toBeDefined();
+    });
+
     test('sets start time in active alert state if alert was previously recovered', () => {
       const previouslyRecoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
       const previouslyRecoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
