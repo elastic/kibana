@@ -28,12 +28,12 @@ export const createOpenTelemetryAgentInstructions = (
   const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.otel.download.title', {
+      title: i18n.translate('xpack.apm.onboarding.otel.download.title', {
         defaultMessage: 'Download the OpenTelemetry APM Agent or SDK',
       }),
       children: (
         <EuiMarkdownFormat>
-          {i18n.translate('xpack.apm.tutorial.otel.download.textPre', {
+          {i18n.translate('xpack.apm.onboarding.otel.download.textPre', {
             defaultMessage:
               'See the [OpenTelemetry Instrumentation guides]({openTelemetryInstrumentationLink}) to download the OpenTelemetry Agent or SDK for your language.',
             values: {
@@ -45,21 +45,24 @@ export const createOpenTelemetryAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.otel.configureAgent.title', {
+      title: i18n.translate('xpack.apm.onboarding.otel.configureAgent.title', {
         defaultMessage: 'Configure OpenTelemetry in your application',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.otel.configureAgent.textPre', {
-              defaultMessage:
-                'Specify the following OpenTelemetry settings as part of the startup of your application. Note that OpenTelemetry SDKs require some bootstrap code in addition to these configuration settings. For more details, see the [Elastic OpenTelemetry documentation]({openTelemetryDocumentationLink}) and the [OpenTelemetry community instrumentation guides]({openTelemetryInstrumentationLink}).',
-              values: {
-                openTelemetryDocumentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
-                openTelemetryInstrumentationLink:
-                  'https://opentelemetry.io/docs/instrumentation',
-              },
-            })}
+            {i18n.translate(
+              'xpack.apm.onboarding.otel.configureAgent.textPre',
+              {
+                defaultMessage:
+                  'Specify the following OpenTelemetry settings as part of the startup of your application. Note that OpenTelemetry SDKs require some bootstrap code in addition to these configuration settings. For more details, see the [Elastic OpenTelemetry documentation]({openTelemetryDocumentationLink}) and the [OpenTelemetry community instrumentation guides]({openTelemetryInstrumentationLink}).',
+                values: {
+                  openTelemetryDocumentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
+                  openTelemetryInstrumentationLink:
+                    'https://opentelemetry.io/docs/instrumentation',
+                },
+              }
+            )}
           </EuiMarkdownFormat>
           <EuiSpacer />
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
@@ -79,13 +82,16 @@ export const createOpenTelemetryAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.otel.configureAgent.textPost', {
-              defaultMessage:
-                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-              values: {
-                documentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
-              },
-            })}
+            {i18n.translate(
+              'xpack.apm.onboarding.otel.configureAgent.textPost',
+              {
+                defaultMessage:
+                  'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+                values: {
+                  documentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
+                },
+              }
+            )}
           </EuiMarkdownFormat>
         </>
       ),
@@ -117,7 +123,7 @@ function ConfigurationValueColumn({
         onClick={createApiKey}
         isLoading={createApiKeyLoading}
       >
-        {i18n.translate('xpack.apm.tutorial.apiKey.create', {
+        {i18n.translate('xpack.apm.onboarding.apiKey.create', {
           defaultMessage: 'Create API Key',
         })}
       </EuiButton>
@@ -178,7 +184,7 @@ export function OpenTelemetryInstructions({
     {
       field: 'setting',
       name: i18n.translate(
-        'xpack.apm.tutorial.config_otel.column.configSettings',
+        'xpack.apm.onboarding.config_otel.column.configSettings',
         {
           defaultMessage: 'Configuration setting (1)',
         }
@@ -187,7 +193,7 @@ export function OpenTelemetryInstructions({
     {
       field: 'value',
       name: i18n.translate(
-        'xpack.apm.tutorial.config_otel.column.configValue',
+        'xpack.apm.onboarding.config_otel.column.configValue',
         {
           defaultMessage: 'Configuration value',
         }
@@ -204,7 +210,7 @@ export function OpenTelemetryInstructions({
     },
     {
       field: 'notes',
-      name: i18n.translate('xpack.apm.tutorial.config_otel.column.notes', {
+      name: i18n.translate('xpack.apm.onboarding.config_otel.column.notes', {
         defaultMessage: 'Notes',
       }),
     },
@@ -220,7 +226,7 @@ export function OpenTelemetryInstructions({
       <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued">
         <FormattedMessage
-          id="xpack.apm.tutorial.config_otel.description1"
+          id="xpack.apm.onboarding.config_otel.description1"
           defaultMessage="(1) OpenTelemetry agents and SDKs must support the {otelExporterOtlpEndpoint}, {otelExporterOtlpHeaders}, and {otelResourceAttributes} variables; some unstable components may not yet comply with this requirement."
           values={{
             otelExporterOtlpEndpoint: (
@@ -254,12 +260,12 @@ export function OpenTelemetryInstructions({
         />
         <EuiSpacer size="xs" />
         <FormattedMessage
-          id="xpack.apm.tutorial.config_otel.description2"
+          id="xpack.apm.onboarding.config_otel.description2"
           defaultMessage="The 'OTEL_METRICS_EXPORTER` and 'OTEL_LOGS_EXPORTER' environment variables may not be supported by some SDKs."
         />
         <EuiSpacer size="xs" />
         <FormattedMessage
-          id="xpack.apm.tutorial.config_otel.description3"
+          id="xpack.apm.onboarding.config_otel.description3"
           defaultMessage="The exhaustive list of environment variables, command line parameters, and configuration code snippets (according to the OpenTelemetry specification) is available in the {otelInstrumentationGuide}. Some unstable OpenTelemetry clients may not support all features and may require alternate configuration mechanisms."
           values={{
             otelInstrumentationGuide: (
@@ -269,7 +275,7 @@ export function OpenTelemetryInstructions({
                 href="https://opentelemetry.io/docs/instrumentation"
               >
                 {i18n.translate(
-                  'xpack.apm.tutorial.config_otel.instrumentationGuide',
+                  'xpack.apm.onboarding.config_otel.instrumentationGuide',
                   {
                     defaultMessage: 'OpenTelemetry Instrumentation guide',
                   }

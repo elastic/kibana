@@ -77,13 +77,13 @@ export function AgentConfigurationTable({
   const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
     {
       field: 'setting',
-      name: i18n.translate('xpack.apm.tutorial.agent.column.configSettings', {
+      name: i18n.translate('xpack.apm.onboarding.agent.column.configSettings', {
         defaultMessage: 'Configuration setting',
       }),
     },
     {
       field: 'value',
-      name: i18n.translate('xpack.apm.tutorial.agent.column.configValue', {
+      name: i18n.translate('xpack.apm.onboarding.agent.column.configValue', {
         defaultMessage: 'Configuration value',
       }),
       render: (_, { value, key }) => (

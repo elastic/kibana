@@ -17,7 +17,7 @@ import { homeRoute } from './home';
 import { serviceDetailRoute } from './service_detail';
 import { mobileServiceDetailRoute } from './mobile_service_detail';
 import { settingsRoute } from './settings';
-import { tutorials } from './tutorials';
+import { onboarding } from './onboarding';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -106,7 +106,7 @@ const apmRoutes = {
           ]),
         }),
       },
-      ...tutorials,
+      ...onboarding,
       ...diagnosticsRoute,
       ...settingsRoute,
       ...serviceDetailRoute,

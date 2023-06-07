@@ -25,7 +25,7 @@ export const dotnetLineNumbers = () => ({
 export const dotnet = `{
   "ElasticApm": {
     /// {{serviceNameHint}} ${i18n.translate(
-      'xpack.apm.tutorial.dotnetClient.createConfig.commands.defaultServiceName',
+      'xpack.apm.onboarding.dotnetClient.createConfig.commands.defaultServiceName',
       {
         defaultMessage: 'Default is the entry assembly of the application.',
       }

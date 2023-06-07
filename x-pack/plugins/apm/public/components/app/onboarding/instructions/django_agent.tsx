@@ -16,54 +16,41 @@ import {
 } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 
-export const createGoAgentInstructions = (
+export const createDjangoAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
   const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
-  const codeBlock = `\
-import (
-  "net/http"
-
-  "go.elastic.co/apm/module/apmhttp"
-)
-
-func main() {
-  mux := http.NewServeMux()
-  ...
-  http.ListenAndServe(":8080", apmhttp.Wrap(mux))
-}
-`;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.go.install.title', {
+      title: i18n.translate('xpack.apm.onboarding.django.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.go.install.textPre', {
-              defaultMessage: 'Install the APM agent packages for Go.',
+            {i18n.translate('xpack.apm.onboarding.django.install.textPre', {
+              defaultMessage:
+                'Install the APM agent for Python as a dependency.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            go get go.elastic.co/apm
+            $ pip install elastic-apm
           </EuiCodeBlock>
         </>
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.go.configure.title', {
+      title: i18n.translate('xpack.apm.onboarding.django.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.go.configure.textPre', {
+            {i18n.translate('xpack.apm.onboarding.django.configure.textPre', {
               defaultMessage:
                 'Agents are libraries that run inside of your application process. \
-APM services are created programmatically based on the executable \
-file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
+APM services are created programmatically based on the `SERVICE_NAME`.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
@@ -79,9 +66,8 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
               <EuiSpacer />
             </>
           )}
-
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.GO}
+            variantId={INSTRUCTION_VARIANT.DJANGO}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}
@@ -89,41 +75,11 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.go.configure.textPost', {
+            {i18n.translate('xpack.apm.onboarding.django.configure.textPost', {
               defaultMessage:
-                'See the [documentation]({documentationLink}) for advanced configuration.',
+                'See the [documentation]({documentationLink}) for advanced usage.',
               values: {
-                documentationLink: `${baseUrl}guide/en/apm/agent/go/current/configuration.html`,
-              },
-            })}
-          </EuiMarkdownFormat>
-        </>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.apm.tutorial.go.goClient.title', {
-        defaultMessage: 'Instrument your application',
-      }),
-      children: (
-        <>
-          <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.go.instrument.textPre', {
-              defaultMessage:
-                'Instrument your Go application by using one of the provided instrumentation modules or \
-by using the tracer API directly.',
-            })}
-          </EuiMarkdownFormat>
-          <EuiSpacer />
-          <EuiCodeBlock language="go" isCopyable={true}>
-            {codeBlock}
-          </EuiCodeBlock>
-          <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.go.instrument.textPost', {
-              defaultMessage:
-                'See the [documentation]({documentationLink}) for a detailed \
-guide to instrumenting Go source code.',
-              values: {
-                documentationLink: `${baseUrl}guide/en/apm/agent/go/current/instrumenting-source.html`,
+                documentationLink: `${baseUrl}guide/en/apm/agent/python/current/django-support.html`,
               },
             })}
           </EuiMarkdownFormat>

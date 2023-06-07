@@ -23,7 +23,7 @@ interface IntroductionProps {
 export function Introduction({ isBeta, guideLink }: IntroductionProps) {
   const betaBadge = (
     <EuiBetaBadge
-      label={i18n.translate('xpack.apm.tutorial.betaLabel', {
+      label={i18n.translate('xpack.apm.onboarding.betaLabel', {
         defaultMessage: 'Beta',
       })}
     />
@@ -37,7 +37,7 @@ export function Introduction({ isBeta, guideLink }: IntroductionProps) {
       allowFullScreen
       fullScreenIconColor="dark"
       alt={i18n.translate(
-        'xpack.apm.tutorial.introduction.imageAltDescription',
+        'xpack.apm.onboarding.introduction.imageAltDescription',
         {
           defaultMessage: 'screenshot of primary dashboard.',
         }
@@ -47,7 +47,7 @@ export function Introduction({ isBeta, guideLink }: IntroductionProps) {
   ];
 
   const description = i18n.translate(
-    'xpack.apm.tutorial.specProvider.longDescription',
+    'xpack.apm.onboarding.specProvider.longDescription',
     {
       defaultMessage:
         'Application Performance Monitoring (APM) collects in-depth \
@@ -66,7 +66,7 @@ It allows you to monitor the performance of thousands of applications in real ti
         iconType="apmApp"
         pageTitle={
           <>
-            {i18n.translate('xpack.apm.tutorial.appName', {
+            {i18n.translate('xpack.apm.onboarding.appName', {
               defaultMessage: 'APM',
             })}
             {isBeta && (

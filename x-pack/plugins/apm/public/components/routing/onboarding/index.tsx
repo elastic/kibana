@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { Tutorials } from '../../app/tutorials';
+import { Onboarding } from '../../app/onboarding';
 
-export const tutorials = {
-  '/tutorials': {
-    element: <Tutorials />,
+export const onboarding = {
+  '/onboarding': {
+    element: <Onboarding />,
   },
 };

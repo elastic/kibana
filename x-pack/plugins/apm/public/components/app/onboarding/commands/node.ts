@@ -22,7 +22,7 @@ export const nodeLineNumbers = () => ({
 });
 
 export const node = `// ${i18n.translate(
-  'xpack.apm.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
+  'xpack.apm.onboarding.nodeClient.configure.commands.addThisToTheFileTopComment',
   {
     defaultMessage:
       'Add this to the very top of the first file loaded in your app',
@@ -31,7 +31,7 @@ export const node = `// ${i18n.translate(
 var apm = require('elastic-apm-node').start({
 
   // {{serviceNameHint}} ${i18n.translate(
-    'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
+    'xpack.apm.onboarding.nodeClient.createConfig.commands.serviceName',
     {
       defaultMessage: 'Overrides the service name in package.json.',
     }

@@ -32,13 +32,13 @@ export const createDotNetAgentInstructions = (
 }`;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.dotNet.download.title', {
+      title: i18n.translate('xpack.apm.onboarding.dotNet.download.title', {
         defaultMessage: 'Download the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.dotNet.download.textPre', {
+            {i18n.translate('xpack.apm.onboarding.dotNet.download.textPre', {
               defaultMessage:
                 'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
       NuGet packages available for different use cases. \n\nFor an ASP.NET Core application with Entity Framework \
@@ -66,7 +66,7 @@ export const createDotNetAgentInstructions = (
     },
     {
       title: i18n.translate(
-        'xpack.apm.tutorial.dotNet.configureApplication.title',
+        'xpack.apm.onboarding.dotNet.configureApplication.title',
         {
           defaultMessage: 'Add the agent to the application',
         }
@@ -75,7 +75,7 @@ export const createDotNetAgentInstructions = (
         <>
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.dotNet.configureApplication.textPre',
+              'xpack.apm.onboarding.dotNet.configureApplication.textPre',
               {
                 defaultMessage:
                   'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
@@ -90,7 +90,7 @@ export const createDotNetAgentInstructions = (
           <EuiSpacer />
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.dotNet.configureApplication.textPost',
+              'xpack.apm.onboarding.dotNet.configureApplication.textPost',
               {
                 defaultMessage:
                   'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
@@ -102,9 +102,12 @@ export const createDotNetAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.dotNet.configureAgent.title', {
-        defaultMessage: 'Sample appsettings.json file:',
-      }),
+      title: i18n.translate(
+        'xpack.apm.onboarding.dotNet.configureAgent.title',
+        {
+          defaultMessage: 'Sample appsettings.json file:',
+        }
+      ),
       children: (
         <>
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
@@ -128,7 +131,7 @@ export const createDotNetAgentInstructions = (
           <EuiSpacer />
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.dotNet.configureAgent.textPost',
+              'xpack.apm.onboarding.dotNet.configureAgent.textPost',
               {
                 defaultMessage:
                   'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \

@@ -25,7 +25,7 @@ export const railsLineNumbers = () => ({
 export const rails = `# config/elastic_apm.yml:
 
 # {{serviceNameHint}} ${i18n.translate(
-  'xpack.apm.tutorial.railsClient.createConfig.commands.defaultServiceName',
+  'xpack.apm.onboarding.railsClient.createConfig.commands.defaultServiceName',
   {
     defaultMessage: 'Defaults to the name of your Rails app.',
   }

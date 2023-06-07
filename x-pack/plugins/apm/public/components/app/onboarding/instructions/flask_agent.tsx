@@ -16,44 +16,44 @@ import {
 } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 
-export const createRailsAgentInstructions = (
+export const createFlaskAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
   const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.rails.install.title', {
+      title: i18n.translate('xpack.apm.onboarding.flask.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rails.install.textPre', {
-              defaultMessage: 'Add the agent to your Gemfile.',
+            {i18n.translate('xpack.apm.onboarding.flask.install.textPre', {
+              defaultMessage:
+                'Install the APM agent for Python as a dependency.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            gem &apos;elastic-apm&apos;
+            $ pip install elastic-apm[flask]
           </EuiCodeBlock>
         </>
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.rails.configure.title', {
+      title: i18n.translate('xpack.apm.onboarding.flask.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rails.configure.textPre', {
+            {i18n.translate('xpack.apm.onboarding.flask.configure.textPre', {
               defaultMessage:
-                'APM is automatically started when your app boots. Configure the agent, by creating the config file {configFile}',
-              values: { configFile: '`config/elastic_apm.yml`' },
+                'Agents are libraries that run inside of your application process. \
+APM services are created programmatically based on the `SERVICE_NAME`.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
             apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
@@ -65,8 +65,9 @@ export const createRailsAgentInstructions = (
               <EuiSpacer />
             </>
           )}
+
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.RAILS}
+            variantId={INSTRUCTION_VARIANT.FLASK}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}
@@ -74,11 +75,11 @@ export const createRailsAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rails.configure.textPost', {
+            {i18n.translate('xpack.apm.onboarding.flask.configure.textPost', {
               defaultMessage:
-                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+                'See the [documentation]({documentationLink}) for advanced usage.',
               values: {
-                documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
+                documentationLink: `${baseUrl}guide/en/apm/agent/python/current/flask-support.html`,
               },
             })}
           </EuiMarkdownFormat>

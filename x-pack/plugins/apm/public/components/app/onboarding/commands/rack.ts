@@ -25,7 +25,7 @@ export const rackLineNumbers = () => ({
 export const rack = `# config/elastic_apm.yml:
 
 # {{serviceNameHint}} ${i18n.translate(
-  'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+  'xpack.apm.onboarding.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
   {
     defaultMessage: "Defaults to the name of your Rack app's class.",
   }

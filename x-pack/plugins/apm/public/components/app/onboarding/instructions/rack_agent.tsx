@@ -16,71 +16,88 @@ import {
 } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 
-export const createPhpAgentInstructions = (
+export const createRackAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
   const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
+  const codeBlock = `# config.ru
+  require 'sinatra/base'
+
+  class MySinatraApp < Sinatra::Base
+    use ElasticAPM::Middleware
+
+    # ...
+  end
+
+  ElasticAPM.start(
+    app: MySinatraApp, # ${i18n.translate(
+      'xpack.apm.onboarding.rack.configure.commands.requiredComment',
+      {
+        defaultMessage: 'required',
+      }
+    )}
+    config_file: '' # ${i18n.translate(
+      'xpack.apm.onboarding.rack.configure.commands.optionalComment',
+      {
+        defaultMessage: 'optional, defaults to config/elastic_apm.yml',
+      }
+    )}
+  )
+
+  run MySinatraApp
+
+  at_exit { ElasticAPM.stop }`;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.php.download.title', {
-        defaultMessage: 'Download the APM agent',
-      }),
-      children: (
-        <EuiMarkdownFormat>
-          {i18n.translate('xpack.apm.tutorial.php.download.textPre', {
-            defaultMessage:
-              'Download the package corresponding to your platform from [GitHub releases]({githubReleasesLink}).',
-            values: {
-              githubReleasesLink:
-                'https://github.com/elastic/apm-agent-php/releases',
-            },
-          })}
-        </EuiMarkdownFormat>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.apm.tutorial.php.installPackage.title', {
-        defaultMessage: 'Install the downloaded package',
+      title: i18n.translate('xpack.apm.onboarding.rack.install.title', {
+        defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.php.installPackage.textPre', {
-              defaultMessage: 'For example on Alpine Linux using APK package:',
+            {i18n.translate('xpack.apm.onboarding.rack.install.textPre', {
+              defaultMessage: 'Add the agent to your Gemfile.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            apk add --allow-untrusted &lt;package-file&gt;.apk
+            gem &apos;elastic-apm&apos;
           </EuiCodeBlock>
-          <EuiSpacer />
-          <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.php.installPackage.textPost', {
-              defaultMessage:
-                'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
-              values: {
-                documentationLink: `${baseUrl}guide/en/apm/agent/php/current/setup.html`,
-              },
-            })}
-          </EuiMarkdownFormat>
         </>
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.php.configureAgent.title', {
+      title: i18n.translate('xpack.apm.onboarding.rack.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.php.Configure the agent.textPre',
-              {
-                defaultMessage:
-                  'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
-              }
-            )}
+            {i18n.translate('xpack.apm.onboarding.rack.configure.textPre', {
+              defaultMessage:
+                'For Rack or a compatible framework (e.g. Sinatra), include the middleware in your app and start the agent.',
+            })}
           </EuiMarkdownFormat>
+          <EuiSpacer />
+          <EuiCodeBlock language="bash" isCopyable={true}>
+            {codeBlock}
+          </EuiCodeBlock>
+        </>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.apm.onboarding.rack.createConfig.title', {
+        defaultMessage: 'Create config file',
+      }),
+      children: (
+        <>
+          <EuiMarkdownFormat>
+            {i18n.translate('xpack.apm.onboarding.rack.createConfig.textPre', {
+              defaultMessage: 'Create a config file {configFile}:',
+              values: { configFile: '`config/elastic_apm.yml`' },
+            })}
+          </EuiMarkdownFormat>
+          <EuiSpacer />
 
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
             apiKeyDetails?.displayApiKeyErrorCallout) && (
@@ -94,7 +111,7 @@ export const createPhpAgentInstructions = (
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.PHP}
+            variantId={INSTRUCTION_VARIANT.RACK}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}
@@ -102,11 +119,11 @@ export const createPhpAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.php.configureAgent.textPost', {
+            {i18n.translate('xpack.apm.onboarding.rack.configure.textPost', {
               defaultMessage:
                 'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
               values: {
-                documentationLink: `${baseUrl}guide/en/apm/agent/php/current/configuration.html`,
+                documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
               },
             })}
           </EuiMarkdownFormat>

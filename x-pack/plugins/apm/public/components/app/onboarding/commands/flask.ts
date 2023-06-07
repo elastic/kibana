@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const djangoVariables = (secretToken?: string) => ({
+export const flaskVariables = (secretToken?: string) => ({
   apmServiceName: 'SERVICE_NAME',
   ...(secretToken && { secretToken: 'SECRET_TOKEN' }),
   ...(!secretToken && { apiKey: 'API_KEY' }),
@@ -15,25 +15,31 @@ export const djangoVariables = (secretToken?: string) => ({
   apmEnvironment: 'ENVIRONMENT',
 });
 
-export const djangoHighlightLang = 'py';
+export const flaskHighlightLang = 'py';
 
-export const djangoLineNumbers = () => ({
+export const flaskLineNumbers = () => ({
   start: 1,
-  highlight: '1, 3, 5, 7, 9, 12, 15, 18-19,  21, 23, 25',
+  highlight: '2-4, 7-8, 10, 13, 16, 19-22',
 });
 
-export const django = `INSTALLED_APPS = (
-  # ${i18n.translate(
-    'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
-    {
-      defaultMessage: 'Add the agent to installed apps',
-    }
-  )}
-  'elasticapm.contrib.django',
-  # ...
-)
+export const flask = `# ${i18n.translate(
+  'xpack.apm.onboarding.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment',
+  {
+    defaultMessage: 'Initialize using environment variables',
+  }
+)}
+from elasticapm.contrib.flask import ElasticAPM
+app = Flask(__name__)
+apm = ElasticAPM(app)
 
-ELASTIC_APM = {
+# ${i18n.translate(
+  'xpack.apm.onboarding.flaskClient.configure.commands.configureElasticApmComment',
+  {
+    defaultMessage: "Or use ELASTIC_APM in your application's settings",
+  }
+)}
+from elasticapm.contrib.flask import ElasticAPM
+app.config['ELASTIC_APM'] = {
   # {{serviceNameHint}}
   'SERVICE_NAME': 'my-service-name',
 
@@ -49,17 +55,8 @@ ELASTIC_APM = {
   # {{{serverUrlHint}}}
   'SERVER_URL': '{{{apmServerUrl}}}',
 
-  # {{{serviceEnvironmentHint}}}
+  {{{serviceEnvironmentHint}}}
   'ENVIRONMENT': 'my-environment',
 }
 
-MIDDLEWARE = (
-  # ${i18n.translate(
-    'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
-    {
-      defaultMessage: 'Add our tracing middleware to send performance metrics',
-    }
-  )}
-  'elasticapm.contrib.django.middleware.TracingMiddleware',
-  #...
-)`;
+apm = ElasticAPM(app)`;

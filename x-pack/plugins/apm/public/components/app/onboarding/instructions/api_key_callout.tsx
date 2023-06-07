@@ -23,7 +23,7 @@ export function ApiKeyCallout({
       <>
         <EuiCallOut
           title={i18n.translate(
-            'xpack.apm.tutorial.apiKey.success.calloutTitle',
+            'xpack.apm.onboarding.apiKey.success.calloutTitle',
             {
               defaultMessage: 'API key created',
             }
@@ -31,9 +31,12 @@ export function ApiKeyCallout({
           color="success"
           iconType="check"
         >
-          {i18n.translate('xpack.apm.tutorial.apiKey.success.calloutMessage', {
-            defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue`,
-          })}
+          {i18n.translate(
+            'xpack.apm.onboarding.apiKey.success.calloutMessage',
+            {
+              defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue`,
+            }
+          )}
         </EuiCallOut>
       </>
     );
@@ -47,7 +50,7 @@ export function ApiKeyCallout({
     return (
       <EuiCallOut
         title={i18n.translate(
-          'xpack.apm.tutorial.apiKey.warning.calloutTitle',
+          'xpack.apm.onboarding.apiKey.warning.calloutTitle',
           {
             defaultMessage: 'User does not have permissions to create API Key',
           }
@@ -55,7 +58,7 @@ export function ApiKeyCallout({
         color="warning"
         iconType="warning"
       >
-        {i18n.translate('xpack.apm.tutorial.apiKey.warning.calloutMessage', {
+        {i18n.translate('xpack.apm.onboarding.apiKey.warning.calloutMessage', {
           defaultMessage:
             'User is missing the following privilege - {missingPrivilege}. Please add the missing APM application privilege to the role of the authenticated user',
           values: {
@@ -68,13 +71,13 @@ export function ApiKeyCallout({
 
   return (
     <EuiCallOut
-      title={i18n.translate('xpack.apm.tutorial.apiKey.error.calloutTitle', {
+      title={i18n.translate('xpack.apm.onboarding.apiKey.error.calloutTitle', {
         defaultMessage: 'Failed to create API key',
       })}
       color="danger"
       iconType="error"
     >
-      {i18n.translate('xpack.apm.tutorial.apiKey.error.calloutMessage', {
+      {i18n.translate('xpack.apm.onboarding.apiKey.error.calloutMessage', {
         defaultMessage: 'Error: {errorMessage}',
         values: {
           errorMessage,

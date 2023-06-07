@@ -36,7 +36,7 @@ export function getNoDataConfig({
       title: i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
         defaultMessage: 'Add data',
       }),
-      href: `${basePath}/app/apm/tutorials`,
+      href: `${basePath}/app/apm/onboarding`,
     };
   } else {
     noDataConfigDetails = hasApmIntegrations

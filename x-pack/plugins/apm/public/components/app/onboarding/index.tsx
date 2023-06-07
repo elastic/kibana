@@ -18,7 +18,7 @@ import { Footer } from './footer';
 import { PrivilegeType } from '../../../../common/privilege_type';
 import { AgentApiKey, InstructionSet } from './instruction_variants';
 
-export function Tutorials() {
+export function Onboarding() {
   const [instructions, setInstructions] = useState<InstructionSet[]>([]);
   const [agentApiKey, setAgentApiKey] = useState<AgentApiKey>({
     apiKey: null,

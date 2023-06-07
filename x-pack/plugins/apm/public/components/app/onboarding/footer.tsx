@@ -26,7 +26,7 @@ export function Footer() {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.apm.tutorial.footer.exploreYourDataDescription"
+                id="xpack.apm.onboarding.footer.exploreYourDataDescription"
                 defaultMessage="When all steps are complete, you're ready to explore your data."
               />
             </p>
@@ -39,7 +39,7 @@ export function Footer() {
             fill
             href={apmLink}
           >
-            {i18n.translate('xpack.apm.tutorial.footer.cta', {
+            {i18n.translate('xpack.apm.onboarding.footer.cta', {
               defaultMessage: 'Launch APM',
             })}
           </EuiButton>

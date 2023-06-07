@@ -9,96 +9,52 @@ import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
+import { ApiKeyCallout } from './api_key_callout';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
-import { ApiKeyCallout } from './api_key_callout';
 
-export const createRackAgentInstructions = (
+export const createNodeAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
   const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
-  const codeBlock = `# config.ru
-  require 'sinatra/base'
-
-  class MySinatraApp < Sinatra::Base
-    use ElasticAPM::Middleware
-
-    # ...
-  end
-
-  ElasticAPM.start(
-    app: MySinatraApp, # ${i18n.translate(
-      'xpack.apm.tutorial.rack.configure.commands.requiredComment',
-      {
-        defaultMessage: 'required',
-      }
-    )}
-    config_file: '' # ${i18n.translate(
-      'xpack.apm.tutorial.rack.configure.commands.optionalComment',
-      {
-        defaultMessage: 'optional, defaults to config/elastic_apm.yml',
-      }
-    )}
-  )
-
-  run MySinatraApp
-
-  at_exit { ElasticAPM.stop }`;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.rack.install.title', {
+      title: i18n.translate('xpack.apm.onboarding.node.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rack.install.textPre', {
-              defaultMessage: 'Add the agent to your Gemfile.',
+            {i18n.translate('xpack.apm.onboarding.node.install.textPre', {
+              defaultMessage:
+                'Install the APM agent for Node.js as a dependency to your application.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            gem &apos;elastic-apm&apos;
+            npm install elastic-apm-node --save
           </EuiCodeBlock>
         </>
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.rack.configure.title', {
+      title: i18n.translate('xpack.apm.onboarding.node.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rack.configure.textPre', {
+            {i18n.translate('xpack.apm.onboarding.node.configure.textPre', {
               defaultMessage:
-                'For Rack or a compatible framework (e.g. Sinatra), include the middleware in your app and start the agent.',
+                'Agents are libraries that run inside of your application process. \
+ APM services are created programmatically based on the `serviceName`. \
+ This agent supports a variety of frameworks but can also be used with your custom stack.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
-            {codeBlock}
-          </EuiCodeBlock>
-        </>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.apm.tutorial.rack.createConfig.title', {
-        defaultMessage: 'Create config file',
-      }),
-      children: (
-        <>
-          <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rack.createConfig.textPre', {
-              defaultMessage: 'Create a config file {configFile}:',
-              values: { configFile: '`config/elastic_apm.yml`' },
-            })}
-          </EuiMarkdownFormat>
-          <EuiSpacer />
-
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
             apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
@@ -110,8 +66,9 @@ export const createRackAgentInstructions = (
               <EuiSpacer />
             </>
           )}
+
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.RACK}
+            variantId={INSTRUCTION_VARIANT.NODE}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}
@@ -119,11 +76,13 @@ export const createRackAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rack.configure.textPost', {
+            {i18n.translate('xpack.apm.onboarding.node.configure.textPost', {
               defaultMessage:
-                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+                'See [the documentation]({documentationLink}) for advanced usage, including how to use with \
+[Babel/ES Modules]({babelEsModulesLink}).',
               values: {
-                documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
+                documentationLink: `${baseUrl}guide/en/apm/agent/nodejs/current/index.html`,
+                babelEsModulesLink: `${baseUrl}guide/en/apm/agent/nodejs/current/advanced-setup.html#es-modules`,
               },
             })}
           </EuiMarkdownFormat>

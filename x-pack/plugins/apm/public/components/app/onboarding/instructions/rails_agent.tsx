@@ -16,41 +16,40 @@ import {
 } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 
-export const createDjangoAgentInstructions = (
+export const createRailsAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
   const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.django.install.title', {
+      title: i18n.translate('xpack.apm.onboarding.rails.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.django.install.textPre', {
-              defaultMessage:
-                'Install the APM agent for Python as a dependency.',
+            {i18n.translate('xpack.apm.onboarding.rails.install.textPre', {
+              defaultMessage: 'Add the agent to your Gemfile.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            $ pip install elastic-apm
+            gem &apos;elastic-apm&apos;
           </EuiCodeBlock>
         </>
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.django.configure.title', {
+      title: i18n.translate('xpack.apm.onboarding.rails.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.django.configure.textPre', {
+            {i18n.translate('xpack.apm.onboarding.rails.configure.textPre', {
               defaultMessage:
-                'Agents are libraries that run inside of your application process. \
-APM services are created programmatically based on the `SERVICE_NAME`.',
+                'APM is automatically started when your app boots. Configure the agent, by creating the config file {configFile}',
+              values: { configFile: '`config/elastic_apm.yml`' },
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
@@ -67,7 +66,7 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.DJANGO}
+            variantId={INSTRUCTION_VARIANT.RAILS}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}
@@ -75,11 +74,11 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.django.configure.textPost', {
+            {i18n.translate('xpack.apm.onboarding.rails.configure.textPost', {
               defaultMessage:
-                'See the [documentation]({documentationLink}) for advanced usage.',
+                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
               values: {
-                documentationLink: `${baseUrl}guide/en/apm/agent/python/current/django-support.html`,
+                documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
               },
             })}
           </EuiMarkdownFormat>
