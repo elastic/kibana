@@ -91,7 +91,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
   patternRollups,
   patterns,
   theme = {},
-  baseTheme
+  baseTheme,
 }: Props) => {
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,

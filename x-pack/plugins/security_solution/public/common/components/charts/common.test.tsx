@@ -174,9 +174,7 @@ describe('checkIfAllValuesAreZero', () => {
     it('should return custom spacing theme', () => {
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.theme.chartMargins).toMatchObject(
-        { top: 4, bottom: 0 },
-      );
+      expect(result.current.theme.chartMargins).toMatchObject({ top: 4, bottom: 0 });
     });
 
     it('should return light baseTheme when isDarkMode false', () => {
