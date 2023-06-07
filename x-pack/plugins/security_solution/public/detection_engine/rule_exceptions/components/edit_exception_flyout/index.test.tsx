@@ -124,6 +124,7 @@ describe('When the edit exception modal is opened', () => {
     mockFetchIndexPatterns.mockImplementation(() => ({
       isLoading: false,
       indexPatterns: stubIndexPattern,
+      getExtendedField: () => Promise.resolve([]),
     }));
     mockUseFindExceptionListReferences.mockImplementation(() => [
       false,
@@ -168,6 +169,7 @@ describe('When the edit exception modal is opened', () => {
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
         indexPatterns: { fields: [], title: 'foo' },
+        getExtendedField: () => Promise.resolve([]),
       }));
 
       const wrapper = mount(

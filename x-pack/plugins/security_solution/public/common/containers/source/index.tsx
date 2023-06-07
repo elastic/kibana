@@ -42,11 +42,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (
-    title: string,
-    fields: IIndexPatternFieldList,
-    _includeUnmapped: boolean = false
-  ): DataViewBase =>
+  (title: string, fields: IIndexPatternFieldList): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -66,10 +62,7 @@ export const getIndexFields = memoizeOne(
           title,
         }
       : { fields: [], title },
-  (newArgs, lastArgs) =>
-    newArgs[0] === lastArgs[0] &&
-    newArgs[1].length === lastArgs[1].length &&
-    newArgs[2] === lastArgs[2]
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 const DEFAULT_BROWSER_FIELDS = {};
@@ -96,8 +89,7 @@ interface FetchIndexReturn {
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false,
-  strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields',
-  includeUnmapped: boolean = false
+  strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields'
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -121,11 +113,7 @@ export const useFetchIndex = (
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
           const dataView = dv.toSpec();
-          const { browserFields } = getDataViewStateFromIndexFields(
-            iNames,
-            dataView.fields,
-            includeUnmapped
-          );
+          const { browserFields } = getDataViewStateFromIndexFields(iNames, dataView.fields);
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
 
@@ -135,7 +123,7 @@ export const useFetchIndex = (
             browserFields,
             indexes: dv.getIndexPattern().split(','),
             indexExists: dv.getIndexPattern().split(',').length > 0,
-            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
+            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
           });
         } catch (exc) {
           setState({
@@ -152,7 +140,7 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, data.dataViews, includeUnmapped, indexNames, state]
+    [addError, data.dataViews, indexNames, state]
   );
 
   useEffect(() => {

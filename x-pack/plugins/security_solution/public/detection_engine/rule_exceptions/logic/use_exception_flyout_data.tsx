@@ -91,7 +91,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   const [
     isIndexPatternLoading,
     { indexPatterns: indexIndexPatterns, dataView: indexDataViewSpec },
-  ] = useFetchIndex(memoRuleIndices, false, 'indexFields', true);
+  ] = useFetchIndex(memoRuleIndices, false, 'indexFields');
 
   // Data view logic
   const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);

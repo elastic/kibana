@@ -85,6 +85,7 @@ describe('When the add exception modal is opened', () => {
     mockFetchIndexPatterns.mockImplementation(() => ({
       isLoading: false,
       indexPatterns: stubIndexPattern,
+      getExtendedField: () => Promise.resolve([]),
     }));
 
     mockUseSignalIndex.mockImplementation(() => ({
@@ -153,6 +154,7 @@ describe('When the add exception modal is opened', () => {
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
         indexPatterns: { fields: [], title: 'foo' },
+        getExtendedField: () => Promise.resolve([]),
       }));
 
       wrapper = mount(
