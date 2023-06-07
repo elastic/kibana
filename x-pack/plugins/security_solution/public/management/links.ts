@@ -197,6 +197,7 @@ export const getManagementFilteredLinks = async (
   // may see failed HTTP requests in the browser console. This is the reason that
   // `hasKibanaPrivilege()` is used below.
   if (
+    currentUser &&
     !isPlatinumPlus &&
     fleetAuthz &&
     hasKibanaPrivilege(
@@ -219,15 +220,16 @@ export const getManagementFilteredLinks = async (
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
-  } = fleetAuthz
-    ? calculateEndpointAuthz(
-        licenseService,
-        fleetAuthz,
-        currentUser.roles,
-        isEndpointRbacEnabled,
-        hasHostIsolationExceptions
-      )
-    : getEndpointAuthzInitialState();
+  } =
+    fleetAuthz && currentUser
+      ? calculateEndpointAuthz(
+          licenseService,
+          fleetAuthz,
+          currentUser.roles,
+          isEndpointRbacEnabled,
+          hasHostIsolationExceptions
+        )
+      : getEndpointAuthzInitialState();
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);

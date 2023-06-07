@@ -19,13 +19,40 @@ import type { SavedObjectsModelChange } from './model_change';
  */
 export interface SavedObjectsModelVersion {
   /**
-   * The list of {@link SavedObjectsModelChange | changes} associated with this version.
+   * The list of changes associated with this version.
+   *
+   * Model version changes are defined via low-level components, allowing to use composition
+   * to describe the list of changes bound to a given version. Composition also allows to more
+   * easily merge changes from multiple source when needed.
+   *
+   * @example Adding a new indexed field with a default value
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *     {
+   *       type: 'data_backfill',
+   *       transform: (doc) => {
+   *         doc.attributes.someNewField = 'some default value';
+   *         return { document: doc };
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * See {@link SavedObjectsModelChange | changes} for more information and examples.
    */
   changes: SavedObjectsModelChange[];
   /**
-   * The {@link SavedObjectsModelVersionSchemaDefinitions} associated with this version.
+   * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
    *
-   * @remark Currently unimplemented and unused.
+   * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
    */
   schemas?: SavedObjectsModelVersionSchemaDefinitions;
 }
@@ -37,9 +64,9 @@ export interface SavedObjectsModelVersion {
  * @example
  * ```typescript
  * const modelVersionMap: SavedObjectsModelVersionMap = {
- *   '1': modelVersion1,
- *   '2': modelVersion2,
- *   '3': modelVersion3,
+ *   1: modelVersion1,
+ *   2: modelVersion2,
+ *   3: modelVersion3,
  * }
  * ```
  *

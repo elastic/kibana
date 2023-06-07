@@ -445,6 +445,49 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     };
   }
 
+  /** Purpose of this function is to take a package policy and compile the inputs
+   This is primarily used by the Synthetics UI to display the inputs which are passed to agent
+   Purpose is to debug the inputs which are passed to the agent and also compared them to the config
+   which is passed to public service locations */
+  public async inspect(
+    soClient: SavedObjectsClientContract,
+    packagePolicy: NewPackagePolicyWithId
+  ): Promise<NewPackagePolicy> {
+    if (!packagePolicy.id) {
+      packagePolicy.id = SavedObjectsUtils.generateId();
+    }
+
+    const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
+    const agentPolicyId = packagePolicy.policy_id;
+
+    let inputs = getInputsWithStreamIds(packagePolicy, packagePolicy.id);
+    const { id, ...pkgPolicyWithoutId } = packagePolicy;
+
+    let elasticsearch: PackagePolicy['elasticsearch'];
+    if (packagePolicy.package) {
+      const pkgInfo = packageInfos.get(
+        `${packagePolicy.package.name}-${packagePolicy.package.version}`
+      );
+
+      inputs = pkgInfo
+        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs)
+        : inputs;
+
+      elasticsearch = pkgInfo?.elasticsearch;
+    }
+
+    return {
+      id: packagePolicy.id,
+      ...pkgPolicyWithoutId,
+      ...(packagePolicy.package
+        ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+        : {}),
+      inputs,
+      elasticsearch,
+      policy_id: agentPolicyId,
+    };
+  }
+
   public async get(
     soClient: SavedObjectsClientContract,
     id: string
@@ -1078,6 +1121,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
+    const secretsToDelete: string[] = [];
     if (idsToDelete.length > 0) {
       const { statuses } = await soClient.bulkDelete(
         idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
@@ -1097,6 +1141,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             },
             policy_id: packagePolicy.policy_id,
           });
+          if (packagePolicy?.secret_references?.length) {
+            secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+          }
         } else if (!success && error) {
           result.push({
             id,
@@ -1125,6 +1172,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           });
         }
       }
+    }
+
+    if (secretsToDelete.length > 0) {
+      await deleteSecrets({ esClient, soClient, ids: secretsToDelete });
     }
 
     try {

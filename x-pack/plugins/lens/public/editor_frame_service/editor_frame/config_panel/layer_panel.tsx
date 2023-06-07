@@ -22,7 +22,6 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components/public';
-import { LayerType } from '../../../../common/types';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
@@ -34,6 +33,7 @@ import {
   LayerAction,
   VisualizationDimensionGroupConfig,
   UserMessagesGetter,
+  AddLayerFunction,
 } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
@@ -49,7 +49,7 @@ import {
 } from '../../../state_management';
 import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
-import { FlyoutContainer } from './flyout_container';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -62,7 +62,7 @@ export function LayerPanel(
     layerId: string;
     layerIndex: number;
     isOnlyLayer: boolean;
-    addLayer: (layerType: LayerType) => void;
+    addLayer: AddLayerFunction;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (
       datasourceId: string | undefined,
@@ -118,6 +118,8 @@ export function LayerPanel(
     core,
   } = props;
 
+  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
+
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
@@ -128,6 +130,7 @@ export function LayerPanel(
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
+
   const registerLayerRef = useCallback(
     (el) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
@@ -332,15 +335,19 @@ export function LayerPanel(
     () =>
       [
         ...(activeVisualization
-          .getSupportedActionsForLayer?.(layerId, visualizationState)
+          .getSupportedActionsForLayer?.(
+            layerId,
+            visualizationState,
+            updateVisualization,
+            isSaveable
+          )
           .map((action) => ({
             ...action,
             execute: () => {
-              updateVisualization(
-                activeVisualization.onLayerAction?.(layerId, action.id, visualizationState)
-              );
+              action.execute(layerActionsFlyoutRef.current);
             },
           })) || []),
+
         ...getSharedActions({
           layerId,
           activeVisualization,
@@ -373,8 +380,10 @@ export function LayerPanel(
       updateVisualization,
       visualizationLayerSettings,
       visualizationState,
+      isSaveable,
     ]
   );
+  const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <>
@@ -398,7 +407,12 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LayerActions actions={compatibleActions} layerIndex={layerIndex} />
+                <LayerActions
+                  actions={compatibleActions}
+                  layerIndex={layerIndex}
+                  mountingPoint={layerActionsFlyoutRef.current}
+                />
+                <div ref={layerActionsFlyoutRef} />
               </EuiFlexItem>
             </EuiFlexGroup>
             {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}

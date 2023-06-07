@@ -381,6 +381,20 @@
         },
         {
           "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.locators",
+          "type": "Object",
+          "tags": [],
+          "label": "locators",
+          "description": [],
+          "signature": [
+            "InfraLocators"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-public.InfraClientStartExports.ContainerMetricsTable",
           "type": "Function",
           "tags": [],

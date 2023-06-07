@@ -10,32 +10,31 @@ import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
-import { ObservabilityAlertSearchBar } from '../../components/shared/alert_search_bar';
 import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
+import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import {
   alertSearchBarStateContainer,
   Provider,
   useAlertSearchBarStateContainer,
-} from '../../components/shared/alert_search_bar/containers';
+} from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
-import type { ObservabilityAppServices } from '../../application/types';
+import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
 const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
-const URL_STORAGE_KEY = '_a';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
@@ -56,9 +55,9 @@ function InternalAlertsPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
-  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY, {
+  const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
 

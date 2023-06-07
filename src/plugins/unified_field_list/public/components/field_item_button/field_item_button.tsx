@@ -136,7 +136,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           content={removeFieldFromWorkspaceTooltip}
         >
           <EuiButtonIcon
-            data-test-subj={`unifiedFieldListItem_removeField-${field.name}`}
+            data-test-subj={`fieldToggle-${field.name}`}
             aria-label={removeFieldFromWorkspaceTooltip}
             {...(buttonRemoveFieldFromWorkspaceProps || {})}
             className={classnames(
@@ -159,7 +159,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           content={addFieldToWorkspaceTooltip}
         >
           <EuiButtonIcon
-            data-test-subj={`unifiedFieldListItem_addField-${field.name}`}
+            data-test-subj={`fieldToggle-${field.name}`}
             aria-label={addFieldToWorkspaceTooltip}
             {...(buttonAddFieldToWorkspaceProps || {})}
             className={classnames(fieldActionClassName, buttonAddFieldToWorkspaceProps?.className)}
@@ -179,7 +179,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   return (
     <FieldButton
       key={`field-item-button-${field.name}`}
-      dataTestSubj={dataTestSubj}
+      dataTestSubj={dataTestSubj || `field-${field.name}-showDetails`}
       size={size || 's'}
       className={classes}
       isActive={isActive}

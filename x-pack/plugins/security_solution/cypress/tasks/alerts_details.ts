@@ -66,18 +66,18 @@ export const verifyInsightCount = ({
 };
 
 export const changeAlertStatusTo = (status: 'open' | 'closed' | 'acknowledged') => {
-  cy.get(OVERVIEW_STATUS).trigger('click');
+  cy.get(OVERVIEW_STATUS).click();
   cy.get(EVENT_DETAILS_ALERT_STATUS_POPOVER).should('be.visible');
 
   if (status === 'acknowledged') {
-    cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible').trigger('click');
+    cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
     return;
   }
   if (status === 'open') {
-    cy.get(OPEN_ALERT_BTN).should('be.visible').trigger('click');
+    cy.get(OPEN_ALERT_BTN).click();
   }
 
   if (status === 'closed') {
-    cy.get(CLOSE_ALERT_BTN).should('be.visible').trigger('click');
+    cy.get(CLOSE_ALERT_BTN).click();
   }
 };

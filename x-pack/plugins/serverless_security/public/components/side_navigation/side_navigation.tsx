@@ -35,6 +35,9 @@ export const SecuritySideNavigation: React.FC = () => {
         />
       }
       closeFlyoutButtonPosition={'inside'}
+      headingProps={{
+        'data-test-subj': 'securitySolutionNavHeading',
+      }}
     />
   );
 };
