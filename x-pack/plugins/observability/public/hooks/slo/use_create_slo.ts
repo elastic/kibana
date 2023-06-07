@@ -48,24 +48,20 @@ export function useCreateSlo() {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries(sloKeys.lists());
 
-        const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) || []
+        const latestQueriesData = (
+          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) ?? []
         ).at(0);
 
-        const [queryKey, data] = latestFetchSloListRequest || [];
+        const [queryKey, data] = latestQueriesData || [];
 
         const newItem = { ...slo, id: uuidv1() };
-
         const optimisticUpdate = {
           ...data,
-          results: [...(data?.results || []), { ...newItem }],
+          results: [...(data?.results ?? []), newItem],
           total: data?.total ? data.total + 1 : 1,
         };
 
-        // Optimistically update to the new value
-        if (queryKey) {
-          queryClient.setQueryData(queryKey, optimisticUpdate);
-        }
+        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
 
         // Return a context object with the snapshotted value
         return { previousSloList: data };
