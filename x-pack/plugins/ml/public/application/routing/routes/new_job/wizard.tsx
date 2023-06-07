@@ -196,7 +196,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
 
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
-    // TODO useRouteResolver should be responsible for the redirecrt
+    // TODO useRouteResolver should be responsible for the redirect
     privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
     jobCaps: () =>
       loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, ANOMALY_DETECTOR),
@@ -205,7 +205,9 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
 
   return (
     <PageLoader context={context}>
-      <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
+      {results ? (
+        <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
+      ) : null}
     </PageLoader>
   );
 };
