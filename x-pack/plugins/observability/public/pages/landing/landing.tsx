@@ -25,7 +25,7 @@ export function LandingPage() {
     } else if (hasApmData) {
       navigateToUrl(basePath.prepend('/app/apm/services'));
     } else {
-      navigateToUrl(basePath.prepend('/app/apm/tutorials'));
+      navigateToUrl(basePath.prepend('/app/apm/onboarding'));
     }
   }
   return <></>;
