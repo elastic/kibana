@@ -108,7 +108,7 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
       {(list, search) => (
         <div style={{ width: 280 }}>
           <EuiPopoverTitle paddingSize="s">
-            {options.length > 0 || searchValue ? (
+            {options.length > 0 || searchValue || searchLoading || recentMonitorsLoading ? (
               search
             ) : (
               <EuiText color="subdued" size="s" className="eui-textCenter">
