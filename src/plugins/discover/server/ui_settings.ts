@@ -30,7 +30,7 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  ENABLE_SQL,
+  ENABLE_TEXT_BASED,
 } from '../common';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
@@ -308,14 +308,14 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
   },
-  [ENABLE_SQL]: {
+  [ENABLE_TEXT_BASED]: {
     name: i18n.translate('discover.advancedSettings.enableSQLTitle', {
-      defaultMessage: 'Enable SQL',
+      defaultMessage: 'Enable text based languages',
     }),
     value: false,
     description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables SQL as a text-based query language in Discover and Lens. If you have feedback on this experience please reach out to us on {link}',
+        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables SQL and ESQL as a text-based query language in Discover and Lens. If you have feedback on this experience please reach out to us on {link}',
       values: {
         link:
           `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +

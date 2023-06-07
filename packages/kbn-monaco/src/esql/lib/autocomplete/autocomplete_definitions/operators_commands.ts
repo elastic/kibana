@@ -11,7 +11,7 @@ import type { AutocompleteCommandDefinition } from '../types';
 
 export const byOperatorDefinition: AutocompleteCommandDefinition = {
   label: 'by',
-  insertText: 'by ',
+  insertText: 'by',
   kind: 21,
   detail: i18n.translate('monaco.esql.autocomplete.byDoc', {
     defaultMessage: 'By',

@@ -67,6 +67,47 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     sortText: 'B',
   },
   {
+    label: 'project',
+    insertText: 'project',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.projectDoc', {
+      defaultMessage:
+        'Rearranges fields in the input table by applying the project clauses in fields',
+    }),
+    documentation: {
+      value: buildDocumentation('project fieldSpecification `,` fieldSpecification *', [
+        '… | project a,b',
+      ]),
+    },
+    sortText: 'B',
+  },
+  {
+    label: 'rename',
+    insertText: 'rename',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.renameDoc', {
+      defaultMessage: 'Renames an old column to a new one',
+    }),
+    documentation: {
+      value: buildDocumentation('rename new = old', ['… | rename a = b']),
+    },
+    sortText: 'B',
+  },
+  {
+    label: 'drop',
+    insertText: 'drop',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.dropDoc', {
+      defaultMessage: 'Drops columns',
+    }),
+    documentation: {
+      value: buildDocumentation('drop fieldSpecification `,` fieldSpecification *', [
+        '… | drop a,b',
+      ]),
+    },
+    sortText: 'B',
+  },
+  {
     label: 'sort',
     insertText: 'sort',
     kind: 1,
@@ -93,6 +134,51 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     }),
     documentation: {
       value: buildDocumentation('where condition = expression', ['… | where status_code == 200']),
+    },
+    sortText: 'B',
+  },
+  {
+    label: 'dissect',
+    insertText: 'dissect',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.dissectDoc', {
+      defaultMessage:
+        'Extracts multiple string values from a single string input, based on a pattern',
+    }),
+    documentation: {
+      value: buildDocumentation(
+        'dissect <inputExpression> <pattern-string> (append_separator=<string>)?',
+        ['… | dissect a "%{b} %{c}";']
+      ),
+    },
+    sortText: 'B',
+  },
+  {
+    label: 'grok',
+    insertText: 'grok',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.grokDoc', {
+      defaultMessage:
+        'Extracts multiple string values from a single string input, based on a pattern',
+    }),
+    documentation: {
+      value: buildDocumentation('grok <inputExpression> <pattern-string>', [
+        '… | grok a "%{b} %{c}";',
+      ]),
+    },
+    sortText: 'B',
+  },
+  {
+    label: 'mv_expand',
+    insertText: 'mv_expand',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.mvExpandDoc', {
+      defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
+    }),
+    documentation: {
+      value: buildDocumentation('mv_expand field', [
+        'ROW a=[1,2,3], b="b", j=["a","b"] | MV_EXPAND a',
+      ]),
     },
     sortText: 'B',
   },

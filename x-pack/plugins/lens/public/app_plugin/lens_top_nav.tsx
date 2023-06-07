@@ -993,6 +993,7 @@ export const LensTopNavMenu = ({
   const supportedTextBasedLanguages = [];
   if (isSQLModeEnabled) {
     supportedTextBasedLanguages.push('SQL');
+    supportedTextBasedLanguages.push('ESQL');
   }
 
   const dataViewPickerProps: DataViewPickerProps = {

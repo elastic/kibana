@@ -23,19 +23,39 @@ sourceCommand
     : explainCommand
     | fromCommand
     | rowCommand
+    | showCommand
     ;
 
 processingCommand
     : evalCommand
     | limitCommand
     | projectCommand
+    | renameCommand
+    | dropCommand
+    | dissectCommand
+    | grokCommand
     | sortCommand
     | statsCommand
     | whereCommand
+    | mvExpandCommand
+    ;
+
+mvExpandCommand
+    : MV_EXPAND qualifiedNames
     ;
 
 whereCommand
-    : WHERE booleanExpression
+    : WHERE whereBooleanExpression
+    ;
+
+whereBooleanExpression
+    : NOT booleanExpression
+    | valueExpression
+    | regexBooleanExpression
+    | left=booleanExpression operator=AND right=booleanExpression
+    | left=booleanExpression operator=OR right=booleanExpression
+    | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP
+    | WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
     ;
 
 booleanExpression
@@ -43,6 +63,11 @@ booleanExpression
     | valueExpression
     | left=booleanExpression operator=AND right=booleanExpression
     | left=booleanExpression operator=OR right=booleanExpression
+    ;
+
+regexBooleanExpression
+    : valueExpression (NOT)? kind=LIKE pattern=string
+    | valueExpression (NOT)? kind=RLIKE pattern=string
     ;
 
 valueExpression
@@ -58,9 +83,14 @@ mathFn
     : functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP
     ;
 
+mathEvalFn
+    : mathFunctionIdentifier LP (mathFunctionExpressionArgument (COMMA mathFunctionExpressionArgument)*)? RP
+    ;
+
 operatorExpression
     : primaryExpression
     | mathFn
+    | mathEvalFn
     | operator=(MINUS | PLUS) operatorExpression
     | left=operatorExpression operator=(ASTERISK | SLASH | PERCENT) right=operatorExpression
     | left=operatorExpression operator=(PLUS | MINUS) right=operatorExpression
@@ -99,7 +129,7 @@ evalCommand
     ;
 
 statsCommand
-    : STATS fields (BY qualifiedNames)?
+    : STATS fields? (BY qualifiedNames)?
     ;
 
 sourceIdentifier
@@ -110,6 +140,15 @@ sourceIdentifier
 functionExpressionArgument
    : qualifiedName
    | string
+   ;
+
+mathFunctionExpressionArgument
+   : qualifiedName
+   | string
+   | number
+   | operatorExpression
+   | number (DATE_LITERAL)
+   | comparison
    ;
 
 qualifiedName
@@ -125,15 +164,27 @@ identifier
     | QUOTED_IDENTIFIER
     ;
 
+mathFunctionIdentifier
+    : MATH_FUNCTION
+    ;
+
 functionIdentifier
     : UNARY_FUNCTION
     ;
 
 constant
-    : NULL                                                                              #nullLiteral
-    | number                                                                            #numericLiteral
-    | booleanValue                                                                      #booleanLiteral
-    | string                                                                            #stringLiteral
+    : NULL
+    | numericValue
+    | booleanValue
+    | string
+    | OPENING_BRACKET numericValue (COMMA numericValue)* CLOSING_BRACKET
+    | OPENING_BRACKET booleanValue (COMMA booleanValue)* CLOSING_BRACKET
+    | OPENING_BRACKET string (COMMA string)* CLOSING_BRACKET
+    ;
+
+numericValue
+    : decimalValue
+    | integerValue
     ;
 
 limitCommand
@@ -149,12 +200,39 @@ orderExpression
     ;
 
 projectCommand
-    :  PROJECT projectClause (COMMA projectClause)*
+    :  PROJECT qualifiedNames
     ;
 
-projectClause
-    : sourceIdentifier
-    | newName=sourceIdentifier ASSIGN oldName=sourceIdentifier
+dropCommand
+    :  DROP qualifiedNames
+    ;
+
+renameVariable
+   :  identifier
+   ;
+
+renameCommand
+    : RENAME renameClause (COMMA renameClause)*
+    ;
+
+renameClause
+    : renameVariable ASSIGN qualifiedName
+    ;
+
+dissectCommand
+    : DISSECT qualifiedNames string commandOptions?
+    ;
+
+grokCommand
+    : GROK qualifiedNames string
+    ;
+
+commandOptions
+    : commandOption (COMMA commandOption)*
+    ;
+
+commandOption
+    : identifier ASSIGN constant
     ;
 
 booleanValue
@@ -164,6 +242,14 @@ booleanValue
 number
     : DECIMAL_LITERAL  #decimalLiteral
     | INTEGER_LITERAL  #integerLiteral
+    ;
+
+decimalValue
+    : DECIMAL_LITERAL
+    ;
+
+integerValue
+    : INTEGER_LITERAL
     ;
 
 string
@@ -180,4 +266,9 @@ explainCommand
 
 subqueryExpression
     : OPENING_BRACKET query CLOSING_BRACKET
+    ;
+
+showCommand
+    : SHOW INFO
+    | SHOW FUNCTIONS
     ;

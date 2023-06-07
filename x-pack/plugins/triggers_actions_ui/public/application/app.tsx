@@ -28,6 +28,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -66,6 +67,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   element: HTMLElement;
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  expressions: ExpressionsStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

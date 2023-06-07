@@ -26,7 +26,8 @@ import {
   closeBracketDefinition,
   mathOperatorsCommandsDefinitions,
   aggregationFunctionsDefinitions,
-  roundCommandDefinition,
+  mathCommandDefinition,
+  whereCommandDefinition,
   assignOperatorDefinition,
   buildConstantsDefinitions,
   buildNewVarDefinition,
@@ -44,9 +45,17 @@ import {
   ProcessingCommandContext,
   SourceIdentifierContext,
   UserVariableContext,
+  RenameVariableContext,
   BooleanExpressionContext,
+  RegexBooleanExpressionContext,
   LimitCommandContext,
   ValueExpressionContext,
+  ProjectCommandContext,
+  DropCommandContext,
+  RenameCommandContext,
+  DissectCommandContext,
+  GrokCommandContext,
+  MvExpandCommandContext,
 } from '../../antlr/esql_parser';
 
 export class AutocompleteListener implements ESQLParserListener {
@@ -58,9 +67,10 @@ export class AutocompleteListener implements ESQLParserListener {
   private parentContext: number | undefined;
 
   private get fields() {
-    return this.tables.length > 1
-      ? buildConstantsDefinitions(this.tables.at(-2)!)
-      : [DynamicAutocompleteItem.FieldIdentifier];
+    const fieldsSuggestions: Array<DynamicAutocompleteItem | AutocompleteCommandDefinition> = [
+      DynamicAutocompleteItem.FieldIdentifier,
+    ];
+    return fieldsSuggestions;
   }
 
   private get hasSuggestions() {
@@ -141,6 +151,11 @@ export class AutocompleteListener implements ESQLParserListener {
   enterStatsCommand(ctx: StatsCommandContext) {
     this.suggestions = [];
     this.parentContext = ESQLParser.STATS;
+    const fn = ctx.fields();
+    if (!fn) {
+      this.suggestions = [buildNewVarDefinition(this.getNewVarName())];
+      return;
+    }
   }
 
   enterEvalCommand(ctx: EvalCommandContext) {
@@ -152,6 +167,65 @@ export class AutocompleteListener implements ESQLParserListener {
     const qn = ctx.qualifiedNames();
     if (qn && qn.text) {
       this.suggestions = this.getEndCommandSuggestions([byOperatorDefinition]);
+    }
+  }
+
+  exitProjectCommand?(ctx: ProjectCommandContext) {
+    const qn = ctx.qualifiedNames();
+    if (qn && qn.text) {
+      if (qn.text.slice(-1) !== ',') {
+        this.suggestions = this.getEndCommandSuggestions();
+      }
+    }
+  }
+
+  exitDropCommand?(ctx: DropCommandContext) {
+    const qn = ctx.qualifiedNames();
+    if (qn && qn.text) {
+      if (qn.text.slice(-1) !== ',') {
+        this.suggestions = this.getEndCommandSuggestions();
+      }
+    }
+  }
+
+  enterRenameCommand(ctx: RenameCommandContext) {
+    this.suggestions = [];
+    this.parentContext = ESQLParser.RENAME;
+  }
+
+  exitRenameCommand?(ctx: RenameCommandContext) {
+    const rc = ctx.renameClause();
+    const commaExists = ctx.COMMA();
+    if (!rc[0].exception) {
+      const qn = rc[0].qualifiedName();
+      if (qn && qn.text) {
+        if (!commaExists.length) {
+          this.suggestions = this.getEndCommandSuggestions();
+        }
+      }
+    }
+  }
+
+  exitDissectCommand?(ctx: DissectCommandContext) {
+    const qn = ctx.qualifiedNames();
+    const pattern = ctx.string();
+    if (qn && qn.text && pattern && pattern.text && pattern.text !== '<missing STRING>') {
+      this.suggestions = this.getEndCommandSuggestions();
+    }
+  }
+
+  exitGrokCommand?(ctx: GrokCommandContext) {
+    const qn = ctx.qualifiedNames();
+    const pattern = ctx.string();
+    if (qn && qn.text && pattern && pattern.text && pattern.text !== '<missing STRING>') {
+      this.suggestions = this.getEndCommandSuggestions();
+    }
+  }
+
+  exitMvExpandCommand?(ctx: MvExpandCommandContext) {
+    const qn = ctx.qualifiedNames();
+    if (qn && qn.text) {
+      this.suggestions = this.getEndCommandSuggestions();
     }
   }
 
@@ -190,6 +264,21 @@ export class AutocompleteListener implements ESQLParserListener {
     }
   }
 
+  enterRenameVariable?(ctx: RenameVariableContext) {
+    this.suggestions = [];
+  }
+
+  exitRenameVariable(ctx: RenameVariableContext) {
+    if (!ctx.exception && !ctx.text) {
+      this.suggestions = [buildNewVarDefinition(this.getNewVarName())];
+    }
+
+    if (!ctx.exception && ctx.text && ctx.text.slice(-1) !== '=') {
+      this.tables.at(-1)?.push(ctx.text);
+      this.suggestions = [assignOperatorDefinition];
+    }
+  }
+
   exitUserVariable(ctx: UserVariableContext) {
     if (!ctx.exception && ctx.text) {
       this.tables.at(-1)?.push(ctx.text);
@@ -210,7 +299,7 @@ export class AutocompleteListener implements ESQLParserListener {
         }
 
         if (this.parentContext === ESQLParser.EVAL) {
-          this.suggestions = [roundCommandDefinition, ...this.fields];
+          this.suggestions = [...mathCommandDefinition, ...this.fields];
           return;
         }
       }
@@ -222,7 +311,9 @@ export class AutocompleteListener implements ESQLParserListener {
     const isInEval = this.parentContext === ESQLParser.EVAL;
 
     if (this.parentContext && (isInStats || isInEval)) {
-      const hasFN = ctx.tryGetToken(esql_parser.UNARY_FUNCTION, 0);
+      const hasFN =
+        ctx.tryGetToken(esql_parser.UNARY_FUNCTION, 0) ||
+        ctx.tryGetToken(esql_parser.MATH_FUNCTION, 0);
       const hasLP = ctx.tryGetToken(esql_parser.LP, 0);
       const hasRP = ctx.tryGetToken(esql_parser.RP, 0);
 
@@ -256,19 +347,39 @@ export class AutocompleteListener implements ESQLParserListener {
   }
 
   exitWhereCommand(ctx: WhereCommandContext) {
-    const booleanExpression = ctx.booleanExpression();
+    const booleanExpression = ctx.whereBooleanExpression();
 
     if (booleanExpression.exception) {
+      if (!booleanExpression.text) {
+        this.suggestions = [...whereCommandDefinition, ...this.fields];
+        return;
+      }
       this.suggestions = this.fields;
       return;
     } else {
       const innerBooleanExpressions = booleanExpression.getRuleContexts(BooleanExpressionContext);
+      const regexBooleanExpression = booleanExpression.getRuleContexts(
+        RegexBooleanExpressionContext
+      );
+
+      if (booleanExpression.WHERE_FUNCTIONS()) {
+        if (booleanExpression.COMMA().length) {
+          this.suggestions = [];
+          return;
+        }
+      }
+
+      if (regexBooleanExpression.length) {
+        this.suggestions = [];
+        return;
+      }
+
       if (innerBooleanExpressions.some((be) => be.exception)) {
         this.suggestions = this.fields;
         return;
       }
     }
-    if (!this.hasSuggestions) {
+    if (!this.hasSuggestions && !booleanExpression.WHERE_FUNCTIONS()) {
       this.suggestions = comparisonCommandsDefinitions;
     }
   }

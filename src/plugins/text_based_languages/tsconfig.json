@@ -13,6 +13,8 @@
     "@kbn/text-based-editor",
     "@kbn/kibana-react-plugin",
     "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/data-views-plugin",
   ],
   "exclude": [
     "target/**/*",

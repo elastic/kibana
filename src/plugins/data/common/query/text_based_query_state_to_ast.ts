@@ -57,6 +57,14 @@ export function textBasedQueryStateToExpressionAst({
         ast.chain.push(essql);
       }
     }
+    // esql query
+    if (mode === 'esql' && 'esql' in query) {
+      const essql = aggregateQueryToAst(query, timeFieldName);
+
+      if (essql) {
+        ast.chain.push(essql);
+      }
+    }
   }
   return ast;
 }

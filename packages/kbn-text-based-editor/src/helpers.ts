@@ -101,6 +101,22 @@ export const getDocumentationSections = async (language: string) => {
       initialSection,
     };
   }
+  if (language === 'esql') {
+    const { sourceCommands, processingCommands, initialSection, functions } = await import(
+      './esql_documentation_sections'
+    );
+    groups.push({
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
+        defaultMessage: 'ESQL',
+      }),
+      items: [],
+    });
+    groups.push(sourceCommands, processingCommands, functions);
+    return {
+      groups,
+      initialSection,
+    };
+  }
 };
 
 export const getInlineEditorText = (queryString: string, isMultiLine: boolean) => {

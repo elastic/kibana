@@ -9,9 +9,9 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ENABLE_TEXT_BASED } from '../../../../../common';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/discover_layout';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -154,10 +154,11 @@ export const DiscoverTopNav = ({
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
+  const isSQLModeEnabled = uiSettings.get(ENABLE_TEXT_BASED);
   const supportedTextBasedLanguages = [];
   if (isSQLModeEnabled) {
     supportedTextBasedLanguages.push('SQL');
+    supportedTextBasedLanguages.push('ESQL');
   }
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {

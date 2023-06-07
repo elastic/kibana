@@ -42,8 +42,18 @@ describe('autocomplete_listener', () => {
   });
 
   describe('where', () => {
-    testSuggestions('from a | where ', ['FieldIdentifier']);
-    testSuggestions('from a | where "field" ', ['==', '!=', '<', '>', '<=', '>=']);
+    testSuggestions('from a | where ', ['is_null', 'cidr_match', 'FieldIdentifier']);
+    testSuggestions('from a | where "field" ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      'like',
+      'rlike',
+      'in',
+    ]);
     testSuggestions('from a | where "field" >= ', ['FieldIdentifier']);
     testSuggestions('from a | where "field" >= "field1" ', ['or', 'and', '|']);
     testSuggestions('from a | where "field" >= "field1" and ', ['FieldIdentifier']);
@@ -54,9 +64,32 @@ describe('autocomplete_listener', () => {
       '>',
       '<=',
       '>=',
+      'like',
+      'rlike',
+      'in',
     ]);
-    testSuggestions('from a | stats a=avg("field") | where a ', ['==', '!=', '<', '>', '<=', '>=']);
-    testSuggestions('from a | stats a=avg("b") | where "c" ', ['==', '!=', '<', '>', '<=', '>=']);
+    testSuggestions('from a | stats a=avg("field") | where a ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      'like',
+      'rlike',
+      'in',
+    ]);
+    testSuggestions('from a | stats a=avg("b") | where "c" ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      'like',
+      'rlike',
+      'in',
+    ]);
     testSuggestions('from a | where "field" >= "field1" and  "field2 == ', ['FieldIdentifier']);
   });
 
@@ -72,10 +105,23 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | limit 4 ', ['|']);
   });
 
+  describe('mv_expand', () => {
+    testSuggestions('from a | mv_expand ', ['FieldIdentifier']);
+    testSuggestions('from a | mv_expand a ', ['|']);
+  });
+
   describe('stats', () => {
     testSuggestions('from a | stats ', ['var0']);
     testSuggestions('from a | stats a ', ['=']);
-    testSuggestions('from a | stats a=', ['avg', 'max', 'min', 'sum', 'FieldIdentifier']);
+    testSuggestions('from a | stats a=', [
+      'avg',
+      'max',
+      'min',
+      'sum',
+      'count',
+      'count_distinct',
+      'FieldIdentifier',
+    ]);
     testSuggestions('from a | stats a=b', ['|', 'by']);
     testSuggestions('from a | stats a=b by ', ['FieldIdentifier']);
     testSuggestions('from a | stats a=c by d', ['|']);
@@ -93,7 +139,30 @@ describe('autocomplete_listener', () => {
   describe('eval', () => {
     testSuggestions('from a | eval ', ['var0']);
     testSuggestions('from a | eval a ', ['=']);
-    testSuggestions('from a | eval a=', ['round', 'FieldIdentifier']);
+    testSuggestions('from a | eval a=', [
+      'round',
+      'abs',
+      'concat',
+      'substring',
+      'starts_with',
+      'split',
+      'to_string',
+      'to_boolean',
+      'to_datetime',
+      'to_double',
+      'to_integer',
+      'to_long',
+      'to_ip',
+      'date_format',
+      'date_trunc',
+      'date_parse',
+      'auto_bucket',
+      'is_finite',
+      'is_infinite',
+      'case',
+      'length',
+      'FieldIdentifier',
+    ]);
     testSuggestions('from a | eval a=b', ['|', '+', '-', '/', '*']);
     testSuggestions('from a | eval a=b, ', ['var0']);
     testSuggestions('from a | eval a=round', ['(']);

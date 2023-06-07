@@ -20,7 +20,7 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
 import { ActionGroupId, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
-import { isEsQueryRule } from './util';
+import { isSearchSourceRule } from './util';
 
 export function getRuleType(
   core: CoreSetup
@@ -126,6 +126,19 @@ export function getRuleType(
     }
   );
 
+  const actionVariableEsqlQueryLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextEsqlQueryLabel',
+    {
+      defaultMessage: 'ESQL query field used to fetch data from Elasticsearch.',
+    }
+  );
+  const actionVariableAlertIdLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextAlertIdLabel',
+    {
+      defaultMessage: 'The string field path used to group alerts.',
+    }
+  );
+
   const actionVariableContextLinkLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
     {
@@ -159,25 +172,28 @@ export function getRuleType(
         { name: 'searchConfiguration', description: actionVariableSearchConfigurationLabel },
         { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'index', description: actionVariableContextIndexLabel },
+        { name: 'esqlQuery', description: actionVariableEsqlQueryLabel },
+        { name: 'alertId', description: actionVariableAlertIdLabel },
       ],
     },
     useSavedObjectReferences: {
       extractReferences: (params) => {
-        if (isEsQueryRule(params.searchType)) {
-          return { params: params as EsQueryRuleParamsExtractedParams, references: [] };
+        if (isSearchSourceRule(params.searchType)) {
+          const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
+          const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
+          return { params: newParams, references };
         }
-        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
-        const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
-        return { params: newParams, references };
+
+        return { params: params as EsQueryRuleParamsExtractedParams, references: [] };
       },
       injectReferences: (params, references) => {
-        if (isEsQueryRule(params.searchType)) {
-          return params;
+        if (isSearchSourceRule(params.searchType)) {
+          return {
+            ...params,
+            searchConfiguration: injectReferences(params.searchConfiguration, references),
+          };
         }
-        return {
-          ...params,
-          searchConfiguration: injectReferences(params.searchConfiguration, references),
-        };
+        return params;
       },
     },
     minimumLicenseRequired: 'basic',

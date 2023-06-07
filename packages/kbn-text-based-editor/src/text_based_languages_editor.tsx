@@ -6,16 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
+import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
-import { SQLLang, monaco } from '@kbn/monaco';
+import {
+  SQLLang,
+  monaco,
+  ESQL_LANG_ID,
+  ESQL_THEME_ID,
+  ESQLLang,
+  ESQLCustomAutocompleteCallbacks,
+} from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopover,
 } from '@kbn/language-documentation-popover';
-
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -46,6 +55,7 @@ import {
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
+import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 
 import './overwrite.scss';
 
@@ -62,6 +72,11 @@ export interface TextBasedLanguagesEditorProps {
   dataTestSubj?: string;
 }
 
+interface TextBasedEditorDeps {
+  dataViews: DataViewsPublicPluginStart;
+  expressions: ExpressionsStart;
+}
+
 const MAX_COMPACT_VIEW_LENGTH = 250;
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
@@ -72,6 +87,9 @@ const KEYCODE_ARROW_DOWN = 40;
 
 const languageId = (language: string) => {
   switch (language) {
+    case 'esql': {
+      return ESQL_LANG_ID;
+    }
     case 'sql':
     default: {
       return SQLLang.ID;
@@ -82,6 +100,8 @@ const languageId = (language: string) => {
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
+let currentCursorContent = '';
+
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
   onTextLangQueryChange,
@@ -97,6 +117,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
+  const kibana = useKibana<TextBasedEditorDeps>();
+  const { dataViews, expressions } = kibana.services;
   const [lines, setLines] = useState(1);
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
@@ -117,7 +139,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     editorHeight,
     isCodeEditorExpanded,
     Boolean(errors?.length),
-    isCodeEditorExpandedFocused
+    isCodeEditorExpandedFocused,
+    Boolean(documentationSections)
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -208,6 +231,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       editor1.current?.onDidChangeModelContent((e) => {
         if (updateLinesFromModel) {
           setLines(editorModel.current?.getLineCount() || 1);
+        }
+        if (editor1?.current) {
+          const currentPosition = editor1.current?.getPosition();
+          const content = editorModel.current?.getValueInRange({
+            startLineNumber: 0,
+            startColumn: 0,
+            endLineNumber: currentPosition?.lineNumber ?? 1,
+            endColumn: currentPosition?.column ?? 1,
+          });
+          if (content) {
+            currentCursorContent = content || editor1.current?.getValue();
+          }
         }
       });
       editor1.current?.onDidFocusEditorText(() => {
@@ -329,6 +364,35 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [language, documentationSections]);
 
+  const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
+    useCallback(() => {
+      return dataViews.getTitles();
+    }, [dataViews]);
+
+  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
+    useMemo(() => {
+      let fieldsSuggestions: string[] = [];
+
+      return async (ctx) => {
+        const pipes = currentCursorContent?.split('|');
+        pipes?.pop();
+        const validContent = pipes?.join('|');
+        if (validContent) {
+          const esqlQuery = {
+            esql: `${validContent} | limit 0`,
+          };
+          try {
+            const table = await fetchFieldsFromESQL(esqlQuery, expressions);
+            fieldsSuggestions = table?.columns.map((c) => c.name) ?? [];
+          } catch (e) {
+            // no action yet
+          }
+        }
+
+        return fieldsSuggestions;
+      };
+    }, [expressions]);
+
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
     accessibilitySupport: 'off',
@@ -343,7 +407,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     minimap: { enabled: false },
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
-    theme: isDark ? 'vs-dark' : 'vs',
+    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
     lineDecorationsWidth: 12,
     autoIndent: 'none',
     wrappingIndent: 'none',
@@ -355,7 +419,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       vertical: 'auto',
     },
     overviewRulerBorder: false,
-    readOnly: isDisabled,
+    readOnly:
+      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
   };
 
   if (isCompactFocused) {
@@ -451,20 +516,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LanguageDocumentationPopover
-                  language={String(language).toUpperCase()}
-                  sections={documentationSections}
-                  buttonProps={{
-                    color: 'text',
-                    'data-test-subj': 'TextBasedLangEditor-documentation',
-                    'aria-label': i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                      {
-                        defaultMessage: 'Documentation',
-                      }
-                    ),
-                  }}
-                />
+                {documentationSections && (
+                  <EuiFlexItem grow={false}>
+                    <LanguageDocumentationPopover
+                      language={String(language).toUpperCase()}
+                      sections={documentationSections}
+                      buttonProps={{
+                        color: 'text',
+                        'data-test-subj': 'TextBasedLangEditor-documentation',
+                        'aria-label': i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                          {
+                            defaultMessage: 'Documentation',
+                          }
+                        ),
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -520,6 +589,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
+                      suggestionProvider={
+                        language === 'esql'
+                          ? ESQLLang.getSuggestionProvider?.({
+                              getSourceIdentifiers,
+                              getFieldsIdentifiers,
+                            })
+                          : undefined
+                      }
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;
@@ -569,7 +646,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     onClick={() => expandCodeEditor(true)}
                     data-test-subj="TextBasedLangEditor-expand"
                     css={{
-                      borderRadius: 0,
+                      ...(documentationSections
+                        ? {
+                            borderRadius: 0,
+                          }
+                        : {
+                            borderTopLeftRadius: 0,
+                            borderBottomLeftRadius: 0,
+                          }),
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                     }}
@@ -577,28 +661,32 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LanguageDocumentationPopover
-                  language={String(language).toUpperCase()}
-                  sections={documentationSections}
-                  buttonProps={{
-                    display: 'empty',
-                    'data-test-subj': 'TextBasedLangEditor-inline-documentation',
-                    'aria-label': i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                      {
-                        defaultMessage: 'Documentation',
-                      }
-                    ),
-                    size: 'm',
-                    css: {
-                      borderTopLeftRadius: 0,
-                      borderBottomLeftRadius: 0,
-                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
-                      border: '1px solid rgb(17 43 134 / 10%) !important',
-                      borderLeft: 'transparent !important',
-                    },
-                  }}
-                />
+                {documentationSections && (
+                  <EuiFlexItem grow={false}>
+                    <LanguageDocumentationPopover
+                      language={String(language).toUpperCase()}
+                      sections={documentationSections}
+                      buttonProps={{
+                        display: 'empty',
+                        'data-test-subj': 'TextBasedLangEditor-inline-documentation',
+                        'aria-label': i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                          {
+                            defaultMessage: 'Documentation',
+                          }
+                        ),
+                        size: 'm',
+                        css: {
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                          backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
+                          border: '1px solid rgb(17 43 134 / 10%) !important',
+                          borderLeft: 'transparent !important',
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

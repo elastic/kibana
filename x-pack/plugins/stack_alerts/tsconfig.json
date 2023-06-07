@@ -42,6 +42,9 @@
     "@kbn/logging-mocks",
     "@kbn/share-plugin",
     "@kbn/discover-plugin",
+    "@kbn/text-based-languages",
+    "@kbn/text-based-editor",
+    "@kbn/expressions-plugin",
   ],
   "exclude": [
     "target/**/*",

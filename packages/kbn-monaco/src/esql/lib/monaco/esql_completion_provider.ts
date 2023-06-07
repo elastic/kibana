@@ -20,11 +20,6 @@ import type {
 } from '../autocomplete/types';
 import type { ESQLWorker } from '../../worker/esql_worker';
 
-const emptyCompletionList: monaco.languages.CompletionList = {
-  incomplete: false,
-  suggestions: [],
-};
-
 export class ESQLCompletionAdapter implements monaco.languages.CompletionItemProvider {
   constructor(
     private worker: (...uris: monaco.Uri[]) => Promise<ESQLWorker>,
@@ -72,21 +67,23 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
   ): Promise<monaco.languages.CompletionList> {
     const lines = model.getLineCount();
 
-    if (
+    const currentLineChars = model.getValueInRange({
+      startLineNumber: 0,
+      startColumn: 0,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    });
+    const wordInfo = model.getWordUntilPosition(position);
+    const worker = await this.worker(model.uri);
+    const providedSuggestions =
       lines !== position.lineNumber ||
       model.getLineContent(position.lineNumber).trimEnd().length >= position.column
-    ) {
-      return emptyCompletionList;
-    }
-
-    const worker = await this.worker(model.uri);
-    const wordInfo = model.getWordUntilPosition(position);
-
-    const providedSuggestions = await worker.provideAutocompleteSuggestions(model.uri.toString(), {
-      word: wordInfo.word,
-      line: position.lineNumber,
-      index: position.column,
-    });
+        ? await worker.provideAutocompleteSuggestionsFromString(currentLineChars)
+        : await worker.provideAutocompleteSuggestions(model.uri.toString(), {
+            word: wordInfo.word,
+            line: position.lineNumber,
+            index: position.column,
+          });
 
     const withDynamicItems = providedSuggestions
       ? await this.injectDynamicAutocompleteItems(providedSuggestions.suggestions, {

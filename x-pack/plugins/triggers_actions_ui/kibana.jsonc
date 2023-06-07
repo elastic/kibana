@@ -21,7 +21,8 @@
       "dataViews",
       "dataViewEditor",
       "alerting",
-      "actions"
+      "actions",
+      "expressions"
     ],
     "optionalPlugins": [
       "cloud",
@@ -34,7 +35,7 @@
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "actions"
+      "actions",
     ],
     "extraPublicDirs": [
       "public/common",

@@ -7,15 +7,22 @@
  */
 
 import { Plugin, CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { setKibanaServices } from './kibana_services';
+
+interface TextBasedLanguagesPluginStart {
+  dataViews: DataViewsPublicPluginStart;
+  expressions: ExpressionsStart;
+}
 
 export class TextBasedLanguagesPlugin implements Plugin<{}, void> {
   public setup() {
     return {};
   }
 
-  public start(core: CoreStart): void {
-    setKibanaServices(core);
+  public start(core: CoreStart, { dataViews, expressions }: TextBasedLanguagesPluginStart): void {
+    setKibanaServices(core, dataViews, expressions);
   }
 
   public stop() {}

@@ -244,7 +244,8 @@ export function ChangeDataView({
                         'unifiedSearch.query.queryBar.indexPattern.textBasedLangSwitchWarning',
                         {
                           defaultMessage:
-                            "Switching data views removes the current SQL query. Save this search to ensure you don't lose work.",
+                            "Switching data views removes the current {textBasedLanguage} query. Save this search to ensure you don't lose work.",
+                          values: { textBasedLanguage },
                         }
                       )}
                     >
@@ -367,7 +368,11 @@ export function ChangeDataView({
             setPopoverIsOpen(false);
             setIsTextBasedLangSelected(true);
             // also update the query with the sql query
-            onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
+            if (lang === 'SQL') {
+              onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
+            } else {
+              onTextLangQuerySubmit?.({ esql: `from ${trigger.title} | limit 10` });
+            }
           }}
         />
       );
@@ -433,6 +438,7 @@ export function ChangeDataView({
       <TextBasedLanguagesTransitionModal
         closeModal={onModalClose}
         setIsTextLangTransitionModalVisible={setIsTextLangTransitionModalVisible}
+        textBasedLanguage={textBasedLanguage}
       />
     );
   }

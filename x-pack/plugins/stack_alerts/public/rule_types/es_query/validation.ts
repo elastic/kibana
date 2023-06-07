@@ -14,9 +14,10 @@ import {
   builtInGroupByTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryRuleParams, SearchType } from './types';
-import { isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,
+  ONLY_ESQL_QUERY_EXPRESSION_ERRORS,
   ONLY_ES_QUERY_EXPRESSION_ERRORS,
   SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
 } from './constants';
@@ -221,6 +222,21 @@ const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>
   return errors;
 };
 
+const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQuery>) => {
+  const errors: typeof ONLY_ESQL_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    ONLY_ESQL_QUERY_EXPRESSION_ERRORS
+  );
+  if (!ruleParams.esqlQuery) {
+    errors.esqlQuery.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'ESQL query is required.',
+      })
+    );
+  }
+  return errors;
+};
+
 export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
   const validationResult = { errors: {} };
 
@@ -239,6 +255,15 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
     validationResult.errors = {
       ...validationResult.errors,
       ...validateSearchSourceParams(ruleParams),
+    };
+    return validationResult;
+  }
+
+  const isEsqlQuery = isEsqlQueryRule(ruleParams);
+  if (isEsqlQuery) {
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...validateEsqlQueryParams(ruleParams),
     };
     return validationResult;
   }

@@ -50,9 +50,12 @@ const EsQueryRuleParamsSchemaProperties = {
   termField: schema.maybe(schema.string({ minLength: 1 })),
   // limit on number of groups returned
   termSize: schema.maybe(schema.number({ min: 1 })),
-  searchType: schema.oneOf([schema.literal('searchSource'), schema.literal('esQuery')], {
-    defaultValue: 'esQuery',
-  }),
+  searchType: schema.oneOf(
+    [schema.literal('searchSource'), schema.literal('esQuery'), schema.literal('esqlQuery')],
+    {
+      defaultValue: 'esQuery',
+    }
+  ),
   timeField: schema.conditional(
     schema.siblingRef('searchType'),
     schema.literal('esQuery'),
@@ -77,6 +80,19 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.siblingRef('searchType'),
     schema.literal('esQuery'),
     schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    schema.never()
+  ),
+  // esqlQuery rule params only
+  esqlQuery: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esqlQuery'),
+    schema.object({ esql: schema.string({ minLength: 1 }) }),
+    schema.never()
+  ),
+  alertId: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esqlQuery'),
+    schema.maybe(schema.string({ minLength: 1 })),
     schema.never()
   ),
 };
@@ -142,7 +158,7 @@ function validateParams(anyParams: unknown): string | undefined {
     }
   }
 
-  if (searchType === 'searchSource') {
+  if (searchType === 'searchSource' || searchType === 'esqlQuery') {
     return;
   }
 

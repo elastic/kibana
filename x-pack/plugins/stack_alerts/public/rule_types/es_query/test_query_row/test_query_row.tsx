@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   copyToClipboard,
   EuiButton,
@@ -27,15 +27,23 @@ export interface TestQueryRowProps {
   }>;
   copyQuery?: () => string;
   hasValidationErrors: boolean;
+  triggerTestQuery?: boolean;
 }
 
 export const TestQueryRow: React.FC<TestQueryRowProps> = ({
   fetch,
   copyQuery,
   hasValidationErrors,
+  triggerTestQuery,
 }) => {
   const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
+
+  useEffect(() => {
+    if (triggerTestQuery !== undefined) {
+      onTestQuery();
+    }
+  }, [triggerTestQuery, onTestQuery]);
 
   return (
     <>

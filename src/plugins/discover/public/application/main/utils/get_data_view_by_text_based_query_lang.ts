@@ -14,7 +14,7 @@ export async function getDataViewByTextBasedQueryLang(
   currentDataView: DataView | undefined,
   services: DiscoverServices
 ) {
-  const text = 'sql' in query ? query.sql : undefined;
+  const text = 'sql' in query ? query.sql : 'esql' in query ? query.esql : undefined;
 
   const indexPatternFromQuery = getIndexPatternFromSQLQuery(text);
   if (

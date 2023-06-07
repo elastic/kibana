@@ -15,15 +15,23 @@ import {
   EsQueryRuleActionContext,
   getContextConditionsDescription,
 } from './action_context';
-import { ExecutorOptions, OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import {
+  ExecutorOptions,
+  OnlyEsQueryRuleParams,
+  OnlySearchSourceRuleParams,
+  OnlyEsqlQueryRuleParams,
+} from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { isEsQueryRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import { fetchEsqlQuery } from './lib/fetch_esql_query';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
-  const esQueryRule = isEsQueryRule(options.params.searchType);
+  const searchSourceRule = isSearchSourceRule(options.params.searchType);
+  const esqlQueryRule = isEsqlQueryRule(options.params.searchType);
+
   const {
     rule: { id: ruleId, name },
     services,
@@ -32,7 +40,14 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     spaceId,
     logger,
   } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
+  const {
+    alertFactory,
+    scopedClusterClient,
+    searchSourceClient,
+    share,
+    dataViews,
+    ruleResultService,
+  } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
@@ -41,7 +56,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  const isGroupAgg = isGroupAggregation(params.termField);
+  const isEsqlQuery = isEsqlQueryRule(params.searchType);
+  const isGroupAgg = isGroupAggregation(params.termField) || (isEsqlQuery && params.alertId);
+
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
   // value of the hit count. If the threshold condition is met, the hits are counted
@@ -50,21 +67,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // avoid counting a document multiple times.
   // latestTimestamp will be ignored if set for grouped queries
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
-  const { parsedResults, dateStart, dateEnd, link } = esQueryRule
-    ? await fetchEsQuery({
-        ruleId,
-        name,
-        alertLimit,
-        params: params as OnlyEsQueryRuleParams,
-        timestamp: latestTimestamp,
-        publicBaseUrl,
-        spacePrefix,
-        services: {
-          scopedClusterClient,
-          logger,
-        },
-      })
-    : await fetchSearchSourceQuery({
+  const { parsedResults, dateStart, dateEnd, link } = searchSourceRule
+    ? await fetchSearchSourceQuery({
         ruleId,
         alertLimit,
         params: params as OnlySearchSourceRuleParams,
@@ -76,8 +80,35 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           logger,
           dataViews,
         },
+      })
+    : esqlQueryRule
+    ? await fetchEsqlQuery({
+        ruleId,
+        alertLimit,
+        params: params as OnlyEsqlQueryRuleParams,
+        latestTimestamp,
+        spacePrefix,
+        services: {
+          share,
+          scopedClusterClient,
+          logger,
+          dataViews,
+          ruleResultService,
+        },
+      })
+    : await fetchEsQuery({
+        ruleId,
+        name,
+        alertLimit,
+        params: params as OnlyEsQueryRuleParams,
+        timestamp: latestTimestamp,
+        publicBaseUrl,
+        spacePrefix,
+        services: {
+          scopedClusterClient,
+          logger,
+        },
       });
-
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;
@@ -86,7 +117,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     // group aggregations use the bucket selector agg to compare conditions
     // within the ES query, so only 'met' results are returned, therefore we don't need
     // to use the compareFn
-    const met = isGroupAgg ? true : compareFn(value, params.threshold);
+    const met = isGroupAgg || isEsqlQuery ? true : compareFn(value, params.threshold);
     if (!met) {
       unmetGroupValues[alertId] = value;
       continue;
@@ -101,6 +132,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         aggType: params.aggType,
@@ -144,6 +176,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: [],
       link,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         isRecovered: true,
