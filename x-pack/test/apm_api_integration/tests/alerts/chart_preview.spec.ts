@@ -309,7 +309,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(response.body.latencyChartPreview.length).to.equal(6);
+      expect(response.body.latencyChartPreview.length).to.equal(12);
       expect(
         response.body.latencyChartPreview.map(
           (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
@@ -318,9 +318,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         'opbeans-java_production_request_DispatcherServlet#doGet',
         'opbeans-java_production_request_APIRestController#stats',
         'opbeans-java_production_request_APIRestController#product',
-        'opbeans-java_production_request_APIRestController#customers',
+        'opbeans-java_production_request_APIRestController#order',
+        'opbeans-java_production_request_APIRestController#products',
         'opbeans-java_production_request_APIRestController#customer',
         'opbeans-java_production_request_APIRestController#topProducts',
+        'opbeans-java_production_request_APIRestController#customerWhoBought',
+        'opbeans-java_production_request_APIRestController#orders',
+        'opbeans-java_production_request_ResourceHttpRequestHandler',
+        'opbeans-java_production_request_APIRestController#customers',
+        'opbeans-java_production_request_DispatcherServlet#doPost',
       ]);
     });
 
