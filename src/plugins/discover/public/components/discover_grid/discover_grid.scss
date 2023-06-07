@@ -36,6 +36,30 @@
 }
 
 .dscDiscoverGrid__cellPopover {
+  min-height: 140px;
+  max-width: 900px !important;
+
+  &.dscDiscoverGrid__cellPopover--withJson {
+    resize: horizontal;
+    min-width: 516px;
+    width: 516px;
+  }
+
+  &:not(.dscDiscoverGrid__cellPopover--withJson) {
+    resize: both;
+    min-width: 300px;
+    width: 400px;
+    max-height: 390px !important;
+  }
+
+  & > div {
+    height: 100%;
+  }
+}
+
+.dscDiscoverGrid__cellPopoverValueContainer {
+  height: 100%;
+
   // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
   .lines-content.monaco-editor-background {
     overflow: unset !important;

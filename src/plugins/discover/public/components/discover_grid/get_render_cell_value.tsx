@@ -7,6 +7,7 @@
  */
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
@@ -19,19 +20,24 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
-import { defaultMonacoEditorWidth } from './constants';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
 import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
+import { defaultMonacoEditorWidth } from './constants';
 import { type ShouldShowFieldInTableHandler } from '../../utils/get_should_show_field_handler';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
+
+const jsonContainerStyles = css`
+  min-width: ${defaultMonacoEditorWidth};
+`;
 
 export const getRenderCellValueFn =
   (
@@ -193,19 +199,15 @@ function renderPopoverContent({
         gutterSize="none"
         direction="column"
         justifyContent="flexEnd"
-        className="dscDiscoverGrid__cellPopover"
+        className="dscDiscoverGrid__cellPopoverValueContainer"
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            json={getJSON(columnId, row, useTopLevelObjectColumns)}
-            width={defaultMonacoEditorWidth}
-            height={200}
-          />
+        <EuiFlexItem css={jsonContainerStyles}>
+          <JsonCodeEditor json={getJSON(columnId, row, useTopLevelObjectColumns)} height={300} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -214,20 +216,22 @@ function renderPopoverContent({
   return (
     <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
       <EuiFlexItem>
-        <span
-          className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
-          // formatFieldValue guarantees sanitized values
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: formatFieldValue(
-              row.flattened[columnId],
-              row.raw,
-              fieldFormats,
-              dataView,
-              field
-            ),
-          }}
-        />
+        <EuiText>
+          <span
+            className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
+            // formatFieldValue guarantees sanitized values
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{
+              __html: formatFieldValue(
+                row.flattened[columnId],
+                row.raw,
+                fieldFormats,
+                dataView,
+                field
+              ),
+            }}
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
     </EuiFlexGroup>
