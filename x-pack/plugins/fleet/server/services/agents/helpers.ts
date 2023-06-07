@@ -78,6 +78,12 @@ export function searchHitToAgent(
     tags: hit._source?.tags,
     outputs,
     components,
+    default_api_key_history: hit._source?.default_api_key_history
+      ? hit._source?.default_api_key_history.map((item) => ({
+          id: item.id,
+          retired_at: item.retired_at,
+        }))
+      : undefined,
 
     // key-value pairs
     user_provided_metadata: hit._source?.user_provided_metadata!,

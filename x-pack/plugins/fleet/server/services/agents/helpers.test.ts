@@ -71,6 +71,12 @@ describe('searchHitToAgent', () => {
         user_provided_metadata: {
           key: 'val',
         },
+        default_api_key_history: [
+          {
+            id: '1',
+            retired_at: '',
+          },
+        ],
       },
       sort: [1686123930000, 'beb13bf6a73e'],
       fields: {
@@ -141,6 +147,12 @@ describe('searchHitToAgent', () => {
       user_provided_metadata: {
         key: 'val',
       },
+      default_api_key_history: [
+        {
+          id: '1',
+          retired_at: '',
+        },
+      ],
     });
   });
 });
