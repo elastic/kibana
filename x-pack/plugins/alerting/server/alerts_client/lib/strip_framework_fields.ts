@@ -10,7 +10,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleAlertData } from '../../types';
 
-const allowedFrameworkFields: string[] = [ALERT_REASON];
+const allowedFrameworkFields = new Set<string>([ALERT_REASON]);
 
 /**
  * Remove framework fields from the alert payload reported by
@@ -22,7 +22,7 @@ export const stripFrameworkFields = <AlertData extends RuleAlertData>(
   payload: AlertData
 ): AlertData => {
   const keysToStrip = Object.keys(alertFieldMap).filter(
-    (key: string) => !allowedFrameworkFields.includes(key)
+    (key: string) => !allowedFrameworkFields.has(key)
   );
   return omit(payload, keysToStrip) as AlertData;
 };
