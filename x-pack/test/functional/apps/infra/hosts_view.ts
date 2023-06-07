@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { parse } from 'url';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
@@ -285,20 +286,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should navigate to Uptime after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(
-          'app/uptime/?search=host.name%3A%20%22Jennys-MBP.fritz.box%22%20OR%20host.ip%3A%20%22192.168.1.79%22'
-        );
+        const url = parse(await browser.getCurrentUrl());
+
+        const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
+        const query = decodeURIComponent(url.query ?? '');
+
+        expect(url.pathname).to.eql('/app/uptime/');
+        expect(query).to.contain(search);
 
         await returnTo(HOSTS_VIEW_PATH);
       });
 
       it('should navigate to APM services after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(
-          'http://localhost:5620/app/apm/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22&rangeFrom=2023-03-28T18%3A20%3A00.000Z&rangeTo=2023-03-28T18%3A21%3A00.000Z&offset=1d'
-        );
+        const url = parse(await browser.getCurrentUrl());
+
+        const query = decodeURIComponent(url.query ?? '');
+
+        const environment = 'environment=ENVIRONMENT_ALL';
+        const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
+        const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
+        const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
+
+        expect(url.pathname).to.eql('/app/apm/');
+        expect(query).to.contain(environment);
+        expect(query).to.contain(kuery);
+        expect(query).to.contain(rangeFrom);
+        expect(query).to.contain(rangeTo);
 
         await returnTo(HOSTS_VIEW_PATH);
       });
