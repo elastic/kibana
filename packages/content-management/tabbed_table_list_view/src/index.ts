@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { TableListViewTable } from './table_list_view_table';
-
-export type {
-  TableListViewTableProps,
-  State as TableListViewState,
-  UserContentCommonSchema,
-} from './table_list_view_table';
-
-export { TableListViewProvider, TableListViewKibanaProvider } from './services';
-
-export type { RowActions } from './types';
+export { TabbedTableListView, type TableListTab } from './tabbed_table_list_view';

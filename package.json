@@ -187,6 +187,7 @@
     "@kbn/content-management-content-editor": "link:packages/content-management/content_editor",
     "@kbn/content-management-examples-plugin": "link:examples/content_management_examples",
     "@kbn/content-management-plugin": "link:src/plugins/content_management",
+    "@kbn/content-management-tabbed-table-list-view": "link:packages/content-management/tabbed_table_list_view",
     "@kbn/content-management-table-list-view": "link:packages/content-management/table_list_view",
     "@kbn/content-management-table-list-view-table": "link:packages/content-management/table_list_view_table",
     "@kbn/content-management-utils": "link:packages/kbn-content-management-utils",

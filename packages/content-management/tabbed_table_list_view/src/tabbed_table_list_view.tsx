@@ -11,13 +11,13 @@ import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
 import type {
-  TableListProps,
-  TableListViewProps,
+  TableListViewTableProps,
   UserContentCommonSchema,
-} from './table_list_view_table';
+} from '@kbn/content-management-table-list-view-table';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 
 export type TableListTabParentProps<T extends UserContentCommonSchema = UserContentCommonSchema> =
-  Pick<TableListProps<T>, 'onFetchSuccess' | 'setPageDataTestSubject'>;
+  Pick<TableListViewTableProps<T>, 'onFetchSuccess' | 'setPageDataTestSubject'>;
 
 export interface TableListTab<T extends UserContentCommonSchema = UserContentCommonSchema> {
   title: string;
