@@ -9,7 +9,7 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 import classNames from 'classnames';
 import TooltipTrigger from 'react-popper-tooltip';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TooltipValueFormatter, Tooltip } from '@elastic/charts';
+import { TooltipValueFormatter } from '@elastic/charts';
 
 import './_index.scss';
 

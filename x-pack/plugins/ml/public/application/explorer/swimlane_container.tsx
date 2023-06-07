@@ -28,7 +28,7 @@ import {
   Position,
   ScaleType,
   Settings,
-  TooltipSettings,
+  TooltipProps,
   TooltipValue,
   Tooltip,
 } from '@elastic/charts';
@@ -369,7 +369,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   ) as ElementClickListener;
 
-  const tooltipOptions: TooltipSettings = useMemo(
+  const tooltipOptions = useMemo<TooltipProps>(
     () => ({
       placement: 'auto',
       fallbackPlacements: ['left'],

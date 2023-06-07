@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { css } from '@emotion/react';
 
-import { Chart, BarSeries, PartialTheme, ScaleType, Settings } from '@elastic/charts';
+import { Chart, BarSeries, PartialTheme, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
 import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -83,10 +83,10 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
   return (
     <div css={cssChartSize}>
       <Chart>
+        <Tooltip type={TooltipType.None} />
         <Settings
           theme={[miniHistogramChartTheme, defaultChartTheme]}
           showLegend={false}
-          tooltip="none"
         />
         <BarSeries
           id="doc_count_overall"

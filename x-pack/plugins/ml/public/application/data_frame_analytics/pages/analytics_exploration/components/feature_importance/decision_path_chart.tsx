@@ -40,12 +40,6 @@ const baselineStyle: LineAnnotationStyle = {
     stroke: euiColorFullShade,
     opacity: 0.75,
   },
-  details: {
-    fontFamily: 'Arial',
-    fontSize: 10,
-    fill: euiColorMediumShade,
-    padding: 0,
-  },
 };
 
 const axes: RecursivePartial<AxisStyle> = {
