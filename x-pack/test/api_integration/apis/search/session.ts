@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -138,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search, this will not be persisted because session is not saved yet
         const searchRes1 = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -172,6 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search
         const searchRes2 = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -256,6 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
       // run search
       const searchRes = await supertest
         .post(`/internal/search/ese`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'foo')
         .send({
           sessionId,
@@ -281,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
       // run search to persist into a session
       await supertest
         .post(`/internal/search/ese/${id}`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'foo')
         .send({
           sessionId,
@@ -517,6 +522,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search
         const searchRes = await supertest
           .post(`/s/${spaceId}/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -542,6 +548,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search to persist into a session
         await supertest
           .post(`/s/${spaceId}/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,

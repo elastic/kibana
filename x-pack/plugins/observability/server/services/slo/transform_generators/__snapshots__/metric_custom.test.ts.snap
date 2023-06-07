@@ -87,8 +87,8 @@ Object {
       "slo.isGoodSlice": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "goodEvents": "slo.numerator",
-            "totalEvents": "slo.denominator",
+            "goodEvents": "slo.numerator>value",
+            "totalEvents": "slo.denominator>value",
           },
           "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
         },
