@@ -9,6 +9,7 @@ import React, { ReactElement, type FC, useCallback, useEffect, useMemo, useState
 import moment from 'moment';
 
 import {
+  AnnotationDomainType,
   Axis,
   BrushEndListener,
   Chart,
@@ -22,7 +23,9 @@ import {
   RectAnnotation,
   LineAnnotation,
 } from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
 
+import { ALERT_END } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
@@ -446,9 +449,31 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
                 min={windowParameters.deviationMin}
                 max={windowParameters.deviationMax}
               />
+              {[
+                <LineAnnotation
+                  key={'manual_annotation_line'}
+                  id={'manual_annotation_line'}
+                  domainType={AnnotationDomainType.XDomain}
+                  dataValues={[
+                    {
+                      dataValue: annotations.start,
+                      header: annotations.start,
+                      details: 'Alert started',
+                    },
+                  ]}
+                  style={{
+                    line: {
+                      strokeWidth: 3,
+                      stroke: 'red',
+                      opacity: 1,
+                    },
+                  }}
+                  marker={<EuiIcon type="warning" color={'red'} />}
+                  markerPosition={Position.Bottom}
+                />,
+              ]}
             </>
           )}
-          {annotations}
         </Chart>
       </div>
     </>
