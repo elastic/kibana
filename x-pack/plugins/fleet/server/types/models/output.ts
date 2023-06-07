@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import _ from 'lodash';
 
 import {
   kafkaAuthType,
@@ -64,19 +65,19 @@ const BaseSchema = {
   ),
 };
 
-const ElasticSearchBaseSchema = {
+export const ElasticSearchBaseSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
 };
 
-const LogstashBaseSchema = {
+export const LogstashBaseSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
 };
 
-const KafkaBaseSchema = {
+export const KafkaBaseSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
@@ -169,54 +170,20 @@ const KafkaBaseSchema = {
   broker_timeout: schema.maybe(schema.number()),
 };
 
-export const OutputBaseSchema = schema.oneOf([
+export const OutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchBaseSchema }),
   schema.object({ ...LogstashBaseSchema }),
   schema.object({ ...KafkaBaseSchema }),
 ]);
 
-export const NewOutputSchema = schema.object({ ...KafkaBaseSchema }); // TODO: add all output types
-export const UpdateOutputSchema = schema.object({
-  name: schema.maybe(schema.string()),
-  type: schema.maybe(
-    schema.oneOf([schema.literal(outputType.Elasticsearch), schema.literal(outputType.Logstash)])
-  ),
-  hosts: schema.maybe(
-    schema.oneOf([
-      schema.arrayOf(schema.uri({ scheme: ['http', 'https'] })),
-      schema.arrayOf(schema.string({ validate: validateLogstashHost })),
-    ])
-  ),
-  is_default: schema.maybe(schema.boolean()),
-  is_default_monitoring: schema.maybe(schema.boolean()),
-  ca_sha256: schema.maybe(schema.string()),
-  ca_trusted_fingerprint: schema.maybe(schema.string()),
-  config_yaml: schema.maybe(schema.string()),
-  ssl: schema.maybe(
-    schema.object({
-      certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-      certificate: schema.maybe(schema.string()),
-      key: schema.maybe(schema.string()),
-    })
-  ),
-  proxy_id: schema.nullable(schema.string()),
-  shipper: schema.maybe(
-    schema.object({
-      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
-      disk_queue_path: schema.nullable(schema.string()),
-      disk_queue_max_size: schema.nullable(schema.number()),
-      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
-      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
-      compression_level: schema.nullable(schema.number()),
-      loadbalance: schema.nullable(schema.boolean()),
-      mem_queue_events: schema.nullable(schema.number()),
-      queue_flush_timeout: schema.nullable(schema.number()),
-      max_batch_bytes: schema.nullable(schema.number()),
-    })
-  ),
-});
+const UpdateElasticSearchBaseSchema = _.omit(ElasticSearchBaseSchema, ['id']);
 
-export const OutputSchema = {
-  ...OutputBaseSchema,
-  ...schema.object({ id: schema.string() }),
-};
+const UpdateLogstashBaseSchema = _.omit(LogstashBaseSchema, ['id']);
+
+const UpdateKafkaBaseSchema = _.omit(KafkaBaseSchema, ['id']);
+
+export const UpdateOutputSchema = schema.oneOf([
+  schema.object({ ...UpdateElasticSearchBaseSchema }),
+  schema.object({ ...UpdateLogstashBaseSchema }),
+  schema.object({ ...UpdateKafkaBaseSchema }),
+]);

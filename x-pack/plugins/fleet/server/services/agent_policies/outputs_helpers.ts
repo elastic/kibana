@@ -36,8 +36,11 @@ export async function getDataOutputForAgentPolicy(
 
 /**
  * Validate outputs are valid for a policy using the current kibana licence or throw.
- * @param data
  * @returns
+ * @param soClient
+ * @param newData
+ * @param existingData
+ * @param allowedOutputTypeForPolicy
  */
 export async function validateOutputForPolicy(
   soClient: SavedObjectsClientContract,

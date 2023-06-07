@@ -8,12 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
+import { ElasticSearchBaseSchema, KafkaBaseSchema, LogstashBaseSchema } from '..';
+
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 import type { PreconfiguredOutput } from '../../../common/types';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
-import { NewOutputSchema } from './output';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -73,17 +74,20 @@ function validatePreconfiguredOutputs(outputs: PreconfiguredOutput[]) {
   }
 }
 
+const PreconfiguredOutputBaseSchema = {
+  id: schema.string(),
+  config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  config_yaml: schema.never(),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+};
+
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  NewOutputSchema.extends({
-    id: schema.string(),
-    config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    config_yaml: schema.never(),
-    allow_edit: schema.maybe(schema.arrayOf(schema.string())),
-  }),
-  {
-    defaultValue: [],
-    validate: validatePreconfiguredOutputs,
-  }
+  schema.oneOf([
+    schema.object({ ...ElasticSearchBaseSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...LogstashBaseSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...KafkaBaseSchema }).extends(PreconfiguredOutputBaseSchema),
+  ]),
+  { defaultValue: [], validate: validatePreconfiguredOutputs }
 );
 
 export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(

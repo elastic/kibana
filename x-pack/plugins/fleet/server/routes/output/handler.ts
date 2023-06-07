@@ -66,7 +66,7 @@ export const getOneOuputHandler: RequestHandler<
   }
 };
 
-export const putOuputHandler: RequestHandler<
+export const putOutputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>

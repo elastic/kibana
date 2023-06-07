@@ -21,7 +21,7 @@ import {
   getOneOuputHandler,
   getOutputsHandler,
   postOutputHandler,
-  putOuputHandler,
+  putOutputHandler,
   postLogstashApiKeyHandler,
 } from './handler';
 
@@ -54,7 +54,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    putOuputHandler
+    putOutputHandler
   );
 
   router.post(
