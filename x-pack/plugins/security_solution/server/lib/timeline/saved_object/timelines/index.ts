@@ -88,12 +88,13 @@ export const resolveTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
 ): Promise<ResolvedTimelineWithOutcomeSavedObject | null> => {
+  let resolvedTimeline = null;
   try {
-    const resolvedSavedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
-    return resolvedSavedTimeline;
-  } catch (e) {
-    return null;
-  }
+    resolvedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+  return resolvedTimeline;
+  // }
 };
 
 export const getTimelineByTemplateTimelineId = async (
@@ -115,22 +116,13 @@ export const getTimelineTemplateOrNull = async (
   frameworkRequest: FrameworkRequest,
   templateTimelineId: string
 ): Promise<TimelineSavedObject | null> => {
+  let templateTimeline = null;
   try {
-    const templateTimelineResponse = await getTimelineByTemplateTimelineId(
-      frameworkRequest,
-      templateTimelineId
-    );
-
-    const timeline = templateTimelineResponse?.timeline[0];
-
-    if (!timeline) {
-      return null;
-    }
-
-    return convertSavedObjectToSavedTimeline(timeline);
+    templateTimeline = await getTimelineByTemplateTimelineId(frameworkRequest, templateTimelineId);
   } catch (e) {
     return null;
   }
+  return templateTimeline?.timeline[0] ?? null;
 };
 
 /** The filter here is able to handle the legacy data,
