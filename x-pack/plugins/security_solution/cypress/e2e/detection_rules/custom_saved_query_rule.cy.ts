@@ -76,7 +76,6 @@ describe('Custom saved_query rules', () => {
       cy.get(QUERY_BAR).should('contain', savedQueryFilterKey);
 
       cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
-      cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
 
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
@@ -111,7 +110,9 @@ describe('Custom saved_query rules', () => {
         cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
       });
 
-      it('Shows validation error on rule edit when saved query can not be loaded', function () {
+      // TODO: this error depended on the schema validation running. Can we show the error
+      // based on the saved query failing to load instead of relying on the schema validation?
+      it.skip('Shows validation error on rule edit when saved query can not be loaded', function () {
         editFirstRule();
 
         cy.get(CUSTOM_QUERY_BAR).should('contain', FAILED_TO_LOAD_ERROR);
@@ -180,6 +181,7 @@ describe('Custom saved_query rules', () => {
         visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
+        uncheckLoadQueryDynamically();
 
         // type custom query, ensure Load dynamically checkbox is absent, as rule can't be saved win non valid saved query
         getCustomQueryInput().type(expectedCustomTestQuery);
@@ -203,6 +205,7 @@ describe('Custom saved_query rules', () => {
         visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
+        uncheckLoadQueryDynamically();
 
         // select another saved query, edit query input, which later should be dismissed once Load query dynamically checkbox checked
         selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);

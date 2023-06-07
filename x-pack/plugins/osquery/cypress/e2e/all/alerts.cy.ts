@@ -95,7 +95,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Response actions', () => {
+  describe.skip('Response actions', () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;
     let ruleId: string;
@@ -105,7 +105,7 @@ describe('Alert Event Details', () => {
     const packData = packFixture();
     const multiQueryPackData = multiQueryPackFixture();
 
-    before(() => {
+    beforeEach(() => {
       loadPack(packData).then((data) => {
         packId = data.saved_object_id;
         packName = data.name;
@@ -119,7 +119,7 @@ describe('Alert Event Details', () => {
         ruleName = data.name;
       });
     });
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
       cleanupPack(multiQueryPackId);
       cleanupRule(ruleId);

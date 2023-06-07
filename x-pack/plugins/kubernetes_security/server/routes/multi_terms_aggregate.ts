@@ -67,6 +67,11 @@ export const doSearch = async (
             field: countBy,
           },
         },
+        count_alerts: {
+          cardinality: {
+            field: countBy,
+          },
+        },
       }
     : undefined;
 
