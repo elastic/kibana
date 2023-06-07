@@ -796,10 +796,7 @@ export class TaskRunner<
         this.logger.warn(
           `Task Runner has skipped executing the Rule (${ruleId}) as it has invalid params.`
         );
-        return {
-          state: originalState,
-          schedule: { interval: this.taskConfig.skip.delay },
-        };
+        return { state: originalState, skip: true };
       }
       stateWithMetrics = asErr(err);
       schedule = asErr(err);

@@ -52,7 +52,7 @@ let mockedTaskInstance: ConcreteTaskInstance;
 const mockedTaskConfig = {
   skip: {
     enabled: false,
-    delay: '3s',
+    delay: 3000,
   },
 };
 
@@ -575,12 +575,7 @@ test('returns the existing state and delayed schedule to retry the task when ret
 
   const result = await taskRunner.run();
 
-  expect(result).toEqual({
-    schedule: {
-      interval: '3s',
-    },
-    state: mockTaskInstance.state,
-  });
+  expect(result).toEqual({ skip: true });
 
   expect(taskRunnerFactoryInitializerParams.logger.warn).toHaveBeenCalledWith(
     'Task Runner has skipped executing the Action (2) as it has invalid params.'

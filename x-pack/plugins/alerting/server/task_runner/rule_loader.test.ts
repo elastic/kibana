@@ -53,7 +53,7 @@ describe('rule_loader', () => {
     taskConfig: {
       skip: {
         enabled: false,
-        delay: '3s',
+        delay: 3000,
       },
     },
   };
@@ -200,7 +200,7 @@ describe('rule_loader', () => {
           taskConfig: {
             skip: {
               enabled: true,
-              delay: '3s',
+              delay: 3000,
             },
           },
         })

@@ -39,7 +39,7 @@ const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const mockedTaskConfig = {
   skip: {
     enabled: false,
-    delay: '3s',
+    delay: 3000,
   },
 };
 

@@ -81,7 +81,7 @@ describe('EphemeralTaskLifecycle', () => {
         task: {
           skip: {
             enabled: false,
-            delay: '3s',
+            delay: 3000,
           },
         },
         ...config,

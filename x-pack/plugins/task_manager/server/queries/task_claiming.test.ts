@@ -76,7 +76,7 @@ const mockApmTrans = {
 const mockedTaskConfig = {
   skip: {
     enabled: false,
-    delay: '3s',
+    delay: 3000,
   },
 };
 
@@ -1031,7 +1031,7 @@ if (doc['task.runAt'].size()!=0) {
           taskConfig: {
             skip: {
               enabled: true,
-              delay: '3s',
+              delay: 3000,
             },
           },
         },

@@ -35,10 +35,17 @@ export type RuleTaskRunResult = {
   | {
       runAt?: Date;
       schedule?: never;
+      skip?: never;
     }
   | {
       schedule?: IntervalSchedule;
       runAt?: never;
+      skip?: never;
+    }
+  | {
+      skip?: boolean;
+      runAt?: never;
+      schedule?: never;
     }
 );
 

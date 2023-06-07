@@ -23,27 +23,6 @@ export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
 // At the default poll interval of 3sec, this averages over the last 15sec.
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
-const SECONDS_REGEX = /^[1-9][0-9]*s$/;
-const MINUTES_REGEX = /^[1-9][0-9]*m$/;
-const HOURS_REGEX = /^[1-9][0-9]*h$/;
-const DAYS_REGEX = /^[1-9][0-9]*d$/;
-
-export function validateDurationSchema(duration: string) {
-  if (duration.match(SECONDS_REGEX)) {
-    return;
-  }
-  if (duration.match(MINUTES_REGEX)) {
-    return;
-  }
-  if (duration.match(HOURS_REGEX)) {
-    return;
-  }
-  if (duration.match(DAYS_REGEX)) {
-    return;
-  }
-  return 'string is not a valid duration: ' + duration;
-}
-
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
     error_threshold: schema.number({
@@ -75,7 +54,7 @@ const eventLoopDelaySchema = schema.object({
 const taskConfig = schema.object({
   skip: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    delay: schema.string({ defaultValue: '3s', validate: validateDurationSchema }),
+    delay: schema.number({ defaultValue: 3000, min: 0 }),
   }),
 });
 

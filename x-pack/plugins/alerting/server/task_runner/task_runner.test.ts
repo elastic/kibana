@@ -105,7 +105,7 @@ describe('Task Runner', () => {
   const mockedTaskConfig = {
     skip: {
       enabled: false,
-      delay: '3s',
+      delay: 3000,
     },
   };
 
@@ -3162,9 +3162,7 @@ describe('Task Runner', () => {
 
     const result = await taskRunner.run();
     expect(result).toEqual({
-      schedule: {
-        interval: '3s',
-      },
+      skip: true,
       state: mockTask.state,
     });
     expect(alertsService.createAlertsClient).not.toHaveBeenCalledWith({});

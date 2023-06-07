@@ -17,6 +17,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { identity, defaults, flow, omit } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import moment from 'moment';
 import { Middleware } from '../lib/middleware';
 import {
   asOk,
@@ -319,7 +320,20 @@ export class TaskManagerRunner implements TaskRunner {
       const result = await this.executionContext.withContext(ctx, () =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
-      const validatedResult = this.validateResult(result);
+
+      let resultToValidate;
+      if (result?.skip) {
+        resultToValidate = {
+          state: this.instance.task.state,
+          runAt: moment(this.instance.task.runAt)
+            .add(this.taskConfig.skip.delay, 'millisecond')
+            .toDate(),
+        };
+      } else {
+        resultToValidate = result;
+      }
+
+      const validatedResult = this.validateResult(resultToValidate);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
       );

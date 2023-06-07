@@ -41,7 +41,7 @@ describe('config validation', () => {
         "request_capacity": 1000,
         "task": Object {
           "skip": Object {
-            "delay": "3s",
+            "delay": 3000,
             "enabled": true,
           },
         },
@@ -99,7 +99,7 @@ describe('config validation', () => {
         "request_capacity": 1000,
         "task": Object {
           "skip": Object {
-            "delay": "3s",
+            "delay": 3000,
             "enabled": true,
           },
         },
@@ -160,7 +160,7 @@ describe('config validation', () => {
         "request_capacity": 1000,
         "task": Object {
           "skip": Object {
-            "delay": "3s",
+            "delay": 3000,
             "enabled": true,
           },
         },
