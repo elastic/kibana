@@ -18,11 +18,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  useCoPilot,
+  CoPilotPrompt,
+  ObservabilityPublicStart,
+  CoPilotContextProvider,
+} from '@kbn/observability-plugin/public';
+import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { LogViewReference } from '../../../../common/log_views';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
@@ -42,9 +49,9 @@ export interface LogEntryFlyoutProps {
 export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   const flyoutRef = useRef<OverlayRef>();
   const {
-    services: { http, data, uiSettings, application },
+    services: { http, data, uiSettings, application, observability },
     overlays: { openFlyout },
-  } = useKibana<{ data: DataPublicPluginStart }>();
+  } = useKibana<{ data: DataPublicPluginStart; observability?: ObservabilityPublicStart }>();
 
   const closeLogEntryFlyout = useCallback(() => {
     flyoutRef.current?.close();
@@ -61,15 +68,26 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
 
       flyoutRef.current = openFlyout(
         <KibanaReactContextProvider>
-          <LogEntryFlyout
-            logEntryId={logEntryId}
-            onCloseFlyout={closeLogEntryFlyout}
-            logViewReference={logViewReference}
-          />
+          <CoPilotContextProvider value={observability?.getCoPilotService()}>
+            <LogEntryFlyout
+              logEntryId={logEntryId}
+              onCloseFlyout={closeLogEntryFlyout}
+              logViewReference={logViewReference}
+            />
+          </CoPilotContextProvider>
         </KibanaReactContextProvider>
       );
     },
-    [http, data, uiSettings, application, openFlyout, logViewReference, closeLogEntryFlyout]
+    [
+      http,
+      data,
+      uiSettings,
+      application,
+      openFlyout,
+      logViewReference,
+      closeLogEntryFlyout,
+      observability,
+    ]
   );
 
   useEffect(() => {
@@ -108,6 +126,16 @@ export const LogEntryFlyout = ({
       fetchLogEntry();
     }
   }, [fetchLogEntry, logViewReference, logEntryId]);
+
+  const explainLogMessageParams = useMemo(() => {
+    return logEntry ? { logEntry: { fields: logEntry.fields } } : undefined;
+  }, [logEntry]);
+
+  const similarLogMessageParams = useMemo(() => {
+    return logEntry ? { logEntry: { fields: logEntry.fields } } : undefined;
+  }, [logEntry]);
+
+  const coPilotService = useCoPilot();
 
   return (
     <EuiFlyout onClose={onCloseFlyout} size="m">
@@ -168,7 +196,31 @@ export const LogEntryFlyout = ({
             ) : undefined
           }
         >
-          <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {coPilotService?.isEnabled() && explainLogMessageParams ? (
+              <EuiFlexItem grow={false}>
+                <CoPilotPrompt
+                  coPilot={coPilotService}
+                  title={explainLogMessageTitle}
+                  params={explainLogMessageParams}
+                  promptId={CoPilotPromptId.LogsExplainMessage}
+                />
+              </EuiFlexItem>
+            ) : null}
+            {coPilotService?.isEnabled() && similarLogMessageParams ? (
+              <EuiFlexItem grow={false}>
+                <CoPilotPrompt
+                  coPilot={coPilotService}
+                  title={similarLogMessagesTitle}
+                  params={similarLogMessageParams}
+                  promptId={CoPilotPromptId.LogsFindSimilar}
+                />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutBody>
       ) : (
         <CenteredEuiFlyoutBody>
@@ -184,6 +236,14 @@ export const LogEntryFlyout = ({
     </EuiFlyout>
   );
 };
+
+const explainLogMessageTitle = i18n.translate('xpack.infra.logFlyout.explainLogMessageTitle', {
+  defaultMessage: "What's this message?",
+});
+
+const similarLogMessagesTitle = i18n.translate('xpack.infra.logFlyout.similarLogMessagesTitle', {
+  defaultMessage: 'How do I find similar log messages?',
+});
 
 const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMessage', {
   defaultMessage: 'Searching log entry in shards',
