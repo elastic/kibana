@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import { Buffer } from 'buffer';
 import { flatten, zip } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   EuiText,
   EuiButton,
@@ -15,6 +16,9 @@ import {
   EuiButtonGroup,
   EuiCodeBlock,
   EuiSteps,
+  EuiStepsProps,
+  EuiSubSteps,
+  EuiStep,
   EuiSkeletonRectangle,
   EuiSwitch,
 } from '@elastic/eui';
@@ -23,18 +27,20 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
+import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
-  const { goToStep, goBack, getState, setState, CurrentStep } = useWizard();
+  const { navigateToKibanaUrl } = useKibanaNavigation();
+  const { goBack, getState, setState, CurrentStep } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
   function onContinue() {
-    goToStep('collectLogs');
+    navigateToKibanaUrl('/app/logs/stream');
   }
 
   function onBack() {
@@ -91,6 +97,75 @@ export function InstallElasticAgent() {
 
   const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
 
+  const {
+    data: progressData,
+    status: progressStatus,
+    refetch: refetchProgress,
+  } = useFetcher(
+    (callApi) => {
+      if (CurrentStep === InstallElasticAgent && getState().apiKeyId) {
+        const { apiKeyId } = getState();
+        return callApi(
+          'GET /internal/observability_onboarding/custom_logs/progress',
+          {
+            params: { query: { apiKeyId } },
+          }
+        );
+      }
+    },
+    [getState().apiKeyId]
+  );
+
+  const progressSucceded = progressStatus === FETCH_STATUS.SUCCESS;
+
+  useEffect(() => {
+    if (progressSucceded) {
+      setTimeout(() => {
+        refetchProgress();
+      }, 2000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progressSucceded]);
+
+  const getStep = useCallback(
+    ({ id, incompleteTitle, loadingTitle, completedTitle }) => {
+      const progress = progressData?.progress;
+      if (progress) {
+        const stepStatus = progress[
+          id
+        ] as EuiStepsProps['steps'][number]['status'];
+        const title =
+          stepStatus === 'loading'
+            ? loadingTitle
+            : stepStatus === 'complete'
+            ? completedTitle
+            : incompleteTitle;
+        return {
+          title,
+          children: null,
+          status: stepStatus ?? ('incomplete' as const),
+        };
+      }
+      return {
+        title: incompleteTitle,
+        children: null,
+        status: 'incomplete' as const,
+      };
+    },
+    [progressData?.progress]
+  );
+
+  const isInstallStarted = progressData?.progress['ea-download'] !== undefined;
+  const isInstallCompleted = progressData?.progress['ea-status'] === 'complete';
+
+  const autoDownloadConfigStep = getStep({
+    id: 'ea-config',
+    incompleteTitle: 'Configure the agent',
+    loadingTitle: 'Downloading Elastic Agent config',
+    completedTitle:
+      'Elastic Agent config written to /opt/Elastic/Agent/elastic-agent.yml',
+  });
+
   return (
     <StepPanel title="Install shipper to collect data">
       <StepPanelContent>
@@ -111,6 +186,8 @@ export function InstallElasticAgent() {
               status:
                 installShipperSetupStatus === FETCH_STATUS.LOADING
                   ? 'loading'
+                  : isInstallCompleted
+                  ? 'complete'
                   : 'current',
               children: (
                 <>
@@ -163,23 +240,76 @@ export function InstallElasticAgent() {
                     label="Auto download config"
                     checked={wizardState.autoDownloadConfig}
                     onChange={onAutoDownloadConfig}
+                    disabled={isInstallStarted}
                   />
+                  {isInstallStarted && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiSubSteps>
+                        {[
+                          {
+                            id: 'ea-download',
+                            incompleteTitle: 'Download Elastic Agent',
+                            loadingTitle: 'Downloading Elastic Agent',
+                            completedTitle: 'Elastic Agent downloaded',
+                          },
+                          {
+                            id: 'ea-extract',
+                            incompleteTitle: 'Extract Elastic Agent',
+                            loadingTitle: 'Extracting Elastic Agent',
+                            completedTitle: 'Elastic Agent extracted',
+                          },
+                          {
+                            id: 'ea-install',
+                            incompleteTitle: 'Install Elastic Agent',
+                            loadingTitle: 'Installing Elastic Agent',
+                            completedTitle: 'Elastic Agent installed',
+                          },
+                          {
+                            id: 'ea-status',
+                            incompleteTitle: 'Connect to the Elastic Agent',
+                            loadingTitle: 'Connecting to the Elastic Agent',
+                            completedTitle: 'Connected to the Elastic Agent',
+                          },
+                        ].map((step, index) => {
+                          const { title, status } = getStep(step);
+                          return (
+                            <EuiStep
+                              key={step.id}
+                              titleSize="xs"
+                              step={index + 1}
+                              title={title}
+                              status={status}
+                              children={null}
+                              css={css({
+                                '> .euiStep__content': {
+                                  paddingBottom: 0,
+                                },
+                              })}
+                            />
+                          );
+                        })}
+                      </EuiSubSteps>
+                    </>
+                  )}
                 </>
               ),
             },
             {
-              title: 'Configure the agent',
+              title: wizardState.autoDownloadConfig
+                ? autoDownloadConfigStep.title
+                : 'Configure the agent',
               status:
                 yamlConfigStatus === FETCH_STATUS.LOADING
                   ? 'loading'
-                  : 'incomplete',
+                  : autoDownloadConfigStep.status,
               children: (
                 <>
                   <EuiText color="subdued">
                     <p>
-                      Copy the config below to the elastic agent.yml on the host
-                      where the Elastic Agent is installed
-                      (/opt/Elastic/Agent/elastic-agent.yml).
+                      {wizardState.autoDownloadConfig
+                        ? 'The agent config below will be downloaded by the install script and written to (/opt/Elastic/Agent/elastic-agent.yml). This will overwrite any existing agent configuration.'
+                        : 'Copy the config below to the elastic agent.yml on the host where the Elastic Agent is installed (/opt/Elastic/Agent/elastic-agent.yml).'}
                     </p>
                   </EuiText>
                   <EuiSpacer size="m" />
@@ -217,6 +347,12 @@ export function InstallElasticAgent() {
                 </>
               ),
             },
+            getStep({
+              id: 'logs-ingest',
+              incompleteTitle: 'Check for shipped logs',
+              loadingTitle: 'Waiting for logs to be shipped',
+              completedTitle: 'Logs are being shipped!',
+            }),
           ]}
         />
       </StepPanelContent>

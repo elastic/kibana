@@ -69,19 +69,6 @@ export function HorizontalSteps() {
             goToStep('installElasticAgent');
           },
         },
-        {
-          title: i18n.translate(
-            'xpack.observability_onboarding.steps.collectLogs',
-            {
-              defaultMessage: 'Collect logs',
-            }
-          ),
-          status: getStatus('collectLogs'),
-          disabled: isDisabled('collectLogs'),
-          onClick: () => {
-            goToStep('collectLogs');
-          },
-        },
       ]}
     />
   );
