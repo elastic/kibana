@@ -7,22 +7,30 @@
 
 import fs from 'fs';
 import { apmSchema } from '../../server/lib/apm_telemetry/schema';
+
 const markdownFilePath = 'x-pack/plugins/apm/dev_docs/apm_telemetry_fields.md';
 
-function generateTable(schema: any, parentKeys: string[] = []): string[] {
+function extractFieldDescriptions(
+  schema: any,
+  parentKeys: string[] = []
+): string[] {
   const fieldDescriptions = [];
   let currentKey: string;
 
   for (currentKey in schema) {
     if (typeof schema[currentKey] === 'object' && schema[currentKey] !== null) {
       const description = schema[currentKey]._meta?.description;
+
       if (description) {
         const fullKey = [...parentKeys, currentKey].join('.');
         fieldDescriptions.push(`| \`${fullKey}\` | ${description} |`);
       }
 
       fieldDescriptions.push(
-        ...generateTable(schema[currentKey], [...parentKeys, currentKey])
+        ...extractFieldDescriptions(schema[currentKey], [
+          ...parentKeys,
+          currentKey,
+        ])
       );
     }
   }
@@ -30,7 +38,7 @@ function generateTable(schema: any, parentKeys: string[] = []): string[] {
   return fieldDescriptions;
 }
 
-const metadataTable = generateTable(apmSchema).join('\n');
+const metadataTable = extractFieldDescriptions(apmSchema).join('\n');
 const markdownTable = `| Field | Description |\n| --- | --- |\n${metadataTable}`;
 
 fs.writeFile(markdownFilePath, markdownTable, (err) => {
