@@ -49,7 +49,7 @@ const PortableDashboardsDemos = ({
   history: AppMountParameters['history'];
 }) => {
   return (
-    <Router>
+    <Router history={history}>
       <CompatRouter>
         <Switch>
           <Route exact path="/">
@@ -69,12 +69,13 @@ const PortableDashboardsDemos = ({
 
 const DashboardsDemo = ({
   data,
+  history,
   dashboard,
 }: {
+  history: AppMountParameters['history'];
   data: PortableDashboardsExampleStartDeps['data'];
   dashboard: PortableDashboardsExampleStartDeps['dashboard'];
 }) => {
-  const history = useHistory();
   const { loading, value: dataviewResults } = useAsync(async () => {
     const dataViews = await data.dataViews.find('kibana_sample_data_logs');
     const findDashboardsService = await dashboard.findDashboardsService();
@@ -118,9 +119,7 @@ const DashboardsDemo = ({
   );
 };
 
-const PortableDashboardListingDemo = () => {
-  const history = useHistory();
-
+const PortableDashboardListingDemo = ({ history }: { history: AppMountParameters['history'] }) => {
   return (
     <DashboardListingTable
       goToDashboard={(dashboardId) =>

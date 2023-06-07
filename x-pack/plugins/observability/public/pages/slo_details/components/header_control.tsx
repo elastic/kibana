@@ -103,7 +103,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         transactionType,
       });
 
-      history.push(basePath.prepend(url));
+      navigate(basePath.prepend(url));
     }
   };
 
@@ -117,7 +117,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
       cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
 
-      history.push(basePath.prepend(paths.observability.slos));
+      navigate(basePath.prepend(paths.observability.slos));
     }
   };
 
@@ -133,7 +133,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleDeleteConfirm = async () => {
     if (slo) {
       deleteSlo({ id: slo.id, name: slo.name });
-      history.push(basePath.prepend(paths.observability.slos));
+      navigate(basePath.prepend(paths.observability.slos));
     }
   };
 

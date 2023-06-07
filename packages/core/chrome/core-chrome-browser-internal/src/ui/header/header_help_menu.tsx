@@ -312,7 +312,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
       if (!isModifiedOrPrevented(event) && event.button === 0) {
         event.preventDefault();
         this.closeMenu();
-        history.push(href);
+        navigate(href);
       }
     };
   }
