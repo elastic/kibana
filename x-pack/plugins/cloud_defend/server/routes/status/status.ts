@@ -1,4 +1,4 @@
-/*
+/*te
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
@@ -164,6 +164,7 @@ const getCloudDefendStatus = async ({
   return response;
 };
 
+
 export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter) =>
   router.versioned
     .get({
@@ -173,7 +174,8 @@ export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter) =>
         tags: ['access:cloud-defend-read'],
       },
     })
-    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
+    .addVersion({ version: '1', validate: {} },
+    async (context, request, response) => {
       const cloudDefendContext = await context.cloudDefend;
       try {
         const status = await getCloudDefendStatus(cloudDefendContext);
@@ -190,4 +192,5 @@ export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter) =>
           statusCode: error.statusCode,
         });
       }
-    });
+    }
+);
