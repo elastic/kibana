@@ -15,7 +15,7 @@ import { useResolver } from '../../use_resolver';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
-  checkPermission,
+  usePermissionCheck,
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { FilterLists } from '../../../settings/filter_lists';
@@ -49,8 +49,10 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
-  const canCreateFilter = checkPermission('canCreateFilter');
-  const canDeleteFilter = checkPermission('canDeleteFilter');
+  const [canCreateFilter, canDeleteFilter] = usePermissionCheck([
+    'canCreateFilter',
+    'canDeleteFilter',
+  ]);
 
   return (
     <PageLoader context={context}>

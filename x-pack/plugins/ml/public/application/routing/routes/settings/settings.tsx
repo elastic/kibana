@@ -15,7 +15,7 @@ import { useResolver } from '../../use_resolver';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
-  checkPermission,
+  usePermissionCheck,
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
@@ -49,10 +49,12 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
-  const canGetFilters = checkPermission('canGetFilters');
-  const canCreateFilter = checkPermission('canCreateFilter');
-  const canGetCalendars = checkPermission('canGetCalendars');
-  const canCreateCalendar = checkPermission('canCreateCalendar');
+  const [canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar] = usePermissionCheck([
+    'canGetFilters',
+    'canCreateFilter',
+    'canGetCalendars',
+    'canCreateCalendar',
+  ]);
 
   return (
     <PageLoader context={context}>
