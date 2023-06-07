@@ -7,7 +7,6 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import type LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -90,7 +89,6 @@ export interface ManifestManagerContext {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: PackagePolicyClient;
   logger: Logger;
-  cache: LRU<string, Buffer>;
   experimentalFeatures: ExperimentalFeatures;
 }
 
@@ -108,7 +106,6 @@ export class ManifestManager {
   protected packagePolicyService: PackagePolicyClient;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
-  protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
   protected experimentalFeatures: ExperimentalFeatures;
 
@@ -118,7 +115,6 @@ export class ManifestManager {
     this.packagePolicyService = context.packagePolicyService;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
-    this.cache = context.cache;
     this.schemaVersion = 'v1';
     this.experimentalFeatures = context.experimentalFeatures;
   }
@@ -374,8 +370,7 @@ export class ManifestManager {
         const fleetArtifact = fleetArtfactsByIdentifier[artifactId];
 
         if (!fleetArtifact) return;
-        // Cache the compressed body of the artifact
-        this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+
         newManifest.replaceArtifact(fleetArtifact);
       });
     }
@@ -385,8 +380,6 @@ export class ManifestManager {
 
   /**
    * Deletes outdated artifact SOs.
-   *
-   * The artifact may still remain in the cache.
    *
    * @param artifactIds The IDs of the artifact to delete..
    * @returns {Promise<Error[]>} Any errors encountered.
