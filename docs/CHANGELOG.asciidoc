@@ -81,8 +81,8 @@ Alerting::
 
 APM::
 * Displays the size of hidden indices in storage explorer {kibana-pull}158746[#158746]
-* Changes the `kibana.alert.evaluation.threshold` unit to microseconds {kibana-pull}158703[#158703]
-* Use `transaction.duration.histogram` for percentile aggregations {kibana-pull}158909[#158909]
+* Changes the APM latency value and latency threshold to microseconds {kibana-pull}158703[#158703]
+* Fixes service transaction metrics by using `transaction.duration.histogram` for percentile aggregations {kibana-pull}158909[#158909]
 
 Discover::
 * Update single doc view locator to URL encode `rowId` {kibana-pull}158635[#158635]
