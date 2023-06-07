@@ -59,6 +59,8 @@ interface SpikeAnalysisTableProps {
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
   dataView: DataView;
+  barColorOverride?: string;
+  barHighlightColorOverride?: string;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -68,6 +70,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   dataView,
   timeRangeMs,
   searchQuery,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -274,6 +278,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               defaultMessage: 'Group',
             }
           )}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       ),
       sortable: false,

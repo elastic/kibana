@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { pick } from 'lodash';
 import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -44,6 +44,8 @@ export interface ExplainLogRateSpikesContentWrapperProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  barColorOverride?: string;
+  barHighlightColorOverride?: string;
 }
 
 export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentWrapperProps> = ({
@@ -53,6 +55,8 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   if (!dataView) return null;
 
@@ -95,6 +99,8 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
+                  barColorOverride={barColorOverride}
+                  barHighlightColorOverride={barHighlightColorOverride}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>
