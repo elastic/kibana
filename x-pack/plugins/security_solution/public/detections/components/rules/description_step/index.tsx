@@ -200,6 +200,8 @@ export const getDescriptionItem = (
       savedQueryName,
       indexPatterns,
     });
+  } else if (field === 'responseActions') {
+    return [];
   } else if (field === 'groupByFields') {
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, license);
@@ -283,8 +285,6 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
-  } else if (field === 'dataViewId') {
-    return [];
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
