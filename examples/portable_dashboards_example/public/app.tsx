@@ -56,10 +56,10 @@ const PortableDashboardsDemos = ({
             <Redirect to={DASHBOARD_DEMO_PATH} />
           </Route>
           <Route path={DASHBOARD_LIST_PATH}>
-            <PortableDashboardListingDemo />
+            <PortableDashboardListingDemo history={history} />
           </Route>
           <Route path={DASHBOARD_DEMO_PATH}>
-            <DashboardsDemo data={data} dashboard={dashboard} />
+            <DashboardsDemo data={data} dashboard={dashboard} history={history} />
           </Route>
         </Switch>
       </CompatRouter>
