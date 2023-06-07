@@ -49,11 +49,19 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   };
 });
 
-jest.mock('@kbn/unified-field-list/src/hooks/use_query_subscriber', () => ({
-  ...mockQueryState,
-  fromDate: 'now-15m',
-  toDate: 'now',
-}));
+jest.mock('@kbn/unified-field-list/src/hooks/use_query_subscriber', () => {
+  const originalModule = jest.requireActual(
+    '@kbn/unified-field-list/src/hooks/use_query_subscriber'
+  );
+  return {
+    ...originalModule,
+    useQuerySubscriber: jest.fn(() => ({
+      ...mockQueryState,
+      fromDate: 'now-15m',
+      toDate: 'now',
+    })),
+  };
+});
 
 jest.mock('../../hooks/use_saved_search_messages', () => {
   const originalModule = jest.requireActual('../../hooks/use_saved_search_messages');
