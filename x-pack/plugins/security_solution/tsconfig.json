@@ -160,6 +160,7 @@
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
     "@kbn/field-formats-plugin",
-    "@kbn/dev-proc-runner"
+    "@kbn/dev-proc-runner",
+    "@kbn/expressions-plugin"
   ]
 }
