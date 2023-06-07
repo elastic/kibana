@@ -413,6 +413,7 @@
     "@kbn/foo-plugin": "link:x-pack/test/ui_capabilities/common/plugins/foo_plugin",
     "@kbn/ftr-apis-plugin": "link:src/plugins/ftr_apis",
     "@kbn/functional-with-es-ssl-cases-test-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/cases",
+    "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/generate-csv": "link:packages/kbn-generate-csv",
     "@kbn/generate-csv-types": "link:packages/kbn-generate-csv-types",
     "@kbn/global-search-bar-plugin": "link:x-pack/plugins/global_search_bar",

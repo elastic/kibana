@@ -4275,6 +4275,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate-console-definitions@link:packages/kbn-generate-console-definitions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
   version "0.0.0"
   uid ""
