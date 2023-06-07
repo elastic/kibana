@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
@@ -90,6 +90,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
   private loadMoreSubject: Subject<number> = new Subject<number>();
+  private unpublishedChanges: BehaviorSubject<{
+    selectedOptions?: string[];
+    existsSelected?: boolean;
+  }> = new BehaviorSubject<{ selectedOptions?: string[]; existsSelected?: boolean }>({});
   private abortController?: AbortController;
   private dataView?: DataView;
   private field?: FieldSpec;
@@ -158,7 +162,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       map((newInput) => ({
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
-        existsSelected: newInput.existsSelected,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
@@ -191,7 +194,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     );
 
     /**
-     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections, and publish filter
+     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections, and write unpublishedChanges
      **/
     this.subscriptions.add(
       this.getInput$()
@@ -203,30 +206,46 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               isEqual(a.selectedOptions, b.selectedOptions)
           )
         )
-        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
-          if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            this.dispatch.clearValidAndInvalidSelections({});
-          } else {
-            const { invalidSelections } = this.getState().componentState ?? {};
-            const newValidSelections: string[] = [];
-            const newInvalidSelections: string[] = [];
-            for (const selectedOption of newSelectedOptions) {
-              if (invalidSelections?.includes(selectedOption)) {
-                newInvalidSelections.push(selectedOption);
-                continue;
-              }
-              newValidSelections.push(selectedOption);
-            }
-            this.dispatch.setValidAndInvalidSelections({
-              validSelections: newValidSelections,
-              invalidSelections: newInvalidSelections,
-            });
-          }
-          const newFilters = await this.buildFilter();
-          this.dispatch.publishFilters(newFilters);
+        .subscribe(async ({ selectedOptions, existsSelected }) => {
+          this.unpublishedChanges.next({ selectedOptions, existsSelected });
         })
     );
+
+    /**
+     * debounce filter publications for a split second for a smoother selection/deselection user experience
+     */
+    this.subscriptions.add(
+      this.unpublishedChanges.pipe(debounceTime(400)).subscribe(() => {
+        this.publishNewSelections();
+      })
+    );
   };
+
+  public async publishNewSelections() {
+    const { selectedOptions, existsSelected } = this.unpublishedChanges.getValue();
+    if (!selectedOptions && existsSelected === undefined) return;
+    if (!selectedOptions || isEmpty(selectedOptions)) {
+      this.dispatch.clearValidAndInvalidSelections({});
+    } else {
+      const { invalidSelections } = this.getState().componentState ?? {};
+      const newValidSelections: string[] = [];
+      const newInvalidSelections: string[] = [];
+      for (const selectedOption of selectedOptions) {
+        if (invalidSelections?.includes(selectedOption)) {
+          newInvalidSelections.push(selectedOption);
+          continue;
+        }
+        newValidSelections.push(selectedOption);
+      }
+      this.dispatch.setValidAndInvalidSelections({
+        validSelections: newValidSelections,
+        invalidSelections: newInvalidSelections,
+      });
+    }
+    const newFilters = await this.buildFilter();
+    this.dispatch.publishFilters(newFilters);
+    this.unpublishedChanges.next({});
+  }
 
   private getCurrentDataViewAndField = async (): Promise<{
     dataView?: DataView;
