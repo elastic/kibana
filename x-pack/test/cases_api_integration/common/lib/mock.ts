@@ -38,7 +38,6 @@ export const postCaseReq: CasePostRequest = {
   title: 'Super Bad Security Issue',
   tags: ['defacement'],
   severity: CaseSeverity.LOW,
-  category: 'foobar',
   connector: {
     id: 'none',
     name: 'none',
