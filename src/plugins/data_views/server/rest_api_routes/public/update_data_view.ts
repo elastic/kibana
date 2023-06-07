@@ -179,7 +179,9 @@ const updateDataViewRouteFactory =
           },
           response: {
             200: {
-              body: dataViewSpecSchema,
+              body: schema.object({
+                [serviceKey]: dataViewSpecSchema,
+              }),
             },
           },
         },

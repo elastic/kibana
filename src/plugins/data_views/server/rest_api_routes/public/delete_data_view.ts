@@ -85,11 +85,7 @@ const deleteIndexPatternRouteFactory =
             id,
           });
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-          });
+          return res.ok();
         })
       )
     );
