@@ -57,7 +57,8 @@ disabled:
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
-  - x-pack/plugins/synthetics/e2e/synthetics_run.ts
+  - x-pack/plugins/synthetics/e2e/uptime/synthetics_run.ts
+  - x-pack/plugins/synthetics/e2e/synthetics/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
   - x-pack/plugins/exploratory_view/e2e/synthetics_run.ts
 

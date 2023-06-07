@@ -149,7 +149,7 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
-  test('getExecutorServices() should call getPublicAlertFactory on alert factory', async () => {
+  test('factory() should call getPublicAlertFactory on alert factory', async () => {
     const alertsClient = new LegacyAlertsClient({
       logger,
       ruleType,
@@ -166,7 +166,7 @@ describe('Legacy Alerts Client', () => {
       recoveredAlertsFromState: {},
     });
 
-    alertsClient.getExecutorServices();
+    alertsClient.factory();
     expect(getPublicAlertFactory).toHaveBeenCalledWith(mockCreateAlertFactory);
   });
 

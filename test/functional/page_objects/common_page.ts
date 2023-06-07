@@ -138,10 +138,12 @@ export class CommonPageObject extends FtrService {
       pathname: `${basePath}${this.config.get(['apps', appName]).pathname}`,
     };
 
-    if (shouldUseHashForSubUrl) {
-      appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
-    } else {
-      appConfig.pathname += `/${subUrl}`;
+    if (typeof subUrl === 'string') {
+      if (shouldUseHashForSubUrl) {
+        appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
+      } else {
+        appConfig.pathname += `/${subUrl}`;
+      }
     }
 
     await this.navigate({

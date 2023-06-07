@@ -51,6 +51,21 @@ Review the following information about the {kib} 8.8.0 release.
 [[known-issues-8.8.0]]
 === Known issues
 
+// tag::known-issue-158940[]
+[discrete]
+.Failed upgrades to 8.8.0 can cause bootlooping and data loss
+[%collapsible]
+====
+*Details* +
+The 8.8.0 release splits the `.kibana` index into multiple saved object indices. If an upgrade to 8.8.0 partially succeeds, but not all the indices are created successfully, {kib} may be unable to successfully complete the upgrade on the next restart.
+
+This can result in a loss of saved objects during the upgrade. This can also leave {kib} in a bootlooping state where it's unable to start due to `write_blocked` indices.
+
+*Impact* +
+The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}58733[related issue].
+====
+// end::known-issue-158940[]
+
 // tag::known-issue-155203[]
 [discrete]
 .Monitors in Synthetics may stop running
@@ -101,6 +116,26 @@ Error installing common resources for AlertsService. No additional resources wil
 If you have upgraded to 8.8.0 and your alerting rules fail, upgrade to 8.8.1.
 ====
 // end::known-issue-120[]
+
+// tag::known-issue-158447[]
+[discrete]
+.Incorrect attachments are added to cases
+[%collapsible]
+====
+*Details* +
+When you attach {ml} visualizations, OsQuery, or Indicators of Compromise (IoCs) to a case, each attachment has its own view which renders in the *Activity* tab.
+For these attachments, a bug was introduced in 8.8.0:
+
+. If you add two different attachments on a case, the view will be the same for both.
+. If you add one attachment to one case and another to a different case, in the second case you will view the attachment of the first case.
+
+Alerts are not affected.
+
+*Impact* +
+There are no mitigations for the first scenario, other than upgrading to 8.8.1.
+For the second scenario, refreshing the case fixes the issue.
+====
+// end::known-issue-158447[]
 
 [float]
 [[breaking-changes-8.8.0]]
