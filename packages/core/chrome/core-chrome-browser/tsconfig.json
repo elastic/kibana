@@ -16,7 +16,8 @@
     "@kbn/core-application-common",
     "@kbn/deeplinks-devtools",
     "@kbn/deeplinks-analytics",
-    "@kbn/deeplinks-ml"
+    "@kbn/deeplinks-ml",
+    "@kbn/deeplinks-management"
   ],
   "exclude": [
     "target/**/*",
