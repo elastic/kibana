@@ -201,4 +201,7 @@ type TestSubject =
   | 'childrenField.input'
   | 'nonChildrenField.input'
   | 'precisionField.input'
-  | 'patternDefinitionsField';
+  | 'patternDefinitionsField'
+  | 'destinationField.input'
+  | 'datasetField.input'
+  | 'namespaceField.input';
