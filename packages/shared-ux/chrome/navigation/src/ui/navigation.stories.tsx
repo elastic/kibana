@@ -428,7 +428,7 @@ export const MinimalUIAndCustomCloudLink = (
 };
 
 export default {
-  title: 'Chrome/Navigation/v2',
+  title: 'Chrome/Navigation',
   description: 'Navigation container to render items for cross-app linking',
   parameters: {
     docs: {
