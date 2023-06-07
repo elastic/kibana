@@ -144,7 +144,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   esqlOptions: {
     suppressionDuration: rule.esql_params?.suppression_duration,
-    groupByFields: rule.esql_params?.group_by_fields,
+    groupByFields: rule.esql_params?.group_by_fields ?? [],
   },
 });
 
