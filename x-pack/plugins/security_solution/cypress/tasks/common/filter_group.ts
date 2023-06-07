@@ -51,7 +51,8 @@ export const editFilterGroupControls = () => {
 
 export const cancelFieldEditing = () => {
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('be.visible');
-  cy.get(FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS.CANCEL).should('be.visible').trigger('click');
+  cy.get(FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS.CANCEL).click();
+  cy.get(FILTER_GROUP_CONTROL_CONFIRM_BTN).click();
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('not.exist');
 };
 

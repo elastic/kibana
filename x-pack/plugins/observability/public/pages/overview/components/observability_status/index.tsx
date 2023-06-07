@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
 import { getContent } from './content';
-import { ObservabilityAppServices } from '../../../../application/types';
 
 export function ObservabilityStatus() {
-  const { http, docLinks } = useKibana<ObservabilityAppServices>().services;
+  const { http, docLinks } = useKibana().services;
   const { hasDataMap } = useHasData();
 
   const content = getContent(http, docLinks);
