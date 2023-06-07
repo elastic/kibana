@@ -36,7 +36,7 @@ export const securityResponseHeadersSchema = schema.object({
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
     // Note: this currently lists all non-experimental permissions, as of May 2023
     defaultValue:
-      'camera=(), display-capture=(self), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
+      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
   }),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers
   crossOriginOpenerPolicy: schema.oneOf(
