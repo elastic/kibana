@@ -76,7 +76,7 @@ Fleet::
 Alerting::
 * Fixes a bug where ML embeddables, OsQuery, and IoCs attachments in a case render the wrong view {kibana-pull}158441[#158441]
 * Makes alert links shorter {kibana-pull}158582[#158582]
-* Throws a mustache error when validating action message for warnings {kibana-pull}158668[#158668]
+* Throws a Mustache error when validating action message for warnings {kibana-pull}158668[#158668]
 * Adds null checks when iterating through index template list {kibana-pull}158742[#158742]
 
 APM::
