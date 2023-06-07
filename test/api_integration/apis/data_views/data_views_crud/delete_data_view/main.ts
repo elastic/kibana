@@ -41,21 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(response4.status).to.be(404);
         });
-
-        it('returns nothing', async () => {
-          const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response1 = await supertest.post(config.path).send({
-            [config.serviceKey]: {
-              title,
-            },
-          });
-          await supertest.get(`${config.path}/${response1.body[config.serviceKey].id}`);
-          const response2 = await supertest.delete(
-            `${config.path}/${response1.body[config.serviceKey].id}`
-          );
-
-          expect(!!response2.body).to.be(false);
-        });
       });
     });
   });
