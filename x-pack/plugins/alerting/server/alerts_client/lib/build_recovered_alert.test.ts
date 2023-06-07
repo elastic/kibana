@@ -41,6 +41,7 @@ const existingActiveAlert = {
         us: '0',
       },
       flapping: false,
+      flapping_history: [true, false],
       instance: {
         id: 'alert-A',
       },
@@ -48,30 +49,6 @@ const existingActiveAlert = {
       start: '2023-03-28T12:27:28.159Z',
       rule,
       status: 'active',
-      uuid: 'abcdefg',
-    },
-    space_ids: ['default'],
-  },
-};
-
-const existingRecoveredAlert = {
-  '@timestamp': '2023-03-28T12:27:28.159Z',
-  kibana: {
-    alert: {
-      action_group: 'default',
-      duration: {
-        us: '0',
-      },
-      end: '2023-03-28T12:27:28.159Z',
-      flapping: false,
-      flapping_history: [true, false, false],
-      instance: {
-        id: 'alert-A',
-      },
-      maintenance_window_ids: ['maint-x'],
-      start: '2023-03-27T12:27:28.159Z',
-      rule,
-      status: 'recovered',
       uuid: 'abcdefg',
     },
     space_ids: ['default'],
@@ -103,6 +80,7 @@ describe('buildRecoveredAlert', () => {
           },
           end: '2023-03-30T12:27:28.159Z',
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -155,6 +133,7 @@ describe('buildRecoveredAlert', () => {
           },
           end: '2023-03-30T12:27:28.159Z',
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -167,45 +146,6 @@ describe('buildRecoveredAlert', () => {
               bar: false,
             },
           },
-          status: 'recovered',
-          uuid: 'abcdefg',
-        },
-        space_ids: ['default'],
-      },
-    });
-  });
-
-  test('should update already recovered alert document with updated flapping history but not maintenance window ids', () => {
-    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
-    legacyAlert.scheduleActions('default');
-    legacyAlert.setFlappingHistory([false, false, true, true]);
-    legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
-
-    expect(
-      buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-        alert: existingRecoveredAlert,
-        legacyAlert,
-        rule: alertRule,
-        recoveryActionGroup: 'recovered',
-        timestamp: '2023-03-29T12:27:28.159Z',
-      })
-    ).toEqual({
-      '@timestamp': '2023-03-29T12:27:28.159Z',
-      kibana: {
-        alert: {
-          action_group: 'recovered',
-          duration: {
-            us: '0',
-          },
-          end: '2023-03-28T12:27:28.159Z',
-          flapping: false,
-          flapping_history: [false, false, true, true],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: ['maint-x'],
-          start: '2023-03-27T12:27:28.159Z',
-          rule,
           status: 'recovered',
           uuid: 'abcdefg',
         },

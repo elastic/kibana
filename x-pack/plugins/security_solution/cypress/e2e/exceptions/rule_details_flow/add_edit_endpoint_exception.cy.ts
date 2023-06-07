@@ -107,6 +107,9 @@ describe('Add endpoint exception from rule details', () => {
     // open add exception modal
     openExceptionFlyoutFromEmptyViewerPrompt();
 
+    // submit button is disabled if no paramerters were added
+    cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+
     // for endpoint exceptions, must specify OS
     selectOs('windows');
 
