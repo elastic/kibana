@@ -17,9 +17,9 @@ import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
-import type { EsqlTable, EsqlResultRow, EsqlResultColumn } from './esql_request';
+import type { EsqlTable, EsqlResultColumn } from './esql_request';
 
-import { rowToDocument, pickCells } from './utils';
+import { rowToDocument } from './utils';
 
 const retrieveGroupByFields = (esqlQuery: string, columns: EsqlResultColumn[]) => {
   // fields after the last ...by, will be the ones piped
