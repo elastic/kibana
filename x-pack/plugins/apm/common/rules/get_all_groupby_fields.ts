@@ -15,9 +15,10 @@ import {
 
 export const getAllGroupByFields = (
   ruleType: string,
-  groupBy: string[] | undefined = []
+  ruleParamsGroupBy: string[] | undefined = []
 ) => {
   let predefinedGroupBy: string[] = [];
+
   switch (ruleType) {
     case ApmRuleType.TransactionDuration:
     case ApmRuleType.TransactionErrorRate:
@@ -28,5 +29,5 @@ export const getAllGroupByFields = (
       break;
   }
 
-  return union(predefinedGroupBy, groupBy);
+  return union(predefinedGroupBy, ruleParamsGroupBy);
 };
