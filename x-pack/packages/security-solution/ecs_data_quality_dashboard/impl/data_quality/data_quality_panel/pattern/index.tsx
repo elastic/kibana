@@ -182,6 +182,7 @@ const PatternComponent: React.FC<Props> = ({
       patternRollup,
       stats,
       theme,
+      baseTheme,
       updatePatternRollup,
     ]
   );

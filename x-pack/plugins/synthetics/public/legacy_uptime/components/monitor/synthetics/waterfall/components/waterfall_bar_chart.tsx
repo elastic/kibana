@@ -17,7 +17,7 @@ import {
   Settings,
   TickFormatter,
   TooltipContainer,
-  CustomTooltip,
+  CustomTooltip as CustomChartTooltip,
   Tooltip,
 } from '@elastic/charts';
 import { BAR_HEIGHT } from './constants';
@@ -35,7 +35,7 @@ const getChartHeight = (data: WaterfallData): number => {
   return noOfXBars * BAR_HEIGHT;
 };
 
-const CustomTooltip: CustomTooltip = (tooltipInfo) => {
+const CustomTooltip: CustomChartTooltip = (tooltipInfo) => {
   const { data, sidebarItems } = useWaterfallContext();
   return useMemo(() => {
     const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);

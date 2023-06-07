@@ -175,6 +175,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       patternRollup?.docsCount,
       patternRollup?.stats,
       theme,
+      baseTheme,
     ]
   );
 

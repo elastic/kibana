@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Partition, Settings } from '@elastic/charts';
+import { LIGHT_THEME, Partition, Settings } from '@elastic/charts';
 import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
 import { render } from '@testing-library/react';
 import type { DonutChartProps } from './donutchart';
@@ -49,12 +49,9 @@ jest.mock('./draggable_legend', () => {
 
 jest.mock('./common', () => {
   return {
-    useTheme: jest.fn(() => ({
-      eui: {
-        euiScrollBar: 0,
-        euiColorDarkShade: '#fff',
-        euiScrollBarCorner: '#ccc',
-      },
+    useThemes: jest.fn(() => ({
+      baseTheme: LIGHT_THEME,
+      theme: {},
     })),
   };
 });
@@ -95,13 +92,7 @@ describe('DonutChart', () => {
     expect(container.querySelector(`[data-test-subj="es-chart-settings"]`)).toBeInTheDocument();
 
     expect((Settings as jest.Mock).mock.calls[0][0]).toEqual({
-      baseTheme: {
-        eui: {
-          euiColorDarkShade: '#fff',
-          euiScrollBar: 0,
-          euiScrollBarCorner: '#ccc',
-        },
-      },
+      baseTheme: LIGHT_THEME,
       theme: {
         chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
         partition: {

@@ -238,14 +238,14 @@ describe('PartitionVisComponent', function () {
 
   it('defaults on displaying the tooltip', () => {
     const component = shallow(<PartitionVisComponent {...wrapperProps} />);
-    expect(component.find(Tooltip).prop('type')).toEqual( TooltipType.Follow);
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.Follow);
   });
 
   it('doesnt show the tooltip when the user requests it', () => {
     const newParams = { ...visParams, addTooltip: false };
     const newProps = { ...wrapperProps, visParams: newParams };
     const component = shallow(<PartitionVisComponent {...newProps} />);
-    expect(component.find(Tooltip).prop('type')).toEqual( TooltipType.None);
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
   it('calls filter callback', () => {
