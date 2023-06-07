@@ -95,6 +95,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
                     orientation: event.target.value as $Values<typeof Orientation>,
                   });
                 }}
+                compressed
               />
             </EuiFormRow>
             <EuiFormRow
@@ -104,7 +105,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
               })}
             >
               <EuiSwitch
-                label=""
+                showLabel={false}
                 checked={props.state.showLabel}
                 onChange={(event: EuiSwitchEvent) => {
                   props.setState({
@@ -112,6 +113,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
                     showLabel: event.target.checked,
                   });
                 }}
+                compressed
               />
             </EuiFormRow>
           </ToolbarPopover>

@@ -47,6 +47,7 @@ export function FontSizeInput(props: Props) {
         setFontSize(value as [number, number]);
       }}
       showLabels
+      compressed
       aria-label={i18n.translate('xpack.lens.label.tagcloud.fontSizeLabel', {
         defaultMessage: 'Font size',
       })}
