@@ -13,7 +13,7 @@ import {
   rowClickTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '@kbn/ui-actions-browser';
+} from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from './service';
 import { setTheme } from './services';
 

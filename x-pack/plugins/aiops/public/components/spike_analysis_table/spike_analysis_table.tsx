@@ -20,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import type { FieldStatsServices } from '@kbn/unified-field-list';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Trigger } from '@kbn/ui-actions-browser';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import { ActionInternal, Action, ActionDefinition } from '../actions';
 import { TriggerInternal } from '../triggers/trigger_internal';

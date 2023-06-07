@@ -6,7 +6,11 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { FieldStats, FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list';
+import {
+  FieldStats,
+  FieldStatsProps,
+  FieldStatsServices,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';

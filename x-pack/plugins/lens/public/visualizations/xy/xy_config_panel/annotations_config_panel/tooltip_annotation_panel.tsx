@@ -9,7 +9,7 @@ import { htmlIdGenerator, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
-import { useExistingFieldsReader } from '@kbn/unified-field-list';
+import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import {
   FieldOption,
   FieldOptionValue,

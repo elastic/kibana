@@ -8,7 +8,7 @@
 
 import { uniqBy } from 'lodash';
 import { defer as createDefer, Defer } from '@kbn/kibana-utils-plugin/public';
-import type { Trigger } from '@kbn/ui-actions-browser';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { Action } from '../actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 
