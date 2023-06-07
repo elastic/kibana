@@ -11,8 +11,8 @@ import { DataViewId } from '../../detection_engine/rule_schema';
 
 const afterKey = t.record(t.string, t.string);
 
-export type RiskScoresRequestSchema = t.TypeOf<typeof riskScoresRequestSchema>;
-export const riskScoresRequestSchema = t.exact(
+export type RiskScorePreviewRequestSchema = t.TypeOf<typeof riskScorePreviewRequestSchema>;
+export const riskScorePreviewRequestSchema = t.exact(
   t.partial({
     after_keys: t.partial({
       host: afterKey,

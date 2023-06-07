@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { DEFAULT_RISK_SCORE_PAGE_SIZE, RISK_SCORE_PREVIEW_URL } from '../../../../common/constants';
-import { riskScoresRequestSchema } from '../../../../common/risk_engine/risk_scoring/risk_scores_request_schema';
+import { riskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { riskScoreService } from '../risk_score_service';
@@ -19,7 +19,7 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
   router.post(
     {
       path: RISK_SCORE_PREVIEW_URL,
-      validate: { body: buildRouteValidation(riskScoresRequestSchema) },
+      validate: { body: buildRouteValidation(riskScorePreviewRequestSchema) },
       options: {
         tags: ['access:securitySolution'],
       },
