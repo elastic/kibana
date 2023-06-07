@@ -206,7 +206,7 @@ export const EngineIndices: React.FC = () => {
                     'xpack.enterpriseSearch.content.engine.indices.allUnknownIndicesCallout.description',
                     {
                       defaultMessage:
-                        'Your search application has no reachable indices, Add some indices and check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
+                        'Your search application has no reachable indices. Add some indices and check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
                     }
                   )}
                 </>
