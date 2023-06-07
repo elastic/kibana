@@ -12,7 +12,7 @@ import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
   SavedObject,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 
@@ -20,7 +20,7 @@ import type { DataViewCrudTypes } from '../common/content_management';
 
 import { DataViewSOType } from '../common/content_management';
 
-export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
+export class ContentMagementWrapper implements PersistenceAPI {
   private contentManagementClient: ContentClient;
 
   constructor(contentManagementClient: ContentClient) {

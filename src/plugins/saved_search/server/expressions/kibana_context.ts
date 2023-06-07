@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
-import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/public';
-import { getKibanaContextFn } from '../../../common/search/expressions';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { StartServicesAccessor } from '@kbn/core/server';
+import { PersistenceAPI } from '@kbn/data-views-plugin/common';
+import { getKibanaContextFn } from '../../common';
+// import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -28,12 +28,18 @@ import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 export function getKibanaContext({
   getStartServices,
 }: {
-  getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+  getStartServices: StartServicesAccessor;
 }) {
-  return getKibanaContextFn(async () => {
-    const [core] = await getStartServices();
+  return getKibanaContextFn(async (getKibanaRequest) => {
+    const request = getKibanaRequest && getKibanaRequest();
+    if (!request) {
+      throw new Error('KIBANA_CONTEXT_KIBANA_REQUEST_MISSING');
+    }
+
+    const [{ savedObjects }] = await getStartServices();
     return {
-      savedObjectsClient: core.savedObjects.client as unknown as SavedObjectsClientCommon,
+      // todo this likely needs to be removed
+      savedObjectsClient: savedObjects.getScopedClient(request) as unknown as PersistenceAPI,
     };
   });
 }

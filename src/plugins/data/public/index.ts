@@ -138,12 +138,12 @@ export type {
   OptionedValueProp,
   ParsedInterval,
   // expressions
-  ExecutionContextSearch,
+  // ExecutionContextSearch,
   ExpressionFunctionKql,
   ExpressionFunctionLucene,
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
-  ExpressionValueSearchContext,
+  // ExpressionValueSearchContext,
   KibanaContext,
 } from '../common';
 

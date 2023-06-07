@@ -17,7 +17,7 @@ import {
 } from './types';
 
 import { DataViewsApiClient } from '.';
-import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
+import { ContentMagementWrapper } from './content_management_wrapper';
 
 import { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 
@@ -77,7 +77,7 @@ export class DataViewsPublicPlugin
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(contentManagement.client),
+      savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields, key) => {

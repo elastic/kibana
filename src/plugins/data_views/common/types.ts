@@ -251,10 +251,10 @@ export interface SavedObjectsClientCommonFindArgs {
 }
 
 /**
- * Common interface for the saved objects client
+ * Common interface for the saved objects client on server and content management in browser
  * @public
  */
-export interface SavedObjectsClientCommon {
+export interface PersistenceAPI {
   /**
    * Search for saved objects
    * @param options - options for search

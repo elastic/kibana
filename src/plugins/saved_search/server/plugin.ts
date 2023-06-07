@@ -9,19 +9,28 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { getSavedSearchObjectType } from './saved_objects';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchStorage } from './content_management';
+import { kibanaContext } from '../common/expressions';
+import { getKibanaContext } from './expressions/kibana_context';
+
+/**
+ * Saved search plugin server Setup contract
+ */
+export interface SavedSearchPublicSetupDependencies {
+  data: DataPluginSetup;
+  contentManagement: ContentManagementServerSetup;
+  expressions: ExpressionsServerSetup;
+}
 
 export class SavedSearchServerPlugin implements Plugin<object, object> {
   public setup(
     core: CoreSetup,
-    plugins: {
-      data: DataPluginSetup;
-      contentManagement: ContentManagementServerSetup;
-    }
+    { data, contentManagement, expressions }: SavedSearchPublicSetupDependencies
   ) {
-    plugins.contentManagement.register({
+    contentManagement.register({
       id: SavedSearchType,
       storage: new SavedSearchStorage(),
       version: {
@@ -29,10 +38,13 @@ export class SavedSearchServerPlugin implements Plugin<object, object> {
       },
     });
 
-    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
-      plugins.data.search.searchSource
+    const getSearchSourceMigrations = data.search.searchSource.getAllMigrations.bind(
+      data.search.searchSource
     );
     core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
+
+    expressions.registerType(kibanaContext);
+    expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
 
     return {};
   }

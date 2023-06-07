@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from '@kbn/core/server';
-import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/server';
-import { getKibanaContextFn } from '../../../common/search/expressions';
-import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { StartServicesAccessor } from '@kbn/core/public';
+// import { PersistenceAPI } from '@kbn/data-views-plugin/common';
+import { getKibanaContextFn } from '../../common';
+import { SavedSearchPublicPluginStart, SavedSearchPublicStartDependencies } from '../plugin';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -25,20 +25,19 @@ import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
  *
  * @internal
  */
+
 export function getKibanaContext({
   getStartServices,
 }: {
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>;
+  getStartServices: StartServicesAccessor<
+    SavedSearchPublicStartDependencies,
+    SavedSearchPublicPluginStart
+  >;
 }) {
-  return getKibanaContextFn(async (getKibanaRequest) => {
-    const request = getKibanaRequest && getKibanaRequest();
-    if (!request) {
-      throw new Error('KIBANA_CONTEXT_KIBANA_REQUEST_MISSING');
-    }
-
-    const [{ savedObjects }] = await getStartServices();
+  return getKibanaContextFn(async () => {
+    const [core] = await getStartServices();
     return {
-      savedObjectsClient: savedObjects.getScopedClient(request) as any as SavedObjectsClientCommon,
+      getSavedSearch: core.savedObjects.client.get.bind(core.savedObjects.client),
     };
   });
 }

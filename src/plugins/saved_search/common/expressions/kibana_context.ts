@@ -14,13 +14,13 @@ import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/common';
+import { PersistenceAPI } from '@kbn/data-views-plugin/common';
+import { KibanaTimerangeOutput } from '@kbn/data-plugin/common';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
-import { KibanaTimerangeOutput } from './timerange';
 
 export interface KibanaContextStartDependencies {
-  savedObjectsClient: SavedObjectsClientCommon;
+  savedObjectsClient: PersistenceAPI;
 }
 
 interface Arguments {
@@ -129,6 +129,8 @@ export const getKibanaContextFn = (
       let filters = [...(input?.filters || [])];
 
       if (args.savedSearchId) {
+        // todo this needs to be passed in
+        // get raw saved object
         const obj = await savedObjectsClient.getSavedSearch(args.savedSearchId);
         const search = (obj.attributes as any).kibanaSavedObjectMeta.searchSourceJSON as string;
         const { query, filter } = getParsedValue(search, {});

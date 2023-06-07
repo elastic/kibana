@@ -13,7 +13,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import {
   UiSettingsCommon,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   SavedObject,
   DataViewSpec,
   IDataViewsApiClient,
@@ -60,7 +60,7 @@ const savedObject = {
 describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
   let indexPatternsNoAccess: DataViewsService;
-  let savedObjectsClient: SavedObjectsClientCommon;
+  let savedObjectsClient: PersistenceAPI;
   let SOClientGetDelay = 0;
   let apiClient: IDataViewsApiClient;
   const uiSettings = {
@@ -73,7 +73,7 @@ describe('IndexPatterns', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    savedObjectsClient = {} as SavedObjectsClientCommon;
+    savedObjectsClient = {} as PersistenceAPI;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
@@ -107,7 +107,7 @@ describe('IndexPatterns', () => {
 
     indexPatterns = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -119,7 +119,7 @@ describe('IndexPatterns', () => {
 
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},

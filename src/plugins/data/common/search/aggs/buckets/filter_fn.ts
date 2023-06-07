@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import { GeoBoundingBoxOutput, KibanaQueryOutput } from '../../expressions';
+import { GeoBoundingBoxOutput, KibanaQueryOutput } from '../../..';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggFilterFnName = 'aggFilter';
