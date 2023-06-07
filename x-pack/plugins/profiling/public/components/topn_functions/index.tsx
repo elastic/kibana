@@ -48,37 +48,44 @@ interface Row {
 function TotalSamplesStat({
   totalSamples,
   newSamples,
+  samplingRateA,
+  samplingRateB,
 }: {
   totalSamples: number;
   newSamples: number | undefined;
+  samplingRateA: number;
+  samplingRateB: number | undefined;
 }) {
   const value = totalSamples.toLocaleString();
 
-  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
-    defaultMessage: ' Total sample estimate: ',
+  let sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
+    defaultMessage: ' Total samples (estimate, sample rate: ',
   });
+
+  const sampleHeaderA = sampleHeader + samplingRateA + "):";
 
   if (newSamples === undefined || newSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
-        description={sampleHeader}
+        description={sampleHeaderA}
       />
     );
   }
 
   const diffSamples = totalSamples - newSamples;
   const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
+  const sampleHeaderB = sampleHeader + samplingRateB + "):";
 
   return (
     <EuiStat
       title={
         <EuiText style={{ fontWeight: 'bold' }}>
           {value}
-          <GetLabel value={percentDelta} prepend="(" append=")" />
+          <GetLabel value={percentDelta} prepend=" (" append=")" />
         </EuiText>
       }
-      description={sampleHeader}
+      description={sampleHeaderB}
     />
   );
 }
@@ -87,12 +94,14 @@ function SampleStat({
   samples,
   diffSamples,
   totalSamples,
+  isSampled,
 }: {
   samples: number;
   diffSamples?: number;
   totalSamples: number;
+  isSampled: boolean;
 }) {
-  const samplesLabel = `${samples.toLocaleString()}`;
+  const samplesLabel = (isSampled ? '~ ' : '') + `${samples.toLocaleString()}`;
 
   if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;
@@ -114,7 +123,8 @@ function SampleStat({
   );
 }
 
-function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number }) {
+function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number; isSampled?: boolean }) {
+  
   const cpuLabel = `${cpu.toFixed(2)}%`;
 
   if (diffCPU === undefined || diffCPU === 0) {
@@ -154,7 +164,7 @@ export function TopNFunctionsTable({
   isDifferentialView,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
-
+  const isEstimatedA = ((topNFunctions.SamplingRate ?? 1.0) != 1.0);
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -243,7 +253,8 @@ export function TopNFunctionsTable({
       }),
       render: (_, { samples, diff }) => {
         return (
-          <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />
+          <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} 
+            isSampled={ isEstimatedA }/>
         );
       },
       align: 'right',
@@ -369,12 +380,13 @@ export function TopNFunctionsTable({
     },
     [sortDirection]
   ).slice(0, 100);
-
   return (
     <>
       <TotalSamplesStat
         totalSamples={totalCount}
         newSamples={comparisonTopNFunctions?.TotalCount}
+        samplingRateA={topNFunctions.SamplingRate}
+        samplingRateB={comparisonTopNFunctions?.SamplingRate}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
