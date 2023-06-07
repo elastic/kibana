@@ -18,11 +18,6 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Pause on error',
   })
-  .option('watch', {
-    default: false,
-    type: 'boolean',
-    description: 'Runs the server in watch mode, restarting on changes',
-  })
   .option('grep', {
     default: undefined,
     type: 'string',

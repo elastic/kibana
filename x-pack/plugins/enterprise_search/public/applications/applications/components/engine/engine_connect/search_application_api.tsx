@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
@@ -156,6 +158,21 @@ export const SearchApplicationAPI = () => {
       {isGenerateModalOpen ? (
         <GenerateEngineApiKeyModal engineName={engineName} onClose={closeGenerateModal} />
       ) : null}
+      <EuiCallOut
+        iconType="iInCircle"
+        title={
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.searchApplication.api.safeSearchCallout.title"
+            defaultMessage="What is Safe Search API?"
+          />
+        }
+      >
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.searchApplication.api.safeSearchCallout.body"
+          defaultMessage="The safe search API endpoint only allows queries with the parameters defined in the settings JSON, so you can create public-facing search endpoints for your Elasticsearch indices."
+        />
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiSteps headingElement="h2" steps={steps} />
     </>
   );

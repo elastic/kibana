@@ -530,7 +530,16 @@ function getPatternFiringAlertsAsDataRuleType() {
   interface State extends RuleTypeState {
     patternIndex?: number;
   }
-  const result: RuleType<ParamsType, never, State, {}, {}, 'default', 'recovered', {}> = {
+  const result: RuleType<
+    ParamsType,
+    never,
+    State,
+    {},
+    {},
+    'default',
+    'recovered',
+    { patternIndex: number; instancePattern: boolean[] }
+  > = {
     id: 'test.patternFiringAad',
     name: 'Test: Firing on a Pattern and writing Alerts as Data',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -553,6 +562,11 @@ function getPatternFiringAlertsAsDataRuleType() {
         maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
       }
 
+      const alertsClient = services.alertsClient;
+      if (!alertsClient) {
+        throw new Error(`Expected alertsClient to be defined but it is not`);
+      }
+
       // get the pattern index, return if past it
       const patternIndex = state.patternIndex ?? 0;
       if (patternIndex >= maxPatternLength) {
@@ -563,9 +577,19 @@ function getPatternFiringAlertsAsDataRuleType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertFactory.create(instanceId).scheduleActions('default');
+          alertsClient.create({
+            id: instanceId,
+            actionGroup: 'default',
+            state: { patternIndex },
+            payload: { patternIndex, instancePattern: instancePattern as boolean[] },
+          });
         } else if (typeof scheduleByPattern === 'string') {
-          services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
+          alertsClient.create({
+            id: instanceId,
+            actionGroup: 'default',
+            state: { patternIndex },
+            payload: { patternIndex, instancePattern: [true] },
+          });
         }
       }
 
