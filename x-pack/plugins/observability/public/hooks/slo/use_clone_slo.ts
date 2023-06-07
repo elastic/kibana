@@ -23,40 +23,36 @@ export function useCloneSlo() {
   return useMutation<
     CreateSLOResponse,
     string,
-    { slo: CreateSLOInput; idToCopyFrom?: string },
+    { slo: CreateSLOInput; originalSloId?: string },
     { previousSloList: FindSLOResponse | undefined }
   >(
     ['cloneSlo'],
-    ({ slo }: { slo: CreateSLOInput; idToCopyFrom?: string }) => {
+    ({ slo }: { slo: CreateSLOInput; originalSloId?: string }) => {
       const body = JSON.stringify(slo);
       return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
     {
-      onMutate: async ({ slo, idToCopyFrom }) => {
+      onMutate: async ({ slo, originalSloId }) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries(sloKeys.lists());
 
-        const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) || []
+        const latestQueriesData = (
+          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) ?? []
         ).at(0);
+        const [queryKey, data] = latestQueriesData ?? [];
 
-        const [queryKey, data] = latestFetchSloListRequest || [];
-
-        const sloUsedToClone = data?.results.find((el) => el.id === idToCopyFrom);
-
+        const originalSlo = data?.results?.find((el) => el.id === originalSloId);
         const optimisticUpdate = {
           ...data,
           results: [
-            ...(data?.results || []),
-            { ...sloUsedToClone, name: slo.name, id: uuidv1(), summary: undefined },
+            ...(data?.results ?? []),
+            { ...originalSlo, name: slo.name, id: uuidv1(), summary: undefined },
           ],
-          total: data?.total && data.total + 1,
+          total: data?.total ? data.total + 1 : 1,
         };
 
         // Optimistically update to the new value
-        if (queryKey) {
-          queryClient.setQueryData(queryKey, optimisticUpdate);
-        }
+        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
 
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.clone.successNotification', {

@@ -115,7 +115,7 @@ export function SloListItem({
       transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
     );
 
-    cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+    cloneSlo({ slo: newSlo, originalSloId: slo.id });
     setIsActionsPopoverOpen(false);
   };
 
