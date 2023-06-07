@@ -199,7 +199,7 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const result = await evaluate(slo, soClient, esClient.asInternalUser, params);
+    const result = await evaluate(slo, soClient, esClient.asCurrentUser, params);
 
     if (result) {
       const {
