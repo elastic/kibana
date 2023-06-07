@@ -4,28 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable react-hooks/rules-of-hooks */
 
+import type { EuiDataGridProps } from '@elastic/eui';
 import {
+  logicalCSS,
+  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiBadge,
+  EuiButtonIcon,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback } from 'react';
-import styled from 'styled-components';
+import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
+import styled, { css } from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager, flattenHit } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-plugin/public/types';
-import type { ControlColumnProps } from '../../../../../common/types';
+// import type { ControlColumnProps } from '../../../../../common/types';
+import { Actions } from '../../../../common/components/header_actions/actions';
+import { RowRendererId } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -64,6 +72,13 @@ import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
+import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
+import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
+import { timelineBodySelector } from '../body/selectors';
+import { TgridTdCell } from '../body/data_driven_columns';
+
+/** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
+const ARIA_ROW_INDEX_OFFSET = 2;
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -166,7 +181,7 @@ const EMPTY_EVENTS: TimelineItem[] = [];
 
 export type Props = OwnProps & PropsFromRedux;
 
-const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+// const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -220,6 +235,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
+  const { timeline: { excludedRowRendererIds } = timelineDefaults } = useSelector((state: State) =>
+    timelineBodySelector(state, timelineId)
+  );
+
   const activeFilterManager = currentTimeline.filterManager;
   const filterManager = useMemo(
     () => activeFilterManager ?? new FilterManager(uiSettings),
@@ -271,14 +290,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [combinedQueries, end, loadingSourcerer, start]
   );
 
-  const visibleColumns = useMemo(() => {
+  const defaultColumns = useMemo(() => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     return columnsHeader.map((c) => c.id);
   }, [columns]);
 
   const getTimelineQueryFields = useCallback(() => {
-    return [...visibleColumns, ...requiredFieldsForActions];
-  }, [visibleColumns]);
+    return [...defaultColumns, ...requiredFieldsForActions];
+  }, [defaultColumns]);
 
   const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
@@ -338,24 +357,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return (combinedQueries && combinedQueries.kqlError != null) || false;
   }, [combinedQueries]);
 
-  const leadingControlColumns = useMemo(
+  const discoverGridRows: Array<DataTableRecord & TimelineItem> = useMemo(
     () =>
-      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
-        ...x,
-        headerCellRender: HeaderActions,
-      })),
-    [ACTION_BUTTON_COUNT]
-  );
-
-  const DiscoverGrid = useDiscoverGrid();
-
-  const discoverGridRows: DataTableRecord[] = useMemo(
-    () =>
-      events.map(({ _id, _index, ecs }) => {
+      events.map(({ _id, _index, ecs, data }) => {
         const _source = ecs as unknown as Record<string, unknown>;
         const hit = { _id, _index: String(_index), _source };
         return {
           id: _id,
+          data,
+          ecs,
           raw: hit,
           flattened: flattenHit(hit, sourcererDataView, {
             includeIgnoredValues: true,
@@ -364,6 +374,253 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       }),
     [events, sourcererDataView]
   );
+
+  const noop = () => {};
+  const leadingControlColumns: EuiDataGridProps['leadingControlColumns'] = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellProps: {
+          ...x.headerCellProps,
+          browserFields,
+          columnHeaders: defaultHeaders ?? [],
+          sort,
+          timelineId: timelineId ?? 'timeline-1',
+        },
+        rowCellRender: ({ rowIndex, colIndex, columnId }) => (
+          <Actions
+            ariaRowindex={rowIndex}
+            columnId={columnId}
+            data={discoverGridRows[rowIndex].data}
+            index={colIndex}
+            rowIndex={rowIndex}
+            setEventsDeleted={noop}
+            checked={false}
+            columnValues="test"
+            ecsData={discoverGridRows[rowIndex].ecs}
+            eventId={discoverGridRows[rowIndex].id}
+            eventIdToNoteIds={{}}
+            loadingEventIds={[]}
+            onEventDetailsPanelOpened={noop}
+            onRowSelected={noop}
+            onRuleChange={noop}
+            showCheckboxes={false}
+            showNotes={false}
+            timelineId={timelineId}
+            toggleShowNotes={noop}
+            refetch={noop}
+            setEventsLoading={noop}
+          />
+        ),
+        headerCellRender: HeaderActions,
+      })),
+    [ACTION_BUTTON_COUNT, browserFields, discoverGridRows, sort, timelineId]
+  );
+
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
+
+  // Pagination
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const onChangePage = useCallback((pageIndex) => {
+    setPagination((pagination) => ({ ...pagination, pageIndex }));
+  }, []);
+  const onChangePageSize = useCallback((pageSize) => {
+    setPagination((pagination) => ({ ...pagination, pageSize }));
+  }, []);
+
+  // Sorting
+  const [sortingColumns, setSortingColumns] = useState(sort);
+
+  const onSort = useCallback((sortColumns) => {
+    setSortingColumns(sortColumns);
+  }, []);
+
+  const DiscoverGrid = useDiscoverGrid();
+
+  const { euiTheme } = useEuiTheme();
+
+  const renderCustomGridBody: EuiDataGridProps['renderCustomGridBody'] = useCallback(
+    ({ Cell, visibleColumns, visibleRowData, setCustomGridBodyProps }) => {
+      // Ensure we're displaying correctly-paginated rows
+      const visibleRows = discoverGridRows.slice(visibleRowData.startRow, visibleRowData.endRow);
+
+      // Add styling needed for custom grid body rows
+      const styles = {
+        row: css`
+          ${logicalCSS('width', 'fit-content')};
+          ${logicalCSS('border-bottom', euiTheme.border.thin)};
+          background-color: ${euiTheme.colors.emptyShade};
+        `,
+        rowCellsWrapper: css`
+          display: flex;
+        `,
+        rowDetailsWrapper: css`
+          text-align: center;
+          background-color: ${euiTheme.colors.body};
+        `,
+      };
+
+      // Set custom props onto the grid body wrapper
+      const bodyRef = useRef<HTMLDivElement | null>(null);
+      useEffect(() => {
+        setCustomGridBodyProps({
+          ref: bodyRef,
+          onScroll: () => console.debug('scrollTop:', bodyRef.current?.scrollTop),
+        });
+      }, [setCustomGridBodyProps]);
+
+      return (
+        <>
+          {visibleRows.map((row, rowIndex) => (
+            <div role="row" css={styles.row} key={rowIndex}>
+              <div css={styles.rowCellsWrapper}>
+                {visibleColumns.map((column, colIndex) => {
+                  console.log('Stuff!!:', column, row);
+                  // Skip the row details cell - we'll render it manually outside of the flex wrapper
+                  if (column.id.includes('timeline')) {
+                    return (
+                      <Cell
+                        colIndex={colIndex}
+                        visibleRowIndex={rowIndex}
+                        key={`${rowIndex},${colIndex}`}
+                      />
+                    );
+                  }
+                  if (column.id !== 'row-details') {
+                    return (
+                      <TgridTdCell
+                        _id={discoverGridRows[rowIndex]._id}
+                        ariaRowindex={rowIndex}
+                        index={rowIndex}
+                        header={defaultHeaders.find(({ id }) => column.id === id)}
+                        data={discoverGridRows[rowIndex].data}
+                        ecsData={discoverGridRows[rowIndex].ecs}
+                        hasRowRenderers={true}
+                        notesCount={0}
+                        renderCellValue={renderCellValue}
+                        tabType={TimelineTabs.query}
+                        timelineId={timelineId}
+                      />
+                    );
+
+                    // return renderCellValue({
+                    //   columnId: column.id,
+                    //   eventId: discoverGridRows[rowIndex]._id,
+                    //   data: discoverGridRows[rowIndex].data,
+                    //   header: defaultHeaders.find(({ id }) => column.id === id),
+                    //   isDraggable: true,
+                    //   isExpandable: true,
+                    //   isExpanded: false,
+                    //   isDetails: false,
+                    //   isTimeline: true,
+                    //   linkValues: undefined,
+                    //   rowIndex,
+                    //   colIndex,
+                    //   setCellProps: () => {},
+                    //   scopeId: timelineId,
+                    //   key: `${timelineId}-query`,
+                    // });
+                    // return (
+                    //   <Cell
+                    //     colIndex={colIndex}
+                    //     visibleRowIndex={rowIndex}
+                    //     key={`${rowIndex},${colIndex}`}
+                    //   />
+                    // );
+                  }
+                })}
+              </div>
+              <div css={styles.rowDetailsWrapper}>
+                <Cell
+                  colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
+                  visibleRowIndex={rowIndex}
+                />
+              </div>
+            </div>
+          ))}
+        </>
+      );
+    },
+    [discoverGridRows, euiTheme.border.thin, euiTheme.colors.body, euiTheme.colors.emptyShade]
+  );
+
+  const enabledRowRenderers = useMemo(() => {
+    if (
+      excludedRowRendererIds &&
+      excludedRowRendererIds.length === Object.keys(RowRendererId).length
+    )
+      return [plainRowRenderer];
+
+    if (!excludedRowRendererIds) return rowRenderers;
+
+    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+  }, [excludedRowRendererIds, rowRenderers]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // The custom row details is actually a trailing control column cell with
+  // a hidden header. This is important for accessibility and markup reasons
+  // @see https://fuschia-stretch.glitch.me/ for more
+  const rowDetails: EuiDataGridProps['trailingControlColumns'] = [
+    {
+      id: 'row-details',
+
+      // The header cell should be visually hidden, but available to screen readers
+      width: 0,
+      headerCellRender: () => <>{'Row details'}</>,
+      headerCellProps: { className: 'euiScreenReaderOnly' },
+
+      // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
+      footerCellProps: { style: { display: 'none' } },
+
+      // When rendering this custom cell, we'll want to override
+      // the automatic width/heights calculated by EuiDataGrid
+      rowCellRender: ({ setCellProps, rowIndex }) => {
+        setCellProps({ style: { width: '100%', height: 'auto' } });
+        return (
+          <>
+            <StatefulRowRenderer
+              ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
+              containerRef={containerRef}
+              event={discoverGridRows[rowIndex] as TimelineItem}
+              lastFocusedAriaColindex={rowIndex - 1}
+              rowRenderers={enabledRowRenderers}
+              timelineId={timelineId}
+            />
+          </>
+        );
+      },
+    },
+  ];
+
+  const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [
+    {
+      id: 'actions',
+      width: 40,
+      headerCellRender: () => (
+        <EuiScreenReaderOnly>
+          <span>{'Actions'}</span>
+        </EuiScreenReaderOnly>
+      ),
+      rowCellRender: () => (
+        <EuiButtonIcon iconType="boxesHorizontal" aria-label="See row actions" />
+      ),
+    },
+  ];
+
+  const RenderFooterCellValue: EuiDataGridProps['renderFooterCellValue'] = ({
+    columnId,
+    setCellProps,
+  }) => {
+    const value = footerCellValues[columnId];
+
+    useEffect(() => {
+      // Turn off the cell expansion button if the footer cell is empty
+      if (!value) setCellProps({ isExpandable: false });
+    }, [value, setCellProps, columnId]);
+
+    return value || null;
+  };
 
   return (
     <>
@@ -427,33 +684,52 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
               className="timeline-flyout-body"
             >
-              {sourcererDataView && (
-                <DiscoverGrid
-                  columns={visibleColumns}
-                  dataView={sourcererDataView}
-                  sort={[]}
-                  rows={discoverGridRows}
-                  ariaLabelledBy={''}
-                  isLoading={isQueryLoading}
-                  onAddColumn={function (column: string): void {
-                    throw new Error('Function not implemented.');
-                  }}
-                  onFilter={() => {
-                    console.log('onFilter called');
-                  }}
-                  onRemoveColumn={() => {
-                    console.log('onRemoveColumn called');
-                  }}
-                  onSetColumns={() => {
-                    console.log('onSetColumns called');
-                  }}
-                  sampleSize={0}
-                  showTimeCol={true}
-                  useNewFieldsApi={false}
-                  cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-                />
-              )}
-              {/* <StatefulBody
+              <div ref={containerRef}>
+                {sourcererDataView && (
+                  <DiscoverGrid
+                    columns={defaultColumns}
+                    columnVisibility={{ visibleColumns, setVisibleColumns }}
+                    dataView={sourcererDataView}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={rowDetails}
+                    sorting={{ columns: sortingColumns, onSort }}
+                    inMemory={{ level: 'sorting' }}
+                    rows={discoverGridRows}
+                    renderCellValue={({ rowIndex, columnId }) =>
+                      discoverGridRows[rowIndex][columnId]
+                    }
+                    renderCustomGridBody={renderCustomGridBody}
+                    ariaLabelledBy={''}
+                    sort={[]}
+                    isLoading={isQueryLoading}
+                    pagination={{
+                      ...pagination,
+                      pageSizeOptions: [10, 25, 50],
+                      onChangePage,
+                      onChangeItemsPerPage: onChangePageSize,
+                    }}
+                    onAddColumn={function (column: string): void {
+                      throw new Error('Function not implemented.');
+                    }}
+                    onFilter={() => {
+                      console.log('onFilter called');
+                    }}
+                    onRemoveColumn={() => {
+                      console.log('onRemoveColumn called');
+                    }}
+                    onSetColumns={() => {
+                      console.log('onSetColumns called');
+                    }}
+                    renderFooterCellValue={RenderFooterCellValue}
+                    rowCount={discoverGridRows.length}
+                    sampleSize={0}
+                    gridStyle={{ border: 'none', header: 'underline' }}
+                    showTimeCol={true}
+                    useNewFieldsApi={false}
+                    cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+                  />
+                )}
+                {/* <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
@@ -470,6 +746,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 leadingControlColumns={leadingControlColumns}
                 trailingControlColumns={trailingControlColumns}
               /> */}
+              </div>
             </StyledEuiFlyoutBody>
 
             {/* <StyledEuiFlyoutFooter

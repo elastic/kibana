@@ -11,6 +11,7 @@ import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
+import type { InfraLocators } from '@kbn/infra-plugin/public/locators';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
@@ -35,18 +36,21 @@ export const getSections = ({
   basePath,
   location,
   apmRouter,
+  infraLocators,
   infraLinksAvailable,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
   apmRouter: ApmRouter;
+  infraLocators: InfraLocators;
   infraLinksAvailable: boolean;
 }) => {
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
+  const { nodeLogsLocator, logsLocator } = infraLocators;
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
@@ -78,11 +82,10 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
         { defaultMessage: 'Pod logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/pod-logs/${podId}`,
-        query: { time },
+      href: nodeLogsLocator.getRedirectUrl({
+        nodeId: podId!,
+        nodeType: 'pod',
+        time,
       }),
       condition: !!podId,
     },
@@ -109,11 +112,10 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
         { defaultMessage: 'Container logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/container-logs/${containerId}`,
-        query: { time },
+      href: nodeLogsLocator.getRedirectUrl({
+        nodeId: containerId!,
+        nodeType: 'container',
+        time,
       }),
       condition: !!containerId,
     },
@@ -140,11 +142,10 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
         { defaultMessage: 'Host logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/host-logs/${hostName}`,
-        query: { time },
+      href: nodeLogsLocator.getRedirectUrl({
+        nodeId: hostName!,
+        nodeType: 'host',
+        time,
       }),
       condition: !!hostName,
     },
@@ -171,14 +172,9 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
         { defaultMessage: 'Trace logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/logs`,
-        query: {
-          time,
-          filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
-        },
+      href: logsLocator.getRedirectUrl({
+        filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
+        time,
       }),
       condition: true,
     },

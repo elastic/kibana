@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { EuiDataGridProps } from '@elastic/eui';
 import React, { Suspense, useMemo } from 'react';
 import { ServicesContextProvider } from '../application/services_provider';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 
-export type ExportedDiscoverGrid = Omit<DiscoverGridProps, 'services'>;
+export type ExportedDiscoverGrid = Omit<DiscoverGridProps, 'services'> & EuiDataGridProps;
 
 const DiscoverGrid = React.lazy(() => import('../components/discover_grid/discover_grid'));
 export const useDiscoverGrid = (services: DiscoverServices) => {

@@ -40,6 +40,13 @@ export const TORQ_TOKEN_LABEL = i18n.translate('xpack.stackConnectors.torqAction
   defaultMessage: 'Torq integration token',
 });
 
+export const TORQ_TOKEN_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.error.requiredWebhookTorqTokenText',
+  {
+    defaultMessage: 'Torq integration token is required.',
+  }
+);
+
 export const BODY_REQUIRED = i18n.translate('xpack.stackConnectors.error.requiredWebhookBodyText', {
   defaultMessage: 'Body is required.',
 });

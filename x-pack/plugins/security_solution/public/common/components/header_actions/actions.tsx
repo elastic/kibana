@@ -92,7 +92,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     (event: React.ChangeEvent<HTMLInputElement>) =>
       onRowSelected({
         eventIds: [eventId],
-        isSelected: event.currentTarget.checked,
+        isSelected: event?.currentTarget.checked,
       }),
     [eventId, onRowSelected]
   );

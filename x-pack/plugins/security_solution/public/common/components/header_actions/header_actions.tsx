@@ -68,7 +68,7 @@ const ActionsContainer = styled.div`
 const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   width,
   browserFields,
-  columnHeaders,
+  columnHeaders = [],
   isEventViewer = false,
   isSelectAllChecked,
   onSelectAll,
@@ -85,7 +85,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   const dispatch = useDispatch();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+  const { defaultColumns } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? 'timeline-1') // TODO fix
+  );
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {

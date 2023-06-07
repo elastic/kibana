@@ -2052,10 +2052,36 @@
               }
             }
           },
+          "id": {
+            "type": "keyword"
+          },
+          "section": {
+            "type": "keyword",
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "version": {
+            "type": "keyword"
+          },
           "benchmark": {
             "type": "object",
             "properties": {
               "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "rule_number": {
                 "type": "keyword"
               }
             }
@@ -2091,6 +2117,36 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
+  "composite-slo": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "budgetingMethod": {
+        "type": "keyword"
+      },
+      "compositeMethod": {
+        "type": "keyword"
+      },
+      "sources": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "revision": {
+            "type": "integer"
+          }
+        }
       },
       "tags": {
         "type": "keyword"

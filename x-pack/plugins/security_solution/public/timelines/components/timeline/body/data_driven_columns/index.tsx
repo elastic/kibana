@@ -230,7 +230,7 @@ const TgridActionTdCell = ({
   );
 };
 
-const TgridTdCell = ({
+export const TgridTdCell = ({
   _id,
   ariaRowindex,
   index,
