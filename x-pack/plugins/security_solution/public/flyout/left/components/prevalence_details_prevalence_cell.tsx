@@ -76,6 +76,7 @@ export const PrevalenceDetailsPrevalenceCell: VFC<PrevalenceDetailsPrevalenceCel
   return (
     <div data-test-subj={PREVALENCE_DETAILS_PREVALENCE_CELL_VALUE_TEST_ID}>
       {Math.round(prevalence * 100)}
+      {'%'}
     </div>
   );
 };

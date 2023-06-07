@@ -44,7 +44,7 @@ export interface UseFetchFieldValuePairByEventTypeParams {
    */
   values: string[];
   /**
-   *
+   * True is the current timeline is active ('timeline-1')
    */
   isActiveTimelines: boolean;
   /**

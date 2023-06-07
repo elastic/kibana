@@ -6,12 +6,13 @@
  */
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import React, { createContext, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { Ecs } from '@kbn/cases-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchHit } from '../../../common/search_strategy';
 import type { LeftPanelProps } from '.';
+import type { GetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
 import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
@@ -39,17 +40,21 @@ export interface LeftPanelContext {
    */
   browserFields: BrowserFields | null;
   /**
+   * An object with top level fields from the ECS object
+   */
+  dataAsNestedObject: Ecs | null;
+  /**
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
   /**
+   * The actual raw document object
+   */
+  searchHit: SearchHit | undefined;
+  /**
    * Retrieves searchHit values for the provided field
    */
-  getFieldsData: (field: string) => unknown | unknown[];
-
-  data: SearchHit | undefined;
-
-  dataAsNestedObject: Ecs | null;
+  getFieldsData: GetFieldsData;
 }
 
 export const LeftPanelContext = createContext<LeftPanelContext | undefined>(undefined);
@@ -86,11 +91,11 @@ export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPane
             eventId: id,
             indexName,
             scopeId,
-            getFieldsData,
             browserFields: sourcererDataView.browserFields,
-            dataFormattedForFieldBrowser,
             dataAsNestedObject,
-            data: searchHit,
+            dataFormattedForFieldBrowser,
+            searchHit,
+            getFieldsData,
           }
         : undefined,
     [

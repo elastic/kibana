@@ -9,7 +9,15 @@ import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
-import { PREVALENCE_ERROR_MESSAGE } from './translations';
+import {
+  PREVALENCE_ERROR_MESSAGE,
+  PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE,
+  PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE,
+  PREVALENCE_TABLE_HOST_PREVALENCE_COLUMN_TITLE,
+  PREVALENCE_TABLE_NAME_COLUMN_TITLE,
+  PREVALENCE_TABLE_TYPE_COLUMN_TITLE,
+  PREVALENCE_TABLE_USER_PREVALENCE_COLUMN_TITLE,
+} from './translations';
 import {
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
@@ -38,17 +46,17 @@ export const PREVALENCE_TAB_ID = 'prevalence-details';
 const columns: Array<EuiBasicTableColumn<unknown>> = [
   {
     field: 'type',
-    name: 'Type',
+    name: PREVALENCE_TABLE_TYPE_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_TYPE_CELL_TEST_ID,
   },
   {
     field: 'name',
-    name: 'Name',
+    name: PREVALENCE_TABLE_NAME_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_NAME_CELL_TEST_ID,
   },
   {
     field: 'alertCount',
-    name: 'Alert Count',
+    name: PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
@@ -64,7 +72,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
   },
   {
     field: 'docCount',
-    name: 'Doc Count',
+    name: PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
@@ -80,7 +88,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
   },
   {
     field: 'hostPrevalence',
-    name: 'Host Prevalence (%)',
+    name: PREVALENCE_TABLE_HOST_PREVALENCE_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
@@ -93,7 +101,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
   },
   {
     field: 'userPrevalence',
-    name: 'User Prevalence (%)',
+    name: PREVALENCE_TABLE_USER_PREVALENCE_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
