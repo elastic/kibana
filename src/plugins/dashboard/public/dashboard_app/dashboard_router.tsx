@@ -13,6 +13,7 @@ import { History } from 'history';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -155,17 +156,19 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       <DashboardMountContext.Provider value={mountContext}>
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <HashRouter>
-            <Switch>
-              <Route
-                path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                render={renderDashboard}
-              />
-              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-              <Route exact path="/">
-                <Redirect to={LANDING_PAGE_PATH} />
-              </Route>
-              <Route render={renderNoMatch} />
-            </Switch>
+            <CompatRouter>
+              <Switch>
+                <Route
+                  path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+                  render={renderDashboard}
+                />
+                <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+                <Route exact path="/">
+                  <Redirect to={LANDING_PAGE_PATH} />
+                </Route>
+                <Route render={renderNoMatch} />
+              </Switch>
+            </CompatRouter>
           </HashRouter>
         </KibanaThemeProvider>
       </DashboardMountContext.Provider>

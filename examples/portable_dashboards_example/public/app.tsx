@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import React, { useMemo } from 'react';
 import { useAsync } from 'react-use/lib';
 import { Router, Redirect, Switch } from 'react-router-dom';
+import { CompatRouter, useNavigate } from 'react-router-dom-v5-compat';
 
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
@@ -48,31 +49,32 @@ const PortableDashboardsDemos = ({
   history: AppMountParameters['history'];
 }) => {
   return (
-    <Router history={history}>
-      <Switch>
-        <Route exact path="/">
-          <Redirect to={DASHBOARD_DEMO_PATH} />
-        </Route>
-        <Route path={DASHBOARD_LIST_PATH}>
-          <PortableDashboardListingDemo history={history} />
-        </Route>
-        <Route path={DASHBOARD_DEMO_PATH}>
-          <DashboardsDemo data={data} dashboard={dashboard} history={history} />
-        </Route>
-      </Switch>
+    <Router>
+      <CompatRouter>
+        <Switch>
+          <Route exact path="/">
+            <Redirect to={DASHBOARD_DEMO_PATH} />
+          </Route>
+          <Route path={DASHBOARD_LIST_PATH}>
+            <PortableDashboardListingDemo />
+          </Route>
+          <Route path={DASHBOARD_DEMO_PATH}>
+            <DashboardsDemo data={data} dashboard={dashboard} />
+          </Route>
+        </Switch>
+      </CompatRouter>
     </Router>
   );
 };
 
 const DashboardsDemo = ({
   data,
-  history,
   dashboard,
 }: {
-  history: AppMountParameters['history'];
   data: PortableDashboardsExampleStartDeps['data'];
   dashboard: PortableDashboardsExampleStartDeps['dashboard'];
 }) => {
+  const history = useHistory();
   const { loading, value: dataviewResults } = useAsync(async () => {
     const dataViews = await data.dataViews.find('kibana_sample_data_logs');
     const findDashboardsService = await dashboard.findDashboardsService();
@@ -116,7 +118,9 @@ const DashboardsDemo = ({
   );
 };
 
-const PortableDashboardListingDemo = ({ history }: { history: AppMountParameters['history'] }) => {
+const PortableDashboardListingDemo = () => {
+  const history = useHistory();
+
   return (
     <DashboardListingTable
       goToDashboard={(dashboardId) =>

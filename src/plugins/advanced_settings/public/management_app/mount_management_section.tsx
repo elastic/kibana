@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
@@ -78,26 +79,28 @@ export async function mountManagementSection(
     <KibanaThemeProvider theme$={params.theme$}>
       <I18nProvider>
         <Router history={params.history}>
-          <Switch>
-            {/* TODO: remove route param (`query`) in 7.13 */}
-            <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
-            <Route path="/">
-              <Settings
-                history={params.history}
-                enableSaving={{
-                  namespace: canSaveAdvancedSettings,
-                  global: canSaveGlobalSettings,
-                }}
-                enableShowing={{ namespace: true, global: canShowGlobalSettings }}
-                toasts={notifications.toasts}
-                docLinks={docLinks.links}
-                settingsService={settings}
-                theme={params.theme$}
-                componentRegistry={componentRegistry}
-                trackUiMetric={trackUiMetric}
-              />
-            </Route>
-          </Switch>
+          <CompatRouter>
+            <Switch>
+              {/* TODO: remove route param (`query`) in 7.13 */}
+              <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
+              <Route path="/">
+                <Settings
+                  history={params.history}
+                  enableSaving={{
+                    namespace: canSaveAdvancedSettings,
+                    global: canSaveGlobalSettings,
+                  }}
+                  enableShowing={{ namespace: true, global: canShowGlobalSettings }}
+                  toasts={notifications.toasts}
+                  docLinks={docLinks.links}
+                  settingsService={settings}
+                  theme={params.theme$}
+                  componentRegistry={componentRegistry}
+                  trackUiMetric={trackUiMetric}
+                />
+              </Route>
+            </Switch>
+          </CompatRouter>
         </Router>
       </I18nProvider>
     </KibanaThemeProvider>,

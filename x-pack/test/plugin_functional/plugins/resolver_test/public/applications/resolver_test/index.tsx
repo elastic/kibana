@@ -6,6 +6,7 @@
  */
 
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -77,19 +78,21 @@ const AppRoot = React.memo(
     return (
       <I18nProvider>
         <Router history={parameters.history}>
-          <KibanaContextProvider services={coreStart}>
-            <Provider store={store}>
-              <Wrapper>
-                <ResolverWithoutProviders
-                  databaseDocumentID=""
-                  resolverComponentInstanceID="test"
-                  indices={[]}
-                  shouldUpdate={false}
-                  filters={{}}
-                />
-              </Wrapper>
-            </Provider>
-          </KibanaContextProvider>
+          <CompatRouter>
+            <KibanaContextProvider services={coreStart}>
+              <Provider store={store}>
+                <Wrapper>
+                  <ResolverWithoutProviders
+                    databaseDocumentID=""
+                    resolverComponentInstanceID="test"
+                    indices={[]}
+                    shouldUpdate={false}
+                    filters={{}}
+                  />
+                </Wrapper>
+              </Provider>
+            </KibanaContextProvider>
+          </CompatRouter>
         </Router>
       </I18nProvider>
     );

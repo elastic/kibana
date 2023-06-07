@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, RouteComponentProps } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPage, EuiText } from '@elastic/eui';
@@ -21,18 +22,20 @@ const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
   const { basename } = deps;
   return (
     <Router basename={basename}>
-      <EuiPage>
-        <Route
-          path={`/rule/:id`}
-          render={(props: RouteComponentProps<{ id: string }>) => {
-            return (
-              <EuiText data-test-subj="noop-title">
-                <h2>View Rule {props.match.params.id}</h2>
-              </EuiText>
-            );
-          }}
-        />
-      </EuiPage>
+      <CompatRouter>
+        <EuiPage>
+          <Route
+            path={`/rule/:id`}
+            render={(props: RouteComponentProps<{ id: string }>) => {
+              return (
+                <EuiText data-test-subj="noop-title">
+                  <h2>View Rule {props.match.params.id}</h2>
+                </EuiText>
+              );
+            }}
+          />
+        </EuiPage>
+      </CompatRouter>
     </Router>
   );
 };

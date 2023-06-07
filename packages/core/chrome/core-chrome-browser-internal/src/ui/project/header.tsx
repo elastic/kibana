@@ -8,6 +8,7 @@
 
 import React, { createRef, useState } from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import {
   EuiHeader,
   EuiHeaderLogo,
@@ -75,32 +76,34 @@ export const ProjectHeader = ({
         <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem border="right">
             <Router history={application.history}>
-              <ProjectNavigation
-                isOpen={isOpen!}
-                closeNav={() => {
-                  setIsOpen(false);
-                  if (toggleCollapsibleNavRef.current) {
-                    toggleCollapsibleNavRef.current.focus();
+              <CompatRouter>
+                <ProjectNavigation
+                  isOpen={isOpen!}
+                  closeNav={() => {
+                    setIsOpen(false);
+                    if (toggleCollapsibleNavRef.current) {
+                      toggleCollapsibleNavRef.current.focus();
+                    }
+                  }}
+                  button={
+                    <EuiHeaderSectionItemButton
+                      data-test-subj="toggleNavButton"
+                      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                        defaultMessage: 'Toggle primary navigation',
+                      })}
+                      onClick={() => setIsOpen(!isOpen)}
+                      aria-expanded={isOpen!}
+                      aria-pressed={isOpen!}
+                      aria-controls={navId}
+                      ref={toggleCollapsibleNavRef}
+                    >
+                      <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
+                    </EuiHeaderSectionItemButton>
                   }
-                }}
-                button={
-                  <EuiHeaderSectionItemButton
-                    data-test-subj="toggleNavButton"
-                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                      defaultMessage: 'Toggle primary navigation',
-                    })}
-                    onClick={() => setIsOpen(!isOpen)}
-                    aria-expanded={isOpen!}
-                    aria-pressed={isOpen!}
-                    aria-controls={navId}
-                    ref={toggleCollapsibleNavRef}
-                  >
-                    <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
-                  </EuiHeaderSectionItemButton>
-                }
-              >
-                {children}
-              </ProjectNavigation>
+                >
+                  {children}
+                </ProjectNavigation>
+              </CompatRouter>
             </Router>
           </EuiHeaderSectionItem>
           <EuiHeaderSectionItem>{renderLogo()}</EuiHeaderSectionItem>

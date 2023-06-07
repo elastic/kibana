@@ -52,6 +52,7 @@ RUNTIME_DEPS = [
   "@npm//react-beautiful-dnd",
   "@npm//react-dom",
   "@npm//react-router-dom",
+  "@npm//react-router-dom-v5-compat",
   "@npm//react-router",
   "@npm//react",
   "@npm//rxjs",

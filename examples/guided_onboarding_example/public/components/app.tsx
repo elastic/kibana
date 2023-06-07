@@ -9,6 +9,7 @@
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPageTemplate } from '@elastic/eui';
@@ -45,27 +46,29 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
         {guidedOnboarding.guidedOnboardingApi?.isEnabled ? (
           <EuiPageTemplate.Section>
             <Router history={history}>
-              <Switch>
-                <Route exact path="/">
-                  <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
-                </Route>
-                <Route exact path="/stepOne">
-                  <StepOne guidedOnboarding={guidedOnboarding} />
-                </Route>
-                <Route exact path="/stepTwo">
-                  <StepTwo />
-                </Route>
-                <Route exact path="/stepThree">
-                  <StepThree guidedOnboarding={guidedOnboarding} />
-                </Route>
-                p
-                <Route
-                  path="/stepFour/:indexName?"
-                  render={(routeProps) => (
-                    <StepFour guidedOnboarding={guidedOnboarding} {...routeProps} />
-                  )}
-                />
-              </Switch>
+              <CompatRouter>
+                <Switch>
+                  <Route exact path="/">
+                    <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
+                  </Route>
+                  <Route exact path="/stepOne">
+                    <StepOne guidedOnboarding={guidedOnboarding} />
+                  </Route>
+                  <Route exact path="/stepTwo">
+                    <StepTwo />
+                  </Route>
+                  <Route exact path="/stepThree">
+                    <StepThree guidedOnboarding={guidedOnboarding} />
+                  </Route>
+                  p
+                  <Route
+                    path="/stepFour/:indexName?"
+                    render={(routeProps) => (
+                      <StepFour guidedOnboarding={guidedOnboarding} {...routeProps} />
+                    )}
+                  />
+                </Switch>
+              </CompatRouter>
             </Router>
           </EuiPageTemplate.Section>
         ) : (

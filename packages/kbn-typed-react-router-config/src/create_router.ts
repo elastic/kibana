@@ -12,7 +12,7 @@ import {
   MatchedRoute,
   matchRoutes as matchRoutesConfig,
   RouteConfig as ReactRouterConfig,
-} from 'react-router-config';
+} from 'react-router-dom';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
 import { mergeRt, deepExactRt } from '@kbn/io-ts-utils';

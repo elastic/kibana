@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import {
   EuiButton,
@@ -52,62 +53,64 @@ export const <%= upperCamelCase(name) %>App = ({ basename, notifications, http, 
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
     <Router basename={basename}>
-      <I18nProvider>
-        <>
-          <navigation.ui.TopNavMenu appName={ PLUGIN_ID } showSearchBar={true} useDefaultBehaviors={true}/>
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="<%= camelCase(name) %>.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
+      <CompatRouter>
+        <I18nProvider>
+          <>
+            <navigation.ui.TopNavMenu appName={ PLUGIN_ID } showSearchBar={true} useDefaultBehaviors={true}/>
+            <EuiPage restrictWidth="1000px">
+              <EuiPageBody>
+                <EuiPageHeader>
+                  <EuiTitle size="l">
+                    <h1>
                       <FormattedMessage
-                        id="<%= camelCase(name) %>.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
+                        id="<%= camelCase(name) %>.helloWorldText"
+                        defaultMessage="{name}"
+                        values={{ name: PLUGIN_NAME }}
                       />
-                    </h2>
+                    </h1>
                   </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
-                  <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="<%= camelCase(name) %>.content"
-                        defaultMessage="Look through the generated code and check out the plugin development documentation."
-                      />
-                    </p>
-                    <EuiHorizontalRule/>
-                    <p>
-                      <FormattedMessage
-                        id="<%= camelCase(name) %>.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
-                      />
-                    </p>
-                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage
-                        id="<%= camelCase(name) %>.buttonText"
-                        defaultMessage="<%= hasServer ? 'Get data' : 'Click me' %>"
-                      />
-                    </EuiButton>
-                  </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-        </>
-      </I18nProvider>
+                </EuiPageHeader>
+                <EuiPageContent>
+                  <EuiPageContentHeader>
+                    <EuiTitle>
+                      <h2>
+                        <FormattedMessage
+                          id="<%= camelCase(name) %>.congratulationsTitle"
+                          defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiPageContentHeader>
+                  <EuiPageContentBody>
+                    <EuiText>
+                      <p>
+                        <FormattedMessage
+                          id="<%= camelCase(name) %>.content"
+                          defaultMessage="Look through the generated code and check out the plugin development documentation."
+                        />
+                      </p>
+                      <EuiHorizontalRule/>
+                      <p>
+                        <FormattedMessage
+                          id="<%= camelCase(name) %>.timestampText"
+                          defaultMessage="Last timestamp: {time}"
+                          values={{ time: timestamp ? timestamp : 'Unknown' }}
+                        />
+                      </p>
+                      <EuiButton type="primary" size="s" onClick={onClickHandler}>
+                        <FormattedMessage
+                          id="<%= camelCase(name) %>.buttonText"
+                          defaultMessage="<%= hasServer ? 'Get data' : 'Click me' %>"
+                        />
+                      </EuiButton>
+                    </EuiText>
+                  </EuiPageContentBody>
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </>
+        </I18nProvider>
+      </CompatRouter>
     </Router>
   );
 };
