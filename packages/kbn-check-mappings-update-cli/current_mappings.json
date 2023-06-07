@@ -931,6 +931,17 @@
       }
     }
   },
+  "event-annotation-group": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
   "visualization": {
     "dynamic": false,
     "properties": {
@@ -2052,10 +2063,36 @@
               }
             }
           },
+          "id": {
+            "type": "keyword"
+          },
+          "section": {
+            "type": "keyword",
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "version": {
+            "type": "keyword"
+          },
           "benchmark": {
             "type": "object",
             "properties": {
               "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "rule_number": {
                 "type": "keyword"
               }
             }
@@ -2094,6 +2131,48 @@
       },
       "tags": {
         "type": "keyword"
+      }
+    }
+  },
+  "composite-slo": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "budgetingMethod": {
+        "type": "keyword"
+      },
+      "compositeMethod": {
+        "type": "keyword"
+      },
+      "sources": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "revision": {
+            "type": "integer"
+          }
+        }
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
+  "observability-onboarding-state": {
+    "properties": {
+      "state": {
+        "type": "object",
+        "dynamic": false
+      },
+      "progress": {
+        "type": "object",
+        "dynamic": false
       }
     }
   },

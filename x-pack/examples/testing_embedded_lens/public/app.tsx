@@ -492,7 +492,9 @@ export const App = (props: {
   const [overrides, setOverrides] = useState<AllOverrides | undefined>();
 
   return (
-    <KibanaContextProvider services={{ uiSettings: props.core.uiSettings }}>
+    <KibanaContextProvider
+      services={{ uiSettings: props.core.uiSettings, settings: props.core.settings }}
+    >
       <EuiPageTemplate fullHeight template="empty">
         <EuiFlexGroup
           className="eui-fullHeight"

@@ -244,4 +244,57 @@ describe('useAllCasesQueryParams', () => {
 
     expect(result.current.filterOptions).toMatchObject(nonDefaultUrlParams);
   });
+
+  describe('validation', () => {
+    it('localStorage perPage query param cannot be > 100', () => {
+      localStorage.setItem(LOCALSTORAGE_QUERY_PARAMS_KEY, JSON.stringify({ perPage: 1000 }));
+
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(result.current.queryParams).toMatchObject({
+        ...LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS,
+        perPage: 100,
+      });
+    });
+
+    it('url perPage query param cannot be > 100', () => {
+      mockLocation.search = stringify({ perPage: 1000 });
+
+      renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(useHistory().replace).toHaveBeenCalledWith({
+        search: stringify({ ...URL_DEFAULTS, perPage: 100 }),
+      });
+
+      mockLocation.search = '';
+    });
+
+    it('validate spelling of localStorage sortOrder', () => {
+      localStorage.setItem(LOCALSTORAGE_QUERY_PARAMS_KEY, JSON.stringify({ sortOrder: 'foobar' }));
+
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(result.current.queryParams).toMatchObject({
+        ...LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS,
+      });
+    });
+
+    it('validate spelling of url sortOrder', () => {
+      mockLocation.search = stringify({ sortOrder: 'foobar' });
+
+      renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(useHistory().replace).toHaveBeenCalledWith({
+        search: stringify({ ...URL_DEFAULTS }),
+      });
+    });
+  });
 });

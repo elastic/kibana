@@ -135,6 +135,7 @@ export const configSchema = schema.object(
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
   },
   {
