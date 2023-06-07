@@ -10,13 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { checkFullLicense } from '../../../license';
-import {
-  checkGetJobsCapabilitiesResolver,
-  usePermissionCheck,
-} from '../../../capabilities/check_capabilities';
+import { createPath, MlRoute, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
@@ -30,7 +26,7 @@ export const settingsRouteFactory = (
   title: i18n.translate('xpack.ml.settings.docTitle', {
     defaultMessage: 'Settings',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
@@ -38,12 +34,9 @@ export const settingsRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
-
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+const PageWrapper: FC = () => {
+  // TODO check capabilities
+  const { context } = useRouteResolver('full', ['canGetJobs'], {
     getMlNodeCount,
   });
 

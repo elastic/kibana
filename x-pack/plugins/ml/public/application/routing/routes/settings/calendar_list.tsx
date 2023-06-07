@@ -11,12 +11,8 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { checkFullLicense } from '../../../license';
-import {
-  checkGetJobsCapabilitiesResolver,
-  usePermissionCheck,
-} from '../../../capabilities/check_capabilities';
+import { useRouteResolver } from '../../use_resolver';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { CalendarsList } from '../../../settings/calendars';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
@@ -39,13 +35,7 @@ export const calendarListRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
-
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    getMlNodeCount,
-  });
+  const { context } = useRouteResolver('full', ['canGetCalendars'], { getMlNodeCount });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 

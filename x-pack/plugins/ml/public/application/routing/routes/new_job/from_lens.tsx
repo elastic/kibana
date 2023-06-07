@@ -6,14 +6,11 @@
  */
 
 import React, { FC } from 'react';
-
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
-
 import { ML_PAGES } from '../../../../locator';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-
+import { useRouteResolver } from '../../use_resolver';
 import { resolver } from '../../../jobs/new_job/job_from_lens';
 
 export const fromLensRouteFactory = (): MlRoute => ({
@@ -22,7 +19,7 @@ export const fromLensRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location }) => {
   const { lensId, vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
     location.search,
     {
@@ -30,9 +27,11 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     }
   );
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+  // TODO check license and capabilities
+  const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
   });
+
   return (
     <PageLoader context={context}>
       {<Redirect to={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB)} />}
