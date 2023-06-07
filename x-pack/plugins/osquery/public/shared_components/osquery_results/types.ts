@@ -24,6 +24,5 @@ export interface OsqueryActionResultProps {
   ruleName?: string[];
   ecsData: EcsSecurityExtension;
   actionId: string;
-  queryId: string;
   startDate: string;
 }

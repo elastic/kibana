@@ -8,9 +8,9 @@
 import React, { FC } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { MlEmbeddedMapComponent } from '../../../../../../../components/ml_embedded_map';
-import { Aggregation, Field, SplitField } from '../../../../../../../../../common/types/fields';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { DetectorTitle } from '../detector_title';
 

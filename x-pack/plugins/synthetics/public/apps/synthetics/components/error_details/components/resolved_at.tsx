@@ -8,13 +8,14 @@ import React, { ReactElement } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
 
 export const ResolvedAt: React.FC = () => {
   const { killerState } = useFindMyKillerState();
 
-  let endsAt: string | ReactElement = useFormatTestRunAt(killerState?.timestamp);
+  const formatter = useDateFormat();
+  let endsAt: string | ReactElement = formatter(killerState?.timestamp ?? '');
 
   if (!endsAt) {
     endsAt = 'N/A';
