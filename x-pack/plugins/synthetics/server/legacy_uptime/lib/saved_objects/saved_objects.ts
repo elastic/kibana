@@ -13,8 +13,9 @@ import {
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
 import { privateLocationsSavedObject } from './private_locations';
-import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../../common/constants';
-import { ConfigKey, DynamicSettingsAttributes } from '../../../../common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../constants/settings';
+import { DynamicSettingsAttributes } from '../../../runtime_types/settings';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';

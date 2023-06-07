@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DynamicSettings } from '../runtime_types';
+import { DynamicSettingsAttributes } from '../runtime_types/settings';
 
-export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
+export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
   heartbeatIndices: 'heartbeat-8*,heartbeat-7*,synthetics-*',
   certAgeThreshold: 730,
   certExpirationThreshold: 30,
@@ -18,3 +18,6 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
     bcc: [],
   },
 };
+
+export const DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES: DynamicSettingsAttributes =
+  DYNAMIC_SETTINGS_DEFAULTS;

@@ -61,12 +61,14 @@ export type UMKibanaRoute = UMRouteDefinition<
  * This is an abstraction over the default Kibana route type. This allows us to use custom
  * arguments in our route handlers and impelement custom middleware.
  */
-export type UptimeRoute = UMRouteDefinition<UMRouteHandler>;
+export type UptimeRoute<ClientContract = any> = UMRouteDefinition<UMRouteHandler<ClientContract>>;
 
 /**
  * Functions of this type accept custom lib functions and outputs a route object.
  */
-export type UMRestApiRouteFactory = (libs: UMServerLibs) => UptimeRoute;
+export type UMRestApiRouteFactory<ClientContract = any> = (
+  libs: UMServerLibs
+) => UptimeRoute<ClientContract>;
 export type SyntheticsRestApiRouteFactory<ClientContract = any> = (
   libs: UMServerLibs
 ) => SyntheticsRoute<ClientContract>;
@@ -77,7 +79,7 @@ export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => Synthetics
  * object that the Kibana platform can consume.
  */
 export type UMKibanaRouteWrapper = (
-  uptimeRoute: UptimeRoute,
+  uptimeRoute: UptimeRoute<any>,
   server: UptimeServerSetup
 ) => UMKibanaRoute;
 
@@ -105,7 +107,7 @@ export interface UptimeRouteContext {
 /**
  * This is the contract we specify internally for route handling.
  */
-export type UMRouteHandler = ({
+export type UMRouteHandler<ClientContract = any> = ({
   uptimeEsClient,
   context,
   request,
@@ -113,7 +115,7 @@ export type UMRouteHandler = ({
   server,
   savedObjectsClient,
   subject,
-}: UptimeRouteContext) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+}: UptimeRouteContext) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
 
 export interface RouteContext<Query = Record<string, any>> {
   uptimeEsClient: UptimeEsClient;
