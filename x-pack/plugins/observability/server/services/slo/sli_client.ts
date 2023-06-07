@@ -49,7 +49,7 @@ export class DefaultSLIClient implements SLIClient {
     const longestLookbackWindow = sortedLookbackWindows[0];
     const longestDateRange = toDateRange({
       duration: longestLookbackWindow.duration,
-      isRolling: true,
+      type: 'rolling',
     });
 
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
