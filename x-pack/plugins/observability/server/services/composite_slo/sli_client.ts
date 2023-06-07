@@ -48,11 +48,7 @@ export class DefaultCompositeSLIClient implements CompositeSLIClient {
       const sli = weightedSLI / totalWeight;
       // Date range should be the same for each window
       const dateRange = slosWithSliData[0].sliData[lookbackWindow.name].dateRange;
-      // We just need to fake good and total since composites don't have good or total
-      // TODO: remove good and total from IndicatorData once I've confirmed it's not really used.
-      const good = 100 * sli;
-      const total = 100;
-      acc[lookbackWindow.name] = { dateRange, good, total, sli };
+      acc[lookbackWindow.name] = { dateRange, sli };
       return acc;
     }, {} as Record<WindowName, IndicatorData>);
   }

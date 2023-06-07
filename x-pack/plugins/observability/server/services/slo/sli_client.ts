@@ -172,8 +172,6 @@ function handleWindowedResult(
     }
 
     indicatorDataPerLookbackWindow[lookbackWindow.name] = {
-      good,
-      total,
       dateRange: { from: new Date(bucket.from_as_string!), to: new Date(bucket.to_as_string!) },
       sli: computeSLI(good, total),
     };

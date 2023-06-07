@@ -9,6 +9,7 @@ import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/ser
 import moment from 'moment';
 
 import { Duration, DurationUnit } from '../../domain/models';
+import { computeSLI } from '../../domain/services';
 import { createSLO } from './fixtures/slo';
 import { DefaultSLIClient } from './sli_client';
 
@@ -94,7 +95,7 @@ describe('SummaryClient', () => {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+                ranges: [{ from: 'now-61m/m', to: 'now/m' }],
               },
               aggs: {
                 good: { sum: { field: 'slo.numerator' } },
@@ -104,7 +105,7 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+                ranges: [{ from: 'now-6m/m', to: 'now/m' }],
               },
               aggs: {
                 good: { sum: { field: 'slo.numerator' } },
@@ -114,8 +115,8 @@ describe('SummaryClient', () => {
           },
         });
 
-        expect(result[LONG_WINDOW]).toMatchObject({ good: 15748, total: 32169 });
-        expect(result[SHORT_WINDOW]).toMatchObject({ good: 772, total: 2211 });
+        expect(result[LONG_WINDOW]).toMatchObject({ sli: computeSLI(15748, 32169) });
+        expect(result[SHORT_WINDOW]).toMatchObject({ sli: computeSLI(772, 2211) });
       });
     });
 
@@ -184,7 +185,7 @@ describe('SummaryClient', () => {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+                ranges: [{ from: 'now-61m/m', to: 'now/m' }],
               },
               aggs: {
                 good: {
@@ -202,7 +203,7 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+                ranges: [{ from: 'now-6m/m', to: 'now/m' }],
               },
               aggs: {
                 good: {
@@ -220,8 +221,8 @@ describe('SummaryClient', () => {
           },
         });
 
-        expect(result[LONG_WINDOW]).toMatchObject({ good: 15748, total: 32169 });
-        expect(result[SHORT_WINDOW]).toMatchObject({ good: 772, total: 2211 });
+        expect(result[LONG_WINDOW]).toMatchObject({ sli: computeSLI(15748, 32169) });
+        expect(result[SHORT_WINDOW]).toMatchObject({ sli: computeSLI(772, 2211) });
       });
     });
   });

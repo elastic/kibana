@@ -54,8 +54,6 @@ describe('DefaultCompositeSLIClient', () => {
     sliClientMock.fetchSLIDataFrom.mockResolvedValueOnce({
       [LONG_WINDOW]: {
         dateRange,
-        good: 95,
-        total: 100,
         sli: 0.95,
       },
     });
@@ -63,15 +61,13 @@ describe('DefaultCompositeSLIClient', () => {
     sliClientMock.fetchSLIDataFrom.mockResolvedValueOnce({
       [LONG_WINDOW]: {
         dateRange,
-        good: 99,
-        total: 100,
         sli: 0.99,
       },
     });
     const compositeSliClient = new DefaultCompositeSLIClient(sliClientMock);
     const sliData = await compositeSliClient.fetchSLIDataFrom(compositeSlo, lookbackWindows);
     expect(sliData).toEqual({
-      [LONG_WINDOW]: { dateRange, good: 96, total: 100, sli: 0.96 },
+      [LONG_WINDOW]: { dateRange, sli: 0.96 },
     });
   });
 });

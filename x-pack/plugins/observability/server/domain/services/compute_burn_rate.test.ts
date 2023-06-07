@@ -15,8 +15,6 @@ describe('computeBurnRate', () => {
   it('computes 0 when total is 0', () => {
     expect(
       computeBurnRate(createSLO(), {
-        good: 10,
-        total: 0,
         dateRange: toDateRange(sixHoursRolling()),
         sli: computeSLI(10, 0),
       })
@@ -26,8 +24,6 @@ describe('computeBurnRate', () => {
   it('computes 0 when good is greater than total', () => {
     expect(
       computeBurnRate(createSLO(), {
-        good: 9999,
-        total: 1,
         dateRange: toDateRange(sixHoursRolling()),
         sli: computeSLI(9999, 1),
       })
@@ -37,8 +33,6 @@ describe('computeBurnRate', () => {
   it('computes the burn rate as 1x the error budget', () => {
     expect(
       computeBurnRate(createSLO({ objective: { target: 0.9 } }), {
-        good: 90,
-        total: 100,
         dateRange: toDateRange(sixHoursRolling()),
         sli: computeSLI(90, 100),
       })
@@ -48,8 +42,6 @@ describe('computeBurnRate', () => {
   it('computes the burn rate as 10x the error budget', () => {
     expect(
       computeBurnRate(createSLO({ objective: { target: 0.99 } }), {
-        good: 90,
-        total: 100,
         dateRange: toDateRange(sixHoursRolling()),
         sli: computeSLI(90, 100),
       })
@@ -59,8 +51,6 @@ describe('computeBurnRate', () => {
   it('computes the burn rate as 0.5x the error budget', () => {
     expect(
       computeBurnRate(createSLO({ objective: { target: 0.8 } }), {
-        good: 90,
-        total: 100,
         dateRange: toDateRange(sixHoursRolling()),
         sli: computeSLI(90, 100),
       })

@@ -83,8 +83,6 @@ const metricCustomIndicatorSchema = t.type({
 
 const indicatorDataSchema = t.type({
   dateRange: dateRangeSchema,
-  good: t.number,
-  total: t.number,
   sli: t.number,
 });
 
