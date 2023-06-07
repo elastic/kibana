@@ -255,9 +255,9 @@ export const getManagementFilteredLinks = async (
       : getEndpointAuthzInitialState();
 
   const showHostIsolationExceptions =
-    canAccessHostIsolationExceptions || // access host isolation exceptions payment feature, always show the link.
-    // read host isolation exceptions is not a payment feature, to allow deleting exceptions after a downgrade scenario.
-    // however, in this situation we allow to read only when there is data, otherwise the link won't be accessible.
+    canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
+    // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
+    // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
     (canReadHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
