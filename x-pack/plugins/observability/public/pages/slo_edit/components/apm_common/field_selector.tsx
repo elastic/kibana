@@ -79,7 +79,7 @@ export function FieldSelector({
             label
           )
         }
-        isInvalid={getFieldState(name).invalid && !isDisabled}
+        isInvalid={isDisabled ? false : getFieldState(name).invalid}
       >
         <Controller
           shouldUnregister
@@ -95,7 +95,7 @@ export function FieldSelector({
               data-test-subj={dataTestSubj}
               isClearable
               isDisabled={isDisabled}
-              isInvalid={fieldState.invalid && !isDisabled}
+              isInvalid={isDisabled ? false : fieldState.invalid}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {
                 if (selected.length) {
