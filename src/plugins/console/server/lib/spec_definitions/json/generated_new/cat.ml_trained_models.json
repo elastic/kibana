@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_cat/ml/trained_models",
+    "/_cat/ml/trained_models/{model_id}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-trained-model.html"
+}

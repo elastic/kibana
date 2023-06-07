@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/_search_shards",
+    "/{index}/_search_shards"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-shards.html"
+}

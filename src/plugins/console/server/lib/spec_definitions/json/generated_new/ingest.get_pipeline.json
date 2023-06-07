@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_ingest/pipeline",
+    "/_ingest/pipeline/{id}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-pipeline-api.html"
+}

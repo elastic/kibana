@@ -1,0 +1,12 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_nodes",
+    "/_nodes/{node_id}",
+    "/_nodes/{metric}",
+    "/_nodes/{node_id}/{metric}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-info.html"
+}

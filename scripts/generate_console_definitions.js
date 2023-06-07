@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './src/cli';
+require('../src/setup_node_env');
+require('@kbn/generate-console-definitions').runGenerateConsoleDefinitionsCli();

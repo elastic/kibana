@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/{index}/_open"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-open-close.html"
+}

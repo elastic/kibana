@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_cat/pending_tasks"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-pending-tasks.html"
+}

@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/_render/template",
+    "/_render/template/{id}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/render-search-template-api.html"
+}

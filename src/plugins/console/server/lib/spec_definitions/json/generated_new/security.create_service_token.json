@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "PUT",
+    "POST"
+  ],
+  "patterns": [
+    "/_security/service/{namespace}/{service}/credential/token/{name}",
+    "/_security/service/{namespace}/{service}/credential/token"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-service-token.html"
+}

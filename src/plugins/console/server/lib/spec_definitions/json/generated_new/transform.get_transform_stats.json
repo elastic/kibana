@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_transform/{transform_id}/_stats"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-stats.html"
+}

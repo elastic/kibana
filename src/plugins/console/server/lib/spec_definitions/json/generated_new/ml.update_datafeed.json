@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_ml/datafeeds/{datafeed_id}/_update"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-datafeed.html"
+}

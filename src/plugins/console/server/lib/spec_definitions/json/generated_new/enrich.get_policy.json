@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_enrich/policy/{name}",
+    "/_enrich/policy"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-enrich-policy-api.html"
+}

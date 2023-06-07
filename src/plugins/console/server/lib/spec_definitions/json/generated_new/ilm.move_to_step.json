@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_ilm/move/{index}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-move-to-step.html"
+}

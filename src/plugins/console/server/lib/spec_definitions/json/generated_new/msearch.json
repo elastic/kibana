@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/_msearch",
+    "/{index}/_msearch"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
+}

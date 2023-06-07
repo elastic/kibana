@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_ml/calendars/{calendar_id}/events"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-post-calendar-event.html"
+}

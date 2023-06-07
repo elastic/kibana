@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_cat/aliases",
+    "/_cat/aliases/{name}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-alias.html"
+}

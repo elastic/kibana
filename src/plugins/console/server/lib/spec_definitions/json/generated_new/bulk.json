@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "POST",
+    "PUT"
+  ],
+  "patterns": [
+    "/_bulk",
+    "/{index}/_bulk"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/docs-bulk.html"
+}

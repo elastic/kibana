@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_ml/anomaly_detectors/{job_id}/_reset"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-reset-job.html"
+}

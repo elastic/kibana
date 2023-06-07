@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "HEAD"
+  ],
+  "patterns": [
+    "/{index}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-exists.html"
+}

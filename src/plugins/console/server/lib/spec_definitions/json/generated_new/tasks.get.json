@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_tasks/{task_id}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html"
+}

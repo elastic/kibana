@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/{index}/_lifecycle/explain"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/dlm-explain-lifecycle.html"
+}

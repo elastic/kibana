@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "PUT",
+    "POST"
+  ],
+  "patterns": [
+    "/_security/profile/{uid}/_disable"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-disable-user-profile.html"
+}

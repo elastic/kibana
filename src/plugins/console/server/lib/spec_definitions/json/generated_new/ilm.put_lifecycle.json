@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "PUT"
+  ],
+  "patterns": [
+    "/_ilm/policy/{policy}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-put-lifecycle.html"
+}

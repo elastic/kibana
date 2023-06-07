@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_security/enroll/node"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-node-enrollment.html"
+}

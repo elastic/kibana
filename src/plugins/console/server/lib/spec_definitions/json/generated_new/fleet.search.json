@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/{index}/_fleet/_fleet_search"
+  ],
+  "documentation": null
+}

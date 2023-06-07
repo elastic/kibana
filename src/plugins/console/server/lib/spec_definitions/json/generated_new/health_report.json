@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_health_report",
+    "/_health_report/{feature}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/health-api.html"
+}

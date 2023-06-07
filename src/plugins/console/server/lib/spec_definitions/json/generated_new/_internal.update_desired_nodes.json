@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "PUT"
+  ],
+  "patterns": [
+    "/_internal/desired_nodes/{history_id}/{version}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/update-desired-nodes.html"
+}

@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_cat/ml/data_frame/analytics",
+    "/_cat/ml/data_frame/analytics/{id}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-dfanalytics.html"
+}

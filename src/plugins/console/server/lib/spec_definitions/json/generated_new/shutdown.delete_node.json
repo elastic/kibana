@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "DELETE"
+  ],
+  "patterns": [
+    "/_nodes/{node_id}/shutdown"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current"
+}

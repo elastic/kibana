@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "PUT"
+  ],
+  "patterns": [
+    "/_settings",
+    "/{index}/_settings"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html"
+}

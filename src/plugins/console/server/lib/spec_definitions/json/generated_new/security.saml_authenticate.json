@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_security/saml/authenticate"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-authenticate.html"
+}

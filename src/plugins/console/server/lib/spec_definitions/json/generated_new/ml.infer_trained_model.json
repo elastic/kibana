@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_ml/trained_models/{model_id}/_infer",
+    "/_ml/trained_models/{model_id}/deployment/_infer"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/infer-trained-model.html"
+}

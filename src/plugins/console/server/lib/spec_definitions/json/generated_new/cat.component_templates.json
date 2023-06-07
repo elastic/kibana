@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_cat/component_templates",
+    "/_cat/component_templates/{name}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-component-templates.html"
+}

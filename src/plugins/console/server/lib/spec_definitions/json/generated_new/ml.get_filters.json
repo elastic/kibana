@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_ml/filters",
+    "/_ml/filters/{filter_id}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-filter.html"
+}

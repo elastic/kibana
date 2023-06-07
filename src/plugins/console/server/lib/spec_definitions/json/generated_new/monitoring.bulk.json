@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "POST",
+    "PUT"
+  ],
+  "patterns": [
+    "/_monitoring/bulk",
+    "/_monitoring/{type}/bulk"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html"
+}

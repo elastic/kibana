@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/_cluster/allocation/explain"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-allocation-explain.html"
+}

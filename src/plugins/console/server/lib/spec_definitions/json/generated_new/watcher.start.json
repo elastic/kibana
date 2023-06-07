@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_watcher/_start"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-start.html"
+}

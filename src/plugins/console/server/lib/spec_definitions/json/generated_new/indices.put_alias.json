@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "PUT",
+    "POST"
+  ],
+  "patterns": [
+    "/{index}/_alias/{name}",
+    "/{index}/_aliases/{name}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
+}

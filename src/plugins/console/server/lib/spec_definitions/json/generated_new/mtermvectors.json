@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/_mtermvectors",
+    "/{index}/_mtermvectors"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html"
+}

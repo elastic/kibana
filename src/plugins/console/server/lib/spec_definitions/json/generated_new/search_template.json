@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/_search/template",
+    "/{index}/_search/template"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html"
+}

@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/{index}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-index.html"
+}

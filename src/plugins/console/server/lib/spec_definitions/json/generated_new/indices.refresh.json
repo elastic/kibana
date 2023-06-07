@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "POST",
+    "GET"
+  ],
+  "patterns": [
+    "/_refresh",
+    "/{index}/_refresh"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-refresh.html"
+}

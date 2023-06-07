@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "PUT",
+    "POST"
+  ],
+  "patterns": [
+    "/_watcher/watch/{id}/_execute",
+    "/_watcher/watch/_execute"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-execute-watch.html"
+}

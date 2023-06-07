@@ -1,0 +1,9 @@
+{
+  "methods": [
+    "POST"
+  ],
+  "patterns": [
+    "/_application/analytics/{collection_name}/event/{event_type}"
+  ],
+  "documentation": "http://todo.com/tbd"
+}

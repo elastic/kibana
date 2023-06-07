@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "PUT",
+    "POST"
+  ],
+  "patterns": [
+    "/_license"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/update-license.html"
+}

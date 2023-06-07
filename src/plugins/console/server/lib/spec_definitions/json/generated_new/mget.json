@@ -1,0 +1,11 @@
+{
+  "methods": [
+    "GET",
+    "POST"
+  ],
+  "patterns": [
+    "/_mget",
+    "/{index}/_mget"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html"
+}

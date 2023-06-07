@@ -1,0 +1,14 @@
+{
+  "methods": [
+    "GET"
+  ],
+  "patterns": [
+    "/_nodes/stats",
+    "/_nodes/{node_id}/stats",
+    "/_nodes/stats/{metric}",
+    "/_nodes/{node_id}/stats/{metric}",
+    "/_nodes/stats/{metric}/{index_metric}",
+    "/_nodes/{node_id}/stats/{metric}/{index_metric}"
+  ],
+  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-stats.html"
+}
