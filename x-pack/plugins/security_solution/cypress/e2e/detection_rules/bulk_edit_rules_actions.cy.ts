@@ -69,7 +69,6 @@ const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
 describe('Detection rules, bulk edit of rule actions', () => {
-
   beforeEach(() => {
     cleanKibana();
     login();
