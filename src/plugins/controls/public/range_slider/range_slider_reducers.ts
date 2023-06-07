@@ -53,8 +53,8 @@ export const rangeSliderReducers = {
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<{ min: string; max: string }>
   ) => {
-    state.componentState.min = action.payload.min;
-    state.componentState.max = action.payload.max;
+    state.componentState.min = Math.floor(parseFloat(action.payload.min));
+    state.componentState.max = Math.ceil(parseFloat(action.payload.max));
   },
   publishFilters: (
     state: WritableDraft<RangeSliderReduxState>,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, ComponentProps, Ref, useEffect, useState } from 'react';
+import React, { FC, ComponentProps, Ref, useEffect, useState, useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import {
@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiDualRange,
-  EuiText,
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
@@ -22,13 +21,16 @@ import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/d
 
 import { pluginServices } from '../../services';
 import { RangeSliderStrings } from './range_slider_strings';
-import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 
 // Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created this annoying/verbose typing
 export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
 
-export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ rangeRef }) => {
+export const RangeSliderPopover: FC<{
+  onChange: (newValue: [string, string]) => void;
+  currentRange: [string, string];
+  rangeRef?: Ref<EuiDualRangeRef>;
+}> = ({ onChange, currentRange, rangeRef }) => {
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
 
   // Controls Services Context
@@ -41,76 +43,47 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
   const dataViewId = rangeSlider.select((state) => state.output.dataViewId);
   const fieldSpec = rangeSlider.select((state) => state.componentState.field);
   const id = rangeSlider.select((state) => state.explicitInput.id);
-  const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
+  // const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
   const max = rangeSlider.select((state) => state.componentState.max);
   const min = rangeSlider.select((state) => state.componentState.min);
   const title = rangeSlider.select((state) => state.explicitInput.title);
-  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
 
-  const hasAvailableRange = min !== '' && max !== '';
-  const hasLowerBoundSelection = value[0] !== '';
-  const hasUpperBoundSelection = value[1] !== '';
+  const hasAvailableRange = min !== undefined && max !== undefined;
 
-  const lowerBoundSelection = parseFloat(value[0]);
-  const upperBoundSelection = parseFloat(value[1]);
-  const minValue = parseFloat(min);
-  const maxValue = parseFloat(max);
+  // const errorMessage = '';
+  // let helpText = '';
 
-  // EuiDualRange can only handle integers as min/max
-  const roundedMin = hasAvailableRange ? Math.floor(minValue) : minValue;
-  const roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
+  // if (!hasAvailableRange) {
+  //   helpText = RangeSliderStrings.popover.getNoAvailableDataHelpText();
+  // } else if (isInvalid) {
+  //   helpText = RangeSliderStrings.popover.getNoDataHelpText();
+  // }
 
   // Caches min and max displayed on popover open so the range slider doesn't resize as selections change
-  const [rangeSliderMin, setRangeSliderMin] = useState<number>(roundedMin);
-  const [rangeSliderMax, setRangeSliderMax] = useState<number>(roundedMax);
+  const [rangeSliderMin, setRangeSliderMin] = useState<number>(min);
+  const [rangeSliderMax, setRangeSliderMax] = useState<number>(max);
 
   useMount(() => {
+    const [lowerBoundSelection, upperBoundSelection] = [
+      parseFloat(currentRange[0]),
+      parseFloat(currentRange[1]),
+    ];
+
     setRangeSliderMin(
       Math.min(
-        roundedMin,
+        min,
         isNaN(lowerBoundSelection) ? Infinity : lowerBoundSelection,
         isNaN(upperBoundSelection) ? Infinity : upperBoundSelection
       )
     );
     setRangeSliderMax(
       Math.max(
-        roundedMax,
+        max,
         isNaN(lowerBoundSelection) ? -Infinity : lowerBoundSelection,
         isNaN(upperBoundSelection) ? -Infinity : upperBoundSelection
       )
     );
   });
-
-  const errorMessage = '';
-  let helpText = '';
-
-  if (!hasAvailableRange) {
-    helpText = RangeSliderStrings.popover.getNoAvailableDataHelpText();
-  } else if (isInvalid) {
-    helpText = RangeSliderStrings.popover.getNoDataHelpText();
-  }
-
-  const displayedValue = [
-    hasLowerBoundSelection
-      ? String(lowerBoundSelection)
-      : hasAvailableRange
-      ? String(roundedMin)
-      : '',
-    hasUpperBoundSelection
-      ? String(upperBoundSelection)
-      : hasAvailableRange
-      ? String(roundedMax)
-      : '',
-  ] as RangeValue;
-
-  const ticks = [];
-  const levels = [];
-
-  if (hasAvailableRange) {
-    ticks.push({ value: rangeSliderMin, label: fieldFormatter(String(rangeSliderMin)) });
-    ticks.push({ value: rangeSliderMax, label: fieldFormatter(String(rangeSliderMax)) });
-    levels.push({ min: roundedMin, max: roundedMax, color: 'success' });
-  }
 
   // derive field formatter from fieldSpec and dataViewId
   useEffect(() => {
@@ -126,6 +99,17 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);
 
+  const ticks = useMemo(() => {
+    return [
+      { value: min, label: fieldFormatter(String(min)) },
+      { value: max, label: fieldFormatter(String(max)) },
+    ];
+  }, [min, max, fieldFormatter]);
+
+  const levels = useMemo(() => {
+    return [{ min, max, color: 'success' }];
+  }, [min, max]);
+
   return (
     <>
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
@@ -138,17 +122,12 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
         <EuiFlexItem>
           <EuiDualRange
             id={id}
-            min={hasAvailableRange ? rangeSliderMin : 0}
-            max={hasAvailableRange ? rangeSliderMax : 100}
-            onChange={([newLowerBound, newUpperBound]) => {
-              const updatedLowerBound =
-                typeof newLowerBound === 'number' ? String(newLowerBound) : value[0];
-              const updatedUpperBound =
-                typeof newUpperBound === 'number' ? String(newUpperBound) : value[1];
-
-              rangeSlider.dispatch.setSelectedRange([updatedLowerBound, updatedUpperBound]);
+            min={rangeSliderMin}
+            max={rangeSliderMax}
+            onChange={([minSelection, maxSelection]) => {
+              onChange([String(minSelection), String(maxSelection)]);
             }}
-            value={displayedValue}
+            value={currentRange}
             ticks={hasAvailableRange ? ticks : undefined}
             levels={hasAvailableRange ? levels : undefined}
             showTicks={hasAvailableRange}
@@ -157,13 +136,13 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
             ref={rangeRef}
             data-test-subj="rangeSlider__slider"
           />
-          <EuiText
+          {/* <EuiText
             size="s"
             color={errorMessage ? 'danger' : 'default'}
             data-test-subj="rangeSlider__helpText"
           >
             {errorMessage || helpText}
-          </EuiText>
+          </EuiText> */}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
@@ -171,7 +150,7 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
               iconType="eraser"
               color="danger"
               onClick={() => {
-                rangeSlider.dispatch.setSelectedRange(['', '']);
+                onChange(['', '']);
               }}
               aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
               data-test-subj="rangeSlider__clearRangeButton"
