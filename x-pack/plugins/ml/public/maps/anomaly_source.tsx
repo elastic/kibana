@@ -18,13 +18,13 @@ import {
 } from '@kbn/maps-plugin/common';
 import { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
 import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { GeoJsonWithMeta } from '@kbn/maps-plugin/public';
 import type { IField } from '@kbn/maps-plugin/public';
 import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
 import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
@@ -47,9 +47,8 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 
 export class AnomalySource implements IVectorSource {
   static mlResultsService: MlApiServices['results'];
-  static canGetJobs: boolean;
   static mlLocator?: LocatorPublic<SerializableRecord>;
-  static timefilter?: TimefilterContract;
+  static timefilter: TimefilterContract;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
     if (typeof descriptor.jobId !== 'string') {
