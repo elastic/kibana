@@ -62,9 +62,6 @@ const mockLayer = {
   getDisplayName: () => {
     return 'layer 1';
   },
-  getImmutableSourceProperties: () => {
-    return [{ label: 'source prop1', value: 'you get one chance to set me' }];
-  },
   canShowTooltip: () => {
     return true;
   },

@@ -14,6 +14,7 @@ import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/
 import {
   AbstractSourceDescriptor,
   Attribution,
+  DataFilters,
   DataRequestMeta,
   StyleDescriptor,
   Timeslice,
@@ -49,7 +50,7 @@ export interface ISource {
   isFilterByMapBounds(): boolean;
   isQueryAware(): boolean;
   isTimeAware(): Promise<boolean>;
-  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
+  getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
   isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
