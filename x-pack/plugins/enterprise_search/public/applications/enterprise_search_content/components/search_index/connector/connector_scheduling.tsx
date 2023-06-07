@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorStatus, SyncJobType } from '../../../../../../common/types/connectors';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
@@ -64,10 +65,16 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 };
 
 export const ConnectorSchedulingComponent: React.FC = () => {
-  const { ingestionStatus } = useValues(IndexViewLogic);
+  const { productFeatures } = useValues(KibanaLogic);
+  const { ingestionStatus, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
+    useValues(IndexViewLogic);
   const { index } = useValues(IndexViewLogic);
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
 
+  const shouldShowIncrementalSync =
+    hasIncrementalSyncFeature && productFeatures.hasIncrementalSyncEnabled;
+  const shouldShowAccessControlSync =
+    hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
   if (!indices.isConnectorIndex(index)) {
     return <></>;
   }
@@ -181,29 +188,33 @@ export const ConnectorSchedulingComponent: React.FC = () => {
               <EuiFlexItem>
                 <ConnectorContentScheduling type={SyncJobType.FULL} index={index} />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <ConnectorContentScheduling type={SyncJobType.INCREMENTAL} index={index} />
-              </EuiFlexItem>
+              {shouldShowIncrementalSync && (
+                <EuiFlexItem>
+                  <ConnectorContentScheduling type={SyncJobType.INCREMENTAL} index={index} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </SchedulePanel>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <SchedulePanel
-            title={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.title',
-              { defaultMessage: 'Document Level Security' }
-            )}
-            description={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.description',
-              {
-                defaultMessage:
-                  'Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date.',
-              }
-            )}
-          >
-            <ConnectorContentScheduling type={SyncJobType.ACCESS_CONTROL} index={index} />
-          </SchedulePanel>
-        </EuiFlexItem>
+        {shouldShowAccessControlSync && (
+          <EuiFlexItem>
+            <SchedulePanel
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.title',
+                { defaultMessage: 'Document Level Security' }
+              )}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.description',
+                {
+                  defaultMessage:
+                    'Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date.',
+                }
+              )}
+            >
+              <ConnectorContentScheduling type={SyncJobType.ACCESS_CONTROL} index={index} />
+            </SchedulePanel>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
