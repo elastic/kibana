@@ -94,7 +94,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
   height = DEFAULT_HEIGHT,
   partitionedFieldMetadata,
   setSelectedTabId,
-  theme,
+  theme = {},
   baseTheme,
 }) => {
   const summaryData = useMemo(
