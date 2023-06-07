@@ -20,7 +20,12 @@ type ConnectorSchedulingActions = Pick<
   'apiSuccess'
 > & {
   clearHasChanges: (type: SyncJobType) => { type: SyncJobType };
+  makeRequest: typeof UpdateConnectorSchedulingApiLogic.actions.makeRequest;
   setHasChanges: (type: SyncJobType) => { type: SyncJobType };
+  updateScheduling: (
+    type: SyncJobType,
+    payload: UpdateConnectorSchedulingArgs
+  ) => { payload: UpdateConnectorSchedulingArgs; type: SyncJobType };
 };
 
 interface ConnectorSchedulingValues {
@@ -28,6 +33,7 @@ interface ConnectorSchedulingValues {
   hasChanges: boolean;
   hasFullSyncChanges: boolean;
   hasIncrementalSyncChanges: boolean;
+  makeRequestType: SyncJobType | null;
 }
 
 export const ConnectorSchedulingLogic = kea<
@@ -36,15 +42,25 @@ export const ConnectorSchedulingLogic = kea<
   actions: {
     clearHasChanges: (type) => ({ type }),
     setHasChanges: (type) => ({ type }),
+    updateScheduling: (type, payload) => ({ payload, type }),
   },
   connect: {
-    actions: [UpdateConnectorSchedulingApiLogic, ['apiSuccess']],
+    actions: [UpdateConnectorSchedulingApiLogic, ['apiSuccess', 'makeRequest']],
   },
+  listeners: ({ actions, values }) => ({
+    apiSuccess: () => {
+      if (values.makeRequestType) {
+        actions.clearHasChanges(values.makeRequestType);
+      }
+    },
+    updateScheduling: ({ payload }) => {
+      actions.makeRequest(payload);
+    },
+  }),
   reducers: {
     hasAccessSyncChanges: [
       false,
       {
-        apiSuccess: () => false,
         clearHasChanges: (current, { type }) =>
           type === SyncJobType.ACCESS_CONTROL ? false : current,
         setHasChanges: (current, { type }) =>
@@ -54,7 +70,6 @@ export const ConnectorSchedulingLogic = kea<
     hasFullSyncChanges: [
       false,
       {
-        apiSuccess: () => false,
         clearHasChanges: (current, { type }) => (type === SyncJobType.FULL ? false : current),
         setHasChanges: (current, { type }) => (type === SyncJobType.FULL ? true : current),
       },
@@ -62,10 +77,15 @@ export const ConnectorSchedulingLogic = kea<
     hasIncrementalSyncChanges: [
       false,
       {
-        apiSuccess: () => false,
         clearHasChanges: (current, { type }) =>
           type === SyncJobType.INCREMENTAL ? false : current,
         setHasChanges: (current, { type }) => (type === SyncJobType.INCREMENTAL ? true : current),
+      },
+    ],
+    makeRequestType: [
+      null,
+      {
+        updateScheduling: (_, { type }) => type,
       },
     ],
   },

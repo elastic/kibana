@@ -23,8 +23,6 @@ import { i18n } from '@kbn/i18n';
 
 import { SyncJobType } from '../../../../../../../common/types/connectors';
 
-import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/update_connector_scheduling_api_logic';
-
 import { ConnectorViewIndex, CrawlerViewIndex } from '../../../../types';
 
 import { ConnectorSchedulingLogic } from '../connector_scheduling_logic';
@@ -66,11 +64,12 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
   type,
   index,
 }) => {
-  const { setHasChanges } = useActions(ConnectorSchedulingLogic);
-  const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
-
+  const { setHasChanges, updateScheduling } = useActions(ConnectorSchedulingLogic);
   const schedulingInput = index.connector.scheduling;
   const [scheduling, setScheduling] = useState(schedulingInput);
+  const [isAccordionOpen, setIsAccordionOpen] = useState<'open' | 'closed'>(
+    scheduling[type].enabled ? 'open' : 'closed'
+  );
 
   return (
     <>
@@ -92,7 +91,10 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-          initialIsOpen={scheduling[type].enabled}
+          forceState={isAccordionOpen}
+          onToggle={(isOpen) => {
+            setIsAccordionOpen(isOpen ? 'open' : 'closed');
+          }}
           extraAction={
             <EuiSwitch
               checked={scheduling[type].enabled}
@@ -101,6 +103,9 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                 { defaultMessage: 'Enabled' }
               )}
               onChange={(e) => {
+                if (e.target.checked) {
+                  setIsAccordionOpen('open');
+                }
                 setScheduling({
                   ...scheduling,
                   ...{
@@ -123,10 +128,10 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                   });
                 }}
                 onSave={(interval) => {
-                  makeRequest({
+                  updateScheduling(type, {
                     connectorId: index.connector.id,
                     scheduling: {
-                      ...scheduling,
+                      ...index.connector.scheduling,
                       [type]: {
                         ...scheduling[type],
                         interval,
