@@ -65,9 +65,13 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 describe('EQL rules', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
     deleteAlertsAndRules();
   });
+
   describe('Detection rules, EQL', () => {
     const rule = getEqlRule();
     const expectedUrls = rule.references?.join('');
@@ -155,6 +159,7 @@ describe('EQL rules', () => {
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {
+      login();
       visit(RULE_CREATION);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);

@@ -64,8 +64,8 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadRule().then((data) => {
         ruleId = data.id;
@@ -105,21 +105,21 @@ describe('Alert Event Details', () => {
     const packData = packFixture();
     const multiQueryPackData = multiQueryPackFixture();
 
-    before(() => {
+    beforeEach(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadPack(multiQueryPackData).then((data) => {
-        multiQueryPackId = data.id;
-        multiQueryPackName = data.attributes.name;
+        multiQueryPackId = data.saved_object_id;
+        multiQueryPackName = data.name;
       });
       loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });
     });
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
       cleanupPack(multiQueryPackId);
       cleanupRule(ruleId);
@@ -145,7 +145,7 @@ describe('Alert Event Details', () => {
       cy.contains('Save changes').click();
       cy.getBySel('response-actions-error')
         .within(() => {
-          cy.contains(' Pack is a required field');
+          cy.contains('Pack is a required field');
         })
         .should('exist');
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
@@ -382,8 +382,8 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadRule(true).then((data) => {
         ruleId = data.id;

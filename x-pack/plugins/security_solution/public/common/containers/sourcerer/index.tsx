@@ -14,6 +14,7 @@ import type {
   SelectedDataView,
   SourcererDataView,
   SourcererUrlState,
+  RunTimeMappings,
 } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
@@ -395,14 +396,14 @@ export const useSourcererDataView = (
     () => ({
       ...fetchIndexReturn,
       dataView: fetchIndexReturn.dataView,
-      runtimeMappings: fetchIndexReturn.dataView?.getRuntimeMappings() ?? {},
-      title: fetchIndexReturn.dataView?.getIndexPattern() ?? '',
+      runtimeMappings: (fetchIndexReturn.dataView?.runtimeFieldMap as RunTimeMappings) ?? {},
+      title: fetchIndexReturn.dataView?.title ?? '',
       id: fetchIndexReturn.dataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
-      fields: fetchIndexReturn.indexPatterns.fields,
+      fields: fetchIndexReturn.dataView?.fields,
     }),
     [fetchIndexReturn, indexPatternsLoading]
   );

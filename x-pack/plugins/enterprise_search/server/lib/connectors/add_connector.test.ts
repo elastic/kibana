@@ -144,6 +144,9 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: false,
         language: 'fr',
+        last_access_control_sync_scheduled_at: null,
+        last_access_control_sync_status: null,
+        last_incremental_sync_scheduled_at: null,
         last_seen: null,
         last_sync_error: null,
         last_sync_scheduled_at: null,
@@ -162,7 +165,7 @@ describe('addConnector lib function', () => {
         sync_now: false,
       },
       index: CONNECTORS_INDEX,
-      refresh: true,
+      refresh: 'wait_for',
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
@@ -327,6 +330,9 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: true,
         language: null,
+        last_access_control_sync_scheduled_at: null,
+        last_access_control_sync_status: null,
+        last_incremental_sync_scheduled_at: null,
         last_seen: null,
         last_sync_error: null,
         last_sync_scheduled_at: null,
@@ -345,7 +351,7 @@ describe('addConnector lib function', () => {
         sync_now: false,
       },
       index: CONNECTORS_INDEX,
-      refresh: true,
+      refresh: 'wait_for',
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
@@ -435,6 +441,9 @@ describe('addConnector lib function', () => {
         index_name: 'search-index_name',
         is_native: false,
         language: 'en',
+        last_access_control_sync_scheduled_at: null,
+        last_access_control_sync_status: null,
+        last_incremental_sync_scheduled_at: null,
         last_seen: null,
         last_sync_error: null,
         last_sync_scheduled_at: null,
@@ -453,7 +462,7 @@ describe('addConnector lib function', () => {
         sync_now: false,
       },
       index: CONNECTORS_INDEX,
-      refresh: true,
+      refresh: 'wait_for',
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'search-index_name',

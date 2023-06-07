@@ -12,7 +12,8 @@
     "types": [
       "cypress",
       "cypress-file-upload",
-      "cypress-pipe",
+      "cypress-real-events",
+      "cypress-recurse",
       "node",
     ],
   },
@@ -32,6 +33,8 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/alerting-plugin",
     "@kbn/securitysolution-data-table",
-    "@kbn/cases-plugin"
+    "@kbn/cases-plugin",
+    "@kbn/data-plugin",
+    "@kbn/core-http-common"
   ]
 }

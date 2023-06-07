@@ -38,11 +38,7 @@ import type {
 import chalk from 'chalk';
 import { dump } from './utils';
 import { isLocalhost } from '../common/localhost_services';
-import {
-  fetchFleetAgents,
-  fetchFleetServerUrl,
-  waitForHostToEnroll,
-} from '../common/fleet_services';
+import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async (): Promise<
@@ -54,15 +50,18 @@ export const runFleetServerIfNeeded = async (): Promise<
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
+    kbnClient,
   } = getRuntimeServices();
 
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
 
-  const fleetServerAlreadyEnrolled = await isFleetServerEnrolled();
+  const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
 
-  if (fleetServerAlreadyEnrolled) {
-    log.info(`Fleet server is already enrolled with Fleet. Nothing to do.`);
+  if (currentFleetServerUrl) {
+    log.info(
+      `Fleet server is already enrolled with Fleet - URL:\n${currentFleetServerUrl}\nNothing to do.`
+    );
     log.indent(-4);
     return;
   }
@@ -88,23 +87,6 @@ export const runFleetServerIfNeeded = async (): Promise<
   log.indent(-4);
 
   return { fleetServerContainerId, fleetServerAgentPolicyId };
-};
-
-const isFleetServerEnrolled = async () => {
-  const { kbnClient } = getRuntimeServices();
-  const policyId = (await getFleetServerPackagePolicy())?.policy_id;
-
-  if (!policyId) {
-    return false;
-  }
-
-  const fleetAgentsResponse = await fetchFleetAgents(kbnClient, {
-    kuery: `(policy_id: "${policyId}" and active : true) and (status:online)`,
-    showInactive: false,
-    perPage: 1,
-  });
-
-  return Boolean(fleetAgentsResponse.total);
 };
 
 const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined> => {
@@ -198,6 +180,7 @@ export const startFleetServerWithDocker = async ({
     log,
     localhostRealIp,
     elastic: { url: elasticUrl, isLocalhost: isElasticOnLocalhost },
+    fleetServer: { port: fleetServerPort },
     kbnClient,
     options: { version },
   } = getRuntimeServices();
@@ -206,7 +189,7 @@ export const startFleetServerWithDocker = async ({
   log.indent(4);
 
   const esURL = new URL(elasticUrl);
-  const containerName = `dev-fleet-server.${esURL.hostname}`;
+  const containerName = `dev-fleet-server.${fleetServerPort}`;
   let esUrlWithRealIp: string = elasticUrl;
 
   if (isElasticOnLocalhost) {
@@ -248,7 +231,7 @@ export const startFleetServerWithDocker = async ({
       `FLEET_SERVER_POLICY=${policyId}`,
 
       '--publish',
-      '8220:8220',
+      `${fleetServerPort}:8220`,
 
       `docker.elastic.co/beats/elastic-agent:${version}`,
     ];
@@ -265,7 +248,7 @@ export const startFleetServerWithDocker = async ({
 (This is ok if one was not running already)`);
       });
 
-    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
+    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:${fleetServerPort}`);
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 

@@ -40,6 +40,7 @@ async function mountComponent({
   dataView = dataViewWithTimefieldMock,
   currentSuggestion,
   allSuggestions,
+  isPlainRecord,
 }: {
   noChart?: boolean;
   noHits?: boolean;
@@ -49,6 +50,7 @@ async function mountComponent({
   dataView?: DataView;
   currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
+  isPlainRecord?: boolean;
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -84,6 +86,7 @@ async function mountComponent({
     breakdown: noBreakdown ? undefined : { field: undefined },
     currentSuggestion,
     allSuggestions,
+    isPlainRecord,
     appendHistogram,
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
@@ -143,6 +146,14 @@ describe('Chart', () => {
 
   test('render when chart.hidden is false', async () => {
     const component = await mountComponent({ chartHidden: false });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+  });
+
+  test('render when is text based and not timebased', async () => {
+    const component = await mountComponent({ isPlainRecord: true, dataView: dataViewMock });
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeTruthy();
