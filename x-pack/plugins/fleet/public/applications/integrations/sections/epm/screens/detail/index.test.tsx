@@ -20,10 +20,7 @@ import type {
   GetSettingsResponse,
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
-import type {
-  DetailViewPanelName,
-  KibanaAssetType,
-} from '../../../../../../../common/types/models';
+import type { KibanaAssetType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -36,9 +33,11 @@ import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import type { DetailViewPanelName } from '.';
+import { Detail } from '.';
+
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
-import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
