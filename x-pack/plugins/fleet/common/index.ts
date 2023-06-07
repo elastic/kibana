@@ -115,6 +115,7 @@ export type {
   UpgradePackagePolicyDryRunResponseItem,
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
+  GetBulkAssetsResponse,
   // Models
   Agent,
   AgentStatus,
@@ -191,6 +192,9 @@ export type {
   // Fleet server models
   FleetServerAgent,
   FleetServerAgentComponentStatus,
+  AssetSOObject,
+  SimpleSOAssetType,
+  AllowedAssetTypes,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
