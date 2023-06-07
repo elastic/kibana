@@ -81,7 +81,7 @@ export interface SavedObjectsModelMappingsDeprecationChange {
  * A {@link SavedObjectsModelChange | model change} used to backfill fields introduced in the same model version.
  *
  * @example
- * ```
+ * ```ts
  * let change: SavedObjectsModelDataBackfillChange = {
  *   type: 'data_backfill',
  *   transform: (document) => {
