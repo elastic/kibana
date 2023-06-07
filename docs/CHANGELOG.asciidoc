@@ -79,13 +79,16 @@ With network throttling being disabled, your monitors may run more quickly (i.e.
 
 // tag::known-issue-158940[]
 [discrete]
-.Failed upgrades to 8.8.0 could cause bootlooping and possibly data loss during upgrade
+.Failed upgrades to 8.8.0 can cause bootlooping and data loss
+[%collapsible]
 ====
 *Details* +
-The 8.8.0 release splits the `.kibana` index into multiple saved object indices. If the upgrade partially succeeds, but not all the indices are created successfully, Kibana might be unable to successfully complete the upgrade on the next restart. Whilst 8.8.1 release includes in {kibana-pull}a fix[#158940] for this problem, customers affected by a failed 8.8.0 upgrade should refer to the https://github.com/elastic/kibana/issues/158733[related issue] for more information, and eventually contact support.
+he 8.8.0 release splits the `.kibana` index into multiple saved object indices. If an upgrade to 8.8.0 partially succeeds, but not all the indices are created successfully, {kib} may be unable to successfully complete the upgrade on the next restart.
+
+This can result in a loss of saved objects during the upgrade. This can also leave {kib} in a bootlooping state where it's unable to start due to `write_blocked` indices.
 
 *Impact* +
-Eventually, some of the saved objects that should be dispatched to the newer indices may be lost during the upgrade. Kibana can also be left on a bootlooping state where it is no longer able to start, due to `write_blocked` indices.
+The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}58733[related issue].
 ====
 // end::known-issue-158940[]
 
