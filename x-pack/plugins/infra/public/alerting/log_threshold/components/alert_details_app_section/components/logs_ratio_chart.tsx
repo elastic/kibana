@@ -15,6 +15,7 @@ import {
   Settings,
   Position,
   AnnotationDomainType,
+  Tooltip,
 } from '@elastic/charts';
 import React, { ReactElement, useEffect, useMemo } from 'react';
 import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
@@ -227,7 +228,8 @@ const LogsRatioChart: React.FC<ChartProps> = ({
           tickFormat={yAxisFormatter}
           domain={chartDomain}
         />
-        <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+        <Settings theme={getChartTheme(isDarkMode)} />
+        <Tooltip {...tooltipProps} />
       </Chart>
     </ChartContainer>
   );

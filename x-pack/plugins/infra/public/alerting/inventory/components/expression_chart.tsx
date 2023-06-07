@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
@@ -192,7 +192,8 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={dateFormatter}
           />
           <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Settings theme={getChartTheme(isDarkMode)} />
+          <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>
       <div style={{ textAlign: 'center' }}>
