@@ -11,16 +11,20 @@ import type {
   AppId as AnalyticsApp,
   DeepLinkId as AnalyticsDeepLink,
 } from '@kbn/deeplinks-analytics';
-import type { AppId as MlApp, DeepLinkId as MlToolsLink } from '@kbn/deeplinks-ml';
+import type { AppId as MlApp, DeepLinkId as MlLink } from '@kbn/deeplinks-ml';
+import type {
+  AppId as ManagementApp,
+  DeepLinkId as ManagementLink,
+} from '@kbn/deeplinks-management';
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
 
 /** @public */
-export type AppId = DevToolsApp | AnalyticsApp | MlApp;
+export type AppId = DevToolsApp | AnalyticsApp | MlApp | ManagementApp;
 
 /** @public */
-export type AppDeepLinkId = AnalyticsDeepLink | DevToolsLink | MlToolsLink;
+export type AppDeepLinkId = AnalyticsDeepLink | DevToolsLink | MlLink | ManagementLink;
 
 /** @public */
 export interface ChromeProjectNavigationNode {

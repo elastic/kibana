@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DEV_TOOLS_APP_ID } from './constants';
+import { MONITORING_APP_ID } from './constants';
 
-export type AppId = typeof DEV_TOOLS_APP_ID;
+// Monitoring
+export type MonitoringAppId = typeof MONITORING_APP_ID;
+export type MonitoringId = 'xxx';
+export type MonitoringDeepLinkId = MonitoringAppId | `${MonitoringAppId}:${LinkId}`;
 
-export type LinkId = 'searchprofiler' | 'painless_lab' | 'grokdebugger' | 'console';
-
-export type DeepLinkId = AppId | `${AppId}:${LinkId}`;
+// Combined
+export type AppId = MonitoringAppId;
+export type LinkId = MonitoringId;
+export type DeepLinkId = MonitoringDeepLinkId;

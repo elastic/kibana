@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const DEV_TOOLS_APP_ID = 'dev_tools';
+export const MONITORING_APP_ID = 'monitoring';
