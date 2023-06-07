@@ -24,9 +24,9 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
     );
 
     return (fetchedResult?.monitors ?? []).map((monitor) => ({
-      label: monitor.attributes.name,
-      key: monitor.attributes.config_id,
-      locationIds: monitor.attributes.locations.map((location) => location.id),
+      label: monitor.name,
+      key: monitor.config_id,
+      locationIds: monitor.locations.map((location) => location.id),
     }));
   }, [debouncedSearch]);
 
