@@ -13,6 +13,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { PublicLastRunSetters } from '@kbn/alerting-plugin/server/types';
 import { OnlyEsqlQueryRuleParams } from '../types';
 import { getSmallerDataViewSpec } from './fetch_search_source_query';
 
@@ -47,6 +48,7 @@ export interface FetchEsqlQueryOpts {
     scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
     dataViews: DataViewsContract;
+    ruleResultService?: PublicLastRunSetters;
   };
 }
 
@@ -98,7 +100,7 @@ export async function fetchEsqlQuery({
         timed_out: false,
         _shards: { failed: 0, successful: 0, total: 0 },
         hits: { hits: [] },
-        aggregations: toEsResult(response, params.alertId),
+        aggregations: toEsResult(response, services.ruleResultService, params.alertId),
       },
       resultLimit: alertLimit,
     }),
@@ -186,7 +188,11 @@ const getEsqlQuery = (
   };
 };
 
-const toEsResult = (results: EsqlTable, alertId?: string) => {
+const toEsResult = (
+  results: EsqlTable,
+  ruleResultService?: PublicLastRunSetters,
+  alertId?: string
+) => {
   const documentsGrouping = results.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(results.columns, row);
     const id = alertId ? document[alertId] ?? 'undefined' : UngroupedGroupId;
@@ -196,6 +202,11 @@ const toEsResult = (results: EsqlTable, alertId?: string) => {
       _source: document,
     };
     if (acc[id]) {
+      if (alertId && ruleResultService) {
+        ruleResultService.addLastRunWarning(
+          'There are duplicate alerts. Changing rule status to warning.'
+        );
+      }
       acc[id].push(hit);
     } else {
       acc[id] = [hit];
