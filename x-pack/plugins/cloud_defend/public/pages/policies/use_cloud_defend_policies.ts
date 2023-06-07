@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { ListResult } from '@kbn/fleet-plugin/common';
-import { POLICIES_ROUTE_PATH } from '../../../common/constants';
+import { CURRENT_API_VERSION, POLICIES_ROUTE_PATH } from '../../../common/constants';
 import type { PoliciesQueryParams } from '../../../common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import type { CloudDefendPolicy } from '../../../common';
@@ -40,7 +40,11 @@ export const useCloudDefendPolicies = ({
 
   return useQuery(
     [QUERY_KEY, query],
-    () => http.get<ListResult<CloudDefendPolicy>>(POLICIES_ROUTE_PATH, { query }),
+    () =>
+      http.get<ListResult<CloudDefendPolicy>>(POLICIES_ROUTE_PATH, {
+        version: CURRENT_API_VERSION,
+        query,
+      }),
     { keepPreviousData: true }
   );
 };
