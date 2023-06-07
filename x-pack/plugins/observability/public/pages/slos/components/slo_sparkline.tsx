@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { AreaSeries, Axis, Chart, Fit, LineSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  Fit,
+  LineSeries,
+  ScaleType,
+  Settings,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
 import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';

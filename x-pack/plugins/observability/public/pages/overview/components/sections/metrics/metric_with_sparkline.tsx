@@ -47,7 +47,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
       <EuiFlexItem grow={false}>
         <Chart size={{ height: 18, width: 40 }}>
           <Tooltip type={TooltipType.None} />
-          <Settings theme={theme} showLegend={false}/>
+          <Settings theme={theme} showLegend={false} />
           <AreaSeries
             id={id}
             data={timeseries}
