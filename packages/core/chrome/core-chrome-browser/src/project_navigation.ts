@@ -90,7 +90,7 @@ type NonEmptyArray<T> = [T, ...T[]];
  */
 export interface NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 > {
   /** Optional id, if not passed a "link" must be provided. */
@@ -102,7 +102,7 @@ export interface NodeDefinition<
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
   /** Optional children of the navigation node */
-  children?: NonEmptyArray<NodeDefinition<LinkId, ChildrenId>>;
+  children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Temporarilly we allow href to be passed.
    * Once all the deeplinks will be exposed in packages we will not allow href anymore
@@ -119,7 +119,7 @@ export interface NodeDefinition<
  */
 export type NodeDefinitionWithChildren<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenID extends string = Id
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];

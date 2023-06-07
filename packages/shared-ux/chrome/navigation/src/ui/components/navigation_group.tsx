@@ -33,7 +33,7 @@ export function useNavigationGroup<T extends boolean = true>(
 
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
@@ -42,7 +42,7 @@ export interface Props<
 
 function NavigationGroupInternalComp<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
   const navigationContext = useNavigation();
@@ -101,7 +101,7 @@ function NavigationGroupInternalComp<
 
 function NavigationGroupComp<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId> & NavigationBucketProps) {
   if (props.preset) {

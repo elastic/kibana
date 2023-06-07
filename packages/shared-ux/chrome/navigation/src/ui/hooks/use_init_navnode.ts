@@ -26,7 +26,7 @@ import { useRegisterTreeNode } from './use_register_tree_node';
 
 function getIdFromNavigationNode<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 >({ id: _id, link, title }: NodeProps<LinkId, Id, ChildrenId>): string {
   const id = _id ?? link;
@@ -48,7 +48,7 @@ function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNav
 
 function createInternalNavNode<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 >(
   id: string,
@@ -78,7 +78,7 @@ function createInternalNavNode<
 
 export const useInitNavNode = <
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 >(
   node: NodePropsEnhanced<LinkId, Id, ChildrenId>

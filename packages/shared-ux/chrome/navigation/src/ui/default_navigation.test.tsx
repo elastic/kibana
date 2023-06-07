@@ -158,7 +158,7 @@ describe('<DefaultNavigation />', () => {
 
       const onProjectNavigationChange = jest.fn();
 
-      const navigationBody: RootNavigationItemDefinition[] = [
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
         {
           type: 'navGroup',
           id: 'root',
@@ -333,7 +333,7 @@ describe('<DefaultNavigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       // Custom project navigation tree definition
-      const projectNavigationTree: ProjectNavigationTreeDefinition = [
+      const projectNavigationTree: ProjectNavigationTreeDefinition<any> = [
         {
           id: 'group1',
           title: 'Group 1',

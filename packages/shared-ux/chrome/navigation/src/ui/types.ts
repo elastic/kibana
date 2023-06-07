@@ -25,7 +25,7 @@ export type NonEmptyArray<T> = [T, ...T[]];
  */
 export interface NodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   /**
@@ -42,7 +42,7 @@ export interface NodeProps<
  */
 export interface NodePropsEnhanced<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = LinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   /**
@@ -89,11 +89,14 @@ export interface CloudLinkDefinition extends CloudLinkProps {
  *
  * A group root item definition.
  */
-export interface GroupDefinition extends NodeDefinition<AppDeepLinkId, string> {
+export interface GroupDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends NodeDefinition<LinkId, Id, ChildrenId> {
   type: 'navGroup';
   /** Flag to indicate if the group is initially collapsed or not. */
   defaultIsCollapsed?: boolean;
-  children?: NonEmptyArray<NodeDefinition<AppDeepLinkId, string>>;
   preset?: NavigationGroupPreset;
 }
 
@@ -102,12 +105,17 @@ export interface GroupDefinition extends NodeDefinition<AppDeepLinkId, string> {
  *
  * The navigation definition for a root item in the side navigation.
  */
-export type RootNavigationItemDefinition =
-  | RecentlyAccessedDefinition
-  | CloudLinkDefinition
-  | GroupDefinition;
+export type RootNavigationItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = RecentlyAccessedDefinition | CloudLinkDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
 
-export type ProjectNavigationTreeDefinition = Array<Omit<GroupDefinition, 'type'>>;
+export type ProjectNavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = Array<Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>>;
 
 /**
  * @public
