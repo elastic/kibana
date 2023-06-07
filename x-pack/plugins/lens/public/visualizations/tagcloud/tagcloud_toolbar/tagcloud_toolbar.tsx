@@ -105,6 +105,9 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
               })}
             >
               <EuiSwitch
+                label={i18n.translate('xpack.lens.label.tagcloud.showLabel', {
+                  defaultMessage: 'Show label',
+                })}
                 showLabel={false}
                 checked={props.state.showLabel}
                 onChange={(event: EuiSwitchEvent) => {
