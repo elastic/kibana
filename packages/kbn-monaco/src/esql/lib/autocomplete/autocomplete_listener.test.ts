@@ -38,7 +38,7 @@ describe('autocomplete_listener', () => {
     testSuggestions('f', ['from']);
     testSuggestions('from ', ['SourceIdentifier']);
     testSuggestions('from a,', ['SourceIdentifier']);
-    testSuggestions('from a, b ', ['|']);
+    testSuggestions('from a, b ', ['SourceIdentifier']);
   });
 
   describe('where', () => {

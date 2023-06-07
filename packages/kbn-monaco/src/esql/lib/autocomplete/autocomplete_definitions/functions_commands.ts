@@ -459,7 +459,7 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
     label: 'percentile',
     insertText: 'percentile',
     kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.countDistinctDoc', {
+    detail: i18n.translate('monaco.esql.autocomplete.percentiletDoc', {
       defaultMessage: 'Returns the n percentile of a field.',
     }),
     documentation: {

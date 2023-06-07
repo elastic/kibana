@@ -122,9 +122,11 @@ export class AutocompleteListener implements ESQLParserListener {
   exitSourceCommand(ctx: SourceCommandContext) {
     if (ctx.exception) {
       this.suggestions = sourceCommandsDefinitions;
-    } else if (!this.hasSuggestions) {
-      this.suggestions = this.getEndCommandSuggestions();
     }
+  }
+
+  enterSourceIdentifier(ctx: SourceIdentifierContext) {
+    this.suggestions = [DynamicAutocompleteItem.SourceIdentifier];
   }
 
   exitSourceIdentifier(ctx: SourceIdentifierContext) {
