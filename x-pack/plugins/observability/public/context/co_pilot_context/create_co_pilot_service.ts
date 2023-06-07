@@ -50,32 +50,36 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
 
             function read() {
               reader!.read().then(({ done, value }) => {
-                if (done) {
-                  observer.next({
-                    chunks,
-                    message: getMessageFromChunks(chunks),
-                    loading: false,
+                try {
+                  if (done) {
+                    observer.next({
+                      chunks,
+                      message: getMessageFromChunks(chunks),
+                      loading: false,
+                    });
+                    observer.complete();
+                    return;
+                  }
+
+                  const lines = decoder
+                    .decode(value)
+                    .trim()
+                    .split('\n')
+                    .map((str) => str.substr(6))
+                    .filter((str) => !!str && str !== '[DONE]');
+
+                  const nextChunks: CreateChatCompletionResponseChunk[] = lines.map((line) =>
+                    JSON.parse(line)
+                  );
+
+                  nextChunks.forEach((chunk) => {
+                    chunks.push(chunk);
+                    observer.next({ chunks, message: getMessageFromChunks(chunks), loading: true });
                   });
-                  observer.complete();
+                } catch (err) {
+                  observer.error(err);
                   return;
                 }
-
-                const lines = decoder
-                  .decode(value)
-                  .trim()
-                  .split('\n')
-                  .map((str) => str.substr(6))
-                  .filter((str) => !!str && str !== '[DONE]');
-
-                const nextChunks: CreateChatCompletionResponseChunk[] = lines.map((line) =>
-                  JSON.parse(line)
-                );
-
-                nextChunks.forEach((chunk) => {
-                  chunks.push(chunk);
-                  observer.next({ chunks, message: getMessageFromChunks(chunks), loading: true });
-                });
-
                 read();
               });
             }

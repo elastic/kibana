@@ -185,43 +185,43 @@ export const LogEntryFlyout = ({
           </div>
         </CenteredEuiFlyoutBody>
       ) : logEntry ? (
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {coPilotService?.isEnabled() && explainLogMessageParams ? (
-            <EuiFlexItem grow={false}>
-              <CoPilotPrompt
-                coPilot={coPilotService}
-                title={explainLogMessageTitle}
-                params={explainLogMessageParams}
-                promptId={CoPilotPromptId.LogsExplainMessage}
+        <EuiFlyoutBody
+          banner={
+            (logEntryErrors?.length ?? 0) > 0 ? (
+              <DataSearchErrorCallout
+                title={loadingErrorCalloutTitle}
+                errors={logEntryErrors ?? []}
+                onRetry={fetchLogEntry}
               />
-            </EuiFlexItem>
-          ) : null}
-          {coPilotService?.isEnabled() && similarLogMessageParams ? (
+            ) : undefined
+          }
+        >
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {coPilotService?.isEnabled() && explainLogMessageParams ? (
+              <EuiFlexItem grow={false}>
+                <CoPilotPrompt
+                  coPilot={coPilotService}
+                  title={explainLogMessageTitle}
+                  params={explainLogMessageParams}
+                  promptId={CoPilotPromptId.LogsExplainMessage}
+                />
+              </EuiFlexItem>
+            ) : null}
+            {coPilotService?.isEnabled() && similarLogMessageParams ? (
+              <EuiFlexItem grow={false}>
+                <CoPilotPrompt
+                  coPilot={coPilotService}
+                  title={similarLogMessagesTitle}
+                  params={similarLogMessageParams}
+                  promptId={CoPilotPromptId.LogsFindSimilar}
+                />
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
-              <CoPilotPrompt
-                coPilot={coPilotService}
-                title={similarLogMessagesTitle}
-                params={similarLogMessageParams}
-                promptId={CoPilotPromptId.LogsFindSimilar}
-              />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiFlyoutBody
-              banner={
-                (logEntryErrors?.length ?? 0) > 0 ? (
-                  <DataSearchErrorCallout
-                    title={loadingErrorCalloutTitle}
-                    errors={logEntryErrors ?? []}
-                    onRetry={fetchLogEntry}
-                  />
-                ) : undefined
-              }
-            >
               <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
-            </EuiFlyoutBody>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
       ) : (
         <CenteredEuiFlyoutBody>
           <div style={{ width: '75%' }}>

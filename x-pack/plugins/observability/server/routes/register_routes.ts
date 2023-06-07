@@ -14,6 +14,7 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
+import axios from 'axios';
 import * as t from 'io-ts';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { IOpenAIClient } from '../services/openai/types';
@@ -77,6 +78,16 @@ export function registerRoutes({ repository, core, logger, dependencies }: Regis
             logger.error(error.message);
             return response.customError({
               statusCode: getHTTPResponseCode(error),
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
+          if (axios.isAxiosError(error)) {
+            logger.error(error);
+            return response.customError({
+              statusCode: error.response?.status || 500,
               body: {
                 message: error.message,
               },
