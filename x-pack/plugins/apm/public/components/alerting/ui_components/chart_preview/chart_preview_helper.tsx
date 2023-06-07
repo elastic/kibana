@@ -9,18 +9,10 @@ import React, { useMemo } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { niceTimeFormatter, TooltipValue } from '@elastic/charts';
-import { sum, min as getMin, max as getMax } from 'lodash';
+import { niceTimeFormatter } from '@elastic/charts';
+import { min as getMin, max as getMax } from 'lodash';
 import { Coordinate } from '../../../../../typings/timeseries';
-
-export const tooltipProps = {
-  headerFormatter: (tooltipValue: TooltipValue) =>
-    moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss'),
-};
-
-export const NUM_BUCKETS = 5;
 
 export const TIME_LABELS = {
   s: i18n.translate('xpack.apm.alerts.timeLabels.seconds', {
@@ -48,17 +40,8 @@ export const useDateFormatter = (xMin?: number, xMax?: number) => {
   return dateFormatter;
 };
 
-export const formatNumber = (val: number) => {
-  return Number(val).toLocaleString('en', {
-    maximumFractionDigits: 1,
-  });
-};
-
-export const yAxisFormatter = formatNumber;
-
 export const getDomain = (
-  series: Array<{ name?: string; data: Coordinate[] }>,
-  stacked: boolean = false
+  series: Array<{ name?: string; data: Coordinate[] }>
 ) => {
   let min: number | null = null;
   let max: number | null = null;
@@ -74,7 +57,7 @@ export const getDomain = (
   );
   const pointValues = Object.values(valuesByTimestamp);
   pointValues.forEach((results) => {
-    const maxResult = stacked ? sum(results) : getMax(results);
+    const maxResult = getMax(results);
     const minResult = getMin(results);
     if (maxResult && (!max || maxResult > max)) {
       max = maxResult;
@@ -94,7 +77,7 @@ export const getDomain = (
   };
 };
 
-export const EmptyContainer: React.FC = ({ children }) => (
+const EmptyContainer: React.FC = ({ children }) => (
   <div
     style={{
       width: '100%',
@@ -162,7 +145,7 @@ export function TimeLabelForData({
       <EuiText size="xs" color="subdued">
         <FormattedMessage
           id="xpack.apm.alerts.timeLabelForData"
-          defaultMessage="Last {lookback} {timeLabel} of data for 3 groups, showing {displayedGroups}/{totalGroups} groups"
+          defaultMessage="Last {lookback} {timeLabel} of data, showing {displayedGroups}/{totalGroups} groups"
           values={{
             lookback,
             timeLabel,

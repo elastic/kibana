@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { NUM_BUCKETS_FOR_PREVIEW_CHART } from '../../../../../common/rules/apm_rule_types';
+
 const intervalUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
 const INTERVAL_STRING_RE = new RegExp(
   '^([0-9\\.]*)\\s*(' + intervalUnits.join('|') + ')$'
@@ -25,12 +27,12 @@ const units: UnitsToSeconds = {
   y: 86400 * 356,
 };
 
-const NUM_BUCKETS = 5;
-
 export const getIntervalInSeconds = (interval: string): number => {
   const matches = interval.match(INTERVAL_STRING_RE);
   if (matches) {
-    return parseFloat(matches[1]) * NUM_BUCKETS * units[matches[2]];
+    return (
+      parseFloat(matches[1]) * NUM_BUCKETS_FOR_PREVIEW_CHART * units[matches[2]]
+    );
   }
   throw new Error('Invalid interval string format.');
 };

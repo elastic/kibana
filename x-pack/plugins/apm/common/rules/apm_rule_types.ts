@@ -40,6 +40,8 @@ export enum AggregationType {
   P99 = '99th',
 }
 
+export const NUM_BUCKETS_FOR_PREVIEW_CHART = 5;
+
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
 export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
 const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {

@@ -22,18 +22,20 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { TooltipValue } from '@elastic/charts';
+import moment from 'moment';
 import { Maybe } from '../../../../../typings/common';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 import {
   TimeLabelForData,
-  NUM_BUCKETS,
   TIME_LABELS,
-  tooltipProps,
   getDomain,
   useDateFormatter,
 } from './chart_preview_helper';
+import { NUM_BUCKETS_FOR_PREVIEW_CHART } from '../../../../../common/rules/apm_rule_types';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -65,16 +67,24 @@ export function ChartPreview({
     opacity: thresholdOpacity,
   };
 
-  // For grouped scenarios we want to limit the groups displayed, for "isAbove" thresholds we'll show
-  // groups with the highest doc counts. And for "isBelow" thresholds we'll show groups with the lowest doc counts.
-  // Ratio scenarios will just default to max.
+  const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
+
+  const tooltipProps = {
+    headerFormatter: (tooltipValue: TooltipValue) => {
+      const dateFormat =
+        (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) ||
+        DEFAULT_DATE_FORMAT;
+      return moment(tooltipValue.value).format(dateFormat);
+    },
+  };
+
   const filteredSeries = useMemo(() => {
     const sortedSeries = series.sort((a, b) => {
       const aMax = Math.max(...a.data.map((point) => point.y as number));
       const bMax = Math.max(...b.data.map((point) => point.y as number));
       return bMax - aMax;
     });
-    return sortedSeries.slice(0, 3);
+    return sortedSeries.slice(0, NUM_BUCKETS_FOR_PREVIEW_CHART);
   }, [series]);
 
   const barSeries = useMemo(() => {
@@ -90,11 +100,6 @@ export function ChartPreview({
     }, []);
   }, [filteredSeries]);
 
-  // const timestamps = filteredSeries.flatMap(({ data }) => data.map(({ x }) => x));
-  // const xMin = Math.min(...timestamps);
-  // const xMax = Math.max(...timestamps);
-  // const xFormatter = niceTimeFormatter([xMin, xMax]);
-
   const timeZone = getTimeZone(uiSettings);
 
   const legendSize =
@@ -104,17 +109,7 @@ export function ChartPreview({
 
   const chartSize = 150;
 
-  // const domainYMax = () => {
-  //   const values = filteredSeries.flatMap(({ data }) => data.map((d) => d.y ?? 0));
-  //   return Math.max(...values, threshold) * 1.1;
-  // };
-
-  // const domain = {
-  //   max: domainYMax(),
-  //   min: 0,
-  // };
-
-  const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries, false);
+  const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries);
   const chartDomain = {
     max: Math.max(yMax, threshold) * 1.1, // Add 10% headroom.
     min: Math.min(yMin, threshold),
@@ -126,7 +121,7 @@ export function ChartPreview({
 
   const dateFormatter = useDateFormatter(xMin, xMax);
 
-  const lookback = timeSize * NUM_BUCKETS;
+  const lookback = timeSize * NUM_BUCKETS_FOR_PREVIEW_CHART;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   const rectDataValues: RectAnnotationDatum[] = [
