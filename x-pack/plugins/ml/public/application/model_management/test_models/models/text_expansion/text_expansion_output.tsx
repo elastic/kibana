@@ -51,6 +51,8 @@ export const Token: FC<{
 }> = ({ response }) => {
   const tokens = response.adjustedTokenWeights
     .filter(({ value }) => value > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5)
     .map(({ token, value }) => ({ token, value: roundToDecimalPlace(value, 3) }));
 
   const { euiColorMediumShade } = euiThemeVars;
@@ -111,9 +113,6 @@ export const Token: FC<{
                   ),
                 },
               ]}
-              pagination={{
-                pageSizeOptions: [10, 25, 0],
-              }}
             />
           </>
         </EuiAccordion>
