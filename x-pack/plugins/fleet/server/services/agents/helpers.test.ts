@@ -22,6 +22,10 @@ describe('searchHitToAgent', () => {
             },
           },
         },
+        agent: {
+          id: '504b3006-52df-46a6-b7db-f3dc67aca7ac',
+          version: '8.9.0',
+        },
         policy_id: '76c5b020-0486-11ee-97a3-c3856dd800f7',
         type: 'PERMANENT',
         outputs: {
@@ -153,6 +157,10 @@ describe('searchHitToAgent', () => {
           retired_at: '',
         },
       ],
+      agent: {
+        id: '504b3006-52df-46a6-b7db-f3dc67aca7ac',
+        version: '8.9.0',
+      },
     });
   });
 });

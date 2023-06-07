@@ -84,6 +84,9 @@ export function searchHitToAgent(
           retired_at: item.retired_at,
         }))
       : undefined,
+    agent: hit._source?.agent
+      ? { id: hit._source?.agent.id, version: hit._source?.agent.version }
+      : undefined,
 
     // key-value pairs
     user_provided_metadata: hit._source?.user_provided_metadata!,

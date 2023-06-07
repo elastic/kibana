@@ -101,6 +101,7 @@ interface AgentBase {
   local_metadata: AgentMetadata;
   tags?: string[];
   components?: FleetServerAgentComponent[];
+  agent?: FleetServerAgentMetadata;
 }
 
 export interface AgentMetrics {
