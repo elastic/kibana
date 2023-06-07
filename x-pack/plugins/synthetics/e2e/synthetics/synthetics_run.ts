@@ -6,8 +6,8 @@
  */
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
-import { argv } from '@kbn/observability-plugin/e2e/parse_args_params';
-import { SyntheticsRunner } from '@kbn/observability-plugin/e2e/synthetics_runner';
+import { argv } from '../helpers/parse_args_params';
+import { SyntheticsRunner } from '../helpers/synthetics_runner';
 
 const { headless, grep, bail: pauseOnError } = argv;
 
