@@ -27,7 +27,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { VIEW_MODE } from '../../../../../common/constants';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import * as ExistingFieldsHookApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import { ExistenceFetchStatus } from '@kbn/unified-field-list';
+import type { ExistenceFetchStatus } from '@kbn/unified-field-list/src/types';
 import { getDataViewFieldList } from './lib/get_field_list';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
