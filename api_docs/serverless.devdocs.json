@@ -123,6 +123,76 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "serverless",
+          "id": "def-public.ServerlessPluginStart.setBreadcrumbs",
+          "type": "Function",
+          "tags": [],
+          "label": "setBreadcrumbs",
+          "description": [],
+          "signature": [
+            "(breadcrumbs: ",
+            "EuiBreadcrumbProps",
+            " | ",
+            "EuiBreadcrumbProps",
+            "[], params?: Partial<",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeSetProjectBreadcrumbsParams",
+              "text": "ChromeSetProjectBreadcrumbsParams"
+            },
+            "> | undefined) => void"
+          ],
+          "path": "x-pack/plugins/serverless/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.setBreadcrumbs.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "breadcrumbs",
+              "description": [],
+              "signature": [
+                "EuiBreadcrumbProps",
+                " | ",
+                "EuiBreadcrumbProps",
+                "[]"
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.setBreadcrumbs.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "params",
+              "description": [],
+              "signature": [
+                "Partial<",
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.ChromeSetProjectBreadcrumbsParams",
+                  "text": "ChromeSetProjectBreadcrumbsParams"
+                },
+                "> | undefined"
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
