@@ -6,33 +6,39 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { Logger } from '@kbn/logging';
-import { genAiSavedObjectId, genAiUsageDashboard } from './dashboard';
+import { getDashboardTitle, getGenAiDashboard } from './dashboard';
 
 export interface OutputError {
   message: string;
   statusCode: number;
 }
 
-export const getGenAiDashboard = async (
-  logger: Logger,
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<{
+export const initGenAiDashboard = async ({
+  logger,
+  savedObjectsClient,
+  spaceId,
+}: {
+  logger: Logger;
+  savedObjectsClient: SavedObjectsClientContract;
+  spaceId: string;
+}): Promise<{
   success: boolean;
   error?: OutputError;
-  body?: SavedObject<DashboardAttributes>;
 }> => {
+  const title = getDashboardTitle(spaceId);
   try {
-    const doesExist = await savedObjectsClient.get<DashboardAttributes>(
-      'dashboard',
-      genAiSavedObjectId
-    );
-    return {
-      success: true,
-      body: doesExist,
-    };
+    const doesExist = await savedObjectsClient.find<DashboardAttributes>({
+      search: `"${title}"`,
+      searchFields: ['title'],
+      type: 'dashboard',
+    });
+    if (doesExist.total > 0) {
+      return {
+        success: true,
+      };
+    }
   } catch (error) {
     logger.error(`Failed to fetch Gen Ai Dashboard saved object: ${error.message}`);
 
@@ -43,16 +49,12 @@ export const getGenAiDashboard = async (
   }
 
   try {
-    const result = await savedObjectsClient.create<DashboardAttributes>(
+    await savedObjectsClient.create<DashboardAttributes>(
       'dashboard',
-      genAiUsageDashboard.attributes,
-      {
-        overwrite: true,
-        id: genAiSavedObjectId,
-      }
+      getGenAiDashboard(spaceId).attributes
     );
 
-    return { success: true, body: result };
+    return { success: true };
   } catch (error) {
     logger.error(`Failed to create Gen Ai Dashboard saved object: ${error.message}`);
     return {

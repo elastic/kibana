@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
@@ -22,7 +22,6 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { styles } from './connector.styles';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';
 import * as i18n from './translations';
 import { DEFAULT_URL, DEFAULT_URL_AZURE } from './constants';
@@ -143,39 +142,67 @@ const providerOptions = [
   },
 ];
 
+export const getDashboardTitle = (spaceId: string): string =>
+  `Generative AI Token Usage - ${spaceId}`;
+
 const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
 }) => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, id, name }] = useFormData({
-    watch: ['config.apiProvider', 'config.dashboardId'],
+    watch: ['config.apiProvider'],
   });
   const { services } = useKibana();
-  const { application, dashboard } = services;
+  const { application, dashboard, spaces } = services;
   const { navigateToUrl } = application;
 
-  const doesHaveDashboardId = useMemo(() => {
-    return config != null && config.dashboardId != null;
-  }, [config]);
+  const [spaceId, setSpaceId] = useState<string>();
+
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
+
+  const [dashboardId, setDashboardId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+    const getDashboardId = async (theSpaceId: string) => {
+      const findDashboardsService = await dashboard.findDashboardsService();
+      const foundDashboardId = (
+        await findDashboardsService.findByTitle(getDashboardTitle(theSpaceId))
+      )?.id;
+      if (!ignore && foundDashboardId != null) {
+        setDashboardId(foundDashboardId);
+      }
+    };
+    if (dashboardId == null && spaceId != null && spaceId.length) {
+      getDashboardId(spaceId);
+    }
+    return () => {
+      ignore = true;
+    };
+  }, [dashboard, dashboardId, spaceId]);
 
   const onClick = useCallback(
     (e) => {
       e.preventDefault();
-      if (doesHaveDashboardId) {
+      if (dashboardId != null) {
         const url = dashboard?.locator?.getRedirectUrl({
           query: {
             language: 'kuery',
             query: `kibana.saved_objects: { id  : ${id} }`,
           },
-          dashboardId: config.dashboardId,
+          dashboardId,
         });
         if (url) {
           navigateToUrl(url);
         }
       }
     },
-    [config.dashboardId, dashboard?.locator, doesHaveDashboardId, id, navigateToUrl]
+    [dashboardId, dashboard?.locator, id, navigateToUrl]
   );
 
   const selectedProviderDefaultValue = useMemo(
@@ -227,15 +254,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           secretsFormSchema={azureAiSecrets}
         />
       )}
-      <UseField
-        path="config.dashboardId"
-        css={styles.hideInput}
-        componentProps={{
-          disabled: true,
-          readOnly: true,
-        }}
-      />
-      {isEdit && doesHaveDashboardId && (
+      {isEdit && dashboardId != null && (
         <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
           {i18n.USAGE_DASHBOARD_LINK(selectedProviderDefaultValue, name)}
         </EuiLink>
