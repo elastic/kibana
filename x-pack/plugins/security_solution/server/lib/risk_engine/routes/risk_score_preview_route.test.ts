@@ -13,6 +13,7 @@ import {
   requestContextMock,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
+import { RiskCategories, RiskWeightTypes } from '../category_weights';
 import { riskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScorePreviewRoute } from './risk_score_preview_route';

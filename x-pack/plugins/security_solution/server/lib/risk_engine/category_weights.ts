@@ -9,12 +9,18 @@ import { keyBy, merge } from 'lodash';
 
 import type { IdentifierType, RiskScoreWeight } from './types';
 
-export const RISK_CATEGORY_WEIGHT_TYPE = 'risk_category';
-export const GLOBAL_IDENTIFIER_WEIGHT_TYPE = 'global_identifier';
+export enum RiskWeightTypes {
+  global = 'global_identifier',
+  riskCategory = 'risk_category',
+}
 
-const RISK_CATEGORIES = ['alerts'];
+export enum RiskCategories {
+  alerts = 'alerts',
+}
+const RISK_CATEGORIES = Object.values(RiskCategories);
+
 const DEFAULT_CATEGORY_WEIGHTS: RiskScoreWeight[] = RISK_CATEGORIES.map((category) => ({
-  type: RISK_CATEGORY_WEIGHT_TYPE,
+  type: RiskWeightTypes.riskCategory,
   value: category,
   host: 1,
   user: 1,
@@ -27,9 +33,9 @@ const convertCategoryToEventKindValue = (category?: string): string | undefined 
   category === 'alerts' ? 'signal' : category;
 
 const isGlobalIdentifierTypeWeight = (weight: RiskScoreWeight): boolean =>
-  weight.type === GLOBAL_IDENTIFIER_WEIGHT_TYPE;
+  weight.type === RiskWeightTypes.global;
 const isRiskCategoryWeight = (weight: RiskScoreWeight): boolean =>
-  weight.type === RISK_CATEGORY_WEIGHT_TYPE;
+  weight.type === RiskWeightTypes.riskCategory;
 
 export const getGlobalWeightForIdentifierType = ({
   identifierType,

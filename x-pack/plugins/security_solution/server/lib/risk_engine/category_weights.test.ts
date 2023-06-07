@@ -9,8 +9,7 @@ import {
   buildCategoryScoreAssignment,
   buildCategoryWeights,
   buildWeightingOfScoreByCategory,
-  GLOBAL_IDENTIFIER_WEIGHT_TYPE,
-  RISK_CATEGORY_WEIGHT_TYPE,
+  RiskWeightTypes,
 } from './category_weights';
 
 describe('buildCategoryWeights', () => {
@@ -64,7 +63,7 @@ describe('buildWeightingOfScoreByCategory', () => {
 
   it('returns default weights if only global weights provided', () => {
     const result = buildWeightingOfScoreByCategory({
-      userWeights: [{ type: GLOBAL_IDENTIFIER_WEIGHT_TYPE, host: 0.1 }],
+      userWeights: [{ type: RiskWeightTypes.global, host: 0.1 }],
       identifierType: 'host',
     });
 
@@ -75,7 +74,7 @@ describe('buildWeightingOfScoreByCategory', () => {
 
   it('returns specified weight when a category weight is provided', () => {
     const result = buildWeightingOfScoreByCategory({
-      userWeights: [{ type: RISK_CATEGORY_WEIGHT_TYPE, value: 'alerts', host: 0.1, user: 0.2 }],
+      userWeights: [{ type: RiskWeightTypes.riskCategory, value: 'alerts', host: 0.1, user: 0.2 }],
       identifierType: 'host',
     });
 
@@ -86,7 +85,7 @@ describe('buildWeightingOfScoreByCategory', () => {
 
   it('returns a default weight when a category weight is provided but not the one being used', () => {
     const result = buildWeightingOfScoreByCategory({
-      userWeights: [{ type: RISK_CATEGORY_WEIGHT_TYPE, value: 'alerts', host: 0.1 }],
+      userWeights: [{ type: RiskWeightTypes.riskCategory, value: 'alerts', host: 0.1 }],
       identifierType: 'user',
     });
 
