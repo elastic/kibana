@@ -708,6 +708,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.missingOrFail(`lns-fieldOption-${field}`);
       }
     },
+    async saveModal(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
+      addToDashboard?: 'new' | 'existing' | null,
+      dashboardId?: string
+    ) {
+      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard: addToDashboard ? addToDashboard : null,
+        dashboardId,
+        saveToLibrary,
+      });
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
+    },
 
     /**
      * Save the current Lens visualization.
@@ -723,20 +747,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
-      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+      await this.saveModal(
+        title,
         saveAsNew,
         redirectToOrigin,
-        addToDashboard: addToDashboard ? addToDashboard : null,
-        dashboardId,
         saveToLibrary,
-      });
-
-      await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
+        addToDashboard,
+        dashboardId
       );
     },
 
