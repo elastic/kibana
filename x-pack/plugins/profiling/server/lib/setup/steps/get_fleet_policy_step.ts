@@ -155,7 +155,7 @@ export function getFleetPolicyStep({
                   type: 'text',
                 },
                 secret_token: {
-                  value: 'foo_bar',
+                  value: 'foo_secret_bar',
                   type: 'text',
                 },
                 tls_enabled: {
@@ -166,11 +166,11 @@ export function getFleetPolicyStep({
                   value: ['TLSv1.1', 'TLSv1.2'],
                   type: 'text',
                 },
-                tls_certificate_path: {
+                tls_certificate: {
                   value: '/app/config/certs/node.crt',
                   type: 'text',
                 },
-                tls_key_path: {
+                tls_key: {
                   value: '/app/config/certs/node.key',
                   type: 'text',
                 },
