@@ -287,6 +287,7 @@ describe('Task Runner', () => {
     expect(call.rule.ruleTypeName).toBe('My test rule');
     expect(call.rule.actions).toEqual(RULE_ACTIONS);
     expect(call.services.alertFactory.create).toBeTruthy();
+    expect(call.services.alertsClient).toBe(null);
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
@@ -325,52 +326,6 @@ describe('Task Runner', () => {
     expect(
       jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
-  });
-
-  test('checks alertsService context initialized if rule type has registered alerts with framework', async () => {
-    const ruleTypeWithAlerts = {
-      ...ruleType,
-      alerts: { context: 'test', mappings: { fieldMap: {} } },
-    };
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeWithAlerts);
-    const taskRunner = new TaskRunner({
-      ruleType: ruleTypeWithAlerts,
-      taskInstance: {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
-      taskConfig: mockedTaskConfig,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
-
-    expect(ruleType.executor).toHaveBeenCalledTimes(1);
-    expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
-      logger,
-      ruleType: ruleTypeWithAlerts,
-      namespace: 'default',
-      rule: {
-        consumer: 'bar',
-        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-        id: '1',
-        name: 'rule-name',
-        parameters: {
-          bar: true,
-        },
-        revision: 0,
-        spaceId: 'default',
-        tags: ['rule-', '-tags'],
-      },
-    });
   });
 
   test.each(ephemeralTestParams)(
@@ -3243,6 +3198,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
@@ -3275,6 +3231,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
@@ -3305,6 +3262,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
