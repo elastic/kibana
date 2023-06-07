@@ -84,3 +84,11 @@ export const RELATED_USERS_TOOL_TIP = i18n.translate(
     defaultMessage: 'These users successfully authenticated to the affected host after the alert.',
   }
 );
+
+export const RESPONSE_TITLE = i18n.translate('xpack.securitySolution.flyout.response.title', {
+  defaultMessage: 'Responses',
+});
+
+export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
+  defaultMessage: 'There are no response actions defined for this event.',
+});
