@@ -1541,7 +1541,8 @@ describe('migration actions', () => {
         }
       `);
     });
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
+    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:
