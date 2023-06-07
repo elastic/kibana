@@ -16,6 +16,7 @@ import {
   EuiDualRange,
   EuiToolTip,
   EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
 
@@ -41,23 +42,14 @@ export const RangeSliderPopover: FC<{
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const dataViewId = rangeSlider.select((state) => state.output.dataViewId);
-  const fieldSpec = rangeSlider.select((state) => state.componentState.field);
+
   const id = rangeSlider.select((state) => state.explicitInput.id);
-  // const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
-  const max = rangeSlider.select((state) => state.componentState.max);
-  const min = rangeSlider.select((state) => state.componentState.min);
   const title = rangeSlider.select((state) => state.explicitInput.title);
 
-  const hasAvailableRange = min !== undefined && max !== undefined;
-
-  // const errorMessage = '';
-  // let helpText = '';
-
-  // if (!hasAvailableRange) {
-  //   helpText = RangeSliderStrings.popover.getNoAvailableDataHelpText();
-  // } else if (isInvalid) {
-  //   helpText = RangeSliderStrings.popover.getNoDataHelpText();
-  // }
+  const min = rangeSlider.select((state) => state.componentState.min);
+  const max = rangeSlider.select((state) => state.componentState.max);
+  const fieldSpec = rangeSlider.select((state) => state.componentState.field);
+  const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
 
   // Caches min and max displayed on popover open so the range slider doesn't resize as selections change
   const [rangeSliderMin, setRangeSliderMin] = useState<number>(min);
@@ -128,21 +120,18 @@ export const RangeSliderPopover: FC<{
               onChange([String(minSelection), String(maxSelection)]);
             }}
             value={currentRange}
-            ticks={hasAvailableRange ? ticks : undefined}
-            levels={hasAvailableRange ? levels : undefined}
-            showTicks={hasAvailableRange}
-            disabled={!hasAvailableRange}
+            ticks={ticks}
+            levels={levels}
+            showTicks
             fullWidth
             ref={rangeRef}
             data-test-subj="rangeSlider__slider"
           />
-          {/* <EuiText
-            size="s"
-            color={errorMessage ? 'danger' : 'default'}
-            data-test-subj="rangeSlider__helpText"
-          >
-            {errorMessage || helpText}
-          </EuiText> */}
+          {isInvalid && (
+            <EuiText size="s" data-test-subj="rangeSlider__helpText">
+              {RangeSliderStrings.popover.getNoDataHelpText()}
+            </EuiText>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
