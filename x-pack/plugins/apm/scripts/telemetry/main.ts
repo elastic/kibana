@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
 import fs from 'fs';
 import { apmSchema } from '../../server/lib/apm_telemetry/schema';
-
 const markdownFilePath = 'x-pack/plugins/apm/dev_docs/apm_telemetry_fields.md';
 
-function generateTable(schema, parentKeys = []) {
+function generateTable(schema: any, parentKeys: string[] = []): string[] {
   const fieldDescriptions = [];
+  let currentKey: string;
 
-  for (let currentKey in schema) {
+  for (currentKey in schema) {
     if (typeof schema[currentKey] === 'object' && schema[currentKey] !== null) {
       const description = schema[currentKey]._meta?.description;
       if (description) {
