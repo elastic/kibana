@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { kibanaService } from '../utils/kibana_service';
+import { createContext } from 'react';
+import { type CoPilotService } from '../../typings/co_pilot';
 
-const DEFAULT_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+export const CoPilotContext = createContext<CoPilotService | undefined>(undefined);
 
-export function useKibanaDateFormat() {
-  return kibanaService.core.uiSettings.get('dateFormat', DEFAULT_FORMAT);
-}
+export const CoPilotContextProvider = CoPilotContext.Provider;
