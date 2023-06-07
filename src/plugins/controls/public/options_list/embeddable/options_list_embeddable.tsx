@@ -162,6 +162,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       map((newInput) => ({
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
+        searchTechnique: newInput.searchTechnique,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
@@ -186,6 +187,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           this.runOptionsListQuery();
         })
     );
+
     // fetch more options when reaching the bottom of the available options
     this.subscriptions.add(
       loadMorePipe.subscribe((size) => {
@@ -305,7 +307,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString, allowExpensiveQueries },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort, searchTechnique },
     } = this.getState();
     this.dispatch.setLoading(true);
     if (searchString.valid) {
@@ -337,6 +339,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           filters,
           dataView,
           timeRange,
+          searchTechnique,
           runPastTimeout,
           selectedOptions,
           allowExpensiveQueries,

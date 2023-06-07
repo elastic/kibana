@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { TRANSFORMS_URL } from '../../urls/risk_score';
 import { RiskScoreEntity } from './common';
 import { getLatestTransformIndex, getPivotTransformIndex } from './indices';
@@ -35,7 +35,7 @@ export const getTransformState = (transformId: string) => {
   return cy.request<{ transforms: Array<{ id: string; state: string }>; count: number }>({
     method: 'get',
     url: `${TRANSFORMS_URL}/transforms/${transformId}/_stats`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
   });
 };
 
@@ -43,7 +43,7 @@ export const startTransforms = (transformIds: string[]) => {
   return cy.request({
     method: 'post',
     url: `${TRANSFORMS_URL}/start_transforms`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     body: transformIds.map((id) => ({
       id,
     })),
@@ -57,7 +57,7 @@ const stopTransform = (state: {
   return cy.request({
     method: 'post',
     url: `${TRANSFORMS_URL}/stop_transforms`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     body:
       state != null && state.transforms.length > 0
         ? [
@@ -74,7 +74,7 @@ export const createTransform = (transformId: string, options: string | Record<st
   return cy.request({
     method: 'put',
     url: `${TRANSFORMS_URL}/transforms/${transformId}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     body: options,
   });
 };
@@ -83,7 +83,7 @@ const deleteTransform = (transformId: string) => {
   return cy.request({
     method: 'post',
     url: `${TRANSFORMS_URL}/delete_transforms`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     failOnStatusCode: false,
     body: {
       transformsInfo: [

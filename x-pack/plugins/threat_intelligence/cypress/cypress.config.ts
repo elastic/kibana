@@ -29,7 +29,7 @@ export default defineCypressConfig({
   execTimeout: 120000,
   pageLoadTimeout: 120000,
   retries: {
-    runMode: 2,
+    runMode: 1,
   },
   screenshotsFolder: '../../../target/kibana-threat-intelligence/cypress/screenshots',
   trashAssetsBeforeRuns: false,
@@ -44,5 +44,7 @@ export default defineCypressConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
+    experimentalMemoryManagement: true,
+    specPattern: './cypress/e2e/**/*.cy.ts',
   },
 });

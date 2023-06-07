@@ -11,10 +11,19 @@ export const availableIndices = async (
   client: IScopedClusterClient,
   indices: string[]
 ): Promise<string[]> => {
-  if (await client.asCurrentUser.indices.exists({ index: indices })) return indices;
+  const availableIndicesList = await client.asCurrentUser.indices.get({
+    expand_wildcards: ['all'],
+    features: ['aliases', 'settings'],
+    filter_path: ['*.aliases', '*.settings.index.verified_before_close'],
+    index: '*',
+  });
 
-  const indicesAndExists: Array<[string, boolean]> = await Promise.all(
-    indices.map(async (index) => [index, await client.asCurrentUser.indices.exists({ index })])
+  return indices.filter(
+    (index) =>
+      Object.keys(availableIndicesList).includes(index) &&
+      !(
+        availableIndicesList[index].settings?.index?.verified_before_close === true ||
+        availableIndicesList[index].settings?.index?.verified_before_close === 'true'
+      )
   );
-  return indicesAndExists.flatMap(([index, exists]) => (exists ? [index] : []));
 };
