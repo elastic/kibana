@@ -1099,7 +1099,17 @@ export class AlertsClient {
   }
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
-    const ruleType = this.getRuleType(ruleTypeId);
-    return ruleType.fieldsForAAD ?? [];
+    const { producer, fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
+    const indices = await this.getAuthorizedAlertsIndices([producer]);
+    const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: o11yIndices,
+      metaFields: ['_id', '_index'],
+      fieldCapsOptions: { allow_no_indices: true },
+      fields: [...fieldsForAAD, 'kibana.*'],
+    });
+
+    return fields;
   }
 }

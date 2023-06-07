@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { O11Y_AAD_FIELDS } from '@kbn/infra-plugin/common/constants';
 import { superUser, obsOnlySpacesAll } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -41,13 +40,49 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Users:', () => {
       it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y featureIds`, async () => {
         const aadFields = await getAADFieldsByRuleType(obsOnlySpacesAll, 'metrics.alert.threshold');
-        expect(aadFields).to.eql(O11Y_AAD_FIELDS);
+        expect(aadFields.slice(0, 2)).to.eql(expectedResult);
+        expect(aadFields.length > 2).to.be(true);
+        for (const field of aadFields) {
+          expectToBeFieldDescriptor(field);
+        }
       });
 
       it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
         const aadFields = await getAADFieldsByRuleType(superUser, 'metrics.alert.threshold');
-        expect(aadFields).to.eql(O11Y_AAD_FIELDS);
+        expect(aadFields.slice(0, 2)).to.eql(expectedResult);
+        expect(aadFields.length > 2).to.be(true);
+        for (const field of aadFields) {
+          expectToBeFieldDescriptor(field);
+        }
       });
     });
   });
+};
+
+const expectedResult = [
+  {
+    name: '_id',
+    type: 'string',
+    searchable: false,
+    aggregatable: false,
+    readFromDocValues: false,
+    metadata_field: true,
+  },
+  {
+    name: '_index',
+    type: 'string',
+    searchable: false,
+    aggregatable: false,
+    readFromDocValues: false,
+    metadata_field: true,
+  },
+];
+
+const expectToBeFieldDescriptor = (field: Record<string, unknown>) => {
+  expect('name' in field).to.be(true);
+  expect('type' in field).to.be(true);
+  expect('searchable' in field).to.be(true);
+  expect('aggregatable' in field).to.be(true);
+  expect('readFromDocValues' in field).to.be(true);
+  expect('metadata_field' in field).to.be(true);
 };

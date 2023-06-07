@@ -21,7 +21,17 @@ describe('getAADFieldsByRuleType', () => {
 
   describe('when racClient returns o11y indices', () => {
     beforeEach(() => {
-      clients.rac.getAADFields.mockResolvedValue(['fieldA', 'fieldB']);
+      clients.rac.getAADFields.mockResolvedValue([
+        {
+          name: '_id',
+          type: 'string',
+          searchable: false,
+          aggregatable: false,
+          readFromDocValues: false,
+          metadata_field: true,
+          esTypes: [],
+        },
+      ]);
 
       getAADFieldsByRuleType(server.router);
     });
