@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
+import { getDataViewByTextBasedQueryLang } from '../../utils/get_data_view_by_text_based_query_lang';
 import type { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
@@ -51,6 +52,19 @@ export const buildStateSubscribe =
     }
     addLog('[appstate] subscribe triggered', nextState);
     const { hideChart, interval, breakdownField, sort, index } = appState.getPrevious();
+    const query = nextState.query;
+
+    if (isTextBasedQuery(query)) {
+      const currentDataView = savedSearch.searchSource.getField('index');
+      const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
+      if (currentDataView !== nextDataView) {
+        addLog('[appstate] text based language data view change', nextState);
+        setDataView(nextDataView);
+        await appState.update({ index: nextDataView.id }, true);
+        return;
+      }
+    }
+
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);

@@ -222,7 +222,7 @@ export const getDiscoverAppStateContainer = ({
     };
   };
 
-  const update = (newPartial: DiscoverAppState, replace = false) => {
+  const update = async (newPartial: DiscoverAppState, replace = false) => {
     addLog('[appState] update', { newPartial, replace });
     if (replace) {
       return replaceUrlState(newPartial);

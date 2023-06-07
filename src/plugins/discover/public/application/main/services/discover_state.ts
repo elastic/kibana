@@ -251,7 +251,6 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     getAppState: appStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
-    setDataView,
   });
 
   const loadDataViewList = async () => {
