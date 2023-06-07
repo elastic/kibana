@@ -47,10 +47,11 @@ jest.mock('./draggable_legend', () => {
   };
 });
 
+const mockBaseTheme = LIGHT_THEME;
 jest.mock('./common', () => {
   return {
     useThemes: jest.fn(() => ({
-      baseTheme: LIGHT_THEME,
+      baseTheme: mockBaseTheme,
       theme: {},
     })),
   };
@@ -91,9 +92,9 @@ describe('DonutChart', () => {
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart-settings"]`)).toBeInTheDocument();
 
-    expect((Settings as jest.Mock).mock.calls[0][0]).toEqual({
-      baseTheme: LIGHT_THEME,
-      theme: {
+    const settingsProps = (Settings as jest.Mock).mock.calls[0][0];
+    expect(settingsProps.baseTheme).toEqual(LIGHT_THEME);
+    expect(settingsProps.theme[0]).toEqual({
         chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
         partition: {
           circlePadding: 4,
@@ -101,9 +102,8 @@ describe('DonutChart', () => {
           idealFontSizeJump: 1.1,
           outerSizeRatio: 1,
         },
-      },
-      onElementClick: expect.any(Function),
     });
+    expect(settingsProps.onElementClick).toBeInstanceOf(Function);
   });
 
   test('should render an empty chart', () => {
