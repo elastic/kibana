@@ -12981,8 +12981,6 @@
     "xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text": "是，移除此索引",
     "xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title": "从搜索应用程序中移除此索引",
     "xpack.enterpriseSearch.content.engine.indices.searchPlaceholder": "筛选索引",
-    "xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description": "可能无法从此搜索应用程序访问某些数据。在受影响的索引上检查任何待处理操作或错误，或移除应不再被此搜索应用程序使用的索引。",
-    "xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title": "您的某些索引不可用。",
     "xpack.enterpriseSearch.content.engine.indicesSelect.docsLabel": "文档：",
     "xpack.enterpriseSearch.content.engine.schema.field_indices.columnTitle": "在所有索引中？",
     "xpack.enterpriseSearch.content.engine.schema.field_indices.moreInfo": "更多信息",
