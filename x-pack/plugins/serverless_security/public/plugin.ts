@@ -49,7 +49,7 @@ export class ServerlessSecurityPlugin
 
     securitySolution.setIsSidebarEnabled(false);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps, storage));
-    serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
+    serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps, storage));
 
     return {};
   }
