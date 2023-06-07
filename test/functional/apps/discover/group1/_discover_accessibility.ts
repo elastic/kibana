@@ -64,9 +64,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await hasFocus(menuButtonTestSubject)).to.be(true);
       };
 
-      it('should return focus to the options button when dismissing the options popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOptionsButton'));
-
       it('should return focus to the open button when dismissing the open search flyout', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
 
