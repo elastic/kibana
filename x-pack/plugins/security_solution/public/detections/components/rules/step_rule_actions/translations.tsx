@@ -53,6 +53,11 @@ function RuleSnoozeDescription(): JSX.Element {
 
 export const RULE_SNOOZE_DESCRIPTION = <RuleSnoozeDescription />;
 
+export const ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.actionsSectionLabel',
+  { defaultMessage: 'Actions' }
+);
+
 export const NOTIFICATION_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.notificationActions',
   {

@@ -19,6 +19,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { getActionDetails } from '../../../../detection_engine/rule_response_actions/constants';
+import { StepPanel } from '../step_panel';
 import * as i18n from './translations';
 
 const DescriptionLine = ({ children }: { children: React.ReactNode }) => (
@@ -85,8 +86,14 @@ export const FrequencyDescription: React.FC<{ frequency?: RuleActionFrequency }>
   return <DescriptionLine>{messagesByUnit[unit] || i18n.PERIODICALLY}</DescriptionLine>;
 };
 
-export const StepActionsRule: React.FC<{ ruleActionsData: ActionsStepRule }> = ({
+interface StepActionsRuleProps {
+  ruleActionsData: ActionsStepRule;
+  isRuleLoading: boolean;
+}
+
+export const StepActionsRule: React.FC<StepActionsRuleProps> = ({
   ruleActionsData,
+  isRuleLoading,
 }) => {
   const {
     services: { triggersActionsUi },
@@ -94,42 +101,48 @@ export const StepActionsRule: React.FC<{ ruleActionsData: ActionsStepRule }> = (
 
   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry as ActionTypeRegistryContract;
 
-  const { data: connectors, isLoading } = useFetchConnectors();
+  const { data: connectors } = useFetchConnectors();
   const { data: connectorTypes } = useFetchConnectorTypes();
-
-  if (isLoading || !connectors || !connectorTypes || !ruleActionsData) {
-    return null;
-  }
 
   const notificationActions = ruleActionsData.actions;
   const responseActions = ruleActionsData.responseActions || [];
+
+  const ruleHasNoActions = notificationActions.length === 0 && responseActions.length === 0;
+
+  if (ruleHasNoActions || !connectors || !connectorTypes || !ruleActionsData) {
+    return null;
+  }
 
   const hasBothNotificationAndResponseActions =
     notificationActions.length > 0 && responseActions.length > 0;
 
   return (
-    <div>
-      {hasBothNotificationAndResponseActions && (
-        <EuiText size="m">{i18n.NOTIFICATION_ACTIONS}</EuiText>
-      )}
-      <EuiSpacer size="s" />
-      {notificationActions.map((action) => (
-        <NotificationAction
-          action={action}
-          connectorTypes={connectorTypes}
-          connectors={connectors}
-          actionTypeRegistry={actionTypeRegistry}
-          key={action.id}
-        />
-      ))}
-      <EuiSpacer size="m" />
+    <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+      <StepPanel loading={isRuleLoading} title={i18n.ACTIONS}>
+        {hasBothNotificationAndResponseActions && (
+          <EuiText size="m">{i18n.NOTIFICATION_ACTIONS}</EuiText>
+        )}
+        <EuiSpacer size="s" />
+        {notificationActions.map((action) => (
+          <NotificationAction
+            action={action}
+            connectorTypes={connectorTypes}
+            connectors={connectors}
+            actionTypeRegistry={actionTypeRegistry}
+            key={action.id}
+          />
+        ))}
+        <EuiSpacer size="m" />
 
-      {hasBothNotificationAndResponseActions && <EuiText size="m">{i18n.RESPONSE_ACTIONS}</EuiText>}
-      <EuiSpacer size="s" />
-      {responseActions.map((action, index) => (
-        <ResponseAction action={action} key={`${action.actionTypeId}-${index}`} />
-      ))}
-    </div>
+        {hasBothNotificationAndResponseActions && (
+          <EuiText size="m">{i18n.RESPONSE_ACTIONS}</EuiText>
+        )}
+        <EuiSpacer size="s" />
+        {responseActions.map((action, index) => (
+          <ResponseAction action={action} key={`${action.actionTypeId}-${index}`} />
+        ))}
+      </StepPanel>
+    </EuiFlexItem>
   );
 };
 

@@ -799,13 +799,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         )}
                       </StepPanel>
                     </EuiFlexItem>
-                    <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={'Actions'}>
-                        {ruleActionsData != null && (
-                          <StepActionsRule ruleActionsData={ruleActionsData} />
-                        )}
-                      </StepPanel>
-                    </EuiFlexItem>
+                    {ruleActionsData != null && (
+                      <StepActionsRule
+                        isRuleLoading={isLoading}
+                        ruleActionsData={ruleActionsData}
+                      />
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
