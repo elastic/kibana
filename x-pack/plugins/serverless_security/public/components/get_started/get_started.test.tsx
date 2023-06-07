@@ -14,7 +14,9 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    useEuiTheme: () => ({ euiTheme: { base: 16, size: { xs: '4px' } } }),
+    useEuiTheme: jest.fn().mockReturnValue({
+      euiTheme: { base: 16, size: { xs: '4px' } },
+    }),
   };
 });
 

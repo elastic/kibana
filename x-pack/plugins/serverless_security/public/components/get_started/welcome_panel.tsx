@@ -53,7 +53,11 @@ const WelcomePanelComponent = () => {
           <EuiFlexItem key={`set-up-card-${index}`}>
             <EuiCard
               layout="horizontal"
-              icon={item.icon ? <EuiIcon size="xxl" {...item.icon} /> : undefined}
+              icon={
+                item.icon ? (
+                  <EuiIcon size="xxl" {...item.icon} data-test-subj={`${item.id}Icon`} />
+                ) : undefined
+              }
               title={
                 <EuiTitle
                   size="s"

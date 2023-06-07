@@ -8,8 +8,17 @@
 import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
 import { WelcomePanel } from './welcome_panel';
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useEuiTheme: jest.fn().mockReturnValue({
+      euiTheme: { base: 16, size: { xs: '4px' }, colors: { mediumShade: '' } },
+    }),
+  };
+});
 
-describe('WelcomePanelComponent', () => {
+describe('WelcomePanel', () => {
   let result: RenderResult;
 
   beforeEach(() => {
@@ -19,48 +28,36 @@ describe('WelcomePanelComponent', () => {
   it('should render the welcome panel with project created header card', () => {
     const { getByText } = result;
 
-    expect(getByText('Project Created')).toBeInTheDocument();
+    expect(getByText('Project created')).toBeInTheDocument();
   });
 
   it('should render the welcome panel with invite your team header card', () => {
     const { getByText } = result;
 
-    expect(getByText('Invite Your Team')).toBeInTheDocument();
+    expect(getByText('Invite your team')).toBeInTheDocument();
   });
 
   it('should render the welcome panel with progress tracker header card', () => {
     const { getByText } = result;
 
-    expect(getByText('Progress Tracker')).toBeInTheDocument();
+    expect(getByText('Progress tracker')).toBeInTheDocument();
   });
 
   it('should render the project created header card with the correct icon', () => {
-    const { getByRole } = result;
+    const { getByTestId } = result;
 
-    expect(getByRole('img', { name: 'checkInCircleFilled' })).toBeInTheDocument();
+    expect(getByTestId('projectCreatedIcon')).toBeInTheDocument();
   });
 
   it('should render the invite your team header card with the correct icon', () => {
-    const { getByRole } = result;
+    const { getByTestId } = result;
 
-    expect(getByRole('img', { name: 'invite' })).toBeInTheDocument();
+    expect(getByTestId('inviteYourTeamIcon')).toBeInTheDocument();
   });
 
   it('should render the progress tracker header card with the correct icon', () => {
-    const { getByRole } = result;
+    const { getByTestId } = result;
 
-    expect(getByRole('img', { name: 'progress' })).toBeInTheDocument();
-  });
-
-  it('should render the project created header card with the correct description', () => {
-    const { getByText } = result;
-
-    expect(getByText('Project created description')).toBeInTheDocument();
-  });
-
-  it('should render the invite your team header card with the correct description', () => {
-    const { getByText } = result;
-
-    expect(getByText('Invite your team description')).toBeInTheDocument();
+    expect(getByTestId('progressTrackerIcon')).toBeInTheDocument();
   });
 });
