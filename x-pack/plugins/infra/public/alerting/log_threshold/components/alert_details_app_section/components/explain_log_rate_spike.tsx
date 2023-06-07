@@ -9,11 +9,10 @@ import React, { FC, useEffect, useState } from 'react';
 import { pick } from 'lodash';
 import moment from 'moment';
 
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ExplainLogRateSpikesContent } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
@@ -21,7 +20,6 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { ALERT_END } from '@kbn/rule-data-utils';
-import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
@@ -45,9 +43,8 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   rule,
   alert,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logViews, uiSettings } = services;
+  const { dataViews, logViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
 
@@ -117,9 +114,6 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   if (!dataView || !esSearchQuery) return null;
 
-  const idx = 0;
-  const chartCriterion = { field: 'unknown' };
-
   return (
     <EuiPanel hasBorder={true} data-test-subj="explainLogRateSpikesAlertDetails">
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -139,22 +133,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
             initialAnalysisStart={initialAnalysisStart}
-            annotations={[
-              <AlertAnnotation
-                key={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
-                id={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
-                alertStart={alert.start}
-                color={euiTheme.colors.danger}
-                dateFormat={uiSettings.get(UI_SETTINGS.DATE_FORMAT)}
-              />,
-              <AlertActiveTimeRangeAnnotation
-                key={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
-                id={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
-                alertStart={alert.start}
-                alertEnd={alertEnd?.valueOf()}
-                color={euiTheme.colors.danger}
-              />,
-            ]}
+            annotations={alert}
             barColorOverride={colorTransformer(Color.color0)}
             appDependencies={pick(services, [
               'application',
