@@ -14,7 +14,7 @@ import { sortBy } from 'lodash';
 
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
-import { deepLinks as devtoolsDeeplinks } from '@kbn/deeplinks-devtools';
+import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
 
@@ -119,7 +119,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               title: tool.title as string,
               path: `#/${tool.id}`,
             };
-            if (!devtoolsDeeplinks.some((dl) => dl.id === deepLink.id)) {
+            if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');
             }
             return deepLink;
