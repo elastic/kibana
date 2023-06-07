@@ -21,6 +21,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { ConnectorStatus, SyncJobType } from '../../../../../../common/types/connectors';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
@@ -144,16 +146,36 @@ export const ConnectorSchedulingComponent: React.FC = () => {
       )}
       <EuiText size="s">
         <p>
-          Your connector is now deployed. Schedule recurring content and access control syncs here.
-          If you want to run a quick test, launch a one-time sync using the <b>Sync</b> button.
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.indices.connectorScheduling.page.description"
+            defaultMessage="Your connector is now deployed. Schedule recurring content and access control syncs here. If you want to run a quick test, launch a one-time sync using the {sync} button."
+            values={{
+              sync: (
+                <b>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.connectorScheduling.page.sync.label',
+                    {
+                      defaultMessage: 'Sync',
+                    }
+                  )}
+                </b>
+              ),
+            }}
+          />
         </p>
       </EuiText>
       <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <SchedulePanel
-            title="Content sync"
-            description="Fetch content to create or update your Elasticsearch documents."
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.contentSync.title',
+              { defaultMessage: 'Content sync' }
+            )}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.contentSync.description',
+              { defaultMessage: 'Fetch content to create or update your Elasticsearch documents.' }
+            )}
           >
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
@@ -167,8 +189,17 @@ export const ConnectorSchedulingComponent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <SchedulePanel
-            title="Document Level Security"
-            description="Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date."
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.title',
+              { defaultMessage: 'Document Level Security' }
+            )}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.description',
+              {
+                defaultMessage:
+                  'Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date.',
+              }
+            )}
           >
             <ConnectorContentScheduling type={SyncJobType.ACCESS_CONTROL} index={index} />
           </SchedulePanel>

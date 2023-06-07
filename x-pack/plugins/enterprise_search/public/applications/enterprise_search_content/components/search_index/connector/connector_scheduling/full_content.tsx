@@ -36,26 +36,47 @@ export interface ConnectorContentSchedulingProps {
 const getAccordionTitle = (type: ConnectorContentSchedulingProps['type']) => {
   switch (type) {
     case SyncJobType.FULL: {
-      return 'Full content sync';
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.indices.connectorScheduling.accordion.fullSync.title',
+        { defaultMessage: 'Full content sync' }
+      );
     }
     case SyncJobType.INCREMENTAL: {
-      return 'Incremental content sync';
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.indices.connectorScheduling.accordion.incrementalSync.title',
+        { defaultMessage: 'Incremental content sync' }
+      );
     }
     case SyncJobType.ACCESS_CONTROL: {
-      return 'Access Control Sync';
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.indices.connectorScheduling.accordion.accessControlSync.title',
+        { defaultMessage: 'Access Control Sync' }
+      );
     }
   }
 };
 const getDescriptionText = (type: ConnectorContentSchedulingProps['type']) => {
   switch (type) {
     case SyncJobType.FULL: {
-      return 'Synchronize all data from your data source.';
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.indices.connectorScheduling.accordion.fullSync.description',
+        { defaultMessage: 'Synchronize all data from your data source.' }
+      );
     }
     case SyncJobType.INCREMENTAL: {
-      return 'A lightweight sync job that only fetches updated content from your data source.';
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.indices.connectorScheduling.accordion.incrementalSync.description',
+        {
+          defaultMessage:
+            'A lightweight sync job that only fetches updated content from your data source.',
+        }
+      );
     }
     case SyncJobType.ACCESS_CONTROL: {
-      return 'Schedule access control syncs to keep permissions mappings up to date.';
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.indices.connectorScheduling.accordion.accessControlSync.description',
+        { defaultMessage: 'Schedule access control syncs to keep permissions mappings up to date.' }
+      );
     }
   }
 };

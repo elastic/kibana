@@ -13153,7 +13153,6 @@
     "xpack.enterpriseSearch.content.indices.configurationConnector.warning.description": "如果您在完成连接器客户端之前至少同步一个文档，您必须重新创建搜索索引。",
     "xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.error": "JSON 格式无效",
     "xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.title": "高级规则",
-    "xpack.enterpriseSearch.content.indices.connectorScheduling.configured.description": "已配置并部署您的连接器。通过单击“同步”按钮配置一次性同步，或启用定期同步计划。连接器使用 UTC 作为其时区。",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.error.title": "复查您的连接器配置以获取报告的错误。",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.button.label": "配置",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.description": "配置并部署连接器，然后返回此处设置同步计划。此计划将指示连接器与您的数据源进行同步以获取已更新文档的时间间隔。",
