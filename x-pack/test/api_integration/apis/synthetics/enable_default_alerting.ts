@@ -17,7 +17,8 @@ import { Spaces } from '../../../alerting_api_integration/spaces_only/scenarios'
 import { ObjectRemover } from '../../../alerting_api_integration/common/lib';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('EnableDefaultAlerting', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/158408
+  describe.skip('EnableDefaultAlerting', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');

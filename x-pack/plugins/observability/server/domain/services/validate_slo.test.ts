@@ -24,14 +24,14 @@ describe('validateSLO', () => {
 
     it("throws when time window duration unit is 'm'", () => {
       const slo = createSLO({
-        timeWindow: { duration: new Duration(1, DurationUnit.Minute), isRolling: true },
+        timeWindow: { duration: new Duration(1, DurationUnit.Minute), type: 'rolling' },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
     });
 
     it("throws when time window duration unit is 'h'", () => {
       const slo = createSLO({
-        timeWindow: { duration: new Duration(1, DurationUnit.Hour), isRolling: true },
+        timeWindow: { duration: new Duration(1, DurationUnit.Hour), type: 'rolling' },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
     });
@@ -56,7 +56,7 @@ describe('validateSLO', () => {
           expect(() =>
             validateSLO(
               createSLO({
-                timeWindow: { duration, isCalendar: true },
+                timeWindow: { duration, type: 'calendarAligned' },
               })
             )
           ).toThrowError('Invalid time_window.duration');
@@ -64,7 +64,7 @@ describe('validateSLO', () => {
           expect(() =>
             validateSLO(
               createSLO({
-                timeWindow: { duration, isCalendar: true },
+                timeWindow: { duration, type: 'calendarAligned' },
               })
             )
           ).not.toThrowError();
@@ -191,7 +191,7 @@ describe('validateSLO', () => {
 
     it("throws when 'objective.timeslice_window' is longer than 'slo.time_window'", () => {
       const slo = createSLO({
-        timeWindow: { duration: new Duration(1, DurationUnit.Week), isRolling: true },
+        timeWindow: { duration: new Duration(1, DurationUnit.Week), type: 'rolling' },
         budgetingMethod: 'timeslices',
         objective: {
           target: 0.95,
