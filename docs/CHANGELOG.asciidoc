@@ -102,9 +102,6 @@ Machine Learning::
 * Disables the delete option for deployed models {kibana-pull}158533[#158533]
 * Applies theme based on the User Profile settings {kibana-pull}158258[#158258]
 
-Management::
-* Fixes {kib} crashing on Safari versions prior to 8.4 {kibana-pull}158825[#158825]
-
 Maps::
 * Fixes toolbar action button not filled when selected {kibana-pull}158284[#158284]
 * Fixes Maps to display dark theme when enabled {kibana-pull}158219[#158219]
@@ -113,6 +110,7 @@ Operations::
 * Fixes configuration stacking order {kibana-pull}158827[#158827]
 
 Platform::
+* Fixes {kib} crashing on Safari versions prior to 16.4 {kibana-pull}158825[#158825]
 * Updates all aliases with a single `updateAliases()` when relocating saved objects {kibana-pull}158940[#158940]
 * Fixes a race condition that could cause intermittent upgrade migration failures when {kib} connects to a single node {es} cluster {kibana-pull}158182[#158182]
 * Dynamically reduces the `migrations.batchSize` value when {kib} encounters a migration batch that's too big to process {kibana-pull}157494[#157494]
