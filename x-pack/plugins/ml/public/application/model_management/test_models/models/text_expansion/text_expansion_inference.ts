@@ -9,6 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
@@ -57,7 +58,10 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
   ) {
     super(trainedModelsApi, model, inputType, deploymentId);
 
-    this.initialize();
+    this.initialize(
+      [this.questionText$.pipe(map((questionText) => questionText !== ''))],
+      [this.questionText$]
+    );
   }
 
   protected async inferText() {
@@ -86,7 +90,6 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
       },
     ]);
     this.queryResults = docs[0].doc?._source[this.inferenceType].predicted_value ?? {};
-    // console.log(this.queryResults);
 
     return this.runPipelineSimulate((doc) => {
       return {
