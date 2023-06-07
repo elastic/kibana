@@ -18,6 +18,7 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
+import { observabilityCoPilotConfig } from './services/openai/config';
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
@@ -48,11 +49,15 @@ const configSchema = schema.object({
     group_by_page_size: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  coPilot: schema.maybe(observabilityCoPilotConfig),
 });
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
+    coPilot: {
+      enabled: true,
+    },
   },
   schema: configSchema,
 };

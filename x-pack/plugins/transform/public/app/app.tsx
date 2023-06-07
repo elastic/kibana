@@ -21,7 +21,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { addInternalBasePath } from '../../common/constants';
 
 import { SectionError } from './components';
-import { SECTION_SLUG } from './constants';
+import { SECTION_SLUG } from './common/constants';
 import { AuthorizationContext, AuthorizationProvider } from './lib/authorization';
 import { AppDependencies } from './app_dependencies';
 

@@ -77,6 +77,7 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
+    alertsClient: null,
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),

@@ -123,6 +123,7 @@ describe('BurnRateRuleExecutor', () => {
       alertWithLifecycle: alertWithLifecycleMock,
       savedObjectsClient: soClientMock,
       scopedClusterClient: { asCurrentUser: esClientMock, asInternalUser: esClientMock },
+      alertsClient: null,
       alertFactory: alertFactoryMock,
       searchSourceClient: searchSourceClientMock,
       uiSettingsClient: uiSettingsClientMock,
