@@ -5,51 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AppDeepLinkId, NodeDefinitionWithChildren } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
+import type { NodeDefinitionWithChildren } from '@kbn/core-chrome-browser';
+import type { DeepLinkId } from '@kbn/deeplinks-devtools';
 
-export type ID =
-  | 'sharedux:management'
-  | 'root'
-  | 'stack_monitoring'
-  | 'integration_management'
-  | 'integrations'
-  | 'fleet'
-  | 'osquery'
-  | 'stack_management'
-  | 'ingest'
-  | 'ingest_pipelines'
-  | 'logstash_pipelines'
-  | 'data'
-  | 'index_management'
-  | 'index_lifecycle_policies'
-  | 'snapshot_and_restore'
-  | 'rollup_jobs'
-  | 'transforms'
-  | 'cross_cluster_replication'
-  | 'remote_clusters'
-  | 'alerts_and_insights'
-  | 'rules'
-  | 'cases'
-  | 'connectors'
-  | 'reporting'
-  | 'machine_learning'
-  | 'watcher'
-  | 'security'
-  | 'users'
-  | 'roles'
-  | 'role_mappings'
-  | 'api_keys'
-  | 'kibana'
-  | 'data_views'
-  | 'saved_objects'
-  | 'tags'
-  | 'search_sessions'
-  | 'spaces'
-  | 'advanced_settings'
-  | 'upgrade_assistant';
+export type NavigationID = 'rootNav:management' | 'root';
 
-export const management: NodeDefinitionWithChildren<AppDeepLinkId, ID> = {
-  id: 'sharedux:management',
+export type ManagementNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, NavigationID>;
+
+export const defaultNavigation: ManagementNodeDefinition = {
+  id: 'rootNav:management',
   title: 'Management',
   icon: 'gear',
   children: [

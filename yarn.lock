@@ -4055,6 +4055,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-management@link:packages/deeplinks/management":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-ml@link:packages/deeplinks/ml":
   version "0.0.0"
   uid ""
@@ -4064,6 +4068,10 @@
   uid ""
 
 "@kbn/default-nav-devtools@link:packages/default-nav/devtools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/default-nav-management@link:packages/default-nav/management":
   version "0.0.0"
   uid ""
 

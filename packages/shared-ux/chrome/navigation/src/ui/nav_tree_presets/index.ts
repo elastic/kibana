@@ -17,10 +17,12 @@ import {
   defaultNavigation as devtools,
   type DevToolsNodeDefinition,
 } from '@kbn/default-nav-devtools';
+import {
+  defaultNavigation as management,
+  type ManagementNodeDefinition,
+} from '@kbn/default-nav-management';
 
 import type { NavigationGroupPreset } from '../types';
-import type { ManagementNodeDefinition } from './types';
-import { management } from './management';
 
 export function getPresets(preset: 'devtools'): DevToolsNodeDefinition;
 export function getPresets(preset: 'management'): ManagementNodeDefinition;

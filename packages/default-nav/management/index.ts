@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AppDeepLinkId, NodeDefinitionWithChildren } from '@kbn/core-chrome-browser';
-
-import type { ID as ManagementID } from './management';
-
-export type ManagementNodeDefinition = NodeDefinitionWithChildren<AppDeepLinkId, ManagementID>;
+export {
+  defaultNavigation,
+  type ManagementNodeDefinition,
+  type NavigationID,
+} from './default_navigation';
