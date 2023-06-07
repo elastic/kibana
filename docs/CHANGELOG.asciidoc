@@ -77,7 +77,7 @@ Alerting::
 * Fixes a bug where ML embeddables, OsQuery, and IoCs attachments in a case render the wrong view {kibana-pull}158441[#158441]
 * Makes alert links shorter {kibana-pull}158582[#158582]
 * Throws a Mustache error when validating action message for warnings {kibana-pull}158668[#158668]
-* Adds null checks when iterating through index template list {kibana-pull}158742[#158742]
+* Adds null checks when iterating through an index template list {kibana-pull}158742[#158742]
 
 APM::
 * Displays the size of hidden indices in storage explorer {kibana-pull}158746[#158746]
@@ -86,7 +86,7 @@ APM::
 
 Discover::
 * Update single doc view locator to URL encode `rowId` {kibana-pull}158635[#158635]
-* Fixes grid theme {kibana-pull}158231[#158231]
+* Fixes the display of grid row selection when in dark mode {kibana-pull}158231[#158231]
 
 Elastic Security::
 For the Elastic Security 8.8.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -95,15 +95,15 @@ Fleet::
 * Include hidden data streams in package upgrade {kibana-pull}158654[#158654]
 
 Logs::
-* Fixes Log Categorization UI failure due to infinite loop {kibana-pull}159090[#159090]
+* Fixes Log Categorization UI failure due to an infinite loop {kibana-pull}159090[#159090]
 
 Machine Learning::
 * Increases calendar events request limit {kibana-pull}158726[#158726]
-* Disables delete action for deployed models {kibana-pull}158533[#158533]
+* Disables the delete option for deployed models {kibana-pull}158533[#158533]
 * Applies theme based on the User Profile settings {kibana-pull}158258[#158258]
 
 Management::
-* Fixes Kibana crashing on Safari versions prior to 8.4 {kibana-pull}158825[#158825]
+* Fixes {kib} crashing on Safari versions prior to 8.4 {kibana-pull}158825[#158825]
 
 Maps::
 * Fixes toolbar action button not filled when selected {kibana-pull}158284[#158284]
@@ -114,7 +114,7 @@ Operations::
 
 Platform::
 * Updates all aliases with a single `updateAliases()` when relocating saved objects {kibana-pull}158940[#158940]
-* Fixes a race condition that could cause intermittent upgrade migration failures when Kibana connects to a single node Elasticsearch cluster {kibana-pull}158182[#158182]
+* Fixes a race condition that could cause intermittent upgrade migration failures when {kib} connects to a single node {es} cluster {kibana-pull}158182[#158182]
 * Dynamically reduces the `migrations.batchSize` value when {kib} encounters a migration batch that's too big to process {kibana-pull}157494[#157494]
 
 [[release-notes-8.8.0]]
