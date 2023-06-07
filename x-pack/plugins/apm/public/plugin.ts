@@ -60,6 +60,7 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -84,6 +85,7 @@ export interface ApmPluginSetupDeps {
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -213,6 +215,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         );
                       }
                     },
+                  },
+                  {
+                    label: apmStorageExplorerTitle,
+                    app: 'apm',
+                    path: '/storage-explorer',
                   },
                 ],
               },

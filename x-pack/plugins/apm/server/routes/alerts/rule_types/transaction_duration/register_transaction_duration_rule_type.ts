@@ -6,13 +6,13 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import {
+  asDuration,
   formatDurationFromTimeUnitChar,
+  getAlertDetailsUrl,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -247,14 +247,26 @@ export function registerTransactionDurationRuleType({
           groupByFields,
         });
 
-        const alertUuid = getAlertUuid(bucketKey.join('_'));
+        const alertId = bucketKey.join('_');
+        const alert = services.alertWithLifecycle({
+          id: alertId,
+          fields: {
+            [TRANSACTION_NAME]: ruleParams.transactionName,
+            [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+            [ALERT_EVALUATION_VALUE]: transactionDuration,
+            [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
+            [ALERT_REASON]: reason,
+            ...sourceFields,
+            ...groupByFields,
+          },
+        });
 
+        const alertUuid = getAlertUuid(alertId);
         const alertDetailsUrl = getAlertDetailsUrl(
           basePath,
           spaceId,
           alertUuid
         );
-
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
           spaceId,
@@ -266,35 +278,21 @@ export function registerTransactionDurationRuleType({
             groupByFields[TRANSACTION_TYPE]
           )
         );
-
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
-
-        services
-          .alertWithLifecycle({
-            id: bucketKey.join('_'),
-            fields: {
-              [TRANSACTION_NAME]: ruleParams.transactionName,
-              [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-              [ALERT_EVALUATION_VALUE]: transactionDuration,
-              [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
-              [ALERT_REASON]: reason,
-              ...sourceFields,
-              ...groupByFields,
-            },
-          })
-          .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-            alertDetailsUrl,
-            interval: formatDurationFromTimeUnitChar(
-              ruleParams.windowSize,
-              ruleParams.windowUnit as TimeUnitChar
-            ),
-            reason,
-            transactionName: ruleParams.transactionName, // When group by doesn't include transaction.name, the context.transaction.name action variable will contain value of the Transaction Name filter
-            threshold: ruleParams.threshold,
-            triggerValue: transactionDurationFormatted,
-            viewInAppUrl,
-            ...groupByActionVariables,
-          });
+        alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
+          alertDetailsUrl,
+          interval: formatDurationFromTimeUnitChar(
+            ruleParams.windowSize,
+            ruleParams.windowUnit as TimeUnitChar
+          ),
+          reason,
+          // When group by doesn't include transaction.name, the context.transaction.name action variable will contain value of the Transaction Name filter
+          transactionName: ruleParams.transactionName,
+          threshold: ruleParams.threshold,
+          triggerValue: transactionDurationFormatted,
+          viewInAppUrl,
+          ...groupByActionVariables,
+        });
       }
 
       return { state: {} };

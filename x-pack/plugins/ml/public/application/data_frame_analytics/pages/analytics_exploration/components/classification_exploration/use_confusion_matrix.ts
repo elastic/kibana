@@ -8,24 +8,23 @@
 import { useState, useEffect } from 'react';
 
 import {
-  isClassificationEvaluateResponse,
-  ResultsSearchQuery,
-  ANALYSIS_CONFIG_TYPE,
-  ClassificationMetricItem,
-} from '../../../../common/analytics';
-import { isKeywordAndTextType } from '../../../../common/fields';
-import {
-  ClassificationEvaluateResponse,
-  ConfusionMatrix,
-} from '../../../../../../../common/types/data_frame_analytics';
-
-import {
   getDependentVar,
   getPredictionFieldName,
-  loadEvalData,
-  loadDocsCount,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
+  ANALYSIS_CONFIG_TYPE,
+  type ClassificationEvaluateResponse,
+  type ConfusionMatrix,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+
+import {
+  isClassificationEvaluateResponse,
+  ResultsSearchQuery,
+  ClassificationMetricItem,
+} from '../../../../common/analytics';
+
+import { loadEvalData, loadDocsCount } from '../../../../common';
 
 import { isTrainingFilter } from './is_training_filter';
 
@@ -84,7 +83,7 @@ export const useConfusionMatrix = (
       const isTraining = isTrainingFilter(searchQuery, resultsField);
 
       try {
-        requiresKeyword = isKeywordAndTextType(dependentVariable);
+        requiresKeyword = newJobCapsServiceAnalytics.isKeywordAndTextType(dependentVariable);
       } catch (e) {
         // Additional error handling due to missing field type is handled by loadEvalData
         console.error('Unable to load new field types', e); // eslint-disable-line no-console

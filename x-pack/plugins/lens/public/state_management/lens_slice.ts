@@ -10,6 +10,8 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -24,7 +26,6 @@ import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } 
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
-import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -50,6 +51,7 @@ export const initialState: LensAppState = {
     indexPatternRefs: [],
     indexPatterns: {},
   },
+  annotationGroups: {},
 };
 
 export const getPreloadedState = ({
@@ -161,6 +163,7 @@ export const switchVisualization = createAction<{
 }>('lens/switchVisualization');
 export const rollbackSuggestion = createAction<void>('lens/rollbackSuggestion');
 export const setToggleFullscreen = createAction<void>('lens/setToggleFullscreen');
+export const setIsLoadLibraryVisible = createAction<boolean>('lens/setIsLoadLibraryVisible');
 export const submitSuggestion = createAction<void>('lens/submitSuggestion');
 export const switchDatasource = createAction<{
   newDatasourceId: string;
@@ -212,6 +215,8 @@ export const cloneLayer = createAction(
 export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
+  extraArg: unknown;
+  ignoreInitialValues?: boolean;
 }>('lens/addLayer');
 
 export const setLayerDefaultDimension = createAction<{
@@ -238,6 +243,10 @@ export const removeDimension = createAction<{
   columnId: string;
   datasourceId?: string;
 }>('lens/removeDimension');
+export const registerLibraryAnnotationGroup = createAction<{
+  group: EventAnnotationGroupConfig;
+  id: string;
+}>('lens/registerLibraryAnnotationGroup');
 
 export const lensActions = {
   setState,
@@ -254,6 +263,7 @@ export const lensActions = {
   switchVisualization,
   rollbackSuggestion,
   setToggleFullscreen,
+  setIsLoadLibraryVisible,
   submitSuggestion,
   switchDatasource,
   switchAndCleanDatasource,
@@ -271,6 +281,7 @@ export const lensActions = {
   changeIndexPattern,
   removeDimension,
   syncLinkedDimensions,
+  registerLibraryAnnotationGroup,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -1031,11 +1042,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [addLayer.type]: (
       state,
       {
-        payload: { layerId, layerType },
+        payload: { layerId, layerType, extraArg, ignoreInitialValues },
       }: {
         payload: {
           layerId: string;
           layerType: LayerType;
+          extraArg: unknown;
+          ignoreInitialValues: boolean;
         };
       }
     ) => {
@@ -1053,7 +1066,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         state.visualization.state,
         layerId,
         layerType,
-        currentDataViewsId
+        currentDataViewsId,
+        extraArg
       );
 
       const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
@@ -1075,15 +1089,17 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             )
           : state.datasourceStates[state.activeDatasourceId].state;
 
-      const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
-        datasourceState,
-        visualizationState,
-        framePublicAPI,
-        activeVisualization,
-        activeDatasource,
-        layerId,
-        layerType,
-      });
+      const { activeDatasourceState, activeVisualizationState } = ignoreInitialValues
+        ? { activeDatasourceState: datasourceState, activeVisualizationState: visualizationState }
+        : addInitialValueIfAvailable({
+            datasourceState,
+            visualizationState,
+            framePublicAPI,
+            activeVisualization,
+            activeDatasource,
+            layerId,
+            layerType,
+          });
 
       state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
@@ -1115,7 +1131,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       const activeVisualization = visualizationMap[state.visualization.activeId];
-      const layerType = getLayerType(activeVisualization, state.visualization.state, layerId);
+      const layerType =
+        activeVisualization.getLayerType(layerId, state.visualization.state) || LayerTypes.DATA;
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
         datasourceState: state.datasourceStates[state.activeDatasourceId].state,
         visualizationState: state.visualization.state,
@@ -1196,6 +1213,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           linkedDimension.columnId && // if there's no columnId, there's no dimension to remove
           remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
       );
+    },
+    [registerLibraryAnnotationGroup.type]: (
+      state,
+      {
+        payload: { group, id },
+      }: {
+        payload: { group: EventAnnotationGroupConfig; id: string };
+      }
+    ) => {
+      state.annotationGroups[id] = group;
     },
   });
 };

@@ -205,6 +205,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickOptionsTab();
       await visEditor.toggleShowThresholdLine();
       await visEditor.clickGo(isNewChartsLibraryEnabled);
+      const line = await visChart.getReferenceLine('xyVisChart');
+      expect(line?.length).to.be(1);
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
