@@ -101,7 +101,7 @@ export function Onboarding() {
             <EuiSpacer />
           </div>
         ))}
-      <Footer />;
+      <Footer />
     </ObservabilityPageTemplate>
   );
 }
