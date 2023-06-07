@@ -65,7 +65,6 @@ describe('taskTypeDictionary', () => {
         Object {
           "createTaskRunner": [Function],
           "description": "one super cool task",
-          "stateSchemaByVersion": undefined,
           "timeout": "5m",
           "title": "Test",
           "type": "test_task_type_0",
@@ -73,7 +72,6 @@ describe('taskTypeDictionary', () => {
         Object {
           "createTaskRunner": [Function],
           "description": "one super cool task",
-          "stateSchemaByVersion": undefined,
           "timeout": "5m",
           "title": "Test",
           "type": "test_task_type_1",
@@ -81,7 +79,6 @@ describe('taskTypeDictionary', () => {
         Object {
           "createTaskRunner": [Function],
           "description": "one super cool task",
-          "stateSchemaByVersion": undefined,
           "timeout": "5m",
           "title": "Test",
           "type": "test_task_type_2",
