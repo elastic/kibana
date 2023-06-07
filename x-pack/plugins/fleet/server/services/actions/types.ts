@@ -103,11 +103,7 @@ export interface FleetActionResult extends CommonFleetActionResultDocFields {
   action_data: object;
   action_id: string;
   action_input_type: string;
-  action_response?: {
-    endpoint: {
-      ack: boolean;
-    };
-  };
+  action_response?: Record<string, unknown>;
   agent_id: string;
   completed_at: string;
   error: string;
