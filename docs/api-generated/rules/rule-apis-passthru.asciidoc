@@ -100,32 +100,9 @@ Any modifications made to this file will be overwritten.
     <pre class="example"><code>{
   "throttle" : "10m",
   "created_at" : "2022-12-05T23:36:58.284Z",
-  "last_run" : {
-    "alerts_count" : {
-      "ignored" : 6,
-      "new" : 1,
-      "recovered" : 5,
-      "active" : 0
-    },
-    "outcome_msg" : "outcome_msg",
-    "warning" : "warning",
-    "outcome" : "succeeded"
-  },
   "api_key_created_by_user" : false,
-  "params" : {
-    "key" : ""
-  },
-  "created_by" : "elastic",
   "enabled" : true,
-  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-  "rule_type_id" : "monitoring_alert_cluster_health",
-  "revision" : 5,
-  "tags" : [ "tags", "tags" ],
   "running" : true,
-  "api_key_owner" : "elastic",
-  "schedule" : {
-    "interval" : "1m"
-  },
   "notify_when" : "onActiveAlert",
   "next_run" : "2022-12-06T00:14:43.818Z",
   "updated_at" : "2022-12-05T23:36:58.284Z",
@@ -134,10 +111,35 @@ Any modifications made to this file will be overwritten.
     "last_duration" : 55,
     "status" : "ok"
   },
-  "name" : "cluster_health_rule",
-  "updated_by" : "elastic",
   "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "consumer" : "alerts",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+    "outcome_order" : 5,
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 2,
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
   "mute_all" : false,
   "actions" : [ {
     "alerts_filter" : {
@@ -151,7 +153,41 @@ Any modifications made to this file will be overwritten.
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ "{}", "{}" ]
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -178,7 +214,41 @@ Any modifications made to this file will be overwritten.
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ "{}", "{}" ]
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -193,8 +263,7 @@ Any modifications made to this file will be overwritten.
       "notify_when" : "onActiveAlert"
     },
     "group" : "default"
-  } ],
-  "consumer" : "alerts"
+  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -428,32 +497,9 @@ Any modifications made to this file will be overwritten.
   "data" : [ {
     "throttle" : "10m",
     "created_at" : "2022-12-05T23:36:58.284Z",
-    "last_run" : {
-      "alerts_count" : {
-        "ignored" : 6,
-        "new" : 1,
-        "recovered" : 5,
-        "active" : 0
-      },
-      "outcome_msg" : "outcome_msg",
-      "warning" : "warning",
-      "outcome" : "succeeded"
-    },
     "api_key_created_by_user" : false,
-    "params" : {
-      "key" : ""
-    },
-    "created_by" : "elastic",
     "enabled" : true,
-    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-    "rule_type_id" : "monitoring_alert_cluster_health",
-    "revision" : 5,
-    "tags" : [ "tags", "tags" ],
     "running" : true,
-    "api_key_owner" : "elastic",
-    "schedule" : {
-      "interval" : "1m"
-    },
     "notify_when" : "onActiveAlert",
     "next_run" : "2022-12-06T00:14:43.818Z",
     "updated_at" : "2022-12-05T23:36:58.284Z",
@@ -462,10 +508,35 @@ Any modifications made to this file will be overwritten.
       "last_duration" : 55,
       "status" : "ok"
     },
-    "name" : "cluster_health_rule",
-    "updated_by" : "elastic",
     "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
     "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "consumer" : "alerts",
+    "last_run" : {
+      "alerts_count" : {
+        "ignored" : 6,
+        "new" : 1,
+        "recovered" : 5,
+        "active" : 0
+      },
+      "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+      "outcome_order" : 5,
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 2,
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
     "mute_all" : false,
     "actions" : [ {
       "alerts_filter" : {
@@ -479,7 +550,41 @@ Any modifications made to this file will be overwritten.
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ "{}", "{}" ]
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -506,7 +611,41 @@ Any modifications made to this file will be overwritten.
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ "{}", "{}" ]
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -521,37 +660,13 @@ Any modifications made to this file will be overwritten.
         "notify_when" : "onActiveAlert"
       },
       "group" : "default"
-    } ],
-    "consumer" : "alerts"
+    } ]
   }, {
     "throttle" : "10m",
     "created_at" : "2022-12-05T23:36:58.284Z",
-    "last_run" : {
-      "alerts_count" : {
-        "ignored" : 6,
-        "new" : 1,
-        "recovered" : 5,
-        "active" : 0
-      },
-      "outcome_msg" : "outcome_msg",
-      "warning" : "warning",
-      "outcome" : "succeeded"
-    },
     "api_key_created_by_user" : false,
-    "params" : {
-      "key" : ""
-    },
-    "created_by" : "elastic",
     "enabled" : true,
-    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-    "rule_type_id" : "monitoring_alert_cluster_health",
-    "revision" : 5,
-    "tags" : [ "tags", "tags" ],
     "running" : true,
-    "api_key_owner" : "elastic",
-    "schedule" : {
-      "interval" : "1m"
-    },
     "notify_when" : "onActiveAlert",
     "next_run" : "2022-12-06T00:14:43.818Z",
     "updated_at" : "2022-12-05T23:36:58.284Z",
@@ -560,10 +675,35 @@ Any modifications made to this file will be overwritten.
       "last_duration" : 55,
       "status" : "ok"
     },
-    "name" : "cluster_health_rule",
-    "updated_by" : "elastic",
     "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
     "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "consumer" : "alerts",
+    "last_run" : {
+      "alerts_count" : {
+        "ignored" : 6,
+        "new" : 1,
+        "recovered" : 5,
+        "active" : 0
+      },
+      "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+      "outcome_order" : 5,
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 2,
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
     "mute_all" : false,
     "actions" : [ {
       "alerts_filter" : {
@@ -577,7 +717,41 @@ Any modifications made to this file will be overwritten.
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ "{}", "{}" ]
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -604,7 +778,41 @@ Any modifications made to this file will be overwritten.
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ "{}", "{}" ]
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -619,8 +827,7 @@ Any modifications made to this file will be overwritten.
         "notify_when" : "onActiveAlert"
       },
       "group" : "default"
-    } ],
-    "consumer" : "alerts"
+    } ]
   } ],
   "page" : 0
 }</code></pre>
@@ -739,32 +946,9 @@ Any modifications made to this file will be overwritten.
     <pre class="example"><code>{
   "throttle" : "10m",
   "created_at" : "2022-12-05T23:36:58.284Z",
-  "last_run" : {
-    "alerts_count" : {
-      "ignored" : 6,
-      "new" : 1,
-      "recovered" : 5,
-      "active" : 0
-    },
-    "outcome_msg" : "outcome_msg",
-    "warning" : "warning",
-    "outcome" : "succeeded"
-  },
   "api_key_created_by_user" : false,
-  "params" : {
-    "key" : ""
-  },
-  "created_by" : "elastic",
   "enabled" : true,
-  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-  "rule_type_id" : "monitoring_alert_cluster_health",
-  "revision" : 5,
-  "tags" : [ "tags", "tags" ],
   "running" : true,
-  "api_key_owner" : "elastic",
-  "schedule" : {
-    "interval" : "1m"
-  },
   "notify_when" : "onActiveAlert",
   "next_run" : "2022-12-06T00:14:43.818Z",
   "updated_at" : "2022-12-05T23:36:58.284Z",
@@ -773,10 +957,35 @@ Any modifications made to this file will be overwritten.
     "last_duration" : 55,
     "status" : "ok"
   },
-  "name" : "cluster_health_rule",
-  "updated_by" : "elastic",
   "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "consumer" : "alerts",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+    "outcome_order" : 5,
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 2,
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
   "mute_all" : false,
   "actions" : [ {
     "alerts_filter" : {
@@ -790,7 +999,41 @@ Any modifications made to this file will be overwritten.
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ "{}", "{}" ]
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -817,7 +1060,41 @@ Any modifications made to this file will be overwritten.
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ "{}", "{}" ]
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -832,8 +1109,7 @@ Any modifications made to this file will be overwritten.
       "notify_when" : "onActiveAlert"
     },
     "group" : "default"
-  } ],
-  "consumer" : "alerts"
+  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -2129,32 +2405,9 @@ Any modifications made to this file will be overwritten.
     <pre class="example"><code>{
   "throttle" : "10m",
   "created_at" : "2022-12-05T23:36:58.284Z",
-  "last_run" : {
-    "alerts_count" : {
-      "ignored" : 6,
-      "new" : 1,
-      "recovered" : 5,
-      "active" : 0
-    },
-    "outcome_msg" : "outcome_msg",
-    "warning" : "warning",
-    "outcome" : "succeeded"
-  },
   "api_key_created_by_user" : false,
-  "params" : {
-    "key" : ""
-  },
-  "created_by" : "elastic",
   "enabled" : true,
-  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-  "rule_type_id" : "monitoring_alert_cluster_health",
-  "revision" : 5,
-  "tags" : [ "tags", "tags" ],
   "running" : true,
-  "api_key_owner" : "elastic",
-  "schedule" : {
-    "interval" : "1m"
-  },
   "notify_when" : "onActiveAlert",
   "next_run" : "2022-12-06T00:14:43.818Z",
   "updated_at" : "2022-12-05T23:36:58.284Z",
@@ -2163,10 +2416,35 @@ Any modifications made to this file will be overwritten.
     "last_duration" : 55,
     "status" : "ok"
   },
-  "name" : "cluster_health_rule",
-  "updated_by" : "elastic",
   "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "consumer" : "alerts",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+    "outcome_order" : 5,
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 2,
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
   "mute_all" : false,
   "actions" : [ {
     "alerts_filter" : {
@@ -2180,7 +2458,41 @@ Any modifications made to this file will be overwritten.
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ "{}", "{}" ]
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -2207,7 +2519,41 @@ Any modifications made to this file will be overwritten.
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ "{}", "{}" ]
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -2222,8 +2568,7 @@ Any modifications made to this file will be overwritten.
       "notify_when" : "onActiveAlert"
     },
     "group" : "default"
-  } ],
-  "consumer" : "alerts"
+  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -2261,6 +2606,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query_filters_inner_meta"><code>actions_inner_alerts_filter_query_filters_inner_meta</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a></li>
     <li><a href="#actions_inner_frequency"><code>actions_inner_frequency</code> - </a></li>
@@ -2412,7 +2759,34 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>Defines a query filter that determines whether the action runs.</div>
     <div class="field-items">
       <div class="param">kql (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Kibana Query Language (KQL). </div>
-<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#object">array[Object]</a></span>  </div>
+<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner">array[actions_inner_alerts_filter_query_filters_inner]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the <code>kbn-es-query</code> package.</div>
+    <div class="field-items">
+      <div class="param">meta (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner_meta">actions_inner_alerts_filter_query_filters_inner_meta</a></span>  </div>
+<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">Dollarstate (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query_filters_inner_meta"><code>actions_inner_alerts_filter_query_filters_inner_meta</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alias (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">controlledBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">disabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">field (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">isMultiIndex (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">key (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">negate (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">value (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2806,7 +3180,8 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">alerts_count (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule_response_properties_last_run_alerts_count">rule_response_properties_last_run_alerts_count</a></span>  </div>
 <div class="param">outcome (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">outcome_msg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">outcome_msg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">outcome_order (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
 <div class="param">warning (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
