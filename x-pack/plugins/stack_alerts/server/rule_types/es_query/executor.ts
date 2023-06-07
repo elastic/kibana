@@ -32,11 +32,16 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     spaceId,
     logger,
   } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
+  const { alertsClient, scopedClusterClient, searchSourceClient, share, dataViews } = services;
+
+  if (!alertsClient) {
+    throw new Error(`Expected alertsClient to be defined but it is not`);
+  }
+
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const alertLimit = alertFactory.alertLimit.getValue();
+  const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
@@ -114,13 +119,25 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       params,
       ...(isGroupAgg ? { group: alertId } : {}),
     });
-    const alert = alertFactory.create(
-      alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId
-    );
-    alert
-      // store the params we would need to recreate the query that led to this alert instance
-      .replaceState({ latestTimestamp, dateStart, dateEnd })
-      .scheduleActions(ActionGroupId, actionContext);
+    alertsClient.report({
+      id: alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId,
+      actionGroup: ActionGroupId,
+      context: actionContext,
+      state: { latestTimestamp, dateStart, dateEnd },
+      payload: {
+        kibana: {
+          alert: {
+            conditions: actionContext.conditions,
+            date_end: dateEnd,
+            date_start: dateStart,
+            latest_timestamp: latestTimestamp,
+            reason: actionContext.message,
+            title: actionContext.title,
+            value: actionContext.value,
+          },
+        },
+      },
+    });
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
       const firstValidTimefieldSort = getValidTimefieldSort(
@@ -132,10 +149,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     }
   }
 
-  alertFactory.alertLimit.setLimitReached(parsedResults.truncated);
+  alertsClient.setAlertLimitReached(parsedResults.truncated);
 
-  const { getRecoveredAlerts } = alertFactory.done();
-  for (const recoveredAlert of getRecoveredAlerts()) {
+  for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
     const alertId = recoveredAlert.getId();
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
@@ -159,7 +175,23 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       isRecovered: true,
       ...(isGroupAgg ? { group: alertId } : {}),
     });
-    recoveredAlert.setContext(recoveryContext);
+    alertsClient.setAlertData({
+      id: recoveredAlert.getId(),
+      context: recoveryContext,
+      payload: {
+        kibana: {
+          alert: {
+            conditions: recoveryContext.conditions,
+            date_end: dateEnd,
+            date_start: dateStart,
+            latest_timestamp: latestTimestamp,
+            reason: recoveryContext.message,
+            title: recoveryContext.title,
+            value: recoveryContext.value,
+          },
+        },
+      },
+    });
   }
   return { state: { latestTimestamp } };
 }
