@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { FindActionResult } from "@kbn/actions-plugin/server";
+import { AsApiContract } from "@kbn/alerting-plugin/server/routes/lib";
+
 export const createConnector = (connector: Record<string, unknown>) =>
   cy.request({
     method: 'POST',
@@ -22,3 +25,33 @@ const slackConnectorAPIPayload = {
 };
 
 export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);
+
+export function deleteAllConnectors() {
+  cy.log('Delete all alerts and rules');
+  function fetchAndDelete() {
+    // delete one at a time while there are any left i guess
+    cy.log('Fetching list of connectors');
+    cy.request({
+      method: "GET",
+      url: "/api/actions/connectors",
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+    }).then(function(response) {
+      // cast this because thats where we are in life
+      type Body = AsApiContract<FindActionResult[]>;
+      const body: Body = response.body;
+      cy.log(`Received list of connectors. There are ${body.length} left.`);
+      if (body.length > 0) {
+
+        const [{id }]: Body = response.body;
+        cy.log(`Deleting connector with id == ${id}`);
+        cy.request({
+          method: "DELETE",
+          url: `/api/actions/connector/${id}`,
+          headers: { 'kbn-xsrf': 'cypress-creds' },
+        }).then(fetchAndDelete)
+      }
+
+    })
+  }
+  fetchAndDelete();
+}

@@ -48,7 +48,7 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 import { createRule } from '../../tasks/api_calls/rules';
-import { createSlackConnector } from '../../tasks/api_calls/connectors';
+import { createSlackConnector, deleteAllConnectors } from '../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
@@ -73,7 +73,8 @@ describe('Detection rules, bulk edit of rule actions', () => {
     cleanKibana();
     login();
     deleteAlertsAndRules();
-    deleteConnectors();
+    //deleteConnectors();
+    deleteAllConnectors();
     esArchiverResetKibana();
 
     createSlackConnector().then(({ body }) => {
