@@ -23,7 +23,7 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
@@ -50,6 +50,7 @@ import { ExperimentDatastreamSettings } from './experimental_datastream_settings
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
+import { useQuery } from '@tanstack/react-query';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -164,7 +165,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [updatePackagePolicy, packagePolicy]
     );
 
-    const { data: dataStreamsData } = useGetDataStreams();
+    const { data: dataStreamsData } = useQuery(['datastreams'], () => sendGetDataStreams(), {
+      enabled: packageInfo.type === 'input', // Only fetch datastream for input type package
+    });
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
 
