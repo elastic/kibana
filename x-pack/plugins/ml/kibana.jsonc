@@ -30,7 +30,8 @@
       "uiActions",
       "unifiedSearch",
       "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "savedSearch"
     ],
     "optionalPlugins": [
       "alerting",
@@ -54,7 +55,6 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "savedSearch",
       "usageCollection",
       "unifiedSearch"
     ],

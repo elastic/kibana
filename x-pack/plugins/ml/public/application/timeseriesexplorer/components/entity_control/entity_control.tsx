@@ -7,8 +7,6 @@
 
 import { isEqual } from 'lodash';
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiComboBox,
@@ -18,8 +16,13 @@ import {
   EuiHealth,
   EuiHighlight,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getSeverityColor, type MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+
 import { UiPartitionFieldConfig } from '../series_controls/series_controls';
+
 import { EntityConfig } from './entity_config';
 
 export interface Entity {

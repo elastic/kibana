@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { isCounterTimeSeriesMetric, TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
-import { isCounterTimeSeriesMetric, TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';
-
-import { isRuntimeMappings } from '../../../../../../../common/shared_imports';
 
 import {
   DropDownOption,
