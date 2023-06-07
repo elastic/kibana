@@ -4,39 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getExceptionList } from '../../../objects/exception';
-import { getNewRule } from '../../../objects/rule';
-
-import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-
-import { EXCEPTIONS_URL } from '../../../urls/navigation';
+import { getExceptionList } from '../../../../objects/exception';
+import { getNewRule } from '../../../../objects/rule';
 import {
-  searchForExceptionList,
-  waitForExceptionsTableToBeLoaded,
-  clearSearchSelection,
-} from '../../../tasks/exceptions_table';
-import {
-  EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-} from '../../../screens/exceptions';
-import { createExceptionList } from '../../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
+  EXCEPTIONS_TABLE_LIST_NAME,
+} from '../../../../screens/exceptions';
+import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
+import {
+  waitForExceptionsTableToBeLoaded,
+  searchForExceptionList,
+  clearSearchSelection,
+} from '../../../../tasks/exceptions_table';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { EXCEPTIONS_URL } from '../../../../urls/navigation';
+
+const EXCEPTION_LIST_NAME = 'My test list';
+const EXCEPTION_LIST_NAME_TWO = 'A test list 2';
 
 const getExceptionList1 = () => ({
   ...getExceptionList(),
-  name: 'Test a new list 1',
+  name: EXCEPTION_LIST_NAME,
   list_id: 'exception_list_1',
 });
+
 const getExceptionList2 = () => ({
   ...getExceptionList(),
-  name: 'Test list 2',
+  name: EXCEPTION_LIST_NAME_TWO,
   list_id: 'exception_list_2',
 });
-
-describe('Exceptions Table', () => {
-  before(() => {
+describe('Filter Lists', () => {
+  beforeEach(() => {
     esArchiverResetKibana();
     login();
 
@@ -59,9 +59,6 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
-  });
-
-  beforeEach(() => {
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
   });
@@ -88,8 +85,8 @@ describe('Exceptions Table', () => {
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(1).should('have.text', 'Test list 2');
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(0).should('have.text', 'Test a new list 1');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(1).should('have.text', EXCEPTION_LIST_NAME_TWO);
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(0).should('have.text', EXCEPTION_LIST_NAME);
 
     // Exact phrase search
     clearSearchSelection();

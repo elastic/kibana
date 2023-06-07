@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import { getExceptionList } from '../../../objects/exception';
-import { getNewRule } from '../../../objects/rule';
+import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
+import { getExceptionList } from '../../../../objects/exception';
+import { getNewRule } from '../../../../objects/rule';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { exceptionsListDetailsUrl } from '../../../urls/navigation';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { EXCEPTIONS_URL, exceptionsListDetailsUrl } from '../../../../urls/navigation';
 import {
+  createSharedExceptionList,
   editExceptionLisDetails,
+  linkSharedListToRulesFromListDetails,
+  saveLinkedRules,
+  validateSharedListLinkedRules,
   waitForExceptionListDetailToBeLoaded,
-} from '../../../tasks/exceptions_table';
-import { createExceptionList } from '../../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
+} from '../../../../tasks/exceptions_table';
+import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
-} from '../../../screens/exceptions';
+  EXCEPTION_LIST_DETAILS_LINK_RULES_BTN,
+} from '../../../../screens/exceptions';
 
 const LIST_NAME = 'My exception list';
 const UPDATED_LIST_NAME = 'Updated exception list';
@@ -34,7 +39,9 @@ const getExceptionList1 = () => ({
   list_id: 'exception_list_test',
 });
 
-describe('Exception list management page', () => {
+const EXCEPTION_LIST_NAME = 'Newly created list';
+
+describe('Exception list detail page', () => {
   before(() => {
     esArchiverResetKibana();
     login();
@@ -54,15 +61,17 @@ describe('Exception list management page', () => {
         })
       )
     );
+    createRule(getNewRule({ name: 'Rule to link to shared list' }));
   });
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
-    waitForExceptionListDetailToBeLoaded();
+    visitWithoutDateRange(EXCEPTIONS_URL);
   });
 
-  it('Edits list details', () => {
+  it('Should edit list details', () => {
+    visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    waitForExceptionListDetailToBeLoaded();
     // Check list details are loaded
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', LIST_NAME);
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', LIST_DESCRIPTION);
@@ -91,5 +100,29 @@ describe('Exception list management page', () => {
     // Ensure description removal persisted
     visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
+  });
+
+  it('Should create a new list and link it to two rules', () => {
+    createSharedExceptionList(
+      { name: 'Newly created list', description: 'This is my list.' },
+      true
+    );
+
+    // After creation - directed to list detail page
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
+
+    // Open Link rules flyout
+    cy.get(EXCEPTION_LIST_DETAILS_LINK_RULES_BTN).click();
+
+    // Link the first two Rules
+    linkSharedListToRulesFromListDetails(2);
+
+    // Save the 2 linked Rules
+    saveLinkedRules();
+
+    const linkedRulesNames = ['Rule to link to shared list', 'New Rule Test'];
+
+    // Validate the number of linked rules as well as the Rules' names
+    validateSharedListLinkedRules(2, linkedRulesNames);
   });
 });

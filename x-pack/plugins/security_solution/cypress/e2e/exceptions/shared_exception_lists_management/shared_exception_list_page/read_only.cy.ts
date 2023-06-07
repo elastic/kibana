@@ -5,29 +5,27 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
-import { cleanKibana } from '../../../tasks/common';
-import { ROLES } from '../../../../common/test';
-import { getExceptionList } from '../../../objects/exception';
+import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
+import { ROLES } from '../../../../../common/test';
+import { getExceptionList } from '../../../../objects/exception';
 import {
   EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-} from '../../../screens/exceptions';
-import { createExceptionList, deleteExceptionList } from '../../../tasks/api_calls/exceptions';
+} from '../../../../screens/exceptions';
+import { createExceptionList, deleteExceptionList } from '../../../../tasks/api_calls/exceptions';
 import {
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
-} from '../../../tasks/common/callouts';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { EXCEPTIONS_URL } from '../../../urls/navigation';
+} from '../../../../tasks/common/callouts';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
-describe('All exception lists - read only', () => {
+describe('Shared exception lists - read only', () => {
   before(() => {
     esArchiverResetKibana();
-    cleanKibana();
   });
 
   beforeEach(() => {
