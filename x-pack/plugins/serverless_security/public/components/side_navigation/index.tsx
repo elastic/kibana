@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+
 import type {
   SideNavComponent,
   SideNavCompProps,
@@ -16,10 +18,11 @@ import { KibanaServicesProvider } from '../../services';
 
 export const getSecuritySideNavComponent = (
   core: CoreStart,
-  pluginsStart: ServerlessSecurityPluginStartDependencies
+  pluginsStart: ServerlessSecurityPluginStartDependencies,
+  storage: Storage
 ): SideNavComponent => {
   return (_props: SideNavCompProps) => (
-    <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
+    <KibanaServicesProvider core={core} pluginsStart={pluginsStart} storage={storage}>
       <SecuritySideNavigation />
     </KibanaServicesProvider>
   );
