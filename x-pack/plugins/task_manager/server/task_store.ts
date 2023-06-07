@@ -244,6 +244,7 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
+    // TODO: Should we force validation when claiming tasks? State could fail validation
     const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write');
     const attributes = taskInstanceToAttributes(validatedTaskInstance);
 

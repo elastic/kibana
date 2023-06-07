@@ -37,16 +37,18 @@ export class TaskValidator {
   }
 
   public getValidatedTaskInstance<T extends TaskInstance>(task: T, mode: 'read' | 'write'): T {
-    // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task
+    // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task,
     // we'll do a pass-through for those
     if (!this.definitions.has(task.taskType)) {
       return task;
     }
 
     const taskTypeDef = this.definitions.get(task.taskType);
+    // TODO: Cache by type
     const lastestStateSchema = getLatestStateSchema(taskTypeDef);
 
-    // TODO: Remove once all task types report their state schema
+    // TODO: Remove once all task types have defined their state schema.
+    // Otherwise, failures on read / write would occur. (don't forget to unskip test)
     if (!lastestStateSchema) {
       return task;
     }
@@ -65,9 +67,8 @@ export class TaskValidator {
           throw e;
         }
         this.logger.debug(
-          `[${task.taskType}][${task.id}] State validation failure, but allowing to proceed given allow_reading_invalid_state is true: ${e.message}`
+          `[${task.taskType}][${task.id}] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: ${e.message}`
         );
-        // TODO telemetry
       }
 
       return {
@@ -76,6 +77,7 @@ export class TaskValidator {
       };
     }
 
+    // We are doing a write operation which must validate against the latest state schema
     return {
       ...task,
       state: this.getValidatedStateSchema(task.state, task.taskType, lastestStateSchema, 'forbid'),
@@ -129,6 +131,7 @@ export class TaskValidator {
       );
     }
 
+    // TODO: Don't extendsDeep all the time
     return latestStateSchema.schema.extendsDeep({ unknowns }).validate(state);
   }
 }
