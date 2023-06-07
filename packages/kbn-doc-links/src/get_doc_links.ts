@@ -382,7 +382,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       gettingStarted: `${SECURITY_SOLUTION_DOCS}index.html`,
       privileges: `${SECURITY_SOLUTION_DOCS}sec-requirements.html`,
       ml: `${SECURITY_SOLUTION_DOCS}machine-learning.html`,
-      ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-changelog.html`,
+      ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-downloadable-updates.html`,
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
@@ -766,6 +766,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
+    },
+    telemetry: {
+      settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
     },
   });
 };

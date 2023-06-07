@@ -8,6 +8,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly 1`] = `
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
   fieldIcon={
     <WrappedFieldIcon
       scripted={false}
@@ -38,6 +39,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for Records (Lens
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--document unifiedFieldListItemButton--exists"
+  dataTestSubj="field-___records___-showDetails"
   fieldIcon={
     <WrappedFieldIcon
       scripted={false}
@@ -68,6 +70,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for text-based co
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--string unifiedFieldListItemButton--exists"
+  dataTestSubj="field-agent-showDetails"
   fieldIcon={
     <WrappedFieldIcon
       type="string"
@@ -96,6 +99,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for wildcard sear
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+  dataTestSubj="field-script date-showDetails"
   fieldIcon={
     <WrappedFieldIcon
       scripted={true}
@@ -125,6 +129,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when a conflict f
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--conflict unifiedFieldListItemButton--exists"
+  dataTestSubj="field-custom_user_field-showDetails"
   fieldIcon={
     <WrappedFieldIcon
       scripted={false}
@@ -156,6 +161,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when empty 1`] = 
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--missing"
+  dataTestSubj="field-script date-showDetails"
   fieldIcon={
     <WrappedFieldIcon
       scripted={true}
@@ -221,6 +227,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action wh
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
   fieldAction={
     <EuiToolTip
       content="Add \\"bytes\\" field"
@@ -232,7 +239,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action wh
         aria-label="Add \\"bytes\\" field"
         className="unifiedFieldListItemButton__action unifiedFieldListItemButton__action--always"
         color="text"
-        data-test-subj="unifiedFieldListItem_addField-bytes"
+        data-test-subj="fieldToggle-bytes"
         iconType="plusInCircle"
         onClick={[Function]}
       />
@@ -267,6 +274,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action wh
     }
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
   fieldAction={
     <EuiToolTip
       content="Remove \\"bytes\\" field"
@@ -278,7 +286,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action wh
         aria-label="Remove \\"bytes\\" field"
         className="unifiedFieldListItemButton__action"
         color="danger"
-        data-test-subj="unifiedFieldListItem_removeField-bytes"
+        data-test-subj="fieldToggle-bytes"
         iconType="cross"
         onClick={[Function]}
       />

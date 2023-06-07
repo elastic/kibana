@@ -153,17 +153,18 @@ export const getLayerFormats = (
       }),
       {}
     ),
-    splitSeriesAccessors: splitColumnAccessors?.reduce((formatters, splitAccessor) => {
-      const formatObj = getAccessorWithFieldFormat(splitAccessor, table.columns);
-      const accessor = Object.keys(formatObj)[0];
-      return {
-        ...formatters,
-        [accessor]: {
+    splitSeriesAccessors: splitColumnAccessors?.reduce<SplitAccessorsFieldFormats>(
+      (formatters, splitAccessor) => {
+        const formatObj = getAccessorWithFieldFormat(splitAccessor, table.columns);
+        const accessor = Object.keys(formatObj)[0];
+        formatters[accessor] = {
           format: formatObj[accessor],
           formatter: formatFactory(formatObj[accessor]),
-        },
-      };
-    }, {}),
+        };
+        return formatters;
+      },
+      {}
+    ),
     splitColumnAccessors: getAccessorWithFieldFormat(splitColumnAccessor, table.columns),
     splitRowAccessors: getAccessorWithFieldFormat(splitRowAccessor, table.columns),
   };

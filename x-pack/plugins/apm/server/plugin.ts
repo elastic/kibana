@@ -18,6 +18,7 @@ import { isEmpty, mapValues } from 'lodash';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import {
@@ -55,6 +56,7 @@ import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source
 import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { getApmFeatureFlags } from '../common/apm_feature_flags';
+import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 
 export class APMPlugin
   implements
@@ -67,6 +69,7 @@ export class APMPlugin
 {
   private currentConfig?: APMConfig;
   private logger?: Logger;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
@@ -147,16 +150,26 @@ export class APMPlugin
       });
     };
 
-    boundGetApmIndices().then((indices) => {
-      plugins.home?.tutorials.registerTutorial(
-        tutorialProvider({
-          apmConfig: currentConfig,
-          apmIndices: indices,
-          cloud: plugins.cloud,
-          isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-        })
+    // This if else block will go away in favour of removing Home Tutorial Integration
+    // Ideally we will directly register a custom integration and pass the configs
+    // for cloud, onPrem and Serverless so that the actual component can take
+    // care of rendering
+    if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
+      plugins.customIntegrations?.registerCustomIntegration(
+        apmTutorialCustomIntegration
       );
-    });
+    } else {
+      boundGetApmIndices().then((indices) => {
+        plugins.home?.tutorials.registerTutorial(
+          tutorialProvider({
+            apmConfig: currentConfig,
+            apmIndices: indices,
+            cloud: plugins.cloud,
+            isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+          })
+        );
+      });
+    }
 
     const telemetryUsageCounter =
       resourcePlugins.usageCollection?.setup.createUsageCounter(
@@ -187,6 +200,7 @@ export class APMPlugin
         ml: plugins.ml,
         observability: plugins.observability,
         ruleDataClient,
+        alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
       });
     }
 

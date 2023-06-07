@@ -176,13 +176,13 @@
         "children": [
           {
             "parentPluginId": "dashboard",
-            "id": "def-public.DashboardCreationOptions.initialInput",
-            "type": "Object",
+            "id": "def-public.DashboardCreationOptions.getInitialInput",
+            "type": "Function",
             "tags": [],
-            "label": "initialInput",
+            "label": "getInitialInput",
             "description": [],
             "signature": [
-              "Partial<",
+              "(() => Partial<",
               {
                 "pluginId": "dashboard",
                 "scope": "common",
@@ -190,20 +190,23 @@
                 "section": "def-common.DashboardContainerInput",
                 "text": "DashboardContainerInput"
               },
-              "> | undefined"
+              ">) | undefined"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "dashboard",
-            "id": "def-public.DashboardCreationOptions.incomingEmbeddable",
-            "type": "Object",
+            "id": "def-public.DashboardCreationOptions.getIncomingEmbeddable",
+            "type": "Function",
             "tags": [],
-            "label": "incomingEmbeddable",
+            "label": "getIncomingEmbeddable",
             "description": [],
             "signature": [
+              "(() => ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -211,11 +214,13 @@
                 "section": "def-public.EmbeddablePackageState",
                 "text": "EmbeddablePackageState"
               },
-              " | undefined"
+              " | undefined) | undefined"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "dashboard",

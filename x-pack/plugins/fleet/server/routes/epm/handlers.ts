@@ -13,7 +13,6 @@ import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
-
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
@@ -30,10 +29,16 @@ import type {
   GetStatsResponse,
   UpdatePackageResponse,
   GetVerificationKeyIdResponse,
+  GetBulkAssetsResponse,
+  SimpleSOAssetType,
+  GetInstalledPackagesResponse,
+  GetEpmDataStreamsResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
+  GetDataStreamsRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageFromRegistryRequestSchema,
@@ -44,11 +49,13 @@ import type {
   FleetRequestHandler,
   UpdatePackageRequestSchema,
   GetLimitedPackagesRequestSchema,
+  GetBulkAssetsRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
   getCategories,
   getPackages,
+  getInstalledPackages,
   getFile,
   getPackageInfo,
   isBulkInstallError,
@@ -65,7 +72,10 @@ import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import type { ReauthorizeTransformRequestSchema } from '../../types';
+import type { ReauthorizeTransformRequestSchema, SimpleSOAssetAttributes } from '../../types';
+import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
+import { getDataStreams } from '../../services/epm/data_streams';
+import { allowedAssetTypesLookup } from '../../../common/constants';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -109,6 +119,52 @@ export const getListHandler: FleetRequestHandler<
       // Only cache responses where the installation status is excluded, otherwise the request
       // needs up-to-date information on whether the package is installed so we can't cache it
       headers: request.query.excludeInstallStatus ? { ...CACHE_CONTROL_10_MINUTES_HEADER } : {},
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getInstalledListHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const res = await getInstalledPackages({
+      savedObjectsClient,
+      ...request.query,
+    });
+
+    const body: GetInstalledPackagesResponse = { ...res };
+
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getDataStreamsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetDataStreamsRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const coreContext = await context.core;
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const res = await getDataStreams({
+      esClient,
+      ...request.query,
+    });
+
+    const body: GetEpmDataStreamsResponse = {
+      ...res,
+    };
+
+    return response.ok({
+      body,
     });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -235,8 +291,46 @@ export const getInfoHandler: FleetRequestHandler<
       ignoreUnverified,
       prerelease,
     });
+
     const body: GetInfoResponse = {
       item: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getBulkAssetsHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetBulkAssetsRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const { assetIds } = request.body;
+
+    const { resolved_objects: resolvedObjects } =
+      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(assetIds);
+    const res: SimpleSOAssetType[] = resolvedObjects
+      .map(({ saved_object: savedObject }) => savedObject)
+      .filter(
+        (savedObject) =>
+          savedObject?.error?.statusCode !== 404 && allowedAssetTypesLookup.has(savedObject.type)
+      )
+      .map((obj) => {
+        return {
+          id: obj.id,
+          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
+          updatedAt: obj.updated_at,
+          attributes: {
+            title: obj.attributes.title,
+            description: obj.attributes.description,
+          },
+        };
+      });
+    const body: GetBulkAssetsResponse = {
+      items: res,
     };
     return response.ok({ body });
   } catch (error) {

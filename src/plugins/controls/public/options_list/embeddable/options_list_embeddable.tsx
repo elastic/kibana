@@ -159,6 +159,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         existsSelected: newInput.existsSelected,
+        searchTechnique: newInput.searchTechnique,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
@@ -183,6 +184,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           this.runOptionsListQuery();
         })
     );
+
     // fetch more options when reaching the bottom of the available options
     this.subscriptions.add(
       loadMorePipe.subscribe((size) => {
@@ -247,7 +249,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             })
           );
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setErrorMessage(e.message);
       }
 
       this.dispatch.setDataViewId(this.dataView?.id);
@@ -267,7 +269,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
         this.field = originalField.toSpec();
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setErrorMessage(e.message);
       }
       this.dispatch.setField(this.field);
     }
@@ -286,7 +288,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString, allowExpensiveQueries },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort, searchTechnique },
     } = this.getState();
     this.dispatch.setLoading(true);
     if (searchString.valid) {
@@ -318,6 +320,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           filters,
           dataView,
           timeRange,
+          searchTechnique,
           runPastTimeout,
           selectedOptions,
           allowExpensiveQueries,
@@ -331,7 +334,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           // from prematurely setting loading to `false` and updating the suggestions to show "No results"
           return;
         }
-        this.onFatalError(response.error);
+        this.dispatch.setErrorMessage(response.error.message);
         return;
       }
 
@@ -365,11 +368,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       // publish filter
       const newFilters = await this.buildFilter();
       batch(() => {
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
         this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.updateQueryResults({
           availableOptions: [],
         });
@@ -412,14 +417,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.runOptionsListQuery();
   };
 
-  public onFatalError = (e: Error) => {
-    batch(() => {
-      this.dispatch.setLoading(false);
-      this.dispatch.setPopoverOpen(false);
-    });
-    super.onFatalError(e);
-  };
-
   public destroy = () => {
     super.destroy();
     this.cleanupStateTools();
@@ -433,6 +430,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
+
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListEmbeddableContext.Provider value={this}>

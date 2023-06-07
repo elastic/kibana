@@ -40,7 +40,7 @@ export const Actions = {
 
 export const ActionsRt = rt.keyof(Actions);
 
-export const UserActionCommonAttributesRt = rt.type({
+export const UserActionCommonAttributesRt = rt.strict({
   created_at: rt.string,
   created_by: UserRt,
   owner: rt.string,
@@ -51,13 +51,13 @@ export const UserActionCommonAttributesRt = rt.type({
  * This should only be used for the getAll route and it should be removed when the route is removed
  * @deprecated use CaseUserActionInjectedIdsRt instead
  */
-export const CaseUserActionInjectedDeprecatedIdsRt = rt.type({
+export const CaseUserActionInjectedDeprecatedIdsRt = rt.strict({
   action_id: rt.string,
   case_id: rt.string,
   comment_id: rt.union([rt.string, rt.null]),
 });
 
-export const CaseUserActionInjectedIdsRt = rt.type({
+export const CaseUserActionInjectedIdsRt = rt.strict({
   comment_id: rt.union([rt.string, rt.null]),
 });
 
