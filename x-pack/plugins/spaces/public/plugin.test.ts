@@ -14,13 +14,14 @@ import {
 } from '@kbn/management-plugin/public/mocks';
 
 import { SpacesPlugin } from './plugin';
+// import { ConfigSchema } from './config';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
     it('should register the spaces API and the space selector app', () => {
       const coreSetup = coreMock.createSetup();
 
-      const plugin = new SpacesPlugin();
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {});
 
       expect(coreSetup.application.register).toHaveBeenCalledWith(
@@ -43,7 +44,7 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const plugin = new SpacesPlugin();
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {
         management,
         home,
@@ -67,7 +68,7 @@ describe('Spaces plugin', () => {
       const coreSetup = coreMock.createSetup();
       const advancedSettings = advancedSettingsMock.createSetupContract();
 
-      const plugin = new SpacesPlugin();
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, { advancedSettings });
 
       expect(advancedSettings.component.register.mock.calls).toMatchInlineSnapshot(`
@@ -92,7 +93,7 @@ describe('Spaces plugin', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
-      const plugin = new SpacesPlugin();
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {});
 
       plugin.start(coreStart);
