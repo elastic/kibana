@@ -19,6 +19,7 @@ import {
 import { login, visit } from '../../tasks/login';
 import { waitForPageToBeLoaded, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
@@ -47,6 +48,7 @@ describe('Inspect Explore pages', () => {
         onLoad: () => {
           waitForWelcomePanelToBeLoaded();
           waitForPageToBeLoaded();
+          selectDataView(DATA_VIEW);
         },
       });
 
