@@ -212,15 +212,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = [
           '0',
-          '1,000',
           '2,000',
-          '3,000',
           '4,000',
-          '5,000',
           '6,000',
-          '7,000',
           '8,000',
-          '9,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -233,15 +228,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(labels);
         const expectedLabels = [
           '0',
-          '1,000',
           '2,000',
-          '3,000',
           '4,000',
-          '5,000',
           '6,000',
-          '7,000',
           '8,000',
-          '9,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -252,15 +242,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = [
           '0',
-          '1,000',
           '2,000',
-          '3,000',
           '4,000',
-          '5,000',
           '6,000',
-          '7,000',
           '8,000',
-          '9,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
