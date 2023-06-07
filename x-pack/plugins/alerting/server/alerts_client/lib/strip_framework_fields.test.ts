@@ -68,10 +68,21 @@ describe('stripFrameworkFields', () => {
       field2: [],
       kibana: {
         alert: {
+          // lodash omit will remove the value for kibana.alert.duration.us but
+          // keep the empty duration object. this doesn't affect the final alert document
+          duration: {},
+          // lodash omit will remove the value for kibana.alert.instance.id but
+          // keep the empty instance object. this doesn't affect the final alert document
+          instance: {},
           not_a_framework_field1: 2,
           not_a_framework_field2: [],
           not_a_framework_field3: {
             abc: 'xyz',
+          },
+          // lodash omit will remove the value for kibana.alert.rule.execution.uuid but
+          // keep the empty rule.execution object. this doesn't affect the final alert document
+          rule: {
+            execution: {},
           },
         },
       },

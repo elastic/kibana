@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, isFunction, fromPairs, isObject, isPlainObject, omit } from 'lodash';
+import { omit } from 'lodash';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleAlertData } from '../../types';
@@ -24,20 +24,5 @@ export const stripFrameworkFields = <AlertData extends RuleAlertData>(
   const keysToStrip = Object.keys(alertFieldMap).filter(
     (key: string) => !allowedFrameworkFields.includes(key)
   );
-  // lodash omit can leave empty objects so we strip them from the result
-  return removeEmptyObjects(omit(payload, keysToStrip)) as AlertData;
-};
-
-type AlertTypes = string | number | boolean | object | AlertTypes[];
-type AlertRecord = Record<string, AlertTypes>;
-type AlertFields = AlertTypes | AlertRecord;
-
-const removeEmptyObjects = (data: AlertFields): AlertFields => {
-  if (isFunction(data) || !isPlainObject(data) || isArray(data)) return data;
-
-  return fromPairs(
-    Object.entries(data)
-      .map(([k, v]) => [k, removeEmptyObjects(v)])
-      .filter(([_, v]) => !(v == null || (isObject(v) && !isArray(v) && isEmpty(v))))
-  );
+  return omit(payload, keysToStrip) as AlertData;
 };
