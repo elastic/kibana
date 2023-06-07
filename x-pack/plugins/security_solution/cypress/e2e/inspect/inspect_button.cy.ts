@@ -17,7 +17,11 @@ import {
   openTableInspectModal,
 } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
-import { waitForPageToBeLoaded, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
+import {
+  postDataView,
+  waitForPageToBeLoaded,
+  waitForWelcomePanelToBeLoaded,
+} from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { selectDataView } from '../../tasks/sourcerer';
 
@@ -44,6 +48,8 @@ describe('Inspect Explore pages', () => {
      */
     it(`inspect ${pageName} page`, () => {
       login();
+      postDataView(DATA_VIEW);
+
       visit(url, {
         onLoad: () => {
           waitForWelcomePanelToBeLoaded();
