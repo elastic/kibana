@@ -29,7 +29,7 @@ export const discoverRouter = (services: DiscoverServices, history: History, isD
             <Route path="/context/:dataViewId/:id">
               <ContextAppRoute />
             </Route>
-            <Route
+            <Route<{ dataView: string; index: string }>
               path="/doc/:dataView/:index/:type"
               render={(props) => (
                 <Redirect to={`/doc/${props.match.params.dataView}/${props.match.params.index}`} />
