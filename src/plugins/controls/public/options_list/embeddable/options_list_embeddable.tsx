@@ -209,6 +209,25 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           )
         )
         .subscribe(async ({ selectedOptions, existsSelected }) => {
+          if (!selectedOptions && existsSelected === undefined) return;
+          if (!selectedOptions || isEmpty(selectedOptions)) {
+            this.dispatch.clearValidAndInvalidSelections({});
+          } else {
+            const { invalidSelections } = this.getState().componentState ?? {};
+            const newValidSelections: string[] = [];
+            const newInvalidSelections: string[] = [];
+            for (const selectedOption of selectedOptions) {
+              if (invalidSelections?.includes(selectedOption)) {
+                newInvalidSelections.push(selectedOption);
+                continue;
+              }
+              newValidSelections.push(selectedOption);
+            }
+            this.dispatch.setValidAndInvalidSelections({
+              validSelections: newValidSelections,
+              invalidSelections: newInvalidSelections,
+            });
+          }
           this.unpublishedChanges.next({ selectedOptions, existsSelected });
         })
     );
@@ -217,33 +236,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
      * debounce filter publications for a split second for a smoother selection/deselection user experience
      */
     this.subscriptions.add(
-      this.unpublishedChanges.pipe(debounceTime(400)).subscribe(() => {
+      this.unpublishedChanges.pipe(debounceTime(750)).subscribe(() => {
         this.publishNewSelections();
       })
     );
   };
 
   public async publishNewSelections() {
-    const { selectedOptions, existsSelected } = this.unpublishedChanges.getValue();
-    if (!selectedOptions && existsSelected === undefined) return;
-    if (!selectedOptions || isEmpty(selectedOptions)) {
-      this.dispatch.clearValidAndInvalidSelections({});
-    } else {
-      const { invalidSelections } = this.getState().componentState ?? {};
-      const newValidSelections: string[] = [];
-      const newInvalidSelections: string[] = [];
-      for (const selectedOption of selectedOptions) {
-        if (invalidSelections?.includes(selectedOption)) {
-          newInvalidSelections.push(selectedOption);
-          continue;
-        }
-        newValidSelections.push(selectedOption);
-      }
-      this.dispatch.setValidAndInvalidSelections({
-        validSelections: newValidSelections,
-        invalidSelections: newInvalidSelections,
-      });
-    }
     const newFilters = await this.buildFilter();
     this.dispatch.publishFilters(newFilters);
     this.unpublishedChanges.next({});
