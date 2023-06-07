@@ -95,13 +95,13 @@ describe('DonutChart', () => {
     const settingsProps = (Settings as jest.Mock).mock.calls[0][0];
     expect(settingsProps.baseTheme).toEqual(LIGHT_THEME);
     expect(settingsProps.theme[0]).toEqual({
-        chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
-        partition: {
-          circlePadding: 4,
-          emptySizeRatio: 0.8,
-          idealFontSizeJump: 1.1,
-          outerSizeRatio: 1,
-        },
+      chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
+      partition: {
+        circlePadding: 4,
+        emptySizeRatio: 0.8,
+        idealFontSizeJump: 1.1,
+        outerSizeRatio: 1,
+      },
     });
     expect(settingsProps.onElementClick).toBeInstanceOf(Function);
   });
