@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export interface Aggregate {
+  key: string | number;
+  doc_count: number;
+}
 
 export interface AlertStatusEventEntityIdMap {
   [alertUuid: string]: {
@@ -12,30 +16,15 @@ export interface AlertStatusEventEntityIdMap {
   };
 }
 
-export enum ProcessEventAlertCategory {
-  all = 'all',
-  file = 'file',
-  network = 'network',
-  process = 'process',
-}
-
 export interface AlertTypeCount {
   category: ProcessEventAlertCategory;
   count: number;
 }
-export type DefaultAlertFilterType = 'all';
+export type EventKind = 'event' | 'signal';
+export type EventCategory = 'process' | 'file' | 'network';
+export type EventAction = 'fork' | 'exec' | 'end' | 'text_output';
 
-export enum EventKind {
-  event = 'event',
-  signal = 'signal',
-}
-
-export enum EventAction {
-  fork = 'fork',
-  exec = 'exec',
-  end = 'end',
-  text_output = 'text_output',
-}
+export type ProcessEventAlertCategory = EventCategory | 'all';
 
 export interface User {
   id?: string;
@@ -107,10 +96,6 @@ export interface ProcessFields {
   end?: string;
   user?: User;
   group?: Group;
-  real_user?: User;
-  real_group?: Group;
-  saved_user?: User;
-  saved_group?: Group;
   supplemental_groups?: Group[];
   exit_code?: number;
   entry_meta?: EntryMeta;
@@ -191,7 +176,7 @@ export interface ProcessEvent {
   '@timestamp'?: string;
   event?: {
     kind?: EventKind;
-    category?: string | string[];
+    category?: EventCategory | EventCategory[];
     action?: EventAction | EventAction[];
     type?: string | string[];
     id?: string;
@@ -273,6 +258,8 @@ export interface ProcessEventOrchestrator {
     parent?: {
       type?: string;
     };
+    labels?: string[];
+    annotations?: string[];
   };
   namespace?: string;
   cluster?: {
