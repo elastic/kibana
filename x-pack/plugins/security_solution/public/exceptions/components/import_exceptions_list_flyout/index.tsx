@@ -172,6 +172,7 @@ export const ImportExceptionListFlyout = React.memo(
                 id={'basicCheckboxId'}
                 label={i18n.IMPORT_EXCEPTION_LIST_OVERWRITE}
                 checked={overwrite}
+                data-test-subj="importExceptionListOverwriteExistingCheckbox"
                 onChange={(e) => {
                   setOverwrite(!overwrite);
                   setAsNewList(false);
@@ -180,6 +181,7 @@ export const ImportExceptionListFlyout = React.memo(
               <EuiCheckbox
                 id={'createNewListCheckbox'}
                 label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
+                data-test-subj="importExceptionListCreateNewCheckbox"
                 checked={asNewList}
                 onChange={(e) => {
                   setAsNewList(!asNewList);
@@ -193,6 +195,7 @@ export const ImportExceptionListFlyout = React.memo(
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="exceptionListsImportFormCloseBTN"
                 iconType="cross"
                 onClick={() => setDisplayImportListFlyout(false)}
                 flush="left"
