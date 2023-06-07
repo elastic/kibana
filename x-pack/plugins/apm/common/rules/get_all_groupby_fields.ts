@@ -17,13 +17,16 @@ export const getAllGroupByFields = (
   ruleType: string,
   groupBy: string[] | undefined = []
 ) => {
-  const predefinedGroupBy =
-    ruleType === ApmRuleType.TransactionDuration ||
-    ruleType === ApmRuleType.TransactionErrorRate
-      ? [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE]
-      : ruleType === ApmRuleType.ErrorCount
-      ? [SERVICE_NAME, SERVICE_ENVIRONMENT]
-      : [];
+  let predefinedGroupBy: string[] = [];
+  switch (ruleType) {
+    case ApmRuleType.TransactionDuration:
+    case ApmRuleType.TransactionErrorRate:
+      predefinedGroupBy = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE];
+      break;
+    case ApmRuleType.ErrorCount:
+      predefinedGroupBy = [SERVICE_NAME, SERVICE_ENVIRONMENT];
+      break;
+  }
 
   return union(predefinedGroupBy, groupBy);
 };
