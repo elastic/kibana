@@ -16,16 +16,9 @@ export interface StartAccessControlSyncArgs {
   nextSyncConfig?: CrawlRequestOverrides;
 }
 
-export const startAccessControlSync = async ({
-  connectorId,
-  nextSyncConfig,
-}: StartAccessControlSyncArgs) => {
+export const startAccessControlSync = async ({ connectorId }: StartAccessControlSyncArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/start_access_control_sync`;
-  return await HttpLogic.values.http.post(route, {
-    // ConnectorConfiguration type is a record of key-value pair where value is a string
-    // To store nextSyncConfig into ConnectorConfiguration the object should be casted to string
-    body: JSON.stringify({ nextSyncConfig: JSON.stringify(nextSyncConfig) }),
-  });
+  return await HttpLogic.values.http.post(route);
 };
 
 export const StartAccessControlSyncApiLogic = createApiLogic(

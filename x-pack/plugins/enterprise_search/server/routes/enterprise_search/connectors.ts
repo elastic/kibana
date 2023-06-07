@@ -166,9 +166,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_incremental_sync',
       validate: {
-        body: schema.object({
-          nextSyncConfig: schema.maybe(schema.string()),
-        }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -176,12 +173,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(
-        client,
-        request.params.connectorId,
-        SyncJobType.INCREMENTAL,
-        request.body.nextSyncConfig
-      );
+      await startConnectorSync(client, request.params.connectorId, SyncJobType.INCREMENTAL);
       return response.ok();
     })
   );
@@ -190,9 +182,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_access_control_sync',
       validate: {
-        body: schema.object({
-          nextSyncConfig: schema.maybe(schema.string()),
-        }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -200,12 +189,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(
-        client,
-        request.params.connectorId,
-        SyncJobType.ACCESS_CONTROL,
-        request.body.nextSyncConfig
-      );
+      await startConnectorSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
       return response.ok();
     })
   );

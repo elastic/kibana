@@ -16,16 +16,9 @@ export interface StartIncrementalSyncArgs {
   nextSyncConfig?: CrawlRequestOverrides;
 }
 
-export const startIncrementalSync = async ({
-  connectorId,
-  nextSyncConfig,
-}: StartIncrementalSyncArgs) => {
+export const startIncrementalSync = async ({ connectorId }: StartIncrementalSyncArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/start_incremental_sync`;
-  return await HttpLogic.values.http.post(route, {
-    // ConnectorConfiguration type is a record of key-value pair where value is a string
-    // To store nextSyncConfig into ConnectorConfiguration the object should be casted to string
-    body: JSON.stringify({ nextSyncConfig: JSON.stringify(nextSyncConfig) }),
-  });
+  return await HttpLogic.values.http.post(route);
 };
 
 export const StartIncrementalSyncApiLogic = createApiLogic(

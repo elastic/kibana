@@ -79,7 +79,7 @@ describe('SyncsContextMenu', () => {
       .find(EuiContextMenuItem);
     expect(menuItems).toHaveLength(1);
 
-    const lastButton = menuItems.at(2);
+    const lastButton = menuItems.last();
 
     expect(lastButton.prop('disabled')).toEqual(false);
     expect(lastButton.text()).toEqual('Cancel Syncs');
