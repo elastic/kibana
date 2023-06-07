@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { RouteComponentProps, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
@@ -60,9 +60,9 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
                   <Route exact path="/stepThree">
                     <StepThree guidedOnboarding={guidedOnboarding} />
                   </Route>
-                  <Route
+                  <Route<{ indexName: string }>
                     path="/stepFour/:indexName?"
-                    render={(routeProps: RouteComponentProps<{ indexName: string }>) => (
+                    render={(routeProps) => (
                       <StepFour guidedOnboarding={guidedOnboarding} {...routeProps} />
                     )}
                   />

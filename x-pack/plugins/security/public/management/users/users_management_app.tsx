@@ -9,7 +9,6 @@ import type { History } from 'history';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect, Router, Switch } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
@@ -107,9 +106,9 @@ export const usersManagementApp = Object.freeze({
                     <CreateUserPage />
                   </Breadcrumb>
                 </Route>
-                <Route
+                <Route<EditUserParams>
                   path="/edit/:username"
-                  render={(props: RouteComponentProps<EditUserParams>) => {
+                  render={(props) => {
                     // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
                     // See https://github.com/elastic/kibana/issues/82440
                     const username = tryDecodeURIComponent(props.match.params.username);
