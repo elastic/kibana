@@ -7,7 +7,7 @@
  */
 
 import type { UiActionsStart, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-browser';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 async function getCompatibleActions(

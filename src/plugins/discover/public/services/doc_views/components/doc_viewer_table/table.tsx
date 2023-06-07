@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getFieldIconType } from '@kbn/unified-field-list';
+import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePager } from '../../../../hooks/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';

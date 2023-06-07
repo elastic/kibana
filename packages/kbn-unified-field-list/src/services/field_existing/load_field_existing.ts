@@ -8,7 +8,7 @@
 
 import { IUiSettingsClient } from '@kbn/core/public';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-service';
+import { UI_SETTINGS } from '@kbn/data-service/src/constants';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { fetchFieldExistence } from './field_existing_utils';

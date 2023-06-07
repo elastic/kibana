@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { UI_SETTINGS } from '@kbn/data-service';
+export { UI_SETTINGS } from '@kbn/data-service/src/constants';
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
 export const KIBANA_USER_QUERY_LANGUAGE_KEY = 'kibana.userQueryLanguage';

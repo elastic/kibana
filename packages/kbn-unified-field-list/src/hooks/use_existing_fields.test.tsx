@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { UI_SETTINGS } from '@kbn/data-service';
+import { UI_SETTINGS } from '@kbn/data-service/src/constants';
 import {
   useExistingFieldsFetcher,
   useExistingFieldsReader,

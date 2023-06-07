@@ -20,7 +20,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
-import { defaultTrigger } from '@kbn/ui-actions-browser';
+import { defaultTrigger } from '@kbn/ui-actions-browser/src/triggers/default_trigger';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());

@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getEsQueryConfig } from '@kbn/data-service';
+import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

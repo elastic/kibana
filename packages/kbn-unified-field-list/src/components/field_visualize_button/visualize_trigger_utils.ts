@@ -12,7 +12,7 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '@kbn/ui-actions-browser';
+} from '@kbn/ui-actions-browser/src/triggers';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
