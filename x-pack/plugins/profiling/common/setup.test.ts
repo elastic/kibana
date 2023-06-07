@@ -99,10 +99,10 @@ function createSettingsState(configured: boolean): PartialSetupState {
   };
 }
 
-describe('Merging partial states', () => {
+describe('Merging partial state operations', () => {
   const defaultSetupState = createDefaultSetupState();
 
-  test('0', () => {
+  test('partial states with missing key', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createCloudState(true),
       createDataState(true),
@@ -113,7 +113,7 @@ describe('Merging partial states', () => {
     expect(mergedState.data.available).toEqual(true);
   });
 
-  test('1', () => {
+  test('deeply nested partial states with overlap', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createApmPolicyState(true),
       createCollectorPolicyState(true),
@@ -125,7 +125,7 @@ describe('Merging partial states', () => {
     expect(mergedState.policies.symbolizer.installed).toEqual(true);
   });
 
-  test('2', () => {
+  test('check resource status with failed partial states', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createPackageState(false),
       createApmPolicyState(true),
@@ -139,7 +139,7 @@ describe('Merging partial states', () => {
     expect(areResourcesSetup(mergedState)).toEqual(false);
   });
 
-  test('3', () => {
+  test('check resource status with all successful partial states', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createPackageState(true),
       createApmPolicyState(true),
