@@ -101,7 +101,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -1343,6 +1343,8 @@
               "ExpandedDetailType",
               " | undefined; session?: ",
               "ExpandedDetailType",
+              " | undefined; securityAssistant?: ",
+              "ExpandedDetailType",
               " | undefined; }"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
@@ -2526,12 +2528,19 @@
             {
               "parentPluginId": "securitySolution",
               "id": "def-server.SecuritySolutionPluginSetup.setAppFeatures.$1",
-              "type": "CompoundType",
+              "type": "Array",
               "tags": [],
               "label": "appFeatureKeys",
               "description": [],
               "signature": [
-                "AppFeatureSecurityKeys & AppFeatureCasesKeys"
+                {
+                  "pluginId": "securitySolution",
+                  "scope": "common",
+                  "docId": "kibSecuritySolutionPluginApi",
+                  "section": "def-common.AppFeatureKey",
+                  "text": "AppFeatureKey"
+                },
+                "[]"
               ],
               "path": "x-pack/plugins/security_solution/server/lib/app_features/app_features.ts",
               "deprecated": false,
@@ -2634,7 +2643,14 @@
         "label": "AppFeatureKeys",
         "description": [],
         "signature": [
-          "AppFeatureSecurityKeys & AppFeatureCasesKeys"
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.AppFeatureKey",
+            "text": "AppFeatureKey"
+          },
+          "[]"
         ],
         "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
         "deprecated": false,
@@ -2681,7 +2697,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
@@ -2707,6 +2723,25 @@
     "objects": [
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.ALL_APP_FEATURE_KEYS",
+        "type": "Object",
+        "tags": [],
+        "label": "ALL_APP_FEATURE_KEYS",
+        "description": [],
+        "signature": [
+          "readonly (",
+          "AppFeatureSecurityKey",
+          ".advancedInsights | ",
+          "AppFeatureCasesKey",
+          ".casesConnectors)[]"
+        ],
+        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.allowedExperimentalValues",
         "type": "Object",
         "tags": [],
@@ -2715,7 +2750,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,

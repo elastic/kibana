@@ -44,6 +44,7 @@ const defaultProps = {
   queryId: '',
   ecsData: {
     _id: 'test',
+    _index: 'test',
   },
 };
 const mockKibana = (permissionType: unknown = defaultPermissions) => {

@@ -76,6 +76,7 @@ interface Props {
   };
   ilmPhases: string[];
   indexNames: string[] | undefined;
+  isAssistantEnabled: boolean;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -106,6 +107,7 @@ const PatternComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   indexNames,
   ilmPhases,
+  isAssistantEnabled,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
@@ -150,6 +152,7 @@ const PatternComponent: React.FC<Props> = ({
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
                 ilmPhase={ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined}
                 indexName={indexName}
+                isAssistantEnabled={isAssistantEnabled}
                 openCreateCaseFlyout={openCreateCaseFlyout}
                 pattern={pattern}
                 patternRollup={patternRollup}
@@ -168,6 +171,7 @@ const PatternComponent: React.FC<Props> = ({
       formatNumber,
       getGroupByFieldsOnClick,
       ilmExplain,
+      isAssistantEnabled,
       itemIdToExpandedRowMap,
       openCreateCaseFlyout,
       pattern,
