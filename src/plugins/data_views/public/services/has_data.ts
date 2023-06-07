@@ -82,6 +82,7 @@ export class HasData {
   }): Promise<boolean> =>
     http
       .post<IndicesViaSearchResponse>(`/internal/search/ese`, {
+        version: '1',
         body: JSON.stringify({
           params: {
             ignore_unavailable: true,
