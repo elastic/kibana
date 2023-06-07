@@ -140,6 +140,7 @@ sourceIdentifier
 functionExpressionArgument
    : qualifiedName
    | string
+   | number
    ;
 
 mathFunctionExpressionArgument

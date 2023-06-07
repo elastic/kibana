@@ -120,6 +120,7 @@ describe('autocomplete_listener', () => {
       'sum',
       'count',
       'count_distinct',
+      'percentile',
       'FieldIdentifier',
     ]);
     testSuggestions('from a | stats a=b', ['|', 'by']);
@@ -153,6 +154,7 @@ describe('autocomplete_listener', () => {
       'to_integer',
       'to_long',
       'to_ip',
+      'to_version',
       'date_format',
       'date_trunc',
       'date_parse',

@@ -238,6 +238,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'to_version',
+    insertText: 'to_version',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toVersionDoc', {
+      defaultMessage: 'Converts to version.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL version = to_version(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'date_format',
     insertText: 'date_format',
     kind: 1,
@@ -436,6 +451,20 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
     documentation: {
       value: buildDocumentation('count(grouped[T]): aggregated[T]', [
         'from index | stats count = count_distinct(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'percentile',
+    insertText: 'percentile',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.countDistinctDoc', {
+      defaultMessage: 'Returns the n percentile of a field.',
+    }),
+    documentation: {
+      value: buildDocumentation('percentile(grouped[T]): aggregated[T]', [
+        'from index | stats pct = percentile(field, 90)',
       ]),
     },
     sortText: 'C',
