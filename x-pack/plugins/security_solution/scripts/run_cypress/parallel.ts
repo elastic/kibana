@@ -43,17 +43,24 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
 const retrieveIntegrations = (
   specPattern: string[],
-  chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-    : 1,
-  chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-    : 0
 ) => {
   const integrationsPaths = globby.sync(specPattern);
-  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-  return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
+  if (process.env.RUN_ALL_TESTS === 'true') {
+    return integrationsPaths;
+  } else {
+    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+      : 1;
+    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+      : 0;
+    const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
+
+    return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
+  }
+
+
 };
 
 export const cli = () => {
@@ -63,28 +70,10 @@ export const cli = () => {
 
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-
-      const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-        ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-        : 1;
-      const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-        ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-        : 0;
-
-      const files = retrieveIntegrations(
-        spec ? [spec] : cypressConfigFile?.e2e?.specPattern,
-        chunksTotal,
-        chunkIndex
-      );
+      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
       if (!files?.length) {
-        const specString = JSON.stringify(spec);
-        throw new Error(
-          `No files found.
-Spec: ${specString}
-chunksTotal: ${chunksTotal}
-chunkIndex: ${chunkIndex}`
-        );
+        throw new Error('No files found');
       }
 
       const esPorts: number[] = [9200, 9220];
@@ -387,8 +376,8 @@ chunkIndex: ${chunkIndex}`
           concurrency: (argv.concurrency as number | undefined)
             ? (argv.concurrency as number)
             : !isOpen
-            ? 3
-            : 1,
+              ? 3
+              : 1,
         }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);

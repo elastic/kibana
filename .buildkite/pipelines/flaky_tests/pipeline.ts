@@ -175,8 +175,11 @@ for (const testSuite of testSuites) {
         env: {
           // disable split of test cases between parallel jobs when running them in flaky test runner
           // by setting chunks vars to value 1, which means all test will run in one job
-          BUILDKITE_PARALLEL_JOB_COUNT: 1,
-          BUILDKITE_PARALLEL_JOB: 0,
+          CLI_NUMBER: 1,
+          CLI_COUNT: 1,
+          // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
+          // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
+          RUN_ALL_TESTS: 'true'
         },
       });
       break;
