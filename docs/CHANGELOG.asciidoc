@@ -48,6 +48,96 @@ Review important information about the {kib} 8.x releases.
 Review the following information about the {kib} 8.8.0 release.
 
 [float]
+[[known-issues-8.8.0]]
+=== Known issues
+
+// tag::known-issue-158940[]
+[discrete]
+.Failed upgrades to 8.8.0 can cause bootlooping and data loss
+[%collapsible]
+====
+*Details* +
+The 8.8.0 release splits the `.kibana` index into multiple saved object indices. If an upgrade to 8.8.0 partially succeeds, but not all the indices are created successfully, {kib} may be unable to successfully complete the upgrade on the next restart.
+
+This can result in a loss of saved objects during the upgrade. This can also leave {kib} in a bootlooping state where it's unable to start due to `write_blocked` indices.
+
+*Impact* +
+The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}58733[related issue].
+====
+// end::known-issue-158940[]
+
+// tag::known-issue-155203[]
+[discrete]
+.Monitors in Synthetics may stop running
+[%collapsible]
+====
+*Details* +
+If Monitor Management was enabled prior to 8.6.0, the API key generated internally will not contain the required permissions. The Synthetics app will attempt to fix this automatically in {kibana-pull}155203[#155203] when a user with https://www.elastic.co/guide/en/observability/8.8/synthetics-role-setup.html[sufficient privileges] visits this page for the first time after upgrading to 8.8.0.
+
+*Impact* +
+All monitors configured to run on Elastic's global managed testing infrastructure will stop running until a user with permissions has loaded the Synthetics app.
+====
+// end::known-issue-155203[]
+
+// tag::known-issue-156798[]
+[discrete]
+.Network throttling disabled for browser monitors in Synthetics
+[%collapsible]
+====
+*Details* +
+Network throttling has been temporarily disabled for browser-based Synthetics monitors running on Elastic's global managed testing infrastructure and private locations. This will be enabled again at some point in the future. We're providing frequent updates on this issue in https://github.com/elastic/synthetics/blob/main/docs/throttling.md[this document].
+
+*Impact* +
+With network throttling being disabled, your monitors may run more quickly (i.e. have a lower duration) than you observed previously and than when network throttling is enabled again in the future. No monitor configurations have been changed, but the network throttling settings are ignored at the moment.
+====
+// end::known-issue-156798[]
+
+// tag::known-issue-120[]
+[discrete]
+.Alert failures when migrating to 8.8.0 from 8.6 or earlier
+[%collapsible]
+====
+*Details* +
+If a cluster meets all of the following conditions, its {elastic-sec} and {observability} rules will fail and no actions will be sent:
+
+- The {elastic-sec} and {observability} rules were created in version 8.6 or earlier releases.
+- There must be an {ref}/index-templates.html[index template] (for any index) that isn't composed of component templates.
+
+The following error messages in the {kib} log occur when {kib} starts or when the rules run:
+
+[source,sh]
+----
+Error installing component template .alerts-ecs-mappings - Cannot read properties of undefined (reading 'includes')
+
+Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - Failure during installation. Cannot read properties of undefined (reading 'includes')
+----
+
+*Impact* +
+If you have upgraded to 8.8.0 and your alerting rules fail, upgrade to 8.8.1.
+====
+// end::known-issue-120[]
+
+// tag::known-issue-158447[]
+[discrete]
+.Incorrect attachments are added to cases
+[%collapsible]
+====
+*Details* +
+When you attach {ml} visualizations, OsQuery, or Indicators of Compromise (IoCs) to a case, each attachment has its own view which renders in the *Activity* tab.
+For these attachments, a bug was introduced in 8.8.0:
+
+. If you add two different attachments on a case, the view will be the same for both.
+. If you add one attachment to one case and another to a different case, in the second case you will view the attachment of the first case.
+
+Alerts are not affected.
+
+*Impact* +
+There are no mitigations for the first scenario, other than upgrading to 8.8.1.
+For the second scenario, refreshing the case fixes the issue.
+====
+// end::known-issue-158447[]
+
+[float]
 [[breaking-changes-8.8.0]]
 === Breaking changes
 
@@ -1060,6 +1150,7 @@ Review the following information about the {kib} 8.6.0 release.
 ====
 *Details* +
 When you attempt to create an APM latency threshold rule in **Observability** > **Alerts** > **Rules** for all services or all transaction types, the request will fail with a `params invalid` error.
+
 *Impact* +
 This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
 ====
