@@ -353,6 +353,7 @@
     "@kbn/datemath": "link:packages/kbn-datemath",
     "@kbn/deeplinks-analytics": "link:packages/deeplinks/analytics",
     "@kbn/deeplinks-devtools": "link:packages/deeplinks/devtools",
+    "@kbn/deeplinks-management": "link:packages/deeplinks/management",
     "@kbn/deeplinks-ml": "link:packages/deeplinks/ml",
     "@kbn/default-nav-analytics": "link:packages/default-nav/analytics",
     "@kbn/default-nav-devtools": "link:packages/default-nav/devtools",
