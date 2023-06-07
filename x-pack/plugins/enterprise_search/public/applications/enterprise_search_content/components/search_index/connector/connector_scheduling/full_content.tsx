@@ -21,6 +21,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { SyncJobType } from '../../../../../../../common/types/connectors';
+
 import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/update_connector_scheduling_api_logic';
 
 import { ConnectorViewIndex, CrawlerViewIndex } from '../../../../types';
@@ -31,30 +33,30 @@ import { ConnectorCronEditor } from './connector_cron_editor';
 
 export interface ConnectorContentSchedulingProps {
   index: CrawlerViewIndex | ConnectorViewIndex;
-  type: 'full' | 'incremental' | 'access_control'; // TODO EFE once DLS Pr merged change with SYNCJOBTYPE
+  type: SyncJobType;
 }
 const getAccordionTitle = (type: ConnectorContentSchedulingProps['type']) => {
   switch (type) {
-    case 'full': {
+    case SyncJobType.FULL: {
       return 'Full content sync';
     }
-    case 'incremental': {
+    case SyncJobType.INCREMENTAL: {
       return 'Incremental content sync';
     }
-    case 'access_control': {
+    case SyncJobType.ACCESS_CONTROL: {
       return 'Access Control Sync';
     }
   }
 };
 const getDescriptionText = (type: ConnectorContentSchedulingProps['type']) => {
   switch (type) {
-    case 'full': {
+    case SyncJobType.FULL: {
       return 'Synchronize all data from your data source.';
     }
-    case 'incremental': {
+    case SyncJobType.INCREMENTAL: {
       return 'A lightweight sync job that only fetches updated content from your data source.';
     }
-    case 'access_control': {
+    case SyncJobType.ACCESS_CONTROL: {
       return 'Schedule access control syncs to keep permissions mappings up to date.';
     }
   }
@@ -113,17 +115,25 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <ConnectorCronEditor
-                schedulingInput={schedulingInput[type]}
+                scheduling={scheduling[type]}
                 type={type}
-                onSave={(schedule) =>
+                onReset={() => {
+                  setScheduling({
+                    ...schedulingInput,
+                  });
+                }}
+                onSave={(interval) => {
                   makeRequest({
                     connectorId: index.connector.id,
                     scheduling: {
-                      ...schedulingInput,
-                      [type]: schedule,
+                      ...scheduling,
+                      [type]: {
+                        ...scheduling[type],
+                        interval,
+                      },
                     },
-                  })
-                }
+                  });
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

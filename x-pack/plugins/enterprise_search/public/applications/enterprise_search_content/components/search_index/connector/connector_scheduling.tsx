@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { ConnectorStatus, SyncJobType } from '../../../../../../common/types/connectors';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
@@ -157,10 +157,10 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           >
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <ConnectorContentScheduling type="full" index={index} />
+                <ConnectorContentScheduling type={SyncJobType.FULL} index={index} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <ConnectorContentScheduling type="incremental" index={index} />
+                <ConnectorContentScheduling type={SyncJobType.INCREMENTAL} index={index} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </SchedulePanel>
@@ -170,7 +170,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
             title="Document Level Security"
             description="Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date."
           >
-            <ConnectorContentScheduling type="access_control" index={index} />
+            <ConnectorContentScheduling type={SyncJobType.ACCESS_CONTROL} index={index} />
           </SchedulePanel>
         </EuiFlexItem>
       </EuiFlexGroup>
