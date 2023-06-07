@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
@@ -50,7 +52,6 @@ import { ExperimentDatastreamSettings } from './experimental_datastream_settings
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
-import { useQuery } from '@tanstack/react-query';
 
 const ScrollAnchor = styled.div`
   display: none;
