@@ -13456,7 +13456,6 @@
     "xpack.enterpriseSearch.content.searchApplication.api.step2.copyEndpointDescription": "使用此 URL 访问您搜索应用程序的 API 终端。",
     "xpack.enterpriseSearch.content.searchApplication.api.step2.title": "复制搜索应用程序的终端",
     "xpack.enterpriseSearch.content.searchApplication.api.step3.title": "了解如何调用终端",
-    "xpack.enterpriseSearch.content.searchApplications.connect.apiTabTitle": "API",
     "xpack.enterpriseSearch.content.searchApplications.connect.pageTitle": "连接",
     "xpack.enterpriseSearch.content.searchApplications.content.indicesTabTitle": "索引",
     "xpack.enterpriseSearch.content.searchApplications.content.pageTitle": "内容",
