@@ -54,7 +54,7 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 

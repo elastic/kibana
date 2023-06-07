@@ -84,7 +84,7 @@ interface Props {
   height?: number;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   setSelectedTabId: (tabId: string) => void;
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 

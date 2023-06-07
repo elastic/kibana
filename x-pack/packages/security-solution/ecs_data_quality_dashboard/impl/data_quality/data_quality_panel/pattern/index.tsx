@@ -89,7 +89,7 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,

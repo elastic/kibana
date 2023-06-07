@@ -53,7 +53,7 @@ export interface Props {
   patterns: string[];
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,

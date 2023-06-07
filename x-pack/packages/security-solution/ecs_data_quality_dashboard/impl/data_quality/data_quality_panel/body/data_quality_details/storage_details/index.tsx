@@ -19,7 +19,7 @@ export interface Props {
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 

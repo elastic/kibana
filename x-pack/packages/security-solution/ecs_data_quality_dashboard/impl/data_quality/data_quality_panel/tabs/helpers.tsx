@@ -104,7 +104,7 @@ export const getTabs = ({
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }) => [
   {

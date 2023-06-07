@@ -45,7 +45,7 @@ export interface Props {
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 
@@ -90,8 +90,8 @@ const StorageTreemapComponent: React.FC<Props> = ({
   onIndexSelected,
   patternRollups,
   patterns,
-  theme,
-  baseTheme,
+  theme = {},
+  baseTheme
 }: Props) => {
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,

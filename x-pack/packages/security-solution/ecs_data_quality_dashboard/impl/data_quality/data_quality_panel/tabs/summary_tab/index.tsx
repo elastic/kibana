@@ -50,7 +50,7 @@ interface Props {
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
   sizeInBytes: number | undefined;
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 

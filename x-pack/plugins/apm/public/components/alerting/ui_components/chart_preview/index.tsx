@@ -18,6 +18,7 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -88,8 +89,8 @@ export function ChartPreview({
         }}
         data-test-subj="ChartPreview"
       >
+        <Tooltip type="none" />
         <Settings
-          tooltip="none"
           showLegend={series.length > 1}
           legendPosition={'bottom'}
           legendSize={legendSize}

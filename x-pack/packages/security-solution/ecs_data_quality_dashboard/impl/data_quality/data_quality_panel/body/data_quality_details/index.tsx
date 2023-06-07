@@ -53,7 +53,7 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,

@@ -71,7 +71,7 @@ export interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
