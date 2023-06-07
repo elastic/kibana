@@ -65,7 +65,13 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
     // config in the process takes precedence
-    expect(newConfiguration).toEqual({ ...originalMonitorConfiguration, hash: '', revision: 2 });
+    console.log('the new config', JSON.stringify(newConfiguration, null, 2));
+    console.log('the original config', JSON.stringify(originalMonitorConfiguration, null, 2));
+    expect(newConfiguration).toEqual({
+      ...originalMonitorConfiguration,
+      hash: '',
+      revision: 2,
+    });
   });
 
   step('Navigate to edit monitor', async () => {
