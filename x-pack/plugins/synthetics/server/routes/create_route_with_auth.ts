@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { UMServerLibs } from '../legacy_uptime/lib/lib';
 import {
   SyntheticsRestApiRouteFactory,
@@ -13,13 +12,13 @@ import {
   SyntheticsRouteHandler,
 } from '../legacy_uptime/routes';
 
-export const createSyntheticsRouteWithAuth = (
+export const createSyntheticsRouteWithAuth = <ClientContract = any>(
   libs: UMServerLibs,
   routeCreator: SyntheticsRestApiRouteFactory | SyntheticsStreamingRouteFactory
-): SyntheticsRoute => {
+): SyntheticsRoute<ClientContract> => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
-  const licenseCheckHandler: SyntheticsRouteHandler = async ({
+  const licenseCheckHandler: SyntheticsRouteHandler<ClientContract> = async ({
     context,
     response,
     ...restProps

@@ -67,7 +67,7 @@ export type UptimeRoute = UMRouteDefinition<UMRouteHandler>;
  * Functions of this type accept custom lib functions and outputs a route object.
  */
 export type UMRestApiRouteFactory = (libs: UMServerLibs) => UptimeRoute;
-export type SyntheticsRestApiRouteFactory<ClientContract extends {}> = (
+export type SyntheticsRestApiRouteFactory<ClientContract = any> = (
   libs: UMServerLibs
 ) => SyntheticsRoute<ClientContract>;
 export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => SyntheticsStreamingRoute;
@@ -81,7 +81,7 @@ export type UMKibanaRouteWrapper = (
   server: UptimeServerSetup
 ) => UMKibanaRoute;
 
-export type SyntheticsRoute<ClientContract> = UMRouteDefinition<
+export type SyntheticsRoute<ClientContract = any> = UMRouteDefinition<
   SyntheticsRouteHandler<ClientContract>
 >;
 export type SyntheticsStreamingRoute = UMRouteDefinition<SyntheticsStreamingRouteHandler>;
@@ -127,7 +127,7 @@ export interface RouteContext<Query = Record<string, any>> {
   spaceId: string;
 }
 
-export type SyntheticsRouteHandler<ClientContract> = ({
+export type SyntheticsRouteHandler<ClientContract = any> = ({
   uptimeEsClient,
   context,
   request,
