@@ -14,9 +14,11 @@ import {
 } from '@kbn/core/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
-  ILogViewsClient,
+  LogView,
   LogViewAttributes,
+  LogViewReference,
   LogViewsStaticConfig,
+  ResolvedLogView,
 } from '../../../common/log_views';
 import { InfraSources } from '../../lib/sources';
 
@@ -39,4 +41,11 @@ export interface LogViewsServiceStart {
     request?: KibanaRequest
   ): ILogViewsClient;
   getScopedClient(request: KibanaRequest): ILogViewsClient;
+}
+
+export interface ILogViewsClient {
+  getLogView(logViewId: string): Promise<LogView>;
+  getResolvedLogView(logView: LogViewReference): Promise<ResolvedLogView>;
+  putLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): Promise<LogView>;
+  resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
 }

@@ -16,7 +16,6 @@ import {
 import {
   defaultLogViewAttributes,
   defaultLogViewId,
-  ILogViewsClient,
   LogIndexReference,
   LogView,
   LogViewAttributes,
@@ -36,6 +35,7 @@ import {
 } from '../../saved_objects/log_view';
 import { logViewSavedObjectRT } from '../../saved_objects/log_view/types';
 import { NotFoundError } from './errors';
+import { ILogViewsClient } from './types';
 
 type DataViewsService = ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>;
 
@@ -53,9 +53,7 @@ export class LogViewsClient implements ILogViewsClient {
     private readonly config: LogViewsStaticConfig
   ) {}
 
-  public async getLogView(logViewReference: LogViewReference): Promise<LogView> {
-    const logViewId = getLogViewId(logViewReference);
-
+  public async getLogView(logViewId: string): Promise<LogView> {
     return await this.getSavedLogView(logViewId)
       .catch((err) =>
         SavedObjectsErrorHelpers.isNotFoundError(err) || err instanceof NotFoundError
@@ -71,18 +69,16 @@ export class LogViewsClient implements ILogViewsClient {
 
   public async getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView> {
     const logView = persistedLogViewReferenceRT.is(logViewReference)
-      ? await this.getLogView(logViewReference)
+      ? await this.getLogView(logViewReference.logViewId)
       : logViewReference;
     const resolvedLogView = await this.resolveLogView(logView.id, logView.attributes);
     return resolvedLogView;
   }
 
   public async putLogView(
-    logViewReference: LogViewReference,
+    logViewId: string,
     logViewAttributes: Partial<LogViewAttributes>
   ): Promise<LogView> {
-    const logViewId = getLogViewId(logViewReference);
-
     const resolvedLogViewId =
       (await this.resolveLogViewId(logViewId)) ?? SavedObjectsUtils.generateId();
 
@@ -220,9 +216,3 @@ const getLogIndicesFromSourceConfigurationLogIndices = (
         dataViewId: logIndices.indexPatternId,
       }
     : logIndices;
-
-const getLogViewId = (logViewReference: LogViewReference) => {
-  return logViewReference.type === 'log-view-inline'
-    ? logViewReference.id
-    : logViewReference.logViewId;
-};

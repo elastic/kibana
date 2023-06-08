@@ -9,16 +9,16 @@ import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import type { ObservabilityConfig } from '@kbn/observability-plugin/server';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { RulesServiceSetup } from '../services/rules';
-import type { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
-import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-import type { InfraFieldsDomain } from './domains/fields_domain';
-import type { InfraLogEntriesDomain } from './domains/log_entries_domain';
-import type { InfraMetricsDomain } from './domains/metrics_domain';
-import type { InfraSources } from './sources';
-import type { InfraSourceStatus } from './source_status';
+import { RulesServiceSetup } from '../services/rules';
+import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
+import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+import { InfraFieldsDomain } from './domains/fields_domain';
+import { InfraLogEntriesDomain } from './domains/log_entries_domain';
+import { InfraMetricsDomain } from './domains/metrics_domain';
+import { InfraSources } from './sources';
+import { InfraSourceStatus } from './source_status';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;

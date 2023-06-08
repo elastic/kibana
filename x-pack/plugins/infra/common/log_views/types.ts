@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import type { ResolvedLogView } from './resolved_log_view';
 
 export interface LogViewsStaticConfig {
   messageFields: string[];
@@ -121,13 +120,3 @@ export const inlineLogViewReferenceRT = rt.type({
 export const logViewReferenceRT = rt.union([persistedLogViewReferenceRT, inlineLogViewReferenceRT]);
 
 export type LogViewReference = rt.TypeOf<typeof logViewReferenceRT>;
-
-export interface ILogViewsClient {
-  getLogView(logViewReference: LogViewReference): Promise<LogView>;
-  getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView>;
-  putLogView(
-    logViewReference: LogViewReference,
-    logViewAttributes: Partial<LogViewAttributes>
-  ): Promise<LogView>;
-  resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
-}

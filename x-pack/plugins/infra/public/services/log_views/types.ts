@@ -8,9 +8,19 @@
 import { HttpStart } from '@kbn/core/public';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { ILogViewsClient, LogViewStatus, ResolvedLogView } from '../../../common/log_views';
+import {
+  LogView,
+  LogViewAttributes,
+  LogViewReference,
+  LogViewStatus,
+  ResolvedLogView,
+} from '../../../common/log_views';
 
 export type LogViewsServiceSetup = void;
+
+export interface LogViewsServiceStart {
+  client: ILogViewsClient;
+}
 
 export interface LogViewsServiceStartDeps {
   dataViews: DataViewsContract;
@@ -18,10 +28,13 @@ export interface LogViewsServiceStartDeps {
   search: ISearchStart;
 }
 
-export interface LogViewsServiceStart {
-  client: ILogViewsPublicClient;
-}
-
-export interface ILogViewsPublicClient extends ILogViewsClient {
+export interface ILogViewsClient {
+  getLogView(logViewReference: LogViewReference): Promise<LogView>;
   getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus>;
+  getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView>;
+  putLogView(
+    logViewReference: LogViewReference,
+    logViewAttributes: Partial<LogViewAttributes>
+  ): Promise<LogView>;
+  resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
 }

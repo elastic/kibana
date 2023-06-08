@@ -16,7 +16,7 @@ import {
 } from '../../../common/alerting/logs/log_threshold';
 import { createLazyComponentWithKibanaContext } from '../../hooks/use_kibana';
 import { InfraClientCoreSetup } from '../../types';
-import { formatRuleData } from './rule_data_formatters';
+import { createRuleFormatter } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
 export function createLogThresholdRuleType(
@@ -47,6 +47,6 @@ export function createLogThresholdRuleType(
       }
     ),
     requiresAppContext: false,
-    format: formatRuleData(logsLocator),
+    format: createRuleFormatter(logsLocator),
   };
 }

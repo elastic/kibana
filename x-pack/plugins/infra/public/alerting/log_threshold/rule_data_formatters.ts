@@ -10,7 +10,7 @@ import type { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/p
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { LogsLocatorParams } from '../../../common/locators';
 
-export const formatRuleData: (
+export const createRuleFormatter: (
   logsLocator: LocatorPublic<LogsLocatorParams>
 ) => ObservabilityRuleTypeFormatter =
   (logsLocator) =>
@@ -20,8 +20,8 @@ export const formatRuleData: (
     const time = alertStartDate != null ? new Date(alertStartDate).valueOf() : undefined;
     const url = logsLocator.getRedirectUrl({ time });
 
-    // the alerts UI appends the link to the base url so we need to remove it here
-    const link = extractLink(url);
+    // the alerts UI already prepends the url to the baseUrl so we need to remove it here
+    const link = removeBaseUrl(url);
 
     return {
       reason,
@@ -29,8 +29,8 @@ export const formatRuleData: (
     };
   };
 
-const extractLink = (url: string): string => {
-  const substring = '/app';
+const removeBaseUrl = (url: string): string => {
+  const substring = '/app/';
   const substringIndex = url.indexOf(substring);
 
   return url.substring(substringIndex);

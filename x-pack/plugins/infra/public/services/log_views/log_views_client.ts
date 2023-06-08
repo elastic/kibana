@@ -29,9 +29,9 @@ import {
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import type { ILogViewsPublicClient } from './types';
+import { ILogViewsClient } from './types';
 
-export class LogViewsClient implements ILogViewsPublicClient {
+export class LogViewsClient implements ILogViewsClient {
   constructor(
     private readonly dataViews: DataViewsContract,
     private readonly http: HttpStart,

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ILogViewsClient, LogViewReference } from '../../../common/log_views';
+import type { LogViewReference } from '../../../common/log_views';
 import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
+import type { ILogViewsClient } from './types';
 
 export const createLogViewsClientMock = (): jest.Mocked<ILogViewsClient> => ({
   getLogView: jest.fn(),

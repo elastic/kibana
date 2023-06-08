@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ILogViewsPublicClient } from './types';
+import { ILogViewsClient } from './types';
 
-export const createLogViewsClientMock = (): jest.Mocked<ILogViewsPublicClient> => ({
+export const createLogViewsClientMock = (): jest.Mocked<ILogViewsClient> => ({
   getLogView: jest.fn(),
   getResolvedLogView: jest.fn(),
   getResolvedLogViewStatus: jest.fn(),

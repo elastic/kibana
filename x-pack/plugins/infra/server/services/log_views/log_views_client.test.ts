@@ -12,7 +12,6 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
 import {
   defaultLogViewId,
-  DEFAULT_LOG_VIEW,
   LogView,
   LogViewAttributes,
   LogViewsStaticConfig,
@@ -80,7 +79,7 @@ describe('LogViewsClient class', () => {
       page: 1,
     });
 
-    const logView = await logViewsClient.getLogView(DEFAULT_LOG_VIEW);
+    const logView = await logViewsClient.getLogView(defaultLogViewId);
 
     expect(savedObjectsClient.get).toHaveBeenCalledWith(logViewSavedObjectName, 'SAVED_OBJECT_ID');
     expect(logView).toEqual(logViewMock);
@@ -110,10 +109,7 @@ describe('LogViewsClient class', () => {
       page: 1,
     });
 
-    const logView = await logViewsClient.getLogView({
-      ...DEFAULT_LOG_VIEW,
-      logViewId: 'SAVED_OBJECT_ID',
-    });
+    const logView = await logViewsClient.getLogView('SAVED_OBJECT_ID');
 
     expect(savedObjectsClient.get).toHaveBeenCalledWith(logViewSavedObjectName, 'SAVED_OBJECT_ID');
     expect(logView).toEqual(logViewMock);
@@ -131,7 +127,7 @@ describe('LogViewsClient class', () => {
       page: 1,
     });
 
-    await logViewsClient.getLogView(DEFAULT_LOG_VIEW);
+    await logViewsClient.getLogView(defaultLogViewId);
 
     expect(infraSources.getSourceConfiguration).toHaveBeenCalledWith(
       savedObjectsClient,
@@ -170,7 +166,7 @@ describe('LogViewsClient class', () => {
       page: 1,
     });
 
-    const logView = await logViewsClient.putLogView(DEFAULT_LOG_VIEW, newLogViewMock.attributes);
+    const logView = await logViewsClient.putLogView(defaultLogViewId, newLogViewMock.attributes);
 
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       logViewSavedObjectName,
@@ -204,7 +200,7 @@ describe('LogViewsClient class', () => {
       page: 1,
     });
 
-    const logView = await logViewsClient.putLogView(DEFAULT_LOG_VIEW, newLogViewMock.attributes);
+    const logView = await logViewsClient.putLogView(defaultLogViewId, newLogViewMock.attributes);
 
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       logViewSavedObjectName,
