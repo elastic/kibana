@@ -35,6 +35,7 @@
     "@kbn/securitysolution-data-table",
     "@kbn/cases-plugin",
     "@kbn/data-plugin",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/actions-plugin"
   ]
 }
