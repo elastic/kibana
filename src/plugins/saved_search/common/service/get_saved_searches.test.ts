@@ -6,26 +6,25 @@
  * Side Public License, v 1.
  */
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { getSavedSearch } from './get_saved_searches';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { GetSavedSearchDependencies } from './get_saved_searches';
 
 describe('getSavedSearch', () => {
-  let search: DataPublicPluginStart['search'];
-  let cmClient: ContentManagementPublicStart['client'];
+  let searchSourceCreate: DataPublicPluginStart['search']['searchSource']['create'];
+  let getSavedSrch: GetSavedSearchDependencies['getSavedSrch'];
 
   beforeEach(() => {
-    cmClient = contentManagementMock.createStartContract().client;
-    search = dataPluginMock.createStartContract().search;
+    getSavedSrch = jest.fn();
+    searchSourceCreate = dataPluginMock.createStartContract().search.searchSource.create;
   });
 
   test('should throw an error if so not found', async () => {
     let errorMessage = 'No error thrown.';
-    cmClient.get = jest.fn().mockReturnValue({
+    getSavedSrch = jest.fn().mockReturnValue({
       statusCode: 404,
       error: 'Not Found',
       message: 'Saved object [ccf1af80-2297-11ec-86e0-1155ffb9c7a7] not found',
@@ -33,8 +32,8 @@ describe('getSavedSearch', () => {
 
     try {
       await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-        contentManagement: cmClient,
-        search,
+        getSavedSrch,
+        searchSourceCreate,
       });
     } catch (error) {
       errorMessage = error.message;
@@ -46,7 +45,7 @@ describe('getSavedSearch', () => {
   });
 
   test('should find saved search', async () => {
-    cmClient.get = jest.fn().mockReturnValue({
+    getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {
           kibanaSavedObjectMeta: {
@@ -77,11 +76,11 @@ describe('getSavedSearch', () => {
     });
 
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-      contentManagement: cmClient,
-      search,
+      getSavedSrch,
+      searchSourceCreate,
     });
 
-    expect(cmClient.get).toHaveBeenCalled();
+    expect(getSavedSrch).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
@@ -150,7 +149,7 @@ describe('getSavedSearch', () => {
   });
 
   test('should find saved search with sql mode', async () => {
-    cmClient.get = jest.fn().mockReturnValue({
+    getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {
           kibanaSavedObjectMeta: {
@@ -182,11 +181,11 @@ describe('getSavedSearch', () => {
     });
 
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-      contentManagement: cmClient,
-      search,
+      getSavedSrch,
+      searchSourceCreate,
     });
 
-    expect(cmClient.get).toHaveBeenCalled();
+    expect(getSavedSrch).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
@@ -255,7 +254,7 @@ describe('getSavedSearch', () => {
   });
 
   it('should call savedObjectsTagging.ui.getTagIdsFromReferences', async () => {
-    cmClient.get = jest.fn().mockReturnValue({
+    getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {
           kibanaSavedObjectMeta: {
@@ -296,8 +295,8 @@ describe('getSavedSearch', () => {
       },
     } as unknown as SavedObjectsTaggingApi;
     await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-      contentManagement: cmClient,
-      search,
+      getSavedSrch,
+      searchSourceCreate,
       savedObjectsTagging,
     });
     expect(savedObjectsTagging.ui.getTagIdsFromReferences).toHaveBeenCalledWith([

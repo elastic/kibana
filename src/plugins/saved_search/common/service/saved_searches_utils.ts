@@ -8,11 +8,11 @@
 
 import { pick } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import type { SavedSearchAttributes } from '../../../common';
-import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../../../common';
-import type { SavedSearch } from './types';
+import type { SavedSearchAttributes } from '..';
+import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
+import type { SavedSearch } from '../types';
 
-export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '../../../common';
+export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '..';
 
 export const fromSavedSearchAttributes = (
   id: string,

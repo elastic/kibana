@@ -20,6 +20,8 @@ import {
 type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 
 const createExecutionContextMock = (): DeeplyMockedKeys<ExecutionContext> => ({
+  // todo
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abortSignal: {} as any,
   getExecutionContext: jest.fn(),
   getSearchContext: jest.fn(),
@@ -41,20 +43,13 @@ describe('kibanaContextFn', () => {
   beforeEach(async () => {
     kibanaContextFn = getKibanaContextFn(getStartServicesMock);
     startServicesMock = {
-      savedObjectsClient: {
-        create: jest.fn(),
-        delete: jest.fn(),
-        find: jest.fn(),
-        get: jest.fn(),
-        getSavedSearch: jest.fn(),
-        update: jest.fn(),
-      },
+      getSavedSearch: jest.fn(),
     };
   });
 
   it('merges and deduplicates queries from different sources', async () => {
     const { fn } = kibanaContextFn;
-    startServicesMock.savedObjectsClient.getSavedSearch.mockResolvedValue({
+    startServicesMock.getSavedSearch.mockResolvedValue({
       attributes: {
         kibanaSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
@@ -87,6 +82,8 @@ describe('kibanaContextFn', () => {
           }),
         },
       },
+      // todo
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     const args = {
       ...emptyArgs,

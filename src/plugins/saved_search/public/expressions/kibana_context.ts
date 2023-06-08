@@ -35,9 +35,10 @@ export function getKibanaContext({
   >;
 }) {
   return getKibanaContextFn(async () => {
-    const [core] = await getStartServices();
+    const serv = await getStartServices();
+    // console.log('HERE!!!', serv);
     return {
-      getSavedSearch: core.savedObjects.client.get.bind(core.savedObjects.client),
+      getSavedSearch: serv[2].get.bind(serv[2].get), // serv[0].savedObjects.client.get.bind(serv[0].savedObjects.client),
     };
   });
 }

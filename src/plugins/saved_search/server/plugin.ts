@@ -7,7 +7,11 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { StartServicesAccessor } from '@kbn/core/server';
+import type {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '@kbn/data-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { getSavedSearchObjectType } from './saved_objects';
@@ -15,6 +19,7 @@ import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchStorage } from './content_management';
 import { kibanaContext } from '../common/expressions';
 import { getKibanaContext } from './expressions/kibana_context';
+import { getSavedSearch } from '../common/service/get_saved_searches';
 
 /**
  * Saved search plugin server Setup contract
@@ -25,7 +30,13 @@ export interface SavedSearchPublicSetupDependencies {
   expressions: ExpressionsServerSetup;
 }
 
-export class SavedSearchServerPlugin implements Plugin<object, object> {
+export interface SavedSearchServerStartDeps {
+  data: DataPluginStart;
+}
+
+export class SavedSearchServerPlugin
+  implements Plugin<object, object, object, SavedSearchServerStartDeps>
+{
   public setup(
     core: CoreSetup,
     { data, contentManagement, expressions }: SavedSearchPublicSetupDependencies
@@ -44,13 +55,17 @@ export class SavedSearchServerPlugin implements Plugin<object, object> {
     core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
 
     expressions.registerType(kibanaContext);
-    expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(
+      getKibanaContext(core.getStartServices as StartServicesAccessor<SavedSearchServerStartDeps>)
+    );
 
     return {};
   }
 
   public start(core: CoreStart) {
-    return {};
+    return {
+      getSavedSearch,
+    };
   }
 
   public stop() {}

@@ -13,14 +13,14 @@ import { Adapters } from '@kbn/inspector-plugin/common';
 import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
-import { PersistenceAPI } from '@kbn/data-views-plugin/common';
+import { SavedObjectReference } from '@kbn/core/server';
 import { KibanaTimerangeOutput } from '@kbn/data-plugin/common';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
+import { SavedSearch } from '../types';
 
 export interface KibanaContextStartDependencies {
-  savedObjectsClient: PersistenceAPI;
+  getSavedSearch: (id: string) => Promise<SavedSearch>;
 }
 
 interface Arguments {
@@ -38,13 +38,10 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   ExecutionContext<Adapters, ExecutionContextSearch>
 >;
 
-const getParsedValue = (data: any, defaultValue: any) =>
-  typeof data === 'string' && data.length ? JSON.parse(data) || defaultValue : defaultValue;
-
 const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
   uniqBy<Query>(
     [...(Array.isArray(first) ? first : [first]), ...(Array.isArray(second) ? second : [second])],
-    (n: any) => JSON.stringify(n.query)
+    (n) => JSON.stringify(n.query)
   );
 
 export const getKibanaContextFn = (
@@ -120,7 +117,7 @@ export const getKibanaContextFn = (
     },
 
     async fn(input, args, { getKibanaRequest }) {
-      const { savedObjectsClient } = await getStartDependencies(getKibanaRequest);
+      const { getSavedSearch } = await getStartDependencies(getKibanaRequest);
 
       const timeRange = args.timeRange || input?.timeRange;
       let queries = mergeQueries(input?.query, args?.q?.filter(Boolean) || []);
@@ -129,17 +126,14 @@ export const getKibanaContextFn = (
       let filters = [...(input?.filters || [])];
 
       if (args.savedSearchId) {
-        // todo this needs to be passed in
-        // get raw saved object
-        const obj = await savedObjectsClient.getSavedSearch(args.savedSearchId);
-        const search = (obj.attributes as any).kibanaSavedObjectMeta.searchSourceJSON as string;
-        const { query, filter } = getParsedValue(search, {});
+        const obj = await getSavedSearch(args.savedSearchId);
+        const { query, filter } = obj.searchSource.getFields();
 
         if (query) {
-          queries = mergeQueries(queries, query);
+          queries = mergeQueries(queries, query as Query);
         }
         if (filter) {
-          filters = [...filters, ...(Array.isArray(filter) ? filter : [filter])];
+          filters = [...filters, ...(Array.isArray(filter) ? filter : [filter])] as Filter[];
         }
       }
       const uniqueArgFilters = filterFromArgs.filter(
@@ -154,7 +148,7 @@ export const getKibanaContextFn = (
       return {
         type: 'kibana_context',
         query: queries,
-        filters: uniqFilters(filters.filter((f: any) => !f.meta?.disabled)),
+        filters: uniqFilters(filters.filter((f: Filter) => !f.meta?.disabled)),
         timeRange,
       };
     },
