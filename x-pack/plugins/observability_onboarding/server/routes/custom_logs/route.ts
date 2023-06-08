@@ -15,12 +15,12 @@ import {
   SavedObservabilityOnboardingState,
 } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { createShipperApiKey } from './create_shipper_api_key';
+import { createShipperApiKey } from './api_key/create_shipper_api_key';
 import { findLatestObservabilityOnboardingState } from './find_latest_observability_onboarding_state';
 import { getESHosts } from './get_es_hosts';
 import { getKibanaUrl } from './get_kibana_url';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
-import { hasLogMonitoringPrivileges } from './has_log_monitoring_privileges';
+import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
