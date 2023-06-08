@@ -21240,7 +21240,6 @@
     "xpack.lens.xyChart.iconSelect.starLabel": "五角星",
     "xpack.lens.xyChart.iconSelect.tagIconLabel": "标签",
     "xpack.lens.xyChart.iconSelect.triangleIconLabel": "三角形",
-    "xpack.lens.xyChart.ignoreGlobalFilters": "使用全局筛选",
     "xpack.lens.xyChart.layerAnnotation": "标注",
     "xpack.lens.xyChart.layerAnnotationsIgnoreTitle": "忽略全局筛选的图层",
     "xpack.lens.xyChart.layerAnnotationsLabel": "标注",
