@@ -55,7 +55,7 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   context: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
-  useLegacyAlerts: true,
+  useLegacyAlerts: false,
 };
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
