@@ -619,7 +619,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
         {
           defaultMessage: 'AUTO_BUCKET',
         }
@@ -627,7 +627,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
             {
               defaultMessage: `### AUTO_BUCKET
 Creates human-friendly buckets and returns a \`datetime\` value for each row that corresponds to the resulting bucket the row falls into. Combine \`AUTO_BUCKET\`with \`STATS ... BY\` to create a date histogram.
