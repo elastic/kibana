@@ -1116,4 +1116,50 @@ describe('TaskStore', () => {
       expect(adHocTaskCounter.count).toEqual(0);
     });
   });
+
+  describe('TaskValidator', () => {
+    test(`should pass allowReadingInvalidState:false accordingly`, () => {
+      const logger = mockLogger();
+
+      new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+      });
+
+      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
+        logger,
+        definitions: taskDefinitions,
+        allowReadingInvalidState: false,
+      });
+    });
+
+    test(`should pass allowReadingInvalidState:true accordingly`, () => {
+      const logger = mockLogger();
+
+      new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: true,
+      });
+
+      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
+        logger,
+        definitions: taskDefinitions,
+        allowReadingInvalidState: true,
+      });
+    });
+  });
 });
