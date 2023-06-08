@@ -896,6 +896,8 @@
       "@kbn/logging/*": ["packages/kbn-logging/*"],
       "@kbn/logging-mocks": ["packages/kbn-logging-mocks"],
       "@kbn/logging-mocks/*": ["packages/kbn-logging-mocks/*"],
+      "@kbn/logs-shared-plugin": ["x-pack/plugins/logs_shared"],
+      "@kbn/logs-shared-plugin/*": ["x-pack/plugins/logs_shared/*"],
       "@kbn/logstash-plugin": ["x-pack/plugins/logstash"],
       "@kbn/logstash-plugin/*": ["x-pack/plugins/logstash/*"],
       "@kbn/managed-vscode-config": ["packages/kbn-managed-vscode-config"],

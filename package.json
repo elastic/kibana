@@ -469,6 +469,7 @@
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
     "@kbn/logging": "link:packages/kbn-logging",
     "@kbn/logging-mocks": "link:packages/kbn-logging-mocks",
+    "@kbn/logs-shared-plugin": "link:x-pack/plugins/logs_shared",
     "@kbn/logstash-plugin": "link:x-pack/plugins/logstash",
     "@kbn/management-plugin": "link:src/plugins/management",
     "@kbn/management-test-plugin": "link:test/plugin_functional/plugins/management_test_plugin",

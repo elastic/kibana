@@ -4627,6 +4627,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/logs-shared-plugin@link:x-pack/plugins/logs_shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logstash-plugin@link:x-pack/plugins/logstash":
   version "0.0.0"
   uid ""
