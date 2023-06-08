@@ -250,6 +250,7 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     getAppState: appStateContainer.getState,
+    getInternalState: internalStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });

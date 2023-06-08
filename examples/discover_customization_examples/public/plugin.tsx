@@ -26,6 +26,12 @@ import { noop } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { css } from '@emotion/react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { useHistory } from 'react-router-dom';
+import type { ControlsPanels } from '@kbn/controls-plugin/common';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {
@@ -223,6 +229,97 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 />
               </EuiPopover>
             </EuiFlexItem>
+          );
+        },
+        PrependFilterBar: () => {
+          const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+          const dataView = useObservable(
+            stateContainer.internalState.state$,
+            stateContainer.internalState.getState()
+          ).dataView;
+          const history = useHistory();
+          const [stateStorage] = useState(() =>
+            createKbnUrlStateStorage({
+              useHash: core.uiSettings.get('state:storeInSessionStorage'),
+              history,
+              ...withNotifyOnErrors(core.notifications.toasts),
+            })
+          );
+
+          useEffect(() => {
+            if (!controlGroupAPI) {
+              return;
+            }
+
+            const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
+              stateStorage.set('controlPanels', input.panels);
+            });
+
+            const filterSubscription = controlGroupAPI.onFiltersPublished$.subscribe(
+              (newFilters) => {
+                stateContainer.internalState.transitions.setHiddenFilters(newFilters);
+                stateContainer.actions.fetchData();
+              }
+            );
+
+            return () => {
+              inputSubscription.unsubscribe();
+              filterSubscription.unsubscribe();
+            };
+          }, [controlGroupAPI, stateStorage]);
+
+          return (
+            <div
+              css={css`
+                .controlGroup {
+                  min-height: unset;
+                }
+
+                .euiFormLabel {
+                  padding-top: 0;
+                  padding-bottom: 0;
+                  line-height: 32px !important;
+                }
+
+                .euiFormControlLayout {
+                  height: 32px;
+                }
+              `}
+            >
+              <ControlGroupRenderer
+                ref={setControlGroupAPI}
+                getCreationOptions={async (initialInput, builder) => {
+                  const panels = stateStorage.get<ControlsPanels>('controlPanels');
+
+                  if (!panels) {
+                    await builder.addDataControlFromField(initialInput, {
+                      dataViewId: dataView?.id!,
+                      title: 'Level',
+                      fieldName: 'tags.keyword',
+                      grow: false,
+                      width: 'small',
+                    });
+
+                    await builder.addDataControlFromField(initialInput, {
+                      dataViewId: dataView?.id!,
+                      title: 'Host',
+                      fieldName: 'host.keyword',
+                      grow: false,
+                      width: 'small',
+                    });
+                  }
+
+                  return {
+                    initialInput: {
+                      ...initialInput,
+                      panels: panels ?? initialInput.panels,
+                      viewMode: ViewMode.VIEW,
+                      filters: stateContainer.appState.get().filters ?? [],
+                    },
+                  };
+                }}
+              />
+            </div>
           );
         },
       });
