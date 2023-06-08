@@ -10,9 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiPagination } from '@elastic/eui';
 
-import type { ScreenshotItem } from '../../../../../types';
+import type { RegistryImage, PackageSpecScreenshot } from '../../../../../../../../common/types';
 import { useLinks } from '../../../../../hooks';
 
+type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
 interface ScreenshotProps {
   images: ScreenshotItem[];
   packageName: string;

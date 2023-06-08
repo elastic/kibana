@@ -68,6 +68,11 @@ describe('useThreatIntelligenceDetails', () => {
       eventId: 'test-event-id',
       getFieldsData: () => {},
       dataFormattedForFieldBrowser: null,
+      data: {
+        _id: 'testId',
+        _index: 'testIndex',
+      },
+      dataAsNestedObject: null,
     });
   });
 
