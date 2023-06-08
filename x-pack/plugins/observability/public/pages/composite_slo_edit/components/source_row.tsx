@@ -15,12 +15,12 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CreateCompositeSLOInput } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchSloDetails } from '../../../../public/hooks/slo/use_fetch_slo_details';
 import { useFetchSloList } from '../../../../public/hooks/slo/use_fetch_slo_list';
+import { CreateCompositeSLOForm } from '../helpers/process_form_values';
 
 interface Props {
   index: number;
@@ -29,7 +29,7 @@ interface Props {
 }
 
 export function SourceRow({ index, isDeleteDisabled, onDeleteSource }: Props) {
-  const { control, getFieldState, watch, setValue } = useFormContext<CreateCompositeSLOInput>();
+  const { control, getFieldState, watch, setValue } = useFormContext<CreateCompositeSLOForm>();
 
   const [searchValue, setSearchValue] = useState<string>('');
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
@@ -45,8 +45,14 @@ export function SourceRow({ index, isDeleteDisabled, onDeleteSource }: Props) {
   });
 
   useEffect(() => {
-    setValue(`sources.${index}.revision`, selectedSourceSlo?.revision ?? 1);
-  }, [selectedSourceSlo, setValue]);
+    if (selectedSourceId !== '' && !!selectedSourceSlo) {
+      setValue(`sources.${index}.revision`, selectedSourceSlo.revision);
+      setValue(`sources.${index}._data`, selectedSourceSlo);
+    }
+    if (selectedSourceId === '') {
+      setValue(`sources.${index}._data`, undefined);
+    }
+  }, [selectedSourceSlo, selectedSourceId, setValue]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -79,7 +85,7 @@ export function SourceRow({ index, isDeleteDisabled, onDeleteSource }: Props) {
                   { defaultMessage: 'Select a source SLO' }
                 )}
                 isInvalid={fieldState.invalid}
-                isLoading={isSloListLoading}
+                isLoading={isSloListLoading || (!!selectedSourceId && isSelectedSourceSloLoading)}
                 onChange={(selected: EuiComboBoxOptionOption[]) => {
                   if (selected.length) {
                     return field.onChange(selected[0].value);

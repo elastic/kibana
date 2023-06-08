@@ -6,12 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CompositeMethod, CreateCompositeSLOInput } from '@kbn/slo-schema';
+import { BudgetingMethod, CompositeMethod } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
   COMPOSITE_METHOD_WEIGHTED_AVERAGE,
 } from '../../utils/slo/labels';
+import { CreateCompositeSLOForm } from './helpers/process_form_values';
 
 export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
   {
@@ -36,9 +37,9 @@ export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   }),
 }));
 
-export const COMPOSITE_SLO_FORM_DEFAULT_VALUES: CreateCompositeSLOInput = {
+export const COMPOSITE_SLO_FORM_DEFAULT_VALUES: CreateCompositeSLOForm = {
   name: '',
-  sources: [{ id: '', revision: 1, weight: 1 }],
+  sources: [{ id: '', revision: 1, weight: 1, data: undefined }],
   timeWindow: {
     duration:
       TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,

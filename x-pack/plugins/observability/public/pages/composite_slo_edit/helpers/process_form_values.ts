@@ -9,13 +9,18 @@ import omit from 'lodash/omit';
 import {
   CompositeSLOWithSummaryResponse,
   CreateCompositeSLOInput,
+  SLOWithSummaryResponse,
   UpdateCompositeSLOInput,
 } from '@kbn/slo-schema';
 import { toDuration } from '../../../utils/slo/duration';
 
+export type CreateCompositeSLOForm = CreateCompositeSLOInput & {
+  sources: Array<CreateCompositeSLOInput['sources'][0] & { _data?: SLOWithSummaryResponse }>;
+};
+
 export function transformResponseToInput(
   values: CompositeSLOWithSummaryResponse | undefined
-): CreateCompositeSLOInput | undefined {
+): CreateCompositeSLOForm | undefined {
   if (!values) return undefined;
 
   return {
@@ -35,10 +40,16 @@ export function transformResponseToInput(
 }
 
 export function transformValuesToCreateInput(
-  values: CreateCompositeSLOInput
+  values: CreateCompositeSLOForm
 ): CreateCompositeSLOInput {
   return {
     ...values,
+    // we remove the source._data used for the form validation
+    sources: values.sources.map((source) => ({
+      id: source.id,
+      revision: source.revision,
+      weight: source.weight,
+    })),
     objective: {
       target: values.objective.target / 100,
       ...(values.budgetingMethod === 'timeslices' &&
@@ -54,10 +65,16 @@ export function transformValuesToCreateInput(
 }
 
 export function transformValuesToUpdateInput(
-  values: CreateCompositeSLOInput
+  values: CreateCompositeSLOForm
 ): UpdateCompositeSLOInput {
   return {
     ...values,
+    // we remove the source._data used for the form validation
+    sources: values.sources.map((source) => ({
+      id: source.id,
+      revision: source.revision,
+      weight: source.weight,
+    })),
     objective: {
       target: values.objective.target / 100,
       ...(values.budgetingMethod === 'timeslices' &&

@@ -43,7 +43,7 @@ export function CompositeSloForm({ compositeSlo }: Props) {
     values: transformResponseToInput(compositeSlo),
     mode: 'all',
   });
-  const { getValues, trigger } = methods;
+  const { getValues, trigger, watch } = methods;
 
   const { mutateAsync: createCompositeSlo, isLoading: isCreating } = useCreateCompositeSlo();
   const { mutateAsync: updateCompositeSlo, isLoading: isUpdating } = useUpdateCompositeSlo();
@@ -101,6 +101,7 @@ export function CompositeSloForm({ compositeSlo }: Props) {
           ]}
         />
 
+        <pre>{JSON.stringify(watch(), null, 2)}</pre>
         <EuiSpacer size="m" />
 
         <EuiFlexGroup direction="row" gutterSize="s">

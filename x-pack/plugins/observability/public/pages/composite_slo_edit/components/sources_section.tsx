@@ -15,10 +15,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateCompositeSLOInput } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { COMPOSITE_METHOD_OPTIONS } from '../constants';
+import { CreateCompositeSLOForm } from '../helpers/process_form_values';
 import { maxWidth } from './composite_slo_form';
 import { SourceRow } from './source_row';
 
@@ -27,7 +27,7 @@ interface Props {
 }
 
 export function SourcesSection({ isEditMode }: Props) {
-  const { control } = useFormContext<CreateCompositeSLOInput>();
+  const { control } = useFormContext<CreateCompositeSLOForm>();
   const {
     fields: sources,
     append,

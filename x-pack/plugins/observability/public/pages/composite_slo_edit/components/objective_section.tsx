@@ -14,9 +14,9 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CreateCompositeSLOInput } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { CreateCompositeSLOForm } from '../helpers/process_form_values';
 import { maxWidth } from './composite_slo_form';
 
 interface Props {
@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function ObjectiveSection({ isEditMode }: Props) {
-  const { control, getFieldState } = useFormContext<CreateCompositeSLOInput>();
+  const { control, getFieldState } = useFormContext<CreateCompositeSLOForm>();
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
