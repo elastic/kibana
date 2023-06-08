@@ -223,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDatatable');
+      await lens.waitForVisualization('lnsDataTable');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
   });
