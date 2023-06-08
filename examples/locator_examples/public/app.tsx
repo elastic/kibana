@@ -13,7 +13,6 @@ import { EuiPageBody } from '@elastic/eui';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { Switch, Redirect, Router, useLocation } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
 import { EuiText } from '@elastic/eui';
@@ -43,12 +42,10 @@ export const Routes: React.FC<{}> = () => {
         <EuiPageContentBody>
           <Switch>
             <Route path="/hello">
-              <CompatRouter>
-                <HelloPage
-                  firstName={query.get('firstName') || ''}
-                  lastName={query.get('lastName') || ''}
-                />
-              </CompatRouter>
+              <HelloPage
+                firstName={query.get('firstName') || ''}
+                lastName={query.get('lastName') || ''}
+              />
             </Route>
             <Redirect from="/" to="/hello" />
           </Switch>
