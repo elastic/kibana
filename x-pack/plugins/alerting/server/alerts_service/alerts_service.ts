@@ -156,12 +156,37 @@ export class AlertsService implements IAlertsService {
       opts.namespace
     );
 
-    if (!initialized) {
-      // TODO - retry initialization here
-      this.options.logger.warn(
-        `There was an error in the framework installing namespace-level resources and creating concrete indices for - ${error}`
+    // If initialization failed, retry
+    if (!initialized && error) {
+      let initPromise: Promise<InitializationPromise> | undefined;
+
+      // If this flag is false, then common resource initialization failed and
+      // we need to retry this before retrying the context specific resources
+      if (!this.initialized) {
+        this.options.logger.info(`Retrying common resource initialization`);
+        initPromise = this.initializeCommon(this.options.timeoutMs);
+      }
+      this.options.logger.info(
+        `Retrying resource initialization for context "${opts.ruleType.alerts.context}"`
       );
-      return null;
+      this.resourceInitializationHelper.retry(opts.ruleType.alerts, opts.namespace, initPromise);
+
+      const retryResult = await this.resourceInitializationHelper.getInitializedContext(
+        opts.ruleType.alerts.context,
+        opts.ruleType.alerts.isSpaceAware ? opts.namespace : DEFAULT_NAMESPACE_STRING
+      );
+
+      if (!retryResult.result) {
+        // Retry also failed
+        this.options.logger.warn(
+          `There was an error in the framework installing namespace-level resources and creating concrete indices for context "${opts.ruleType.alerts.context}" - Original error: ${error}; Error after retry: ${retryResult.error}`
+        );
+        return null;
+      } else {
+        this.options.logger.info(
+          `Resource installation for "${opts.ruleType.alerts.context}" succeeded after retry`
+        );
+      }
     }
 
     if (!opts.ruleType.alerts.shouldWrite) {
@@ -171,6 +196,10 @@ export class AlertsService implements IAlertsService {
       return null;
     }
 
+    // TODO - when we replace the LegacyAlertsClient, we will need to decide whether to
+    // initialize the AlertsClient even if alert resource installation failed. That would allow
+    // us to detect alerts and trigger notifications even if we can't persist the alerts
+    // (partial rule failure vs failing the entire rule execution).
     return new AlertsClient<
       AlertData,
       LegacyState,

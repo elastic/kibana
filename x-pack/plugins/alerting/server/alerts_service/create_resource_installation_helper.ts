@@ -15,6 +15,12 @@ export interface InitializationPromise {
 }
 export interface ResourceInstallationHelper {
   add: (context: IRuleTypeAlerts, namespace?: string, timeoutMs?: number) => void;
+  retry: (
+    context: IRuleTypeAlerts,
+    namespace?: string,
+    initPromise?: Promise<InitializationPromise>,
+    timeoutMs?: number
+  ) => void;
   getInitializedContext: (context: string, namespace: string) => Promise<InitializationPromise>;
 }
 
@@ -34,6 +40,7 @@ export function createResourceInstallationHelper(
   commonResourcesInitPromise: Promise<InitializationPromise>,
   installFn: (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => Promise<void>
 ): ResourceInstallationHelper {
+  let commonInitPromise: Promise<InitializationPromise> = commonResourcesInitPromise;
   const initializedContexts: Map<string, Promise<InitializationPromise>> = new Map();
 
   const waitUntilContextResourcesInstalled = async (
@@ -42,7 +49,7 @@ export function createResourceInstallationHelper(
     timeoutMs?: number
   ): Promise<InitializationPromise> => {
     try {
-      const { result: commonInitResult, error: commonInitError } = await commonResourcesInitPromise;
+      const { result: commonInitResult, error: commonInitError } = await commonInitPromise;
       if (commonInitResult) {
         await installFn(context, namespace, timeoutMs);
         return successResult();
@@ -64,6 +71,25 @@ export function createResourceInstallationHelper(
       namespace: string = DEFAULT_NAMESPACE_STRING,
       timeoutMs?: number
     ) => {
+      initializedContexts.set(
+        `${context.context}_${namespace}`,
+
+        // Return a promise than can be checked when needed
+        waitUntilContextResourcesInstalled(context, namespace, timeoutMs)
+      );
+    },
+    retry: (
+      context: IRuleTypeAlerts,
+      namespace: string = DEFAULT_NAMESPACE_STRING,
+      initPromise?: Promise<InitializationPromise>,
+      timeoutMs?: number
+    ) => {
+      // Use the new common initialization promise if specified
+      if (initPromise) {
+        commonInitPromise = initPromise;
+      }
+
+      // Create and set a new promise for this context
       initializedContexts.set(
         `${context.context}_${namespace}`,
 
