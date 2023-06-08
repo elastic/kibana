@@ -26,16 +26,16 @@ import {
   type DataFrameAnalyticsConfig,
   type FeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
-
-import { MlApiServices } from '../../../../../services/ml_api_service';
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
   getDataGridSchemasFromFieldTypes,
   getFieldType,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
+  type UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
+
+import { MlApiServices } from '../../../../../services/ml_api_service';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields } from '../../../../common';

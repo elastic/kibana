@@ -89,6 +89,9 @@ export const epmRouteService = {
       .replace('{pkgVersion}', pkgVersion)
       .replace(/\/$/, ''); // trim trailing slash
   },
+  getBulkAssetsPath: () => {
+    return EPM_API_ROUTES.BULK_ASSETS_PATTERN;
+  },
 };
 
 export const packagePolicyRouteService = {
