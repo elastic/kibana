@@ -20,6 +20,11 @@ import { PrimaryAndComparisonSearchBar } from '../../components/primary_and_comp
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
 import { TopNFunctionsTable } from '../../components/topn_functions';
+import {
+  NormalizationMenu,
+  NormalizationMode,
+  NormalizationOptions,
+} from '../../components/normalization_menu';
 
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const {
@@ -115,14 +120,30 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     return <RedirectTo pathname="/functions/topn" />;
   }
 
+  const normalizationOptions: NormalizationOptions = {
+    baselineScale: 1,
+    baselineTime: 1,
+    comparisonScale: 1,
+    comparisonTime: 1,
+  };
+
   return (
     <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
       <>
         <EuiFlexGroup direction="column">
           {isDifferentialView && (
-            <EuiFlexItem grow={false}>
-              <PrimaryAndComparisonSearchBar />
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <PrimaryAndComparisonSearchBar />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <NormalizationMenu
+                  mode={NormalizationMode.Time}
+                  options={normalizationOptions}
+                  onChange={() => {}}
+                />
+              </EuiFlexItem>
+            </>
           )}
           <EuiFlexItem>
             <EuiFlexGroup direction="row" gutterSize="s">

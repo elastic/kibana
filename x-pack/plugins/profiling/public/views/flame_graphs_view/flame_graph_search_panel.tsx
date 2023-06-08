@@ -11,13 +11,13 @@ import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { PrimaryAndComparisonSearchBar } from '../../components/primary_and_comparison_search_bar';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
-import { DifferentialComparisonMode } from './differential_comparison_mode';
 import {
   ComparisonMode,
   NormalizationMode,
   NormalizationOptions,
   NormalizationMenu,
 } from '../../components/normalization_menu';
+import { DifferentialComparisonMode } from '../../components/differential_comparison_mode';
 
 interface Props {
   isDifferentialView: boolean;

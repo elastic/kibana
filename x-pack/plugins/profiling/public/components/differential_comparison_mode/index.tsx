@@ -7,7 +7,7 @@
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ComparisonMode } from '../../components/normalization_menu';
+import { ComparisonMode } from '../normalization_menu';
 
 interface Props {
   comparisonMode: ComparisonMode;
@@ -20,7 +20,7 @@ export function DifferentialComparisonMode({ comparisonMode, onChange }: Props) 
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h3>
-              {i18n.translate('xpack.profiling.flameGraphsView.differentialComparisonModeTitle', {
+              {i18n.translate('xpack.profiling.differentialComparisonMode.title', {
                 defaultMessage: 'Format',
               })}
             </h3>
@@ -28,13 +28,10 @@ export function DifferentialComparisonMode({ comparisonMode, onChange }: Props) 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
-            legend={i18n.translate(
-              'xpack.profiling.flameGraphsView.differentialComparisonModeLegend',
-              {
-                defaultMessage:
-                  'This switch allows you to switch between an absolute and relative comparison between both graphs',
-              }
-            )}
+            legend={i18n.translate('xpack.profiling.differentialComparisonMode.legend', {
+              defaultMessage:
+                'This switch allows you to switch between an absolute and relative comparison between both graphs',
+            })}
             type="single"
             buttonSize="s"
             idSelected={comparisonMode}
@@ -45,19 +42,15 @@ export function DifferentialComparisonMode({ comparisonMode, onChange }: Props) 
               {
                 id: ComparisonMode.Absolute,
                 label: i18n.translate(
-                  'xpack.profiling.flameGraphsView.differentialComparisonModeAbsoluteButtonLabel',
-                  {
-                    defaultMessage: 'Abs',
-                  }
+                  'xpack.profiling.differentialComparisonMode.absoluteButtonLabel',
+                  { defaultMessage: 'Abs' }
                 ),
               },
               {
                 id: ComparisonMode.Relative,
                 label: i18n.translate(
-                  'xpack.profiling.flameGraphsView.differentialComparisonModeRelativeButtonLabel',
-                  {
-                    defaultMessage: 'Rel',
-                  }
+                  'xpack.profiling.differentialComparisonMode.relativeButtonLabel',
+                  { defaultMessage: 'Rel' }
                 ),
               },
             ]}
