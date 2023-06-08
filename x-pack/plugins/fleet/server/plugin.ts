@@ -132,7 +132,7 @@ import {
 } from './services/security/uninstall_token_service';
 import type { FleetToHostFileClientInterface } from './services/files/types';
 import { FleetToHostFilesClient } from './services/files/client_to_host';
-import { FleetActionsClient } from './services/actions';
+import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -257,7 +257,7 @@ export interface FleetStartContract {
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
-  createFleetActionsClient: (packageName: string) => FleetActionsClient;
+  createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
 }
 
 export class FleetPlugin

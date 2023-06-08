@@ -5,69 +5,82 @@
  * 2.0.
  */
 
-import type {
-  createAction,
-  bulkCreateActions,
-  getActionsByIds,
-  getActionResultsWithKuery,
-  getActionResultsByIds,
-  getActionsWithKuery,
-} from './actions';
-
+export interface BulkCreateResponse {
+  status: 'success' | 'failed' | 'mixed';
+  items: Array<{
+    status: 'success' | 'error';
+    // action_id
+    id: string;
+  }>;
+}
 export interface FleetActionsClientInterface {
   /**
    *
    * @param action
-   * @returns {id: string; created_at: string}
+   * @returns {Promise<FleetActionRequest>}
    * @throws {FleetActionsError}
    * creates a new action document
    */
-  create(action: FleetActionRequest): Promise<ReturnType<typeof createAction>>;
+  create(action: FleetActionRequest): Promise<FleetActionRequest>;
 
   /**
    *
    * @param actions
-   * @returns {id: string; created_at: string}[]
+   * @returns {Promise<BulkCreateResponse>}
    * @throws {FleetActionsError}
    * creates multiple action documents
    * return successfully created actions
    * logs failed actions documents
    */
-  bulkCreate(actions: FleetActionRequest[]): Promise<ReturnType<typeof bulkCreateActions>>;
+  bulkCreate(actions: FleetActionRequest[]): Promise<BulkCreateResponse>;
 
   /**
    *
    * @param actionIds
-   * @returns {FleetAction[]}
+   * @returns {Promise<items: FleetActionRequest[], total: number>}
    * @throws {FleetActionsError}
    * returns actions by action ids
    */
-  getActionsByIds(actionIds: string[]): Promise<ReturnType<typeof getActionsByIds>>;
+  getActionsByIds(actionIds: string[]): Promise<{
+    items: FleetActionRequest[];
+    total: number;
+  }>;
 
   /**
    *
    * @param kuery
-   * @returns {FleetAction[]}
+   * @returns {Promise<items: FleetActionRequest[], total: number>}
    * @throws {FleetActionsError}
    * returns actions by kuery
    */
-  getActionsWithKuery(kuery: string): Promise<ReturnType<typeof getActionsWithKuery>>;
+  getActionsWithKuery(kuery: string): Promise<{
+    items: FleetActionRequest[];
+    total: number;
+  }>;
 
   /**
    *
    * @param actionIds
-   * @returns {FleetActionResult[]}
+   * @returns {Promise<items: FleetActionResult[], total: number>}
    * @throws {FleetActionsError}
    * returns action results by action ids
    */
-  getResultsByIds(actionIds: string[]): Promise<ReturnType<typeof getActionResultsByIds>>;
+  getResultsByIds(actionIds: string[]): Promise<{
+    items: FleetActionResult[];
+    total: number;
+  }>;
 
   /**
    *
    * @param kuery
-   * @returns {FleetActionResult[]}
+   * @returns {Promise<items: FleetActionResult[], total: number>}
+   * @throws {FleetActionsError}
+   * returns action results by action ids
    */
-  getResultsWithKuery(kuery: string): Promise<ReturnType<typeof getActionResultsWithKuery>>;
+  getResultsWithKuery(kuery: string): Promise<{
+    items: FleetActionResult[];
+    total: number;
+  }>;
 }
 
 interface CommonFleetActionResultDocFields {

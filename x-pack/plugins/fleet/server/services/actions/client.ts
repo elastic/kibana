@@ -9,7 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { FleetActionsClientError } from '../../../common/errors';
 
-import type { FleetActionsClientInterface, FleetActionRequest, FleetActionResult } from './types';
+import type {
+  FleetActionsClientInterface,
+  FleetActionRequest,
+  FleetActionResult,
+  BulkCreateResponse,
+} from './types';
 import {
   createAction,
   bulkCreateActions,
@@ -46,39 +51,51 @@ export class FleetActionsClient implements FleetActionsClientInterface {
     return result;
   }
 
-  async create(action: FleetActionRequest): Promise<ReturnType<typeof createAction>> {
+  async create(action: FleetActionRequest): Promise<FleetActionRequest> {
     const verifiedAction = this._verifyAction(action);
     return createAction(this.esClient, verifiedAction);
   }
 
-  async bulkCreate(actions: FleetActionRequest[]): Promise<ReturnType<typeof bulkCreateActions>> {
+  async bulkCreate(actions: FleetActionRequest[]): Promise<BulkCreateResponse> {
     actions.map((action) => this._verifyAction(action));
 
     return bulkCreateActions(this.esClient, actions);
   }
 
-  async getActionsByIds(ids: string[]): Promise<ReturnType<typeof getActionsByIds>> {
+  async getActionsByIds(ids: string[]): Promise<{
+    items: FleetActionRequest[];
+    total: number;
+  }> {
     const actions = await getActionsByIds(this.esClient, ids);
     actions.items.every((action) => this._verifyAction(action));
 
     return actions;
   }
 
-  async getActionsWithKuery(kuery: string): Promise<ReturnType<typeof getActionsWithKuery>> {
+  async getActionsWithKuery(kuery: string): Promise<{
+    items: FleetActionRequest[];
+    total: number;
+  }> {
     const actions = await getActionsWithKuery(this.esClient, kuery);
     actions.items.every((action) => this._verifyAction(action));
 
     return actions;
   }
 
-  async getResultsByIds(ids: string[]): Promise<ReturnType<typeof getActionResultsByIds>> {
+  async getResultsByIds(ids: string[]): Promise<{
+    items: FleetActionResult[];
+    total: number;
+  }> {
     const results = await getActionResultsByIds(this.esClient, ids);
     results.items.every((result) => this._verifyResult(result));
 
     return results;
   }
 
-  async getResultsWithKuery(kuery: string): Promise<ReturnType<typeof getActionResultsWithKuery>> {
+  async getResultsWithKuery(kuery: string): Promise<{
+    items: FleetActionResult[];
+    total: number;
+  }> {
     const results = await getActionResultsWithKuery(this.esClient, kuery);
     results.items.every((result) => this._verifyResult(result));
 

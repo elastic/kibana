@@ -10,7 +10,12 @@ import { merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
 import { v4 as uuidV4 } from 'uuid';
 
-import type { FleetActionRequest, FleetActionResult } from './types';
+import type {
+  FleetActionRequest,
+  FleetActionResult,
+  FleetActionsClientInterface,
+  BulkCreateResponse,
+} from './types';
 
 export const generateFleetAction = (
   overrides: DeepPartial<FleetActionRequest> = {}
@@ -158,5 +163,54 @@ export const generateFleetActionsBulkCreateESResponse = (
     took: 23,
     errors: hasErrors,
     items,
+  };
+};
+
+export const createFleetActionsClientMock = (): jest.Mocked<FleetActionsClientInterface> => {
+  const createResponse: FleetActionRequest = generateFleetAction({
+    action_id: 'action_id_1',
+    input_type: 'foo',
+  });
+  const actionsRequests: FleetActionRequest[] = ['action_id_1', 'action_id_2'].map((id) =>
+    generateFleetAction({
+      action_id: id,
+      input_type: 'foo',
+    })
+  );
+  const actionsResults: FleetActionResult[] = ['action_id_1', 'action_id_2'].map((id) =>
+    generateFleetActionResult({
+      action_id: id,
+      action_input_type: 'foo',
+    })
+  );
+
+  return {
+    create: jest.fn(async (_) => createResponse),
+    bulkCreate: jest.fn(
+      async (_) =>
+        ({
+          status: 'success',
+          items: [
+            { status: 'success', id: 'action_id_1' },
+            { status: 'success', id: 'action_id_2' },
+          ],
+        } as BulkCreateResponse)
+    ),
+    getActionsByIds: jest.fn(async (_) => ({
+      items: actionsRequests,
+      total: actionsRequests.length,
+    })),
+    getActionsWithKuery: jest.fn(async (_) => ({
+      items: actionsRequests,
+      total: actionsRequests.length,
+    })),
+    getResultsByIds: jest.fn(async (_) => ({
+      items: actionsResults,
+      total: actionsResults.length,
+    })),
+    getResultsWithKuery: jest.fn(async (_) => ({
+      items: actionsResults,
+      total: actionsResults.length,
+    })),
   };
 };

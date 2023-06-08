@@ -53,6 +53,7 @@ export interface EndpointAppContextServiceSetupContract {
 export interface EndpointAppContextServiceStartContract {
   fleetAuthzService?: FleetStartContract['authz'];
   createFleetFilesClient: FleetStartContract['createFilesClient'];
+  createFleetActionsClient: FleetStartContract['createFleetActionsClient'];
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   endpointFleetServicesFactory: EndpointFleetServicesFactoryInterface;
@@ -70,7 +71,6 @@ export interface EndpointAppContextServiceStartContract {
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ReturnType<typeof actionCreateService> | undefined;
   cloud: CloudSetup;
-  createFleetActionsClient: FleetStartContract['createFleetActionsClient'];
 }
 
 /**

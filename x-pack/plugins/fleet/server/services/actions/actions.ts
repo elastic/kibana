@@ -16,7 +16,7 @@ import { FleetActionsError } from '../../../common/errors';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 import { auditLoggingService } from '../audit_logging';
 
-import type { FleetActionRequest, FleetActionResult } from './types';
+import type { FleetActionRequest, FleetActionResult, BulkCreateResponse } from './types';
 
 export const createAction = async (
   esClient: ElasticsearchClient,
@@ -75,14 +75,7 @@ type BulkCreate = Array<{ create: { _index: string; _id: string } } | FleetActio
 export const bulkCreateActions = async (
   esClient: ElasticsearchClient,
   _actions: FleetActionRequest[]
-): Promise<{
-  status: 'success' | 'failed' | 'mixed';
-  items: Array<{
-    status: 'success' | 'error';
-    // action_id
-    id: string;
-  }>;
-}> => {
+): Promise<BulkCreateResponse> => {
   const actions: FleetActionRequest[] = [];
   const bulkCreateActionsBody = _actions.reduce<BulkCreate>((acc, action) => {
     // doc id is same as action_id
@@ -141,10 +134,7 @@ export const bulkCreateActions = async (
 export const getActionsByIds = async (
   esClient: ElasticsearchClient,
   actionIds: string[]
-): Promise<{
-  items: FleetActionRequest[];
-  total: number;
-}> => {
+): Promise<{ items: FleetActionRequest[]; total: number }> => {
   try {
     const getActionsResponse = await esClient.search({
       index: AGENT_ACTIONS_INDEX,

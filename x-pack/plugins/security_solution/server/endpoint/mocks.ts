@@ -37,6 +37,7 @@ import {
   createMessageSigningServiceMock,
   createFleetFromHostFilesClientMock,
   createFleetToHostFilesClientMock,
+  createFleetActionsClientMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
@@ -97,6 +98,7 @@ export const createMockEndpointAppContextService = (
   const casesClientMock = createCasesClientMock();
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
   const fleetToHostFilesClientMock = createFleetToHostFilesClientMock();
+  const fleetActionsClientMock = createFleetActionsClientMock();
 
   return {
     start: jest.fn(),
@@ -117,6 +119,7 @@ export const createMockEndpointAppContextService = (
     getFeatureUsageService: jest.fn(),
     getExceptionListsClient: jest.fn(),
     getMessageSigningService: jest.fn(),
+    getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -205,6 +208,7 @@ export const createMockEndpointAppContextServiceStartContract =
       experimentalFeatures: createMockConfig().experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
       actionCreateService: undefined,
+      createFleetActionsClient: jest.fn((..._) => createFleetActionsClientMock()),
     };
   };
 
