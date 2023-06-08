@@ -35,7 +35,7 @@ import {
   InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
-} from './locators';
+} from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -89,9 +89,6 @@ export class Plugin implements InfraClientPluginClass {
       createInventoryMetricRuleType()
     );
 
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core)
-    );
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
@@ -189,6 +186,10 @@ export class Plugin implements InfraClientPluginClass {
         },
       });
     }
+
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdRuleType(core, logsLocator)
+    );
 
     if (this.appTarget === LOGS_APP_TARGET) {
       core.application.register({
