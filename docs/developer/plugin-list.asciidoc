@@ -719,7 +719,7 @@ Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
-|Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
+|any change will work
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]
