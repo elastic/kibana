@@ -57,4 +57,4 @@ export const convertToLens = async (vis, timefilter) => {
     },
     indexPatternIds: [indexPatternId],
   };
-}
+};
