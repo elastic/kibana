@@ -21,7 +21,11 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-import { deleteAllExceptions, removeExceptionListServerGeneratedProperties } from '../../utils';
+import {
+  deleteAllExceptions,
+  removeExceptionListItemServerGeneratedProperties,
+  removeExceptionListServerGeneratedProperties,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -160,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(updatedItem.item_id).to.equal(expectedItemId);
         });
 
-        it('preserves all fields that are unspecified in the request, a la PATCH semantics', async () => {
+        it('preserves optional fields that are unspecified in the request, a la PATCH semantics', async () => {
           // create a simple exception list
           await supertest
             .post(EXCEPTION_LIST_URL)
@@ -169,10 +173,13 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // create a simple exception list item
-          // TODO meta is mapped as keyword in new SO indices, causing a conflict when we try to persist it. However, it's still specified as an object in our io-ts schema, so there's not a valid value we can currently send.
           const { meta, ...createPayload } = {
             ...getCreateExceptionListItemSchemaMock(),
-            // TODO by not specifying custom values for all fields, we can't distinguish between "preserves old values" and "drops and uses default values if unspecified"
+            comments: [
+              {
+                comment: 'Im an old comment',
+              },
+            ],
             tags: ['hi mom'],
           };
           await supertest
@@ -190,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(items.total).to.eql(1);
           const [item] = items.data;
 
-          // update nothing!
+          // Perform an update with only required fields. If any fields change on the item, then they're not really optional.
           const { item_id: _, ...updatePayload } = {
             ...getUpdateMinimalExceptionListItemSchemaMock(),
             id: item.id,
@@ -203,11 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const { body: itemsAfterUpdate } = await supertest
-            .get(
-              `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
-                getCreateExceptionListMinimalSchemaMock().list_id
-              }`
-            )
+            .get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${createPayload.list_id}`)
             .set('kbn-xsrf', 'true')
             .send()
             .expect(200);
@@ -215,7 +218,10 @@ export default ({ getService }: FtrProviderContext) => {
           // Validate that we have a single exception item with the expected properties
           expect(itemsAfterUpdate.total).to.eql(1);
           const [updatedItem] = itemsAfterUpdate.data;
-          expect(updatedItem).to.eql(item);
+          expect(updatedItem.id).to.eql(item.id);
+          expect(removeExceptionListItemServerGeneratedProperties(updatedItem)).to.eql(
+            removeExceptionListItemServerGeneratedProperties(item)
+          );
         });
       });
 
