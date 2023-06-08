@@ -47,6 +47,7 @@ const defaultProps: OsqueryActionResultsProps = {
   ],
   ecsData: {
     _id: 'test',
+    _index: 'test',
   },
 };
 

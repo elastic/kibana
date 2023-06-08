@@ -36,9 +36,9 @@ const pageTitle = i18n.translate(
   }
 );
 const API_TAB_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.content.searchApplications.connect.apiTabTitle',
+  'xpack.enterpriseSearch.content.searchApplications.connect.safeSearchAPITabTitle',
   {
-    defaultMessage: 'API',
+    defaultMessage: 'Safe Search API',
   }
 );
 const DOCUMENTATION_TAB_TITLE = i18n.translate(
