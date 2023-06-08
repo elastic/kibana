@@ -31,7 +31,7 @@ export const SourceSelection: FC = () => {
       http,
       uiSettings,
       savedObjectsManagement,
-      data: { dataViews: dataViewsContract },
+      data: { dataViews: dataViewsService },
       savedSearch: savedSearchService,
     },
   } = useMlKibana();
@@ -59,7 +59,7 @@ export const SourceSelection: FC = () => {
       try {
         const dataViewAndSavedSearch = await getDataViewAndSavedSearch({
           savedSearchService,
-          dataViewsContract,
+          dataViewsService,
           savedSearchId: id,
         });
         dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';

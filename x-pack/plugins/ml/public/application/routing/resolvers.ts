@@ -22,19 +22,19 @@ export interface ResolverResults {
 
 interface BasicResolverDependencies {
   savedSearchService: SavedSearchPublicPluginStart;
-  dataViewsContract: DataViewsContract;
+  dataViewsService: DataViewsContract;
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
 export const basicResolvers = ({
-  dataViewsContract,
+  dataViewsService,
   redirectToMlAccessDeniedPage,
   savedSearchService,
 }: BasicResolverDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
-  cacheDataViewsContract: () => cacheDataViewsContract(dataViewsContract),
+  cacheDataViewsContract: () => cacheDataViewsContract(dataViewsService),
   checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
   loadSavedSearches: () => savedSearchService.getAll(),
 });

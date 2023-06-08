@@ -360,7 +360,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
   const context = useMlContext();
-  const dataViewsService = context.dataViewsContract;
+  const dataViewsService = context.dataViewsService;
 
   const {
     annotations,

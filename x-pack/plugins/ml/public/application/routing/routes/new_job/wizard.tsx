@@ -206,7 +206,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
         loadNewJobCapabilities(
           index,
           savedSearchId,
-          deps.dataViewsContract,
+          deps.dataViewsService,
           deps.savedSearchService,
           ANOMALY_DETECTOR
         ),

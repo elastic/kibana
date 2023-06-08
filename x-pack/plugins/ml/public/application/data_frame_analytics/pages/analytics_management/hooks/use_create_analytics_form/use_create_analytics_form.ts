@@ -175,7 +175,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       // index exists - create data view
       if (exists?.indexExists === true) {
         try {
-          await mlContext.dataViewsContract.createAndSave(
+          await mlContext.dataViewsService.createAndSave(
             {
               title: dataViewName,
               ...(form.timeFieldName ? { timeFieldName: form.timeFieldName } : {}),
@@ -264,7 +264,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     try {
       // Set the existing data view names.
       const indexPatternsMap: SourceIndexMap = {};
-      const savedObjects = (await mlContext.dataViewsContract.getCache()) || [];
+      const savedObjects = (await mlContext.dataViewsService.getCache()) || [];
       savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
@@ -286,7 +286,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const initiateWizard = async () => {
-    await mlContext.dataViewsContract.clearCache();
+    await mlContext.dataViewsService.clearCache();
     await prepareFormValidation();
   };
 

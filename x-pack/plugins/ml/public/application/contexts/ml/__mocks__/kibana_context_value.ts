@@ -19,6 +19,6 @@ export const kibanaContextValueMock = {
   },
   selectedDataView: dataViewMock,
   selectedSavedSearch: mockSavedSearch,
-  dataViewsContract: dataViewsContractMock,
+  dataViewsService: dataViewsContractMock,
   kibanaConfig: uiSettingsServiceMock.createStartContract(),
 };

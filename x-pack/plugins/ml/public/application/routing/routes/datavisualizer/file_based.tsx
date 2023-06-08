@@ -47,7 +47,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 
   const { context } = useResolver(deps, undefined, undefined, {
     checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsService),
     checkFindFileStructurePrivilege: () =>
       checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
   });

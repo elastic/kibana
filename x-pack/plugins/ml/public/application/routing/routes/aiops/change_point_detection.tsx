@@ -45,7 +45,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(deps, index, savedSearchId, {
     checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsService),
   });
 
   return (

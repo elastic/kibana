@@ -15,7 +15,7 @@ export const useMlContext = () => {
     context.combinedQuery === undefined ||
     context.selectedDataView === undefined ||
     context.selectedSavedSearch === undefined ||
-    context.dataViewsContract === undefined ||
+    context.dataViewsService === undefined ||
     context.kibanaConfig === undefined
   ) {
     throw new Error('required attribute is undefined');

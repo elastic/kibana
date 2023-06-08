@@ -54,7 +54,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
       loadNewJobCapabilities(
         index,
         savedSearchId,
-        deps.dataViewsContract,
+        deps.dataViewsService,
         deps.savedSearchService,
         DATA_FRAME_ANALYTICS
       ),

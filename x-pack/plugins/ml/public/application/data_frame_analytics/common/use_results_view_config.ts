@@ -99,13 +99,13 @@ export const useResultsViewConfig = (jobId: string) => {
             let dataView: DataView | undefined;
 
             try {
-              dataView = await mlContext.dataViewsContract.get(destDataViewId);
+              dataView = await mlContext.dataViewsService.get(destDataViewId);
 
               // Force refreshing the fields list here because a user directly coming
               // from the job creation wizard might land on the page without the
               // data view being fully initialized because it was created
               // before the analytics job populated the destination index.
-              await mlContext.dataViewsContract.refreshFields(dataView);
+              await mlContext.dataViewsService.refreshFields(dataView);
             } catch (e) {
               dataView = undefined;
             }
@@ -115,7 +115,7 @@ export const useResultsViewConfig = (jobId: string) => {
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
-                dataView = await mlContext.dataViewsContract.get(sourceDataViewId);
+                dataView = await mlContext.dataViewsService.get(sourceDataViewId);
               } catch (e) {
                 dataView = undefined;
               }

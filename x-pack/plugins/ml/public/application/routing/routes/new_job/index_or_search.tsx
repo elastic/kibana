@@ -193,11 +193,11 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   const newJobResolvers = {
     ...basicResolvers(deps),
     preConfiguredJobRedirect: () =>
-      preConfiguredJobRedirect(deps.dataViewsContract, basePath.get(), navigateToUrl),
+      preConfiguredJobRedirect(deps.dataViewsService, basePath.get(), navigateToUrl),
   };
   const dataVizResolvers = {
     checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsService),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
   };
 

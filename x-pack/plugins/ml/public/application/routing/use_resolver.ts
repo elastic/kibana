@@ -29,7 +29,7 @@ import { ML_PAGES } from '../../../common/constants/locator';
  * @return { context, results } returns the ML context and resolver results
  */
 export const useResolver = (
-  { config: kibanaConfig, savedSearchService, dataViewsContract }: PageDependencies,
+  { config: kibanaConfig, savedSearchService, dataViewsService }: PageDependencies,
   dataViewId: string | undefined,
   savedSearchId: string | undefined,
   resolvers: Resolvers
@@ -78,7 +78,7 @@ export const useResolver = (
         if (savedSearchId !== undefined) {
           dataViewAndSavedSearch = await getDataViewAndSavedSearch({
             savedSearchService,
-            dataViewsContract,
+            dataViewsService,
             savedSearchId,
           });
         } else if (dataViewId !== undefined) {
@@ -97,7 +97,7 @@ export const useResolver = (
           combinedQuery,
           selectedDataView: dataView,
           selectedSavedSearch: savedSearch,
-          dataViewsContract,
+          dataViewsService,
           kibanaConfig,
         });
       } catch (error) {

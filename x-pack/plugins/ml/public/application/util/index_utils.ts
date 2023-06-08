@@ -12,24 +12,24 @@ import { Query, Filter } from '@kbn/es-query';
 import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { getToastNotifications } from './dependency_cache';
 
-let dataViewsContract: DataViewsContract | null = null;
+let dataViewsService: DataViewsContract | null = null;
 
 export async function cacheDataViewsContract(dvc: DataViewsContract) {
-  dataViewsContract = dvc;
+  dataViewsService = dvc;
 }
 
 export async function getDataViewNames() {
-  if (dataViewsContract === null) {
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
-  return (await dataViewsContract.getIdsWithTitle()).map(({ title }) => title);
+  return (await dataViewsService.getIdsWithTitle()).map(({ title }) => title);
 }
 
 export async function getDataViewIdFromName(name: string): Promise<string | null> {
-  if (dataViewsContract === null) {
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
-  const dataViews = await dataViewsContract.find(name);
+  const dataViews = await dataViewsService.find(name);
   const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
   if (!dataView) {
     return null;
@@ -38,14 +38,14 @@ export async function getDataViewIdFromName(name: string): Promise<string | null
 }
 
 export function getDataViewById(id: string): Promise<DataView> {
-  if (dataViewsContract === null) {
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
 
   if (id) {
-    return dataViewsContract.get(id);
+    return dataViewsService.get(id);
   } else {
-    return dataViewsContract.create({});
+    return dataViewsService.create({});
   }
 }
 
@@ -56,11 +56,11 @@ export interface DataViewAndSavedSearch {
 
 export async function getDataViewAndSavedSearch({
   savedSearchService,
-  dataViewsContract: dataViews,
+  dataViewsService: dataViews,
   savedSearchId,
 }: {
   savedSearchService: SavedSearchPublicPluginStart;
-  dataViewsContract: DataViewsContract;
+  dataViewsService: DataViewsContract;
   savedSearchId: string;
 }) {
   const resp: DataViewAndSavedSearch = {

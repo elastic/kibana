@@ -13,9 +13,9 @@ import type { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;
-  selectedDataView: DataView; // // TODO this should be DataView or null
+  selectedDataView: DataView;
   selectedSavedSearch: SavedSearch | null;
-  dataViewsContract: DataViewsContract;
+  dataViewsService: DataViewsContract;
   kibanaConfig: IUiSettingsClient;
 }
 

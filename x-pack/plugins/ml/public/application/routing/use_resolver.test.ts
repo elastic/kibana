@@ -67,7 +67,7 @@ describe('useResolver', () => {
     expect(result.current.context.selectedDataView).toEqual(null);
     expect(result.current.context.selectedSavedSearch).toEqual(null);
     expect(result.current.context.kibanaConfig).toBeDefined();
-    expect(result.current.context.dataViewsContract).toBeDefined();
+    expect(result.current.context.dataViewsService).toBeDefined();
 
     expect(addError).toHaveBeenCalledTimes(0);
     expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);

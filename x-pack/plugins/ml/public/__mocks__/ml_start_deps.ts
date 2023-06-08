@@ -31,7 +31,7 @@ export const createMlPageDepsMock = () => ({
   savedSearchService: savedSearchPluginMock.createStartContract(),
   history: appMountParametersMock.history,
   setHeaderActionMenu: appMountParametersMock.setHeaderActionMenu,
-  dataViewsContract: dataViewPluginMocks.createStartContract(),
+  dataViewsService: dataViewPluginMocks.createStartContract(),
   config: uiSettingsServiceMock.createStartContract(),
   setBreadcrumbs: jest.fn(),
   redirectToMlAccessDeniedPage: jest.fn(),

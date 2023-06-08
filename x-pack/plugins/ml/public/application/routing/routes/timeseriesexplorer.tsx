@@ -110,7 +110,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
-  const dataViewsService = useMlContext().dataViewsContract;
+  const dataViewsService = useMlContext().dataViewsService;
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
