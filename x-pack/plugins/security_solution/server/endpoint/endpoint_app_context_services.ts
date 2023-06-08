@@ -162,7 +162,6 @@ export class EndpointAppContextService {
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
-    const { endpointRbacEnabled, endpointRbacV1Enabled } = this.experimentalFeatures;
     const isPlatinumPlus = this.getLicenseService().isPlatinumPlus();
     const listClient = this.getExceptionListsClient();
 
@@ -174,7 +173,7 @@ export class EndpointAppContextService {
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
-      endpointRbacEnabled || endpointRbacV1Enabled,
+      true,
       hasExceptionsListItems
     );
   }

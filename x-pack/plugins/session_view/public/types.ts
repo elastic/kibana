@@ -11,7 +11,7 @@ export type SessionViewServices = CoreStart;
 
 export interface SessionViewDeps {
   // we pass in the index of the session leader that spawned session_view, this avoids having to query multiple cross cluster indices
-  processIndex: string;
+  index: string;
 
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
