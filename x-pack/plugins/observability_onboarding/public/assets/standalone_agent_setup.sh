@@ -2,7 +2,8 @@
 
 API_KEY_ENCODED=$1
 API_ENDPOINT=$2
-AUTO_DOWNLOAD_CONFIG=$3
+ELASTIC_AGENT_VERSION=$3
+AUTO_DOWNLOAD_CONFIG=$4
 
 updateStepProgress() {
   local STEPNAME="$1"
@@ -17,9 +18,9 @@ updateStepProgress() {
 }
 
 echo "Downloading Elastic Agent archive"
-# https://www.elastic.co/guide/en/fleet/8.7/install-standalone-elastic-agent.html
 updateStepProgress "ea-download" "loading"
-curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.7.1-linux-x86_64.tar.gz --fail --continue-at -
+ELASTIC_AGENT_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64.tar.gz"
+curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL --fail --continue-at -
 if [ "$?" -eq 0 ]; then
   echo "Downloaded Elastic Agent"
   updateStepProgress "ea-download" "complete"

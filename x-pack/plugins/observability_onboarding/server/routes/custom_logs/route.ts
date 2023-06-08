@@ -39,6 +39,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     apiEndpoint: string;
     scriptDownloadUrl: string;
     esHost: string;
+    elasticAgentVersion: string;
   }> {
     const {
       context,
@@ -48,6 +49,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       core,
       plugins,
       request,
+      config: { elasticAgentVersion },
     } = resources;
     const coreStart = await core.start();
     const scriptDownloadUrl = getKibanaUrl(
@@ -84,6 +86,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       apiEndpoint,
       scriptDownloadUrl,
       esHost,
+      elasticAgentVersion,
     };
   },
 });

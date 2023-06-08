@@ -6,6 +6,7 @@
  */
 import { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { ObservabilityOnboardingServerRouteRepository } from '.';
+import { ObservabilityOnboardingConfig } from '..';
 import {
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStartDependencies,
@@ -30,6 +31,7 @@ export interface ObservabilityOnboardingRouteHandlerResources {
     setup: CoreSetup;
     start: () => Promise<CoreStart>;
   };
+  config: ObservabilityOnboardingConfig;
 }
 
 export interface ObservabilityOnboardingRouteCreateOptions {
