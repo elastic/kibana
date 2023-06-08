@@ -15,12 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  CreateCompositeSLOInput,
-  SLOWithSummaryResponse,
-  sloWithSummarySchema,
-} from '@kbn/slo-schema';
-import React, { useState } from 'react';
+import { CreateCompositeSLOInput } from '@kbn/slo-schema';
+import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { COMPOSITE_METHOD_OPTIONS } from '../constants';
 import { maxWidth } from './composite_slo_form';
@@ -55,20 +51,22 @@ export function SourcesSection({ isEditMode }: Props) {
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
       <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFormRow
-          label={i18n.translate('xpack.observability.slo.compositeSloForm.compositeMethod', {
-            defaultMessage: 'Choose the composite method',
-          })}
-        >
-          <Controller
-            name="compositeMethod"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { ref, ...field } }) => (
-              <EuiSelect {...field} required options={COMPOSITE_METHOD_OPTIONS} />
-            )}
-          />
-        </EuiFormRow>
+        <EuiFlexItem grow={0}>
+          <EuiFormRow
+            label={i18n.translate('xpack.observability.slo.compositeSloForm.compositeMethod', {
+              defaultMessage: 'Choose the composite method',
+            })}
+          >
+            <Controller
+              name="compositeMethod"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect {...field} required options={COMPOSITE_METHOD_OPTIONS} />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
 
         <EuiFlexGroup direction="column" gutterSize="s">
           {sources?.map((source, index) => (

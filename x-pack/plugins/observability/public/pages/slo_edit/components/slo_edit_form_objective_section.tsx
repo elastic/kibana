@@ -117,7 +117,7 @@ export function SloEditFormObjectiveSection() {
             label={
               <span>
                 {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
-                  defaultMessage: 'Target / SLO (%)',
+                  defaultMessage: 'Target (%)',
                 })}{' '}
                 <EuiIconTip
                   content={i18n.translate('xpack.observability.slo.sloEdit.targetSlo.tooltip', {

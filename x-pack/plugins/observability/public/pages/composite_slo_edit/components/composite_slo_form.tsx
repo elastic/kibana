@@ -21,6 +21,7 @@ import {
   transformValuesToUpdateInput,
 } from '../helpers/process_form_values';
 import { DescriptionSection } from './description_section';
+import { ObjectiveSection } from './objective_section';
 import { SourcesSection } from './sources_section';
 
 export interface Props {
@@ -85,9 +86,9 @@ export function CompositeSloForm({ compositeSlo }: Props) {
             },
             {
               title: i18n.translate('xpack.observability.slo.compositeSloForm.objectives.title', {
-                defaultMessage: 'Set objectives',
+                defaultMessage: 'Set objective',
               }),
-              children: <h1>test 2</h1>,
+              children: <ObjectiveSection isEditMode={isEditMode} />,
               status: 'incomplete',
             },
             {
