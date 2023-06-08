@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, max } from 'lodash';
+import { isEmpty, max, memoize } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -29,11 +29,22 @@ export class TaskValidator {
   private readonly logger: Logger;
   private readonly definitions: TaskTypeDictionary;
   private readonly allowReadingInvalidState: boolean;
+  private readonly cachedGetLatestStateSchema: (taskTypeDef: TaskDefinition) => LatestStateSchema;
+  private readonly cachedExtendSchema: typeof extendSchema;
 
   constructor({ definitions, allowReadingInvalidState, logger }: TaskValidatorOpts) {
     this.logger = logger;
     this.definitions = definitions;
     this.allowReadingInvalidState = allowReadingInvalidState;
+    this.cachedGetLatestStateSchema = memoize(
+      getLatestStateSchema,
+      (taskTypeDef) => taskTypeDef.type
+    );
+    this.cachedExtendSchema = memoize(
+      extendSchema,
+      // We need to cache two outcomes per task type (unknowns: ignore and unknowns: forbid)
+      (options) => `${options.taskType}|unknowns:${options.unknowns}`
+    );
   }
 
   public getValidatedTaskInstance<T extends TaskInstance>(task: T, mode: 'read' | 'write'): T {
@@ -44,8 +55,7 @@ export class TaskValidator {
     }
 
     const taskTypeDef = this.definitions.get(task.taskType);
-    // TODO: Cache by type
-    const lastestStateSchema = getLatestStateSchema(taskTypeDef);
+    const lastestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
     // TODO: Remove once all task types have defined their state schema.
     // Otherwise, failures on read / write would occur. (don't forget to unskip test)
@@ -131,9 +141,21 @@ export class TaskValidator {
       );
     }
 
-    // TODO: Don't extendsDeep all the time
-    return latestStateSchema.schema.extendsDeep({ unknowns }).validate(state);
+    return this.cachedExtendSchema({ unknowns, taskType, latestStateSchema }).validate(state);
   }
+}
+
+function extendSchema(options: {
+  latestStateSchema: LatestStateSchema;
+  unknowns: 'forbid' | 'ignore';
+  taskType: string;
+}) {
+  if (!options.latestStateSchema) {
+    throw new Error(
+      `[TaskValidator] stateSchemaByVersion not defined for task type: ${options.taskType}`
+    );
+  }
+  return options.latestStateSchema.schema.extendsDeep({ unknowns: options.unknowns });
 }
 
 function getLatestStateSchema(taskTypeDef: TaskDefinition): LatestStateSchema {
