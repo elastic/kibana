@@ -525,7 +525,7 @@ export async function getPackageFromSource(options: {
     }
   }
   if (!res) {
-    throw new FleetError(`package 3 info for ${pkgName}-${pkgVersion} does not exist`);
+    throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {
     paths: res.paths,
