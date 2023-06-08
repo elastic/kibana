@@ -525,6 +525,7 @@ describe('Task Runner Cancel', () => {
       },
       timings: {
         claim_to_start_duration_ms: 0,
+        persist_alerts_duration_ms: 0,
         prepare_rule_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,
