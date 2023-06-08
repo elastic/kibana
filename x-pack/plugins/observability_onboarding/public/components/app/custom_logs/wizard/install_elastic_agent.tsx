@@ -42,6 +42,7 @@ export function InstallElasticAgent() {
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
+  const [apiKeyId, setApiKeyId] = useState('');
 
   function onInspect() {
     goToStep('inspect');
@@ -98,7 +99,7 @@ export function InstallElasticAgent() {
   );
 
   useEffect(() => {
-    setState({ ...getState(), apiKeyId: installShipperSetup?.apiKeyId ?? '' });
+    setApiKeyId(installShipperSetup?.apiKeyId ?? '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [installShipperSetup?.apiKeyId]);
 
@@ -110,8 +111,7 @@ export function InstallElasticAgent() {
     refetch: refetchProgress,
   } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent && getState().apiKeyId) {
-        const { apiKeyId } = getState();
+      if (CurrentStep === InstallElasticAgent && apiKeyId) {
         return callApi(
           'GET /internal/observability_onboarding/custom_logs/progress',
           {
@@ -120,7 +120,7 @@ export function InstallElasticAgent() {
         );
       }
     },
-    [getState().apiKeyId]
+    [apiKeyId]
   );
 
   const progressSucceded = progressStatus === FETCH_STATUS.SUCCESS;
