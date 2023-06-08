@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { NoPermissions } from './no_permissions';
+import { UiCounterMetricType } from '@kbn/analytics';
+
+export type TrackUiMetricFn = (
+  metricType: UiCounterMetricType,
+  eventName: string | string[]
+) => void;

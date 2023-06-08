@@ -36,9 +36,6 @@ jest.mock('../../../hooks/use_license', () => {
     },
   };
 });
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn((feature: string) => feature === 'endpointRbacEnabled'),
-}));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useHttpMock = _useHttp as jest.Mock;

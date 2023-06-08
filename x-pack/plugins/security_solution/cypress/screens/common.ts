@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface Aggregate {
-  key: string | number;
-  doc_count: number;
-}
+export const TOOLTIP = '[role="tooltip"]';
