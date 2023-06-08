@@ -40,7 +40,7 @@ function useFetchSloOrCompositeSloDetails({ sloId }: { sloId: string }) {
     sloId,
   });
   return {
-    isLoading: isLoading && isLoadingCompositeSlo,
+    isLoading: isLoading || isLoadingCompositeSlo,
     slo: slo || compositeSlo,
   };
 }
