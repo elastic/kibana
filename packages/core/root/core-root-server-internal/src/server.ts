@@ -168,10 +168,16 @@ export class Server {
 
     this.nodeRoles = nodePreboot.roles;
 
+    const isBackgroundTaskOnly =
+      this.nodeRoles.backgroundTasks && !this.nodeRoles.ui && !this.nodeRoles.migrator;
+    // eslint-disable-next-line no-console
+    console.log(`isBackgroundTaskOnly: ${isBackgroundTaskOnly}`);
+
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
       environment: environmentPreboot,
       node: nodePreboot,
+      isBackgroundTaskOnly,
     });
 
     // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also

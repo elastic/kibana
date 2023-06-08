@@ -6,10 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { writeFileSync } from 'fs';
 import _ from 'lodash';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Command from './command';
 import serveCommand from './serve/serve';
+import { createSession, generateFileName } from './profiling/session';
+import { startProfiling } from './profiling/cpu_profile';
+
+async function generateCpuProfile() {
+  const session = await createSession();
+  const stopProfiling = await startProfiling(session);
+  setTimeout(async () => {
+    const profile = await stopProfiling();
+    const fileName = `${generateFileName()}.cpuprofile`;
+    writeFileSync(fileName, JSON.stringify(profile));
+    session.destroy();
+    console.log(`generated CPU profile in ${fileName}`);
+  }, 30 * 1000);
+}
+
+generateCpuProfile();
 
 const argv = process.argv.slice();
 const program = new Command('bin/kibana');

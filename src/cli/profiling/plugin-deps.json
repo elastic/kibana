@@ -1,0 +1,2203 @@
+[
+  {
+    "pluginName": "advancedSettings",
+    "optionalPlugins": [
+      "home",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "management"
+    ]
+  },
+  {
+    "pluginName": "bfetch",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "expressionGauge",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "expressions",
+      "fieldFormats",
+      "charts",
+      "visualizations",
+      "presentationUtil",
+      "data"
+    ]
+  },
+  {
+    "pluginName": "expressionHeatmap",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "expressions",
+      "fieldFormats",
+      "charts",
+      "visualizations",
+      "presentationUtil",
+      "data"
+    ]
+  },
+  {
+    "pluginName": "expressionLegacyMetricVis",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "expressions",
+      "fieldFormats",
+      "charts",
+      "visualizations",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionMetricVis",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "expressions",
+      "fieldFormats",
+      "charts",
+      "visualizations",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionPartitionVis",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "fieldFormats",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionTagcloud",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "expressions",
+      "visualizations",
+      "charts",
+      "presentationUtil",
+      "fieldFormats"
+    ]
+  },
+  {
+    "pluginName": "expressionXY",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "expressions",
+      "charts",
+      "data",
+      "fieldFormats",
+      "uiActions",
+      "eventAnnotation",
+      "visualizations"
+    ]
+  },
+  {
+    "pluginName": "charts",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions"
+    ]
+  },
+  {
+    "pluginName": "console",
+    "optionalPlugins": [
+      "usageCollection",
+      "home"
+    ],
+    "requiredPlugins": [
+      "devTools",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "contentManagement",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "controls",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "presentationUtil",
+      "savedObjects",
+      "kibanaReact",
+      "expressions",
+      "embeddable",
+      "dataViews",
+      "data",
+      "unifiedSearch",
+      "uiActions"
+    ]
+  },
+  {
+    "pluginName": "customIntegrations",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "dashboard",
+    "optionalPlugins": [
+      "home",
+      "spaces",
+      "savedObjectsTaggingOss",
+      "screenshotMode",
+      "usageCollection",
+      "taskManager"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "dataViewEditor",
+      "embeddable",
+      "controls",
+      "inspector",
+      "navigation",
+      "savedObjects",
+      "savedObjectsFinder",
+      "savedObjectsManagement",
+      "share",
+      "screenshotMode",
+      "uiActions",
+      "urlForwarding",
+      "presentationUtil",
+      "visualizations",
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "data",
+    "optionalPlugins": [
+      "usageCollection",
+      "taskManager",
+      "security"
+    ],
+    "requiredPlugins": [
+      "bfetch",
+      "expressions",
+      "uiActions",
+      "share",
+      "inspector",
+      "fieldFormats",
+      "dataViews",
+      "screenshotMode",
+      "management"
+    ]
+  },
+  {
+    "pluginName": "dataViewEditor",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "dataViewFieldEditor",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "data",
+      "fieldFormats",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "dataViewManagement",
+    "optionalPlugins": [
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "management",
+      "data",
+      "urlForwarding",
+      "dataViewFieldEditor",
+      "dataViewEditor",
+      "dataViews",
+      "fieldFormats",
+      "unifiedSearch",
+      "savedObjectsManagement"
+    ]
+  },
+  {
+    "pluginName": "dataViews",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "fieldFormats",
+      "expressions"
+    ]
+  },
+  {
+    "pluginName": "devTools",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "urlForwarding"
+    ]
+  },
+  {
+    "pluginName": "discover",
+    "optionalPlugins": [
+      "home",
+      "share",
+      "usageCollection",
+      "spaces",
+      "triggersActionsUi",
+      "savedObjectsTaggingOss",
+      "lens"
+    ],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "dataViews",
+      "embeddable",
+      "inspector",
+      "fieldFormats",
+      "urlForwarding",
+      "navigation",
+      "uiActions",
+      "savedObjects",
+      "savedObjectsFinder",
+      "savedObjectsManagement",
+      "dataViewFieldEditor",
+      "dataViewEditor",
+      "expressions",
+      "unifiedFieldList",
+      "unifiedSearch",
+      "unifiedHistogram"
+    ]
+  },
+  {
+    "pluginName": "embeddable",
+    "optionalPlugins": [
+      "savedObjectsTaggingOss"
+    ],
+    "requiredPlugins": [
+      "data",
+      "inspector",
+      "uiActions",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
+    ]
+  },
+  {
+    "pluginName": "esUiShared",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "eventAnnotation",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "data"
+    ]
+  },
+  {
+    "pluginName": "expressionError",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionImage",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionMetric",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionRepeatImage",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionRevealImage",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressionShape",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ]
+  },
+  {
+    "pluginName": "expressions",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "fieldFormats",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "files",
+    "optionalPlugins": [
+      "security",
+      "usageCollection"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "filesManagement",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "files",
+      "management"
+    ]
+  },
+  {
+    "pluginName": "ftrApis",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "guidedOnboarding",
+    "optionalPlugins": [
+      "cloud",
+      "features"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "home",
+    "optionalPlugins": [
+      "usageCollection",
+      "customIntegrations",
+      "cloud",
+      "guidedOnboarding"
+    ],
+    "requiredPlugins": [
+      "dataViews",
+      "share",
+      "urlForwarding"
+    ]
+  },
+  {
+    "pluginName": "imageEmbeddable",
+    "optionalPlugins": [
+      "security",
+      "screenshotMode"
+    ],
+    "requiredPlugins": [
+      "embeddable",
+      "files",
+      "uiActions"
+    ]
+  },
+  {
+    "pluginName": "inputControlVis",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data",
+      "expressions",
+      "visDefaultEditor",
+      "visualizations",
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "inspector",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "share"
+    ]
+  },
+  {
+    "pluginName": "interactiveSetup",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "kibanaOverview",
+    "optionalPlugins": [
+      "newsfeed",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "navigation",
+      "dataViews",
+      "home",
+      "share",
+      "dataViewEditor"
+    ]
+  },
+  {
+    "pluginName": "kibanaReact",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "kibanaUsageCollection",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "usageCollection"
+    ]
+  },
+  {
+    "pluginName": "kibanaUtils",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "management",
+    "optionalPlugins": [
+      "home"
+    ],
+    "requiredPlugins": [
+      "share"
+    ]
+  },
+  {
+    "pluginName": "mapsEms",
+    "optionalPlugins": [
+      "licensing"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "navigation",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "newsfeed",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "screenshotMode"
+    ]
+  },
+  {
+    "pluginName": "presentationUtil",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "savedObjects",
+      "kibanaReact",
+      "embeddable",
+      "expressions",
+      "dataViews",
+      "uiActions"
+    ]
+  },
+  {
+    "pluginName": "savedObjects",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "savedObjectsFinder",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "savedObjectsManagement",
+    "optionalPlugins": [
+      "home",
+      "savedObjectsTaggingOss",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "management",
+      "data",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "savedObjectsTaggingOss",
+    "optionalPlugins": [
+      "savedObjects"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "savedSearch",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data"
+    ]
+  },
+  {
+    "pluginName": "screenshotMode",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "share",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "telemetry",
+    "optionalPlugins": [
+      "home",
+      "security"
+    ],
+    "requiredPlugins": [
+      "telemetryCollectionManager",
+      "usageCollection",
+      "screenshotMode"
+    ]
+  },
+  {
+    "pluginName": "telemetryCollectionManager",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "usageCollection"
+    ]
+  },
+  {
+    "pluginName": "telemetryManagementSection",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "advancedSettings",
+      "telemetry"
+    ]
+  },
+  {
+    "pluginName": "uiActions",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "uiActionsEnhanced",
+    "optionalPlugins": [
+      "licensing"
+    ],
+    "requiredPlugins": [
+      "embeddable",
+      "uiActions"
+    ]
+  },
+  {
+    "pluginName": "unifiedFieldList",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "dataViews",
+      "data",
+      "fieldFormats",
+      "charts",
+      "uiActions"
+    ]
+  },
+  {
+    "pluginName": "unifiedHistogram",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "unifiedSearch",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "dataViews",
+      "data",
+      "uiActions",
+      "screenshotMode",
+      "savedObjectsManagement"
+    ]
+  },
+  {
+    "pluginName": "urlForwarding",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "usageCollection",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "visDefaultEditor",
+    "optionalPlugins": [
+      "visualizations"
+    ],
+    "requiredPlugins": [
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "visTypeMarkdown",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "visualizations"
+    ]
+  },
+  {
+    "pluginName": "visTypeGauge",
+    "optionalPlugins": [
+      "expressionGauge"
+    ],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "visTypeHeatmap",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "usageCollection",
+      "fieldFormats",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "visTypeMetric",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data",
+      "visualizations",
+      "charts",
+      "expressions",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "visTypePie",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "usageCollection",
+      "expressionPartitionVis",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "visTypeTable",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "expressions",
+      "visualizations",
+      "fieldFormats",
+      "dataViews",
+      "usageCollection"
+    ]
+  },
+  {
+    "pluginName": "visTypeTagcloud",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data",
+      "expressions",
+      "visualizations",
+      "charts"
+    ]
+  },
+  {
+    "pluginName": "visTypeTimelion",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "visualizations",
+      "data",
+      "expressions",
+      "charts",
+      "dataViews",
+      "fieldFormats"
+    ]
+  },
+  {
+    "pluginName": "visTypeTimeseries",
+    "optionalPlugins": [
+      "home"
+    ],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "inspector",
+      "dataViews",
+      "fieldFormats",
+      "usageCollection",
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "visTypeVega",
+    "optionalPlugins": [
+      "home"
+    ],
+    "requiredPlugins": [
+      "data",
+      "visualizations",
+      "mapsEms",
+      "expressions",
+      "inspector",
+      "dataViews",
+      "usageCollection"
+    ]
+  },
+  {
+    "pluginName": "visTypeVislib",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "fieldFormats"
+    ]
+  },
+  {
+    "pluginName": "visTypeXy",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "charts",
+      "visualizations",
+      "data",
+      "expressions",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "visualizationUiComponents",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "visualizations",
+    "optionalPlugins": [
+      "home",
+      "share",
+      "spaces",
+      "savedObjectsTaggingOss"
+    ],
+    "requiredPlugins": [
+      "data",
+      "charts",
+      "expressions",
+      "fieldFormats",
+      "uiActions",
+      "urlForwarding",
+      "navigation",
+      "embeddable",
+      "inspector",
+      "savedObjects",
+      "screenshotMode",
+      "presentationUtil",
+      "dataViews",
+      "dataViewEditor",
+      "unifiedSearch",
+      "usageCollection",
+      "savedObjectsFinder",
+      "savedObjectsManagement",
+      "contentManagement"
+    ]
+  },
+  {
+    "pluginName": "actions",
+    "optionalPlugins": [
+      "usageCollection",
+      "spaces",
+      "security",
+      "monitoringCollection"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "taskManager",
+      "encryptedSavedObjects",
+      "eventLog",
+      "features"
+    ]
+  },
+  {
+    "pluginName": "aiops",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "lens",
+      "licensing",
+      "uiActions",
+      "unifiedFieldList"
+    ]
+  },
+  {
+    "pluginName": "alerting",
+    "optionalPlugins": [
+      "usageCollection",
+      "security",
+      "monitoringCollection",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "dataViews",
+      "share",
+      "encryptedSavedObjects",
+      "eventLog",
+      "features",
+      "kibanaUtils",
+      "licensing",
+      "taskManager",
+      "kibanaReact",
+      "management",
+      "esUiShared"
+    ]
+  },
+  {
+    "pluginName": "apm",
+    "optionalPlugins": [
+      "actions",
+      "alerting",
+      "cases",
+      "charts",
+      "cloud",
+      "fleet",
+      "fieldFormats",
+      "home",
+      "ml",
+      "security",
+      "spaces",
+      "taskManager",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "data",
+      "embeddable",
+      "features",
+      "infra",
+      "inspector",
+      "licensing",
+      "observability",
+      "observabilityShared",
+      "exploratoryView",
+      "ruleRegistry",
+      "triggersActionsUi",
+      "share",
+      "unifiedSearch",
+      "dataViews",
+      "advancedSettings",
+      "unifiedFieldList",
+      "lens",
+      "maps"
+    ]
+  },
+  {
+    "pluginName": "assetManager",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "banners",
+    "optionalPlugins": [
+      "screenshotMode"
+    ],
+    "requiredPlugins": [
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "canvas",
+    "optionalPlugins": [
+      "home",
+      "reporting",
+      "spaces",
+      "usageCollection",
+      "savedObjects"
+    ],
+    "requiredPlugins": [
+      "bfetch",
+      "charts",
+      "data",
+      "dataViews",
+      "embeddable",
+      "expressionError",
+      "expressionImage",
+      "expressionMetric",
+      "expressionRepeatImage",
+      "expressionRevealImage",
+      "expressionShape",
+      "expressions",
+      "features",
+      "inspector",
+      "presentationUtil",
+      "visualizations",
+      "uiActions",
+      "share",
+      "savedObjectsManagement",
+      "savedObjectsFinder"
+    ]
+  },
+  {
+    "pluginName": "cases",
+    "optionalPlugins": [
+      "home",
+      "taskManager",
+      "usageCollection",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "embeddable",
+      "esUiShared",
+      "lens",
+      "licensing",
+      "features",
+      "kibanaReact",
+      "kibanaUtils",
+      "triggersActionsUi",
+      "management",
+      "security",
+      "notifications",
+      "ruleRegistry",
+      "files",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
+    ]
+  },
+  {
+    "pluginName": "cloud",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "cloudDefend",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "navigation",
+      "data",
+      "fleet",
+      "unifiedSearch",
+      "kibanaReact",
+      "cloud",
+      "security",
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "cloudChat",
+    "optionalPlugins": [
+      "security"
+    ],
+    "requiredPlugins": [
+      "cloud"
+    ]
+  },
+  {
+    "pluginName": "cloudDataMigration",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "cloud",
+      "management",
+      "kibanaReact",
+      "features"
+    ]
+  },
+  {
+    "pluginName": "cloudExperiments",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "cloud",
+      "dataViews"
+    ]
+  },
+  {
+    "pluginName": "cloudFullStory",
+    "optionalPlugins": [
+      "security"
+    ],
+    "requiredPlugins": [
+      "cloud"
+    ]
+  },
+  {
+    "pluginName": "cloudGainsight",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "cloud"
+    ]
+  },
+  {
+    "pluginName": "cloudLinks",
+    "optionalPlugins": [
+      "cloud",
+      "security",
+      "guidedOnboarding"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "cloudSecurityPosture",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "navigation",
+      "data",
+      "fleet",
+      "unifiedSearch",
+      "taskManager",
+      "security",
+      "charts",
+      "discover",
+      "cloud",
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "crossClusterReplication",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "home",
+      "licensing",
+      "licenseApiGuard",
+      "management",
+      "remoteClusters",
+      "indexManagement",
+      "features"
+    ]
+  },
+  {
+    "pluginName": "customBranding",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "licensing",
+      "licenseApiGuard"
+    ]
+  },
+  {
+    "pluginName": "dashboardEnhanced",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "dashboard",
+      "data",
+      "embeddable",
+      "share",
+      "uiActionsEnhanced",
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "dataVisualizer",
+    "optionalPlugins": [
+      "security",
+      "maps",
+      "home",
+      "lens",
+      "dataViewFieldEditor",
+      "customIntegrations",
+      "cloud"
+    ],
+    "requiredPlugins": [
+      "data",
+      "usageCollection",
+      "embeddable",
+      "share",
+      "discover",
+      "fileUpload",
+      "uiActions",
+      "charts",
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "discoverEnhanced",
+    "optionalPlugins": [
+      "share",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "uiActions",
+      "embeddable",
+      "discover"
+    ]
+  },
+  {
+    "pluginName": "urlDrilldown",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "embeddable",
+      "uiActions",
+      "uiActionsEnhanced"
+    ]
+  },
+  {
+    "pluginName": "ecsDataQualityDashboard",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data"
+    ]
+  },
+  {
+    "pluginName": "embeddableEnhanced",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "embeddable",
+      "kibanaReact",
+      "uiActions",
+      "uiActionsEnhanced"
+    ]
+  },
+  {
+    "pluginName": "encryptedSavedObjects",
+    "optionalPlugins": [
+      "security"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "enterpriseSearch",
+    "optionalPlugins": [
+      "customIntegrations",
+      "globalSearch",
+      "home",
+      "ml",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "features",
+      "security",
+      "licensing",
+      "data",
+      "discover",
+      "charts",
+      "infra",
+      "cloud",
+      "esUiShared",
+      "guidedOnboarding",
+      "lens",
+      "embeddable"
+    ]
+  },
+  {
+    "pluginName": "eventLog",
+    "optionalPlugins": [
+      "spaces"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "exploratoryView",
+    "optionalPlugins": [
+      "discover",
+      "embeddable",
+      "home",
+      "licensing",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "cases",
+      "charts",
+      "data",
+      "dataViews",
+      "features",
+      "files",
+      "guidedOnboarding",
+      "inspector",
+      "lens",
+      "observabilityShared",
+      "security",
+      "share",
+      "triggersActionsUi",
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "features",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "fileUpload",
+    "optionalPlugins": [
+      "security"
+    ],
+    "requiredPlugins": [
+      "data",
+      "usageCollection"
+    ]
+  },
+  {
+    "pluginName": "fleet",
+    "optionalPlugins": [
+      "features",
+      "cloud",
+      "usageCollection",
+      "home",
+      "globalSearch",
+      "telemetry",
+      "discover",
+      "ingestPipelines",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "data",
+      "encryptedSavedObjects",
+      "navigation",
+      "customIntegrations",
+      "share",
+      "security",
+      "unifiedSearch",
+      "savedObjectsTagging",
+      "taskManager",
+      "guidedOnboarding",
+      "files"
+    ]
+  },
+  {
+    "pluginName": "globalSearch",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "globalSearchBar",
+    "optionalPlugins": [
+      "usageCollection",
+      "savedObjectsTagging"
+    ],
+    "requiredPlugins": [
+      "globalSearch"
+    ]
+  },
+  {
+    "pluginName": "globalSearchProviders",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "globalSearch"
+    ]
+  },
+  {
+    "pluginName": "graph",
+    "optionalPlugins": [
+      "home",
+      "features",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "data",
+      "navigation",
+      "savedObjects",
+      "unifiedSearch",
+      "inspector",
+      "savedObjectsManagement",
+      "savedObjectsFinder"
+    ]
+  },
+  {
+    "pluginName": "grokdebugger",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "licensing",
+      "home",
+      "devTools"
+    ]
+  },
+  {
+    "pluginName": "indexLifecycleManagement",
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection",
+      "indexManagement",
+      "home"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "indexManagement",
+    "optionalPlugins": [
+      "security",
+      "usageCollection",
+      "fleet"
+    ],
+    "requiredPlugins": [
+      "home",
+      "management",
+      "features",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "infra",
+    "optionalPlugins": [
+      "spaces",
+      "ml",
+      "home",
+      "embeddable",
+      "osquery"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "cases",
+      "charts",
+      "data",
+      "dataViews",
+      "discover",
+      "embeddable",
+      "features",
+      "lens",
+      "observability",
+      "observabilityShared",
+      "ruleRegistry",
+      "security",
+      "share",
+      "triggersActionsUi",
+      "unifiedSearch",
+      "usageCollection",
+      "visTypeTimeseries"
+    ]
+  },
+  {
+    "pluginName": "ingestPipelines",
+    "optionalPlugins": [
+      "security",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features",
+      "share",
+      "fileUpload"
+    ]
+  },
+  {
+    "pluginName": "kubernetesSecurity",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data",
+      "timelines",
+      "ruleRegistry",
+      "sessionView"
+    ]
+  },
+  {
+    "pluginName": "lens",
+    "optionalPlugins": [
+      "expressionLegacyMetricVis",
+      "expressionPartitionVis",
+      "usageCollection",
+      "taskManager",
+      "globalSearch",
+      "savedObjectsTagging",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "charts",
+      "expressions",
+      "fieldFormats",
+      "inspector",
+      "navigation",
+      "urlForwarding",
+      "visualizations",
+      "dashboard",
+      "uiActions",
+      "uiActionsEnhanced",
+      "embeddable",
+      "share",
+      "presentationUtil",
+      "dataViewFieldEditor",
+      "dataViewEditor",
+      "expressionGauge",
+      "expressionMetricVis",
+      "expressionHeatmap",
+      "expressionXY",
+      "eventAnnotation",
+      "unifiedSearch",
+      "unifiedFieldList",
+      "contentManagement"
+    ]
+  },
+  {
+    "pluginName": "licenseApiGuard",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "licenseManagement",
+    "optionalPlugins": [
+      "telemetry"
+    ],
+    "requiredPlugins": [
+      "home",
+      "licensing",
+      "management",
+      "features",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "licensing",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "lists",
+    "optionalPlugins": [
+      "spaces",
+      "security"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "logstash",
+    "optionalPlugins": [
+      "home",
+      "monitoring",
+      "security"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features"
+    ]
+  },
+  {
+    "pluginName": "maps",
+    "optionalPlugins": [
+      "cloud",
+      "customIntegrations",
+      "home",
+      "savedObjectsTagging",
+      "charts",
+      "screenshotMode",
+      "security",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "controls",
+      "unifiedSearch",
+      "lens",
+      "licensing",
+      "features",
+      "inspector",
+      "data",
+      "fieldFormats",
+      "fileUpload",
+      "uiActions",
+      "navigation",
+      "expressions",
+      "visualizations",
+      "dashboard",
+      "embeddable",
+      "mapsEms",
+      "savedObjects",
+      "share",
+      "presentationUtil",
+      "contentManagement"
+    ]
+  },
+  {
+    "pluginName": "ml",
+    "optionalPlugins": [
+      "alerting",
+      "dashboard",
+      "home",
+      "licenseManagement",
+      "management",
+      "maps",
+      "security",
+      "spaces",
+      "usageCollection",
+      "cases"
+    ],
+    "requiredPlugins": [
+      "aiops",
+      "charts",
+      "cloud",
+      "data",
+      "dataViews",
+      "dataVisualizer",
+      "discover",
+      "embeddable",
+      "features",
+      "fieldFormats",
+      "lens",
+      "licensing",
+      "share",
+      "taskManager",
+      "triggersActionsUi",
+      "uiActions",
+      "unifiedSearch",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
+    ]
+  },
+  {
+    "pluginName": "monitoring",
+    "optionalPlugins": [
+      "infra",
+      "usageCollection",
+      "home",
+      "cloud",
+      "triggersActionsUi",
+      "alerting",
+      "actions",
+      "encryptedSavedObjects",
+      "dashboard",
+      "fleet"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "features",
+      "data",
+      "navigation",
+      "observability",
+      "dataViews",
+      "unifiedSearch"
+    ]
+  },
+  {
+    "pluginName": "monitoringCollection",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "notifications",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "actions",
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "observability",
+    "optionalPlugins": [
+      "discover",
+      "home",
+      "licensing",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "cases",
+      "charts",
+      "data",
+      "dataViews",
+      "embeddable",
+      "exploratoryView",
+      "features",
+      "files",
+      "guidedOnboarding",
+      "inspector",
+      "lens",
+      "observabilityShared",
+      "ruleRegistry",
+      "triggersActionsUi",
+      "security",
+      "share",
+      "unifiedSearch",
+      "visualizations"
+    ]
+  },
+  {
+    "pluginName": "observabilityOnboarding",
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "data",
+      "observability"
+    ]
+  },
+  {
+    "pluginName": "observabilityShared",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "cases",
+      "guidedOnboarding"
+    ]
+  },
+  {
+    "pluginName": "osquery",
+    "optionalPlugins": [
+      "fleet",
+      "home",
+      "usageCollection",
+      "lens",
+      "telemetry",
+      "cases"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "licensing",
+      "dataViews",
+      "discover",
+      "features",
+      "navigation",
+      "taskManager",
+      "triggersActionsUi",
+      "ruleRegistry",
+      "security"
+    ]
+  },
+  {
+    "pluginName": "painlessLab",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "devTools",
+      "licensing",
+      "home"
+    ]
+  },
+  {
+    "pluginName": "profiling",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "navigation",
+      "data",
+      "kibanaUtils",
+      "share",
+      "observability",
+      "observabilityShared",
+      "features",
+      "kibanaReact",
+      "unifiedSearch",
+      "dataViews",
+      "charts",
+      "spaces",
+      "cloud",
+      "fleet",
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "remoteClusters",
+    "optionalPlugins": [
+      "usageCollection",
+      "cloud"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "indexManagement",
+      "features",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "reporting",
+    "optionalPlugins": [
+      "security",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "data",
+      "discover",
+      "fieldFormats",
+      "esUiShared",
+      "home",
+      "management",
+      "licensing",
+      "uiActions",
+      "taskManager",
+      "embeddable",
+      "screenshotting",
+      "screenshotMode",
+      "share",
+      "features"
+    ]
+  },
+  {
+    "pluginName": "rollup",
+    "optionalPlugins": [
+      "home",
+      "indexManagement",
+      "usageCollection",
+      "visTypeTimeseries"
+    ],
+    "requiredPlugins": [
+      "management",
+      "licensing",
+      "features"
+    ]
+  },
+  {
+    "pluginName": "ruleRegistry",
+    "optionalPlugins": [
+      "security",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "data",
+      "triggersActionsUi"
+    ]
+  },
+  {
+    "pluginName": "runtimeFields",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "savedObjectsTagging",
+    "optionalPlugins": [
+      "usageCollection",
+      "security"
+    ],
+    "requiredPlugins": [
+      "features",
+      "management",
+      "savedObjectsTaggingOss"
+    ]
+  },
+  {
+    "pluginName": "screenshotting",
+    "optionalPlugins": [
+      "cloud"
+    ],
+    "requiredPlugins": [
+      "expressions",
+      "screenshotMode"
+    ]
+  },
+  {
+    "pluginName": "searchprofiler",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "devTools",
+      "home",
+      "licensing",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "security",
+    "optionalPlugins": [
+      "cloud",
+      "dataViews",
+      "home",
+      "management",
+      "usageCollection",
+      "spaces",
+      "share"
+    ],
+    "requiredPlugins": [
+      "features",
+      "licensing",
+      "taskManager"
+    ]
+  },
+  {
+    "pluginName": "securitySolution",
+    "optionalPlugins": [
+      "cloudExperiments",
+      "encryptedSavedObjects",
+      "fleet",
+      "ml",
+      "newsfeed",
+      "security",
+      "usageCollection",
+      "lists",
+      "home",
+      "telemetry",
+      "dataViewFieldEditor",
+      "osquery",
+      "savedObjectsTaggingOss"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "alerting",
+      "cases",
+      "cloud",
+      "cloudDefend",
+      "cloudSecurityPosture",
+      "dashboard",
+      "data",
+      "ecsDataQualityDashboard",
+      "dataViews",
+      "embeddable",
+      "eventLog",
+      "features",
+      "guidedOnboarding",
+      "inspector",
+      "kubernetesSecurity",
+      "lens",
+      "licensing",
+      "maps",
+      "ruleRegistry",
+      "sessionView",
+      "spaces",
+      "taskManager",
+      "threatIntelligence",
+      "timelines",
+      "triggersActionsUi",
+      "uiActions",
+      "unifiedSearch",
+      "files",
+      "controls",
+      "dataViews",
+      "savedObjectsManagement"
+    ]
+  },
+  {
+    "pluginName": "serverless",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "kibanaReact",
+      "management"
+    ]
+  },
+  {
+    "pluginName": "serverlessObservability",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "serverless",
+      "observabilityShared"
+    ]
+  },
+  {
+    "pluginName": "serverlessSearch",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "serverless",
+      "enterpriseSearch",
+      "management"
+    ]
+  },
+  {
+    "pluginName": "serverlessSecurity",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "serverless",
+      "security",
+      "securitySolution",
+      "kibanaReact"
+    ]
+  },
+  {
+    "pluginName": "sessionView",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data",
+      "timelines",
+      "ruleRegistry"
+    ]
+  },
+  {
+    "pluginName": "snapshotRestore",
+    "optionalPlugins": [
+      "usageCollection",
+      "security",
+      "cloud",
+      "home"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "spaces",
+    "optionalPlugins": [
+      "advancedSettings",
+      "home",
+      "management",
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "features",
+      "licensing"
+    ]
+  },
+  {
+    "pluginName": "stackAlerts",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "unifiedSearch",
+      "alerting",
+      "features",
+      "triggersActionsUi",
+      "kibanaReact",
+      "savedObjects",
+      "data",
+      "dataViews",
+      "kibanaUtils"
+    ]
+  },
+  {
+    "pluginName": "stackConnectors",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "actions",
+      "esUiShared",
+      "triggersActionsUi"
+    ]
+  },
+  {
+    "pluginName": "synthetics",
+    "optionalPlugins": [
+      "cloud",
+      "data",
+      "fleet",
+      "home",
+      "ml",
+      "spaces",
+      "telemetry"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "alerting",
+      "cases",
+      "data",
+      "fleet",
+      "embeddable",
+      "discover",
+      "dataViews",
+      "encryptedSavedObjects",
+      "exploratoryView",
+      "features",
+      "inspector",
+      "licensing",
+      "observability",
+      "observabilityShared",
+      "ruleRegistry",
+      "security",
+      "share",
+      "taskManager",
+      "triggersActionsUi",
+      "usageCollection",
+      "unifiedSearch",
+      "bfetch"
+    ]
+  },
+  {
+    "pluginName": "taskManager",
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "telemetryCollectionXpack",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "telemetryCollectionManager"
+    ]
+  },
+  {
+    "pluginName": "threatIntelligence",
+    "optionalPlugins": [],
+    "requiredPlugins": [
+      "cases",
+      "data",
+      "dataViews",
+      "kibanaUtils",
+      "navigation",
+      "kibanaReact",
+      "triggersActionsUi",
+      "inspector"
+    ]
+  },
+  {
+    "pluginName": "timelines",
+    "optionalPlugins": [
+      "security"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "cases",
+      "data",
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  },
+  {
+    "pluginName": "transform",
+    "optionalPlugins": [
+      "security",
+      "usageCollection",
+      "spaces",
+      "alerting"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "home",
+      "licensing",
+      "management",
+      "features",
+      "share",
+      "triggersActionsUi",
+      "fieldFormats",
+      "unifiedSearch",
+      "charts",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
+    ]
+  },
+  {
+    "pluginName": "translations",
+    "optionalPlugins": [],
+    "requiredPlugins": []
+  },
+  {
+    "pluginName": "triggersActionsUi",
+    "optionalPlugins": [
+      "cloud",
+      "features",
+      "home",
+      "spaces"
+    ],
+    "requiredPlugins": [
+      "management",
+      "charts",
+      "data",
+      "kibanaReact",
+      "kibanaUtils",
+      "savedObjects",
+      "unifiedSearch",
+      "dataViews",
+      "dataViewEditor",
+      "alerting",
+      "actions"
+    ]
+  },
+  {
+    "pluginName": "upgradeAssistant",
+    "optionalPlugins": [
+      "usageCollection",
+      "cloud",
+      "security",
+      "infra"
+    ],
+    "requiredPlugins": [
+      "management",
+      "data",
+      "licensing",
+      "features",
+      "share"
+    ]
+  },
+  {
+    "pluginName": "ux",
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection",
+      "taskManager",
+      "actions",
+      "alerts",
+      "observability",
+      "security",
+      "maps",
+      "lens"
+    ],
+    "requiredPlugins": [
+      "features",
+      "data",
+      "dataViews",
+      "exploratoryView",
+      "licensing",
+      "triggersActionsUi",
+      "observabilityShared",
+      "embeddable",
+      "infra",
+      "inspector",
+      "apm"
+    ]
+  },
+  {
+    "pluginName": "watcher",
+    "optionalPlugins": [
+      "licenseManagement"
+    ],
+    "requiredPlugins": [
+      "home",
+      "licensing",
+      "licenseApiGuard",
+      "management",
+      "charts",
+      "data",
+      "features"
+    ]
+  }
+]

@@ -1,3 +1,4 @@
+/*.cpuprofile
 .aws-config.json
 .signing-config.json
 .ackrc
