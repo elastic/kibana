@@ -26,6 +26,17 @@ export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin[
 
 const configSchema = schema.object({
   alphaEnabled: schema.maybe(schema.boolean()),
+  sourceIndices: schema.maybe(
+    schema.object({
+      metrics: schema.string({ defaultValue: 'metricbeat-*,metrics-*' }),
+      logs: schema.string({ defaultValue: 'filebeat-*,logs-*' }),
+      traces: schema.string({ defaultValue: 'traces-*' }),
+      serviceMetrics: schema.string({ defaultValue: 'metrics-apm*' }),
+    })
+  ),
+  lockedSource: schema.oneOf([schema.literal('assets'), schema.literal('signals')], {
+    defaultValue: 'signals',
+  }),
   implicitCollection: schema.maybe(
     schema.object({
       enabled: schema.boolean({ defaultValue: true }),
