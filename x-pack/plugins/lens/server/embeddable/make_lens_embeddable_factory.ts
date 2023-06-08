@@ -34,7 +34,6 @@ import {
   commonMigratePartitionChartGroups,
   commonMigratePartitionMetrics,
   commonMigrateIndexPatternDatasource,
-  commonMigrateMetricFormatter,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
