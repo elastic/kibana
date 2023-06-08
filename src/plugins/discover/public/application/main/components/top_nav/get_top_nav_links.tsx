@@ -15,7 +15,6 @@ import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_shari
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { openOptionsPopover } from './open_options_popover';
 import { openAlertsPopover } from './open_alerts_popover';
 
 /**
@@ -38,24 +37,6 @@ export const getTopNavLinks = ({
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
 }): TopNavMenuData[] => {
-  const options = {
-    id: 'options',
-    label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {
-      defaultMessage: 'Options',
-    }),
-    description: i18n.translate('discover.localMenu.optionsDescription', {
-      defaultMessage: 'Options',
-    }),
-    run: (anchorElement: HTMLElement) =>
-      openOptionsPopover({
-        I18nContext: services.core.i18n.Context,
-        anchorElement,
-        theme$: services.core.theme.theme$,
-        services,
-      }),
-    testId: 'discoverOptionsButton',
-  };
-
   const alerts = {
     id: 'alerts',
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
@@ -225,7 +206,6 @@ export const getTopNavLinks = ({
   };
 
   return [
-    ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
     shareSearch,

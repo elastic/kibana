@@ -9,6 +9,7 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { groupBy, keys } from 'lodash';
 
 import { ApplicationStart } from '@kbn/core-application-browser';
 
@@ -26,14 +27,25 @@ export interface GuideCardsProps {
   guidesState: GuideState[];
 }
 export const GuideCards = (props: GuideCardsProps) => {
+  const groupedGuideCards = groupBy(guideCards, 'solution');
+
   return (
-    <EuiFlexGroup wrap justifyContent="center" responsive={false}>
-      {guideCards.map((card, index) => (
-        <EuiFlexItem key={index} grow={false}>
-          <GuideCard card={card} {...props} />
-          <EuiSpacer size="m" />
-        </EuiFlexItem>
-      ))}
+    <EuiFlexGroup>
+      {keys(groupedGuideCards).map((groupedGuideCard, groupIndex) => {
+        const cards = groupedGuideCards[groupedGuideCard];
+        return (
+          <EuiFlexItem key={groupIndex}>
+            <EuiFlexGroup direction="column" alignItems="center">
+              {cards.map((card, index) => (
+                <EuiFlexItem key={index} grow={false}>
+                  <GuideCard card={card} {...props} />
+                  <EuiSpacer size="m" />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

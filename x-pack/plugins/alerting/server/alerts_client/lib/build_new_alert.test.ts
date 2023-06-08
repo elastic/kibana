@@ -50,6 +50,7 @@ describe('buildNewAlert', () => {
         alert: {
           action_group: 'default',
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -83,6 +84,7 @@ describe('buildNewAlert', () => {
             us: '0',
           },
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -126,6 +128,94 @@ describe('buildNewAlert', () => {
         },
         space_ids: ['default'],
       },
+    });
+  });
+
+  test('should include alert payload if specified', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+
+    expect(
+      buildNewAlert<
+        { count: number; url: string; kibana: { alert: { nested_field: number } } },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-28T12:27:28.159Z',
+        payload: { count: 1, url: `https://url1`, kibana: { alert: { nested_field: 2 } } },
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-28T12:27:28.159Z',
+      count: 1,
+      kibana: {
+        alert: {
+          action_group: 'default',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          rule,
+          status: 'active',
+          uuid: legacyAlert.getUuid(),
+        },
+        space_ids: ['default'],
+      },
+      url: `https://url1`,
+    });
+  });
+
+  test('should overwrite any framework fields included in payload', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+
+    expect(
+      buildNewAlert<
+        {
+          count: number;
+          url: string;
+          kibana: { alert: { action_group: string; nested_field: number } };
+        },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-28T12:27:28.159Z',
+        payload: {
+          count: 1,
+          url: `https://url1`,
+          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+        },
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-28T12:27:28.159Z',
+      count: 1,
+      kibana: {
+        alert: {
+          action_group: 'default',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          rule,
+          status: 'active',
+          uuid: legacyAlert.getUuid(),
+        },
+        space_ids: ['default'],
+      },
+      url: `https://url1`,
     });
   });
 });
