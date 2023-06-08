@@ -224,10 +224,11 @@ function redirectHandler(
   TypeOf<typeof NoParametersRequestSchema.body>,
   SecuritySolutionRequestHandlerContext
 > {
-  return async (_context, _req, res) => {
+  return async (context, _req, res) => {
+    const basePath = (await context.securitySolution).getServerBasePath();
     return res.custom({
       statusCode: 308,
-      headers: { location },
+      headers: { location: `${basePath}${location}` },
     });
   };
 }
