@@ -86,7 +86,10 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
       const { convertToLens } = await import('./convert_to_lens');
       return vis ? convertToLens(vis, timefilter) : null;
     },
-    getExpressionVariables: async (vis?: Vis<TagCloudVisParams>, timeFilter?: TimefilterContract) => {
+    getExpressionVariables: async (
+      vis?: Vis<TagCloudVisParams>,
+      timeFilter?: TimefilterContract
+    ) => {
       const { convertToLens } = await import('./convert_to_lens');
       return {
         canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),

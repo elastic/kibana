@@ -336,7 +336,7 @@ export type HeatmapConfiguration = HeatmapLayerState & {
 export interface TagcloudVisConfiguration {
   layerId: string;
   layerType: LayerType;
-  valueAccessor:string;
+  valueAccessor: string;
   tagAccessor: string;
   maxFontSize: number;
   minFontSize: number;
