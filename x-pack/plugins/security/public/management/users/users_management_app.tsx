@@ -36,10 +36,6 @@ interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
-interface EditUserParams {
-  username: string;
-}
-
 export const usersManagementApp = Object.freeze({
   id: 'users',
   create({ authc, getStartServices }: CreateParams) {
