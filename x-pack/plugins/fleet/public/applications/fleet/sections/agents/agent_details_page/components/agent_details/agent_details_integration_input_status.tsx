@@ -24,7 +24,7 @@ export const AgentDetailsIntegrationInputStatus: React.FunctionComponent<{
     <EuiCallOut
       title={inputStatusFormatter.getErrorTitleFromStatus()}
       color="danger"
-      iconType="warning"
+      iconType="error"
       data-test-subj="integrationInputErrorCallOut"
     >
       <StyledEuiText size="s" data-test-subj="integrationInputErrorDescription">

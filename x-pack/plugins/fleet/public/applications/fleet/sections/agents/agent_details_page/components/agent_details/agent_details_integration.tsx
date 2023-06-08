@@ -186,7 +186,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiBadge
                     color={theme.euiTheme.colors.danger}
-                    iconType="warning"
+                    iconType="error"
                     iconSide="left"
                     data-test-subj={dataTestSubj ? `${dataTestSubj}-needsAttention` : undefined}
                   >

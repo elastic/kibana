@@ -97,7 +97,7 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
     if (inputStatus.status === undefined) {
       return (
         <EuiHealth
-          color="subdued"
+          color="default"
           data-test-subj="xpack.fleet.agentDetailsIntegrations.inputStatusSuccessHealth"
           className="inputStatusHealth"
         />
