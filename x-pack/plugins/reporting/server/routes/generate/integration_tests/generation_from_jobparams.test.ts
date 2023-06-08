@@ -206,7 +206,7 @@ describe('POST /api/reporting/generate', () => {
             },
             status: 'pending',
           },
-          path: 'undefined/api/reporting/jobs/download/foo',
+          path: '/mock-server-basepath/api/reporting/jobs/download/foo',
         });
       });
   });

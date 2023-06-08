@@ -33,6 +33,7 @@ interface SendOptions {
   options: object;
   strategy: string;
   space?: string;
+  internalOrigin: string;
 }
 
 export class BsearchSecureService extends FtrService {
@@ -43,6 +44,7 @@ export class BsearchSecureService extends FtrService {
     auth,
     referer,
     kibanaVersion,
+    internalOrigin,
     options,
     strategy,
     space,
@@ -74,6 +76,13 @@ export class BsearchSecureService extends FtrService {
           .set('kbn-version', kibanaVersion)
           .set('kbn-xsrf', 'true')
           .send(options);
+      } else if (internalOrigin) {
+        result = await supertestWithoutAuth
+          .post(url)
+          .auth(auth.username, auth.password)
+          .set('x-elastic-internal-origin', internalOrigin)
+          .set('kbn-xsrf', 'true')
+          .send(options);
       } else {
         result = await supertestWithoutAuth
           .post(url)
@@ -96,6 +105,7 @@ export class BsearchSecureService extends FtrService {
         .post(`${spaceUrl}/internal/bsearch`)
         .auth(auth.username, auth.password)
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
         .send({
           batch: [
             {

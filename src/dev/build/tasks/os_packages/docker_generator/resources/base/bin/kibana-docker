@@ -161,6 +161,7 @@ kibana_vars=(
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist
     server.rewriteBasePath
+    server.restrictInternalApis
     server.securityResponseHeaders.disableEmbedding
     server.securityResponseHeaders.permissionsPolicy
     server.securityResponseHeaders.referrerPolicy

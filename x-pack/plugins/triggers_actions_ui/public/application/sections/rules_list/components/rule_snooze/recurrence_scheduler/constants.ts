@@ -8,7 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { invert, mapValues } from 'lodash';
 import { RRuleFrequency } from '../../../../../../types';
 
-export { ISO_WEEKDAYS, I18N_WEEKDAY_OPTIONS } from '../../../../../../common/constants';
+export { I18N_WEEKDAY_OPTIONS } from '../../../../../../common/constants';
+export { ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
 
 export const RECURRENCE_END_OPTIONS = [
   { id: 'never', label: 'Never' },

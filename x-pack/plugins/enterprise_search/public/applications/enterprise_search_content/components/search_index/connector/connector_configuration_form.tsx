@@ -76,7 +76,7 @@ export const ConnectorConfigurationForm = () => {
             </EuiToolTip>
           );
 
-        if (dependencies.length > 0) {
+        if (dependencies?.length > 0) {
           // dynamic spacing without CSS
           const previousField = localConfigView[index - 1];
           const nextField = localConfigView[index + 1];

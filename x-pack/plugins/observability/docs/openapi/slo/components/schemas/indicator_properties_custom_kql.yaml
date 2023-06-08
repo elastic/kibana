@@ -31,7 +31,7 @@ properties:
         example: ''
       timestampField:
         description: >
-          The timestamp field used in the source indice. If not specified, @timestamp will be used.
+          The timestamp field used in the source indice.
         type: string
         example: timestamp
   type:

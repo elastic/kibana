@@ -14,7 +14,7 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/observability-shared-plugin/public';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/es_fields/apm';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
@@ -40,7 +40,10 @@ export function InstanceActionsMenu({
   kuery,
   onClose,
 }: Props) {
-  const { core } = useApmPluginContext();
+  const {
+    core,
+    infra: { locators },
+  } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
     serviceNodeName,
@@ -89,6 +92,7 @@ export function InstanceActionsMenu({
     basePath: core.http.basePath,
     onFilterByInstanceClick: handleFilterByInstanceClick,
     metricsHref,
+    infraLocators: locators,
   });
 
   return (

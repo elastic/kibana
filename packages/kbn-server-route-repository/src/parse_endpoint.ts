@@ -13,10 +13,15 @@ export function parseEndpoint(endpoint: string) {
 
   const method = parts[0].trim().toLowerCase() as Method;
   const pathname = parts[1].trim();
+  const version = parts[2]?.trim();
 
   if (!['get', 'post', 'put', 'delete'].includes(method)) {
-    throw new Error('Endpoint was not prefixed with a valid HTTP method');
+    throw new Error(`Endpoint ${endpoint} was not prefixed with a valid HTTP method`);
   }
 
-  return { method, pathname };
+  if (!version && pathname.startsWith('/api')) {
+    throw new Error(`Missing version for public endpoint ${endpoint}`);
+  }
+
+  return { method, pathname, version };
 }

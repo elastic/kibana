@@ -35,6 +35,7 @@ describe('Guided onboarding tour', () => {
     createRule(getNewRule({ query: 'user.name:*' }));
   });
   beforeEach(() => {
+    login();
     startAlertsCasesTour();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();

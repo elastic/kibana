@@ -29,6 +29,8 @@ export function TrainedModelsTableProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
+  const browser = getService('browser');
 
   return new (class ModelsTable {
     public async parseModelsTable() {
@@ -161,14 +163,26 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertModelCollapsedActionsButtonExists(modelId: string, expectedValue: boolean) {
-      const actionsExists = await testSubjects.exists(
-        this.rowSelector(modelId, 'euiCollapsedItemActionsButton')
-      );
+      const actionsExists = await this.doesModelCollapsedActionsButtonExist(modelId);
       expect(actionsExists).to.eql(
         expectedValue,
         `Expected row collapsed actions menu button for trained model '${modelId}' to be ${
           expectedValue ? 'visible' : 'hidden'
         } (got ${actionsExists ? 'visible' : 'hidden'})`
+      );
+    }
+
+    public async doesModelCollapsedActionsButtonExist(modelId: string): Promise<boolean> {
+      return await testSubjects.exists(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
+    }
+
+    public async toggleActionsContextMenu(modelId: string, expectOpen = true) {
+      await testSubjects.click(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
+      const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+      const isDisplayed = await panelElement.isDisplayed();
+      expect(isDisplayed).to.eql(
+        expectOpen,
+        `Expected the action context menu for '${modelId}' to be ${expectOpen ? 'open' : 'closed'}`
       );
     }
 
@@ -224,10 +238,24 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertModelDeleteActionButtonEnabled(modelId: string, expectedValue: boolean) {
-      await this.assertModelDeleteActionButtonExists(modelId, true);
-      const isEnabled = await testSubjects.isEnabled(
-        this.rowSelector(modelId, 'mlModelsTableRowDeleteAction')
-      );
+      const actionsButtonExists = await this.doesModelCollapsedActionsButtonExist(modelId);
+
+      let isEnabled = null;
+
+      if (actionsButtonExists) {
+        await this.toggleActionsContextMenu(modelId, true);
+        const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+        const actionButton = await panelElement.findByTestSubject('mlModelsTableRowDeleteAction');
+        isEnabled = await actionButton.isEnabled();
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+      } else {
+        await this.assertModelDeleteActionButtonExists(modelId, true);
+        isEnabled = await testSubjects.isEnabled(
+          this.rowSelector(modelId, 'mlModelsTableRowDeleteAction')
+        );
+      }
+
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected row delete action button for trained model '${modelId}' to be '${

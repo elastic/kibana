@@ -168,7 +168,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const uiSettings = core.uiSettings;
+  const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
 
@@ -535,6 +535,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -564,6 +565,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,

@@ -7,17 +7,16 @@
 
 lexer grammar esql_lexer;
 
-options { caseInsensitive = true; }
-
 DISSECT : D I S S E C T -> pushMode(EXPRESSION);
 GROK : G R O K -> pushMode(EXPRESSION);
 EVAL : E V A L -> pushMode(EXPRESSION);
-EXPLAIN : E X P L A I N -> pushMode(EXPRESSION);
+EXPLAIN : E X P L A I N -> pushMode(EXPLAIN_MODE);
 FROM : F R O M -> pushMode(SOURCE_IDENTIFIERS);
 ROW : R O W -> pushMode(EXPRESSION);
 STATS : S T A T S -> pushMode(EXPRESSION);
 WHERE : W H E R E -> pushMode(EXPRESSION);
 SORT : S O R T -> pushMode(EXPRESSION);
+MV_EXPAND : M V UNDERSCORE E X P A N D -> pushMode(EXPRESSION);
 LIMIT : L I M I T -> pushMode(EXPRESSION);
 PROJECT : P R O J E C T -> pushMode(EXPRESSION);
 DROP : D R O P -> pushMode(EXPRESSION);
@@ -35,7 +34,12 @@ MULTILINE_COMMENT
 WS
     : [ \r\n\t]+ -> channel(HIDDEN)
     ;
-
+mode EXPLAIN_MODE;
+EXPLAIN_OPENING_BRACKET : '[' -> type(OPENING_BRACKET), pushMode(DEFAULT_MODE);
+EXPLAIN_PIPE : '|' -> type(PIPE), popMode;
+EXPLAIN_WS : WS -> channel(HIDDEN);
+EXPLAIN_LINE_COMMENT : LINE_COMMENT -> channel(HIDDEN);
+EXPLAIN_MULTILINE_COMMENT : MULTILINE_COMMENT -> channel(HIDDEN);
 mode EXPRESSION;
 
 PIPE : '|' -> popMode;
@@ -92,11 +96,12 @@ ASSIGN : '=';
 COMMA : ',';
 DOT : '.';
 LP : '(';
-OPENING_BRACKET : '[' -> pushMode(DEFAULT_MODE);
-CLOSING_BRACKET : ']' -> popMode, popMode; // pop twice, once to clear mode of current cmd and once to exit DEFAULT_MODE
+OPENING_BRACKET : '[' -> pushMode(EXPRESSION), pushMode(EXPRESSION);
+CLOSING_BRACKET : ']' -> popMode, popMode;
 NOT : 'not';
-LIKE: 'like';
-RLIKE: 'rlike';
+LIKE: L I K E;
+RLIKE: R L I K E;
+IN: I N;
 NULL : 'null';
 OR : 'or';
 RP : ')';
@@ -143,9 +148,32 @@ MATH_FUNCTION
     | S T A R T S UNDERSCORE W I T H
     | D A T E UNDERSCORE F O R M A T
     | D A T E UNDERSCORE T R U N C
+    | D A T E UNDERSCORE P A R S E
+    | A U T O UNDERSCORE B U C K E T
     | I S UNDERSCORE F I N I T E
     | I S UNDERSCORE I N F I N I T E
     | C A S E
+    | L E N G T H
+    | M V UNDERSCORE M A X
+    | M V UNDERSCORE M I N
+    | M V UNDERSCORE M A X
+    | M V UNDERSCORE S U M
+    | M V UNDERSCORE C O U N T
+    | M V UNDERSCORE J O I N
+    | M V UNDERSCORE M E D I A N
+    | S P L I T
+    | T O UNDERSCORE S T R I N G
+    | T O UNDERSCORE S T R
+    | T O UNDERSCORE B O O L
+    | T O UNDERSCORE B O O L E A N
+    | T O UNDERSCORE D A T E T I M E
+    | T O UNDERSCORE D T
+    | T O UNDERSCORE D B L
+    | T O UNDERSCORE D O U B L E
+    | T O UNDERSCORE I N T
+    | T O UNDERSCORE I N T E G E R
+    | T O UNDERSCORE L O N G
+    | T O UNDERSCORE I P
     ;
 
 UNARY_FUNCTION

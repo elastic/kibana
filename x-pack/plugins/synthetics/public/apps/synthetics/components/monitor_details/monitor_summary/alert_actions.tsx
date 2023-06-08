@@ -10,11 +10,11 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import rison from '@kbn/rison';
 import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useMonitorAlertEnable } from '../../../hooks/use_monitor_alert_enable';
@@ -51,7 +51,7 @@ export const AlertActions = ({
   };
 
   if (!monitor) {
-    return <EuiLoadingContent lines={1} />;
+    return <EuiSkeletonText lines={1} />;
   }
 
   const onToggleAlertClick = () => {

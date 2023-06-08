@@ -17,8 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
 import { useSelectedLocation } from '../hooks/use_selected_location';
-import { useMonitorName } from './use_monitor_name';
 import { AddMonitorLink } from '../../common/links/add_monitor';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 

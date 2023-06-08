@@ -16,7 +16,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiToolTip,
 } from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { PRIVATE_AVAILABLE_LABEL } from '../../../monitor_add_edit/form/run_test_btn';

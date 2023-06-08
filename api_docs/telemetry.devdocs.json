@@ -713,7 +713,7 @@
             "section": "def-server.DataTelemetryPayload",
             "text": "DataTelemetryPayload"
           },
-          " | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
+          " | undefined; kibana: { count: number; indices: number; os: Record<string, unknown[]>; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
         ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
         "deprecated": false,

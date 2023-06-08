@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { rootRequest } from '../common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
 import type { RuleCreateProps } from '../../../common/detection_engine/rule_schema';
 
-export const createRule = (rule: RuleCreateProps) => {
-  return cy.request({
+export const createRule = <T = unknown>(rule: RuleCreateProps) => {
+  return rootRequest<T>({
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,
@@ -19,7 +20,7 @@ export const createRule = (rule: RuleCreateProps) => {
 };
 
 export const deleteCustomRule = (ruleId = '1') => {
-  cy.request({
+  rootRequest({
     method: 'DELETE',
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -34,7 +35,7 @@ export const importRule = (ndjsonPath: string) => {
       const formdata = new FormData();
       formdata.append('file', blob, ndjsonPath);
 
-      cy.request({
+      rootRequest({
         url: 'api/detection_engine/rules/_import',
         method: 'POST',
         headers: {

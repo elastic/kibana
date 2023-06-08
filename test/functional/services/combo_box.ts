@@ -117,7 +117,6 @@ export class ComboBoxService extends FtrService {
    * @param value option text
    */
   public async setCustom(comboBoxSelector: string, value: string): Promise<void> {
-    this.log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
     await this.setFilterValue(comboBoxElement, value);
     await this.common.pressEnterKey();

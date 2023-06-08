@@ -43,6 +43,7 @@ import {
   versionMigrationCompleted,
   buildRemoveAliasActions,
   MigrationType,
+  increaseBatchSize,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -833,6 +834,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           lastHitSortValue: res.right.lastHitSortValue,
           progress,
           logs,
+          // We succeeded in reading this batch, so increase the batch size for the next request.
+          batchSize: increaseBatchSize(stateP),
         };
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
@@ -875,7 +878,32 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      const left = res.left;
+      if (isTypeof(left, 'es_response_too_large')) {
+        if (stateP.batchSize === 1) {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: `After reducing the read batch size to a single document, the Elasticsearch response content length was ${left.contentLength}bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
+          };
+        } else {
+          const batchSize = Math.max(Math.floor(stateP.batchSize / 2), 1);
+          return {
+            ...stateP,
+            batchSize,
+            controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
+              },
+            ],
+          };
+        }
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -1139,6 +1167,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           lastHitSortValue: res.right.lastHitSortValue,
           progress,
           logs,
+          // We succeeded in reading this batch, so increase the batch size for the next request.
+          batchSize: increaseBatchSize(stateP),
         };
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
@@ -1179,7 +1209,32 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      const left = res.left;
+      if (isTypeof(left, 'es_response_too_large')) {
+        if (stateP.batchSize === 1) {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: `After reducing the read batch size to a single document, the response content length was ${left.contentLength} bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
+          };
+        } else {
+          const batchSize = Math.max(Math.floor(stateP.batchSize / 2), 1);
+          return {
+            ...stateP,
+            batchSize,
+            controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
+              },
+            ],
+          };
+        }
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

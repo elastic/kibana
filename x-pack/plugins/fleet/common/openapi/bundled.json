@@ -6599,6 +6599,10 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "description": "Indicates whether the agent policy has tamper protection enabled. Default false.",
+            "type": "boolean"
           }
         },
         "required": [
@@ -6673,6 +6677,9 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -6742,6 +6749,9 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "type": "boolean"
           }
         },
         "required": [

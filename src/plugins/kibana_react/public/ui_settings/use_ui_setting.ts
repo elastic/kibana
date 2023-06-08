@@ -20,13 +20,15 @@ import { useKibana } from '../context';
  * ```
  */
 export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  if (typeof services.uiSettings !== 'object') {
+  if (!settings) {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
-  return services.uiSettings.get(key, defaultValue);
+  return settings.client.get(key, defaultValue);
 };
 
 /**
@@ -39,13 +41,15 @@ export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
  * ```
  */
 export const useGlobalUiSetting = <T>(key: string, defaultValue?: T): T => {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  if (typeof services.settings !== 'object') {
+  if (!settings) {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
-  return services.settings.globalClient.get(key, defaultValue);
+  return settings.globalClient.get(key, defaultValue);
 };
 
 type Setter<T> = (newValue: T) => Promise<boolean>;
@@ -64,18 +68,20 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  * ```
  */
 export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  if (typeof services.uiSettings !== 'object') {
+  if (!settings) {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
   const observable$ = useMemo(
-    () => services.uiSettings!.get$(key, defaultValue),
-    [key, defaultValue, services.uiSettings]
+    () => settings!.client.get$(key, defaultValue),
+    [key, defaultValue, settings]
   );
-  const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
-  const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);
+  const value = useObservable<T>(observable$, settings!.client.get(key, defaultValue));
+  const set = useCallback((newValue: T) => settings!.client.set(key, newValue), [key]);
 
   return [value, set];
 };
@@ -94,24 +100,20 @@ export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] 
  * ```
  */
 export const useGlobalUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  if (typeof services.settings !== 'object') {
+  if (!settings) {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
   const observable$ = useMemo(
-    () => services.settings!.globalClient.get$(key, defaultValue),
-    [key, defaultValue, services.settings!.globalClient]
+    () => settings!.globalClient.get$(key, defaultValue),
+    [key, defaultValue, settings!.globalClient]
   );
-  const value = useObservable<T>(
-    observable$,
-    services.settings!.globalClient.get(key, defaultValue)
-  );
-  const set = useCallback(
-    (newValue: T) => services.settings!.globalClient.set(key, newValue),
-    [key]
-  );
+  const value = useObservable<T>(observable$, settings!.globalClient.get(key, defaultValue));
+  const set = useCallback((newValue: T) => settings!.globalClient.set(key, newValue), [key]);
 
   return [value, set];
 };

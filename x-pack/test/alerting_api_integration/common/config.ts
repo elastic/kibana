@@ -44,6 +44,7 @@ const enabledActionTypes = [
   '.servicenow-itom',
   '.jira',
   '.resilient',
+  '.gen-ai',
   '.slack',
   '.slack_api',
   '.tines',

@@ -53,7 +53,8 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
     parse: (rawEsResult) => ({
       suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          return [...acc, { value: suggestion.key, docCount: suggestion.doc_count }];
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
         },
         []
       ),
@@ -76,7 +77,8 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
     parse: (rawEsResult) => ({
       suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          return [...acc, { value: suggestion.key_as_string, docCount: suggestion.doc_count }];
+          acc.push({ value: suggestion.key_as_string, docCount: suggestion.doc_count });
+          return acc;
         },
         []
       ),
@@ -151,7 +153,8 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
         suggestions: sortedSuggestions
           .slice(0, 10) // only return top 10 results
           .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
-            return [...acc, { value: suggestion.key, docCount: suggestion.doc_count }];
+            acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+            return acc;
           }, []),
       };
     },
@@ -189,7 +192,8 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
     parse: (rawEsResult) => ({
       suggestions: get(rawEsResult, 'aggregations.nestedSuggestions.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          return [...acc, { value: suggestion.key, docCount: suggestion.doc_count }];
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
         },
         []
       ),

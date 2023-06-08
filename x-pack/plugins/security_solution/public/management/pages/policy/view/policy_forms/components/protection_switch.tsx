@@ -125,6 +125,7 @@ export const ProtectionSwitch = React.memo(
         checked={selected !== ProtectionModes.off}
         onChange={handleSwitchChange}
         disabled={!showEditableFormFields}
+        data-test-subj={`${protection}ProtectionSwitch`}
       />
     );
   }

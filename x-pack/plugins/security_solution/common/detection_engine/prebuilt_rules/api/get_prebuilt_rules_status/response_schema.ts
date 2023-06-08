@@ -6,12 +6,8 @@
  */
 
 export interface GetPrebuiltRulesStatusResponseBody {
-  status_code: number;
-  message: string;
-  attributes: {
-    /** Aggregated info about all prebuilt rules */
-    stats: PrebuiltRulesStatusStats;
-  };
+  /** Aggregated info about all prebuilt rules */
+  stats: PrebuiltRulesStatusStats;
 }
 
 export interface PrebuiltRulesStatusStats {

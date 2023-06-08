@@ -19,7 +19,7 @@
               "type": "keyword"
             },
             "type": {
-              "type": "long"
+              "type": "keyword"
             }
           }
         },

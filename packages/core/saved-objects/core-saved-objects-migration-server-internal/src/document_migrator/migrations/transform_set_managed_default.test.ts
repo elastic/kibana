@@ -6,35 +6,39 @@
  * Side Public License, v 1.
  */
 
+import { unary } from 'lodash';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { transformSetManagedDefault } from './transform_set_managed_default';
+
+const transform = unary(SavedObjectsUtils.getMigrationFunction(transformSetManagedDefault));
 
 describe('transformAddManaged', () => {
   it('should add managed if not defined', () => {
     expect(
-      transformSetManagedDefault({
+      transform({
         id: 'a',
         attributes: {},
         type: 'something',
       })
-    ).toHaveProperty('transformedDoc.managed');
+    ).toHaveProperty('managed');
   });
   it('should not change managed if already defined', () => {
-    const docWithManagedFalse = transformSetManagedDefault({
+    const docWithManagedFalse = transform({
       id: 'a',
       attributes: {},
       type: 'something',
       managed: false,
     });
-    const docWithManagedTrue = transformSetManagedDefault({
+    const docWithManagedTrue = transform({
       id: 'a',
       attributes: {},
       type: 'something',
       managed: true,
     });
     [docWithManagedFalse, docWithManagedTrue].forEach((doc) => {
-      expect(doc.transformedDoc.managed).toBeDefined();
+      expect(doc.managed).toBeDefined();
     });
-    expect(docWithManagedFalse.transformedDoc.managed).not.toBeTruthy();
-    expect(docWithManagedTrue.transformedDoc.managed).toBeTruthy();
+    expect(docWithManagedFalse.managed).not.toBeTruthy();
+    expect(docWithManagedTrue.managed).toBeTruthy();
   });
 });

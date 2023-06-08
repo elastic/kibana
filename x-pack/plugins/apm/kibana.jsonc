@@ -10,6 +10,8 @@
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
       "data",
+      "dashboard",
+      "controls",
       "embeddable",
       "features",
       "infra",
@@ -26,7 +28,8 @@
       "advancedSettings",
       "unifiedFieldList",
       "lens",
-      "maps"
+      "maps",
+      "uiActions"
     ],
     "optionalPlugins": [
       "actions",

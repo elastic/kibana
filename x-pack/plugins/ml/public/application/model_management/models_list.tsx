@@ -38,6 +38,7 @@ import {
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
   MODEL_STATE,
+  ModelState,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
@@ -70,7 +71,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   pipelines?: ModelPipelines['pipelines'] | null;
   deployment_ids: string[];
   putModelConfig?: object;
-  state: string;
+  state: ModelState;
 };
 
 export type ModelItemFull = Required<ModelItem>;

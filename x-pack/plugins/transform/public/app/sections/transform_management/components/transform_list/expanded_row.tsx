@@ -138,6 +138,15 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   };
 
   const checkpointingItems: Item[] = [];
+  if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
+    checkpointingItems.push({
+      title: 'changes_last_detected_at',
+      description: formatHumanReadableDateTimeSeconds(
+        item.stats.checkpointing.changes_last_detected_at
+      ),
+    });
+  }
+
   if (item.stats.checkpointing.last !== undefined) {
     checkpointingItems.push({
       title: 'last.checkpoint',
@@ -155,6 +164,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
         description: item.stats.checkpointing.last.timestamp_millis,
       });
     }
+  }
+
+  if (item.stats.checkpointing.last_search_time !== undefined) {
+    checkpointingItems.push({
+      title: 'last_search_time',
+      description: formatHumanReadableDateTimeSeconds(item.stats.checkpointing.last_search_time),
+    });
   }
 
   if (item.stats.checkpointing.next !== undefined) {
@@ -176,6 +192,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
         description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
       });
     }
+  }
+
+  if (item.stats.checkpointing.operations_behind !== undefined) {
+    checkpointingItems.push({
+      title: 'operations_behind',
+      description: item.stats.checkpointing.operations_behind,
+    });
   }
 
   const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {

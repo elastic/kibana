@@ -37,6 +37,11 @@ processingCommand
     | sortCommand
     | statsCommand
     | whereCommand
+    | mvExpandCommand
+    ;
+
+mvExpandCommand
+    : MV_EXPAND qualifiedNames
     ;
 
 whereCommand
@@ -49,6 +54,7 @@ whereBooleanExpression
     | regexBooleanExpression
     | left=booleanExpression operator=AND right=booleanExpression
     | left=booleanExpression operator=OR right=booleanExpression
+    | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP
     | WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
     ;
 
@@ -167,10 +173,18 @@ functionIdentifier
     ;
 
 constant
-    : NULL                                                                              #nullLiteral
-    | number                                                                            #numericLiteral
-    | booleanValue                                                                      #booleanLiteral
-    | string                                                                            #stringLiteral
+    : NULL
+    | numericValue
+    | booleanValue
+    | string
+    | OPENING_BRACKET numericValue (COMMA numericValue)* CLOSING_BRACKET
+    | OPENING_BRACKET booleanValue (COMMA booleanValue)* CLOSING_BRACKET
+    | OPENING_BRACKET string (COMMA string)* CLOSING_BRACKET
+    ;
+
+numericValue
+    : decimalValue
+    | integerValue
     ;
 
 limitCommand
@@ -228,6 +242,14 @@ booleanValue
 number
     : DECIMAL_LITERAL  #decimalLiteral
     | INTEGER_LITERAL  #integerLiteral
+    ;
+
+decimalValue
+    : DECIMAL_LITERAL
+    ;
+
+integerValue
+    : INTEGER_LITERAL
     ;
 
 string

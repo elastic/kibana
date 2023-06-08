@@ -13,7 +13,7 @@ import React, { useCallback, useMemo } from 'react';
 import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {

@@ -346,7 +346,23 @@ describe('Task Runner', () => {
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
 
     expect(ruleType.executor).toHaveBeenCalledTimes(1);
-    expect(alertsService.getContextInitializationPromise).toHaveBeenCalledWith('test', 'default');
+    expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
+      logger,
+      ruleType: ruleTypeWithAlerts,
+      namespace: 'default',
+      rule: {
+        consumer: 'bar',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        name: 'rule-name',
+        parameters: {
+          bar: true,
+        },
+        revision: 0,
+        spaceId: 'default',
+        tags: ['rule-', '-tags'],
+      },
+    });
   });
 
   test.each(ephemeralTestParams)(

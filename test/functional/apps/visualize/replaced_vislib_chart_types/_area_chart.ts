@@ -433,8 +433,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isFieldErrorMessageExists).to.be(false);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/156821
-      describe.skip('interval errors', () => {
+      describe('interval errors', () => {
         before(async () => {
           // to trigger displaying of error messages
           await testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');

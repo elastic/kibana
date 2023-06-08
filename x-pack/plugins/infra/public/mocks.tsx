@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { createLocatorMock } from './locators/locators.mock';
 import { createInventoryViewsServiceStartMock } from './services/inventory_views/inventory_views_service.mock';
 import { createLogViewsServiceStartMock } from './services/log_views/log_views_service.mock';
 import { createMetricsExplorerViewsServiceStartMock } from './services/metrics_explorer_views/metrics_explorer_views_service.mock';
@@ -17,6 +18,7 @@ export const createInfraPluginStartMock = () => ({
   logViews: createLogViewsServiceStartMock(),
   metricsExplorerViews: createMetricsExplorerViewsServiceStartMock(),
   telemetry: createTelemetryServiceMock(),
+  locators: createLocatorMock(),
   ContainerMetricsTable: () => <div />,
   HostMetricsTable: () => <div />,
   PodMetricsTable: () => <div />,

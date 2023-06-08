@@ -1,12 +1,13 @@
 [[advanced-options]]
 == Advanced Settings
 
-*Advanced Settings* control the behavior of {kib}. For example, you can change the format used to display dates,
-specify the default data view, and set the precision for displayed decimal values.
+*Advanced Settings* control the behavior of {kib}. You can change the settings that apply to spaces, or to all of {kib}. For example, you can change the format used to display dates,
+specify the default data view, and apply your own branding.
 
-. Open the main menu, then click *Stack Management > Advanced Settings*.
-. Scroll or search for the setting.
-. Make your change, then click *Save changes*.
+WARNING: Changing a setting can affect {kib} performance and cause problems
+that are difficult to diagnose. Setting a property value to a blank field
+reverts to the default behavior, which might not be compatible with other
+configuration settings. Deleting a custom setting permanently removes it from {kib}.
 
 [float]
 === Required permissions
@@ -25,12 +26,14 @@ For more information on granting access to {kib}, refer to <<xpack-security-auth
 
 [float]
 [[kibana-settings-reference]]
-=== {kib} settings reference
+=== Change the space settings
 
-WARNING: Changing a setting can affect {kib} performance and cause problems
-that are difficult to diagnose. Setting a property value to a blank field
-reverts to the default behavior, which might not be compatible with other
-configuration settings. Deleting a custom setting permanently removes it from {kib}.
+Change the settings that apply only to {kib} spaces.
+
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Click *Space Settings*.
+. Scroll or search for the setting.
+. Make your change, then click *Save changes*.
 
 [float]
 [[kibana-general-settings]]
@@ -542,10 +545,6 @@ The maximum number of buckets a datasource can return. High numbers can have a n
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
 Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
-[[visualize-enablelabs]]`visualize:enableLabs`::
-Enables users to create, view, and edit experimental visualizations. When disabled,
-only production-ready visualizations are available to users.
-
 [float]
 [[kibana-telemetry-settings]]
 ==== Usage Data
@@ -554,3 +553,41 @@ only production-ready visualizations are available to users.
 [[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
 When enabled, helps improve the Elastic Stack by providing usage statistics for
 basic features.
+
+[float]
+[[kibana-global-settings-reference]]
+=== Change the global settings
+
+Change the settings that apply only to {kib} spaces.
+
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Click *Global Settings*.
+. Scroll or search for the setting.
+. Make your change, then click *Save changes*.
+
+[float]
+[[kibana-custom-branding-settings]]
+==== Custom branding
+
+[horizontal]
+[[custom-logo]]`xpackCustomBranding:logo`::
+A custom image that appears in the header of all {kib} pages. Images must have a transparent background, and 128 x 128 pixels or smaller.
+
+[[organization-name]]`xpackCustomBranding:customizedLogo`::
+The custom text that appears in the header of all {kib} pages. Images must have a transparent background, and 200 x 84 pixels or smaller.
+
+[[page-title]]`xpackCustomBranding:pageTitle`::
+The custom text that appears on {kib} browser tabs.
+
+[[favicon-svg]]`xpackCustomBranding:faviconSVG`::
+The URL of a custom SVG image that appears on {kib} browser tabs. Images must be 16 x 16 pixels.
+
+[[favicon-png]]`xpackCustomBranding:faviconPNG`::
+The URL of a custom PNG image that appears on {kib} browser tabs.
+
+[float]
+[[kibana-usage-data-settings]]
+==== Usage Data
+
+[[provide-usage-data]]`telemetry:enabled`::
+When enabled, helps manage and improve Elastic products and services by providing usage statistics.

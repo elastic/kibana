@@ -88,7 +88,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
 
 exports[`LayerWizardSelect Should render loading screen before layer wizards are loaded 1`] = `
 <EuiPanel>
-  <EuiLoadingContent
+  <EuiSkeletonText
     lines={2}
   />
 </EuiPanel>

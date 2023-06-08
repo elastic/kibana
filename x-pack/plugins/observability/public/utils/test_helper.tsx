@@ -18,7 +18,7 @@ import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
-import { PluginContext } from '../context/plugin_context';
+import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
 import { Subset } from '../typings';

@@ -21,10 +21,10 @@ export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetchSummary(sloList: SLO[]): Promise<Record<SLOId, Summary>> {
-    const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
-      (acc, slo) => ({ [slo.id]: toDateRange(slo.timeWindow), ...acc }),
-      {}
-    );
+    const dateRangeBySlo = sloList.reduce<Record<SLOId, DateRange>>((acc, slo) => {
+      acc[slo.id] = toDateRange(slo.timeWindow);
+      return acc;
+    }, {});
     const searches = sloList.flatMap((slo) => [
       { index: `${SLO_DESTINATION_INDEX_NAME}*` },
       generateSearchQuery(slo, dateRangeBySlo[slo.id]),

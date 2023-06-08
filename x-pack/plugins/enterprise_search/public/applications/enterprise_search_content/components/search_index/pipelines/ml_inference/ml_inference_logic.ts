@@ -40,6 +40,10 @@ import {
   TrainedModelsApiLogic,
 } from '../../../../api/ml_models/ml_trained_models_logic';
 import {
+  StartTextExpansionModelApiLogic,
+  StartTextExpansionModelApiLogicActions,
+} from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import {
   AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
@@ -156,6 +160,7 @@ interface MLInferenceProcessorsActions {
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
   };
+  startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
 export interface AddInferencePipelineModal {
@@ -230,6 +235,8 @@ export const MLInferenceLogic = kea<
       ],
       PipelinesLogic,
       ['closeAddMlInferencePipelineModal as closeAddMlInferencePipelineModal'],
+      StartTextExpansionModelApiLogic,
+      ['apiSuccess as startTextExpansionModelSuccess'],
     ],
     values: [
       CachedFetchIndexApiLogic,
@@ -315,6 +322,10 @@ export const MLInferenceLogic = kea<
           existingPipeline: false,
         });
       }
+    },
+    startTextExpansionModelSuccess: () => {
+      // Refresh ML models list when the text expansion model is started
+      actions.makeMLModelsRequest(undefined);
     },
   }),
   path: ['enterprise_search', 'content', 'pipelines_add_ml_inference_pipeline'],

@@ -210,10 +210,12 @@ export default function ({ getService }: FtrProviderContext) {
               numOfAllocations: 1,
               threadsPerAllocation: 2,
             });
+            await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, false);
           });
 
           it(`stops deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.stopDeployment(model.id);
+            await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, true);
           });
 
           it(`deletes the imported model ${model.id}`, async () => {

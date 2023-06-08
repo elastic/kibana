@@ -46,7 +46,6 @@ export type {
   VisualizationStage,
 } from './vis_types/vis_type_alias_registry';
 export {
-  VISUALIZE_ENABLE_LABS_SETTING,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
   LegendSize,

@@ -77,7 +77,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         > & {
           create: ControlGroupContainerFactory['create'];
         };
-        const { initialInput, settings } =
+        const { initialInput, settings, fieldFilterPredicate } =
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
           {};
         const newControlGroup = (await factory?.create(
@@ -87,7 +87,8 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
             ...initialInput,
           },
           undefined,
-          settings
+          settings,
+          fieldFilterPredicate
         )) as ControlGroupContainer;
 
         if (canceled) {

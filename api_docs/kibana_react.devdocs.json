@@ -2538,7 +2538,7 @@
               {
                 "parentPluginId": "kibanaReact",
                 "id": "def-public.KibanaReactOverlays.openFlyout.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],

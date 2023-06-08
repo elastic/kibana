@@ -152,7 +152,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -539,7 +539,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -822,7 +822,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1048,7 +1048,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1303,7 +1303,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1502,7 +1502,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1758,7 +1758,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -2039,7 +2039,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"

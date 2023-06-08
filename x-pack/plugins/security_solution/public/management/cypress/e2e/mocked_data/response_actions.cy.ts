@@ -101,6 +101,8 @@ describe('Response actions', () => {
 
     it('edit response action inside of a rule', () => {
       visitRuleActions(ruleId);
+      cy.getByTestSubj('edit-rule-actions-tab').click();
+
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('input').should('have.value', 'Isolate host');
         cy.getByTestSubj('input').should('have.value', 'Isolate host');
@@ -125,6 +127,8 @@ describe('Response actions', () => {
 
     it('delete response action inside of a rule', () => {
       visitRuleActions(ruleId);
+      cy.getByTestSubj('edit-rule-actions-tab').click();
+
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('remove-response-action').click();
       });
@@ -150,9 +154,12 @@ describe('Response actions', () => {
       cleanupRule(ruleId);
     });
 
-    // FLAKY: https://github.com/elastic/security-team/issues/6518
-    it.skip('All response action controls are disabled', () => {
+    it('All response action controls are disabled', () => {
+      cy.intercept('GET', 'api/index_patterns/_fields_for_wildcard*').as('getFieldsForWildcard');
       visitRuleActions(ruleId);
+      cy.wait('@getFieldsForWildcard');
+      cy.getByTestSubj('edit-rule-actions-tab').click();
+
       cy.getByTestSubj('response-actions-wrapper').within(() => {
         cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
           'be.disabled'

@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const dataViewId = 'existence_index';
-  const API_PATH = `/api/unified_field_list/existing_fields/${dataViewId}`;
+  const API_PATH = `/internal/unified_field_list/existing_fields/${dataViewId}`;
 
   describe('existing_fields apis', () => {
     before(async () => {

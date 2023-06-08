@@ -170,7 +170,10 @@ export const ParamsList = () => {
           setIsDeleteModalVisible(true);
         }}
       >
-        Delete {selectedItems.length} params
+        {i18n.translate('xpack.synthetics.settingsRoute.params.deleteCount', {
+          defaultMessage: 'Delete {count} params',
+          values: { count: selectedItems.length },
+        })}
       </EuiButton>
     );
   };
@@ -237,7 +240,7 @@ export const ParamsList = () => {
         items={filteredItems}
         columns={columns}
         tableLayout="auto"
-        isSelectable={true}
+        isSelectable={canSave}
         pagination={true}
         sorting={{
           sort: { field: 'key', direction: 'asc' },
@@ -255,7 +258,7 @@ export const ParamsList = () => {
           setPageSize(page?.size ?? 10);
         }}
         selection={{
-          selectable: () => true,
+          selectable: () => canSave,
           onSelectionChange: (sItems) => {
             setSelectedItems(sItems);
           },

@@ -57,6 +57,7 @@ export class Auth {
         'kbn-version': version,
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
+        'x-elastic-internal-origin': 'Kibana',
       },
       validateStatus: () => true,
       maxRedirects: 0,

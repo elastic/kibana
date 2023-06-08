@@ -57,6 +57,7 @@ describe('getSelectorConditions', () => {
     expect(options.includes('targetFilePath')).toBeTruthy();
 
     // check that process specific conditions are not included
+    expect(options.includes('processName')).toBeFalsy();
     expect(options.includes('processExecutable')).toBeFalsy();
     expect(options.includes('sessionLeaderInteractive')).toBeFalsy();
   });
@@ -73,6 +74,7 @@ describe('getSelectorConditions', () => {
     expect(options.includes('targetFilePath')).toBeFalsy();
 
     // check that process specific conditions are not included
+    expect(options.includes('processName')).toBeTruthy();
     expect(options.includes('processExecutable')).toBeTruthy();
     expect(options.includes('sessionLeaderInteractive')).toBeTruthy();
   });

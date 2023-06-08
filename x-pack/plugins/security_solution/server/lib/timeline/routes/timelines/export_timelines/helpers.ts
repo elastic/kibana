@@ -28,21 +28,14 @@ const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): Expor
     globalNotes: [],
   };
 
-  return (
-    currentNotes.reduce((acc, note) => {
-      if (note.eventId == null) {
-        return {
-          ...acc,
-          globalNotes: [...acc.globalNotes, note],
-        };
-      } else {
-        return {
-          ...acc,
-          eventNotes: [...acc.eventNotes, note],
-        };
-      }
-    }, initialNotes) ?? initialNotes
-  );
+  return currentNotes.reduce((acc, note) => {
+    if (note.eventId == null) {
+      acc.globalNotes.push(note);
+    } else {
+      acc.eventNotes.push(note);
+    }
+    return acc;
+  }, initialNotes);
 };
 
 const getPinnedEventsIdsByTimelineId = (

@@ -2441,38 +2441,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeStart.project",
-            "type": "Object",
-            "tags": [],
-            "label": "project",
-            "description": [
-              "\nConfiguration for serverless projects"
-            ],
-            "signature": [
-              "{ setNavigation(projectNavigation: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigation",
-                "text": "ChromeProjectNavigation"
-              },
-              "): void; setSideNavComponent(component: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.SideNavComponent",
-                "text": "SideNavComponent"
-              },
-              " | null): void; }"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

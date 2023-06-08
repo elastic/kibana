@@ -389,7 +389,7 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
 async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): Promise<string> {
-  const interval = parseInterval(job.analysis_config.bucket_span);
+  const interval = parseInterval(job.analysis_config.bucket_span!);
   const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -462,6 +462,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
       undefined,
       jobConfig,
       datafeedConfig
+      // @ts-expect-error TODO: fix after elasticsearch-js bump
     )) as unknown as estypes.MlPreviewDatafeedResponse<Record<string, unknown>>['data'];
 
     const docTimeFieldName = job.data_description.time_field;

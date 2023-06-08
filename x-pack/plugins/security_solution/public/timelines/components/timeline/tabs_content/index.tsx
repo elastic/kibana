@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -69,7 +69,7 @@ const QueryTab: React.FC<{
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
 }> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
-  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
     <QueryTabContent
       renderCellValue={renderCellValue}
       rowRenderers={rowRenderers}
@@ -84,7 +84,7 @@ const EqlTab: React.FC<{
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
 }> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
-  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
     <EqlTabContent
       renderCellValue={renderCellValue}
       rowRenderers={rowRenderers}
@@ -95,21 +95,21 @@ const EqlTab: React.FC<{
 EqlTab.displayName = 'EqlTab';
 
 const GraphTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
-  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
     <GraphTabContent timelineId={timelineId} />
   </Suspense>
 ));
 GraphTab.displayName = 'GraphTab';
 
 const NotesTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
-  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
     <NotesTabContent timelineId={timelineId} />
   </Suspense>
 ));
 NotesTab.displayName = 'NotesTab';
 
 const SessionTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
-  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
     <SessionTabContent timelineId={timelineId} />
   </Suspense>
 ));
@@ -120,7 +120,7 @@ const PinnedTab: React.FC<{
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
 }> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
-  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
     <PinnedTabContent
       renderCellValue={renderCellValue}
       rowRenderers={rowRenderers}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import yaml from 'js-yaml';
+import { uniq } from 'lodash';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { errorBlockActionRequiresTargetFilePath } from '../components/control_general_view/translations';
@@ -177,15 +178,22 @@ export function validateMaxSelectorsAndResponses(selectors: Selector[], response
   return errors;
 }
 
-export function validateStringValuesForCondition(condition: SelectorCondition, values: string[]) {
+export function validateStringValuesForCondition(condition: SelectorCondition, values?: string[]) {
   const errors: string[] = [];
   const maxValueBytes =
     SelectorConditionsMap[condition].maxValueBytes || MAX_CONDITION_VALUE_LENGTH_BYTES;
 
   const { pattern, patternError } = SelectorConditionsMap[condition];
 
-  values.forEach((value) => {
-    if (pattern && !new RegExp(pattern).test(value)) {
+  values?.forEach((value) => {
+    if (value?.length === 0) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorGenericEmptyValue', {
+          defaultMessage: '"{condition}" values cannot be empty',
+          values: { condition },
+        })
+      );
+    } else if (pattern && !new RegExp(pattern).test(value)) {
       if (patternError) {
         errors.push(patternError);
       } else {
@@ -209,7 +217,7 @@ export function validateStringValuesForCondition(condition: SelectorCondition, v
     }
   });
 
-  return errors;
+  return uniq(errors);
 }
 
 export function getRestrictedValuesForCondition(

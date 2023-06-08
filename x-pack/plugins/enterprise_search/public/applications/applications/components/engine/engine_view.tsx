@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { useParams, Redirect, Switch } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
@@ -36,16 +36,28 @@ import { SearchApplicationContent } from './search_application_content';
 
 export const EngineView: React.FC = () => {
   const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
-  const { engineName, fetchEngineApiError, fetchEngineApiStatus, isDeleteModalVisible } =
-    useValues(EngineViewLogic);
+  const {
+    engineName,
+    fetchEngineApiError,
+    fetchEngineApiStatus,
+    hasSchemaConflicts,
+    isDeleteModalVisible,
+  } = useValues(EngineViewLogic);
   const { tabId = EngineViewTabs.PREVIEW } = useParams<{
     tabId?: string;
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
 
+  useLayoutEffect(() => {
+    renderHeaderActions(EngineHeaderDocsAction);
+
+    return () => {
+      renderHeaderActions();
+    };
+  }, []);
+
   useEffect(() => {
     fetchEngine({ engineName });
-    renderHeaderActions(EngineHeaderDocsAction);
   }, [engineName]);
 
   if (fetchEngineApiStatus === Status.ERROR) {
@@ -61,6 +73,7 @@ export const EngineView: React.FC = () => {
         }}
         engineName={engineName}
         emptyState={<EngineError error={fetchEngineApiError} />}
+        hasSchemaConflicts={hasSchemaConflicts}
       />
     );
   }
@@ -97,6 +110,7 @@ export const EngineView: React.FC = () => {
               rightSideItems: [],
             }}
             engineName={engineName}
+            hasSchemaConflicts={hasSchemaConflicts}
           >
             <EngineError notFound />
           </EnterpriseSearchEnginesPageTemplate>

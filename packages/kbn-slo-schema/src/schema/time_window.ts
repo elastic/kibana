@@ -7,7 +7,6 @@
  */
 
 import * as t from 'io-ts';
-import { dateType } from './common';
 import { durationType } from './duration';
 
 const rollingTimeWindowSchema = t.type({
@@ -17,7 +16,7 @@ const rollingTimeWindowSchema = t.type({
 
 const calendarAlignedTimeWindowSchema = t.type({
   duration: durationType,
-  calendar: t.type({ startTime: dateType }),
+  isCalendar: t.literal<boolean>(true),
 });
 
 const timeWindowSchema = t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]);

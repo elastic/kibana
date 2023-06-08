@@ -57,7 +57,6 @@ export default function getFlappingSettingsTests({ getService }: FtrProviderCont
               expect(response.body.status_change_threshold).to.eql(
                 DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold
               );
-              expect(response.body.created_by).to.be.a('string');
               expect(response.body.updated_by).to.be.a('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);

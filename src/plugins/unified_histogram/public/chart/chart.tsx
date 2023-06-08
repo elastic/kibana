@@ -140,7 +140,7 @@ export function Chart({
     !chart.hidden &&
     dataView.id &&
     dataView.type !== DataViewType.ROLLUP &&
-    dataView.isTimeBased()
+    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
   );
 
   const input$ = useMemo(
@@ -257,6 +257,7 @@ export function Chart({
     dataView,
     relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
     lensAttributes: lensAttributesContext.attributes,
+    isPlainRecord,
   });
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;

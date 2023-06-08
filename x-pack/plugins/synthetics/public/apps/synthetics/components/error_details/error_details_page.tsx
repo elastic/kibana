@@ -65,14 +65,18 @@ export function ErrorDetailsPage() {
             stepsLoading={stepsLoading}
             isErrorDetails={true}
           />
-          <EuiSpacer size="m" />
-          <EuiPanel hasShadow={false} hasBorder>
-            <TestRunErrorInfo
-              journeyDetails={data?.details}
-              showErrorTitle={false}
-              showErrorLogs={true}
-            />
-          </EuiPanel>
+          {isBrowser && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiPanel hasShadow={false} hasBorder>
+                <TestRunErrorInfo
+                  journeyDetails={data?.details}
+                  showErrorTitle={false}
+                  showErrorLogs={true}
+                />
+              </EuiPanel>
+            </>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
           {data?.details?.journey && failedStep && (

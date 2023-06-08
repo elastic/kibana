@@ -283,12 +283,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
-    async assertFieldStatTopValuesContent(
-      fieldName: string,
-      fieldType: 'keyword' | 'date' | 'number',
-      expectedContent: string[]
-    ) {
-      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, fieldType, expectedContent);
+    async assertFieldStatTopValuesContent(fieldName: string, expectedContent: string[]) {
+      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, expectedContent);
     },
 
     async assertDependentVariableInputMissing() {

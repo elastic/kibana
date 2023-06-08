@@ -11,7 +11,7 @@ interface ProfilingEvents {
   [key: string]: number;
 }
 
-interface ProfilingStackTrace {
+export interface ProfilingStackTrace {
   ['file_ids']: string[];
   ['frame_ids']: string[];
   ['address_or_lines']: number[];

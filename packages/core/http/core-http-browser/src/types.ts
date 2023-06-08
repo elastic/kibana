@@ -148,6 +148,7 @@ export interface IAnonymousPaths {
 /**
  * Headers to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause
  * {@link HttpHandler} to throw an error.
+ * Includes the required Header that validates internal requests to internal APIs
  * @public
  */
 export interface HttpHeadersInit {

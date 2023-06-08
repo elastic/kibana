@@ -59,7 +59,9 @@
     "@kbn/ml-route-utils",
     "@kbn/core-lifecycle-server",
     "@kbn/security-plugin",
-    "@kbn/ml-error-utils"
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/ml-error-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
@@ -28,7 +28,6 @@ export const getTopNavLinks = ({
   state,
   onOpenInspector,
   isPlainRecord,
-  persistDataView,
   adHocDataViews,
 }: {
   dataView: DataView;
@@ -38,7 +37,6 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -143,17 +141,7 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      if (!services.share) {
-        return;
-      }
-      // this prompts the user to save the dataview if adhoc dataview is detected
-      // for text based languages we don't want this check
-      if (!isPlainRecord) {
-        const updatedDataView = await persistDataView(dataView);
-        if (!updatedDataView) {
-          return;
-        }
-      }
+      if (!services.share) return;
       const savedSearch = state.savedSearchState.getState();
       const sharingData = await getSharingData(
         savedSearch.searchSource,
@@ -162,11 +150,46 @@ export const getTopNavLinks = ({
         isPlainRecord
       );
 
+      const { locator } = services;
+      const appState = state.appState.getState();
+      const { timefilter } = services.data.query.timefilter;
+      const timeRange = timefilter.getTime();
+      const refreshInterval = timefilter.getRefreshInterval();
+      const { grid, ...otherState } = appState;
+      const filters = services.filterManager.getFilters();
+
+      // Share -> Get links -> Snapshot
+      const params: DiscoverAppLocatorParams = {
+        ...otherState,
+        ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
+        ...(dataView?.isPersisted()
+          ? { dataViewId: dataView?.id }
+          : { dataViewSpec: dataView?.toSpec() }),
+        filters,
+        timeRange,
+        refreshInterval,
+      };
+      const relativeUrl = locator.getRedirectUrl(params);
+
+      // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
+      // replaced when https://github.com/elastic/kibana/issues/153323 is implemented.
+      const link = document.createElement('a');
+      link.setAttribute('href', relativeUrl);
+      const shareableUrl = link.href;
+
+      // Share -> Get links -> Saved object
+      const shareableUrlForSavedObject = await locator.getUrl(
+        { savedSearchId: savedSearch.id },
+        { absolute: true }
+      );
+
       services.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href),
+        shareableUrl,
+        shareableUrlForSavedObject,
+        shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {

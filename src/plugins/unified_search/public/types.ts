@@ -15,7 +15,6 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Query, AggregateQuery } from '@kbn/es-query';
 import { CoreStart, DocLinksStart } from '@kbn/core/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
@@ -95,5 +94,4 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  expressions: ExpressionsStart;
 }

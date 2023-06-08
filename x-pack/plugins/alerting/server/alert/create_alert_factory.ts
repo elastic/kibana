@@ -54,7 +54,6 @@ export interface CreateAlertFactoryOpts<
   logger: Logger;
   maxAlerts: number;
   autoRecoverAlerts: boolean;
-  maintenanceWindowIds: string[];
   canSetRecoveryContext?: boolean;
 }
 
@@ -67,7 +66,6 @@ export function createAlertFactory<
   logger,
   maxAlerts,
   autoRecoverAlerts,
-  maintenanceWindowIds,
   canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
@@ -154,7 +152,8 @@ export function createAlertFactory<
             autoRecoverAlerts,
             // flappingSettings.enabled is false, as we only want to use this function to get the recovered alerts
             flappingSettings: DISABLE_FLAPPING_SETTINGS,
-            maintenanceWindowIds,
+            // no maintenance window IDs are passed as we only want to use this function to get recovered alerts
+            maintenanceWindowIds: [],
           });
           return Object.keys(currentRecoveredAlerts ?? {}).map(
             (alertId: string) => currentRecoveredAlerts[alertId]

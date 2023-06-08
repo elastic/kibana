@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body, status } = await supertest
       .get(`/s/${idSpace1}/api/ml/saved_objects/sync`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('2023-05-15'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -39,9 +39,9 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number
   ) {
     const { body, status } = await supertest
-      .post(`/s/${idSpace1}/api/ml/saved_objects/sync_check`)
+      .post(`/s/${idSpace1}/internal/ml/saved_objects/sync_check`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ mlSavedObjectType });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

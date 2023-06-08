@@ -37,6 +37,25 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
     properties: {
       filtering_advanced_config: { type: 'boolean' },
       filtering_rules: { type: 'boolean' },
+      incremental_sync: {
+        properties: {
+          enabled: { type: 'boolean' },
+        },
+      },
+      sync_rules: {
+        properties: {
+          basic: {
+            properties: {
+              enabled: { type: 'boolean' },
+            },
+          },
+          advanced: {
+            properties: {
+              enabled: { type: 'boolean' },
+            },
+          },
+        },
+      },
     },
   },
   filtering: {
@@ -116,6 +135,7 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   is_native: { type: 'boolean' },
   language: { type: 'keyword' },
   last_deleted_document_count: { type: 'long' },
+  last_incremental_sync_scheduled_at: { type: 'date' },
   last_indexed_document_count: { type: 'long' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
@@ -139,6 +159,7 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   },
   service_type: { type: 'keyword' },
   status: { type: 'keyword' },
+  sync_cursor: { type: 'object' },
   sync_now: { type: 'boolean' },
 };
 
@@ -232,6 +253,7 @@ const indices: IndexDefinition[] = [
               },
             },
             service_type: { type: 'keyword' },
+            sync_cursor: { type: 'object' },
           },
         },
         created_at: { type: 'date' },
@@ -239,6 +261,7 @@ const indices: IndexDefinition[] = [
         error: { type: 'keyword' },
         indexed_document_count: { type: 'integer' },
         indexed_document_volume: { type: 'integer' },
+        job_type: { type: 'keyword' },
         last_seen: { type: 'date' },
         metadata: { type: 'object' },
         started_at: { type: 'date' },

@@ -182,3 +182,20 @@ export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolic
     icon: o.icon,
     disabled: o.disabled,
   }));
+
+export const getMaxPackageName = (
+  packageName: string,
+  packagePolicies?: Array<{ name: string }>
+) => {
+  // Retrieve highest number appended to package policy name and increment it by one
+  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+
+  const maxPkgPolicyName = Math.max(
+    ...(packagePolicies ?? [])
+      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
+    0
+  );
+
+  return `${packageName}-${maxPkgPolicyName + 1}`;
+};

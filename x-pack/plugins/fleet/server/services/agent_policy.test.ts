@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import { PackagePolicyRestrictionRelatedError } from '../errors';
+import { PackagePolicyRestrictionRelatedError, FleetUnauthorizedError } from '../errors';
 import type {
   AgentPolicy,
   FullAgentPolicy,
@@ -31,6 +31,7 @@ import { downloadSourceService } from './download_source';
 import { getFullAgentPolicy } from './agent_policies';
 import * as outputsHelpers from './agent_policies/outputs_helpers';
 import { auditLoggingService } from './audit_logging';
+import { licenseService } from './license';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -179,6 +180,39 @@ describe('agent policy', () => {
         id: 'test-agent-policy',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+          is_protected: true,
+        })
+      ).rejects.toThrowError(
+        new FleetUnauthorizedError('Tamper protection requires Platinum license')
+      );
+    });
+
+    it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+        })
+      ).resolves.not.toThrowError(
+        new FleetUnauthorizedError('Tamper protection requires Platinum license')
+      );
     });
   });
 
@@ -583,6 +617,53 @@ describe('agent policy', () => {
         id: 'test-agent-policy',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'test-id',
+        type: 'mocked',
+        references: [],
+      });
+
+      expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          name: 'test',
+          namespace: 'default',
+          is_protected: true,
+        })
+      ).rejects.toThrowError(
+        new FleetUnauthorizedError('Tamper protection requires Platinum license')
+      );
+    });
+
+    it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'test-id',
+        type: 'mocked',
+        references: [],
+      });
+
+      expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          name: 'test',
+          namespace: 'default',
+        })
+      ).resolves.not.toThrowError(
+        new FleetUnauthorizedError('Tamper protection requires Platinum license')
+      );
     });
   });
 

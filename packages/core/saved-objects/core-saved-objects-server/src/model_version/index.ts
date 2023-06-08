@@ -7,17 +7,29 @@
  */
 
 export type {
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapProvider,
+} from './model_version';
+
+export type {
+  SavedObjectsModelChange,
+  SavedObjectsModelMappingsAdditionChange,
+  SavedObjectsModelMappingsDeprecationChange,
+  SavedObjectsModelDataBackfillChange,
+} from './model_change';
+
+export type {
   SavedObjectModelTransformationDoc,
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationFn,
   SavedObjectModelBidirectionalTransformation,
   SavedObjectModelTransformationResult,
+  SavedObjectModelDataBackfillFn,
 } from './transformations';
 
 export type {
-  SavedObjectsModelChange,
-  SavedObjectsModelExpansionChange,
-  SavedObjectsModelVersion,
-  SavedObjectsModelVersionMap,
-  SavedObjectsModelVersionMapProvider,
-} from './model_version';
+  SavedObjectsModelVersionSchemaDefinitions,
+  SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectModelVersionForwardCompatibilityFn,
+} from './schemas';

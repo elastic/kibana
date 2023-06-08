@@ -133,7 +133,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
   const { detectors } = job.analysis_config;
   if (detectorIndex >= 0 && detectorIndex < detectors.length) {
     const dtr = detectors[detectorIndex];
-    const functionName = dtr.function;
+    const functionName = dtr.function as ML_JOB_AGGREGATION;
 
     // Check that the function maps to an ES aggregation,
     // and that the partitioning field isn't mlcategory
@@ -334,7 +334,7 @@ export function isJobVersionGte(job: CombinedJob, version: string): boolean {
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
 export function mlFunctionToESAggregation(
-  functionName: ML_JOB_AGGREGATION | string
+  functionName?: ML_JOB_AGGREGATION | string
 ): ES_AGGREGATION | null {
   if (
     functionName === ML_JOB_AGGREGATION.MEAN ||
@@ -915,4 +915,21 @@ export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
   }
 
   return false;
+}
+
+/**
+ * Extract unique influencers from the job or collection of jobs
+ * @param jobs
+ */
+export function extractInfluencers(jobs: Job | Job[]): string[] {
+  if (!Array.isArray(jobs)) {
+    jobs = [jobs];
+  }
+  const influencers = new Set<string>();
+  for (const job of jobs) {
+    for (const influencer of job.analysis_config.influencers || []) {
+      influencers.add(influencer);
+    }
+  }
+  return Array.from(influencers);
 }

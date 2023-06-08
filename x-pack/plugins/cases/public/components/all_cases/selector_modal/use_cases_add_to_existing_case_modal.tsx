@@ -44,7 +44,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
 
   const { dispatch, appId } = useCasesContext();
   const casesToasts = useCasesToast();
-  const { createAttachments } = useCreateAttachments();
+  const { mutateAsync: createAttachments } = useCreateAttachments();
   const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
 
   const closeModal = useCallback(() => {
@@ -87,8 +87,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
         await createAttachments({
           caseId: theCase.id,
           caseOwner: theCase.owner,
-          data: attachments,
-          throwOnError: true,
+          attachments,
         });
 
         if (props.onSuccess) {

@@ -21,7 +21,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { BETA_LABEL } from '../../../../shared/constants';
+import { BETA_LABEL, NATIVE_LABEL } from '../../../../shared/constants';
+
+import './connector_checkable.scss';
 
 export type ConnectorCheckableProps = Omit<
   EuiCheckableCardProps,
@@ -30,14 +32,18 @@ export type ConnectorCheckableProps = Omit<
   documentationUrl: string | undefined;
   icon: string;
   isBeta: boolean;
+  isTechPreview: boolean;
   name: string;
   serviceType: string;
+  showNativeBadge: boolean;
 };
 
 export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   documentationUrl,
   icon,
   isBeta,
+  isTechPreview,
+  showNativeBadge,
   name,
   serviceType,
   ...props
@@ -49,7 +55,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       className="connectorCheckable"
       data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
       label={
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {icon && (
             <EuiFlexItem grow={false}>
               <EuiIcon type={icon} />
@@ -65,7 +71,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       name={name}
       value={serviceType}
     >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="xs">
         {documentationUrl && (
           <EuiFlexItem grow={false}>
             <EuiLink target="_blank" href={documentationUrl}>
@@ -78,13 +84,43 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
             </EuiLink>
           </EuiFlexItem>
         )}
-        {isBeta && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" iconType="beaker">
-              <EuiText size="xs">{BETA_LABEL}</EuiText>
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            justifyContent="flexStart"
+            responsive={false}
+          >
+            {showNativeBadge && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <EuiText size="xs">{NATIVE_LABEL}</EuiText>
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {isBeta && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <EuiText size="xs">{BETA_LABEL}</EuiText>
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {isTechPreview && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" iconType="beaker">
+                  <EuiText size="xs">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.techPreviewLabel',
+                      {
+                        defaultMessage: 'Tech preview',
+                      }
+                    )}
+                  </EuiText>
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCheckableCard>
   );

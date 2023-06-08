@@ -162,9 +162,9 @@ function combineAllRollupFields(
         rollupFields[fieldName] = conf.fields[fieldName];
       } else {
         const aggs = conf.fields[fieldName];
-        // @ts-expect-error fix type. our RollupFields type is better
         aggs.forEach((agg) => {
           if (rollupFields[fieldName].find((f) => f.agg === agg.agg) === null) {
+            // @ts-expect-error TODO: fix after elasticsearch-js bump
             rollupFields[fieldName].push(agg);
           }
         });

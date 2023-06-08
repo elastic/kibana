@@ -51,7 +51,7 @@ import { unmuteAll } from './methods/unmute_all';
 import { muteInstance } from './methods/mute_instance';
 import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
-import { listAlertTypes } from './methods/list_alert_types';
+import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
 
 export type ConstructorOptions = Omit<
@@ -157,7 +157,7 @@ export class RulesClient {
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
-  public listAlertTypes = () => listAlertTypes(this.context);
+  public listRuleTypes = () => listRuleTypes(this.context);
 
   public getSpaceId(): string | undefined {
     return this.context.spaceId;

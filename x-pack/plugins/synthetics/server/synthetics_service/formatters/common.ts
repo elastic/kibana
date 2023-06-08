@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { arrayFormatter } from './formatting_utils';
+import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
 import { commonFormatters as commonBasicFormatters } from '../../../common/formatters/common/formatters';
 import { CommonFields, ConfigKey, MonitorFields } from '../../../common/runtime_types';
 
@@ -26,6 +26,7 @@ export type Formatter =
 export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
 export const commonFormatters: CommonFormatMap = {
   ...commonBasicFormatters,
+  [ConfigKey.PARAMS]: stringToObjectFormatter,
   [ConfigKey.SCHEDULE]: (fields) =>
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.TAGS]: arrayFormatter,

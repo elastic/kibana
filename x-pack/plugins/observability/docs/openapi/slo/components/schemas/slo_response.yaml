@@ -18,6 +18,7 @@ properties:
       - $ref: 'indicator_properties_custom_kql.yaml'
       - $ref: 'indicator_properties_apm_availability.yaml'
       - $ref: 'indicator_properties_apm_latency.yaml'
+      - $ref: 'indicator_properties_custom_metric.yaml'
   timeWindow:
     oneOf:
       - $ref: 'time_window_rolling.yaml'
@@ -28,7 +29,7 @@ properties:
     $ref: 'objective.yaml'
   settings:
     $ref: 'settings.yaml'
-  revision: 
+  revision:
     description: The SLO revision
     type: number
     example: 2

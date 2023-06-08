@@ -13,10 +13,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';

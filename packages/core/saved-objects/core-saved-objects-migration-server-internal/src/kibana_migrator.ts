@@ -29,6 +29,7 @@ import {
   type SavedObjectsTypeMappingDefinitions,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  type MigrateDocumentOptions,
   type KibanaMigratorStatus,
   type MigrationResult,
   type IndexTypesMap,
@@ -176,7 +177,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     });
 
     this.log.debug('Applying registered migrations for the following saved object types:');
-    Object.entries(this.documentMigrator.migrationVersion)
+    Object.entries(this.documentMigrator.getMigrationVersion())
       .sort(([t1, v1], [t2, v2]) => {
         return Semver.compare(v1, v2);
       })
@@ -243,7 +244,13 @@ export class KibanaMigrator implements IKibanaMigrator {
                 migrateDoc: this.documentMigrator.migrateAndConvert,
                 rawDocs,
               }),
-            migrationVersionPerType: this.documentMigrator.migrationVersion,
+            coreMigrationVersionPerType: this.documentMigrator.getMigrationVersion({
+              includeDeferred: false,
+              migrationType: 'core',
+            }),
+            migrationVersionPerType: this.documentMigrator.getMigrationVersion({
+              includeDeferred: false,
+            }),
             indexPrefix: indexName,
             migrationsConfig: this.soMigrationsConfig,
             typeRegistry: this.typeRegistry,
@@ -260,7 +267,10 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.activeMappings;
   }
 
-  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc);
+  public migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    { allowDowngrade = false }: MigrateDocumentOptions = {}
+  ): SavedObjectUnsanitizedDoc {
+    return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 }

@@ -6,12 +6,12 @@
  */
 import { add820Indices } from './migrations';
 import { SavedObject, SavedObjectMigrationContext } from '@kbn/core/server';
-import { DynamicSettings } from '../../../../common/runtime_types';
+import { DynamicSettingsAttributes } from '../../../../common/runtime_types';
 
 describe('add820Indices migration', () => {
   const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
 
-  const makeSettings = (heartbeatIndices: string): SavedObject<DynamicSettings> => {
+  const makeSettings = (heartbeatIndices: string): SavedObject<DynamicSettingsAttributes> => {
     return {
       id: '1',
       type: 't',

@@ -27,7 +27,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';

@@ -15,7 +15,7 @@ import { sloSchema } from '@kbn/slo-schema';
 
 import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { SLONotFound } from '../../errors';
+import { SLOIdConflict, SLONotFound } from '../../errors';
 
 type ObjectValues<T> = T[keyof T];
 
@@ -56,7 +56,7 @@ export interface Paginated<T> {
 }
 
 export interface SLORepository {
-  save(slo: SLO): Promise<SLO>;
+  save(slo: SLO, options?: { throwOnConflict: boolean }): Promise<SLO>;
   findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
@@ -66,9 +66,24 @@ export interface SLORepository {
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
 
-  async save(slo: SLO): Promise<SLO> {
+  async save(slo: SLO, options = { throwOnConflict: false }): Promise<SLO> {
+    let existingSavedObjectId;
+    const findResponse = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${slo.id})`,
+    });
+    if (findResponse.total === 1) {
+      if (options.throwOnConflict) {
+        throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
+      }
+
+      existingSavedObjectId = findResponse.saved_objects[0].id;
+    }
+
     const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
-      id: slo.id,
+      id: existingSavedObjectId,
       overwrite: true,
     });
 
@@ -76,26 +91,33 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 
   async findById(id: string): Promise<SLO> {
-    try {
-      const slo = await this.soClient.get<StoredSLO>(SO_SLO_TYPE, id);
-      return toSLO(slo.attributes);
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw new SLONotFound(`SLO [${id}] not found`);
-      }
-      throw err;
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new SLONotFound(`SLO [${id}] not found`);
     }
+
+    return toSLO(response.saved_objects[0].attributes);
   }
 
   async deleteById(id: string): Promise<void> {
-    try {
-      await this.soClient.delete(SO_SLO_TYPE, id);
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw new SLONotFound(`SLO [${id}] not found`);
-      }
-      throw err;
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new SLONotFound(`SLO [${id}] not found`);
     }
+
+    await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
   async find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>> {

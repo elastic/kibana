@@ -8,8 +8,9 @@ import React, { useCallback } from 'react';
 import {
   EuiSpacer,
   EuiButtonEmpty,
-  EuiPageHeader,
   type EuiDescriptionListProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -98,6 +99,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const {
     pageIndex,
     sort,
+    query,
     queryError,
     pageSize,
     setTableOptions,
@@ -117,6 +119,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     sort,
     resourceId: decodedResourceId,
     enabled: !queryError,
+    query,
   });
 
   const error = resourceFindings.error || queryError;
@@ -193,40 +196,45 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={resourceFindings.isFetching}
       />
-      <PageTitle>
-        <BackToResourcesButton />
-        <PageTitleText
-          title={
-            <CloudPosturePageTitle
-              title={i18n.translate(
-                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
-                {
-                  defaultMessage: '{resourceName} {hyphen} Findings',
-                  values: {
-                    resourceName: resourceFindings.data?.resourceName,
-                    hyphen: resourceFindings.data?.resourceName ? '-' : '',
-                  },
-                }
-              )}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <PageTitle>
+            <PageTitleText
+              title={
+                <CloudPosturePageTitle
+                  title={i18n.translate(
+                    'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
+                    {
+                      defaultMessage: '{resourceName} {hyphen} Findings',
+                      values: {
+                        resourceName: resourceFindings.data?.resourceName,
+                        hyphen: resourceFindings.data?.resourceName ? '-' : '',
+                      },
+                    }
+                  )}
+                />
+              }
             />
-          }
+          </PageTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BackToResourcesButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      {resourceFindings.data && (
+        <CspInlineDescriptionList
+          listItems={getResourceFindingSharedValues({
+            resourceId: decodedResourceId,
+            resourceName: resourceFindings.data?.resourceName || '',
+            resourceSubType: resourceFindings.data?.resourceSubType || '',
+            clusterId: resourceFindings.data?.clusterId || '',
+            cloudAccountName: resourceFindings.data?.cloudAccountName || '',
+          })}
         />
-      </PageTitle>
-      <EuiPageHeader
-        description={
-          resourceFindings.data && (
-            <CspInlineDescriptionList
-              listItems={getResourceFindingSharedValues({
-                resourceId: decodedResourceId,
-                resourceName: resourceFindings.data?.resourceName || '',
-                resourceSubType: resourceFindings.data?.resourceSubType || '',
-                clusterId: resourceFindings.data?.clusterId || '',
-                cloudAccountName: resourceFindings.data?.cloudAccountName || '',
-              })}
-            />
-          )
-        }
-      />
+      )}
+
       <EuiSpacer />
       {error && <ErrorCallout error={error} />}
       {!error && (

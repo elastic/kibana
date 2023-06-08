@@ -7,6 +7,112 @@
 
 import { mockAlertSearchResponse } from '../../../../common/components/alerts_treemap/lib/mocks/mock_alert_search_response';
 
+export const getQuery = (
+  selectedGroup: string,
+  uniqueValue: string,
+  timeRange: { from: string; to: string }
+) => ({
+  _source: false,
+  aggs: {
+    unitsCount: {
+      value_count: {
+        field: 'groupByField',
+      },
+    },
+    groupsCount: {
+      cardinality: {
+        field: 'groupByField',
+      },
+    },
+    groupByFields: {
+      aggs: {
+        unitsCount: {
+          cardinality: {
+            field: 'kibana.alert.uuid',
+          },
+        },
+        description: {
+          terms: {
+            field: 'kibana.alert.rule.description',
+            size: 1,
+          },
+        },
+        bucket_truncate: {
+          bucket_sort: {
+            from: 0,
+            size: 25,
+            sort: [
+              {
+                unitsCount: {
+                  order: 'desc',
+                },
+              },
+            ],
+          },
+        },
+        countSeveritySubAggregation: {
+          cardinality: {
+            field: 'kibana.alert.severity',
+          },
+        },
+        hostsCountAggregation: {
+          cardinality: {
+            field: 'host.name',
+          },
+        },
+        ruleTags: {
+          terms: {
+            field: 'kibana.alert.rule.tags',
+          },
+        },
+        severitiesSubAggregation: {
+          terms: {
+            field: 'kibana.alert.severity',
+          },
+        },
+        usersCountAggregation: {
+          cardinality: {
+            field: 'user.name',
+          },
+        },
+      },
+      terms: {
+        field: 'groupByField',
+        size: 10000,
+      },
+    },
+  },
+  query: {
+    bool: {
+      filter: [
+        { bool: { filter: [], must: [], must_not: [], should: [] } },
+        {
+          range: {
+            '@timestamp': {
+              gte: timeRange.from,
+              lte: timeRange.to,
+            },
+          },
+        },
+      ],
+    },
+  },
+  runtime_mappings: {
+    groupByField: {
+      type: 'keyword',
+      script: {
+        source:
+          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+        params: {
+          selectedGroup,
+          uniqueValue,
+        },
+      },
+    },
+  },
+  size: 0,
+});
+
 export const groupingSearchResponse = {
   ...mockAlertSearchResponse,
   hits: {
@@ -26,8 +132,8 @@ export const groupingSearchResponse = {
       sum_other_doc_count: 0,
       buckets: [
         {
-          key: ['critical hosts [Duplicate]', 'critical hosts [Duplicate]'],
-          key_as_string: 'critical hosts [Duplicate]|critical hosts [Duplicate]',
+          key: ['critical hosts [Duplicate]'],
+          key_as_string: 'critical hosts [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -77,9 +183,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['critical hosts [Duplicate] [Duplicate]', 'critical hosts [Duplicate] [Duplicate]'],
-          key_as_string:
-            'critical hosts [Duplicate] [Duplicate]|critical hosts [Duplicate] [Duplicate]',
+          key: ['critical hosts [Duplicate] [Duplicate]'],
+          key_as_string: 'critical hosts [Duplicate] [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -129,8 +234,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['high hosts [Duplicate]', 'high hosts [Duplicate]'],
-          key_as_string: 'high hosts [Duplicate]|high hosts [Duplicate]',
+          key: ['high hosts [Duplicate]'],
+          key_as_string: 'high hosts [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -180,8 +285,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['high hosts [Duplicate] [Duplicate]', 'high hosts [Duplicate] [Duplicate]'],
-          key_as_string: 'high hosts [Duplicate] [Duplicate]|high hosts [Duplicate] [Duplicate]',
+          key: ['high hosts [Duplicate] [Duplicate]'],
+          key_as_string: 'high hosts [Duplicate] [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -231,8 +336,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['low hosts  [Duplicate]', 'low hosts  [Duplicate]'],
-          key_as_string: 'low hosts  [Duplicate]|low hosts  [Duplicate]',
+          key: ['low hosts  [Duplicate]'],
+          key_as_string: 'low hosts  [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -282,8 +387,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['low hosts  [Duplicate] [Duplicate]', 'low hosts  [Duplicate] [Duplicate]'],
-          key_as_string: 'low hosts  [Duplicate] [Duplicate]|low hosts  [Duplicate] [Duplicate]',
+          key: ['low hosts  [Duplicate] [Duplicate]'],
+          key_as_string: 'low hosts  [Duplicate] [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -333,8 +438,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['medium hosts [Duplicate]', 'medium hosts [Duplicate]'],
-          key_as_string: 'medium hosts [Duplicate]|medium hosts [Duplicate]',
+          key: ['medium hosts [Duplicate]'],
+          key_as_string: 'medium hosts [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -384,9 +489,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['medium hosts [Duplicate] [Duplicate]', 'medium hosts [Duplicate] [Duplicate]'],
-          key_as_string:
-            'medium hosts [Duplicate] [Duplicate]|medium hosts [Duplicate] [Duplicate]',
+          key: ['medium hosts [Duplicate] [Duplicate]'],
+          key_as_string: 'medium hosts [Duplicate] [Duplicate]',
           doc_count: 300,
           hostsCountAggregation: {
             value: 30,
@@ -436,8 +540,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['critical users  [Duplicate]', 'critical users  [Duplicate]'],
-          key_as_string: 'critical users  [Duplicate]|critical users  [Duplicate]',
+          key: ['critical users  [Duplicate]'],
+          key_as_string: 'critical users  [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -487,12 +591,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: [
-            'critical users  [Duplicate] [Duplicate]',
-            'critical users  [Duplicate] [Duplicate]',
-          ],
-          key_as_string:
-            'critical users  [Duplicate] [Duplicate]|critical users  [Duplicate] [Duplicate]',
+          key: ['critical users  [Duplicate] [Duplicate]'],
+          key_as_string: 'critical users  [Duplicate] [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -542,8 +642,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['high users  [Duplicate]', 'high users  [Duplicate]'],
-          key_as_string: 'high users  [Duplicate]|high users  [Duplicate]',
+          key: ['high users  [Duplicate]'],
+          key_as_string: 'high users  [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -593,8 +693,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['high users  [Duplicate] [Duplicate]', 'high users  [Duplicate] [Duplicate]'],
-          key_as_string: 'high users  [Duplicate] [Duplicate]|high users  [Duplicate] [Duplicate]',
+          key: ['high users  [Duplicate] [Duplicate]'],
+          key_as_string: 'high users  [Duplicate] [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -644,8 +744,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['low users [Duplicate]', 'low users [Duplicate]'],
-          key_as_string: 'low users [Duplicate]|low users [Duplicate]',
+          key: ['low users [Duplicate]'],
+          key_as_string: 'low users [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -695,8 +795,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['low users [Duplicate] [Duplicate]', 'low users [Duplicate] [Duplicate]'],
-          key_as_string: 'low users [Duplicate] [Duplicate]|low users [Duplicate] [Duplicate]',
+          key: ['low users [Duplicate] [Duplicate]'],
+          key_as_string: 'low users [Duplicate] [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -746,8 +846,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['medium users [Duplicate]', 'medium users [Duplicate]'],
-          key_as_string: 'medium users [Duplicate]|medium users [Duplicate]',
+          key: ['medium users [Duplicate]'],
+          key_as_string: 'medium users [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -797,9 +897,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['medium users [Duplicate] [Duplicate]', 'medium users [Duplicate] [Duplicate]'],
-          key_as_string:
-            'medium users [Duplicate] [Duplicate]|medium users [Duplicate] [Duplicate]',
+          key: ['medium users [Duplicate] [Duplicate]'],
+          key_as_string: 'medium users [Duplicate] [Duplicate]',
           doc_count: 273,
           hostsCountAggregation: {
             value: 10,
@@ -849,8 +948,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['critical hosts', 'critical hosts'],
-          key_as_string: 'critical hosts|critical hosts',
+          key: ['critical hosts'],
+          key_as_string: 'critical hosts',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -900,12 +999,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: [
-            'critical hosts [Duplicate] [Duplicate] [Duplicate]',
-            'critical hosts [Duplicate] [Duplicate] [Duplicate]',
-          ],
-          key_as_string:
-            'critical hosts [Duplicate] [Duplicate] [Duplicate]|critical hosts [Duplicate] [Duplicate] [Duplicate]',
+          key: ['critical hosts [Duplicate] [Duplicate] [Duplicate]'],
+          key_as_string: 'critical hosts [Duplicate] [Duplicate] [Duplicate]',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -955,8 +1050,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['high hosts', 'high hosts'],
-          key_as_string: 'high hosts|high hosts',
+          key: ['high hosts'],
+          key_as_string: 'high hosts',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -1006,12 +1101,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: [
-            'high hosts [Duplicate] [Duplicate] [Duplicate]',
-            'high hosts [Duplicate] [Duplicate] [Duplicate]',
-          ],
-          key_as_string:
-            'high hosts [Duplicate] [Duplicate] [Duplicate]|high hosts [Duplicate] [Duplicate] [Duplicate]',
+          key: ['high hosts [Duplicate] [Duplicate] [Duplicate]'],
+          key_as_string: 'high hosts [Duplicate] [Duplicate] [Duplicate]',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -1061,8 +1152,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['low hosts ', 'low hosts '],
-          key_as_string: 'low hosts |low hosts ',
+          key: ['low hosts '],
+          key_as_string: 'low hosts ',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -1112,12 +1203,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: [
-            'low hosts  [Duplicate] [Duplicate] [Duplicate]',
-            'low hosts  [Duplicate] [Duplicate] [Duplicate]',
-          ],
-          key_as_string:
-            'low hosts  [Duplicate] [Duplicate] [Duplicate]|low hosts  [Duplicate] [Duplicate] [Duplicate]',
+          key: ['low hosts  [Duplicate] [Duplicate] [Duplicate]'],
+          key_as_string: 'low hosts  [Duplicate] [Duplicate] [Duplicate]',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -1167,8 +1254,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: ['medium hosts', 'medium hosts'],
-          key_as_string: 'medium hosts|medium hosts',
+          key: ['medium hosts'],
+          key_as_string: 'medium hosts',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -1218,12 +1305,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: [
-            'medium hosts [Duplicate] [Duplicate] [Duplicate]',
-            'medium hosts [Duplicate] [Duplicate] [Duplicate]',
-          ],
-          key_as_string:
-            'medium hosts [Duplicate] [Duplicate] [Duplicate]|medium hosts [Duplicate] [Duplicate] [Duplicate]',
+          key: ['medium hosts [Duplicate] [Duplicate] [Duplicate]'],
+          key_as_string: 'medium hosts [Duplicate] [Duplicate] [Duplicate]',
           doc_count: 100,
           hostsCountAggregation: {
             value: 30,
@@ -1273,12 +1356,8 @@ export const groupingSearchResponse = {
           },
         },
         {
-          key: [
-            'critical users  [Duplicate] [Duplicate] [Duplicate]',
-            'critical users  [Duplicate] [Duplicate] [Duplicate]',
-          ],
-          key_as_string:
-            'critical users  [Duplicate] [Duplicate] [Duplicate]|critical users  [Duplicate] [Duplicate] [Duplicate]',
+          key: ['critical users  [Duplicate] [Duplicate] [Duplicate]'],
+          key_as_string: 'critical users  [Duplicate] [Duplicate] [Duplicate]',
           doc_count: 91,
           hostsCountAggregation: {
             value: 10,

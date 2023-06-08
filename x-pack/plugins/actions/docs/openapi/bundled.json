@@ -39,16 +39,6 @@
           },
           {
             "$ref": "#/components/parameters/space_id"
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "An UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.\n",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
-            }
           }
         ],
         "requestBody": {
@@ -272,6 +262,132 @@
                 }
               }
             }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Creates a connector.",
+        "operationId": "createConnectorId",
+        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "connectorId",
+            "description": "A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Create connector request body properties",
+                "description": "The properties vary depending on the connector type.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_cases_webhook"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_email"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_index"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_jira"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_opsgenie"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_pagerduty"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_resilient"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_serverlog"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_servicenow"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_servicenow_itom"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_servicenow_sir"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_slack_api"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_slack_webhook"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_swimlane"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_teams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_tines"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_webhook"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_xmatters"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "connector_type_id"
+                }
+              },
+              "examples": {
+                "createIndexConnectorRequest": {
+                  "$ref": "#/components/examples/create_index_connector_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connector_response_properties"
+                },
+                "examples": {
+                  "createIndexConnectorResponse": {
+                    "$ref": "#/components/examples/create_index_connector_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [

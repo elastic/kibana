@@ -72,7 +72,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   onSuccess: (theCase: CaseUI) => void;
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutate']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;

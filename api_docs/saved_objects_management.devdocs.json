@@ -318,9 +318,7 @@
               },
               "; width?: string | undefined; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; dataType?: ",
               "EuiTableDataType",
-              " | undefined; align?: ",
-              "HorizontalAlignment",
-              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; render?: ((value: any, record: ",
+              " | undefined; render?: ((value: any, record: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -328,7 +326,9 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; isExpander?: boolean | undefined; textOnly?: boolean | undefined; truncateText?: boolean | undefined; mobileOptions?: (Omit<",
+              ") => React.ReactNode) | undefined; align?: ",
+              "HorizontalAlignment",
+              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; isExpander?: boolean | undefined; textOnly?: boolean | undefined; truncateText?: boolean | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
               ", \"render\"> & { render?: ((item: ",
               {
@@ -739,7 +739,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
@@ -2253,7 +2253,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,

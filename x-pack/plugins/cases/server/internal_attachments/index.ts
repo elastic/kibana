@@ -6,14 +6,11 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+
 import {
-  excess,
   FileAttachmentMetadataRt,
   FILE_ATTACHMENT_TYPE,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../common/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
@@ -24,10 +21,7 @@ export const registerInternalAttachments = (
 };
 
 const schemaValidator = (data: unknown): void => {
-  const fileMetadata = pipe(
-    excess(FileAttachmentMetadataRt).decode(data),
-    fold(throwErrors(badRequest), identity)
-  );
+  const fileMetadata = decodeWithExcessOrThrow(FileAttachmentMetadataRt)(data);
 
   if (fileMetadata.files.length > 1) {
     throw badRequest('Only a single file can be stored in an attachment');

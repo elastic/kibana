@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { mockedQueryService, mockedSearchService } from '../../../common/mocks/test_providers';
+import { mockedQueryService, mockedSearchService } from '../../../mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Aggregation, convertAggregationToChartSeries, createFetchAggregatedIndicators } from '.';
+import {
+  Aggregation,
+  convertAggregationToChartSeries,
+  createFetchAggregatedIndicators,
+} from './fetch_aggregated_indicators';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
-import { mockUiSetting } from '../../../common/mocks/mock_kibana_ui_settings_service';
+import { mockUiSetting } from '../../../mocks/mock_kibana_ui_settings_service';
 
 const aggregationResponse = {
   rawResponse: { aggregations: { [BARCHART_AGGREGATION_NAME]: { buckets: [] } } },

@@ -12,7 +12,7 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../common';
 import { handleErrors } from '../util/handle_errors';
-import { serializedFieldFormatSchema } from '../util/schemas';
+import { serializedFieldFormatSchema } from '../../../common/schemas';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,

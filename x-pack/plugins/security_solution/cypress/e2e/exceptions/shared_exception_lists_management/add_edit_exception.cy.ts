@@ -26,9 +26,12 @@ describe('Add/edit exception from exception management page', () => {
   before(() => {
     esArchiverResetKibana();
     esArchiverLoad('exceptions');
+    createRule(getNewRule());
+  });
+
+  beforeEach(() => {
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
-    createRule(getNewRule());
   });
 
   after(() => {

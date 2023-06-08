@@ -7,22 +7,18 @@
 
 import { format } from './get_monitor_url';
 
-export const getSyntheticsMonitorRouteFromMonitorId = ({
+export const getSyntheticsErrorRouteFromMonitorId = ({
   configId,
-  dateRangeStart,
-  dateRangeEnd,
+  stateId,
   locationId,
 }: {
+  stateId: string;
   configId: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
   locationId: string;
 }) =>
   format({
-    pathname: `/app/synthetics/monitor/${configId}/history`,
+    pathname: encodeURI(`/app/synthetics/monitor/${configId}/errors/${stateId}`),
     query: {
-      dateRangeEnd,
-      dateRangeStart,
       locationId,
     },
   });

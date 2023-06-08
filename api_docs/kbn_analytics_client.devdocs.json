@@ -727,6 +727,10 @@
                 "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -829,6 +833,14 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "infra",

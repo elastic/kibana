@@ -28,6 +28,7 @@ export const callValidateIndicesAPI = async (requestArgs: RequestArgs, fetch: Ht
   const response = await fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
     method: 'POST',
     body: JSON.stringify(
+      // @ts-expect-error TODO: fix after elasticsearch-js bump
       validationIndicesRequestPayloadRT.encode({ data: { indices, fields, runtimeMappings } })
     ),
   });

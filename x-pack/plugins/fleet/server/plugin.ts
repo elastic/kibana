@@ -58,8 +58,16 @@ import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, INTEGRATIONS_PLUGIN_ID } from '../common';
+import {
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INTEGRATIONS_PLUGIN_ID,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+} from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+import { FleetFilesClient } from './services/files/client';
+
+import type { FleetFileClientInterface, FleetFileTransferDirection } from './services/files/types';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -116,6 +124,10 @@ import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
 import { getRequestStore } from './services/request_store';
+import {
+  UninstallTokenService,
+  type UninstallTokenServiceInterface,
+} from './services/security/uninstall_token_service';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -160,6 +172,7 @@ export interface FleetAppContext {
   bulkActionsResolver: BulkActionsResolver;
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export type FleetSetupContract = void;
@@ -208,7 +221,23 @@ export interface FleetStartContract {
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 
+  /**
+   * Create a Fleet Files client instance
+   * @param packageName
+   * @param type
+   * @param maxSizeBytes
+   */
+  createFilesClient: (
+    /** The integration package name */
+    packageName: string,
+    /** Type of file */
+    type: FleetFileTransferDirection,
+    /** Max size for files created when `type` is `to-host` */
+    maxSizeBytes?: number
+  ) => FleetFileClientInterface;
+
   messageSigningService: MessageSigningServiceInterface;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export class FleetPlugin
@@ -441,6 +470,11 @@ export class FleetPlugin
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+    const uninstallTokenService = new UninstallTokenService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      })
+    );
 
     appContextService.start({
       elasticsearch: core.elasticsearch,
@@ -465,6 +499,7 @@ export class FleetPlugin
       telemetryEventsSender: this.telemetryEventsSender,
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
+      uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
 
@@ -551,7 +586,17 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      createFilesClient: (packageName, type, maxFileBytes) => {
+        return new FleetFilesClient(
+          core.elasticsearch.client.asInternalUser,
+          this.initializerContext.logger.get('fleetFiles', packageName),
+          packageName,
+          type,
+          maxFileBytes
+        );
+      },
       messageSigningService,
+      uninstallTokenService,
     };
   }
 

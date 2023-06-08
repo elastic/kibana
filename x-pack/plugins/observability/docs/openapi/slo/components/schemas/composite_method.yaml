@@ -1,0 +1,6 @@
+title: Composite method
+type: string
+description: The composite method to use.
+enum:
+  - weightedAverage
+example: weightedAverage

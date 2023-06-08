@@ -29,6 +29,7 @@ import type {
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
+  GetStartedComponent,
 } from './types';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -88,6 +89,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   readonly experimentalFeatures: ExperimentalFeatures;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private getStartedComponent?: GetStartedComponent;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -171,6 +173,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
+        getStartedComponent: this.getStartedComponent,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -313,6 +316,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getNavLinks$: () => navLinks$,
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setGetStartedPage: (getStartedComponent: GetStartedComponent) => {
+        this.getStartedComponent = getStartedComponent;
+      },
     };
   }
 
@@ -412,7 +418,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
-        landingPages: new subPluginClasses.LandingPages(),
         cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
@@ -439,7 +444,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
       kubernetes: subPlugins.kubernetes.start(),
-      landingPages: subPlugins.landingPages.start(),
       management: subPlugins.management.start(core, plugins),
       overview: subPlugins.overview.start(),
       rules: subPlugins.rules.start(storage),

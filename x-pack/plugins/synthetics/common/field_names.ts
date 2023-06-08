@@ -17,3 +17,5 @@ export const URL_PORT = 'url.port';
 export const OBSERVER_GEO_NAME = 'observer.geo.name';
 
 export const ERROR_MESSAGE = 'error.message';
+
+export const STATE_ID = 'montior.state.id';

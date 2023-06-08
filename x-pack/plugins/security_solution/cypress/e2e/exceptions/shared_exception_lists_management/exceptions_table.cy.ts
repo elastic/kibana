@@ -62,6 +62,7 @@ describe('Exceptions Table', () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(EXCEPTIONS_URL);
   });
 

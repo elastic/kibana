@@ -440,9 +440,6 @@ taken into consideration until another solution is implemented:
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
-### Cypress-pipe
-It is very common in the code to don't have click handlers regitered. In this specific case, please use [Cypress pipe](https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/). 
-
 ### CCS test specific
 When testing CCS we want to put our focus in making sure that our `Source` instance is receiving properly the data that comes from the `Remote` instances, as well as the data is displayed as we expect on the `Source`.
 

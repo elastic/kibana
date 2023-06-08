@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiIconTip,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiStat,
   EuiText,
   EuiToolTip,
@@ -44,7 +44,7 @@ export const ThresholdIndicator = ({
   asStat?: boolean;
 }) => {
   if (loading) {
-    return <EuiLoadingContent lines={1} />;
+    return <EuiSkeletonText lines={1} />;
   }
   const delta = getDeltaPercent(current, previous);
 

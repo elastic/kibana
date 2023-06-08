@@ -17,7 +17,8 @@ export default function updateSpaceTestSuite({ getService }: FtrProviderContext)
   const { updateTest, expectAlreadyExistsResult, expectDefaultSpaceResult, expectNotFound } =
     updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  describe('update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156130
+  describe.skip('update', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

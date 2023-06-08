@@ -41,11 +41,9 @@ const DetectionResponseRoutes = () => (
 );
 
 const LandingRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.landing}>
-      <LandingPage />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.landing}>
+    <LandingPage />
+  </TrackApplicationView>
 );
 
 const EntityAnalyticsRoutes = () => (

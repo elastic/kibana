@@ -404,7 +404,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '1 popular field. 53 available fields. 0 empty fields. 3 meta fields.'
+          '53 available fields. 0 empty fields. 3 meta fields.'
         );
       });
 

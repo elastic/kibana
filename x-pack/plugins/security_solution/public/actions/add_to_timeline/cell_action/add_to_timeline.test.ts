@@ -12,6 +12,7 @@ import { createAddToTimelineCellActionFactory } from './add_to_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { set } from 'lodash/fp';
 
 const services = createStartServicesMock();
 const mockWarningToast = services.notifications.toasts.addWarning;
@@ -28,24 +29,24 @@ const context = {
 } as CellActionExecutionContext;
 
 const defaultDataProvider = {
+  and: [],
+  enabled: true,
+  excluded: false,
+  id: 'event-field-default-timeline-1-user_name-0-the-value',
+  kqlQuery: '',
+  name: 'user.name',
+  queryMatch: {
+    field: 'user.name',
+    operator: ':',
+    value: 'the-value',
+  },
+};
+
+const defaultDataProviderAction = {
   type: addProvider.type,
   payload: {
     id: TimelineId.active,
-    providers: [
-      {
-        and: [],
-        enabled: true,
-        excluded: false,
-        id: 'event-field-default-timeline-1-user_name-0-the-value',
-        kqlQuery: '',
-        name: 'user.name',
-        queryMatch: {
-          field: 'user.name',
-          operator: ':',
-          value: 'the-value',
-        },
-      },
-    ],
+    providers: [defaultDataProvider],
   },
 };
 
@@ -80,9 +81,62 @@ describe('createAddToTimelineCellAction', () => {
   });
 
   describe('execute', () => {
-    it('should execute normally', async () => {
+    it('should execute with default value', async () => {
       await addToTimelineAction.execute(context);
-      expect(mockDispatch).toHaveBeenCalledWith(defaultDataProvider);
+      expect(mockDispatch).toHaveBeenCalledWith(defaultDataProviderAction);
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
+    it('should execute with null value', async () => {
+      await addToTimelineAction.execute({
+        field: { name: 'user.name', value: null, type: 'text' },
+      } as CellActionExecutionContext);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        set(
+          'payload.providers[0]',
+          {
+            ...defaultDataProvider,
+            id: 'empty-value-timeline-1-user_name-0',
+            excluded: true,
+            queryMatch: {
+              field: 'user.name',
+              value: '',
+              operator: ':*',
+            },
+          },
+          defaultDataProviderAction
+        )
+      );
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
+    it('should execute with multiple values', async () => {
+      const value2 = 'value2';
+      const value3 = 'value3';
+      await addToTimelineAction.execute({
+        field: { name: 'user.name', value: [value, value2, value3], type: 'text' },
+      } as CellActionExecutionContext);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        set(
+          'payload.providers[0]',
+          {
+            ...defaultDataProvider,
+            and: [
+              {
+                ...defaultDataProvider,
+                id: 'event-field-default-timeline-1-user_name-0-value2',
+                queryMatch: { ...defaultDataProvider.queryMatch, value: value2 },
+              },
+              {
+                ...defaultDataProvider,
+                id: 'event-field-default-timeline-1-user_name-0-value3',
+                queryMatch: { ...defaultDataProvider.queryMatch, value: value3 },
+              },
+            ],
+          },
+          defaultDataProviderAction
+        )
+      );
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
@@ -106,7 +160,7 @@ describe('createAddToTimelineCellAction', () => {
             negateFilters: false,
           },
         });
-        expect(mockDispatch).toHaveBeenCalledWith(defaultDataProvider);
+        expect(mockDispatch).toHaveBeenCalledWith(defaultDataProviderAction);
         expect(mockWarningToast).not.toHaveBeenCalled();
       });
 
@@ -118,10 +172,10 @@ describe('createAddToTimelineCellAction', () => {
           },
         });
         expect(mockDispatch).toHaveBeenCalledWith({
-          ...defaultDataProvider,
+          ...defaultDataProviderAction,
           payload: {
-            ...defaultDataProvider.payload,
-            providers: [{ ...defaultDataProvider.payload.providers[0], excluded: true }],
+            ...defaultDataProviderAction.payload,
+            providers: [{ ...defaultDataProviderAction.payload.providers[0], excluded: true }],
           },
         });
         expect(mockWarningToast).not.toHaveBeenCalled();

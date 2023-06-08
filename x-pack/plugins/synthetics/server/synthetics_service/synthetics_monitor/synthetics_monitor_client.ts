@@ -11,6 +11,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { RouteContext } from '../../legacy_uptime/routes';
 import { normalizeSecrets } from '../utils';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
@@ -33,7 +34,6 @@ import {
   SyntheticsMonitorWithSecrets,
   MonitorServiceLocation,
 } from '../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;

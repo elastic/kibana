@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { FieldConfiguration, SearchFieldConfiguration } from '@elastic/search-ui';
+import { FieldConfiguration } from '@elastic/search-ui';
 
 import { FetchEngineFieldCapabilitiesApiLogic } from '../../../api/engines/fetch_engine_field_capabilities_api_logic';
 import { EngineNameLogic } from '../engine_name_logic';
@@ -21,7 +21,6 @@ export interface EngineSearchPreviewValues {
   engineName: typeof EngineNameLogic.values.engineName;
   fieldTypesByIndex: Record<string, Record<string, string>>;
   resultFields: Record<string, FieldConfiguration>;
-  searchableFields: Record<string, SearchFieldConfiguration>;
   sortableFields: string[];
 }
 
@@ -82,18 +81,6 @@ export const EngineSearchPreviewLogic = kea<
             .filter(({ metadata_field: isMeta }) => !isMeta)
             .map(({ name }) => [name, { raw: {}, snippet: { fallback: true } }])
         );
-      },
-    ],
-    searchableFields: [
-      () => [selectors.engineFieldCapabilitiesData],
-      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
-        if (!data) return {};
-
-        const searchableFields = Object.fromEntries(
-          data.fields.filter(({ type }) => type === 'text').map(({ name }) => [name, { weight: 1 }])
-        );
-
-        return searchableFields;
       },
     ],
     sortableFields: [

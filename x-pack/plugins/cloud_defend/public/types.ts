@@ -134,11 +134,24 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
     selectorType: 'file',
     type: 'stringArray',
     maxValueBytes: 255,
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidTargetFilePath,
   },
   ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
-  processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
-  processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
+  processExecutable: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processName'],
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidProcessExecutable,
+  },
+  processName: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processExecutable'],
+    maxValueBytes: 15,
+  },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
 };
 

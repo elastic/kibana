@@ -24,13 +24,13 @@
 [
   {
     "name": "apm",
-    "version": "8.9.0-preview-1682533168",
+    "version": "8.9.0-preview-1684289323",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "1.7.0"
+    "version": "1.8.0"
   },
   {
     "name": "endpoint",
@@ -47,8 +47,14 @@
     "allowSyncToPrerelease": true
   },
   {
+    "name": "profiler_collector",
+    "version": "8.9.0-preview",
+    "forceAlignStackVersion": true,
+    "allowSyncToPrerelease": true
+  },
+  {
     "name": "synthetics",
-    "version": "0.12.1"
+    "version": "1.0.1"
   },
   {
     "name": "security_detection_engine",

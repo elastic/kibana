@@ -40,7 +40,7 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const [
-    { application, chrome, uiSettings, notifications, overlays, http, docLinks, theme },
+    { application, chrome, uiSettings, settings, notifications, overlays, http, docLinks, theme },
     {
       data,
       dataViewFieldEditor,
@@ -63,6 +63,7 @@ export async function mountManagementSection(
     application,
     chrome,
     uiSettings,
+    settings,
     notifications,
     overlays,
     unifiedSearch,

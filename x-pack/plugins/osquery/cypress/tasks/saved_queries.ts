@@ -94,7 +94,7 @@ export const getSavedQueriesComplexTest = () =>
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryId);
         cy.react('PlayButtonComponent', {
-          props: { savedQuery: { attributes: { id: savedQueryId } } },
+          props: { savedQuery: { id: savedQueryId } },
         }).click();
         selectAllAgents();
         submitQuery();
@@ -103,7 +103,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.contains('Saved queries').click();
         cy.contains(savedQueryId);
         cy.react('CustomItemAction', {
-          props: { index: 1, item: { attributes: { id: savedQueryId } } },
+          props: { index: 1, item: { id: savedQueryId } },
         }).click();
         findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
         // Run in test configuration
@@ -127,7 +127,7 @@ export const getSavedQueriesComplexTest = () =>
         // delete saved query
         cy.contains(savedQueryId);
         cy.react('CustomItemAction', {
-          props: { index: 1, item: { attributes: { id: savedQueryId } } },
+          props: { index: 1, item: { id: savedQueryId } },
         }).click();
         deleteAndConfirm('query');
         cy.contains(savedQueryId).should('exist');

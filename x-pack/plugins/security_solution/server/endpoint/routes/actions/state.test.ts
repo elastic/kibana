@@ -6,21 +6,17 @@
  */
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 
 import { registerActionStateRoutes } from './state';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
@@ -77,19 +73,7 @@ describe('when calling the Action state route handler', () => {
       'when can encrypt is set to %s it returns proper value',
       async (canEncrypt) => {
         const routerMock: RouterMock = httpServiceMock.createRouter();
-        const endpointAppContextService = new EndpointAppContextService();
-        registerActionStateRoutes(
-          routerMock,
-          {
-            logFactory: loggingSystemMock.create(),
-            service: endpointAppContextService,
-            config: () => Promise.resolve(createMockConfig()),
-            experimentalFeatures: parseExperimentalConfigValue(
-              createMockConfig().enableExperimental
-            ),
-          },
-          canEncrypt
-        );
+        registerActionStateRoutes(routerMock, createMockEndpointAppContext(), canEncrypt);
 
         await callRoute(routerMock, ACTION_STATE_ROUTE, {
           authz: { canIsolateHost: true },
@@ -102,17 +86,7 @@ describe('when calling the Action state route handler', () => {
   describe('without having right privileges', () => {
     it('it returns unauthorized error', async () => {
       const routerMock: RouterMock = httpServiceMock.createRouter();
-      const endpointAppContextService = new EndpointAppContextService();
-      registerActionStateRoutes(
-        routerMock,
-        {
-          logFactory: loggingSystemMock.create(),
-          service: endpointAppContextService,
-          config: () => Promise.resolve(createMockConfig()),
-          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        },
-        true
-      );
+      registerActionStateRoutes(routerMock, createMockEndpointAppContext(), true);
 
       await callRoute(routerMock, ACTION_STATE_ROUTE, {
         authz: {

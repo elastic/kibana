@@ -103,4 +103,14 @@ export const comparisonCommandsDefinitions: AutocompleteCommandDefinition[] = [
     }),
     sortText: 'D',
   },
+  {
+    label: 'in',
+    insertText: 'in',
+    kind: 11,
+    detail: i18n.translate('monaco.esql.autocomplete.inDoc', {
+      defaultMessage:
+        'Tests if the value an expression takes is contained in a list of other expressions',
+    }),
+    sortText: 'D',
+  },
 ];

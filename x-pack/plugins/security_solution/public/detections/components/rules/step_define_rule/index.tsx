@@ -7,7 +7,6 @@
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -58,6 +57,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { ThresholdInput } from '../threshold_input';
+import { SuppressionInfoIcon } from '../suppression_info_icon';
 import {
   Field,
   Form,
@@ -128,6 +128,10 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
     display: $isVisible ? 'flex' : 'none',
   },
 }))<{ $isVisible: boolean }>``;
+
+const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
+  ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
+`;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
@@ -899,68 +903,63 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           )}
 
-          <EuiSpacer size="l" />
-          <EuiAccordion
-            data-test-subj="alertSuppressionAccordion"
-            id="alertSuppressionAccordion"
-            buttonContent={i18n.ALERT_SUPPRESSION_ACCORDION_BUTTON}
+          <RuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionInput"
           >
-            <EuiSpacer size="l" />
+            <UseField
+              path="groupByFields"
+              component={GroupByFields}
+              componentProps={{
+                browserFields: termsAggregationFields,
+                isDisabled:
+                  !license.isAtLeast(minimumLicenseForSuppression) &&
+                  initialState.groupByFields.length === 0,
+              }}
+            />
+          </RuleTypeEuiFormRow>
 
-            <RuleTypeEuiFormRow
-              $isVisible={isQueryRule(ruleType)}
-              data-test-subj="alertSuppressionInput"
+          <IntendedRuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionDuration"
+          >
+            <UseMultiFields
+              fields={{
+                groupByRadioSelection: {
+                  path: 'groupByRadioSelection',
+                },
+                groupByDurationValue: {
+                  path: 'groupByDuration.value',
+                },
+                groupByDurationUnit: {
+                  path: 'groupByDuration.unit',
+                },
+              }}
             >
-              <UseField
-                path="groupByFields"
-                component={GroupByFields}
-                componentProps={{
-                  browserFields: termsAggregationFields,
-                  isDisabled:
-                    !license.isAtLeast(minimumLicenseForSuppression) &&
-                    initialState.groupByFields.length === 0,
-                }}
-              />
-            </RuleTypeEuiFormRow>
+              {GroupByChildren}
+            </UseMultiFields>
+          </IntendedRuleTypeEuiFormRow>
 
-            <RuleTypeEuiFormRow
-              $isVisible={isQueryRule(ruleType)}
-              data-test-subj="alertSuppressionDuration"
+          <IntendedRuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionMissingFields"
+            label={
+              <span>
+                {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
+              </span>
+            }
+            fullWidth
+          >
+            <UseMultiFields
+              fields={{
+                suppressionMissingFields: {
+                  path: 'suppressionMissingFields',
+                },
+              }}
             >
-              <UseMultiFields
-                fields={{
-                  groupByRadioSelection: {
-                    path: 'groupByRadioSelection',
-                  },
-                  groupByDurationValue: {
-                    path: 'groupByDuration.value',
-                  },
-                  groupByDurationUnit: {
-                    path: 'groupByDuration.unit',
-                  },
-                }}
-              >
-                {GroupByChildren}
-              </UseMultiFields>
-            </RuleTypeEuiFormRow>
-
-            <RuleTypeEuiFormRow
-              $isVisible={isQueryRule(ruleType)}
-              data-test-subj="alertSuppressionMissingFields"
-              label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
-            >
-              <UseMultiFields
-                fields={{
-                  suppressionMissingFields: {
-                    path: 'suppressionMissingFields',
-                  },
-                }}
-              >
-                {AlertsSuppressionMissingFields}
-              </UseMultiFields>
-            </RuleTypeEuiFormRow>
-          </EuiAccordion>
-          <EuiSpacer size="l" />
+              {AlertsSuppressionMissingFields}
+            </UseMultiFields>
+          </IntendedRuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>

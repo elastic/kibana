@@ -20,6 +20,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...config,
+
+    servers: {
+      ...config.servers,
+      fleetserver: {
+        protocol: 'https',
+        hostname: hostIp,
+        port: 8220,
+      },
+    },
+
     kbnTestServer: {
       ...config.kbnTestServer,
       serverArgs: [

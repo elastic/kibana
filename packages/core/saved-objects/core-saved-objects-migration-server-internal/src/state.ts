@@ -63,7 +63,6 @@ export interface BaseState extends ControlState {
    * max_retry_time = 11.7 minutes
    */
   readonly retryAttempts: number;
-
   /**
    * The number of documents to process in each batch. This determines the
    * maximum number of documents that will be read and written in a single
@@ -83,6 +82,12 @@ export interface BaseState extends ControlState {
    * When writing batches, we limit the number of documents in a batch
    * (batchSize) as well as the size of the batch in bytes (maxBatchSizeBytes).
    */
+  readonly maxBatchSize: number;
+  /**
+   * The number of documents to process in each batch. Under most circumstances
+   * batchSize == maxBatchSize. But if we fail to read a batch because of a
+   * Nodejs `RangeError` we'll temporarily half `batchSize` and retry.
+   */
   readonly batchSize: number;
   /**
    * When writing batches, limits the batch size in bytes to ensure that we
@@ -90,6 +95,12 @@ export interface BaseState extends ControlState {
    * http.max_content_length which defaults to 100mb.
    */
   readonly maxBatchSizeBytes: number;
+  /**
+   * If a read batch exceeds this limit we half the batchSize and retry. By
+   * not JSON.parsing and transforming large batches we can avoid RangeErrors
+   * or Kibana OOMing.
+   */
+  readonly maxReadBatchSizeBytes: number;
   readonly logs: MigrationLog[];
   /**
    * If saved objects exist which have an unknown type they will cause

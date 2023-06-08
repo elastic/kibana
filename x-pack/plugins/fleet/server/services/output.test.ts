@@ -89,6 +89,13 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-preconfigured-default-output-allow-edit-name'): {
+        return mockOutputSO('existing-preconfigured-default-output-allow-edit-name', {
+          name: 'test',
+          allow_edit: ['name'],
+        });
+      }
+
       case outputIdToUuid('existing-logstash-output'): {
         return mockOutputSO('existing-logstash-output', {
           type: 'logstash',
@@ -321,7 +328,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         )
       ).rejects.toThrow(
-        `Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.`
+        `Preconfigured output existing-preconfigured-default-output is_default cannot be updated outside of kibana config file.`
       );
     });
 
@@ -587,10 +594,10 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient();
       await expect(
         outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
-          config_yaml: '',
+          config_yaml: 'test: 123',
         })
       ).rejects.toThrow(
-        'Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.'
+        'Preconfigured output existing-preconfigured-default-output config_yaml cannot be updated outside of kibana config file.'
       );
     });
 
@@ -611,6 +618,23 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalled();
     });
 
+    it('Allow to update preconfigured output allowed to edit field from preconfiguration', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'existing-preconfigured-default-output-allow-edit-name',
+        {
+          name: 'test 123',
+        },
+        {
+          fromPreconfiguration: false,
+        }
+      );
+
+      expect(soClient.update).toBeCalled();
+    });
+
     it('Should throw when an existing preconfigured default output and updating an output to become the default one outside of preconfiguration', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-preconfigured-default-output',
@@ -624,7 +648,7 @@ describe('Output Service', () => {
           type: 'elasticsearch',
         })
       ).rejects.toThrow(
-        `Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.`
+        `Preconfigured output existing-preconfigured-default-output is_default cannot be updated outside of kibana config file.`
       );
     });
 

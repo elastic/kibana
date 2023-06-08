@@ -291,28 +291,38 @@ describe('useEnterpriseSearchEngineNav', () => {
 
     // @ts-ignore
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
-    expect(engineItem).toEqual({
-      href: `/app/enterprise_search/applications/search_applications/${engineName}`,
-      id: 'engineId',
-      items: [
-        {
-          href: `/app/enterprise_search/applications/search_applications/${engineName}/preview`,
-          id: 'enterpriseSearchEnginePreview',
-          name: 'Search Preview',
-        },
-        {
-          href: `/app/enterprise_search/applications/search_applications/${engineName}/content`,
-          id: 'enterpriseSearchApplicationsContent',
-          name: 'Content',
-        },
-        {
-          href: `/app/enterprise_search/applications/search_applications/${engineName}/connect`,
-          id: 'enterpriseSearchApplicationConnect',
-          name: 'Connect',
-        },
-      ],
-      name: engineName,
-    });
+    expect(engineItem).toMatchInlineSnapshot(`
+      Object {
+        "href": "/app/enterprise_search/applications/search_applications/my-test-engine",
+        "id": "engineId",
+        "items": Array [
+          Object {
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/preview",
+            "id": "enterpriseSearchEnginePreview",
+            "items": undefined,
+            "name": "Search Preview",
+          },
+          Object {
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+            "id": "enterpriseSearchApplicationsContent",
+            "items": undefined,
+            "name": <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              Content
+            </EuiFlexGroup>,
+          },
+          Object {
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/connect",
+            "id": "enterpriseSearchApplicationConnect",
+            "items": undefined,
+            "name": "Connect",
+          },
+        ],
+        "name": "my-test-engine",
+      }
+    `);
   });
 
   it('returns selected engine without tabs when isEmpty', () => {
@@ -342,6 +352,37 @@ describe('useEnterpriseSearchEngineNav', () => {
       id: 'engineId',
       name: engineName,
     });
+  });
+
+  it('returns selected engine with conflict warning when hasSchemaConflicts', () => {
+    const engineName = 'my-test-engine';
+    const navItems = useEnterpriseSearchEngineNav(engineName, false, true);
+
+    // @ts-ignore
+    const engineItem = navItems
+      .find((ni: EuiSideNavItemType<unknown>) => ni.id === 'applications')
+      .items.find((ni: EuiSideNavItemType<unknown>) => ni.id === 'searchApplications')
+      .items[0].items.find(
+        (ni: EuiSideNavItemType<unknown>) => ni.id === 'enterpriseSearchApplicationsContent'
+      );
+
+    expect(engineItem).toMatchInlineSnapshot(`
+      Object {
+        "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+        "id": "enterpriseSearchApplicationsContent",
+        "items": undefined,
+        "name": <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
+          Content
+          <EuiIcon
+            color="danger"
+            type="warning"
+          />
+        </EuiFlexGroup>,
+      }
+    `);
   });
 });
 

@@ -48,5 +48,25 @@ describe('Default createCopyToClipboardActionFactory', () => {
       expect(mockCopy).toHaveBeenCalledWith('user.name: "the value"');
       expect(mockSuccessToast).toHaveBeenCalled();
     });
+
+    it('should escape value', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        field: { ...context.field, value: 'the "value"' },
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: "the \\"value\\""');
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should suport multiple values', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        field: { ...context.field, value: ['the "value"', 'another value', 'last value'] },
+      });
+      expect(mockCopy).toHaveBeenCalledWith(
+        'user.name: "the \\"value\\"" AND "another value" AND "last value"'
+      );
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
   });
 });

@@ -2691,6 +2691,49 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.IHttpEluMonitorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "IHttpEluMonitorConfig",
+        "description": [
+          "\nHTTP request ELU monitor config"
+        ],
+        "path": "packages/core/http/core-http-server/src/elu_monitor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.IHttpEluMonitorConfig.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nWhether the monitoring of event loop utilization for HTTP requests is enabled."
+            ],
+            "path": "packages/core/http/core-http-server/src/elu_monitor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.IHttpEluMonitorConfig.logging",
+            "type": "Object",
+            "tags": [],
+            "label": "logging",
+            "description": [],
+            "signature": [
+              "{ readonly enabled: boolean; readonly threshold: { readonly elu: number; readonly ela: number; }; }"
+            ],
+            "path": "packages/core/http/core-http-server/src/elu_monitor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.IKibanaResponse",
         "type": "Interface",
         "tags": [],
@@ -5065,6 +5108,22 @@
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaRequestState.measureElu",
+            "type": "Function",
+            "tags": [],
+            "label": "measureElu",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

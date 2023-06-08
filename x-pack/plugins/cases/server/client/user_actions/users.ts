@@ -7,7 +7,7 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { GetCaseUsersResponse, User, UserWithProfileInfo } from '../../../common/api';
-import { GetCaseUsersResponseRt } from '../../../common/api';
+import { decodeOrThrow, GetCaseUsersResponseRt } from '../../../common/api';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -101,7 +101,7 @@ export const getUsers = async (
       reporter: reporterResponse[0],
     };
 
-    return GetCaseUsersResponseRt.encode(results);
+    return decodeOrThrow(GetCaseUsersResponseRt)(results);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case users case id: ${caseId}: ${error}`,

@@ -237,7 +237,7 @@ export class CategorizationJobCreator extends JobCreator {
           ? ML_JOB_AGGREGATION.COUNT
           : ML_JOB_AGGREGATION.RARE;
 
-      const bs = job.analysis_config.bucket_span;
+      const bs = job.analysis_config.bucket_span!;
       this.setDetectorType(detectorType);
       if (dtr.partitionField !== null) {
         this.categorizationPerPartitionField = dtr.partitionField.id;

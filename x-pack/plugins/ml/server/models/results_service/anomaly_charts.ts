@@ -734,7 +734,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     // Add extra properties used by the explorer dashboard charts.
     fullSeriesConfig.functionDescription = record.function_description;
 
-    const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span);
+    const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span!);
     if (parsedBucketSpan !== null) {
       fullSeriesConfig.bucketSpanSeconds = parsedBucketSpan.asSeconds();
     }

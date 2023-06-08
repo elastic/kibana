@@ -191,7 +191,7 @@ export class JobCreator {
   }
 
   public get bucketSpan(): BucketSpan {
-    return this._job_config.analysis_config.bucket_span;
+    return this._job_config.analysis_config.bucket_span!;
   }
 
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {

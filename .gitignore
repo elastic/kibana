@@ -42,6 +42,14 @@ __tmp__
 /x-pack/test/*/screenshots/visual_regression_gallery.html
 /x-pack/test/functional/apps/*/*/reporting/reports/failure
 
+# Ignore the same artifacts in x-pack/test_serverless
+/x-pack/test_serverless/*/failure_debug
+/x-pack/test_serverless/*/screenshots/diff
+/x-pack/test_serverless/*/screenshots/failure
+/x-pack/test_serverless/*/screenshots/session
+/x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
+/x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
+
 /html_docs
 .eslintcache
 /plugins/

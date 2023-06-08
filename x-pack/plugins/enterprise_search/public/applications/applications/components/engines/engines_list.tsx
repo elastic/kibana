@@ -174,7 +174,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
                 documentationUrl: (
                   <EuiLink
                     data-test-subj="engines-documentation-link"
-                    href={docLinks.enterpriseSearchEngines}
+                    href={docLinks.searchApplications}
                     target="_blank"
                     data-telemetry-id="entSearchApplications-documentation-viewDocumentaion"
                   >

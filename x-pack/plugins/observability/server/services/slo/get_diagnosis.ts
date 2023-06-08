@@ -26,15 +26,19 @@ export async function getGlobalDiagnosis(
   esClient: ElasticsearchClient,
   licensing: LicensingApiRequestHandlerContext
 ) {
-  const licenseInfo = licensing.license.toJSON();
-  const userPrivileges = await esClient.security.getUserPrivileges();
-  const sloResources = await getSloResourcesDiagnosis(esClient);
+  try {
+    const licenseInfo = licensing.license.toJSON();
+    const userPrivileges = await esClient.security.getUserPrivileges();
+    const sloResources = await getSloResourcesDiagnosis(esClient);
 
-  return {
-    licenseAndFeatures: licenseInfo,
-    userPrivileges,
-    sloResources,
-  };
+    return {
+      licenseAndFeatures: licenseInfo,
+      userPrivileges,
+      sloResources,
+    };
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function getSloDiagnosis(
@@ -79,29 +83,36 @@ export async function getSloDiagnosis(
 }
 
 async function getSloResourcesDiagnosis(esClient: ElasticsearchClient) {
-  const indexTemplateExists = await esClient.indices.existsIndexTemplate({
-    name: SLO_INDEX_TEMPLATE_NAME,
-  });
-
-  const mappingsTemplateExists = await esClient.cluster.existsComponentTemplate({
-    name: SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  });
-
-  const settingsTemplateExists = await esClient.cluster.existsComponentTemplate({
-    name: SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  });
-
-  let ingestPipelineExists = true;
   try {
-    await esClient.ingest.getPipeline({ id: SLO_INGEST_PIPELINE_NAME });
-  } catch (err) {
-    ingestPipelineExists = false;
-  }
+    const indexTemplateExists = await esClient.indices.existsIndexTemplate({
+      name: SLO_INDEX_TEMPLATE_NAME,
+    });
 
-  return {
-    [SLO_INDEX_TEMPLATE_NAME]: indexTemplateExists ? OK : NOT_OK,
-    [SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME]: mappingsTemplateExists ? OK : NOT_OK,
-    [SLO_COMPONENT_TEMPLATE_SETTINGS_NAME]: settingsTemplateExists ? OK : NOT_OK,
-    [SLO_INGEST_PIPELINE_NAME]: ingestPipelineExists ? OK : NOT_OK,
-  };
+    const mappingsTemplateExists = await esClient.cluster.existsComponentTemplate({
+      name: SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+    });
+
+    const settingsTemplateExists = await esClient.cluster.existsComponentTemplate({
+      name: SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
+    });
+
+    let ingestPipelineExists = true;
+    try {
+      await esClient.ingest.getPipeline({ id: SLO_INGEST_PIPELINE_NAME });
+    } catch (err) {
+      ingestPipelineExists = false;
+      throw err;
+    }
+
+    return {
+      [SLO_INDEX_TEMPLATE_NAME]: indexTemplateExists ? OK : NOT_OK,
+      [SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME]: mappingsTemplateExists ? OK : NOT_OK,
+      [SLO_COMPONENT_TEMPLATE_SETTINGS_NAME]: settingsTemplateExists ? OK : NOT_OK,
+      [SLO_INGEST_PIPELINE_NAME]: ingestPipelineExists ? OK : NOT_OK,
+    };
+  } catch (err) {
+    if (err.meta.statusCode === 403) {
+      throw new Error('Insufficient permissions to access Elasticsearch Cluster', { cause: err });
+    }
+  }
 }

@@ -27,7 +27,7 @@ import { StatusBadge } from './status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
-const defaultDateRangeOptions = Object.freeze({
+export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   autoRefreshOptions: {
     enabled: false,
     duration: 10000,
@@ -38,9 +38,20 @@ const defaultDateRangeOptions = Object.freeze({
 });
 
 export const useDateRangePicker = (isFlyout: boolean) => {
-  const { setUrlDateRangeFilters } = useActionHistoryUrlParams();
-  const [dateRangePickerState, setDateRangePickerState] =
-    useState<DateRangePickerValues>(defaultDateRangeOptions);
+  const {
+    setUrlDateRangeFilters,
+    startDate: startDateFromUrl,
+    endDate: endDateFromUrl,
+  } = useActionHistoryUrlParams();
+  const [dateRangePickerState, setDateRangePickerState] = useState<DateRangePickerValues>({
+    ...DEFAULT_DATE_RANGE_OPTIONS,
+    startDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.startDate
+      : startDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.startDate,
+    endDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.endDate
+      : endDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.endDate,
+  });
 
   const updateActionListDateRanges = useCallback(
     ({ start, end }) => {
@@ -234,20 +245,21 @@ export const useActionsLogFilter = ({
       : isHostsFilter
       ? []
       : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+          const featureFlags = ExperimentalFeaturesService.get();
+
           // `get-file` is currently behind FF
-          if (
-            commandName === 'get-file' &&
-            !ExperimentalFeaturesService.get().responseActionGetFileEnabled
-          ) {
+          if (commandName === 'get-file' && !featureFlags.responseActionGetFileEnabled) {
             return false;
           }
 
           // TODO: remove this when `execute` is no longer behind FF
           // planned for 8.8
-          if (
-            commandName === 'execute' &&
-            !ExperimentalFeaturesService.get().responseActionExecuteEnabled
-          ) {
+          if (commandName === 'execute' && !featureFlags.responseActionExecuteEnabled) {
+            return false;
+          }
+
+          // upload - v8.9
+          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
             return false;
           }
 

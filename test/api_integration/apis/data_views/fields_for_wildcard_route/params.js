@@ -22,15 +22,6 @@ export default function ({ getService }) {
     it('requires a pattern query param', () =>
       supertest.get('/api/index_patterns/_fields_for_wildcard').query({}).expect(400));
 
-    it('accepts a JSON formatted meta_fields query param', () =>
-      supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
-        .query({
-          pattern: '*',
-          meta_fields: JSON.stringify(['meta']),
-        })
-        .expect(200));
-
     it('accepts include_unmapped param', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
@@ -40,33 +31,6 @@ export default function ({ getService }) {
         })
         .expect(200));
 
-    it('accepts meta_fields query param in string array', () =>
-      supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
-        .query({
-          pattern: '*',
-          meta_fields: ['_id', 'meta'],
-        })
-        .expect(200));
-
-    it('accepts single meta_fields query param', () =>
-      supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
-        .query({
-          pattern: '*',
-          meta_fields: ['_id'],
-        })
-        .expect(200));
-
-    it('rejects a comma-separated list of meta_fields', () =>
-      supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
-        .query({
-          pattern: '*',
-          meta_fields: 'foo,bar',
-        })
-        .expect(400));
-
     it('rejects unexpected query params', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
@@ -75,5 +39,90 @@ export default function ({ getService }) {
           [randomness.word()]: randomness.word(),
         })
         .expect(400));
+
+    describe('fields', () => {
+      it('accepts a JSON formatted fields query param', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            fields: JSON.stringify(['baz']),
+          })
+          .expect(200));
+
+      it('accepts meta_fields query param in string array', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            fields: ['baz', 'foo'],
+          })
+          .expect(200));
+
+      it('accepts single array fields query param', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            fields: ['baz'],
+          })
+          .expect(200));
+
+      it('accepts single fields query param', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            fields: 'baz',
+          })
+          .expect(200));
+
+      it('rejects a comma-separated list of fields', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            fields: 'foo,bar',
+          })
+          .expect(400));
+    });
+
+    describe('meta_fields', () => {
+      it('accepts a JSON formatted meta_fields query param', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            meta_fields: JSON.stringify(['meta']),
+          })
+          .expect(200));
+
+      it('accepts meta_fields query param in string array', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            meta_fields: ['_id', 'meta'],
+          })
+          .expect(200));
+
+      it('accepts single meta_fields query param', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            meta_fields: ['_id'],
+          })
+          .expect(200));
+
+      it('rejects a comma-separated list of meta_fields', () =>
+        supertest
+          .get('/api/index_patterns/_fields_for_wildcard')
+          .query({
+            pattern: '*',
+            meta_fields: 'foo,bar',
+          })
+          .expect(400));
+    });
   });
 }

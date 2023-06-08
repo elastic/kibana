@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
@@ -452,7 +453,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
 
   const renderDragDropPrompt = () => {
     return (

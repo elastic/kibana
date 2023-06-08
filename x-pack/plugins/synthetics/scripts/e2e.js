@@ -12,8 +12,4 @@ const path = require('path');
 
 const e2eDir = path.join(__dirname, '../e2e');
 
-try {
-  executeSyntheticsRunner(e2eDir);
-} catch (e) {
-  console.log(e);
-}
+executeSyntheticsRunner(e2eDir);

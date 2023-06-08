@@ -626,7 +626,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
       {
-        defaultMessage: 'If “Suppress by” field does not exist',
+        defaultMessage: 'If a suppression field is missing',
       }
     ),
   },

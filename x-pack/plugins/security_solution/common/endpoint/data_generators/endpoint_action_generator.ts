@@ -24,6 +24,8 @@ import type {
   ResponseActionGetFileParameters,
   ResponseActionsExecuteParameters,
   ResponseActionExecuteOutputContent,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
 import {
@@ -118,6 +120,32 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       if (!output) {
         output = this.generateExecuteActionResponseOutput();
       }
+    }
+
+    if (command === 'upload' && !output) {
+      let uploadOutput = output as ActionResponseOutput<ResponseActionUploadOutputContent>;
+
+      if (overrides.error) {
+        uploadOutput = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_some-error',
+            path: '',
+            disk_free_space: 0,
+          },
+        };
+      } else {
+        uploadOutput = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_file-success',
+            path: '/disk1/file/saved/here',
+            disk_free_space: 4825566125475,
+          },
+        };
+      }
+
+      output = uploadOutput as typeof output;
     }
 
     return merge(
@@ -237,6 +265,31 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           }),
         };
       }
+    }
+
+    if (command === 'upload') {
+      const uploadActionDetails = details as ActionDetails<
+        ResponseActionUploadOutputContent,
+        ResponseActionUploadParameters
+      >;
+
+      uploadActionDetails.parameters = {
+        file_id: 'file-x-y-z',
+        file_name: 'foo.txt',
+        file_size: 1234,
+        file_sha256: 'file-hash-sha-256',
+      };
+
+      uploadActionDetails.outputs = {
+        'agent-a': {
+          type: 'json',
+          content: {
+            code: 'ra_upload_file-success',
+            path: '/path/to/uploaded/file',
+            disk_free_space: 1234567,
+          },
+        },
+      };
     }
 
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<

@@ -17,7 +17,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 import { Filter, Query } from '@kbn/es-query';
@@ -27,6 +27,7 @@ import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
 import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
@@ -110,19 +111,15 @@ export const LogCategorizationPage: FC = () => {
     [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const {
-    documentStats,
-    timefilter,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-    intervalMs,
-  } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
+  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+    { dataView, savedSearch: selectedSavedSearch },
+    aiopsListState
+  );
+
+  const { documentStats, timefilter, earliest, latest, intervalMs } = useData(
+    dataView,
     'log_categorization',
-    aiopsListState,
+    searchQuery,
     setGlobalState,
     undefined,
     undefined,
@@ -302,7 +299,7 @@ export const LogCategorizationPage: FC = () => {
         </>
       ) : null}
 
-      {loading === true ? <EuiLoadingContent lines={10} /> : null}
+      {loading === true ? <EuiSkeletonText lines={10} /> : null}
 
       <InformationText
         loading={loading}

@@ -155,9 +155,12 @@ export const EngineIndices: React.FC = () => {
             ),
           onClick: (index) =>
             navigateToUrl(
-              generateEncodedPath(SEARCH_INDEX_PATH, {
+              `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/${generateEncodedPath(SEARCH_INDEX_PATH, {
                 indexName: index.name,
-              })
+              })}`,
+              {
+                shouldNotCreateHref: true,
+              }
             ),
           type: 'icon',
         },

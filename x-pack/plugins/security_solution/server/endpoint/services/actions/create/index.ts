@@ -38,6 +38,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionsExecuteParameters,
+  EndpointActionDataParameterTypes,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
 import type { FeatureKeys } from '../../feature_usage';
@@ -60,6 +61,7 @@ type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
   rule_id?: string;
   rule_name?: string;
   error?: string;
+  hosts?: Record<string, { name: string }>;
 };
 
 interface CreateActionMetadata {
@@ -70,10 +72,13 @@ interface CreateActionMetadata {
 
 export interface ActionCreateService {
   createActionFromAlert: (payload: CreateActionPayload) => Promise<ActionDetails>;
-  createAction: (
+  createAction: <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
     payload: CreateActionPayload,
     metadata: CreateActionMetadata
-  ) => Promise<ActionDetails>;
+  ) => Promise<ActionDetails<TOutputContent, TParameters>>;
 }
 
 export const actionCreateService = (
@@ -84,10 +89,13 @@ export const actionCreateService = (
     return createAction({ ...payload }, { minimumLicenseRequired: 'enterprise' });
   };
 
-  const createAction = async (
+  const createAction = async <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
     payload: CreateActionPayload,
     { casesClient, minimumLicenseRequired = 'basic' }: CreateActionMetadata
-  ): Promise<ActionDetails> => {
+  ): Promise<ActionDetails<TOutputContent, TParameters>> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
@@ -145,6 +153,7 @@ export const actionCreateService = (
           command: payload.command,
           comment: payload.comment ?? undefined,
           ...(payload.alert_ids ? { alert_id: payload.alert_ids } : {}),
+          ...(payload.hosts ? { hosts: payload.hosts } : {}),
           parameters: getActionParameters() ?? undefined,
         },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
@@ -311,7 +320,7 @@ export const actionCreateService = (
     return {
       ...actionId,
       ...data,
-    };
+    } as ActionDetails<TOutputContent, TParameters>;
   };
 
   return {

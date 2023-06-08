@@ -39,6 +39,7 @@ export interface ProductAccess {
 export interface ProductFeatures {
   hasConnectors: boolean;
   hasDefaultIngestPipeline: boolean;
+  hasDocumentLevelSecurityEnabled: boolean;
   hasNativeConnectors: boolean;
   hasWebCrawler: boolean;
 }

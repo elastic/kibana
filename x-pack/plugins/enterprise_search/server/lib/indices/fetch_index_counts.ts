@@ -14,5 +14,5 @@ export const fetchIndexCounts = async (client: IScopedClusterClient, indicesName
     return { [indexName]: count };
   });
   const indexCountArray = await Promise.all(countPromises);
-  return indexCountArray.reduce((acc, current) => ({ ...acc, ...current }), {});
+  return indexCountArray.reduce((acc, current) => Object.assign(acc, current), {});
 };

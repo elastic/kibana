@@ -12,16 +12,20 @@ import { i18n } from '@kbn/i18n';
 
 interface BetaCallOutProps {
   description: string;
+  title?: string;
 }
 
-export const BetaCallOut: React.FC<BetaCallOutProps> = ({ description }) => {
+export const BetaCallOut: React.FC<BetaCallOutProps> = ({ title, description }) => {
   return (
     <EuiCallOut
       color="warning"
       iconType="beaker"
-      title={i18n.translate('xpack.enterpriseSearch.betaCalloutTitle', {
-        defaultMessage: 'Beta feature',
-      })}
+      title={
+        title ||
+        i18n.translate('xpack.enterpriseSearch.betaCalloutTitle', {
+          defaultMessage: 'Beta feature',
+        })
+      }
     >
       {description}
     </EuiCallOut>

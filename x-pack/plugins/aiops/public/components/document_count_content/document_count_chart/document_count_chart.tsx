@@ -56,6 +56,8 @@ interface DocumentCountChartProps {
   interval: number;
   chartPointsSplitLabel: string;
   isBrushCleared: boolean;
+  /* Timestamp for start of initial analysis */
+  autoAnalysisStart?: number;
 }
 
 const SPEC_ID = 'document_count';
@@ -101,6 +103,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   interval,
   chartPointsSplitLabel,
   isBrushCleared,
+  autoAnalysisStart,
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -201,39 +204,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     timefilterUpdateHandler({ from, to });
   };
 
-  const onElementClick: ElementClickListener = ([elementData]) => {
-    if (brushSelectionUpdateHandler === undefined) {
-      return;
-    }
-    const startRange = (elementData as XYChartElementEvent)[0].x;
-
-    const range = {
-      from: startRange,
-      to: startRange + interval,
-    };
-
-    if (viewMode === VIEW_MODE.ZOOM) {
-      timefilterUpdateHandler(range);
-    } else {
-      if (
-        typeof startRange === 'number' &&
-        originalWindowParameters === undefined &&
-        windowParameters === undefined &&
-        adjustedChartPoints !== undefined
-      ) {
-        const wp = getWindowParameters(
-          startRange + interval / 2,
-          timeRangeEarliest,
-          timeRangeLatest + interval
-        );
-        const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
-        setOriginalWindowParameters(wpSnap);
-        setWindowParameters(wpSnap);
-        brushSelectionUpdateHandler(wpSnap, true);
-      }
-    }
-  };
-
   const timeZone = getTimezone(uiSettings);
 
   const [originalWindowParameters, setOriginalWindowParameters] = useState<
@@ -243,6 +213,69 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const [windowParametersAsPixels, setWindowParametersAsPixels] = useState<
     WindowParameters | undefined
   >();
+
+  const triggerAnalysis = useCallback(
+    (startRange: number) => {
+      const range = {
+        from: startRange,
+        to: startRange + interval,
+      };
+
+      if (viewMode === VIEW_MODE.ZOOM) {
+        timefilterUpdateHandler(range);
+      } else {
+        if (
+          typeof startRange === 'number' &&
+          originalWindowParameters === undefined &&
+          windowParameters === undefined &&
+          adjustedChartPoints !== undefined
+        ) {
+          const wp = getWindowParameters(
+            startRange + interval / 2,
+            timeRangeEarliest,
+            timeRangeLatest + interval
+          );
+          const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
+          setOriginalWindowParameters(wpSnap);
+          setWindowParameters(wpSnap);
+          if (brushSelectionUpdateHandler !== undefined) {
+            brushSelectionUpdateHandler(wpSnap, true);
+          }
+        }
+      }
+    },
+    [
+      interval,
+      timeRangeEarliest,
+      timeRangeLatest,
+      snapTimestamps,
+      originalWindowParameters,
+      setWindowParameters,
+      brushSelectionUpdateHandler,
+      adjustedChartPoints,
+      timefilterUpdateHandler,
+      viewMode,
+      windowParameters,
+    ]
+  );
+
+  const onElementClick: ElementClickListener = useCallback(
+    ([elementData]) => {
+      if (brushSelectionUpdateHandler === undefined) {
+        return;
+      }
+      const startRange = (elementData as XYChartElementEvent)[0].x;
+
+      triggerAnalysis(startRange);
+    },
+    [triggerAnalysis, brushSelectionUpdateHandler]
+  );
+
+  useEffect(() => {
+    if (autoAnalysisStart !== undefined) {
+      triggerAnalysis(autoAnalysisStart);
+    }
+  }, [triggerAnalysis, autoAnalysisStart]);
 
   useEffect(() => {
     if (isBrushCleared && originalWindowParameters !== undefined) {
@@ -351,7 +384,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
-            // temporary fix to reduce horizontal chart margin until fixed in Elastic Charts itself
             labelFormat={useLegacyTimeAxis ? undefined : () => ''}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
