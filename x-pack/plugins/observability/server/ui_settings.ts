@@ -362,7 +362,7 @@ export const uiSettings: Record<string, UiSettings> = {
   [enableLegacyUptimeApp]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableLegacyUptimeApp', {
-      defaultMessage: 'Enable Legacy Uptime UI',
+      defaultMessage: 'Always show legacy Uptime app',
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
