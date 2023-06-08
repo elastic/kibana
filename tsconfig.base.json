@@ -1553,5 +1553,6 @@
       "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
     ]
-  }
+  },
+  "exclude": ["tmp", "target/**/*", "node_modules"]
 }
