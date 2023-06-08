@@ -17,6 +17,8 @@ import { getObservabilityOnboardingState } from './get_observability_onboarding_
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { getLogsCount } from './get_logs_count';
 
+const ELASTIC_AGENT_VERSION = '8.8.0'; // This should be defined from a source with the latest public release
+
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
     'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
@@ -43,7 +45,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       core,
       plugins,
       request,
-      config: { elasticAgentVersion },
     } = resources;
     const coreStart = await core.start();
     const scriptDownloadUrl = getKibanaUrl(
@@ -80,7 +81,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       apiEndpoint,
       scriptDownloadUrl,
       esHost,
-      elasticAgentVersion,
+      elasticAgentVersion: ELASTIC_AGENT_VERSION,
     };
   },
 });

@@ -16,7 +16,6 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  elasticAgentVersion: schema.string({ defaultValue: '8.8.0' }),
 });
 
 export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
