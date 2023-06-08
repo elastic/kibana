@@ -92,6 +92,20 @@ export class Plugin {
         // can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
         maxConcurrency: 1,
 
+        // To ensure the validity of task state during read and write operations, utilize the stateSchemaByVersion configuration. This functionality validates the state before executing a task. Make sure to define the schema property using the @kbn/config-schema plugin, specifically as an ObjectType (schema.object) at the top level.
+        stateSchemaByVersion: {
+          1: {
+            schema: schema.object({
+              count: schema.number(),
+            }),
+            up: (state) => {
+              return {
+                count: state.count || 0,
+              };
+            },
+          }
+        }
+
         // The createTaskRunner function / method returns an object that is responsible for
         // performing the work of the task. context: { taskInstance }, is documented below.
         createTaskRunner(context) {
