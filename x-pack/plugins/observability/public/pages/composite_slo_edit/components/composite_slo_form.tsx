@@ -20,6 +20,7 @@ import {
   transformValuesToCreateInput,
   transformValuesToUpdateInput,
 } from '../helpers/process_form_values';
+import { DescriptionSection } from './description_section';
 import { SourcesSection } from './sources_section';
 
 export interface Props {
@@ -93,7 +94,7 @@ export function CompositeSloForm({ compositeSlo }: Props) {
               title: i18n.translate('xpack.observability.slo.compositeSloForm.description.title', {
                 defaultMessage: 'Describe composite SLO',
               }),
-              children: <h1>test 3</h1>,
+              children: <DescriptionSection isEditMode={isEditMode} />,
               status: 'incomplete',
             },
           ]}
