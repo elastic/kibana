@@ -21,13 +21,9 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import byteSize from 'byte-size';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import {
-  AlertStatusEventEntityIdMap,
-  Process,
-  ProcessEvent,
-} from '../../../common/types/process_tree';
-import { DisplayOptionsState } from '../../../common/types/session_view';
-import { SessionViewDeps } from '../../types';
+import type { AlertStatusEventEntityIdMap, Process, ProcessEvent } from '../../../common';
+import type { DisplayOptionsState } from '../session_view_display_options';
+import type { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
@@ -46,7 +42,7 @@ import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations
  * The main wrapper component for the session view.
  */
 export const SessionView = ({
-  processIndex,
+  index,
   sessionEntityId,
   sessionStartTime,
   height,
@@ -132,7 +128,7 @@ export const SessionView = ({
     hasPreviousPage,
     refetch,
   } = useFetchSessionViewProcessEvents(
-    processIndex,
+    index,
     sessionEntityId,
     sessionStartTime,
     currentJumpToCursor
@@ -148,7 +144,7 @@ export const SessionView = ({
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
   const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } = useFetchGetTotalIOBytes(
-    processIndex,
+    index,
     sessionEntityId,
     sessionStartTime
   );
@@ -160,8 +156,8 @@ export const SessionView = ({
   }, [totalTTYOutputBytes?.total]);
 
   const handleRefresh = useCallback(() => {
-    refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
-    refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
+    refetchAlerts({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchTotalTTYOutput();
   }, [refetch, refetchAlerts, refetchTotalTTYOutput]);
 
@@ -199,9 +195,9 @@ export const SessionView = ({
   }, [newUpdatedAlertsStatus, fetchAlertStatus]);
 
   const onSearchIndexChange = useCallback(
-    (index: number) => {
+    (i: number) => {
       if (searchResults) {
-        const process = searchResults[index];
+        const process = searchResults[i];
 
         if (process) {
           onProcessSelected(process);
@@ -431,7 +427,7 @@ export const SessionView = ({
         }}
       </EuiResizableContainer>
       <TTYPlayer
-        index={processIndex}
+        index={index}
         show={showTTY}
         sessionEntityId={sessionEntityId}
         sessionStartTime={sessionStartTime}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface Aggregate {
-  key: string | number;
-  doc_count: number;
-}
+import { INTERNAL_ALERTING_SNOOZE_RULE } from '@kbn/alerting-plugin/common';
+
+export const internalAlertingSnoozeRule = (ruleId: string) =>
+  INTERNAL_ALERTING_SNOOZE_RULE.replace('{id}', ruleId);
