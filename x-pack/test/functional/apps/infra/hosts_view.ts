@@ -350,7 +350,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
       });
 
-      describe.only('Hosts table', async () => {
+      describe('Hosts table', async () => {
         let hostRows: WebElementWrapper[] = [];
 
         before(async () => {
