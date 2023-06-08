@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { CompositeSLOResponse, SLOResponse } from '@kbn/slo-schema';
