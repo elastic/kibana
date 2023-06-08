@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPGRADE_ALL = i18n.translate(
+export const UPDATE_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeAll',
   {
-    defaultMessage: 'Upgrade all',
+    defaultMessage: 'Update all',
   }
 );
 
-export const UPGRADE_SELECTED_RULES = (numberOfSelectedRules: number) => {
+export const UPDATE_SELECTED_RULES = (numberOfSelectedRules: number) => {
   return i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeSelected',
     {
-      defaultMessage: 'Upgrade {numberOfSelectedRules} selected rule(s)',
+      defaultMessage: 'Update {numberOfSelectedRules} selected rule(s)',
       values: { numberOfSelectedRules },
     }
   );

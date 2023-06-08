@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { css } from '@emotion/css'; // not @emotion/react
+import { css } from '@emotion/css';
 import React from 'react';
 
 export const DISMISS = i18n.translate('xpack.securitySolution.detectionEngine.rules.dismissTitle', {
@@ -31,7 +31,7 @@ export const RULE_UPDATES_LINK = i18n.translate(
 );
 
 type OnClick = () => void;
-export const UPDATE_RULES_CALLOUT_TITLE = (onClick: OnClick) => (
+export const getUpdateRulesCalloutTitle = (onClick: OnClick) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle"
     defaultMessage="Updates available for installed rules. Review and update in&nbsp;{link}."

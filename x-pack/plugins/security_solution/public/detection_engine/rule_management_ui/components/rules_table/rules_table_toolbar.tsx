@@ -12,7 +12,7 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 export enum AllRulesTabs {
-  installed = 'installed',
+  management = 'management',
   monitoring = 'monitoring',
   updates = 'updates',
 }
@@ -30,12 +30,12 @@ export const RulesTableToolbar = React.memo(() => {
 
   const ruleTabs = useMemo(
     () => ({
-      [AllRulesTabs.installed]: {
-        id: AllRulesTabs.installed,
+      [AllRulesTabs.management]: {
+        id: AllRulesTabs.management,
         name: i18n.INSTALLED_RULES_TAB,
         disabled: false,
-        href: `/rules/${AllRulesTabs.installed}`,
-        isBeta: !!((installedTotal ?? 0) > 0),
+        href: `/rules/${AllRulesTabs.management}`,
+        isBeta: installedTotal > 0,
         betaOptions: {
           text: `${installedTotal}`,
         },
@@ -45,7 +45,7 @@ export const RulesTableToolbar = React.memo(() => {
         name: i18n.RULE_MONITORING_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.monitoring}`,
-        isBeta: !!((installedTotal ?? 0) > 0),
+        isBeta: installedTotal > 0,
         betaOptions: {
           text: `${installedTotal}`,
         },
@@ -55,7 +55,7 @@ export const RulesTableToolbar = React.memo(() => {
         name: i18n.RULE_UPDATES_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.updates}`,
-        isBeta: !!((updateTotal ?? 0) > 0),
+        isBeta: updateTotal > 0,
         betaOptions: {
           text: `${updateTotal}`,
         },

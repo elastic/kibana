@@ -8,7 +8,6 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { usePerformInstallSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -17,32 +16,26 @@ import { SeverityBadge } from '../../../../../detections/components/rules/severi
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import { useUserData } from '../../../../../detections/components/user_info';
+import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
+import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
+import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
+import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
 
-interface ColumnsProps {
-  installSpecificRules: ReturnType<typeof usePerformInstallSpecificRules>['mutateAsync'];
-  hasCRUDPermissions: boolean;
-  isRuleInstalling: boolean;
-}
-
-const useRuleNameColumn = (): TableColumn => {
-  return useMemo(
-    () => ({
-      field: 'name',
-      name: i18n.COLUMN_RULE,
-      render: (value: RuleInstallationInfoForReview['name']) => (
-        <EuiText id={value} size="s">
-          {value}
-        </EuiText>
-      ),
-      sortable: true,
-      truncateText: true,
-      width: '40%',
-      align: 'left',
-    }),
-    []
-  );
+export const RULE_NAME_COLUMN: TableColumn = {
+  field: 'name',
+  name: i18n.COLUMN_RULE,
+  render: (value: RuleInstallationInfoForReview['name']) => (
+    <EuiText id={value} size="s">
+      {value}
+    </EuiText>
+  ),
+  sortable: true,
+  truncateText: true,
+  width: '40%',
+  align: 'left',
 };
 
 const TAGS_COLUMN: TableColumn = {
@@ -89,27 +82,16 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-type InstallRowRule = (
-  value: RuleInstallationInfoForReview['rule_id'],
-  item: RuleInstallationInfoForReview
-) => void;
-
 const createInstallButtonColumn = (
-  installRowRule: InstallRowRule,
-  isRuleInstalling: boolean
+  installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
+  loadingRules: RuleSignatureId[]
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
-  render: (
-    value: RuleInstallationInfoForReview['rule_id'],
-    item: RuleInstallationInfoForReview
-  ) => {
+  render: (ruleId: RuleSignatureId) => {
+    const isRuleInstalling = loadingRules.includes(ruleId);
     return (
-      <EuiButtonEmpty
-        size="s"
-        disabled={isRuleInstalling}
-        onClick={() => installRowRule(value, item)}
-      >
+      <EuiButtonEmpty size="s" disabled={isRuleInstalling} onClick={() => installOneRule(ruleId)}>
         {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -118,33 +100,18 @@ const createInstallButtonColumn = (
   align: 'center',
 });
 
-export const useAddPrebuiltRulesTableColumns = ({
-  installSpecificRules,
-  hasCRUDPermissions,
-  isRuleInstalling,
-}: ColumnsProps): TableColumn[] => {
-  const ruleNameColumn = useRuleNameColumn();
+export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
+  const [{ canUserCRUD }] = useUserData();
+  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-
-  const installRowRule = useMemo(
-    () =>
-      async (
-        value: RuleInstallationInfoForReview['rule_id'],
-        item: RuleInstallationInfoForReview
-      ) => {
-        await installSpecificRules([
-          {
-            rule_id: value,
-            version: item.version,
-          },
-        ]);
-      },
-    [installSpecificRules]
-  );
+  const {
+    state: { loadingRules },
+    actions: { installOneRule },
+  } = useAddPrebuiltRulesTableContext();
 
   return useMemo(
     () => [
-      ruleNameColumn,
+      RULE_NAME_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -167,8 +134,8 @@ export const useAddPrebuiltRulesTableColumns = ({
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createInstallButtonColumn(installRowRule, isRuleInstalling)] : []),
+      ...(hasCRUDPermissions ? [createInstallButtonColumn(installOneRule, loadingRules)] : []),
     ],
-    [hasCRUDPermissions, installRowRule, isRuleInstalling, ruleNameColumn, showRelatedIntegrations]
+    [hasCRUDPermissions, installOneRule, loadingRules, showRelatedIntegrations]
   );
 };

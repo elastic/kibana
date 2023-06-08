@@ -6,26 +6,15 @@
  */
 
 // import { isEqual } from 'lodash';
-import React, { createContext, useContext, useMemo, useState } from 'react';
-import type {
-  CriteriaWithPagination,
-  EuiSearchBarProps,
-  EuiTableSelectionType,
-} from '@elastic/eui';
-import { useUserData } from '../../../../../detections/components/user_info';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
+import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformUpgradeAllRules,
   usePerformUpgradeSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import { invariant } from '../../../../../../common/utils/invariant';
-import type { InMemoryPaginationOptions } from '../../../../rule_management/logic';
-import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
-import type { TableColumn } from './use_upgrade_prebuilt_rules_table_columns';
-import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
-import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilts_rules_table_buttons';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -33,9 +22,9 @@ export interface UpgradePrebuiltRulesTableState {
    */
   rules: RuleUpgradeInfoForReview[];
   /**
-   * Value of the currently selected table rows for InMemoryTable management
+   * All unique tags for all rules
    */
-  selectionValue: EuiTableSelectionType<RuleUpgradeInfoForReview>;
+  tags: string[];
   /**
    * Is true then there is no cached data and the query is currently fetching.
    */
@@ -49,30 +38,14 @@ export interface UpgradePrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
-   * Is true whenever mutation to upgrade all available rules is in-flight
+   * List of rule IDs that are currently being upgraded
    */
-  isUpgradeAllRulesLoading: boolean;
-  /**
-   * Is true whenever mutation to upgrade specific rules is in-flight
-   */
-  isUpgradeSpecificRulesLoading: boolean;
+  loadingRules: RuleSignatureId[];
   /**
   /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
-  /**
-   * Currently selected page and number of rows per page
-   */
-  pagination: InMemoryPaginationOptions;
-  /**
-   * EuiSearchBarProps filters for InMemoryTable
-   */
-  filters: EuiSearchBarProps;
-  /**
-   * Columns for the Upgrade Rules Table
-   */
-  rulesColumns: TableColumn[];
   /**
    * Rule rows selected in EUI InMemory Table
    */
@@ -80,10 +53,11 @@ export interface UpgradePrebuiltRulesTableState {
 }
 
 export interface UpgradePrebuiltRulesTableActions {
-  reFetchRules: ReturnType<typeof usePrebuiltRulesUpgradeReview>['refetch'];
-  onTableChange: (criteria: CriteriaWithPagination<RuleUpgradeInfoForReview>) => void;
-  upgradeAllRules: ReturnType<typeof usePerformUpgradeAllRules>['mutateAsync'];
-  upgradeSpecificRules: ReturnType<typeof usePerformUpgradeSpecificRules>['mutateAsync'];
+  reFetchRules: () => void;
+  upgradeOneRule: (ruleId: string) => void;
+  upgradeSelectedRules: () => void;
+  upgradeAllRules: () => void;
+  selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -102,21 +76,8 @@ interface UpgradePrebuiltRulesTableContextProviderProps {
 export const UpgradePrebuiltRulesTableContextProvider = ({
   children,
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
-  const [pagination, setPagination] = useState<{ pageIndex: number }>({ pageIndex: 0 });
+  const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
-
-  const onTableChange = ({ page: { index } }: CriteriaWithPagination<RuleUpgradeInfoForReview>) => {
-    setPagination({ pageIndex: index });
-  };
-
-  const selectionValue: EuiTableSelectionType<RuleUpgradeInfoForReview> = useMemo(
-    () => ({
-      selectable: () => true,
-      onSelectionChange: (newSelectedRules) => setSelectedRules(newSelectedRules),
-      initialSelected: [],
-    }),
-    []
-  );
 
   const {
     data: { rules, stats: { tags } } = {
@@ -133,87 +94,80 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
-  const { mutateAsync: upgradeAllRules, isLoading: isUpgradeAllRulesLoading } =
-    usePerformUpgradeAllRules();
-  const { mutateAsync: upgradeSpecificRules, isLoading: isUpgradeSpecificRulesLoading } =
-    usePerformUpgradeSpecificRules();
+  const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
+  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
 
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
-  const rulesColumns = useUpgradePrebuiltRulesTableColumns({
-    upgradeSpecificRules,
-    hasCRUDPermissions: hasPermissions,
-    isRuleUpgrading: isUpgradeAllRulesLoading || isUpgradeSpecificRulesLoading,
-  });
+  const upgradeOneRule = useCallback(
+    async (ruleId: RuleSignatureId) => {
+      const rule = rules.find((r) => r.rule_id === ruleId);
+      invariant(rule, `Rule with id ${ruleId} not found`);
 
-  const actions = useMemo(
+      setLoadingRules((prev) => [...prev, ruleId]);
+      await upgradeSpecificRulesRequest([
+        {
+          rule_id: ruleId,
+          version: rule.diff.fields.version?.target_version ?? rule.rule.version,
+          revision: rule.revision,
+        },
+      ]);
+      setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+    },
+    [rules, upgradeSpecificRulesRequest]
+  );
+
+  const upgradeSelectedRules = useCallback(async () => {
+    const rulesToUpgrade = selectedRules.map((rule) => ({
+      rule_id: rule.rule_id,
+      version: rule.diff.fields.version?.target_version ?? rule.rule.version,
+      revision: rule.revision,
+    }));
+    setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
+    await upgradeSpecificRulesRequest(rulesToUpgrade);
+    setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
+    setSelectedRules([]);
+  }, [selectedRules, upgradeSpecificRulesRequest]);
+
+  const upgradeAllRules = useCallback(async () => {
+    // Unselect all rules so that the table doesn't show the "bulk actions" bar
+    setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
+    await upgradeAllRulesRequest();
+    setLoadingRules((prev) => prev.filter((id) => !rules.some((r) => r.rule_id === id)));
+    setSelectedRules([]);
+  }, [rules, upgradeAllRulesRequest]);
+
+  const actions = useMemo<UpgradePrebuiltRulesTableActions>(
     () => ({
       reFetchRules: refetch,
-      onTableChange,
+      upgradeOneRule,
+      upgradeSelectedRules,
       upgradeAllRules,
-      upgradeSpecificRules,
+      selectRules: setSelectedRules,
     }),
-    [refetch, upgradeAllRules, upgradeSpecificRules]
+    [refetch, upgradeAllRules, upgradeOneRule, upgradeSelectedRules]
   );
 
-  const filters: EuiSearchBarProps = useMemo(
-    () => ({
-      box: {
-        incremental: true,
-        isClearable: true,
-      },
-      toolsRight: [<UpgradePrebuiltRulesTableButtons />],
-      filters: [
-        {
-          type: 'field_value_selection',
-          field: 'tags',
-          name: 'Tags',
-          multiSelect: true,
-          options: tags.map((tag) => ({
-            value: tag,
-            name: tag,
-            field: 'tags',
-          })),
-        },
-      ],
-    }),
-    [tags]
-  );
-
-  const providerValue = useMemo(() => {
+  const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
     return {
       state: {
         rules,
-        pagination: {
-          ...pagination,
-          initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
-          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-        },
-        selectionValue,
-        filters,
+        tags,
         isFetched,
         isLoading,
         isRefetching,
-        rulesColumns,
         selectedRules,
-        isUpgradeAllRulesLoading,
-        isUpgradeSpecificRulesLoading,
+        loadingRules,
         lastUpdated: dataUpdatedAt,
       },
       actions,
     };
   }, [
     rules,
-    pagination,
-    selectionValue,
-    filters,
+    tags,
     isFetched,
     isLoading,
     isRefetching,
-    isUpgradeAllRulesLoading,
-    isUpgradeSpecificRulesLoading,
-    rulesColumns,
     selectedRules,
+    loadingRules,
     dataUpdatedAt,
     actions,
   ]);

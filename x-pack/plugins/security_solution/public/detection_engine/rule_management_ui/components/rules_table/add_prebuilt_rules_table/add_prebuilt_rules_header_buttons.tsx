@@ -5,32 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import * as i18n from './translations';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
+import * as i18n from './translations';
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
-    state: { rules, selectedRules, isInstallSpecificRulesLoading, isInstallAllRulesLoading },
-    actions: { installAllRules, installSpecificRules },
+    state: { rules, selectedRules, loadingRules },
+    actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
-
-  const installRules = useCallback(async () => {
-    await installAllRules();
-  }, [installAllRules]);
-
-  const installSelectedRules = useCallback(async () => {
-    await installSpecificRules(
-      selectedRules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }))
-    );
-  }, [installSpecificRules, selectedRules]);
 
   const isRulesAvailableForInstall = rules.length > 0;
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRuleInstalling = isInstallSpecificRulesLoading || isInstallAllRulesLoading;
+  const isRuleInstalling = loadingRules.length > 0;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
@@ -46,7 +36,8 @@ export const AddPrebuiltRulesHeaderButtons = () => {
         <EuiButton
           fill
           iconType="plusInCircle"
-          onClick={installRules}
+          data-test-subj="installAllRulesButton"
+          onClick={installAllRules}
           disabled={!isRulesAvailableForInstall || isRuleInstalling}
         >
           {i18n.INSTALL_ALL}

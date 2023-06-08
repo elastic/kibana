@@ -42,7 +42,7 @@ const RulesSubRoutes = [
     exact: true,
   },
   {
-    path: `/rules/:tabName(${AllRulesTabs.installed}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
+    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
     main: RulesPage,
     exact: true,
   },
@@ -79,7 +79,7 @@ const RulesContainerComponent: React.FC = () => {
             )}
           />
           <Route path="/rules" exact>
-            <Redirect to={`/rules/${AllRulesTabs.installed}`} />
+            <Redirect to={`/rules/${AllRulesTabs.management}`} />
           </Route>
           {RulesSubRoutes.map((route) => (
             <Route

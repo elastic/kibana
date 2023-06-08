@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -46,9 +46,8 @@ import { MaintenanceWindowCallout } from '../../components/maintenance_window_ca
 import { SuperHeader } from './super_header';
 import {
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
-  UPDATE_RULES_CALLOUT_TITLE,
+  getUpdateRulesCalloutTitle,
 } from '../../components/mini_callout/translations';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { AllRulesTabs } from '../../components/rules_table/rules_table_toolbar';
 
 const RulesPageComponent: React.FC = () => {
@@ -57,7 +56,6 @@ const RulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
-  const invalidateRuleStatuses = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
@@ -71,12 +69,6 @@ const RulesPageComponent: React.FC = () => {
   // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
   const shouldDisplayNewRulesCallout = rulesToInstallCount > 0;
   const shouldDisplayUpdateRulesCallout = rulesToUpgradeCount > 0;
-
-  // Invalidate rule statuses to fetch available rules for installation and upgrade
-  // when navigating to the installed rules tab after installing or upgrading rules
-  useEffect(() => {
-    invalidateRuleStatuses();
-  }, [invalidateRuleStatuses]);
 
   const [
     {
@@ -193,7 +185,7 @@ const RulesPageComponent: React.FC = () => {
             <MiniCallout
               iconType={'iInCircle'}
               data-test-subj="prebuilt-rules-update-callout"
-              title={UPDATE_RULES_CALLOUT_TITLE(updateCallOutOnClick)}
+              title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
             />
           )}
 

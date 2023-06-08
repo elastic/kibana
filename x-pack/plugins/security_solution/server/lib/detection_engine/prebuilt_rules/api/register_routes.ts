@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
@@ -20,7 +19,6 @@ import { performRuleUpgradeRoute } from './perform_rule_upgrade/perform_rule_upg
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
   security: SetupPlugins['security']
 ) => {
   // Legacy endpoints that we're going to deprecate

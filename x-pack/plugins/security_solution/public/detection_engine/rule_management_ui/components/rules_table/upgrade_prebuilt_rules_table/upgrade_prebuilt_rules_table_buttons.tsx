@@ -5,46 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
 import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
 export const UpgradePrebuiltRulesTableButtons = () => {
   const {
-    state: { rules, selectedRules, isUpgradeSpecificRulesLoading, isUpgradeAllRulesLoading },
-    actions: { upgradeAllRules, upgradeSpecificRules },
+    state: { rules, selectedRules, loadingRules },
+    actions: { upgradeAllRules, upgradeSelectedRules },
   } = useUpgradePrebuiltRulesTableContext();
-
-  const upgradeRules = useCallback(async () => {
-    await upgradeAllRules();
-  }, [upgradeAllRules]);
-
-  const upgradeSelectedRules = useCallback(async () => {
-    const updateRulesPayload = selectedRules.map(({ rule, rule_id: ruleId, diff, revision }) => ({
-      rule_id: ruleId,
-      version: diff.fields.version?.target_version ?? rule.version,
-      revision,
-    }));
-    await upgradeSpecificRules(updateRulesPayload);
-  }, [upgradeSpecificRules, selectedRules]);
 
   const isRulesAvailableForUpgrade = rules.length > 0;
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRuleUpgrading = isUpgradeSpecificRulesLoading || isUpgradeAllRulesLoading;
+  const isRuleUpgrading = loadingRules.length > 0;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayUpgradeSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={upgradeSelectedRules}
-            disabled={isUpgradeSpecificRulesLoading || isRuleUpgrading}
-          >
+          <EuiButton onClick={upgradeSelectedRules} disabled={isRuleUpgrading}>
             <>
-              {i18n.UPGRADE_SELECTED_RULES(numberOfSelectedRules)}
+              {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
               {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
             </>
           </EuiButton>
@@ -54,10 +38,10 @@ export const UpgradePrebuiltRulesTableButtons = () => {
         <EuiButton
           fill
           iconType="plusInCircle"
-          onClick={upgradeRules}
+          onClick={upgradeAllRules}
           disabled={!isRulesAvailableForUpgrade || isRuleUpgrading}
         >
-          {i18n.UPGRADE_ALL}
+          {i18n.UPDATE_ALL}
           {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
         </EuiButton>
       </EuiFlexItem>

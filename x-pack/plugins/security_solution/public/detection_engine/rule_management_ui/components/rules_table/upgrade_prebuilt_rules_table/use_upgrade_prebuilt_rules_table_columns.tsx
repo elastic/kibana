@@ -6,43 +6,36 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
+import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
+import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
+import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
+import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
+import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
 
-interface ColumnsProps {
-  upgradeSpecificRules: ReturnType<typeof usePerformUpgradeSpecificRules>['mutateAsync'];
-  hasCRUDPermissions: boolean;
-  isRuleUpgrading: boolean;
-}
-
-const useRuleNameColumn = (): TableColumn => {
-  return useMemo(
-    () => ({
-      field: 'rule.name',
-      name: i18n.COLUMN_RULE,
-      render: (value: RuleUpgradeInfoForReview['rule']['name']) => (
-        <EuiText id={value} size="s">
-          {value}
-        </EuiText>
-      ),
-      sortable: true,
-      truncateText: true,
-      width: '60%',
-      align: 'left',
-    }),
-    []
-  );
+const RULE_NAME_COLUMN: TableColumn = {
+  field: 'rule.name',
+  name: i18n.COLUMN_RULE,
+  render: (value: RuleUpgradeInfoForReview['rule']['name']) => (
+    <EuiText id={value} size="s">
+      {value}
+    </EuiText>
+  ),
+  sortable: true,
+  truncateText: true,
+  width: '60%',
+  align: 'left',
 };
 
 const TAGS_COLUMN: TableColumn = {
@@ -89,21 +82,17 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-type UpgradeRowRule = (
-  value: RuleUpgradeInfoForReview['rule_id'],
-  item: RuleUpgradeInfoForReview
-) => void;
-
-const createUpgradelButtonColumn = (
-  upgradeRowRule: UpgradeRowRule,
-  isRuleUpgrading: boolean
+const createUpgradeButtonColumn = (
+  upgradeOneRule: UpgradePrebuiltRulesTableActions['upgradeOneRule'],
+  loadingRules: RuleSignatureId[]
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
-  render: (value: RuleUpgradeInfoForReview['rule_id'], item: RuleUpgradeInfoForReview) => {
+  render: (ruleId: RuleUpgradeInfoForReview['rule_id']) => {
+    const isRuleUpgrading = loadingRules.includes(ruleId);
     return (
-      <EuiButtonEmpty size="s" onClick={() => upgradeRowRule(value, item)}>
-        {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPGRADE_RULE_BUTTON}
+      <EuiButtonEmpty size="s" disabled={isRuleUpgrading} onClick={() => upgradeOneRule(ruleId)}>
+        {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
   },
@@ -111,31 +100,18 @@ const createUpgradelButtonColumn = (
   align: 'center',
 });
 
-export const useUpgradePrebuiltRulesTableColumns = ({
-  upgradeSpecificRules,
-  hasCRUDPermissions,
-  isRuleUpgrading,
-}: ColumnsProps): TableColumn[] => {
-  const ruleNameColumn = useRuleNameColumn();
+export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
+  const [{ canUserCRUD }] = useUserData();
+  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-
-  const upgradeRowRule = useMemo(
-    () => async (value: RuleUpgradeInfoForReview['rule_id'], item: RuleUpgradeInfoForReview) => {
-      const payload = [
-        {
-          rule_id: value,
-          version: item.diff.fields.version?.target_version ?? item.rule.version,
-          revision: item.revision,
-        },
-      ];
-      await upgradeSpecificRules(payload);
-    },
-    [upgradeSpecificRules]
-  );
+  const {
+    state: { loadingRules },
+    actions: { upgradeOneRule },
+  } = useUpgradePrebuiltRulesTableContext();
 
   return useMemo(
     () => [
-      ruleNameColumn,
+      RULE_NAME_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -158,8 +134,8 @@ export const useUpgradePrebuiltRulesTableColumns = ({
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createUpgradelButtonColumn(upgradeRowRule, isRuleUpgrading)] : []),
+      ...(hasCRUDPermissions ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules)] : []),
     ],
-    [hasCRUDPermissions, isRuleUpgrading, ruleNameColumn, showRelatedIntegrations, upgradeRowRule]
+    [hasCRUDPermissions, loadingRules, showRelatedIntegrations, upgradeOneRule]
   );
 };

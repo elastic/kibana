@@ -689,14 +689,14 @@ export const NO_RULES_BODY = i18n.translate(
 export const NO_RULES_AVAILABLE_FOR_INSTALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addRules.noRulesTitle',
   {
-    defaultMessage: 'No Elastic rules available for installation',
+    defaultMessage: 'All Elastic rules have been installed',
   }
 );
 
 export const NO_RULES_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle',
   {
-    defaultMessage: 'You are up to date with all Elastic rules.',
+    defaultMessage: 'There are no prebuilt detection rules available for installation',
   }
 );
 export const NO_RULES_AVAILABLE_FOR_UPGRADE = i18n.translate(
@@ -1205,9 +1205,9 @@ export const INSTALL_RULE_BUTTON = i18n.translate(
   }
 );
 
-export const UPGRADE_RULE_BUTTON = i18n.translate(
+export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',
   {
-    defaultMessage: 'Upgrade rule',
+    defaultMessage: 'Update rule',
   }
 );

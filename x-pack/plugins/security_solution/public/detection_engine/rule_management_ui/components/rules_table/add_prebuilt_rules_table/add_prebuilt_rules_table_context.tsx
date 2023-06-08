@@ -5,35 +5,25 @@
  * 2.0.
  */
 
-// import { isEqual } from 'lodash';
-import React, { createContext, useContext, useMemo, useState } from 'react';
-import type {
-  CriteriaWithPagination,
-  EuiSearchBarProps,
-  EuiTableSelectionType,
-} from '@elastic/eui';
-import { useUserData } from '../../../../../detections/components/user_info';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformInstallAllRules,
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
-import { invariant } from '../../../../../../common/utils/invariant';
-import type { InMemoryPaginationOptions } from '../../../../rule_management/logic';
-import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
-import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
-import type { TableColumn } from './use_add_prebuilt_rules_table_columns';
-import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
+
 export interface AddPrebuiltRulesTableState {
   /**
    * Rules available to be installed
    */
   rules: RuleInstallationInfoForReview[];
   /**
-   * Value of the currently selected table rows for InMemoryTable management
+   * All unique tags for all rules
    */
-  selectionValue: EuiTableSelectionType<RuleInstallationInfoForReview>;
+  tags: string[];
   /**
    * Is true then there is no cached data and the query is currently fetching.
    */
@@ -47,29 +37,13 @@ export interface AddPrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
-   * Is true whenever mutation to install all available rules is in-flight
+   * List of rule IDs that are currently being upgraded
    */
-  isInstallAllRulesLoading: boolean;
-  /**
-   * Is true whenever mutation to install specific rules is in-flight
-   */
-  isInstallSpecificRulesLoading: boolean;
+  loadingRules: RuleSignatureId[];
   /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
-  /**
-   * Currently selected page and number of rows per page
-   */
-  pagination: InMemoryPaginationOptions;
-  /**
-   * EuiSearchBarProps filters for InMemoryTable
-   */
-  filters: EuiSearchBarProps;
-  /**
-   * Columns for Add Rules Table
-   */
-  rulesColumns: TableColumn[];
   /**
    * Rule rows selected in EUI InMemory Table
    */
@@ -77,10 +51,11 @@ export interface AddPrebuiltRulesTableState {
 }
 
 export interface AddPrebuiltRulesTableActions {
-  reFetchRules: ReturnType<typeof usePrebuiltRulesInstallReview>['refetch'];
-  onTableChange: (criteria: CriteriaWithPagination<RuleInstallationInfoForReview>) => void;
-  installAllRules: ReturnType<typeof usePerformInstallAllRules>['mutateAsync'];
-  installSpecificRules: ReturnType<typeof usePerformInstallSpecificRules>['mutateAsync'];
+  reFetchRules: () => void;
+  installOneRule: (ruleId: RuleSignatureId) => void;
+  installAllRules: () => void;
+  installSelectedRules: () => void;
+  selectRules: (rules: RuleInstallationInfoForReview[]) => void;
 }
 
 export interface AddPrebuiltRulesContextType {
@@ -97,23 +72,8 @@ interface AddPrebuiltRulesTableContextProviderProps {
 export const AddPrebuiltRulesTableContextProvider = ({
   children,
 }: AddPrebuiltRulesTableContextProviderProps) => {
-  const [pagination, setPagination] = useState<{ pageIndex: number }>({ pageIndex: 0 });
+  const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
-
-  const onTableChange = ({
-    page: { index },
-  }: CriteriaWithPagination<RuleInstallationInfoForReview>) => {
-    setPagination({ pageIndex: index });
-  };
-
-  const selectionValue: EuiTableSelectionType<RuleInstallationInfoForReview> = useMemo(
-    () => ({
-      selectable: () => true,
-      onSelectionChange: (newSelectedRules) => setSelectedRules(newSelectedRules),
-      initialSelected: [],
-    }),
-    []
-  );
 
   const {
     data: { rules, stats: { tags } } = {
@@ -130,69 +90,65 @@ export const AddPrebuiltRulesTableContextProvider = ({
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
-  const { mutateAsync: installAllRules, isLoading: isInstallAllRulesLoading } =
-    usePerformInstallAllRules();
-  const { mutateAsync: installSpecificRules, isLoading: isInstallSpecificRulesLoading } =
-    usePerformInstallSpecificRules();
+  const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
+  const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
 
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
-  const rulesColumns = useAddPrebuiltRulesTableColumns({
-    installSpecificRules,
-    hasCRUDPermissions: hasPermissions,
-    isRuleInstalling: isInstallSpecificRulesLoading || isInstallAllRulesLoading,
-  });
+  const installOneRule = useCallback(
+    async (ruleId: RuleSignatureId) => {
+      const rule = rules.find((r) => r.rule_id === ruleId);
+      invariant(rule, `Rule with id ${ruleId} not found`);
+
+      setLoadingRules((prev) => [...prev, ruleId]);
+      await installSpecificRulesRequest([
+        {
+          rule_id: ruleId,
+          version: rule.version,
+        },
+      ]);
+      setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+    },
+    [installSpecificRulesRequest, rules]
+  );
+
+  const installSelectedRules = useCallback(async () => {
+    const rulesToUpgrade = selectedRules.map((rule) => ({
+      rule_id: rule.rule_id,
+      version: rule.version,
+    }));
+    setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
+    await installSpecificRulesRequest(rulesToUpgrade);
+    setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
+    setSelectedRules([]);
+  }, [installSpecificRulesRequest, selectedRules]);
+
+  const installAllRules = useCallback(async () => {
+    // Unselect all rules so that the table doesn't show the "bulk actions" bar
+    setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
+    await installAllRulesRequest();
+    setLoadingRules((prev) => prev.filter((id) => !rules.some((r) => r.rule_id === id)));
+    setSelectedRules([]);
+  }, [installAllRulesRequest, rules]);
 
   const actions = useMemo(
     () => ({
-      reFetchRules: refetch,
-      onTableChange,
       installAllRules,
-      installSpecificRules,
+      installOneRule,
+      installSelectedRules,
+      reFetchRules: refetch,
+      selectRules: setSelectedRules,
     }),
-    [installAllRules, installSpecificRules, refetch]
+    [installAllRules, installOneRule, installSelectedRules, refetch]
   );
 
-  const filters: EuiSearchBarProps = useMemo(
-    () => ({
-      box: {
-        incremental: true,
-        isClearable: true,
-      },
-      filters: [
-        {
-          type: 'field_value_selection',
-          field: 'tags',
-          name: 'Tags',
-          multiSelect: true,
-          options: tags.map((tag) => ({
-            value: tag,
-            name: tag,
-            field: 'tags',
-          })),
-        },
-      ],
-    }),
-    [tags]
-  );
-
-  const providerValue = useMemo(() => {
+  const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
     return {
       state: {
         rules,
-        pagination: {
-          ...pagination,
-          initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
-          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-        },
-        selectionValue,
-        filters,
+        tags,
         isFetched,
         isLoading,
-        isInstallAllRulesLoading,
-        isInstallSpecificRulesLoading,
+        loadingRules,
         isRefetching,
-        rulesColumns,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -200,15 +156,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
     };
   }, [
     rules,
-    pagination,
-    selectionValue,
-    filters,
+    tags,
     isFetched,
     isLoading,
-    isInstallAllRulesLoading,
-    isInstallSpecificRulesLoading,
+    loadingRules,
     isRefetching,
-    rulesColumns,
     selectedRules,
     dataUpdatedAt,
     actions,

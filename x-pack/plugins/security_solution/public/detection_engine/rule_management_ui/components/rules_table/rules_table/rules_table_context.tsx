@@ -15,7 +15,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -39,7 +38,6 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 interface RulesSnoozeSettings {
   /**
@@ -62,10 +60,6 @@ export interface RulesTableState {
    * Rules to display (sorted and paginated in case of in-memory)
    */
   rules: Rule[];
-  /**
-   * Rules available for installation
-   */
-  rulesToInstall: RuleInstallationInfoForReview[];
   /**
    * Currently selected table filter
    */
@@ -302,12 +296,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   );
 
-  const {
-    data: { rules: rulesToInstall = [] } = {
-      rules: [],
-    },
-  } = usePrebuiltRulesInstallReview();
-
   // Fetch rules snooze settings
   const {
     data: rulesSnoozeSettingsMap,
@@ -362,7 +350,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     return {
       state: {
         rules,
-        rulesToInstall,
         rulesSnoozeSettings: {
           data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
@@ -398,7 +385,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     };
   }, [
     rules,
-    rulesToInstall,
     rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,

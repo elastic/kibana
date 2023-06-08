@@ -174,7 +174,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const isTableSelectable =
     hasPermissions &&
-    (selectedTab === AllRulesTabs.installed || selectedTab === AllRulesTabs.monitoring);
+    (selectedTab === AllRulesTabs.management || selectedTab === AllRulesTabs.monitoring);
 
   const euiBasicTableSelectionProps = useMemo(
     () => ({
@@ -220,7 +220,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   let tableProps;
   switch (selectedTab) {
-    case AllRulesTabs.installed:
+    case AllRulesTabs.management:
       tableProps = {
         'data-test-subj': 'rules-management-table',
         columns: rulesColumns,
