@@ -39,6 +39,7 @@ export const EPM_API_ROUTES = {
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
+  BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
 
   INFO_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
@@ -166,6 +167,10 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   LIST_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys`,
   INFO_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
   DELETE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
+};
+
+export const UNINSTALL_TOKEN_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
 };
 
 // Agents setup API routes

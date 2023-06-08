@@ -137,7 +137,18 @@ export interface OutputSOAttributes {
 }
 
 export interface SettingsSOAttributes {
+  prerelease_integrations_enabled: boolean;
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
-  prerelease_integrations_enabled: boolean;
+}
+
+export interface DownloadSourceSOAttributes {
+  name: string;
+  host: string;
+  is_default: boolean;
+  source_id?: string;
+}
+export interface SimpleSOAssetAttributes {
+  title?: string;
+  description?: string;
 }
