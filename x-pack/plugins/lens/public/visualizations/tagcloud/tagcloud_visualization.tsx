@@ -87,8 +87,8 @@ export const getTagcloudVisualization = ({
       : {
           ...suggestions[0],
           visualizationState: {
-            ...suggestions[0].visualizationState,
-            ...context.configuration,
+            ...(suggestions[0].visualizationState as TagcloudState),
+            ...(context.configuration as unknown as TagcloudState),
           },
         };
   },
