@@ -51,6 +51,10 @@ Run the tests locally with the following command:
 | Command | Description |
 | -- | -- |
 | `yarn cypress:open` | Starts a local ES and Kibana and runs the Cypress binary. All e2e specs are available to run via the UI |
+| `yarn cypress:explore:run` | Run the Explore cypress e2e tests via the command line. The Cypress UI will not open. |
+| `yarn cypress:investigations:run` | Run the Investigations cypress e2e tests via the command line. The Cypress UI will not open. |
+| `yarn cypress:investigations:run` | Run the Investigations cypress e2e tests via the command line. The Cypress UI will not open. |
+| `yarn cypress:run:cases` | Run the Cases cypress e2e tests via the command line. The Cypress UI will not open. |
 
 ### Execution modes
 
