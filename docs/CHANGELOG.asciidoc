@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.8.1>>
 * <<release-notes-8.8.0>>
 * <<release-notes-8.7.1>>
 * <<release-notes-8.7.0>>
@@ -42,6 +43,80 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.8.1]]
+== {kib} 8.8.1
+
+coming::[8.8.1]
+
+Review the following information about the {kib} 8.8.1 release.
+
+[float]
+[[breaking-changes-8.8.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.8.1, review the breaking changes, then mitigate the impact to your application.
+
+There are no breaking changes in the {kib} 8.8.1 release.
+
+To review the breaking changes in the previous release, check {kibana-ref-all}/8.8/release-notes-8.8.0.html#breaking-changes-8.8.0[8.8.0].
+
+[float]
+[[enhancement-v8.8.1]]
+=== Enhancements
+
+Elastic Security::
+For the Elastic Security 8.8.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Add Elastic Agent UI instructions for Universal Profile {kibana-pull}158936[#158936]
+
+[float]
+[[fixes-v8.8.1]]
+=== Bug Fixes
+
+Alerting::
+* Fixes a bug where ML embeddables, OsQuery, and IoCs attachments in a case render the wrong view {kibana-pull}158441[#158441]
+* Makes alert links shorter {kibana-pull}158582[#158582]
+* Throws a Mustache error when validating action message for warnings {kibana-pull}158668[#158668]
+* Adds null checks when iterating through an index template list {kibana-pull}158742[#158742]
+
+APM::
+* Displays the size of hidden indices in storage explorer {kibana-pull}158746[#158746]
+* Changes the APM latency value and latency threshold to microseconds {kibana-pull}158703[#158703]
+* Fixes service transaction metrics by using `transaction.duration.histogram` for percentile aggregations {kibana-pull}158909[#158909]
+
+Discover::
+* Update single doc view locator to URL encode `rowId` {kibana-pull}158635[#158635]
+* Fixes the display of grid row selection when in dark mode {kibana-pull}158231[#158231]
+
+Elastic Security::
+For the Elastic Security 8.8.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Include hidden data streams in package upgrade {kibana-pull}158654[#158654]
+
+Logs::
+* Fixes Log Categorization UI failure due to an infinite loop {kibana-pull}159090[#159090]
+
+Machine Learning::
+* Increases calendar events request limit {kibana-pull}158726[#158726]
+* Disables the delete option for deployed models {kibana-pull}158533[#158533]
+* Applies theme based on the User Profile settings {kibana-pull}158258[#158258]
+
+Maps::
+* Fixes toolbar action button not filled when selected {kibana-pull}158284[#158284]
+* Fixes Maps to display dark theme when enabled {kibana-pull}158219[#158219]
+
+Operations::
+* Fixes configuration stacking order {kibana-pull}158827[#158827]
+
+Platform::
+* Fixes {kib} crashing on Safari versions prior to 16.4 {kibana-pull}158825[#158825]
+* Updates all aliases with a single `updateAliases()` when relocating saved objects {kibana-pull}158940[#158940]
+* Fixes a race condition that could cause intermittent upgrade migration failures when {kib} connects to a single node {es} cluster {kibana-pull}158182[#158182]
+* Dynamically reduces the `migrations.batchSize` value when {kib} encounters a migration batch that's too big to process {kibana-pull}157494[#157494]
+
 [[release-notes-8.8.0]]
 == {kib} 8.8.0
 
@@ -116,6 +191,26 @@ Error installing common resources for AlertsService. No additional resources wil
 If you have upgraded to 8.8.0 and your alerting rules fail, upgrade to 8.8.1.
 ====
 // end::known-issue-120[]
+
+// tag::known-issue-158447[]
+[discrete]
+.Incorrect attachments are added to cases
+[%collapsible]
+====
+*Details* +
+When you attach {ml} visualizations, OsQuery, or Indicators of Compromise (IoCs) to a case, each attachment has its own view which renders in the *Activity* tab.
+For these attachments, a bug was introduced in 8.8.0:
+
+. If you add two different attachments on a case, the view will be the same for both.
+. If you add one attachment to one case and another to a different case, in the second case you will view the attachment of the first case.
+
+Alerts are not affected.
+
+*Impact* +
+There are no mitigations for the first scenario, other than upgrading to 8.8.1.
+For the second scenario, refreshing the case fixes the issue.
+====
+// end::known-issue-158447[]
 
 [float]
 [[breaking-changes-8.8.0]]

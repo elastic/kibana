@@ -21,6 +21,8 @@ export const { uiPlugins, parsingPlugins, processingPlugins } = {
   processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
 };
 
+export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
+
 uiPlugins.push(timelineMarkdownPlugin.plugin);
 uiPlugins.push(osqueryMarkdownPlugin.plugin);
 uiPlugins.push(insightMarkdownPlugin.plugin);

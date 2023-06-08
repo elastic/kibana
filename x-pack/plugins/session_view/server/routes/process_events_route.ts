@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import _ from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
@@ -19,57 +20,73 @@ import {
   PROCESS_EVENTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TIMESTAMP_PROPERTY,
+  PROCESS_EVENT_FIELDS,
 } from '../../common/constants';
-import { ProcessEvent } from '../../common/types/process_tree';
+import { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
 
 export const registerProcessEventsRoute = (
   router: IRouter,
+  logger: Logger,
   ruleRegistry: RuleRegistryPluginStartContract
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: PROCESS_EVENTS_ROUTE,
-      validate: {
-        query: schema.object({
-          index: schema.string(),
-          sessionEntityId: schema.string(),
-          sessionStartTime: schema.string(),
-          cursor: schema.maybe(schema.string()),
-          forward: schema.maybe(schema.boolean()),
-          pageSize: schema.maybe(schema.number()),
-        }),
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              index: schema.string(),
+              sessionEntityId: schema.string(),
+              sessionStartTime: schema.string(),
+              cursor: schema.maybe(schema.string()),
+              forward: schema.maybe(schema.boolean()),
+              pageSize: schema.maybe(schema.number({ min: 1, max: PROCESS_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
+            }),
+          },
+        },
       },
-    },
-    async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-      const { index, sessionEntityId, sessionStartTime, cursor, forward, pageSize } = request.query;
+      async (context, request, response) => {
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+        const { index, sessionEntityId, sessionStartTime, cursor, forward, pageSize } =
+          request.query;
 
-      try {
-        const body = await fetchEventsAndScopedAlerts(
-          client,
-          alertsClient,
-          index,
-          sessionEntityId,
-          sessionStartTime,
-          cursor,
-          forward,
-          pageSize
-        );
+        try {
+          const body = await fetchEventsAndScopedAlerts(
+            client,
+            alertsClient,
+            index,
+            sessionEntityId,
+            sessionStartTime,
+            cursor,
+            forward,
+            pageSize
+          );
 
-        return response.ok({ body });
-      } catch (err) {
-        // unauthorized
-        if (err.meta.statusCode === 403) {
-          return response.ok({ body: { total: 0, events: [] } });
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch process events: ${err}`);
+
+          // unauthorized
+          if (err?.meta?.statusCode === 403) {
+            return response.ok({ body: { total: 0, events: [] } });
+          }
+
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
         }
-
-        return response.badRequest(err.message);
       }
-    }
-  );
+    );
 };
 
 export const fetchEventsAndScopedAlerts = async (
@@ -114,6 +131,7 @@ export const fetchEventsAndScopedAlerts = async (
       size: Math.min(pageSize, PROCESS_EVENTS_PER_PAGE),
       sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
       search_after: cursorMillis ? [cursorMillis] : undefined,
+      fields: PROCESS_EVENT_FIELDS,
     },
   });
 
