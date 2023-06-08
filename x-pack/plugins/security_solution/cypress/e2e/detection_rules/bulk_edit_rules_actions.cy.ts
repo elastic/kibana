@@ -15,7 +15,7 @@ import {
 } from '../../screens/rules_bulk_edit';
 import { actionFormSelector } from '../../screens/common/rule_actions';
 
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import type { RuleActionCustomFrequency } from '../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
@@ -48,7 +48,7 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 import { createRule } from '../../tasks/api_calls/rules';
-import { createSlackConnector } from '../../tasks/api_calls/connectors';
+import { createSlackConnector, deleteAllConnectors } from '../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
@@ -68,16 +68,13 @@ const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-// TODO: Fix flakiness and unskip https://github.com/elastic/kibana/issues/154721
-describe.skip('Detection rules, bulk edit of rule actions', () => {
-  before(() => {
+describe('Detection rules, bulk edit of rule actions', () => {
+  beforeEach(() => {
     cleanKibana();
     login();
-  });
-
-  beforeEach(() => {
     deleteAlertsAndRules();
-    deleteConnectors();
+    // deleteConnectors();
+    deleteAllConnectors();
     esArchiverResetKibana();
 
     createSlackConnector().then(({ body }) => {
