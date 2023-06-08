@@ -8,6 +8,9 @@
     "@kbn/core",
     "@kbn/discover-plugin",
     "@kbn/developer-examples-plugin",
+    "@kbn/controls-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": ["target/**/*"]
 }
