@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { CommentType } from '@kbn/cases-plugin/common';
@@ -18,6 +17,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions/types';
 import { validateAgents, validateEndpointLicense } from './validate';
 import type { LicenseService } from '../../../../../common/license/license';
 import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
@@ -111,12 +111,13 @@ export const actionCreateService = (
       .getEndpointMetadataService()
       .getMetadataForEndpoints(esClient, endpointIDs);
 
+    const fleetActionsClient = await endpointContext.service.getFleetActionsClient();
+
     const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
 
     // create an Action ID and dispatch it to ES & Fleet Server
     const actionID = uuidv4();
 
-    let fleetActionIndexResult: TransportResult<IndexResponse, unknown>;
     let logsEndpointActionsResult: TransportResult<IndexResponse, unknown>;
 
     const getActionParameters = () => {
@@ -223,23 +224,10 @@ export const actionCreateService = (
           data: fleetActionDocSignature.data.toString('base64'),
           signature: fleetActionDocSignature.signature,
         },
-      };
+      } as unknown as FleetActionRequest;
       // write actions to .fleet-actions index
       try {
-        fleetActionIndexResult = await esClient.index<EndpointAction>(
-          {
-            index: AGENT_ACTIONS_INDEX,
-            body: signedFleetActionDoc,
-            refresh: 'wait_for',
-          },
-          {
-            meta: true,
-          }
-        );
-
-        if (fleetActionIndexResult.statusCode !== 201) {
-          throw new Error(fleetActionIndexResult.body.result);
-        }
+        await fleetActionsClient.create(signedFleetActionDoc);
       } catch (e) {
         // create entry in .logs-endpoint.action.responses-default data stream
         // when writing to .fleet-actions fails
