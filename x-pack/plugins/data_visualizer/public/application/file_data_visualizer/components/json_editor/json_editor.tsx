@@ -23,7 +23,8 @@ interface JobEditorProps {
 export const JsonEditor: FC<JobEditorProps> = ({
   value,
   height = '500px',
-  width = '100%',
+  // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
+  width = '99%',
   mode = EDITOR_MODE.JSON,
   readOnly = false,
   onChange = () => {},
