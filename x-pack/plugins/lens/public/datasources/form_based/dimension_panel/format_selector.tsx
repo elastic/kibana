@@ -132,7 +132,7 @@ function useDebouncedInputforParam<T extends FormatParamsKeys>(
 }
 
 export function FormatSelector(props: FormatSelectorProps) {
-  const { docLinks, uiSettings } = useKibana<LensAppServices>().services;
+  const { uiSettings } = useKibana<LensAppServices>().services;
   const { selectedColumn, onChange } = props;
   const currentFormat = isColumnFormatted(selectedColumn)
     ? selectedColumn.params?.format
