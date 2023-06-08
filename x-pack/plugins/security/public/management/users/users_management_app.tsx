@@ -106,7 +106,7 @@ export const usersManagementApp = Object.freeze({
                     <CreateUserPage />
                   </Breadcrumb>
                 </Route>
-                <Route<EditUserParams>
+                <Route
                   path="/edit/:username"
                   render={(props) => {
                     // Additional decoding is a workaround for a bug in react-router's version of the `history` module.

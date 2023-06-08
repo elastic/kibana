@@ -43,7 +43,7 @@ const AlertingExampleApp = ({
             </Page>
           )}
         />
-        <Route<{ id: string }>
+        <Route
           path={`/rule/:id`}
           render={(props) => {
             return (
@@ -53,7 +53,7 @@ const AlertingExampleApp = ({
             );
           }}
         />
-        <Route<{ id: string }>
+        <Route
           path={`/astros/:id`}
           render={(props) => {
             return (

@@ -60,12 +60,9 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
                   <Route exact path="/stepThree">
                     <StepThree guidedOnboarding={guidedOnboarding} />
                   </Route>
-                  <Route<{ indexName: string }>
-                    path="/stepFour/:indexName?"
-                    render={(routeProps) => (
-                      <StepFour guidedOnboarding={guidedOnboarding} {...routeProps} />
-                    )}
-                  />
+                  <Route path="/stepFour/:indexName?">
+                    <StepFour guidedOnboarding={guidedOnboarding} />
+                  </Route>
                 </Switch>
               </CompatRouter>
             </Router>

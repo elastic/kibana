@@ -23,17 +23,17 @@ import { useSharedUXExecutionContext } from './use_execution_context';
  * and send them to the execution context, later used to enrich APM
  * 'route-change' transactions.
  */
-export const Route = <T extends { [K in keyof T]?: string }>({
+export const Route = ({
   children,
   component: Component,
   render,
   ...rest
-}: RouteProps<string, T>) => {
+}: RouteProps<string, { [K: string]: string }>) => {
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
     }
-    return (props: RouteComponentProps<T>) => (
+    return (props: RouteComponentProps) => (
       <>
         <MatchPropagator />
         <Component {...props} />

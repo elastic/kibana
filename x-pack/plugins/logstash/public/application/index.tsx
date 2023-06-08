@@ -80,12 +80,12 @@ export const renderApp = async (
                 />
               )}
             />
-            <Route<{ id: string }>
+            <Route
               path="/pipeline/:id"
               exact
               render={({ match }) => <Redirect to={`/pipeline/${match.params.id}/edit`} />}
             />
-            <Route<{ id: string }>
+            <Route
               path="/pipeline/:id/edit"
               exact
               render={({ match }) => (
