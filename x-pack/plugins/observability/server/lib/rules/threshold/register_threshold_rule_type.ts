@@ -133,8 +133,8 @@ export function thresholdRuleType(
 
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-    name: i18n.translate('xpack.observability.threshold.alertName', {
-      defaultMessage: '🔥 Threshold',
+    name: i18n.translate('xpack.observability.threshold.ruleName', {
+      defaultMessage: 'Threshold',
     }),
     validate: {
       params: schema.object(
