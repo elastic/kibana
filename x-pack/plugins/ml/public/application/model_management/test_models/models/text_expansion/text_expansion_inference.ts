@@ -47,7 +47,7 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     }),
   ];
 
-  public questionText$ = new BehaviorSubject<string>('');
+  public queryText$ = new BehaviorSubject<string>('');
   private queryResults: Record<string, number> = {};
 
   constructor(
@@ -59,8 +59,8 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize(
-      [this.questionText$.pipe(map((questionText) => questionText !== ''))],
-      [this.questionText$]
+      [this.queryText$.pipe(map((questionText) => questionText !== ''))],
+      [this.queryText$]
     );
   }
 
@@ -85,7 +85,7 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(this.getPipeline(), [
       {
         _source: {
-          text_field: this.getQuestionText(),
+          text_field: this.getQueryText(),
         },
       },
     ]);
@@ -108,16 +108,16 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     return this.getBasicProcessors();
   }
 
-  public setQuestionText(text: string) {
-    this.questionText$.next(text);
+  public setQueryText(text: string) {
+    this.queryText$.next(text);
   }
 
-  public getQuestionText$() {
-    return this.questionText$.asObservable();
+  public getQueryText$() {
+    return this.queryText$.asObservable();
   }
 
-  public getQuestionText() {
-    return this.questionText$.getValue();
+  public getQueryText() {
+    return this.queryText$.getValue();
   }
 
   public getInputComponent(): JSX.Element | null {

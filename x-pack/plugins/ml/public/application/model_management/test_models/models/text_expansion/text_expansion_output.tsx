@@ -13,6 +13,7 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiStat,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
@@ -66,15 +67,17 @@ export const Token: FC<{
             title={roundToDecimalPlace(response.score, 3)}
             textAlign="left"
             titleColor={color}
-            description={null}
-            // description={
-            //   <EuiTextColor color={color}>
-            //     <span>
-            //       <EuiIcon type="visGauge" color={color} /> Score
-            //     </span>
-            //   </EuiTextColor>
-            // }
+            // description={null}
+            description={
+              <EuiTextColor color={color}>
+                <span>
+                  {/* <EuiIcon type color={color} /> Score */}
+                  Score
+                </span>
+              </EuiTextColor>
+            }
           />
+          <EuiSpacer size="s" />
           <span css={response.score === 0 ? { color } : {}}>{response.text}</span>
           <EuiSpacer size="s" />
         </>

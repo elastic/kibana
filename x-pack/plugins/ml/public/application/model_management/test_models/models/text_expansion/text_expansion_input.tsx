@@ -18,7 +18,7 @@ import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 const QueryInput: FC<{
   inferrer: TextExpansionInference;
 }> = ({ inferrer }) => {
-  const questionText = useObservable(inferrer.getQuestionText$(), inferrer.getQuestionText());
+  const questionText = useObservable(inferrer.getQueryText$(), inferrer.getQueryText());
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 
   return (
@@ -33,7 +33,7 @@ const QueryInput: FC<{
         disabled={runningState === RUNNING_STATE.RUNNING}
         fullWidth
         onChange={(e) => {
-          inferrer.setQuestionText(e.target.value);
+          inferrer.setQueryText(e.target.value);
         }}
       />
     </EuiFormRow>
