@@ -54,6 +54,7 @@ interface Props {
   setListParams: (listParams: SnapshotListParams) => void;
   totalItemCount: number;
   isLoading: boolean;
+  unfilteredSnapshots: SnapshotDetails[];
 }
 
 export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
@@ -66,11 +67,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
     setListParams,
     totalItemCount,
     isLoading,
+    unfilteredSnapshots,
   } = props;
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
-  const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(snapshots);
+  const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(unfilteredSnapshots);
 
   const columns = [
     {

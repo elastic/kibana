@@ -41,6 +41,9 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   location: { search },
   history,
 }) => {
+  const unfilteredSnapshotsResponse = useLoadSnapshots(DEFAULT_SNAPSHOT_LIST_PARAMS);
+  const unfilteredSnapshots = unfilteredSnapshotsResponse.data.snapshots || [];
+
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
   const [listParams, setListParams] = useState<SnapshotListParams>(DEFAULT_SNAPSHOT_LIST_PARAMS);
   const {
@@ -197,6 +200,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           setListParams={setListParams}
           totalItemCount={totalSnapshotsCount}
           isLoading={isLoading}
+          unfilteredSnapshots={unfilteredSnapshots}
         />
       </section>
     );
