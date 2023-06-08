@@ -36,6 +36,10 @@ export const convertToLens = async (vis, timefilter) => {
 
   const [layerConfig] = layers;
 
+  if (!layerConfig.buckets.all.length || !layerConfig.metrics.length) {
+    return null;
+  }
+
   const layerId = uuidv4();
 
   const indexPatternId = dataView.id!;
@@ -50,10 +54,15 @@ export const convertToLens = async (vis, timefilter) => {
       },
     ],
     configuration: {
-      maxFontSize: 72,
-      minFontSize: 18,
-      orientation: 'single',
-      showLabel: true,
+      layerId,
+      layerType: 'data',
+      valueAccessor: layerConfig.metrics[0],
+      tagAccessor: layerConfig.buckets.all[0],
+      maxFontSize: vis.params.maxFontSize,
+      minFontSize: vis.params.minFontSize,
+      orientation: vis.params.orientation,
+      palette: vis.params.palette,
+      showLabel: vis.params.showLabel,
     },
     indexPatternIds: [indexPatternId],
   };

@@ -81,6 +81,18 @@ export const getTagcloudVisualization = ({
 
   getSuggestions: suggestions,
 
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    return !suggestions.length
+      ? undefined
+      : {
+        ...suggestions[0],
+        visualizationState: {
+          ...suggestions[0].visualizationState,
+          ...context.configuration,
+        },
+      };
+  },
+
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state) {
