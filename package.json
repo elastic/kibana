@@ -759,7 +759,7 @@
     "jest-snapshot": "29.3.1",
     "jest-specific-snapshot": "^5.0.0",
     "jest-styled-components": "7.0.3",
-    "jest-when": "^3.2.1",
+    "jest-when": "3.4.1",
     "jsdom": "13.1.0",
     "json-schema-typed": "^8.0.1",
     "json5": "^2.2.3",
