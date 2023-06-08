@@ -41,6 +41,7 @@ export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext)
       .put(getLogViewUrl(logViewId))
       .set({
         'kbn-xsrf': 'some-xsrf-token',
+        'Elastic-Api-Version': '1',
       })
       .send(putLogViewRequestPayloadRT.encode(payload));
 
