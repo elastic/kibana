@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import {
-  isOfAggregateQueryType,
-  getIndexPatternFromSQLQuery,
-  AggregateQuery,
-  Query,
-} from '@kbn/es-query';
+import { isOfAggregateQueryType, AggregateQuery, Query } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -37,7 +32,6 @@ export function useTextBasedQueryLanguage({
     columns: [],
     query: undefined,
   });
-  const indexTitle = useRef<string>('');
   const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
@@ -80,7 +74,6 @@ export function useTextBasedQueryLanguage({
             prev.current = { columns: firstRowColumns, query };
           }
         }
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
 
         const dataViewObj = stateContainer.internalState.getState().dataView!;
 
@@ -89,14 +82,10 @@ export function useTextBasedQueryLanguage({
           nextColumns.length && (!initialFetch || !stateColumns?.length)
         );
         // no need to reset index to state if it hasn't changed
-        const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
-        const queryChanged = indexPatternFromQuery !== indexTitle.current;
-        if (!addColumnsToState && !queryChanged) {
-          return;
-        }
+        const addDataViewToState = Boolean(dataViewObj?.id !== index);
 
-        if (queryChanged) {
-          indexTitle.current = indexPatternFromQuery;
+        if (!addColumnsToState && !addDataViewToState) {
+          return;
         }
 
         const nextState = {
