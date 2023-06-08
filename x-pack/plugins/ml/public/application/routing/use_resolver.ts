@@ -63,6 +63,9 @@ export const useRouteResolver = (
   const mlLicenseInfo = useMlLicenseInfo();
 
   const licenseResolver = useCallback(async () => {
+    // License hasn't been resolved yet
+    if (!mlLicenseInfo.license) return;
+
     if (mlLicenseInfo.isMlEnabled === false || mlLicenseInfo.isMinimumLicense === false) {
       // ML is not enabled or the license isn't at least basic
       await navigateToApp('home');
