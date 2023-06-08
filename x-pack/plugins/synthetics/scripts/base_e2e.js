@@ -22,16 +22,6 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
-  .option('open', {
-    default: false,
-    type: 'boolean',
-    description: 'Opens the Synthetics Test Runner',
-  })
-  .option('watch', {
-    default: false,
-    type: 'boolean',
-    description: 'Runs the server in watch mode, restarting on changes',
-  })
   .option('pauseOnError', {
     default: false,
     type: 'boolean',
@@ -63,35 +53,26 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const config = './synthetics_run.ts';
-
-function executeSyntheticsRunner(dirPath) {
+function executeSyntheticsRunner(dirPath, config = './synthetics_run.ts') {
   console.log(`Running ${ftrScript} in ${dirPath}`);
+  const grepArg = grep ? '--grep ' + grep : '';
+  const kbnInstallDir = `--kibana-install-dir '${kibanaInstallDir}'`;
+  const options = { cwd: dirPath, stdio: 'inherit' };
+
   if (server) {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
-      {
-        cwd: dirPath,
-        stdio: 'inherit',
-      }
+      `node ../../../../scripts/${ftrScript} --config ${config}  ${kbnInstallDir}`,
+      options
     );
   } else if (runner) {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError} ${
-        grep ? '--grep ' + grep : ''
-      }`,
-      {
-        cwd: dirPath,
-        stdio: 'inherit',
-      }
+      `node ../../../../scripts/${ftrScript} --config ${config} ${kbnInstallDir}  --headless ${headless} --bail ${pauseOnError} ${grepArg}`,
+      options
     );
   } else {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' --grep '${grep}'`,
-      {
-        cwd: dirPath,
-        stdio: 'inherit',
-      }
+      `node ../../../../scripts/${ftrScript} --config ${config}  ${kbnInstallDir} ${grepArg}`,
+      options
     );
   }
 }

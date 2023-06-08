@@ -9,6 +9,8 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { Ecs } from '@kbn/cases-plugin/common';
+import type { SearchHit } from '../../../common/search_strategy';
 import type { LeftPanelProps } from '.';
 import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
@@ -36,6 +38,10 @@ export interface LeftPanelContext {
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+
+  data: SearchHit | undefined;
+
+  dataAsNestedObject: Ecs | null;
 }
 
 export const LeftFlyoutContext = createContext<LeftPanelContext | undefined>(undefined);
@@ -56,20 +62,28 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, dataFormattedForFieldBrowser, searchHit] = useTimelineEventsDetails({
-    indexName: eventIndex,
-    eventId: id ?? '',
-    runtimeMappings: sourcererDataView.runtimeMappings,
-    skip: !id,
-  });
+  const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject] =
+    useTimelineEventsDetails({
+      indexName: eventIndex,
+      eventId: id ?? '',
+      runtimeMappings: sourcererDataView.runtimeMappings,
+      skip: !id,
+    });
   const getFieldsData = useGetFieldsData(searchHit?.fields);
 
   const contextValue = useMemo(
     () =>
       id && indexName
-        ? { eventId: id, indexName, getFieldsData, data: searchHit, dataFormattedForFieldBrowser }
+        ? {
+            eventId: id,
+            indexName,
+            getFieldsData,
+            data: searchHit,
+            dataFormattedForFieldBrowser,
+            dataAsNestedObject,
+          }
         : undefined,
-    [id, indexName, getFieldsData, searchHit, dataFormattedForFieldBrowser]
+    [id, indexName, getFieldsData, searchHit, dataFormattedForFieldBrowser, dataAsNestedObject]
   );
 
   if (loading) {

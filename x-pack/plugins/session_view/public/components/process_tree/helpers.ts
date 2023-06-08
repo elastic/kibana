@@ -7,14 +7,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { escapeRegExp } from 'lodash';
 import { sortProcesses } from '../../../common/utils/sort_processes';
-import {
+import type {
   AlertStatusEventEntityIdMap,
-  EventKind,
   Process,
   ProcessEvent,
   ProcessMap,
   ProcessFields,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { ProcessImpl } from './hooks';
 
 // Creates an instance of Process, from a nested leader process fieldset
@@ -94,7 +93,7 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
 
     if (event.kibana?.alert) {
       process.addAlert(event);
-    } else if (event.event?.kind === EventKind.event) {
+    } else if (event.event?.kind === 'event') {
       process.addEvent(event);
     }
   });
