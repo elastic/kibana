@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback } from 'react';
@@ -113,24 +113,24 @@ export function CompositeSloForm({ compositeSlo }: Props) {
           >
             {isEditMode
               ? i18n.translate('xpack.observability.slo.compositeSloForm.editButton', {
-                  defaultMessage: 'Update Composite SLO',
+                  defaultMessage: 'Update composite SLO',
                 })
               : i18n.translate('xpack.observability.slo.compositeSloForm.createButton', {
-                  defaultMessage: 'Create Composite SLO',
+                  defaultMessage: 'Create composite SLO',
                 })}
           </EuiButton>
 
-          <EuiButton
+          <EuiButtonEmpty
             data-test-subj="compositeSloFormCancelButton"
-            color="ghost"
-            fill
+            // @ts-ignore
+            color="disabled"
             disabled={isCreating || isUpdating}
             onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
           >
             {i18n.translate('xpack.observability.slo.compositeSloForm.cancelButton', {
               defaultMessage: 'Cancel',
             })}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexGroup>
       </EuiFlexGroup>
     </FormProvider>

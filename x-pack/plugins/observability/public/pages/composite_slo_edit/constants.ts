@@ -38,7 +38,7 @@ export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
 
 export const COMPOSITE_SLO_FORM_DEFAULT_VALUES: CreateCompositeSLOInput = {
   name: '',
-  sources: [],
+  sources: [{ id: '', revision: 1, weight: 1 }],
   timeWindow: {
     duration:
       TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
