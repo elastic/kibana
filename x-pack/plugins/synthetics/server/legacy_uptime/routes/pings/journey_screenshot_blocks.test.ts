@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { IKibanaResponse } from '@kbn/core/server';
-import { createJourneyScreenshotBlocksRoute, ClientContract } from './journey_screenshot_blocks';
+import { createJourneyScreenshotBlocksRoute } from './journey_screenshot_blocks';
 import { UMServerLibs } from '../../uptime_server';
+import { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
 
 describe('journey screenshot blocks route', () => {
   let handlerContext: any;
@@ -43,9 +44,9 @@ describe('journey screenshot blocks route', () => {
 
     const route = createJourneyScreenshotBlocksRoute(libs as UMServerLibs);
 
-    const response = (await route.handler(
-      handlerContext as any
-    )) as IKibanaResponse<ClientContract>;
+    const response = (await route.handler(handlerContext as any)) as IKibanaResponse<
+      ScreenshotBlockDoc[]
+    >;
     expect(response.status).toBe(400);
   });
 
@@ -57,7 +58,7 @@ describe('journey screenshot blocks route', () => {
     } as unknown as UMServerLibs);
 
     expect(
-      ((await route.handler(handlerContext as any)) as IKibanaResponse<ClientContract>).status
+      ((await route.handler(handlerContext as any)) as IKibanaResponse<ScreenshotBlockDoc[]>).status
     ).toBe(404);
   });
 
@@ -110,9 +111,9 @@ describe('journey screenshot blocks route', () => {
       },
     } as unknown as UMServerLibs);
 
-    const response = (await route.handler(
-      handlerContext as any
-    )) as IKibanaResponse<ClientContract>;
+    const response = (await route.handler(handlerContext as any)) as IKibanaResponse<
+      ScreenshotBlockDoc[]
+    >;
     expect(response.status).toBe(200);
     // @ts-expect-error incomplete implementation for testing
     expect(response.body).toEqual(responseData);

@@ -13,20 +13,13 @@ import { getJourneyScreenshotBlocks } from '../../lib/requests/get_journey_scree
 import { UMServerLibs } from '../../lib/lib';
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
-
-export type ClientContract = Array<{
-  id: string;
-  synthetics: {
-    blob: string;
-    blob_mime: string;
-  };
-}>;
+import { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
 
 function isStringArray(data: unknown): data is string[] {
   return isRight(t.array(t.string).decode(data));
 }
 
-export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory<ClientContract> = (
+export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory<ScreenshotBlockDoc[]> = (
   libs: UMServerLibs
 ) => ({
   method: 'POST',
@@ -45,7 +38,7 @@ export const journeyScreenshotBlocksHandler = async ({
   response,
   request,
   uptimeEsClient,
-}: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ClientContract>> => {
+}: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ScreenshotBlockDoc[]>> => {
   const { hashes: blockIds } = request.body;
 
   if (!isStringArray(blockIds)) return response.badRequest();
