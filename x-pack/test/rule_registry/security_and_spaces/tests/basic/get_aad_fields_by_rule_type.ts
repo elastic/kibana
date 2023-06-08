@@ -15,6 +15,7 @@ import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const SPACE1 = 'space1';
   const TEST_URL = '/internal/rac/alerts/aad_fields';
 
@@ -39,21 +40,28 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Users:', () => {
       it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y featureIds`, async () => {
-        const aadFields = await getAADFieldsByRuleType(obsOnlySpacesAll, 'metrics.alert.threshold');
-        expect(aadFields.slice(0, 2)).to.eql(expectedResult);
-        expect(aadFields.length > 2).to.be(true);
-        for (const field of aadFields) {
-          expectToBeFieldDescriptor(field);
-        }
+        await retry.try(async () => {
+          const aadFields = await getAADFieldsByRuleType(
+            obsOnlySpacesAll,
+            'metrics.alert.threshold'
+          );
+          expect(aadFields.slice(0, 2)).to.eql(expectedResult);
+          expect(aadFields.length > 2).to.be(true);
+          for (const field of aadFields) {
+            expectToBeFieldDescriptor(field);
+          }
+        });
       });
 
       it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
-        const aadFields = await getAADFieldsByRuleType(superUser, 'metrics.alert.threshold');
-        expect(aadFields.slice(0, 2)).to.eql(expectedResult);
-        expect(aadFields.length > 2).to.be(true);
-        for (const field of aadFields) {
-          expectToBeFieldDescriptor(field);
-        }
+        await retry.try(async () => {
+          const aadFields = await getAADFieldsByRuleType(superUser, 'metrics.alert.threshold');
+          expect(aadFields.slice(0, 2)).to.eql(expectedResult);
+          expect(aadFields.length > 2).to.be(true);
+          for (const field of aadFields) {
+            expectToBeFieldDescriptor(field);
+          }
+        });
       });
     });
   });
