@@ -164,6 +164,9 @@ exports.EcsCustomPropertyMappings = {
                       claim_to_start_duration_ms: {
                         type: 'long',
                       },
+                      persist_alerts_duration_ms: {
+                        type: 'long',
+                      },
                       prepare_rule_duration_ms: {
                         type: 'long',
                       },

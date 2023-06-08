@@ -15,6 +15,7 @@ import { HttpError, Status } from '../../../../../../common/types/api';
 
 import {
   ConnectorSyncJob,
+  SyncJobType,
   SyncStatus,
   TriggerMethod,
 } from '../../../../../../common/types/connectors';
@@ -76,6 +77,7 @@ describe('SyncJobsViewLogic', () => {
         id: 'id',
         indexed_document_count: 50,
         indexed_document_volume: 40,
+        job_type: SyncJobType.FULL,
         last_seen: '2022-09-05T15:59:39.816+00:00',
         metadata: {},
         started_at: '2022-09-05T14:59:39.816+00:00',

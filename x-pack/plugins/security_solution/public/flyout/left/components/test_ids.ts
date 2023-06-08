@@ -35,3 +35,7 @@ export const THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID =
   `${PREFIX}ThreatIntelligenceDetailsLoadingSpinner` as const;
 
 export const INVESTIGATION_TEST_ID = `${PREFIX}Investigation` as const;
+
+export const RESPONSE_BASE_TEST_ID = `${PREFIX}Responses` as const;
+export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_BASE_TEST_ID}Details` as const;
+export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;

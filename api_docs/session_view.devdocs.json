@@ -61,7 +61,7 @@
         "tags": [],
         "label": "EventAction",
         "description": [],
-        "path": "x-pack/plugins/session_view/common/types/process_tree/index.ts",
+        "path": "x-pack/plugins/session_view/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -106,7 +106,7 @@
         "tags": [],
         "label": "EventAction",
         "description": [],
-        "path": "x-pack/plugins/session_view/common/types/process_tree/index.ts",
+        "path": "x-pack/plugins/session_view/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
