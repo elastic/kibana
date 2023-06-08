@@ -16,8 +16,8 @@ import {
   ComparisonMode,
   NormalizationMode,
   NormalizationOptions,
+  NormalizationMenu,
 } from '../../components/normalization_menu';
-import { NormalizationMenu } from './normalization_menu';
 
 interface Props {
   isDifferentialView: boolean;
