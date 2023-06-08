@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, max, memoize } from 'lodash';
+import { max, memoize } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -131,10 +131,6 @@ export class TaskValidator {
     latestStateSchema: LatestStateSchema,
     unknowns: 'forbid' | 'ignore'
   ): ConcreteTaskInstance['state'] {
-    if (isEmpty(state)) {
-      return {};
-    }
-
     if (!latestStateSchema) {
       throw new Error(
         `[TaskValidator] stateSchemaByVersion not defined for task type: ${taskType}`
