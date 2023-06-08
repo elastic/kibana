@@ -17,7 +17,7 @@ import { EuiStepStatus } from '@elastic/eui/src/components/steps/step_number';
 
 function AgentStatusWarningCallout() {
   return (
-    <EuiCallOut color="warning">
+    <EuiCallOut color="warning" data-test-subj="agentStatusWarningCallout">
       {i18n.translate(
         'xpack.apm.onboarding.agentStatus.warning.calloutMessage',
         {
@@ -30,7 +30,7 @@ function AgentStatusWarningCallout() {
 
 function AgentStatusSuccessCallout() {
   return (
-    <EuiCallOut color="success">
+    <EuiCallOut color="success" data-test-subj="agentStatusSuccessCallout">
       {i18n.translate(
         'xpack.apm.onboarding.agentStatus.success.calloutMessage',
         {
