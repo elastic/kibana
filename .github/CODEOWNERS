@@ -87,7 +87,9 @@ src/plugins/console @elastic/platform-deployment-management
 packages/content-management/content_editor @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
-packages/content-management/table_list @elastic/appex-sharedux
+packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
+packages/content-management/table_list_view @elastic/appex-sharedux
+packages/content-management/table_list_view_table @elastic/appex-sharedux
 packages/kbn-content-management-utils @elastic/kibana-data-discovery
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation
