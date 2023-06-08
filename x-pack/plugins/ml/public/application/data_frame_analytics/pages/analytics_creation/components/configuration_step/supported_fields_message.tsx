@@ -9,14 +9,13 @@ import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { type Field, EVENT_RATE_FIELD_ID, OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import {
   type DataFrameAnalysisConfigType,
   ANALYSIS_CONFIG_TYPE,
   BASIC_NUMERICAL_TYPES,
   EXTENDED_NUMERICAL_TYPES,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
-import { OMIT_FIELDS } from '../../../../../../../common/constants/field_types';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { CATEGORICAL_TYPES } from './form_options_validation';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
