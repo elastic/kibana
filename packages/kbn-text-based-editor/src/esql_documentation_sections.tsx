@@ -1481,5 +1481,37 @@ ROW a=[10, 9, 8]
         />
       ),
     },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_VERSION',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_VERSION
+Converts an input string to a version value. For example:
+
+\`\`\`
+ROW v = TO_VERSION("1.2.3")
+\`\`\`
+
+Returning:
+
+\`\`\`
+1.2.3
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
   ],
 };
