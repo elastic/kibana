@@ -13,7 +13,7 @@ import {
 
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
-    await axios.post(kibanaUrl + '/internal/uptime/service/enablement', undefined, {
+    await axios.put(kibanaUrl + '/internal/uptime/service/enablement', undefined, {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });
