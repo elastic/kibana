@@ -19,8 +19,8 @@ import {
   createLogViewNotificationChannel,
   createLogViewStateMachine,
 } from '../observability_logs/log_view_state';
+import type { ILogViewsClient } from '../services/log_views';
 import { isDevMode } from '../utils/dev_mode';
-import { ILogViewsPublicClient } from '../services/log_views';
 
 export const useLogView = ({
   initialLogViewReference,
@@ -31,7 +31,7 @@ export const useLogView = ({
   listenForUrlChanges,
 }: {
   initialLogViewReference?: LogViewReference;
-  logViews: ILogViewsPublicClient;
+  logViews: ILogViewsClient;
   useDevTools?: boolean;
   initializeFromUrl?: InitializeFromUrl;
   updateContextInUrl?: UpdateContextInUrl;
