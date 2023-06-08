@@ -1451,6 +1451,274 @@ FROM employees
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
         {
+          defaultMessage: 'TO_BOOLEAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_BOOLEAN
+Converts an input value to a boolean value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a string or numeric type.
+
+A string value of **"true"** will be case-insensitive converted to the Boolean **true**. For anything else, including the empty string, the function will return **false**. For example:
+
+\`\`\`
+ROW str = ["true", "TRuE", "false", "", "yes", "1"]
+| EVAL bool = TO_BOOLEAN(str)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["true", "TRuE", "false", "", "yes", "1"] | [true, true, false, false, false, false]
+\`\`\`
+
+The numerical value of **0** will be converted to **false**, anything else will be converted to **true**.
+
+Alias: TO_BOOL
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_DATETIME',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_DATETIME
+Converts an input value to a date value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a string or numeric type.
+
+A string will only be successfully converted if it’s respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`. For example:
+
+\`\`\`
+ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
+| EVAL datetime = TO_DATETIME(string)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"] | [1953-09-02T00:00:00.000Z, 1964-06-02T00:00:00.000Z]
+\`\`\`
+
+Note that in this example, the last value in the source multi-valued field has not been converted. The reason being that if the date format is not respected, the conversion will result in a **null** value.
+
+If the input parameter is of a numeric type, its value will be interpreted as milliseconds since the Unix epoch. For example:
+
+\`\`\`
+ROW int = [0, 1]
+| EVAL dt = TO_DATETIME(int)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[0, 1] | [1970-01-01T00:00:00.000Z, 1970-01-01T00:00:00.001Z]
+\`\`\`
+
+Alias: TO_DT
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_DOUBLE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_DOUBLE
+Converts an input value to a double value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+
+Example:
+
+\`\`\`
+ROW str1 = "5.20128E11", str2 = "foo"
+| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
+\`\`\`
+
+Returning:
+
+\`\`\`
+5.20128E11 | foo | 5.20128E11 | 5.20128E11 | null
+\`\`\`
+
+Note that in this example, the last conversion of the string isn’t possible. When this happens, the result is a **null** value.
+
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to double.
+
+Boolean **true** will be converted to double **1.0**, **false** to **0.0**.
+
+Alias: TO_DBL
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_INTEGER',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_INTEGER
+Converts an input value to an integer value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+
+Example:
+
+\`\`\`
+ROW long = [5013792, 2147483647, 501379200000]
+| EVAL int = TO_INTEGER(long)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[5013792, 2147483647, 501379200000] | [5013792, 2147483647]
+\`\`\`
+
+Note that in this example, the last value of the multi-valued field cannot be converted as an integer. When this happens, the result is a **null** value.
+
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer.
+
+Boolean **true** will be converted to integer **1**, **false** to **0**.
+
+Alias: TO_INT
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_IP',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_IP
+Converts an input string to an IP value.
+
+The input can be a single- or multi-valued field or an expression.
+
+Example:
+
+\`\`\`
+ROW str1 = "1.1.1.1", str2 = "foo"
+| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
+| WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
+\`\`\`
+
+Returning:
+
+\`\`\`
+1.1.1.1 | foo | 1.1.1.1 | null
+\`\`\`
+
+Note that in the example above the last conversion of the string isn’t possible. When this happens, the result is a **null** value.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_LONG',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_LONG
+Converts an input value to an long value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+
+Example:
+
+\`\`\`
+ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
+| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
+\`\`\`
+
+Returning:
+
+\`\`\`
+2147483648 | 2147483648.2 | foo | 2147483648 | 2147483648 | null
+\`\`\`
+
+Note that in this example, the last conversion of the string isn’t possible. When this happens, the result is a **null** value. 
+
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer.
+
+Boolean **true** will be converted to long **1**, **false** to **0**.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
           defaultMessage: 'TO_STRING',
         }
       ),
@@ -1505,6 +1773,8 @@ Returning:
 \`\`\`
 1.2.3
 \`\`\`
+
+Alias: TO_VER
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
