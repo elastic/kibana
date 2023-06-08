@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { findLatestObservabilityOnboardingState } from '../custom_logs/find_latest_observability_onboarding_state';
+import { getObservabilityOnboardingState } from '../custom_logs/get_observability_onboarding_state';
 import { getESHosts } from '../custom_logs/get_es_hosts';
 import { generateYml } from './generate_yml';
 
@@ -28,8 +28,9 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       esClient: coreStart.elasticsearch.client.asInternalUser as Client,
     });
 
-    const savedState = await findLatestObservabilityOnboardingState({
+    const savedState = await getObservabilityOnboardingState({
       savedObjectsClient,
+      apiKeyId,
     });
 
     const yaml = generateYml({

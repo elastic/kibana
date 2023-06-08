@@ -6,20 +6,14 @@
  */
 
 import * as t from 'io-ts';
-import Boom from '@hapi/boom';
 import type { Client } from '@elastic/elasticsearch';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getESHosts } from './get_es_hosts';
 import { getKibanaUrl } from './get_kibana_url';
 import { createShipperApiKey } from './create_shipper_api_key';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
-import {
-  ObservabilityOnboardingState,
-  OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-  SavedObservabilityOnboardingState,
-} from '../../saved_objects/observability_onboarding_status';
+import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
-import { findLatestObservabilityOnboardingState } from './find_latest_observability_onboarding_state';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { getLogsCount } from './get_logs_count';
 
@@ -147,150 +141,6 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
-const getStateRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/observability_onboarding/custom_logs/state',
-  options: { tags: [] },
-  params: t.type({
-    query: t.type({
-      apiKeyId: t.string,
-    }),
-  }),
-  async handler(resources): Promise<{
-    savedObservabilityOnboardingState: SavedObservabilityOnboardingState | null;
-  }> {
-    const {
-      params: {
-        query: { apiKeyId },
-      },
-      core,
-    } = resources;
-    const coreStart = await core.start();
-    const savedObjectsClient =
-      coreStart.savedObjects.createInternalRepository();
-    const savedObservabilityOnboardingState =
-      (await getObservabilityOnboardingState({
-        savedObjectsClient,
-        apiKeyId,
-      })) || null;
-    return { savedObservabilityOnboardingState };
-  },
-});
-
-const getLatestStateRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/observability_onboarding/custom_logs/state/latest',
-  options: { tags: [] },
-  async handler(resources): Promise<{
-    savedObservabilityOnboardingState: SavedObservabilityOnboardingState | null;
-  }> {
-    const { core } = resources;
-    const coreStart = await core.start();
-    const savedObjectsClient =
-      coreStart.savedObjects.createInternalRepository();
-    const savedObservabilityOnboardingState =
-      (await findLatestObservabilityOnboardingState({ savedObjectsClient })) ||
-      null;
-    return { savedObservabilityOnboardingState };
-  },
-});
-
-const customLogsExistsRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/observability_onboarding/custom_logs/exists',
-  options: { tags: [] },
-  params: t.type({
-    query: t.type({
-      dataset: t.string,
-      namespace: t.string,
-    }),
-  }),
-  async handler(resources): Promise<{ exists: boolean }> {
-    const {
-      core,
-      request,
-      params: {
-        query: { dataset, namespace },
-      },
-    } = resources;
-    const coreStart = await core.start();
-    const esClient =
-      coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-    try {
-      const logsCount = await getLogsCount({ dataset, namespace, esClient });
-      return { exists: logsCount > 0 };
-    } catch (error) {
-      throw Boom.boomify(error, {
-        statusCode: error.statusCode,
-        message: error.message,
-        data: error.body,
-      });
-    }
-  },
-});
-
-const deleteStatesRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'DELETE /internal/observability_onboarding/custom_logs/states',
-  options: { tags: [] },
-  async handler(resources): Promise<object> {
-    const { core } = resources;
-    const coreStart = await core.start();
-    const savedObjectsClient =
-      coreStart.savedObjects.createInternalRepository();
-    const findStatesResult =
-      await savedObjectsClient.find<ObservabilityOnboardingState>({
-        type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-      });
-    const bulkDeleteResult = await savedObjectsClient.bulkDelete(
-      findStatesResult.saved_objects
-    );
-    return { bulkDeleteResult };
-  },
-});
-
-const stepProgressResetRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'PUT /internal/observability_onboarding/custom_logs/steps/reset',
-  options: { tags: [] },
-  params: t.type({
-    body: t.type({
-      apiKeyId: t.string,
-    }),
-  }),
-  async handler(resources): Promise<object> {
-    const {
-      core,
-      params: {
-        body: { apiKeyId },
-      },
-    } = resources;
-    const coreStart = await core.start();
-    const savedObjectsClient =
-      coreStart.savedObjects.createInternalRepository();
-
-    const savedObservabilityOnboardingState =
-      await getObservabilityOnboardingState({
-        savedObjectsClient,
-        apiKeyId,
-      });
-
-    if (!savedObservabilityOnboardingState) {
-      return {
-        message:
-          'Unable to report setup progress - onboarding session not found.',
-      };
-    }
-
-    const { id, updatedAt, ...observabilityOnboardingState } =
-      savedObservabilityOnboardingState;
-    const result = await saveObservabilityOnboardingState({
-      savedObjectsClient,
-      apiKeyId,
-      observabilityOnboardingState: {
-        ...observabilityOnboardingState,
-        progress: {},
-      },
-    });
-    return { result };
-  },
-});
-
 const getProgressRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/custom_logs/progress',
   options: { tags: [] },
@@ -350,10 +200,5 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
 export const customLogsRouteRepository = {
   ...createApiKeyRoute,
   ...stepProgressUpdateRoute,
-  ...getStateRoute,
-  ...getLatestStateRoute,
-  ...customLogsExistsRoute,
-  ...deleteStatesRoute,
-  ...stepProgressResetRoute,
   ...getProgressRoute,
 };
