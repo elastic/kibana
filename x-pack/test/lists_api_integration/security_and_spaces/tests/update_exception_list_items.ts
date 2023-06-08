@@ -180,7 +180,6 @@ export default ({ getService }: FtrProviderContext) => {
                 comment: 'Im an old comment',
               },
             ],
-            tags: ['hi mom'],
           };
           await supertest
             .post(EXCEPTION_LIST_ITEM_URL)
