@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import React, { ReactNode, useRef } from 'react';
@@ -52,7 +52,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       alignItems="center"
       tabIndex={-1}
     >
-      {props.prepend && <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>}
+      {props.prepend}
       <FilterItems
         filters={props.filters!}
         onFiltersUpdated={props.onFiltersUpdated}

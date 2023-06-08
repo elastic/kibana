@@ -251,6 +251,12 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               return;
             }
 
+            const stateSubscription = stateStorage
+              .change$<ControlsPanels>('controlPanels')
+              .subscribe((panels) => {
+                controlGroupAPI.updateInput({ panels: panels ?? undefined });
+              });
+
             const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
               stateStorage.set('controlPanels', input.panels);
             });
@@ -263,13 +269,19 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             );
 
             return () => {
+              stateSubscription.unsubscribe();
               inputSubscription.unsubscribe();
               filterSubscription.unsubscribe();
             };
           }, [controlGroupAPI, stateStorage]);
 
+          if (dataView?.getIndexPattern() !== 'kibana_sample_data_logs') {
+            return null;
+          }
+
           return (
-            <div
+            <EuiFlexItem
+              grow={false}
               css={css`
                 .controlGroup {
                   min-height: unset;
@@ -319,7 +331,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                   };
                 }}
               />
-            </div>
+            </EuiFlexItem>
           );
         },
       });
