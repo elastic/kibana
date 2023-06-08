@@ -140,7 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('heatmapChart')).to.be(true);
+      expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
       await PageObjects.discover.chooseLensChart('Donut');
       await PageObjects.header.waitUntilLoadingHasFinished();
