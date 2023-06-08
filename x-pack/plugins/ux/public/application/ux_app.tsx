@@ -9,10 +9,11 @@ import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Redirect } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
+import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import {
   AppMountParameters,
   CoreStart,
