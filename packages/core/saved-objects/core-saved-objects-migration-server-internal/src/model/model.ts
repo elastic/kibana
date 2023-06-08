@@ -276,7 +276,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (
       // If this version's migration has already been completed we can proceed
       Either.isRight(aliasesRes) &&
-      // TODO check that this behaves correctly when skipping reindexing
       versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliasesRes.right)
     ) {
       return {
@@ -637,11 +636,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: stateP.mustRefresh ? 'REFRESH_SOURCE' : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
     } else if (Either.isLeft(res)) {
+      const left = res.left;
       // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
       // it might happen that another Kibana instance has deleted this instance's version index.
       // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
       // similar to MARK_VERSION_INDEX_READY_CONFLICT.
-      if (isTypeof(res.left, 'alias_not_found_exception')) {
+      if (isTypeof(left, 'alias_not_found_exception')) {
         // We assume that the alias was already deleted by another Kibana instance
         return {
           ...stateP,
@@ -649,8 +649,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ? 'REFRESH_SOURCE'
             : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
         };
+      } else if (isTypeof(left, 'index_not_found_exception')) {
+        // We don't handle the following errors as the migration algorithm
+        // will never cause them to occur:
+        // - index_not_found_exception
+        throwBadResponse(stateP, left as never);
+      } else if (isTypeof(left, 'remove_index_not_a_concrete_index')) {
+        // We don't handle this error as the migration algorithm will never
+        // cause it to occur (this error is only relevant to the LEGACY_DELETE
+        // step).
+        throwBadResponse(stateP, left as never);
       } else {
-        throwBadResponse(stateP, res.left as never);
+        // TODO update to handle 2 more cases
+        throwBadResponse(stateP, left);
       }
     } else {
       throwBadResponse(stateP, res);
@@ -724,11 +735,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'CALCULATE_EXCLUDE_FILTERS',
       };
-    } else {
+    } else if (isTypeof(res.left, 'index_not_found_exception')) {
       // We don't handle the following errors as the migration algorithm
       // will never cause them to occur:
       // - index_not_found_exception
       throwBadResponse(stateP, res.left as never);
+    } else {
+      throwBadResponse(stateP, res.left);
     }
   } else if (stateP.controlState === 'CALCULATE_EXCLUDE_FILTERS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -825,7 +838,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, left);
       }
     } else {
-      throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -972,7 +985,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, left);
       }
     } else {
-      throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
     // We follow a similar control flow as for
@@ -1052,7 +1065,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else {
         // should never happen
-        throwBadResponse(stateP, res as never);
+        throwBadResponse(stateP, left);
       }
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
@@ -1327,7 +1340,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      if (isTypeof(res.left, 'documents_transform_failed')) {
+      const left = res.left;
+      if (isTypeof(left, 'documents_transform_failed')) {
         // continue to build up any more transformation errors before failing the migration.
         return {
           ...stateP,
@@ -1338,7 +1352,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           progress,
         };
       } else {
-        throwBadResponse(stateP, res as never);
+        throwBadResponse(stateP, left);
       }
     }
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
@@ -1359,22 +1373,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         hasTransformedDocs: true,
       };
     } else {
-      if (isTypeof(res.left, 'request_entity_too_large_exception')) {
+      const left = res.left;
+      if (isTypeof(left, 'request_entity_too_large_exception')) {
         return {
           ...stateP,
           controlState: 'FATAL',
           reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
         };
       } else if (
-        isTypeof(res.left, 'target_index_had_write_block') ||
-        isTypeof(res.left, 'index_not_found_exception')
+        isTypeof(left, 'target_index_had_write_block') ||
+        isTypeof(left, 'index_not_found_exception')
       ) {
         // we fail on these errors since the target index will never get
         // deleted and should only have a write block if a newer version of
         // Kibana started an upgrade
-        throwBadResponse(stateP, res.left as never);
+        throwBadResponse(stateP, left as never);
       } else {
-        throwBadResponse(stateP, res.left);
+        throwBadResponse(stateP, left);
       }
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT') {
@@ -1546,11 +1561,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // another instance has already completed the migration and deleted
           // the temporary index
           return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
-        } else {
+        } else if (isTypeof(left, 'index_not_found_exception')) {
           // The migration algorithm will never cause a
           // index_not_found_exception for an index other than the temporary
           // index handled above.
           throwBadResponse(stateP, left as never);
+        } else {
+          throwBadResponse(stateP, left);
         }
       } else if (isTypeof(left, 'remove_index_not_a_concrete_index')) {
         // We don't handle this error as the migration algorithm will never

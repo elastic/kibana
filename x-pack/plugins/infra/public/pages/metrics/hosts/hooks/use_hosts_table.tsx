@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
@@ -114,10 +114,6 @@ const sortTableData =
  */
 const titleLabel = i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHeader', {
   defaultMessage: 'Name',
-});
-
-const osLabel = i18n.translate('xpack.infra.hostsViewPage.table.operatingSystemColumnHeader', {
-  defaultMessage: 'Operating System',
 });
 
 const averageCpuUsageLabel = i18n.translate(
@@ -259,13 +255,6 @@ export const useHostsTable = () => {
             onClick={() => reportHostEntryClick(title)}
           />
         ),
-      },
-      {
-        name: osLabel,
-        field: 'os',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-os',
-        render: (os: string) => <EuiText size="s">{os}</EuiText>,
       },
       {
         name: averageCpuUsageLabel,
