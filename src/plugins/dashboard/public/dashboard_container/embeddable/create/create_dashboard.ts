@@ -13,7 +13,7 @@ import {
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
 } from '@kbn/controls-plugin/common';
-import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
@@ -21,7 +21,7 @@ import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-pl
 import { DashboardContainerInput } from '../../../../common';
 import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
-import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../../../dashboard_constants';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
@@ -177,6 +177,12 @@ export const initializeDashboard = async ({
     const { filters, query, timeRestore, timeRange, refreshInterval } = initialInput;
     const { kbnUrlStateStorage } = unifiedSearchSettings;
 
+    // start syncing global query state with the URL.
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+      queryService,
+      kbnUrlStateStorage
+    );
+
     // apply filters and query to the query service
     filterManager.setAppFilters(cloneDeep(filters ?? []));
     queryString.setQuery(query ?? queryString.getDefaultQuery());
@@ -186,18 +192,14 @@ export const initializeDashboard = async ({
      * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
      * from the query service. The order of the following lines is very important.
      */
-    if (timeRestore) {
+    const hasInheritedTimeRangeFromURL = Boolean(
+      kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time
+    );
+    if (hasInheritedTimeRangeFromURL || !timeRestore) {
+      initialInput.timeRange = timefilterService.getTime();
+    } else if (timeRestore) {
       if (timeRange) timefilterService.setTime(timeRange);
       if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
-    }
-
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      queryService,
-      kbnUrlStateStorage
-    );
-
-    if (!timeRestore) {
-      initialInput.timeRange = timefilterService.getTime();
     }
 
     untilDashboardReady().then((dashboardContainer) => {
