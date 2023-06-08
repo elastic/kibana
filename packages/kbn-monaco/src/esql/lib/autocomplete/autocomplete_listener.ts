@@ -232,6 +232,15 @@ export class AutocompleteListener implements ESQLParserListener {
   }
 
   exitQualifiedName(ctx: QualifiedNameContext) {
+    const isInEval = this.parentContext === ESQLParser.EVAL;
+    const isInStats = this.parentContext === ESQLParser.STATS;
+    if (this.parentContext && (isInStats || isInEval)) {
+      this.suggestions = [
+        ...this.getEndCommandSuggestions(),
+        ...(isInEval ? mathOperatorsCommandsDefinitions : []),
+      ];
+    }
+
     if (
       ctx
         .identifier()
@@ -296,12 +305,12 @@ export class AutocompleteListener implements ESQLParserListener {
       const ve = ctx.valueExpression();
       if (!ve) {
         if (this.parentContext === ESQLParser.STATS) {
-          this.suggestions = [...aggregationFunctionsDefinitions, ...this.fields];
+          this.suggestions = [...aggregationFunctionsDefinitions];
           return;
         }
 
         if (this.parentContext === ESQLParser.EVAL) {
-          this.suggestions = [...mathCommandDefinition, ...this.fields];
+          this.suggestions = [...mathCommandDefinition];
           return;
         }
       }
@@ -332,10 +341,12 @@ export class AutocompleteListener implements ESQLParserListener {
         }
       } else {
         if (ctx.childCount === 1) {
-          this.suggestions = [
-            ...this.getEndCommandSuggestions(),
-            ...(isInEval ? mathOperatorsCommandsDefinitions : []),
-          ];
+          if (ctx.text && ctx.text.indexOf('(') === -1) {
+            this.suggestions = [
+              ...(isInEval ? mathCommandDefinition : []),
+              ...(isInStats ? aggregationFunctionsDefinitions : []),
+            ];
+          }
           return;
         }
       }
