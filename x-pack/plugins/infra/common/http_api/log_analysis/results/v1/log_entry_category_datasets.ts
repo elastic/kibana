@@ -12,8 +12,8 @@ import {
   forbiddenErrorRT,
   timeRangeRT,
   routeTimingMetadataRT,
-} from '../../shared';
-import { persistedLogViewReferenceRT } from '../../../log_views';
+} from '../../../shared';
+import { persistedLogViewReferenceRT } from '../../../../log_views';
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH =
   '/api/infra/log_analysis/results/log_entry_category_datasets';
 
