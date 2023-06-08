@@ -367,7 +367,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
       defaultMessage:
-        'Legacy Uptime app is now hidden by default if you have no data in last 24 hours. Enabling it here will always show it.',
+        'Legacy Uptime app is now hidden by default if you have no data in last week. Enabling it here will always show it.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
