@@ -218,12 +218,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should bring the ignore global filters confgiured at panel level over', async () => {
+    it('should bring the ignore global filters configured at panel level over', async () => {
       await visualBuilder.clickPanelOptions('table');
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis');
+      await lens.waitForVisualization('lnsDatatable');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
   });

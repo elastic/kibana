@@ -189,7 +189,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
-    it('should bring the ignore global filters confgiured at panel level over', async () => {
+    it('should bring the ignore global filters configured at panel level over', async () => {
       await visualBuilder.clickPanelOptions('topN');
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();

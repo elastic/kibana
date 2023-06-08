@@ -62,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
       ).to.be(true);
+      await testSubjects.click('lns-indexPattern-dimensionContainerBack');
     });
 
     it('should add an annotation layer and settings shoud be available with ignore filters', async () => {
