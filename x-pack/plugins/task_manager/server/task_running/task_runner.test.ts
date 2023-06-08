@@ -432,17 +432,20 @@ describe('TaskManagerRunner', () => {
         `[Error: type: Bad Request]`
       );
 
-      expect(store.update).toHaveBeenCalledWith({
-        ...mockInstance({
-          id,
-          attempts: initialAttempts + 1,
-          schedule: undefined,
-        }),
-        status: TaskStatus.Idle,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
-      });
+      expect(store.update).toHaveBeenCalledWith(
+        {
+          ...mockInstance({
+            id,
+            attempts: initialAttempts + 1,
+            schedule: undefined,
+          }),
+          status: TaskStatus.Idle,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        { validate: false }
+      );
     });
 
     test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails for version conflict`, async () => {
@@ -834,7 +837,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test('reschedules tasks that return a schedule', async () => {
@@ -862,7 +867,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
@@ -936,7 +943,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test('removes non-recurring tasks after they complete', async () => {

@@ -44,7 +44,7 @@ describe('Bulk Operation Buffer', () => {
         return Promise.resolve([incrementAttempts(task1), incrementAttempts(task2)]);
       });
 
-      const bufferedUpdate = createBuffer(bulkUpdate, { validate: true });
+      const bufferedUpdate = createBuffer(bulkUpdate, {});
 
       const task1 = createTask();
       const task2 = createTask();
@@ -62,7 +62,7 @@ describe('Bulk Operation Buffer', () => {
       });
 
       const bufferMaxDuration = 50;
-      const bufferedUpdate = createBuffer(bulkUpdate, { bufferMaxDuration, validate: true });
+      const bufferedUpdate = createBuffer(bulkUpdate, { bufferMaxDuration });
 
       const task1 = createTask();
       const task2 = createTask();
@@ -102,7 +102,6 @@ describe('Bulk Operation Buffer', () => {
       const bufferedUpdate = createBuffer(bulkUpdate, {
         bufferMaxDuration,
         bufferMaxOperations: 2,
-        validate: true,
       });
 
       const task1 = createTask();
@@ -136,7 +135,6 @@ describe('Bulk Operation Buffer', () => {
       const bufferedUpdate = createBuffer(bulkUpdate, {
         bufferMaxDuration,
         bufferMaxOperations: 3,
-        validate: true,
       });
 
       const task1 = createTask();
@@ -175,7 +173,7 @@ describe('Bulk Operation Buffer', () => {
         }
       );
 
-      const bufferedUpdate = createBuffer(bulkUpdate, { validate: true });
+      const bufferedUpdate = createBuffer(bulkUpdate, {});
 
       const task1 = createTask();
       const task2 = createTask();
@@ -197,7 +195,7 @@ describe('Bulk Operation Buffer', () => {
         return Promise.reject(new Error('bulkUpdate is an illusion'));
       });
 
-      const bufferedUpdate = createBuffer(bulkUpdate, { validate: true });
+      const bufferedUpdate = createBuffer(bulkUpdate, {});
 
       const task1 = createTask();
       const task2 = createTask();
@@ -240,7 +238,7 @@ describe('Bulk Operation Buffer', () => {
 
       const logger = mockLogger();
 
-      const bufferedUpdate = createBuffer(bulkUpdate, { logger, validate: true });
+      const bufferedUpdate = createBuffer(bulkUpdate, { logger });
 
       const task1 = createTask();
       const task2 = createTask();

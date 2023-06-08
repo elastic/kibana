@@ -116,9 +116,6 @@ export class TaskPollingLifecycle {
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: config.max_workers,
       logger,
-      // Buffer is used to remove and update tasks internally and operations
-      // should succeed regardless if the task state is invalid.
-      validate: false,
     });
 
     this.pool = new TaskPool({

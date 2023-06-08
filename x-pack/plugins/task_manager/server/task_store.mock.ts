@@ -14,6 +14,9 @@ interface TaskStoreOptions {
 export const taskStoreMock = {
   create({ index = '', taskManagerId = '' }: TaskStoreOptions = {}) {
     const mocked = {
+      taskValidator: {
+        getValidatedTaskInstance: jest.fn().mockImplementation((task) => task),
+      },
       convertToSavedObjectIds: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),

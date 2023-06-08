@@ -100,6 +100,7 @@ export class TaskStore {
   public readonly index: string;
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
+  public readonly taskValidator: TaskValidator;
 
   private esClient: ElasticsearchClient;
   private esClientWithoutRetries: ElasticsearchClient;
@@ -107,7 +108,6 @@ export class TaskStore {
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
-  private readonly taskValidator: TaskValidator;
 
   /**
    * Constructs a new TaskStore.

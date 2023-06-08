@@ -14,7 +14,7 @@ describe('Buffered Task Store', () => {
   test('proxies the TaskStore for `maxAttempts` and `remove`', async () => {
     const taskStore = taskStoreMock.create();
     taskStore.bulkUpdate.mockResolvedValue([]);
-    const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
+    const bufferedStore = new BufferedTaskStore(taskStore, {});
 
     bufferedStore.remove('1');
     expect(taskStore.remove).toHaveBeenCalledWith('1');
@@ -23,19 +23,45 @@ describe('Buffered Task Store', () => {
   describe('update', () => {
     test("proxies the TaskStore's `bulkUpdate`", async () => {
       const taskStore = taskStoreMock.create();
-      const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
 
       const task = taskManagerMock.createTask();
 
       taskStore.bulkUpdate.mockResolvedValue([asOk(task)]);
 
-      expect(await bufferedStore.update(task)).toMatchObject(task);
-      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task], { validate: true });
+      expect(await bufferedStore.update(task, { validate: true })).toMatchObject(task);
+      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task], { validate: false });
+
+      expect(taskStore.taskValidator.getValidatedTaskInstance).toHaveBeenCalledTimes(2);
+      expect(taskStore.taskValidator.getValidatedTaskInstance).toHaveBeenNthCalledWith(
+        1,
+        task,
+        'write'
+      );
+      expect(taskStore.taskValidator.getValidatedTaskInstance).toHaveBeenNthCalledWith(
+        2,
+        task,
+        'read'
+      );
+    });
+
+    test(`doesn't validate when specified`, async () => {
+      const taskStore = taskStoreMock.create();
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
+
+      const task = taskManagerMock.createTask();
+
+      taskStore.bulkUpdate.mockResolvedValue([asOk(task)]);
+
+      expect(await bufferedStore.update(task, { validate: false })).toMatchObject(task);
+      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task], { validate: false });
+
+      expect(taskStore.taskValidator.getValidatedTaskInstance).not.toHaveBeenCalled();
     });
 
     test('handles partially successfull bulkUpdates resolving each call appropriately', async () => {
       const taskStore = taskStoreMock.create();
-      const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
 
       const tasks = [
         taskManagerMock.createTask(),
@@ -58,9 +84,9 @@ describe('Buffered Task Store', () => {
       ]);
 
       const results = [
-        bufferedStore.update(tasks[0]),
-        bufferedStore.update(tasks[1]),
-        bufferedStore.update(tasks[2]),
+        bufferedStore.update(tasks[0], { validate: true }),
+        bufferedStore.update(tasks[1], { validate: true }),
+        bufferedStore.update(tasks[2], { validate: true }),
       ];
       expect(await results[0]).toMatchObject(tasks[0]);
       expect(results[1]).rejects.toMatchInlineSnapshot(`
@@ -79,7 +105,7 @@ describe('Buffered Task Store', () => {
 
     test('handles multiple items with the same id', async () => {
       const taskStore = taskStoreMock.create();
-      const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
 
       const duplicateIdTask = taskManagerMock.createTask();
       const tasks = [
@@ -105,10 +131,10 @@ describe('Buffered Task Store', () => {
       ]);
 
       const results = [
-        bufferedStore.update(tasks[0]),
-        bufferedStore.update(tasks[1]),
-        bufferedStore.update(tasks[2]),
-        bufferedStore.update(tasks[3]),
+        bufferedStore.update(tasks[0], { validate: true }),
+        bufferedStore.update(tasks[1], { validate: true }),
+        bufferedStore.update(tasks[2], { validate: true }),
+        bufferedStore.update(tasks[3], { validate: true }),
       ];
       expect(await results[0]).toMatchObject(tasks[0]);
       expect(results[1]).rejects.toMatchInlineSnapshot(`
