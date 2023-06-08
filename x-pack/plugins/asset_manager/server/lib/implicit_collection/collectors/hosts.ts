@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { APM_INDICES, METRICS_INDICES, LOGS_INDICES } from '../../../constants';
 import { Asset } from '../../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { withSpan } from './helpers';
@@ -14,9 +13,11 @@ export async function collectHosts({
   client,
   from,
   transaction,
+  sourceIndices,
 }: CollectorOptions): Promise<Asset[]> {
+  const { metrics, logs, traces } = sourceIndices;
   const dsl = {
-    index: [APM_INDICES, LOGS_INDICES, METRICS_INDICES],
+    index: [metrics, logs, traces],
     size: QUERY_MAX_SIZE,
     collapse: { field: 'host.hostname' },
     sort: [{ _score: 'desc' }, { '@timestamp': 'desc' }],

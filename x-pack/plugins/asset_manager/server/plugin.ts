@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import {
   Plugin,
   CoreSetup,
@@ -21,54 +20,9 @@ import { upsertTemplate } from './lib/manage_index_templates';
 import { startImplicitCollection } from './lib/implicit_collection';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
+import { AssetManagerConfig, configSchema } from './types';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
-
-const configSchema = schema.object({
-  alphaEnabled: schema.maybe(schema.boolean()),
-  // Designate where various types of data live.
-  // NOTE: this should be handled in a centralized way for observability, so
-  // that when a user configures these differently from the known defaults,
-  // that value is propagated everywhere. For now, we duplicate the value here.
-  sourceIndices: schema.maybe(
-    schema.object({
-      metrics: schema.string({ defaultValue: 'metricbeat-*,metrics-*' }),
-      logs: schema.string({ defaultValue: 'filebeat-*,logs-*' }),
-      traces: schema.string({ defaultValue: 'traces-*' }),
-      serviceMetrics: schema.string({ defaultValue: 'metrics-apm*' }),
-    })
-  ),
-  // Choose an explicit source for asset queries.
-  // NOTE: This will eventually need to be able to cleverly switch
-  // between these values based on the availability of data in the
-  // indices, and possibly for each asset kind/type value.
-  // For now, we set this explicitly.
-  lockedSource: schema.oneOf([schema.literal('assets'), schema.literal('signals')], {
-    defaultValue: 'signals',
-  }),
-  implicitCollection: schema.maybe(
-    schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      interval: schema.duration({ defaultValue: '5m' }),
-      input: schema.maybe(
-        schema.object({
-          hosts: schema.string(),
-          username: schema.string(),
-          password: schema.string(),
-        })
-      ),
-      output: schema.maybe(
-        schema.object({
-          hosts: schema.string(),
-          username: schema.string(),
-          password: schema.string(),
-        })
-      ),
-    })
-  ),
-});
-
-export type AssetManagerConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<AssetManagerConfig> = {
   schema: configSchema,
@@ -126,6 +80,7 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
         outputClient,
         intervalMs: this.config.implicitCollection.interval.asMilliseconds(),
         logger: this.context.logger.get('implicit_collection'),
+        sourceIndices: this.config.sourceIndices,
       });
     }
   }
