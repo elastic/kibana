@@ -15,9 +15,6 @@ import {
   EuiFieldText,
   EuiSwitch,
   EuiCode,
-  EuiIcon,
-  EuiLink,
-  EuiText,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -88,7 +85,7 @@ const suffixLabel = i18n.translate('xpack.lens.indexPattern.suffixLabel', {
 });
 
 const compactLabel = i18n.translate('xpack.lens.indexPattern.compactLabel', {
-  defaultMessage: 'Compact',
+  defaultMessage: 'Compact values',
 });
 
 type FormatParams = NonNullable<ValueFormatConfig['params']>;
@@ -284,40 +281,27 @@ export function FormatSelector(props: FormatSelectorProps) {
               />
             </>
           ) : null}
+          {selectedFormat?.supportsCompact ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                compressed
+                label={compactLabel}
+                checked={Boolean(compact)}
+                onChange={() => setCompact(!compact)}
+                data-test-subj="lns-indexpattern-dimension-formatCompact"
+              />
+            </>
+          ) : null}
         </div>
       </EuiFormRow>
-      {selectedFormat?.supportsCompact ? (
-        <EuiFormRow label={compactLabel} display="columnCompressedSwitch" fullWidth>
-          <EuiSwitch
-            compressed
-            showLabel={false}
-            label={compactLabel}
-            checked={Boolean(compact)}
-            onChange={() => setCompact(!compact)}
-            data-test-subj="lns-indexpattern-dimension-formatCompact"
-          />
-        </EuiFormRow>
-      ) : null}
       {currentFormat?.id === 'custom' ? (
-        <EuiFormRow
-          display="columnCompressed"
-          label={' '}
-          hasEmptyLabelSpace
-          helpText={
-            <EuiText size="xs">
-              <EuiLink target="_blank" href={docLinks?.links.indexPatterns.fieldFormattersNumber}>
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.number.documentationLabel"
-                  defaultMessage="Syntax Help"
-                />
-                &nbsp;
-                <EuiIcon type="link" />
-              </EuiLink>
-            </EuiText>
-          }
-        >
+        <EuiFormRow display="columnCompressed" hasEmptyLabelSpace>
           <EuiFieldText
             data-test-subj={'numberEditorFormatPattern'}
+            prepend={i18n.translate('xpack.lens.indexPattern.custom.patternLabel', {
+              defaultMessage: 'Format',
+            })}
             value={pattern}
             placeholder={defaultNumeralPatternInKibana}
             onChange={(e) => {
