@@ -451,6 +451,7 @@ examples/locator_examples @elastic/kibana-app-services
 examples/locator_explorer @elastic/kibana-app-services
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
+x-pack/plugins/logs_shared @elastic/infra-monitoring-ui
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
