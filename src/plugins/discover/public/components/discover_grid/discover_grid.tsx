@@ -58,6 +58,7 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
+import { convertCellActionValue } from './discover_grid_cell_actions';
 
 const themeDefault = { darkMode: false };
 
@@ -448,19 +449,8 @@ export const DiscoverGrid = ({
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
-    (fieldName, rowIndex): CellActionValue => {
-      const value = displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as
-        | CellActionValue
-        | number
-        | number[];
-      if (value == null) {
-        return value;
-      }
-      if (Array.isArray(value)) {
-        return value.map((val) => val.toString());
-      }
-      return value.toString();
-    },
+    (fieldName, rowIndex): CellActionValue =>
+      convertCellActionValue(displayedRows[rowIndex % displayedRows.length].flattened[fieldName]),
     [displayedRows]
   );
 
