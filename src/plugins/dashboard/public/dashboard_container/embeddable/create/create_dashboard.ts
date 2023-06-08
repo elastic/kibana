@@ -177,12 +177,6 @@ export const initializeDashboard = async ({
     const { filters, query, timeRestore, timeRange, refreshInterval } = initialInput;
     const { kbnUrlStateStorage } = unifiedSearchSettings;
 
-    // start syncing global query state with the URL.
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      queryService,
-      kbnUrlStateStorage
-    );
-
     // apply filters and query to the query service
     filterManager.setAppFilters(cloneDeep(filters ?? []));
     queryString.setQuery(query ?? queryString.getDefaultQuery());
@@ -201,6 +195,12 @@ export const initializeDashboard = async ({
       if (timeRange) timefilterService.setTime(timeRange);
       if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
     }
+
+    // start syncing global query state with the URL.
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+      queryService,
+      kbnUrlStateStorage
+    );
 
     untilDashboardReady().then((dashboardContainer) => {
       const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(dashboardContainer)();
