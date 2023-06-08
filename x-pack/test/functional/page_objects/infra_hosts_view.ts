@@ -285,7 +285,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // Sorting
     getDiskLatencyHeader() {
-      return testSubjects.find('tableHeaderCell_diskLatency_4');
+      return testSubjects.find('tableHeaderCell_diskLatency_3');
     },
 
     getTitleHeader() {
