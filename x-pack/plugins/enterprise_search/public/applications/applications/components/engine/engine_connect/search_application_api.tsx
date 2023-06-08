@@ -49,28 +49,81 @@ export const SearchApplicationAPI = () => {
 
   const steps = [
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step1.title', {
-        defaultMessage: 'Generate and save API key',
-      }),
+      children: (
+        <>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.description"
+                defaultMessage="Your search application uses a {searchTemplateDocLink} to control the types of queries it accepts. Run the following command to view your current search template:"
+                values={{
+                  searchTemplateDocLink: (
+                    <EuiLink href={docLinks.searchTemplates}>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.searchTemplateDocLink"
+                        defaultMessage="search template"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow>
+              <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
+                {'GET _application/search_application/<name>/'}
+              </EuiCodeBlock>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.warning"
+                defaultMessage="We provide a basic, default search template to get started, but you'll probably want to update it for your use case. Use the examples in our {searchTemplateExampleDoc} for inspiration."
+                values={{
+                  searchTemplateExampleDoc: (
+                    <EuiLink href={docLinks.searchApplicationsTemplates}>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.warning.searchTemplateExampleDocLink"
+                        defaultMessage="documentation"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        </>
+      ),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.title',
+        {
+          defaultMessage: 'Set up your search template',
+        }
+      ),
+    },
+    {
       children: (
         <>
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.api.step1.apiKeyWarning',
+                'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning',
                 {
                   defaultMessage:
-                    "Elastic does not store API keys. Once generated, you'll only be able to view the key one time. Make sure you save it somewhere secure. If you lose access to it you'll need to generate a new API key from this screen.",
+                    'This API key will only be able to access your Safe Search endpoint. Learn more about API keys.',
                 }
-              )}{' '}
+              )}
               <EuiLink
                 href={docLinks.apiKeys}
-                data-telemetry-id="entSearchApplications-searchApplication-api-step1-learnMoreLink"
-                external
-                target="_blank"
+                data-telemetry-id="entSearchApplications-searchApplication-safeSearchApi-step2-learnMoreLink"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.api.step1.learnMoreLink',
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.learnMoreLink',
                   {
                     defaultMessage: 'Learn more about API keys.',
                   }
@@ -85,10 +138,10 @@ export const SearchApplicationAPI = () => {
                 iconSide="left"
                 iconType="plusInCircleFilled"
                 onClick={openGenerateModal}
-                data-telemetry-id="entSearchApplications-searchApplication-api-step1-createApiKeyButton"
+                data-telemetry-id="entSearchApplications-searchApplication-safeSearchApi-step2-createApiKeyButton"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.api.step1.createAPIKeyButton',
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.createAPIKeyButton',
                   {
                     defaultMessage: 'Create API Key',
                   }
@@ -99,7 +152,7 @@ export const SearchApplicationAPI = () => {
               <EuiButton
                 iconSide="left"
                 iconType="popout"
-                data-telemetry-id="entSearchApplications-searchApplication-api-step1-viewKeysButton"
+                data-telemetry-id="entSearchApplications-searchApplication-safeSearchApi-step2-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {
                     shouldNotCreateHref: true,
@@ -107,7 +160,7 @@ export const SearchApplicationAPI = () => {
                 }
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.api.step1.viewKeysButton',
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.viewKeysButton',
                   {
                     defaultMessage: 'View Keys',
                   }
@@ -117,19 +170,22 @@ export const SearchApplicationAPI = () => {
           </EuiFlexGroup>
         </>
       ),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.title',
+        {
+          defaultMessage: 'Generate and save API key',
+        }
+      ),
     },
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step2.title', {
-        defaultMessage: "Copy your search application's endpoint",
-      }),
       children: (
         <>
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.api.step2.copyEndpointDescription',
+                'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.copyEndpointDescription',
                 {
-                  defaultMessage: "Use this URL to access your search application's API endpoints.",
+                  defaultMessage: "Here's the URL for your endpoint:",
                 }
               )}
             </p>
@@ -138,18 +194,27 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
-                {elasticsearchUrl(cloudContext)}
+                {'https://[elasticsearch]/_application/search_application/<name>/_search'}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
       ),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.title',
+        {
+          defaultMessage: "Copy your search application's endpoint",
+        }
+      ),
     },
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step3.title', {
-        defaultMessage: 'Learn how to call your endpoints',
-      }),
       children: <EngineApiIntegrationStage />,
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.title',
+        {
+          defaultMessage: 'Learn how to call your endpoints',
+        }
+      ),
     },
   ];
 
@@ -162,14 +227,31 @@ export const SearchApplicationAPI = () => {
         iconType="iInCircle"
         title={
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.searchApplication.api.safeSearchCallout.title"
+            id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.title"
             defaultMessage="What is Safe Search API?"
           />
         }
       >
         <FormattedMessage
-          id="xpack.enterpriseSearch.content.searchApplication.api.safeSearchCallout.body"
-          defaultMessage="The safe search API endpoint only allows queries with the parameters defined in the settings JSON, so you can create public-facing search endpoints for your Elasticsearch indices."
+          id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body"
+          defaultMessage="The Safe Search API allows you to create a secure, public-facing search endpoint for your search application. This endpoint only accepts queries that match the parameters defined in your search template. {safeSearchDocumentation}"
+          values={{
+            safeSearchDocumentation: (
+              <EuiLink
+                data-test-subj="safe-search-documentation-link"
+                href="#"
+                target="_blank"
+                data-telemetry-id="entSearchApplications-documentation-viewDocumentaion"
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.documentationLink',
+                  {
+                    defaultMessage: 'Learn more about the Safe Search API',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
         />
       </EuiCallOut>
       <EuiSpacer />
