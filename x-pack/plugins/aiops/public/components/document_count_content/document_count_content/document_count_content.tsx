@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { FC } from 'react';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
 
 import { DocumentCountStats } from '../../../get_document_stats';
@@ -17,45 +16,27 @@ import { DocumentCountStats } from '../../../get_document_stats';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 
-const clearSelectionLabel = i18n.translate(
-  'xpack.aiops.documentCountContent.clearSelectionAriaLabel',
-  {
-    defaultMessage: 'Clear selection',
-  }
-);
-
 export interface DocumentCountContentProps {
-  brushSelectionUpdateHandler: (d: WindowParameters) => void;
-  clearSelectionHandler: () => void;
+  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
+  isBrushCleared: boolean;
   totalCount: number;
   sampleProbability: number;
-  windowParameters?: WindowParameters;
-  incomingInitialAnalysisStart?: number | WindowParameters;
+  initialAnalysisStart?: number | WindowParameters;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   brushSelectionUpdateHandler,
-  clearSelectionHandler,
   documentCountStats,
   documentCountStatsSplit,
   documentCountStatsSplitLabel = '',
+  isBrushCleared,
   totalCount,
   sampleProbability,
-  windowParameters,
-  incomingInitialAnalysisStart,
+  initialAnalysisStart,
 }) => {
-  const [isBrushCleared, setIsBrushCleared] = useState(true);
-  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
-    number | WindowParameters | undefined
-  >(incomingInitialAnalysisStart);
-
-  useEffect(() => {
-    setIsBrushCleared(windowParameters === undefined);
-  }, [windowParameters]);
-
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
     (time) => +time
@@ -89,42 +70,16 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     }));
   }
 
-  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
-    if (!isBrushCleared || force) {
-      brushSelectionUpdateHandler(d);
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-  }
-
-  function clearSelection() {
-    setIsBrushCleared(true);
-    setInitialAnalysisStart(undefined);
-    clearSelectionHandler();
-  }
-
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
           <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
         </EuiFlexItem>
-        {!isBrushCleared && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={clearSelection}
-              size="xs"
-              data-test-subj="aiopsClearSelectionBadge"
-            >
-              {clearSelectionLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
       {documentCountStats.interval !== undefined && (
         <DocumentCountChart
-          brushSelectionUpdateHandler={brushSelectionUpdate}
+          brushSelectionUpdateHandler={brushSelectionUpdateHandler}
           chartPoints={chartPoints}
           chartPointsSplit={chartPointsSplit}
           timeRangeEarliest={timeRangeEarliest}

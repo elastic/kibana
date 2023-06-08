@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 import { EuiEmptyPrompt, EuiHorizontalRule, EuiResizableContainer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,11 +52,19 @@ export interface ExplainLogRateSpikesContentProps {
 export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> = ({
   dataView,
   setGlobalState,
-  initialAnalysisStart,
+  initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
+    number | WindowParameters | undefined
+  >(incomingInitialAnalysisStart);
+  const [isBrushCleared, setIsBrushCleared] = useState(true);
+
+  useEffect(() => {
+    setIsBrushCleared(windowParameters === undefined);
+  }, [windowParameters]);
 
   const {
     currentSelectedSignificantTerm,
@@ -81,12 +89,23 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
 
+  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
+    if (!isBrushCleared || force) {
+      setWindowParameters(d);
+    }
+    if (force) {
+      setIsBrushCleared(false);
+    }
+  }
+
   function clearSelection() {
     setWindowParameters(undefined);
     setPinnedSignificantTerm(null);
     setPinnedGroup(null);
     setSelectedSignificantTerm(null);
     setSelectedGroup(null);
+    setIsBrushCleared(true);
+    setInitialAnalysisStart(undefined);
   }
   // Note: Temporarily removed height and disabled sticky histogram until we can fix the scrolling issue in a follow up
   return (
@@ -102,18 +121,17 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
           >
             {documentCountStats !== undefined && (
               <DocumentCountContent
-                brushSelectionUpdateHandler={setWindowParameters}
-                clearSelectionHandler={clearSelection}
+                brushSelectionUpdateHandler={brushSelectionUpdate}
                 documentCountStats={documentCountStats}
                 documentCountStatsSplit={documentCountStatsCompare}
                 documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
                   currentSelectedSignificantTerm,
                   currentSelectedGroup
                 )}
+                isBrushCleared={isBrushCleared}
                 totalCount={totalCount}
                 sampleProbability={sampleProbability}
-                windowParameters={windowParameters}
-                incomingInitialAnalysisStart={initialAnalysisStart}
+                initialAnalysisStart={initialAnalysisStart}
               />
             )}
             <EuiHorizontalRule />
@@ -130,10 +148,12 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
               <ExplainLogRateSpikesAnalysis
                 dataView={dataView}
                 earliest={earliest}
+                isBrushCleared={isBrushCleared}
                 latest={latest}
-                windowParameters={windowParameters}
-                searchQuery={esSearchQuery}
+                onReset={clearSelection}
                 sampleProbability={sampleProbability}
+                searchQuery={esSearchQuery}
+                windowParameters={windowParameters}
               />
             )}
             {windowParameters === undefined && (

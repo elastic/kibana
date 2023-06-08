@@ -79,6 +79,9 @@ interface ExplainLogRateSpikesAnalysisProps {
   earliest: number;
   /** End timestamp filter */
   latest: number;
+  isBrushCleared: boolean;
+  /** Callback for resetting the analysis */
+  onReset: () => void;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
   /** The search query to be applied to the analysis as a filter */
@@ -90,7 +93,9 @@ interface ExplainLogRateSpikesAnalysisProps {
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
   dataView,
   earliest,
+  isBrushCleared,
   latest,
+  onReset,
   windowParameters,
   searchQuery,
   sampleProbability,
@@ -256,11 +261,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
+        isBrushCleared={isBrushCleared}
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
         onRefresh={() => startHandler(false)}
         onCancel={cancel}
+        onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis}
       >
         <EuiFlexItem grow={false}>
