@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should expose the ignore global filters control for a data layer', async () => {
+      await PageObjects.lens.openLayerContextMenu();
       expect(
         await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
       ).to.be(false);

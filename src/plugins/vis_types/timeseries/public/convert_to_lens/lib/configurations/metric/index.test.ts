@@ -18,6 +18,17 @@ jest.mock('../palette', () => ({
   getPalette: jest.fn(() => mockGetPalette()),
 }));
 
+function createEmptyLensLayer(partialLayer: Partial<Layer>): Layer {
+  return {
+    columns: [],
+    columnOrder: [],
+    indexPatternId: 'some-index-pattern',
+    ignoreGlobalFilters: false,
+    layerId: '0',
+    ...partialLayer,
+  };
+}
+
 describe('getConfigurationForMetric', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,15 +37,11 @@ describe('getConfigurationForMetric', () => {
 
   const metricId = 'some-id';
   const metric = { id: metricId, type: METRIC_TYPES.COUNT };
+
   test('should return null if no series was provided', () => {
     const layerId = 'layer-id-1';
     const model = createPanel({ series: [] });
-    const layer: Layer = {
-      columns: [],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
-      layerId,
-    };
+    const layer = createEmptyLensLayer({ layerId });
     const config = getConfigurationForMetric(model, layer);
 
     expect(config).toBeNull();
@@ -47,12 +54,7 @@ describe('getConfigurationForMetric', () => {
     const model = createPanel({
       series: [createSeries({ metrics: [metric1] })],
     });
-    const layer: Layer = {
-      columns: [],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
-      layerId,
-    };
+    const layer = createEmptyLensLayer({ layerId });
     const config = getConfigurationForMetric(model, layer);
 
     expect(config).toBeNull();
@@ -69,12 +71,7 @@ describe('getConfigurationForMetric', () => {
         createSeries({ metrics: [metric, metric2] }),
       ],
     });
-    const layer: Layer = {
-      columns: [],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
-      layerId,
-    };
+    const layer = createEmptyLensLayer({ layerId });
     const config = getConfigurationForMetric(model, layer);
 
     expect(config).toBeNull();
@@ -94,7 +91,9 @@ describe('getConfigurationForMetric', () => {
     const model = createPanel({
       series: [createSeries({ metrics: [metric, metric1] }), createSeries({ metrics: [metric2] })],
     });
-    const layer: Layer = {
+
+    const layer = createEmptyLensLayer({
+      layerId,
       columns: [
         {
           columnId: columnId1,
@@ -105,10 +104,7 @@ describe('getConfigurationForMetric', () => {
           meta: { metricId: metricId2 },
         },
       ] as Column[],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
-      layerId,
-    };
+    });
     const config = getConfigurationForMetric(model, layer);
 
     expect(config).toEqual({
@@ -131,7 +127,7 @@ describe('getConfigurationForMetric', () => {
       series: [createSeries({ metrics: [metric] })],
     });
     const bucket = { columnId: bucketColumnId } as Column;
-    const layer: Layer = {
+    const layer = createEmptyLensLayer({
       columns: [
         {
           columnId,
@@ -144,10 +140,8 @@ describe('getConfigurationForMetric', () => {
           meta: { metricId },
         },
       ],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
       layerId,
-    };
+    });
     const config = getConfigurationForMetric(model, layer, bucket);
 
     expect(config).toEqual({
@@ -169,7 +163,7 @@ describe('getConfigurationForMetric', () => {
     const model = createPanel({
       series: [createSeries({ metrics: [metric] })],
     });
-    const layer: Layer = {
+    const layer = createEmptyLensLayer({
       columns: [
         {
           columnId,
@@ -182,10 +176,8 @@ describe('getConfigurationForMetric', () => {
           meta: { metricId },
         },
       ],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
       layerId,
-    };
+    });
     const config = getConfigurationForMetric(model, layer);
     expect(config).toBeNull();
     expect(mockGetPalette).toBeCalledTimes(1);
@@ -215,12 +207,7 @@ describe('getConfigurationForGauge', () => {
   test('should return null if no series was provided', () => {
     const layerId = 'layer-id-1';
     const model = createPanel({ series: [] });
-    const layer: Layer = {
-      columns: [],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
-      layerId,
-    };
+    const layer = createEmptyLensLayer({ layerId });
     const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
 
     expect(config).toBeNull();
@@ -233,12 +220,7 @@ describe('getConfigurationForGauge', () => {
     const model = createPanel({
       series: [createSeries({ metrics: [metric1] })],
     });
-    const layer: Layer = {
-      columns: [],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
-      layerId,
-    };
+    const layer = createEmptyLensLayer({ layerId });
     const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
 
     expect(config).toBeNull();
@@ -252,7 +234,7 @@ describe('getConfigurationForGauge', () => {
     const model = createPanel({
       series: [createSeries({ metrics: [metric] })],
     });
-    const layer: Layer = {
+    const layer = createEmptyLensLayer({
       columns: [
         {
           columnId,
@@ -265,10 +247,8 @@ describe('getConfigurationForGauge', () => {
           meta: { metricId },
         },
       ],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
       layerId,
-    };
+    });
     const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
     expect(config).toBeNull();
     expect(mockGetPalette).toBeCalledTimes(1);
@@ -279,12 +259,7 @@ describe('getConfigurationForGauge', () => {
     const metric1 = { id: 'metric-id-1', type: TSVB_METRIC_TYPES.SERIES_AGG, function: 'sum' };
     const color = '#fff';
     const model = createPanel({ series: [createSeries({ metrics: [metric, metric1], color })] });
-    const layer: Layer = {
-      columns: [],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
-      layerId,
-    };
+    const layer = createEmptyLensLayer({ layerId });
     const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
 
     expect(config).toEqual({
@@ -312,7 +287,7 @@ describe('getConfigurationForGauge', () => {
     const model = createPanel({ series: [createSeries({ metrics: [metric, metric1], color })] });
     const bucketColumnId = 'bucket-column-id-1';
     const bucket = { columnId: bucketColumnId } as Column;
-    const layer: Layer = {
+    const layer = createEmptyLensLayer({
       columns: [
         {
           columnId: columnId1,
@@ -325,10 +300,8 @@ describe('getConfigurationForGauge', () => {
           meta: { metricId },
         },
       ],
-      columnOrder: [],
-      indexPatternId: 'some-index-pattern',
       layerId,
-    };
+    });
     const config = getConfigurationForGauge(model, layer, bucket, gaugeMaxColumn);
 
     expect(config).toEqual({
