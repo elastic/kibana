@@ -26,7 +26,12 @@ import type {
   ExceptionListSchema,
   EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { comment, osType } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ListOperatorTypeEnum,
+  ListOperatorEnum,
+  comment,
+  osType,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   ExceptionsBuilderExceptionItem,
@@ -901,6 +906,7 @@ export const buildRuleExceptionWithConditions = ({
 /**
  Generate exception conditions based on the highlighted fields of the alert that 
  have corresponding values in the alert data.
+ For the initial implementation the nested conditions are not considered
  */
 export const buildExceptionEntriesFromAlertFields = ({
   highlightedFields,
@@ -913,13 +919,16 @@ export const buildExceptionEntriesFromAlertFields = ({
     const fieldKey = field.id;
     const fieldValue = get(alertData, fieldKey) || get(alertData, getKibanaAlertIdField(fieldKey));
 
-    if (fieldValue)
+    if (fieldValue) {
       acc.push({
         field: fieldKey,
-        operator: 'included',
-        type: 'match',
+        operator: ListOperatorEnum.INCLUDED,
+        type: Array.isArray(fieldValue)
+          ? ListOperatorTypeEnum.MATCH_ANY
+          : ListOperatorTypeEnum.MATCH,
         value: fieldValue,
       });
+    }
     return acc;
   }, []);
 };

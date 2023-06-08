@@ -38,6 +38,7 @@ import type {
   OsTypeArray,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ListOperatorTypeEnum, ListOperatorEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { DataViewBase } from '@kbn/es-query';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
@@ -1480,6 +1481,15 @@ describe('Exception helpers', () => {
 
   describe('Auto-populate Rule Exceptions with Alert highlighted fields', () => {
     const name = 'Exception name';
+    const endpointCapabilties = [
+      'isolation',
+      'kill_process',
+      'suspend_process',
+      'running_processes',
+      'get_file',
+      'execute',
+      'upload_file',
+    ];
     const alertData = {
       'kibana.alert.rule.category': 'Custom Query Rule',
       'kibana.alert.rule.consumer': 'siem',
@@ -1526,7 +1536,9 @@ describe('Exception helpers', () => {
           type: 'endpoint',
         },
       ],
-
+      Endpoint: {
+        capabilities: endpointCapabilties,
+      },
       _id: 'b9edb05a090729be2077b99304542d6844973843dec43177ac618f383df44a6d',
     };
     const expectedHighlightedFields = [
@@ -1561,9 +1573,9 @@ describe('Exception helpers', () => {
         label: 'Event Cardinality',
       },
     ];
-    const operator = 'included' as const;
-    const type = 'match' as const;
-    const exceptionEntries = [
+    const operator = ListOperatorEnum.INCLUDED;
+    const type = ListOperatorTypeEnum.MATCH;
+    const exceptionEntries: EntriesArray = [
       {
         field: 'host.name',
         operator,
@@ -1621,6 +1633,12 @@ describe('Exception helpers', () => {
       },
       { field: 'process.name', operator: 'included', type: 'match', value: 'malware writer' },
     ];
+    const entriesWithMatchAny = {
+      field: 'Endpoint.capabilities',
+      operator,
+      type: ListOperatorTypeEnum.MATCH_ANY,
+      value: endpointCapabilties,
+    };
     describe('buildRuleExceptionWithConditions', () => {
       it('should build conditions, name and namespace for exception correctly', () => {
         const exception = buildRuleExceptionWithConditions({ name, exceptionEntries });
@@ -1672,12 +1690,24 @@ describe('Exception helpers', () => {
         });
         expect(entries).toEqual([]);
       });
-      it('should build exception entries from only the fields that have values in the alertData', () => {
+      it('should build exception entries with "match" operator in case the field key has single value', () => {
         const entries = buildExceptionEntriesFromAlertFields({
           highlightedFields: expectedHighlightedFields,
           alertData,
         });
         expect(entries).toEqual(expectedExceptionEntries);
+      });
+      it('should build the exception entries with "match_any" in case the field key has multiple values', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: [
+            ...expectedHighlightedFields,
+            {
+              id: 'Endpoint.capabilities',
+            },
+          ],
+          alertData,
+        });
+        expect(entries).toEqual([...expectedExceptionEntries, entriesWithMatchAny]);
       });
     });
 
