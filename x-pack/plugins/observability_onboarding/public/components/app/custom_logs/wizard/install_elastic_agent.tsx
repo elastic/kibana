@@ -100,7 +100,6 @@ export function InstallElasticAgent() {
 
   useEffect(() => {
     setApiKeyId(installShipperSetup?.apiKeyId ?? '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [installShipperSetup?.apiKeyId]);
 
   const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
@@ -202,7 +201,7 @@ export function InstallElasticAgent() {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onInspect}>
                   {i18n.translate(
-                    'xpack.observability_onboardbacking.steps.inspect',
+                    'xpack.observability_onboarding.steps.inspect',
                     { defaultMessage: 'Inspect' }
                   )}
                 </EuiButtonEmpty>
