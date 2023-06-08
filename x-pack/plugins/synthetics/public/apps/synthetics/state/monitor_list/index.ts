@@ -101,7 +101,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       if ('updated_at' in action.payload) {
         state.data.monitors = state.data.monitors.map<EncryptedSyntheticsSavedMonitor>(
           (monitor: any) => {
-            if (monitor.id === action.payload.id) {
+            if (monitor.config_id === action.payload.id) {
               return action.payload.attributes;
             }
             return monitor;
