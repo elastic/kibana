@@ -22,7 +22,7 @@ export type MlNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, Navigation
 
 export const defaultNavigation: MlNodeDefinition = {
   id: 'rootNav:ml',
-  title: i18n.translate('deeplinks.ml.machineLearning', {
+  title: i18n.translate('defaultNavigation.ml.machineLearning', {
     defaultMessage: 'Machine learning',
   }),
   icon: 'indexMapping',
@@ -40,13 +40,13 @@ export const defaultNavigation: MlNodeDefinition = {
       ],
     },
     {
-      title: i18n.translate('deeplinks.ml.anomalyDetection', {
+      title: i18n.translate('defaultNavigation.ml.anomalyDetection', {
         defaultMessage: 'Anomaly Detection',
       }),
       id: 'anomaly_detection',
       children: [
         {
-          title: i18n.translate('deeplinks.ml.jobs', {
+          title: i18n.translate('defaultNavigation.ml.jobs', {
             defaultMessage: 'Jobs',
           }),
           link: 'ml:anomalyDetection',
@@ -64,7 +64,7 @@ export const defaultNavigation: MlNodeDefinition = {
     },
     {
       id: 'data_frame_analytics',
-      title: i18n.translate('deeplinks.ml.dataFrameAnalytics', {
+      title: i18n.translate('defaultNavigation.ml.dataFrameAnalytics', {
         defaultMessage: 'Data frame analytics',
       }),
       children: [
@@ -82,7 +82,7 @@ export const defaultNavigation: MlNodeDefinition = {
     },
     {
       id: 'model_management',
-      title: i18n.translate('deeplinks.ml.modelManagement', {
+      title: i18n.translate('defaultNavigation.ml.modelManagement', {
         defaultMessage: 'Model management',
       }),
       children: [
@@ -96,18 +96,18 @@ export const defaultNavigation: MlNodeDefinition = {
     },
     {
       id: 'data_visualizer',
-      title: i18n.translate('deeplinks.ml.dataVisualizer', {
+      title: i18n.translate('defaultNavigation.ml.dataVisualizer', {
         defaultMessage: 'Data visualizer',
       }),
       children: [
         {
-          title: i18n.translate('deeplinks.ml.file', {
+          title: i18n.translate('defaultNavigation.ml.file', {
             defaultMessage: 'File',
           }),
           link: 'ml:fileUpload',
         },
         {
-          title: i18n.translate('deeplinks.ml.dataView', {
+          title: i18n.translate('defaultNavigation.ml.dataView', {
             defaultMessage: 'Data view',
           }),
           link: 'ml:indexDataVisualizer',
@@ -116,12 +116,12 @@ export const defaultNavigation: MlNodeDefinition = {
     },
     {
       id: 'aiops_labs',
-      title: i18n.translate('deeplinks.ml.aiopsLabs', {
+      title: i18n.translate('defaultNavigation.ml.aiopsLabs', {
         defaultMessage: 'AIOps labs',
       }),
       children: [
         {
-          title: i18n.translate('deeplinks.ml.explainLogRateSpikes', {
+          title: i18n.translate('defaultNavigation.ml.explainLogRateSpikes', {
             defaultMessage: 'Explain log rate spikes',
           }),
           link: 'ml:explainLogRateSpikes',

@@ -23,7 +23,7 @@ export type ManagementNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, Na
 
 export const defaultNavigation: ManagementNodeDefinition = {
   id: 'rootNav:management',
-  title: i18n.translate('deeplinks.management.sectionLabel', {
+  title: i18n.translate('defaultNavigation.management.sectionLabel', {
     defaultMessage: 'Management',
   }),
   icon: 'gear',
@@ -39,7 +39,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
     },
     {
       id: 'integration_management',
-      title: i18n.translate('deeplinks.management.integrationManagement', {
+      title: i18n.translate('defaultNavigation.management.integrationManagement', {
         defaultMessage: 'Integration management',
       }),
       children: [
@@ -56,13 +56,13 @@ export const defaultNavigation: ManagementNodeDefinition = {
     },
     {
       id: 'stack_management',
-      title: i18n.translate('deeplinks.management.integrationManagement', {
+      title: i18n.translate('defaultNavigation.management.integrationManagement', {
         defaultMessage: 'Stack management',
       }),
       children: [
         {
           id: 'ingest',
-          title: i18n.translate('deeplinks.management.ingest', {
+          title: i18n.translate('defaultNavigation.management.ingest', {
             defaultMessage: 'Ingest',
           }),
           children: [
@@ -76,7 +76,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
         },
         {
           id: 'data',
-          title: i18n.translate('deeplinks.management.integrationManagement', {
+          title: i18n.translate('defaultNavigation.management.integrationManagement', {
             defaultMessage: 'Data',
           }),
           children: [
@@ -90,7 +90,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
         },
         {
           id: 'alerts_and_insights',
-          title: i18n.translate('deeplinks.management.alertAndInsights', {
+          title: i18n.translate('defaultNavigation.management.alertAndInsights', {
             defaultMessage: 'Alerts and insights',
           }),
           children: [

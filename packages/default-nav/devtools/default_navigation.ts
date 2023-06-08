@@ -14,7 +14,7 @@ export type NavigationID = 'rootNav:devtools' | 'root';
 export type DevToolsNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, NavigationID>;
 
 export const defaultNavigation: DevToolsNodeDefinition = {
-  title: i18n.translate('deeplinks.devTools.developerTools', {
+  title: i18n.translate('defaultNavigation.devTools.developerTools', {
     defaultMessage: 'Developer tools',
   }),
   id: 'rootNav:devtools',

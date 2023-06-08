@@ -15,7 +15,7 @@ export type AnalyticsNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, Nav
 
 export const defaultNavigation: AnalyticsNodeDefinition = {
   id: 'rootNav:analytics',
-  title: i18n.translate('deeplinks.analytics.dataExploration', {
+  title: i18n.translate('defaultNavigation.analytics.dataExploration', {
     defaultMessage: 'Data exploration',
   }),
   icon: 'stats',
