@@ -17,6 +17,7 @@ import {
   isEqualState,
 } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 
@@ -62,7 +63,7 @@ export const buildStateSubscribe =
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: nextState.index, savedSearch },
+        { id: nextState.index, savedSearch, isTextBasedQuery: isTextBasedQuery(nextState?.query) },
         { internalStateContainer: internalState, services }
       );
 

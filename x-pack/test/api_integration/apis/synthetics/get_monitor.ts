@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SimpleSavedObject } from '@kbn/core/public';
+import { SavedObject } from '@kbn/core/server';
 import { ConfigKey, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(200);
 
-      return res.body as SimpleSavedObject<MonitorFields>;
+      return res.body as SavedObject<MonitorFields>;
     };
 
     before(async () => {
@@ -56,13 +56,11 @@ export default function ({ getService }: FtrProviderContext) {
           .get(API_URLS.SYNTHETICS_MONITORS + '?perPage=1000') // 1000 to sort of load all saved monitors
           .expect(200);
 
-        const found: Array<SimpleSavedObject<MonitorFields>> = apiResponse.body.monitors.filter(
-          ({ id }: SimpleSavedObject<MonitorFields>) => [id1, id2].includes(id)
+        const found: Array<SavedObject<MonitorFields>> = apiResponse.body.monitors.filter(
+          ({ id }: SavedObject<MonitorFields>) => [id1, id2].includes(id)
         );
         found.sort(({ id: a }) => (a === id2 ? 1 : a === id1 ? -1 : 0));
-        const foundMonitors = found.map(
-          ({ attributes }: SimpleSavedObject<MonitorFields>) => attributes
-        );
+        const foundMonitors = found.map(({ attributes }: SavedObject<MonitorFields>) => attributes);
 
         const expected = [mon1, mon2];
 
@@ -85,6 +83,68 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
       });
+
+      it('with single monitorQueryId filter', async () => {
+        const [_, { id: id2 }] = await Promise.all(monitors.map(saveMonitor));
+
+        const resp = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&monitorQueryIds=${id2}`)
+          .expect(200);
+
+        const resultMonitorIds = resp.body.monitors.map(
+          ({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id
+        );
+        expect(resultMonitorIds.length).eql(1);
+        expect(resultMonitorIds).eql([id2]);
+      });
+
+      it('with multiple monitorQueryId filter', async () => {
+        const [_, { id: id2 }, { id: id3 }] = await Promise.all(monitors.map(saveMonitor));
+
+        const resp = await supertest
+          .get(
+            `${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${id2}&monitorQueryIds=${id3}`
+          )
+          .expect(200);
+
+        const resultMonitorIds = resp.body.monitors.map(
+          ({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id
+        );
+
+        expect(resultMonitorIds.length).eql(2);
+        expect(resultMonitorIds).eql([id2, id3]);
+      });
+
+      it('monitorQueryId respects custom_heartbeat_id while filtering', async () => {
+        const customHeartbeatId0 = 'custom-heartbeat-id-test-01';
+        const customHeartbeatId1 = 'custom-heartbeat-id-test-02';
+        await Promise.all(
+          [
+            {
+              ...monitors[0],
+              [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId0,
+              [ConfigKey.NAME]: `NAME-${customHeartbeatId0}`,
+            },
+            {
+              ...monitors[1],
+              [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId1,
+              [ConfigKey.NAME]: `NAME-${customHeartbeatId1}`,
+            },
+          ].map(saveMonitor)
+        );
+
+        const resp = await supertest
+          .get(
+            `${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${customHeartbeatId0}&monitorQueryIds=${customHeartbeatId1}`
+          )
+          .expect(200);
+
+        const resultMonitorIds = resp.body.monitors
+          .map(({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id)
+          .filter((id: string, index: number, arr: string[]) => arr.indexOf(id) === index); // Filter only unique
+        expect(resultMonitorIds.length).eql(2);
+        expect(resultMonitorIds).eql([customHeartbeatId0, customHeartbeatId1]);
+      });
     });
 
     describe('get one monitor', () => {
@@ -92,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
         const [{ id: id1 }] = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '/' + id1)
+          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id1) + '?decrypted=true')
           .expect(200);
 
         expect(apiResponse.body.attributes).eql({
@@ -108,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
         const getResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
+          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', invalidMonitorId))
           .set('kbn-xsrf', 'true');
 
         expect(getResponse.status).eql(404);
@@ -119,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         const veryLargeMonId = new Array(1050).fill('1').join('');
 
         await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '/' + veryLargeMonId)
+          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', veryLargeMonId))
           .set('kbn-xsrf', 'true')
           .expect(400);
       });

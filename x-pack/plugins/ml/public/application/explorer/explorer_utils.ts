@@ -23,14 +23,15 @@ import {
   type MlEntityField,
   type MlInfluencer,
   type MlRecordForInfluencer,
+  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { getDataViewIdFromName } from '../util/index_utils';
-import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -51,7 +52,6 @@ import {
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { MlResultsService } from '../services/results_service';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 
@@ -141,7 +141,7 @@ export interface SourceIndicesWithGeoFields {
 // create new job objects based on standard job config objects
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
-    const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+    const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
     return {
       id: job.job_id,
       selected: false,

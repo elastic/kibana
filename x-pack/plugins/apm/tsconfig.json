@@ -30,6 +30,7 @@
     "@kbn/features-plugin",
     "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/license-management-plugin",
     "@kbn/maps-plugin",
     "@kbn/ml-plugin",
     "@kbn/observability-plugin",
@@ -88,6 +89,10 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/ui-actions-plugin",
     "@kbn/observability-alert-details",
+    "@kbn/custom-integrations-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/controls-plugin",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

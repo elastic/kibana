@@ -21,8 +21,9 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { RawEventData } from './types';
-import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
+import type { RawEventData } from '../../../../common/types/response_actions';
+import { useResponseActionsView } from './response_actions_view';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -32,7 +33,6 @@ import {
   getTourAnchor,
   SecurityStepId,
 } from '../guided_onboarding_tour/tour_config';
-import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -57,6 +57,7 @@ import { useRiskScoreData } from './use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { useOsqueryTab } from './osquery_tab';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
@@ -67,7 +68,9 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
-  | EventsViewType.osqueryView;
+  // Depending on endpointResponseActionsEnabled flag whether to render Osquery Tab or the commonTab (osquery + endpoint results)
+  | EventsViewType.osqueryView
+  | EventsViewType.responseActionsView;
 
 export enum EventsViewType {
   tableView = 'table-view',
@@ -75,7 +78,7 @@ export enum EventsViewType {
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
   osqueryView = 'osquery-results-view',
-  endpointView = 'endpoint-results-view',
+  responseActionsView = 'response-actions-results-view',
 }
 
 interface Props {
@@ -214,7 +217,9 @@ const EventDetailsComponent: React.FC<Props> = ({
     const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
-
+  const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
+    'endpointResponseActionsEnabled'
+  );
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -427,26 +432,24 @@ const EventDetailsComponent: React.FC<Props> = ({
     }),
     [rawEventData]
   );
-
+  const responseActionsTab = useResponseActionsView({
+    rawEventData: rawEventData as RawEventData,
+    ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
+  });
   const osqueryTab = useOsqueryTab({
     rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
-  const endpointResponseActionsTab = useEndpointResponseActionsTab({
-    rawEventData: rawEventData as RawEventData,
-  });
+  const responseActionsTabs = useMemo(() => {
+    return endpointResponseActionsEnabled ? [responseActionsTab] : [osqueryTab];
+  }, [endpointResponseActionsEnabled, osqueryTab, responseActionsTab]);
 
   const tabs = useMemo(() => {
-    return [
-      summaryTab,
-      threatIntelTab,
-      tableTab,
-      jsonTab,
-      osqueryTab,
-      endpointResponseActionsTab,
-    ].filter((tab: EventViewTab | undefined): tab is EventViewTab => !!tab);
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab, endpointResponseActionsTab]);
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, ...responseActionsTabs].filter(
+      (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
+    );
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTabs]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickDataTab('timeSeries');
       });
 
-      describe('basics', () => {
+      describe('basics', function () {
         this.tags('includeFirefox');
 
         it('should render all necessary components', async () => {
@@ -224,8 +224,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.setMetricsGroupByTerms('bytes');
             await header.waitUntilLoadingHasFinished();
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
+            await header.waitUntilLoadingHasFinished();
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');
+            await header.waitUntilLoadingHasFinished();
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 
@@ -237,7 +239,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('Elastic charts', () => {
+      describe('Elastic charts', function () {
+        this.tags('skipFirefox');
         beforeEach(async () => {
           await visualBuilder.toggleNewChartsLibraryWithDebug(true);
           await visualBuilder.clickPanelOptions('timeSeries');
@@ -594,7 +597,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         after(async () => await visualBuilder.toggleNewChartsLibraryWithDebug(false));
       });
 
-      describe('index pattern selection mode', () => {
+      describe('index pattern selection mode', function () {
+        this.tags('skipFirefox');
         it('should disable switch for Kibana index patterns mode by default', async () => {
           await visualBuilder.clickPanelOptions('timeSeries');
           const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();

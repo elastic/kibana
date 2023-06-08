@@ -261,7 +261,7 @@ export class SavedSearchEmbeddable
         this.searchProps!.isLoading = false;
         this.searchProps!.isPlainRecord = true;
         this.searchProps!.showTimeCol = false;
-        this.searchProps!.isSortEnabled = false;
+        this.searchProps!.isSortEnabled = true;
         return;
       }
 
@@ -572,10 +572,13 @@ export class SavedSearchEmbeddable
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
+    const query = this.savedSearch.searchSource.getField('query');
+
     const props = {
       savedSearch: this.savedSearch,
       searchProps,
       useLegacyTable,
+      query,
     };
     if (searchProps.services) {
       ReactDOM.render(

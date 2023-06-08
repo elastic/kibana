@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  fromSavedSearchAttributes,
-  toSavedSearchAttributes,
-  throwErrorOnSavedSearchUrlConflict,
-} from './saved_searches_utils';
+import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_searches_utils';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
@@ -37,6 +33,7 @@ describe('saved_searches_utils', () => {
           'id',
           attributes,
           ['tags-1', 'tags-2'],
+          [],
           createSearchSourceMock(),
           {}
         )
@@ -53,6 +50,7 @@ describe('saved_searches_utils', () => {
           "hideChart": true,
           "id": "id",
           "isTextBasedQuery": false,
+          "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
@@ -89,28 +87,6 @@ describe('saved_searches_utils', () => {
           "viewMode": undefined,
         }
       `);
-    });
-  });
-
-  describe('throwErrorOnSavedSearchUrlConflict', () => {
-    test('should throw an error on url conflict', async () => {
-      let error = 'no error';
-
-      try {
-        await throwErrorOnSavedSearchUrlConflict({
-          id: 'id',
-          sharingSavedObjectProps: {
-            outcome: 'conflict',
-            errorJSON: '{}',
-          },
-        } as SavedSearch);
-      } catch (e) {
-        error = e.message;
-      }
-
-      expect(error).toBe(
-        'This search has the same URL as a legacy alias. Disable the alias to resolve this error : {}'
-      );
     });
   });
 

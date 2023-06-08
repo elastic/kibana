@@ -7,7 +7,7 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { add820Indices } from './migrations';
+import { add820Indices, remove890Indices } from './migrations';
 
 export const settingsObjectType = 'uptime-dynamic-settings';
 export const settingsObjectId = 'uptime-dynamic-settings-singleton';
@@ -48,5 +48,6 @@ export const umDynamicSettings: SavedObjectsType = {
   migrations: {
     // Takes a pre 8.2.0 doc, and converts it to 8.2.0
     '8.2.0': add820Indices,
+    '8.9.0': remove890Indices,
   },
 };

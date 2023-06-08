@@ -14,6 +14,7 @@ import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import { SearchBar } from './search_bar';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { TrackUiMetricFn } from '../types';
 
 jest.mock(
   'react-virtualized-auto-sizer',
@@ -47,12 +48,15 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 describe('SearchBar', () => {
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let trackUiMetric: TrackUiMetricFn;
+
   const basePathUrl = '/plugins/globalSearchBar/assets/';
   const darkMode = false;
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
+    trackUiMetric = jest.fn();
   });
 
   const update = () => {
@@ -100,7 +104,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
-          trackUiMetric={jest.fn()}
+          trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
     );
@@ -118,6 +122,10 @@ describe('SearchBar', () => {
     await assertSearchResults(['Discover • Kibana', 'My Dashboard • Test']);
     expect(searchService.find).toHaveBeenCalledTimes(2);
     expect(searchService.find).toHaveBeenLastCalledWith({ term: 'd' }, {});
+
+    expect(trackUiMetric).nthCalledWith(1, 'count', 'search_focus');
+    expect(trackUiMetric).nthCalledWith(2, 'count', 'search_request');
+    expect(trackUiMetric).toHaveBeenCalledTimes(2);
   });
 
   it('supports keyboard shortcuts', async () => {
@@ -128,7 +136,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
-          trackUiMetric={jest.fn()}
+          trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
     );
@@ -139,6 +147,10 @@ describe('SearchBar', () => {
     const inputElement = await screen.findByTestId('nav-search-input');
 
     expect(document.activeElement).toEqual(inputElement);
+
+    expect(trackUiMetric).nthCalledWith(1, 'count', 'shortcut_used');
+    expect(trackUiMetric).nthCalledWith(2, 'count', 'search_focus');
+    expect(trackUiMetric).toHaveBeenCalledTimes(2);
   });
 
   it('only display results from the last search', async () => {
@@ -160,7 +172,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
-          trackUiMetric={jest.fn()}
+          trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
     );
@@ -177,5 +189,43 @@ describe('SearchBar', () => {
     update();
 
     await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
+  });
+
+  it('tracks the application navigated to', async () => {
+    searchService.find.mockReturnValueOnce(
+      of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
+    );
+
+    render(
+      <IntlProvider locale="en">
+        <SearchBar
+          globalSearch={searchService}
+          navigateToUrl={applications.navigateToUrl}
+          basePathUrl={basePathUrl}
+          darkMode={darkMode}
+          trackUiMetric={trackUiMetric}
+        />
+      </IntlProvider>
+    );
+
+    expect(searchService.find).toHaveBeenCalledTimes(0);
+
+    await focusAndUpdate();
+
+    expect(searchService.find).toHaveBeenCalledTimes(1);
+    expect(searchService.find).toHaveBeenCalledWith({}, {});
+    await assertSearchResults(['Discover • Kibana']);
+
+    const navSearchOptionToClick = await screen.findByTestId('nav-search-option');
+    act(() => {
+      fireEvent.click(navSearchOptionToClick);
+    });
+
+    expect(trackUiMetric).nthCalledWith(1, 'count', 'search_focus');
+    expect(trackUiMetric).nthCalledWith(2, 'click', [
+      'user_navigated_to_application',
+      'user_navigated_to_application_discover',
+    ]);
+    expect(trackUiMetric).toHaveBeenCalledTimes(2);
   });
 });

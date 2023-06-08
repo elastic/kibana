@@ -6,7 +6,13 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { CasePostRequest, CommentAttributes } from '../common/api';
+import type {
+  CasePostRequest,
+  CommentAttributes,
+  CommentRequestAlertType,
+  CommentRequestUserType,
+  ConnectorMappings,
+} from '../common/api';
 import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
@@ -419,6 +425,47 @@ export const newCase: CasePostRequest = {
   },
   owner: SECURITY_SOLUTION_OWNER,
 };
+
+export const comment: CommentRequestUserType = {
+  comment: 'a comment',
+  type: CommentType.user as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const alertComment: CommentRequestAlertType = {
+  alertId: 'alert-id-1',
+  index: 'alert-index-1',
+  rule: {
+    id: 'rule-id-1',
+    name: 'rule-name-1',
+  },
+  type: CommentType.alert as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const multipleAlert: CommentRequestAlertType = {
+  ...alertComment,
+  alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
+  index: ['test-index-3', 'test-index-4', 'test-index-5'],
+};
+
+export const mappings: ConnectorMappings = [
+  {
+    source: 'title',
+    target: 'short_description',
+    action_type: 'overwrite',
+  },
+  {
+    source: 'description',
+    target: 'description',
+    action_type: 'append',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    action_type: 'append',
+  },
+];
 
 const casesClientMock = createCasesClientMock();
 

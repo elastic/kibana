@@ -1873,6 +1873,22 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.shouldWrite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldWrite",
+            "description": [
+              "\nOptional flag to opt into writing alerts as data. When not specified\ndefaults to false. We need this because we needed all previous rule\nregistry rules to register with the framework in order to install\nElasticsearch assets but we don't want to migrate them to using\nthe framework for writing alerts as data until all the pieces are ready"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.IRuleTypeAlerts.useEcs",
             "type": "CompoundType",
             "tags": [],
@@ -2005,7 +2021,15 @@
                 "section": "def-common.RuleTypeState",
                 "text": "RuleTypeState"
               },
-              ", InstanceState extends { [x: string]: unknown; } = { [x: string]: unknown; }, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = never, RecoveryActionGroupId extends string = never>(ruleType: ",
+              ", InstanceState extends { [x: string]: unknown; } = { [x: string]: unknown; }, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = never, RecoveryActionGroupId extends string = never, AlertData extends ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleAlertData",
+                "text": "RuleAlertData"
+              },
+              " = never>(ruleType: ",
               {
                 "pluginId": "alerting",
                 "scope": "server",
@@ -2013,7 +2037,7 @@
                 "section": "def-server.RuleType",
                 "text": "RuleType"
               },
-              "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>) => void"
+              "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>) => void"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
@@ -2034,7 +2058,7 @@
                     "section": "def-server.RuleType",
                     "text": "RuleType"
                   },
-                  "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>"
+                  "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
                 "deprecated": false,
@@ -2301,7 +2325,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
+          "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>"
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
@@ -2403,7 +2427,7 @@
                 "section": "def-server.RuleExecutorServices",
                 "text": "RuleExecutorServices"
               },
-              "<InstanceState, InstanceContext, ActionGroupIds>"
+              "<InstanceState, InstanceContext, ActionGroupIds, AlertData>"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -2514,7 +2538,7 @@
             "section": "def-server.RuleExecutorServices",
             "text": "RuleExecutorServices"
           },
-          "<State, Context, ActionGroupIds>"
+          "<State, Context, ActionGroupIds, AlertData>"
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
@@ -2604,13 +2628,168 @@
             "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorServices.alertFactory",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "alertFactory",
-            "description": [],
+            "description": [
+              "\nDeprecate alertFactory and remove when all rules are onboarded to\nthe alertsClient"
+            ],
             "signature": [
               "Pick<",
               "AlertFactory",
               "<State, Context, ActionGroupIds>, \"create\" | \"done\"> & { alertLimit: Pick<{ getValue: () => number; setLimitReached: (reached: boolean) => void; checkLimitUsage: () => void; }, \"getValue\" | \"setLimitReached\">; }"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_anomaly_detection_alert_type.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_anomaly_detection_alert_type.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/alerting/metric_anomaly/metric_anomaly_executor.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/notifications/legacy_rules_notification_alert_type.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/server/alerts/base_rule.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/lib/get_entities_and_generate_alerts.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/executor.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/executor.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/common.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/alert_rules/common.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/plugins/rule_registry/server/utils/rule_executor.test_helpers.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.test.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.alertsClient",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertsClient",
+            "description": [
+              "\nOnly available when framework alerts are enabled and rule\ntype has registered alert context with the framework with shouldWrite set to true"
+            ],
+            "signature": [
+              "PublicAlertsClient",
+              "<AlertData, State, Context, ActionGroupIds> | null"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -2715,7 +2894,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
+              ">; delete: (indexPatternId: string) => Promise<void>; find: (search: string, size?: number) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3013,7 +3192,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>"
+          "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
@@ -3137,7 +3316,7 @@
                 "section": "def-common.WithoutReservedActionGroups",
                 "text": "WithoutReservedActionGroups"
               },
-              "<ActionGroupIds, RecoveryActionGroupId>>) => Promise<{ state: State; }>"
+              "<ActionGroupIds, RecoveryActionGroupId>, AlertData>) => Promise<{ state: State; }>"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -3159,7 +3338,7 @@
                     "section": "def-server.RuleExecutorOptions",
                     "text": "RuleExecutorOptions"
                   },
-                  "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
+                  "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>"
                 ],
                 "path": "x-pack/plugins/alerting/server/types.ts",
                 "deprecated": false,
@@ -3715,7 +3894,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<Params, State, InstanceState, InstanceContext, ActionGroupIds>) => Promise<{ state: State; }>"
+          "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>) => Promise<{ state: State; }>"
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
@@ -3737,7 +3916,7 @@
                 "section": "def-server.RuleExecutorOptions",
                 "text": "RuleExecutorOptions"
               },
-              "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
+              "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -4113,11 +4292,27 @@
           "SnoozeParams",
           ") => Promise<void>; unsnooze: (options: ",
           "UnsnoozeParams",
-          ") => Promise<void>; clearExpiredSnoozes: (options: { id: string; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: ",
+          ") => Promise<void>; clearExpiredSnoozes: (options: { rule: Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: ",
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: (options: ",
           "MuteOptions",
-          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listAlertTypes: () => Promise<Set<",
+          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; getSpaceId: () => string | undefined; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
@@ -9381,6 +9576,9 @@
         "tags": [],
         "label": "INTERNAL_ALERTING_API_FIND_RULES_PATH",
         "description": [],
+        "signature": [
+          "\"/internal/alerting/rules/_find\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9410,6 +9608,21 @@
         "description": [],
         "signature": [
           "\"/internal/alerting/rules/maintenance_window\""
+        ],
+        "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_SNOOZE_RULE",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_SNOOZE_RULE",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/rule/{id}/_snooze\""
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
@@ -9934,6 +10147,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.RuleAlertData",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleAlertData",
+        "description": [],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RuleAlertingOutcome",
         "type": "Type",
         "tags": [],
@@ -10120,7 +10348,9 @@
             "section": "def-common.AggregateOptions",
             "text": "AggregateOptions"
           },
-          ", \"search\" | \"filter\"> & { after?: Record<string, string | number | null> | undefined; maxTags?: number | undefined; }"
+          ", \"search\" | \"filter\"> & { after?: ",
+          "AggregationsCompositeAggregateKey",
+          " | undefined; maxTags?: number | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
         "deprecated": false,

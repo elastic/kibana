@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export function useDeleteSlo() {
   const {
@@ -34,10 +35,10 @@ export function useDeleteSlo() {
     {
       onMutate: async (slo) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList'], { exact: false });
+        await queryClient.cancelQueries(sloKeys.lists());
 
         const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
+          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) || []
         ).at(0);
 
         const [queryKey, data] = latestFetchSloListRequest || [];
@@ -66,7 +67,7 @@ export function useDeleteSlo() {
       // If the mutation fails, use the context returned from onMutate to roll back
       onError: (_err, slo, context) => {
         if (context?.previousSloList) {
-          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
+          queryClient.setQueryData(sloKeys.lists(), context.previousSloList);
         }
 
         toasts.addDanger(
@@ -78,10 +79,10 @@ export function useDeleteSlo() {
       },
       onSuccess: () => {
         if (
-          queryClient.getQueryCache().find(['fetchSloList'], { exact: false })?.options // @ts-ignore
-            .refetchInterval === undefined
+          // @ts-ignore
+          queryClient.getQueryCache().find(sloKeys.lists())?.options.refetchInterval === undefined
         ) {
-          queryClient.invalidateQueries(['fetchSloList'], { exact: false });
+          queryClient.invalidateQueries(sloKeys.lists());
         }
       },
     }

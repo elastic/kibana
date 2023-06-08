@@ -8,7 +8,6 @@
 import type {
   Comment,
   CommentResponseAlertsType,
-  ConnectorMappingsAttributes,
   CaseUserActionsDeprecatedResponse,
 } from '../../../common/api';
 import {
@@ -241,24 +240,6 @@ export const basicParams = {
   title: 'a title',
   ...entity,
 };
-
-export const mappings: ConnectorMappingsAttributes[] = [
-  {
-    source: 'title',
-    target: 'short_description',
-    action_type: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    action_type: 'append',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    action_type: 'append',
-  },
-];
 
 export const userActions: CaseUserActionsDeprecatedResponse = [
   {
