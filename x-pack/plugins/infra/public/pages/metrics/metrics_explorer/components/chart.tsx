@@ -12,7 +12,7 @@ import {
   niceTimeFormatter,
   Position,
   Settings,
-  TooltipValue,
+  TooltipProps,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -82,9 +82,9 @@ export const MetricsExplorerChart = ({
       ? niceTimeFormatter([firstRow.timestamp, lastRow.timestamp])
       : (value: number) => `${value}`;
   }, [series.rows]);
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+      ({ value }) => moment(value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };

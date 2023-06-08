@@ -6,14 +6,23 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { StepDefineRule, aggregatableFields } from '.';
-import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
 import { fireEvent, render, within } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
+import { useRuleForms } from '../../../../detection_engine/rule_creation_ui/pages/form';
+import { stepActionsDefaultValue } from '../step_rule_actions';
+import {
+  defaultSchedule,
+  stepAboutDefaultValue,
+  stepDefineDefaultValue,
+} from '../../../pages/detection_engine/rules/utils';
+import type { FormHook } from '../../../../shared_imports';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+
 jest.mock('../../../../common/components/query_bar', () => {
   return {
     QueryBar: jest.fn(({ filterQuery }) => {
@@ -269,20 +278,42 @@ test('aggregatableFields with aggregatable: true', function () {
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
 describe('StepDefineRule', () => {
+  const TestComp = ({
+    setFormRef,
+  }: {
+    setFormRef: (form: FormHook<DefineStepRule, DefineStepRule>) => void;
+  }) => {
+    const { defineStepForm, eqlOptionsSelected, setEqlOptionsSelected } = useRuleForms({
+      defineStepDefault: stepDefineDefaultValue,
+      aboutStepDefault: stepAboutDefaultValue,
+      scheduleStepDefault: defaultSchedule,
+      actionsStepDefault: stepActionsDefaultValue,
+    });
+
+    setFormRef(defineStepForm);
+
+    return (
+      <StepDefineRule
+        isLoading={false}
+        form={defineStepForm}
+        indicesConfig={[]}
+        threatIndicesConfig={[]}
+        optionsSelected={eqlOptionsSelected}
+        setOptionsSelected={setEqlOptionsSelected}
+        indexPattern={{ fields: [], title: '' }}
+        isIndexPatternLoading={false}
+        browserFields={{}}
+      />
+    );
+  };
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
   });
   it('renders correctly', () => {
-    const wrapper = shallow(
-      <StepDefineRule
-        isReadOnlyView={false}
-        isLoading={false}
-        indicesConfig={[]}
-        threatIndicesConfig={[]}
-        defaultValues={stepDefineDefaultValue}
-      />
-    );
+    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
+      wrappingComponent: TestProviders,
+    });
 
     expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);
   });
@@ -324,13 +355,7 @@ describe('StepDefineRule', () => {
     });
     const { getAllByTestId } = render(
       <TestProviders>
-        <StepDefineRule
-          isReadOnlyView={false}
-          isLoading={false}
-          indicesConfig={[]}
-          threatIndicesConfig={[]}
-          defaultValues={stepDefineDefaultValue}
-        />
+        <TestComp setFormRef={() => {}} />
       </TestProviders>
     );
     expect(getAllByTestId('query-bar')[0].textContent).toEqual(
@@ -346,13 +371,7 @@ describe('StepDefineRule', () => {
       });
     const { getByTestId } = render(
       <TestProviders>
-        <StepDefineRule
-          isReadOnlyView={false}
-          isLoading={false}
-          indicesConfig={[]}
-          threatIndicesConfig={[]}
-          defaultValues={stepDefineDefaultValue}
-        />
+        <TestComp setFormRef={() => {}} />
       </TestProviders>
     );
     expect(getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(eqlQuery.queryBar.query.query);
