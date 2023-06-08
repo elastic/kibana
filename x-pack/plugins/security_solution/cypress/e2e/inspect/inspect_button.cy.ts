@@ -34,6 +34,8 @@ describe('Inspect Explore pages', () => {
     esArchiverLoad('risk_hosts');
 
     login();
+    // Create and select data view
+    postDataView(DATA_VIEW);
   });
 
   after(() => {
@@ -48,7 +50,6 @@ describe('Inspect Explore pages', () => {
      */
     it(`inspect ${pageName} page`, () => {
       login();
-      postDataView(DATA_VIEW);
 
       visit(url, {
         onLoad: () => {
