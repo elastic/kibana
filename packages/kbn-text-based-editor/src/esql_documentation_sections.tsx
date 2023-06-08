@@ -1034,7 +1034,7 @@ NOTE: The output type is always a double and the input type can be any number.
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvConcatFunction',
         {
           defaultMessage: 'MV_CONCAT',
         }
@@ -1042,7 +1042,7 @@ NOTE: The output type is always a double and the input type can be any number.
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvConcatFunction.markdown',
             {
               defaultMessage: `### MV_CONCAT
 Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter:
@@ -1449,7 +1449,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toBooleanFunction',
         {
           defaultMessage: 'TO_BOOLEAN',
         }
@@ -1457,7 +1457,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toBooleanFunction.markdown',
             {
               defaultMessage: `### TO_BOOLEAN
 Converts an input value to a boolean value.
@@ -1490,7 +1490,7 @@ Alias: TO_BOOL
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDatetimeFunction',
         {
           defaultMessage: 'TO_DATETIME',
         }
@@ -1498,7 +1498,7 @@ Alias: TO_BOOL
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDatetimeFunction.markdown',
             {
               defaultMessage: `### TO_DATETIME
 Converts an input value to a date value.
@@ -1544,7 +1544,7 @@ Alias: TO_DT
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDoubleFunction',
         {
           defaultMessage: 'TO_DOUBLE',
         }
@@ -1552,7 +1552,7 @@ Alias: TO_DT
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDoubleFunction.markdown',
             {
               defaultMessage: `### TO_DOUBLE
 Converts an input value to a double value.
@@ -1589,7 +1589,7 @@ Alias: TO_DBL
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIntegerFunction',
         {
           defaultMessage: 'TO_INTEGER',
         }
@@ -1597,7 +1597,7 @@ Alias: TO_DBL
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIntegerFunction.markdown',
             {
               defaultMessage: `### TO_INTEGER
 Converts an input value to an integer value.
@@ -1634,7 +1634,7 @@ Alias: TO_INT
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIpFunction',
         {
           defaultMessage: 'TO_IP',
         }
@@ -1642,7 +1642,7 @@ Alias: TO_INT
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIpFunction.markdown',
             {
               defaultMessage: `### TO_IP
 Converts an input string to an IP value.
@@ -1674,7 +1674,7 @@ Note that in the example above the last conversion of the string isn’t possibl
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toLongFunction',
         {
           defaultMessage: 'TO_LONG',
         }
@@ -1682,7 +1682,7 @@ Note that in the example above the last conversion of the string isn’t possibl
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toLongFunction.markdown',
             {
               defaultMessage: `### TO_LONG
 Converts an input value to an long value.
@@ -1751,7 +1751,7 @@ ROW a=[10, 9, 8]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toVersionFunction',
         {
           defaultMessage: 'TO_VERSION',
         }
@@ -1759,7 +1759,7 @@ ROW a=[10, 9, 8]
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toVersionFunction.markdown',
             {
               defaultMessage: `### TO_VERSION
 Converts an input string to a version value. For example:
