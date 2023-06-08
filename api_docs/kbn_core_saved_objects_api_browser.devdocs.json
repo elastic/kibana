@@ -162,14 +162,6 @@
             "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/assets/assets.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/assets/assets.tsx"
-          },
-          {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/services/workpad.ts"
           },
@@ -2325,14 +2317,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/assets/assets.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_details/monitor_selector/use_recently_viewed_monitors.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
               }
@@ -3290,14 +3274,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/assets/types.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/assets/types.ts"
           },
           {
             "plugin": "dashboardEnhanced",

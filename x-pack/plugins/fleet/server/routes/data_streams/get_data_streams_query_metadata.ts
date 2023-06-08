@@ -13,6 +13,12 @@ export async function getDataStreamsQueryMetadata({
   dataStreamName: string;
   esClient: ElasticsearchClient;
 }) {
+  const termsEnumIndexFilter = {
+    terms: {
+      _tier: ['data_hot', 'data_warm'],
+    },
+  };
+
   const [
     maxEventIngestedResponse,
     namespaceResponse,
@@ -31,6 +37,9 @@ export async function getDataStreamsQueryMetadata({
       // set `unmapped_type` for cases where `event.ingested` is not defiend, e.g.
       // in custom logs or custom HTTPJSON integrations
       body: {
+        query: {
+          ...termsEnumIndexFilter,
+        },
         sort: {
           'event.ingested': {
             order: 'desc',
@@ -44,24 +53,29 @@ export async function getDataStreamsQueryMetadata({
     esClient.termsEnum({
       index: dataStreamName,
       field: 'data_stream.namespace',
+      index_filter: termsEnumIndexFilter,
     }),
     esClient.termsEnum({
       index: dataStreamName,
       field: 'data_stream.dataset',
+      index_filter: termsEnumIndexFilter,
     }),
     esClient.termsEnum({
       index: dataStreamName,
       field: 'data_stream.type',
+      index_filter: termsEnumIndexFilter,
     }),
     esClient.termsEnum({
       index: dataStreamName,
       field: 'service.name',
       size: 2,
+      index_filter: termsEnumIndexFilter,
     }),
     esClient.termsEnum({
       index: dataStreamName,
       field: 'service.environment',
       size: 2,
+      index_filter: termsEnumIndexFilter,
     }),
   ]);
 

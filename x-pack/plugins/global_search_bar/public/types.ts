@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export interface DisplayOptionsState {
-  timestamp: boolean;
-  verboseMode: boolean;
-}
+import { UiCounterMetricType } from '@kbn/analytics';
+
+export type TrackUiMetricFn = (
+  metricType: UiCounterMetricType,
+  eventName: string | string[]
+) => void;
