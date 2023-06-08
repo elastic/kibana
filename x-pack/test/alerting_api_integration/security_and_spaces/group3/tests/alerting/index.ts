@@ -28,6 +28,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./fields_rule'));
       loadTestFile(require.resolve('./get_flapping_settings'));
       loadTestFile(require.resolve('./run_soon'));
+      loadTestFile(require.resolve('./suggestions_value_rule'));
       loadTestFile(require.resolve('./update_flapping_settings'));
       loadTestFile(require.resolve('./user_managed_api_key'));
     });

@@ -64,7 +64,7 @@ export interface RouteOptions {
   licenseState: ILicenseState;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   usageCounter?: UsageCounter;
-  config$: Observable<ConfigSchema>;
+  config$?: Observable<ConfigSchema>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -115,6 +115,6 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   activeMaintenanceWindowsRoute(router, licenseState);
-  registerValueSuggestionsRoute(router, licenseState, config$);
+  registerValueSuggestionsRoute(router, licenseState, config$!);
   registerFieldsRoute(router, licenseState);
 }
