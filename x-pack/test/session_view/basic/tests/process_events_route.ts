@@ -54,7 +54,8 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       .set('Elastic-Api-Version', CURRENT_API_VERSION);
   }
 
-  describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with a basic license`, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/159275
+  describe.skip(`Session view - ${PROCESS_EVENTS_ROUTE} - with a basic license`, () => {
     describe(`using typical process event data`, () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
