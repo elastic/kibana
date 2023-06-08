@@ -49,10 +49,6 @@ export function IndexSelection() {
 
     const searchPattern = search.endsWith('*') ? search.substring(0, search.length - 1) : search;
     const matchingIndices = indices.filter(({ name }) => name.startsWith(searchPattern));
-    // const matchingDataViews = dataViews.filter(
-    //   (view) =>
-    //     view.getName().startsWith(searchPattern) || view.getIndexPattern().startsWith(searchPattern)
-    // );
 
     if (matchingIndices.length === 0 && dataViews.length === 0) {
       return setIndexOptions([]);
