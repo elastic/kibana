@@ -388,7 +388,7 @@ export class DiscoverPlugin
 
     const { uiActions } = plugins;
 
-    const viewSavedSearchAction = new ViewSavedSearchAction(core.application);
+    const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     setUiActions(plugins.uiActions);
 

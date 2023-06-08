@@ -11,8 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import { DashboardAPI, DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
+import { Filter, uniqFilters } from '@kbn/es-query';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../common';
+import { DiscoverAppLocator, SEARCH_EMBEDDABLE_TYPE } from '../../common';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
@@ -20,18 +22,47 @@ export interface ViewSearchContext {
   embeddable: IEmbeddable;
 }
 
+const isDashboard = (embeddable: IEmbeddable): embeddable is DashboardAPI => {
+  return embeddable.type === DASHBOARD_CONTAINER_TYPE;
+};
+
 export class ViewSavedSearchAction implements Action<ViewSearchContext> {
   public id = ACTION_VIEW_SAVED_SEARCH;
   public readonly type = ACTION_VIEW_SAVED_SEARCH;
 
-  constructor(private readonly application: ApplicationStart) {}
+  constructor(
+    private readonly application: ApplicationStart,
+    private readonly locator: DiscoverAppLocator
+  ) {}
 
   async execute(context: ActionExecutionContext<ViewSearchContext>): Promise<void> {
     const { embeddable } = context;
-    const savedSearchId = (embeddable as SavedSearchEmbeddable).getSavedSearch().id;
-    const path = getSavedSearchUrl(savedSearchId);
+    const savedSearch = (embeddable as SavedSearchEmbeddable).getSavedSearch();
+    const savedSearchId = savedSearch.id;
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
-    await this.application.navigateToApp(app ? app : 'discover', { path });
+
+    if (!app || app === 'discover') {
+      const rootEmbeddable = embeddable.getRoot();
+      let filters: Filter[] = [];
+
+      if (isDashboard(rootEmbeddable)) {
+        filters = rootEmbeddable.getInput().filters;
+      }
+
+      const savedSearchFilters = savedSearch.searchSource.getField('filter') as
+        | Filter[]
+        | undefined;
+
+      filters = uniqFilters([...(savedSearchFilters ?? []), ...filters]);
+
+      await this.locator.navigate({
+        savedSearchId,
+        filters,
+      });
+    } else {
+      const path = getSavedSearchUrl(savedSearchId);
+      await this.application.navigateToApp(app ? app : 'discover', { path });
+    }
   }
 
   getDisplayName(context: ActionExecutionContext<ViewSearchContext>): string {
