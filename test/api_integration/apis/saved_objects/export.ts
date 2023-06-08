@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 function ndjsonToObject(input: string) {
   return input.split('\n').map((str) => JSON.parse(str));
 }
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -50,6 +51,32 @@ export default function ({ getService }: FtrProviderContext) {
             expect(objects[3]).to.have.property('exportedCount', 3);
             expect(objects[3]).to.have.property('missingRefCount', 0);
             expect(objects[3].missingReferences).to.have.length(0);
+          });
+      });
+
+      it('should support exporting all types', async () => {
+        await supertest
+          .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
+          .send({
+            type: ['*'],
+            excludeExportDetails: true,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = ndjsonToObject(resp.text);
+            expect(objects).to.have.length(4);
+            expect(objects.map((obj) => ({ id: obj.id, type: obj.type }))).to.eql([
+              { id: '7.0.0-alpha1', type: 'config' },
+              {
+                id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                type: 'index-pattern',
+              },
+              {
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                type: 'visualization',
+              },
+              { id: 'be3733a0-9efe-11e7-acb3-3dab96693fab', type: 'dashboard' },
+            ]);
           });
       });
 
