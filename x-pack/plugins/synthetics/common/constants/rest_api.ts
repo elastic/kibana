@@ -22,7 +22,6 @@ export enum API_URLS {
   JOURNEY_FAILED_STEPS = `/internal/uptime/journeys/failed_steps`,
   JOURNEY_SCREENSHOT = `/internal/uptime/journey/screenshot/{checkGroup}/{stepIndex}`,
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/uptime/journey/screenshot/block`,
-  LOG_PAGE_VIEW = `/internal/uptime/log_page_view`,
 
   ML_MODULE_JOBS = `/internal/ml/modules/jobs_exist/`,
   ML_SETUP_MODULE = '/internal/ml/modules/setup/',

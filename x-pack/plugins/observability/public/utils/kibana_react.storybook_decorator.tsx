@@ -33,6 +33,9 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         uptime: { enabled: false },
       },
     },
+    coPilot: {
+      enabled: false,
+    },
   };
   const mockTheme: CoreTheme = {
     darkMode: false,

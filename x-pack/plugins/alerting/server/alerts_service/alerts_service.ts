@@ -36,6 +36,7 @@ import {
   installWithTimeout,
 } from './lib';
 import { type LegacyAlertsClientParams, type AlertRuleData, AlertsClient } from '../alerts_client';
+import { IAlertsClient } from '../alerts_client/types';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -92,7 +93,7 @@ interface IAlertsService {
     RecoveryActionGroupId extends string
   >(
     opts: CreateAlertsClientParams
-  ): Promise<AlertsClient<
+  ): Promise<IAlertsClient<
     AlertData,
     LegacyState,
     LegacyContext,
@@ -136,7 +137,15 @@ export class AlertsService implements IAlertsService {
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string
-  >(opts: CreateAlertsClientParams) {
+  >(
+    opts: CreateAlertsClientParams
+  ): Promise<IAlertsClient<
+    AlertData,
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null> {
     if (!opts.ruleType.alerts) {
       return null;
     }
