@@ -191,6 +191,25 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:serverless-test-all')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/serverless_common.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/serverless_observability.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/serverless_search.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/serverless_security.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:serverless-test-observability')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/serverless_observability.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:serverless-test-search')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/serverless_search.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:serverless-test-security')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/serverless_security.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     uploadPipeline(pipeline.join('\n'));

@@ -1,0 +1,13 @@
+steps:
+  - command: SERVERLESS_ENVIRONMENT=search .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Search Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
