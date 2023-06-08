@@ -11,11 +11,11 @@ import { apiService } from './utils';
 
 let indexStatusPromise: Promise<{ indexExists: boolean; indices: string }> | null = null;
 
-export const fetchIndexStatus = async (): Promise<StatesIndexStatus> => {
+export const fetchIndexStatus = async (from?: string, to?: string): Promise<StatesIndexStatus> => {
   if (indexStatusPromise) {
     return indexStatusPromise;
   }
-  indexStatusPromise = apiService.get(API_URLS.INDEX_STATUS, undefined, StatesIndexStatusType);
+  indexStatusPromise = apiService.get(API_URLS.INDEX_STATUS, { from, to }, StatesIndexStatusType);
   indexStatusPromise.then(
     () => {
       indexStatusPromise = null;

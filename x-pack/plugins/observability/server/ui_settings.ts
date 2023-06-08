@@ -28,6 +28,7 @@ import {
   enableCriticalPath,
   enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
+  enableLegacyUptimeApp,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -355,6 +356,19 @@ export const uiSettings: Record<string, UiSettings> = {
         },
       }
     ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [enableLegacyUptimeApp]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableLegacyUptimeApp', {
+      defaultMessage: 'Enable Legacy Uptime UI',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
+      defaultMessage:
+        'Legacy Uptime app is now hidden by default if you have no data in last 24 hours. Enabling it here will always show it.',
+    }),
     schema: schema.boolean(),
     requiresPageReload: true,
   },
