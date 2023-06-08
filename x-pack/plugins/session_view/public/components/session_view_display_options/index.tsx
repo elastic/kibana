@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { DisplayOptionsState } from '../../../common/types/session_view';
 import { useStyles } from './styles';
 
 const TIMESTAMP_OPTION_KEY = 'Timestamp';
@@ -39,6 +38,11 @@ const VERBOSE_TOOLTIP_CONTENT = i18n.translate(
     defaultMessage: 'For a complete set of results, turn on Verbose mode.',
   }
 );
+
+export interface DisplayOptionsState {
+  timestamp: boolean;
+  verboseMode: boolean;
+}
 
 export const SessionViewDisplayOptions = ({
   onChange,
