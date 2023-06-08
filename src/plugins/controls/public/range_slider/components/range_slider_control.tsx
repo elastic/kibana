@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useRef, useEffect } from 'react';
+import React, { FC, useState, useRef } from 'react';
 
 import { EuiInputPopover } from '@elastic/eui';
 
@@ -24,18 +24,9 @@ export const RangeSliderControl: FC = () => {
   const rangeSlider = useRangeSlider();
 
   const error = rangeSlider.select((state) => state.componentState.error);
-  const value = rangeSlider.select((state) => state.explicitInput.value);
-
-  const [currentRange, setCurrentRange] = useState(value);
-
-  useEffect(() => {
-    rangeSlider.dispatch.setSelectedRange(currentRange);
-  }, [currentRange, rangeSlider.dispatch]);
 
   const button = (
     <RangeSliderButton
-      currentRange={currentRange}
-      onChange={setCurrentRange}
       onClick={(event) => {
         // the popover should remain open if the click target is one of the number inputs
         if (isPopoverOpen && event.target instanceof HTMLInputElement) {
@@ -68,11 +59,7 @@ export const RangeSliderControl: FC = () => {
         rangeRef.current?.onResize(width);
       }}
     >
-      <RangeSliderPopover
-        rangeRef={rangeRef}
-        currentRange={currentRange}
-        onChange={setCurrentRange}
-      />
+      <RangeSliderPopover rangeRef={rangeRef} />
     </EuiInputPopover>
   );
 };

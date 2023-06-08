@@ -28,10 +28,8 @@ import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
 
 export const RangeSliderPopover: FC<{
-  onChange: (newValue: [string, string]) => void;
-  currentRange: [string, string];
   rangeRef?: Ref<EuiDualRangeRef>;
-}> = ({ onChange, currentRange, rangeRef }) => {
+}> = ({ rangeRef }) => {
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
 
   // Controls Services Context
@@ -45,6 +43,7 @@ export const RangeSliderPopover: FC<{
 
   const id = rangeSlider.select((state) => state.explicitInput.id);
   const title = rangeSlider.select((state) => state.explicitInput.title);
+  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
 
   const min = rangeSlider.select((state) => state.componentState.min);
   const max = rangeSlider.select((state) => state.componentState.max);
@@ -56,10 +55,7 @@ export const RangeSliderPopover: FC<{
   const [rangeSliderMax, setRangeSliderMax] = useState<number>(max);
 
   useMount(() => {
-    const [lowerBoundSelection, upperBoundSelection] = [
-      parseFloat(currentRange[0]),
-      parseFloat(currentRange[1]),
-    ];
+    const [lowerBoundSelection, upperBoundSelection] = [parseFloat(value[0]), parseFloat(value[1])];
 
     setRangeSliderMin(
       Math.min(
@@ -117,9 +113,9 @@ export const RangeSliderPopover: FC<{
             min={rangeSliderMin}
             max={rangeSliderMax}
             onChange={([minSelection, maxSelection]) => {
-              onChange([String(minSelection), String(maxSelection)]);
+              rangeSlider.dispatch.setSelectedRange([String(minSelection), String(maxSelection)]);
             }}
-            value={currentRange}
+            value={value}
             ticks={ticks}
             levels={levels}
             showTicks
@@ -139,7 +135,7 @@ export const RangeSliderPopover: FC<{
               iconType="eraser"
               color="danger"
               onClick={() => {
-                onChange(['', '']);
+                rangeSlider.dispatch.setSelectedRange(['', '']);
               }}
               aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
               data-test-subj="rangeSlider__clearRangeButton"

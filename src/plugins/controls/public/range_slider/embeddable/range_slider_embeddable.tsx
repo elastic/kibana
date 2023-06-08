@@ -41,7 +41,6 @@ import { ControlsDataService } from '../../services/data/types';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
-import { RangeValue } from '@kbn/controls-plugin/common/range_slider/types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -137,7 +136,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private initialize = async () => {
     const initialValue = this.getInput().value;
     if (!initialValue) {
-      this.unpublishedChanges.next({ range: ['', ''] });
       this.setInitializationFinished();
     }
 
@@ -150,7 +148,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       })
       .then(async () => {
         if (initialValue) {
-          await this.buildFilter();
           this.setInitializationFinished();
         }
         this.setupSubscriptions();
@@ -191,7 +188,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.getInput$()
         .pipe(distinctUntilChanged((a, b) => isEqual(a.value, b.value)))
         .subscribe(({ value }) => {
-          this.unpublishedChanges.next({ range: value });
+          this.unpublishedChanges.next({ range: value ?? ['', ''] });
         })
     );
 

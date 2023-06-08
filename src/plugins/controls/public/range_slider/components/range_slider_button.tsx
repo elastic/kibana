@@ -16,12 +16,8 @@ import './range_slider.scss';
 
 export const RangeSliderButton = ({
   onClick,
-  onChange,
-  currentRange,
 }: {
   onClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  onChange: (newRange: [string, string]) => void;
-  currentRange: [string, string];
 }) => {
   const rangeSlider = useRangeSlider();
 
@@ -30,7 +26,8 @@ export const RangeSliderButton = ({
   const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
 
   const id = rangeSlider.select((state) => state.explicitInput.id);
-  const value = rangeSlider.select((state) => state.explicitInput.value);
+  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
+
   const isLoading = rangeSlider.select((state) => state.output.loading);
 
   return (
@@ -44,9 +41,9 @@ export const RangeSliderButton = ({
         <EuiFieldNumber
           controlOnly
           fullWidth
-          value={currentRange[0] === String(min) ? '' : currentRange[0]}
+          value={value[0] === String(min) ? '' : value[0]}
           onChange={(event) => {
-            onChange([event.target.value, value[1]]);
+            rangeSlider.dispatch.setSelectedRange([event.target.value, value[1]]);
           }}
           placeholder={String(min)}
           isInvalid={isInvalid}
@@ -57,9 +54,9 @@ export const RangeSliderButton = ({
         <EuiFieldNumber
           controlOnly
           fullWidth
-          value={currentRange[1] === String(max) ? '' : currentRange[1]}
+          value={value[1] === String(max) ? '' : value[1]}
           onChange={(event) => {
-            onChange([value[0], event.target.value]);
+            rangeSlider.dispatch.setSelectedRange([value[0], event.target.value]);
           }}
           placeholder={String(max)}
           isInvalid={isInvalid}
