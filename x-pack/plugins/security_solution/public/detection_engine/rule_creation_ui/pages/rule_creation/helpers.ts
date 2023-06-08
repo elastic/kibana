@@ -40,8 +40,6 @@ import type {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
-  RuleStepsFormData,
-  RuleStep,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
@@ -70,23 +68,6 @@ export const getTimeTypeValue = (time: string): { unit: Unit; value: number } =>
   }
   return timeObj;
 };
-
-export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
-  formData?: T
-): formData is { [K in keyof T]: Exclude<T[K], undefined> } =>
-  !!formData?.isValid && !!formData.data;
-
-export const isDefineStep = (input: unknown): input is RuleStepsFormData[RuleStep.defineRule] =>
-  has('data.ruleType', input);
-
-export const isAboutStep = (input: unknown): input is RuleStepsFormData[RuleStep.aboutRule] =>
-  has('data.name', input);
-
-export const isScheduleStep = (input: unknown): input is RuleStepsFormData[RuleStep.scheduleRule] =>
-  has('data.interval', input);
-
-export const isActionsStep = (input: unknown): input is RuleStepsFormData[RuleStep.ruleActions] =>
-  has('data.actions', input);
 
 export interface RuleFields {
   anomalyThreshold: unknown;

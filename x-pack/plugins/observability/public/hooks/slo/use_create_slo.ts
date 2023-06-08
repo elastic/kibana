@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export function useCreateSlo() {
   const {
@@ -33,7 +34,7 @@ export function useCreateSlo() {
             values: { name },
           })
         );
-        queryClient.invalidateQueries(['fetchSloList']);
+        queryClient.invalidateQueries(sloKeys.lists());
       },
       onError: (error, { slo: { name } }) => {
         toasts.addError(new Error(String(error)), {
@@ -45,10 +46,10 @@ export function useCreateSlo() {
       },
       onMutate: async ({ slo }) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList']);
+        await queryClient.cancelQueries(sloKeys.lists());
 
         const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
+          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) || []
         ).at(0);
 
         const [queryKey, data] = latestFetchSloListRequest || [];

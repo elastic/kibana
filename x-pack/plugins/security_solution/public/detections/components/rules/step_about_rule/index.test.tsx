@@ -10,21 +10,23 @@ import { mount, shallow } from 'enzyme';
 import { act } from '@testing-library/react';
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { StepAboutRule } from '.';
+import { StepAboutRule, StepAboutRuleReadOnly } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import { mockAboutStepRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-import type {
-  AboutStepRule,
-  RuleStepsFormHooks,
-  RuleStep,
-  DefineStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { AboutStepRule, DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType, GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 import { TestProviders } from '../../../../common/mock';
+import { useRuleForms } from '../../../../detection_engine/rule_creation_ui/pages/form';
+import { stepActionsDefaultValue } from '../step_rule_actions';
+import {
+  defaultSchedule,
+  stepDefineDefaultValue,
+} from '../../../pages/detection_engine/rules/utils';
+import type { FormHook } from '../../../../shared_imports';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
@@ -69,16 +71,34 @@ export const stepDefineStepMLRule: DefineStepRule = {
 
 describe('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
-  let formHook: RuleStepsFormHooks[RuleStep.aboutRule] | null = null;
-  const setFormHook = <K extends keyof RuleStepsFormHooks>(
-    step: K,
-    hook: RuleStepsFormHooks[K]
-  ) => {
-    formHook = hook as typeof formHook;
+  const TestComp = ({
+    setFormRef,
+    defineStepDefaultOverride,
+  }: {
+    setFormRef: (form: FormHook<AboutStepRule, AboutStepRule>) => void;
+    defineStepDefaultOverride?: DefineStepRule;
+  }) => {
+    const defineStepDefault = defineStepDefaultOverride ?? stepDefineDefaultValue;
+    const { aboutStepForm } = useRuleForms({
+      defineStepDefault,
+      aboutStepDefault: stepAboutDefaultValue,
+      scheduleStepDefault: defaultSchedule,
+      actionsStepDefault: stepActionsDefaultValue,
+    });
+
+    setFormRef(aboutStepForm);
+
+    return (
+      <StepAboutRule
+        defaultValues={stepAboutDefaultValue}
+        defineRuleData={defineStepDefault}
+        isLoading={false}
+        form={aboutStepForm}
+      />
+    );
   };
 
   beforeEach(() => {
-    formHook = null;
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
       {
@@ -92,12 +112,10 @@ describe('StepAboutRuleComponent', () => {
 
   it('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
     const wrapper = shallow(
-      <StepAboutRule
+      <StepAboutRuleReadOnly
         addPadding={false}
         defaultValues={mockAboutStepRule()}
         descriptionColumns="multi"
-        isReadOnlyView={true}
-        isLoading={false}
       />
     );
 
@@ -105,14 +123,12 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if description is not present', async () => {
+    let form: FormHook<AboutStepRule, AboutStepRule>;
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
+      <TestComp
+        setFormRef={(newForm) => {
+          form = newForm;
+        }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -120,29 +136,24 @@ describe('StepAboutRuleComponent', () => {
     );
 
     await act(async () => {
-      if (!formHook) {
-        throw new Error('Form hook not set, but tests depend on it');
-      }
       wrapper
         .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
         .first()
         .simulate('change', { target: { value: 'Test name text' } });
 
-      const result = await formHook();
-      expect(result?.isValid).toEqual(false);
+      const result = await form.validate();
+      expect(result).toEqual(false);
     });
   });
 
   it('is invalid if threat match rule and threat_indicator_path is not present', async () => {
+    let form: FormHook<AboutStepRule, AboutStepRule>;
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        defineRuleData={{ ruleType: 'threat_match' } as DefineStepRule}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
+      <TestComp
+        setFormRef={(newForm) => {
+          form = newForm;
+        }}
+        defineStepDefaultOverride={{ ruleType: 'threat_match' } as DefineStepRule}
       />,
       {
         wrappingComponent: TestProviders,
@@ -150,28 +161,23 @@ describe('StepAboutRuleComponent', () => {
     );
 
     await act(async () => {
-      if (!formHook) {
-        throw new Error('Form hook not set, but tests depend on it');
-      }
       wrapper
         .find('[data-test-subj="detectionEngineStepAboutThreatIndicatorPath"] input')
         .first()
         .simulate('change', { target: { value: '' } });
 
-      const result = await formHook();
-      expect(result?.isValid).toEqual(false);
+      const result = await form.validate();
+      expect(result).toEqual(false);
     });
   });
 
   it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
+    let form: FormHook<AboutStepRule, AboutStepRule>;
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
+      <TestComp
+        setFormRef={(newForm) => {
+          form = newForm;
+        }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -188,24 +194,18 @@ describe('StepAboutRuleComponent', () => {
       .simulate('change', { target: { value: 'Test name text' } });
 
     await act(async () => {
-      if (!formHook) {
-        throw new Error('Form hook not set, but tests depend on it');
-      }
-
-      const result = await formHook();
-      expect(result?.isValid).toEqual(true);
+      const result = await form.validate();
+      expect(result).toEqual(true);
     });
   });
 
   it('is invalid if no "name" is present', async () => {
+    let form: FormHook<AboutStepRule, AboutStepRule>;
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
+      <TestComp
+        setFormRef={(newForm) => {
+          form = newForm;
+        }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -213,28 +213,22 @@ describe('StepAboutRuleComponent', () => {
     );
 
     await act(async () => {
-      if (!formHook) {
-        throw new Error('Form hook not set, but tests depend on it');
-      }
-
       wrapper
         .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
         .first()
         .simulate('change', { target: { value: 'Test description text' } });
-      const result = await formHook();
-      expect(result?.isValid).toEqual(false);
+      const result = await form.validate();
+      expect(result).toEqual(false);
     });
   });
 
   it('is valid if both "name" and "description" are present', async () => {
+    let form: FormHook<AboutStepRule, AboutStepRule>;
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
+      <TestComp
+        setFormRef={(newForm) => {
+          form = newForm;
+        }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -275,24 +269,19 @@ describe('StepAboutRuleComponent', () => {
     };
 
     await act(async () => {
-      if (!formHook) {
-        throw new Error('Form hook not set, but tests depend on it');
-      }
-      const result = await formHook();
+      const result = await form.submit();
       expect(result?.isValid).toEqual(true);
       expect(result?.data).toEqual(expected);
     });
   });
 
   it('it allows user to set the risk score as a number (and not a string)', async () => {
+    let form: FormHook<AboutStepRule, AboutStepRule>;
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
+      <TestComp
+        setFormRef={(newForm) => {
+          form = newForm;
+        }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -339,24 +328,19 @@ describe('StepAboutRuleComponent', () => {
     };
 
     await act(async () => {
-      if (!formHook) {
-        throw new Error('Form hook not set, but tests depend on it');
-      }
-      const result = await formHook();
+      const result = await form.submit();
       expect(result?.isValid).toEqual(true);
       expect(result?.data).toEqual(expected);
     });
   });
 
   it('does not modify the provided risk score until the user changes the severity', async () => {
+    let form: FormHook<AboutStepRule, AboutStepRule>;
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
+      <TestComp
+        setFormRef={(newForm) => {
+          form = newForm;
+        }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -374,10 +358,7 @@ describe('StepAboutRuleComponent', () => {
       .simulate('change', { target: { value: 'Test description text' } });
 
     await act(async () => {
-      if (!formHook) {
-        throw new Error('Form hook not set, but tests depend on it');
-      }
-      const result = await formHook();
+      const result = await form.submit();
       expect(result?.isValid).toEqual(true);
       expect(result?.data?.riskScore.value).toEqual(21);
 
@@ -387,7 +368,7 @@ describe('StepAboutRuleComponent', () => {
         .simulate('click');
       wrapper.find('button#medium').simulate('click');
 
-      const result2 = await formHook();
+      const result2 = await form.submit();
       expect(result2?.isValid).toEqual(true);
       expect(result2?.data?.riskScore.value).toEqual(47);
     });
@@ -400,20 +381,9 @@ describe('StepAboutRuleComponent', () => {
       return { jobs: [{ results_index_name: 'shared' }] };
     });
 
-    mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        defineRuleData={stepDefineStepMLRule}
-        descriptionColumns="multi"
-        isReadOnlyView={false}
-        setForm={setFormHook}
-        isLoading={false}
-      />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
+    mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
+      wrappingComponent: TestProviders,
+    });
 
     const indexNames = ['.ml-anomalies-shared'];
     expect(useFetchIndex).lastCalledWith(indexNames);
