@@ -17,11 +17,10 @@ import type { LocationDescriptor, History } from 'history';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
-import TableListView, {
-  TableList,
-  TableListProps,
-  UserContentCommonSchema,
-  type TableListViewProps,
+import {
+  TableListViewTable,
+  type TableListViewTableProps,
+  type UserContentCommonSchema,
 } from './table_list_view_table';
 
 const mockUseEffect = useEffect;
@@ -62,16 +61,18 @@ const getActions = (testBed: TestBed) => ({
 });
 
 describe('TableListView', () => {
-  const requiredProps: TableListViewProps = {
+  const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
     listingLimit: 500,
     initialFilter: '',
     initialPageSize: 20,
-    title: 'test title',
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
     getDetailViewLink: () => 'http://elastic.co',
     urlStateEnabled: false,
+    onFetchSuccess: () => {},
+    tableCaption: 'my caption',
+    setPageDataTestSubject: () => {},
   };
 
   beforeAll(() => {
@@ -82,8 +83,8 @@ describe('TableListView', () => {
     jest.useRealTimers();
   });
 
-  const setup = registerTestBed<string, TableListViewProps>(
-    WithServices<TableListViewProps>(TableListView),
+  const setup = registerTestBed<string, TableListViewTableProps>(
+    WithServices<TableListViewTableProps>(TableListViewTable),
     {
       defaultProps: { ...requiredProps },
       memoryRouter: { wrapComponent: true },
@@ -377,8 +378,8 @@ describe('TableListView', () => {
   });
 
   describe('column sorting', () => {
-    const setupColumnSorting = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, {
+    const setupColumnSorting = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
         TagList: getTagList({ references: [] }),
       }),
       {
@@ -580,8 +581,8 @@ describe('TableListView', () => {
   });
 
   describe('content editor', () => {
-    const setupInspector = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView),
+    const setupInspector = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable),
       {
         defaultProps: { ...requiredProps },
         memoryRouter: { wrapComponent: true },
@@ -631,8 +632,8 @@ describe('TableListView', () => {
   });
 
   describe('tag filtering', () => {
-    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, {
+    const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
         getTagList: () => [
           { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
           { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
@@ -783,8 +784,8 @@ describe('TableListView', () => {
   describe('url state', () => {
     let router: Router | undefined;
 
-    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, {
+    const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
         getTagList: () => [
           { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
           { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
@@ -1093,7 +1094,7 @@ describe('TableListView', () => {
       },
     ];
 
-    const setupTest = async (props?: Partial<TableListViewProps>) => {
+    const setupTest = async (props?: Partial<TableListViewTableProps>) => {
       let testBed: TestBed | undefined;
       const deleteItems = jest.fn();
       await act(async () => {
@@ -1176,7 +1177,7 @@ describe('TableListView', () => {
 });
 
 describe('TableList', () => {
-  const requiredProps: TableListProps = {
+  const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
     initialPageSize: 20,
@@ -1188,10 +1189,13 @@ describe('TableList', () => {
     setPageDataTestSubject: () => {},
   };
 
-  const setup = registerTestBed<string, TableListProps>(WithServices<TableListProps>(TableList), {
-    defaultProps: { ...requiredProps, refreshListBouncer: false },
-    memoryRouter: { wrapComponent: true },
-  });
+  const setup = registerTestBed<string, TableListViewTableProps>(
+    WithServices<TableListViewTableProps>(TableListViewTable),
+    {
+      defaultProps: { ...requiredProps, refreshListBouncer: false },
+      memoryRouter: { wrapComponent: true },
+    }
+  );
 
   it('refreshes the list when the bouncer changes', async () => {
     let testBed: TestBed;

@@ -19,6 +19,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/content-management-content-editor",
+    "@kbn/content-management-table-list-view",
     "@kbn/core-http-browser",
     "@kbn/core-mount-utils-browser",
     "@kbn/core-overlays-browser",

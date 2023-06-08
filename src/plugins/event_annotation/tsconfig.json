@@ -23,7 +23,7 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/presentation-util-plugin",
-    "@kbn/content-management-table-list",
+    "@kbn/content-management-table-list-view",
     "@kbn/visualizations-plugin",
     "@kbn/data-views-plugin",
     "@kbn/visualization-ui-components",

@@ -28,7 +28,7 @@
     "@kbn/config-schema",
     "@kbn/i18n-react",
     "@kbn/inspector-plugin",
-    "@kbn/content-management-table-list",
+    "@kbn/content-management-table-list-view",
     "@kbn/test-jest-helpers",
     "@kbn/data-views-plugin",
     "@kbn/es-query",

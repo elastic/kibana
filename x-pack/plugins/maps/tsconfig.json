@@ -50,7 +50,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/shared-ux-button-exit-full-screen",
     "@kbn/i18n-react",
-    "@kbn/content-management-table-list",
+    "@kbn/content-management-table-list-view",
     "@kbn/react-field",
     "@kbn/analytics",
     "@kbn/mapbox-gl",

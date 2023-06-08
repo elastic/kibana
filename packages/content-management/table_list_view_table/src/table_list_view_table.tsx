@@ -270,7 +270,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   refreshListBouncer,
   setPageDataTestSubject,
 }: TableListViewTableProps<T>) {
-  setPageDataTestSubject(`${entityName}LandingPage`);
+  useEffect(() => {
+    setPageDataTestSubject(`${entityName}LandingPage`);
+  }, [entityName, setPageDataTestSubject]);
 
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(

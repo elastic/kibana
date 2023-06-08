@@ -32,7 +32,7 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/shared-ux-page-analytics-no-data",
-    "@kbn/content-management-table-list",
+    "@kbn/content-management-table-list-view",
     "@kbn/i18n-react",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",

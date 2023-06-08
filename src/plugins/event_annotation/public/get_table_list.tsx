@@ -9,10 +9,8 @@
 import React, { FC } from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
-import {
-  type TableListTabParentProps,
-  TableListViewKibanaProvider,
-} from '@kbn/content-management-table-list-view-table';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { type TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';

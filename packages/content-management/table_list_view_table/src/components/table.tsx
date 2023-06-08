@@ -26,7 +26,7 @@ import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
   State as TableListViewState,
-  TableListProps,
+  TableListViewTableProps,
   UserContentCommonSchema,
 } from '../table_list_view_table';
 import type { TableItemsRowActions } from '../types';
@@ -54,7 +54,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
-  deleteItems: TableListProps<T>['deleteItems'];
+  deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
