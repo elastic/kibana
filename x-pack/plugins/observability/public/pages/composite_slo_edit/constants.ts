@@ -6,8 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CreateCompositeSLOInput } from '@kbn/slo-schema';
-import { BUDGETING_METHOD_OCCURRENCES, BUDGETING_METHOD_TIMESLICES } from '../../utils/slo/labels';
+import { BudgetingMethod, CompositeMethod, CreateCompositeSLOInput } from '@kbn/slo-schema';
+import {
+  BUDGETING_METHOD_OCCURRENCES,
+  BUDGETING_METHOD_TIMESLICES,
+  COMPOSITE_METHOD_WEIGHTED_AVERAGE,
+} from '../../utils/slo/labels';
 
 export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
   {
@@ -18,6 +22,10 @@ export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: str
     value: 'timeslices',
     text: BUDGETING_METHOD_TIMESLICES,
   },
+];
+
+export const COMPOSITE_METHOD_OPTIONS: Array<{ value: CompositeMethod; text: string }> = [
+  { value: 'weightedAverage', text: COMPOSITE_METHOD_WEIGHTED_AVERAGE },
 ];
 
 export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({

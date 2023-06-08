@@ -120,6 +120,8 @@ type UpdateCompositeSLOInput = t.OutputOf<typeof updateCompositeSLOParamsSchema.
 type UpdateCompositeSLOParams = t.TypeOf<typeof updateCompositeSLOParamsSchema.props.body>;
 type UpdateCompositeSLOResponse = t.OutputOf<typeof updateCompositeSLOResponseSchema>;
 
+type CompositeMethod = t.TypeOf<typeof weightedAverageCompositeMethodSchema>;
+
 export {
   compositeSLOResponseSchema,
   createCompositeSLOParamsSchema,
@@ -132,6 +134,7 @@ export {
 };
 
 export type {
+  CompositeMethod,
   CompositeSLOWithSummaryResponse,
   CreateCompositeSLOInput,
   CreateCompositeSLOParams,

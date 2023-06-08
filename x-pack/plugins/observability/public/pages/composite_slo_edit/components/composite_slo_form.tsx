@@ -20,6 +20,7 @@ import {
   transformValuesToCreateInput,
   transformValuesToUpdateInput,
 } from '../helpers/process_form_values';
+import { SourcesSection } from './sources_section';
 
 export interface Props {
   compositeSlo: CompositeSLOWithSummaryResponse | undefined;
@@ -78,7 +79,7 @@ export function CompositeSloForm({ compositeSlo }: Props) {
               title: i18n.translate('xpack.observability.slo.compositeSloForm.sources.title', {
                 defaultMessage: 'Add source SLOs',
               }),
-              children: <h1>test</h1>,
+              children: <SourcesSection isEditMode={isEditMode} />,
               status: 'incomplete',
             },
             {
@@ -102,7 +103,7 @@ export function CompositeSloForm({ compositeSlo }: Props) {
 
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiButton
-            data-test-subj="o11yCompositeSloEditFormButton"
+            data-test-subj="compositeSloSubmitFormButton"
             color="primary"
             fill
             isLoading={isCreating || isUpdating}
@@ -118,7 +119,7 @@ export function CompositeSloForm({ compositeSlo }: Props) {
           </EuiButton>
 
           <EuiButton
-            data-test-subj="o11yCompositeSloEditFormCancelButton"
+            data-test-subj="compositeSloFormCancelButton"
             color="ghost"
             fill
             disabled={isCreating || isUpdating}

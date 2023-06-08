@@ -66,6 +66,11 @@ export const BUDGETING_METHOD_TIMESLICES = i18n.translate(
   }
 );
 
+export const COMPOSITE_METHOD_WEIGHTED_AVERAGE = i18n.translate(
+  'xpack.observability.slo.compositeMethod.weightedAverage',
+  { defaultMessage: 'Weighted average' }
+);
+
 export function toDurationLabel(durationStr: string): string {
   const duration = toDuration(durationStr);
 
