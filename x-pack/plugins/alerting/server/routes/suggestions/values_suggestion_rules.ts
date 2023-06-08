@@ -31,6 +31,18 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   fieldNames: { ruleTypeId: 'alert.alertTypeId', consumer: 'alert.consumer' },
 };
 
+export const RulesSuggestionsSchema = {
+  body: schema.object(
+    {
+      field: schema.string(),
+      query: schema.string(),
+      filters: schema.maybe(schema.any()),
+      fieldMeta: schema.maybe(schema.any()),
+    },
+    { unknowns: 'allow' }
+  ),
+};
+
 export function registerValueSuggestionsRoute(
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
@@ -40,20 +52,7 @@ export function registerValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/rules/suggestions/values',
-      validate: {
-        body: schema.object(
-          {
-            field: schema.string(),
-            query: schema.string(),
-            filters: schema.maybe(schema.any()),
-            fieldMeta: schema.maybe(schema.any()),
-            method: schema.maybe(
-              schema.oneOf([schema.literal('terms_agg'), schema.literal('terms_enum')])
-            ),
-          },
-          { unknowns: 'allow' }
-        ),
-      },
+      validate: RulesSuggestionsSchema,
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, request, response) {
@@ -87,7 +86,6 @@ export function registerValueSuggestionsRoute(
           { term: { namespaces: rulesClient.getSpaceId() } },
         ] as estypes.QueryDslQueryContainer[];
         const index = ALERTING_CASES_SAVED_OBJECT_INDEX;
-
         try {
           const body = await termsAggSuggestions(
             config,

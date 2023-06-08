@@ -8,80 +8,16 @@
 import React, { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fromKueryExpression, KueryNode, Query } from '@kbn/es-query';
-import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 
 import useAsync from 'react-use/lib/useAsync';
 import { isEmpty } from 'lodash';
-import { TriggersAndActionsUiServices } from '../../../../..';
+
 import { useKibana } from '../../../../../common/lib/kibana';
 import { NO_INDEX_PATTERNS } from '../../../alerts_search_bar/constants';
 import { validateFieldsKueryNode } from './validate_kuery_node';
+import { suggestionsAbstraction } from './constants';
+import { enhanceSuggestionAbstractionFields } from './helpers';
 
-const suggestionsAbstraction: SuggestionsAbstraction = {
-  type: 'rules',
-  fields: {
-    'alert.tags': {
-      field: 'alert.tags',
-      fieldToQuery: 'alert.attributes.tags',
-      displayField: 'tags',
-    },
-    'alert.name.keyword': {
-      field: 'alert.name.keyword',
-      fieldToQuery: 'alert.attributes.name.keyword',
-      displayField: 'name',
-    },
-    'alert.actions.actionTypeId': {
-      field: 'alert.actions.actionTypeId',
-      nestedField: 'alert.actions:{ actionTypeId  }',
-      fieldToQuery: 'alert.attributes.actions.actionTypeId',
-      displayField: 'actions',
-    },
-    'alert.alertTypeId': {
-      field: 'alert.alertTypeId',
-      fieldToQuery: 'alert.attributes.alertTypeId',
-      displayField: 'type',
-    },
-    'alert.lastRun.outcome': {
-      field: 'alert.lastRun.outcome',
-      fieldToQuery: 'alert.attributes.lastRun.outcome',
-      displayField: 'lastResponse',
-    },
-    'alert.enabled': {
-      field: 'alert.enabled',
-      fieldToQuery: 'alert.attributes.enabled',
-      displayField: 'enabled',
-    },
-    'alert.muteAll': {
-      field: 'alert.muteAll',
-      fieldToQuery: 'alert.attributes.muteAll',
-      displayField: 'muted',
-    },
-    'alert.params.threat.tactic.name': {
-      field: 'alert.params.threat.tactic.name',
-      fieldToQuery: 'alert.attributes.params.threat.tactic.name',
-      displayField: 'threat.tactic.name',
-    },
-    'alert.params.threat.technique.name': {
-      field: 'alert.params.threat.technique.name',
-      fieldToQuery: 'alert.attributes.params.threat.technique.name',
-      displayField: 'threat.technique.name',
-    },
-  },
-};
-
-const enhanceSuggestionAbstractionFields = (
-  enhanceSuggestionsAbstraction: SuggestionsAbstraction
-): SuggestionsAbstraction => {
-  return {
-    type: enhanceSuggestionsAbstraction.type,
-    fields: Object.entries(enhanceSuggestionsAbstraction.fields).reduce<
-      SuggestionsAbstraction['fields']
-    >((acc, [key, value]) => {
-      Object.assign(acc, { [value.displayField]: value });
-      return acc;
-    }, enhanceSuggestionsAbstraction.fields),
-  };
-};
 export interface KqlSearchBarProps {
   onQuerySubmit: (kueryNode: KueryNode) => void;
 }
@@ -93,7 +29,7 @@ export const KqlSearchBar = React.memo<KqlSearchBarProps>(({ onQuerySubmit }) =>
     unifiedSearch: {
       ui: { SearchBar },
     },
-  } = useKibana<TriggersAndActionsUiServices>().services;
+  } = useKibana().services;
 
   const {
     value: fields,
@@ -135,7 +71,7 @@ export const KqlSearchBar = React.memo<KqlSearchBarProps>(({ onQuerySubmit }) =>
     if (!isEmpty(query?.query)) {
       kueryNode = fromKueryExpression(query?.query ?? '');
       try {
-        validateFieldsKueryNode({ astFilter: kueryNode, suggestionAbstraction: saMemo });
+        validateFieldsKueryNode({ astFilter: kueryNode, suggestionsAbstraction: saMemo });
       } catch (e) {
         toasts.addDanger(e.toString());
         return;

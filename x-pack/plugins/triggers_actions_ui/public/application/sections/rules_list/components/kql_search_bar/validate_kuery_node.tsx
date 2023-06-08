@@ -13,7 +13,7 @@ const astFunctionType = ['is', 'range', 'nested'];
 
 export interface IterateFieldsKueryNodeParams {
   astFilter: KueryNode;
-  suggestionAbstraction: SuggestionsAbstraction;
+  suggestionsAbstraction: SuggestionsAbstraction;
   hasNestedKey?: boolean;
   nestedKeys?: string;
   storeValue?: boolean;
@@ -29,35 +29,38 @@ export interface IterateActionProps {
 
 export const validateFieldsKueryNode = ({
   astFilter,
-  suggestionAbstraction,
+  suggestionsAbstraction,
 }: {
   astFilter: KueryNode;
-  suggestionAbstraction: SuggestionsAbstraction;
+  suggestionsAbstraction: SuggestionsAbstraction;
 }) => {
-  const fields = Object.keys(suggestionAbstraction.fields).filter((saf) =>
-    saf.startsWith('alert.')
-  );
+  const fields = Object.values(suggestionsAbstraction.fields).reduce<string[]>((acc, saf) => {
+    if (!acc.includes(saf.displayField)) {
+      acc.push(saf.displayField);
+    }
+    return acc;
+  }, []);
   const action = ({ ast, index, fieldName }: IterateActionProps) => {
     if (index === 0) {
-      if (fields.includes(fieldName)) {
-        throw new Error(`Filter is not supported on this field ${fieldName}`);
+      if (!fields.includes(fieldName)) {
+        throw new Error(`Filter is not supported on this field "${fieldName}"`);
       }
     }
-    if (suggestionAbstraction.fields[fieldName]) {
-      ast.value = suggestionAbstraction.fields[fieldName].fieldToQuery;
+    if (suggestionsAbstraction.fields[fieldName]) {
+      ast.value = suggestionsAbstraction.fields[fieldName].fieldToQuery;
     }
   };
 
   iterateFieldsKueryNode({
     astFilter,
-    suggestionAbstraction,
+    suggestionsAbstraction,
     action,
   });
 };
 
-export const iterateFieldsKueryNode = ({
+const iterateFieldsKueryNode = ({
   astFilter,
-  suggestionAbstraction,
+  suggestionsAbstraction,
   hasNestedKey = false,
   nestedKeys,
   storeValue,
@@ -75,8 +78,8 @@ export const iterateFieldsKueryNode = ({
       if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
         localNestedKeys = ast.value;
       } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
-        const key = suggestionAbstraction.fields[ast.value]
-          ? suggestionAbstraction.fields[ast.value].field
+        const key = suggestionsAbstraction.fields[ast.value]
+          ? suggestionsAbstraction.fields[ast.value].field
           : ast.value;
         const mappingKey = 'properties.' + key.split('.').join('.properties.');
         const field = get(alertMappings, mappingKey);
@@ -90,7 +93,7 @@ export const iterateFieldsKueryNode = ({
       const myPath = `${path}.${index}`;
       iterateFieldsKueryNode({
         astFilter: ast,
-        suggestionAbstraction,
+        suggestionsAbstraction,
         storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
         path: `${myPath}.arguments`,
         hasNestedKey: ast.type === 'function' && ast.function === 'nested',

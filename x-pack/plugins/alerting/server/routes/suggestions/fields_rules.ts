@@ -11,7 +11,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -31,15 +31,27 @@ export function registerFieldsRoute(
     {
       path: '/internal/rules/suggestions/fields',
       validate: {
-        body: schema.object({
-          fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-        }),
+        body: schema.nullable(
+          schema.object({
+            fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          })
+        ),
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, request, response) {
-        // TODO Add validation to make sure all fields start with 'alert.'
-        const { fields: requestedFields = ['alert.*'] } = request.body;
+        const tmpFields = request.body?.fields ?? ['alert.*'];
+        const requestedFields = Array.isArray(tmpFields) ? tmpFields : [tmpFields];
+        const isAllFieldsValid = requestedFields.every((f) => f.startsWith('alert.'));
+        if (!isAllFieldsValid) {
+          return response.badRequest({
+            body: new Error(
+              i18n.translate('xpack.alerting.api.error.rules.fields', {
+                defaultMessage: 'You can only request fields starting with "alert."',
+              })
+            ),
+          });
+        }
         const indices = [ALERTING_CASES_SAVED_OBJECT_INDEX];
         const { elasticsearch } = await context.core;
 
@@ -48,7 +60,7 @@ export function registerFieldsRoute(
         );
         const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
           pattern: indices,
-          fields: Array.isArray(requestedFields) ? requestedFields : [requestedFields],
+          fields: requestedFields,
           fieldCapsOptions: { allow_no_indices: true },
         });
         return response.ok({ body: fields });
