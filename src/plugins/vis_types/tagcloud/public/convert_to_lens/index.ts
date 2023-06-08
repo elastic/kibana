@@ -11,9 +11,16 @@ import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import {
+  NavigateToLensContext,
+  TagcloudVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
+import type { TagCloudVisParams } from '../types';
 import { getDataViewsStart } from '../services';
 
-export const convertToLens = async (vis, timefilter) => {
+export const convertToLens = async (vis: Vis<TagCloudVisParams>, timefilter?: TimefilterContract) => {
   if (!timefilter) {
     return null;
   }
@@ -65,5 +72,5 @@ export const convertToLens = async (vis, timefilter) => {
       showLabel: vis.params.showLabel,
     },
     indexPatternIds: [indexPatternId],
-  };
+  } as NavigateToLensContext<TagcloudVisConfiguration>;
 };

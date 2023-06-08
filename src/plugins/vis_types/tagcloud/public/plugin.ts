@@ -9,6 +9,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
 import { TagcloudPublicConfig } from '../config';
 import { setDataViewsStart } from './services';
