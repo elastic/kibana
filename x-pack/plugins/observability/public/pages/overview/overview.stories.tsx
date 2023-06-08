@@ -86,6 +86,9 @@ const withCore = makeDecorator({
           uptime: { enabled: false },
         },
       },
+      coPilot: {
+        enabled: false,
+      },
     };
 
     return (

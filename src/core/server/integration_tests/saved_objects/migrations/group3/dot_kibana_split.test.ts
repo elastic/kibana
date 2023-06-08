@@ -42,7 +42,8 @@ const RELOCATE_TYPES: Record<string, string> = {
 };
 
 const PARALLEL_MIGRATORS = 6;
-export const logFilePath = Path.join(__dirname, 'dot_kibana_split.test.log');
+export const logFilePathFirstRun = Path.join(__dirname, 'dot_kibana_split_1st_run.test.log');
+export const logFilePathSecondRun = Path.join(__dirname, 'dot_kibana_split_2nd_run.test.log');
 
 describe('split .kibana index into multiple system indices', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -53,11 +54,12 @@ describe('split .kibana index into multiple system indices', () => {
   });
 
   beforeEach(async () => {
-    await clearLog(logFilePath);
+    await clearLog(logFilePathFirstRun);
+    await clearLog(logFilePathSecondRun);
   });
 
   describe('when migrating from a legacy version', () => {
-    let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
+    let migratorTestKitFactory: (logFilePath: string) => Promise<KibanaMigratorTestKit>;
 
     beforeAll(async () => {
       esServer = await startElasticsearch({
@@ -77,7 +79,7 @@ describe('split .kibana index into multiple system indices', () => {
         }
       );
 
-      migratorTestKitFactory = () =>
+      migratorTestKitFactory = (logFilePath: string) =>
         getKibanaMigratorTestKit({
           types: updatedTypeRegistry.getAllTypes(),
           kibanaIndex: '.kibana',
@@ -85,7 +87,7 @@ describe('split .kibana index into multiple system indices', () => {
           defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
         });
 
-      const { runMigrations, client } = await migratorTestKitFactory();
+      const { runMigrations, client } = await migratorTestKitFactory(logFilePathFirstRun);
 
       // count of types in the legacy index
       expect(await getAggregatedTypesCount(client, '.kibana_1')).toEqual({
@@ -286,7 +288,7 @@ describe('split .kibana index into multiple system indices', () => {
         }
       `);
 
-      const logs = await parseLogFile(logFilePath);
+      const logs = await parseLogFile(logFilePathFirstRun);
 
       expect(logs).toContainLogEntries(
         [
@@ -378,7 +380,7 @@ describe('split .kibana index into multiple system indices', () => {
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
             `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC.`,
-            `[${index}] MARK_VERSION_INDEX_READY_SYNC -> DONE.`,
+            `[${index}] MARK_VERSION_INDEX_READY_SYNC`, // all migrators try to update all aliases, all but one will have conclicts
             `[${index}] Migration completed after`,
           ],
           { ordered: true }
@@ -393,10 +395,9 @@ describe('split .kibana index into multiple system indices', () => {
 
     afterEach(async () => {
       // we run the migrator again to ensure that the next time state is loaded everything still works as expected
-      const { runMigrations } = await migratorTestKitFactory();
-      await clearLog(logFilePath);
+      const { runMigrations } = await migratorTestKitFactory(logFilePathSecondRun);
       await runMigrations();
-      const logs = await parseLogFile(logFilePath);
+      const logs = await parseLogFile(logFilePathSecondRun);
       expect(logs).not.toContainLogEntries(['REINDEX', 'CREATE', 'UPDATE_TARGET_MAPPINGS']);
     });
 
@@ -419,9 +420,11 @@ describe('split .kibana index into multiple system indices', () => {
       expect(breakdownBefore).toEqual({
         '.kibana': {
           'apm-telemetry': 1,
+          application_usage_transactional: 4,
           config: 1,
           dashboard: 52994,
           'index-pattern': 1,
+          'maps-telemetry': 1,
           search: 1,
           space: 1,
           'ui-metric': 5,
