@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(LOG_ANALYSIS_VALIDATE_DATASETS_PATH)
         .set({
           'kbn-xsrf': 'some-xsrf-token',
+          'Elastic-Api-Version': '1',
         })
         .send(
           validateLogEntryDatasetsRequestPayloadRT.encode({
