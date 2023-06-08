@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './results';
-export * from './validation';
+export { TagcloudToolbar } from './tagcloud_toolbar';
