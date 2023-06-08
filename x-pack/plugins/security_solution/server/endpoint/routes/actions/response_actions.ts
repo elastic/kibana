@@ -145,37 +145,31 @@ export function registerResponseActionRoutes(
     )
   );
 
-  // `get-file` currently behind FF
-  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
-    router.post(
-      {
-        path: GET_FILE_ROUTE,
-        validate: EndpointActionGetFileSchema,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      },
-      withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
-        logger,
-        responseActionRequestHandler(endpointContext, 'get-file')
-      )
-    );
-  }
+  router.post(
+    {
+      path: GET_FILE_ROUTE,
+      validate: EndpointActionGetFileSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canWriteFileOperations'] },
+      logger,
+      responseActionRequestHandler(endpointContext, 'get-file')
+    )
+  );
 
-  // `execute` currently behind FF (planned for 8.8)
-  if (endpointContext.experimentalFeatures.responseActionExecuteEnabled) {
-    router.post(
-      {
-        path: EXECUTE_ROUTE,
-        validate: ExecuteActionRequestSchema,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      },
-      withEndpointAuthz(
-        { all: ['canWriteExecuteOperations'] },
-        logger,
-        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
-      )
-    );
-  }
+  router.post(
+    {
+      path: EXECUTE_ROUTE,
+      validate: ExecuteActionRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canWriteExecuteOperations'] },
+      logger,
+      responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+    )
+  );
 
   registerActionFileUploadRoute(router, endpointContext);
 }
