@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { logViewAttributesRT, logViewRT } from '../../log_views';
+import { logViewAttributesRT, logViewRT } from '../../../log_views';
 
 export const putLogViewRequestParamsRT = rt.type({
   logViewId: rt.string,
@@ -15,6 +15,7 @@ export const putLogViewRequestParamsRT = rt.type({
 export const putLogViewRequestPayloadRT = rt.type({
   attributes: rt.partial(logViewAttributesRT.type.props),
 });
+
 export type PutLogViewRequestPayload = rt.TypeOf<typeof putLogViewRequestPayloadRT>;
 
 export const putLogViewResponsePayloadRT = rt.type({
