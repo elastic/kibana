@@ -11,8 +11,14 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationMap,
+  SavedObjectMigrationContext,
 } from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { ConnectorTypes } from '../../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { SanitizedCaseOwner } from '..';
@@ -23,14 +29,27 @@ import { payloadMigration } from './payload';
 import { addSeverityToCreateUserAction } from './severity';
 import type { UserActions } from './types';
 import { addAssigneesToCreateUserAction } from './assignees';
+import {
+  getLensMigrations,
+  isDeferredMigration,
+  isPersistableStateAttachmentUserActionSO,
+  logError,
+} from '../utils';
+import { MIN_USER_ACTIONS_DEFERRED_KIBANA_VERSION } from '../constants';
 
 export interface UserActionsMigrationsDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 export const createUserActionsMigrations = (
   deps: UserActionsMigrationsDeps
 ): SavedObjectMigrationMap => {
+  const embeddableMigrations = getLensMigrations({
+    lensEmbeddableFactory: deps.lensEmbeddableFactory,
+    migratorFactory: lensMigratorFactory,
+  });
+
   const userActionsMigrations = {
     '7.10.0': (
       doc: SavedObjectUnsanitizedDoc<UserActions>
@@ -84,5 +103,52 @@ export const createUserActionsMigrations = (
     '8.5.0': addAssigneesToCreateUserAction,
   };
 
-  return userActionsMigrations;
+  return mergeSavedObjectMigrationMaps(userActionsMigrations, embeddableMigrations);
+};
+
+export const lensMigratorFactory = (
+  migrate: MigrateFunction,
+  migrationVersion: string
+): SavedObjectMigrationParams<UserActionPersistedAttributes, UserActionPersistedAttributes> => {
+  const deferred = isDeferredMigration(MIN_USER_ACTIONS_DEFERRED_KIBANA_VERSION, migrationVersion);
+
+  return {
+    // @ts-expect-error: remove when core changes the types
+    deferred,
+    transform: (
+      doc: SavedObjectUnsanitizedDoc<UserActionPersistedAttributes>,
+      context: SavedObjectMigrationContext
+    ): SavedObjectSanitizedDoc<UserActionPersistedAttributes> => {
+      try {
+        if (!isPersistableStateAttachmentUserActionSO(doc)) {
+          return Object.assign(doc, { references: doc.references ?? [] });
+        }
+
+        const { persistableStateAttachmentState } = doc.attributes.payload;
+
+        const migratedLensState = migrate(persistableStateAttachmentState);
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            payload: {
+              ...doc.attributes.payload,
+              persistableStateAttachmentState: migratedLensState,
+            },
+          },
+          references: doc.references ?? [],
+        };
+      } catch (error) {
+        logError({
+          id: doc.id,
+          context,
+          error,
+          docType: 'persistable lens attachment',
+          docKey: 'comment',
+        });
+        return Object.assign(doc, { references: doc.references ?? [] });
+      }
+    },
+  };
 };

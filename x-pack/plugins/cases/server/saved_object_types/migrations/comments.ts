@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd, cloneDeep, unset, isFunction } from 'lodash';
+import { trimEnd, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
@@ -28,12 +28,17 @@ import {
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
 import {
+  getLensMigrations,
   isDeferredMigration,
   isPersistableStateAttachmentSO,
   isUserCommentSO,
   logError,
 } from './utils';
-import { GENERATED_ALERT, MIN_DEFERRED_KIBANA_VERSION, SUB_CASE_SAVED_OBJECT } from './constants';
+import {
+  GENERATED_ALERT,
+  MIN_COMMENTS_DEFERRED_KIBANA_VERSION,
+  SUB_CASE_SAVED_OBJECT,
+} from './constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
@@ -64,13 +69,10 @@ export interface CreateCommentsMigrationsDeps {
 export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const lensMigrations = migrationDeps.lensEmbeddableFactory().migrations;
-  const lensMigrationObject = isFunction(lensMigrations) ? lensMigrations() : lensMigrations || {};
-
-  const embeddableMigrations = mapValues<
-    MigrateFunctionsObject,
-    SavedObjectMigrationParams<AttachmentPersistedAttributes, AttachmentPersistedAttributes>
-  >(lensMigrationObject, migrateByValueLensVisualizations);
+  const embeddableMigrations = getLensMigrations({
+    lensEmbeddableFactory: migrationDeps.lensEmbeddableFactory,
+    migratorFactory: migrateByValueLensVisualizations,
+  });
 
   const commentsMigrations = {
     '7.11.0': (
@@ -129,7 +131,7 @@ export const migrateByValueLensVisualizations = (
   migrate: MigrateFunction,
   migrationVersion: string
 ): SavedObjectMigrationParams<AttachmentPersistedAttributes, AttachmentPersistedAttributes> => {
-  const deferred = isDeferredMigration(MIN_DEFERRED_KIBANA_VERSION, migrationVersion);
+  const deferred = isDeferredMigration(MIN_COMMENTS_DEFERRED_KIBANA_VERSION, migrationVersion);
 
   return {
     // @ts-expect-error: remove when core changes the types

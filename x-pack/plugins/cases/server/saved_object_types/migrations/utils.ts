@@ -13,9 +13,19 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { AttributesTypePersistableState, AttributesTypeUser } from '../../../common/api';
-import { CommentType } from '../../../common/api';
+import { isFunction, mapValues } from 'lodash';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
+import { CommentType, ActionTypes } from '../../../common/api';
+import type {
+  AttributesTypePersistableState,
+  AttributesTypeUser,
+  CommentUserAction,
+  CommentRequestPersistableStateType,
+} from '../../../common/api';
+import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {
@@ -77,4 +87,40 @@ export const isPersistableStateAttachmentSO = (
   doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
 ): doc is SavedObjectUnsanitizedDoc<AttributesTypePersistableState> => {
   return doc.attributes.type === CommentType.persistableState;
+};
+
+type PersistableStateUserAction = Omit<CommentUserAction, 'payload'> & {
+  payload: CommentRequestPersistableStateType;
+};
+
+export const isPersistableStateAttachmentUserActionSO = (
+  doc: SavedObjectUnsanitizedDoc<UserActionPersistedAttributes>
+): doc is SavedObjectUnsanitizedDoc<PersistableStateUserAction> => {
+  return (
+    doc.attributes.type === ActionTypes.comment &&
+    doc.attributes.payload.type === CommentType.persistableState
+  );
+};
+
+interface GetLensMigrationsArgs<T> {
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  migratorFactory: (
+    migrate: MigrateFunction,
+    migrationVersion: string
+  ) => SavedObjectMigrationParams<T, T>;
+}
+
+export const getLensMigrations = <T>({
+  lensEmbeddableFactory,
+  migratorFactory,
+}: GetLensMigrationsArgs<T>) => {
+  const lensMigrations = lensEmbeddableFactory().migrations;
+  const lensMigrationObject = isFunction(lensMigrations) ? lensMigrations() : lensMigrations || {};
+
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationParams<T, T>>(
+    lensMigrationObject,
+    migratorFactory
+  );
+
+  return embeddableMigrations;
 };

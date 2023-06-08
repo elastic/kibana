@@ -137,6 +137,7 @@ export class CasePlugin {
     core.savedObjects.registerType(
       createCaseUserActionSavedObjectType({
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+        lensEmbeddableFactory: this.lensEmbeddableFactory,
       })
     );
     core.savedObjects.registerType(casesTelemetrySavedObjectType);

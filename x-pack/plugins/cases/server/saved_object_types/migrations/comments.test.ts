@@ -31,7 +31,11 @@ import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { GENERATED_ALERT, MIN_DEFERRED_KIBANA_VERSION, SUB_CASE_SAVED_OBJECT } from './constants';
+import {
+  GENERATED_ALERT,
+  MIN_COMMENTS_DEFERRED_KIBANA_VERSION,
+  SUB_CASE_SAVED_OBJECT,
+} from './constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { omit, partition } from 'lodash';
 import gte from 'semver/functions/gte';
@@ -301,7 +305,7 @@ describe('comments migrations', () => {
       const lensVersions = Object.keys(lensMigrationObjectWithFakeMigration);
       const [lensVersionToBeDeferred, lensVersionToNotBeDeferred] = partition(
         lensVersions,
-        (version) => gte(version, MIN_DEFERRED_KIBANA_VERSION)
+        (version) => gte(version, MIN_COMMENTS_DEFERRED_KIBANA_VERSION)
       );
 
       const migrations = createCommentsMigrations({
