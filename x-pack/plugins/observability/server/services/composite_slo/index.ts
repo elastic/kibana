@@ -11,3 +11,4 @@ export * from './delete_composite_slo';
 export * from './find_composite_slo';
 export * from './summary_client';
 export * from './update_composite_slo';
+export * from './find_composite_slo_by_id_with_sources';

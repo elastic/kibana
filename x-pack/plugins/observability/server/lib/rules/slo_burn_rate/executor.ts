@@ -41,9 +41,11 @@ import {
   MEDIUM_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
 } from '../../../../common/constants';
-import { KibanaSavedObjectsCompositeSLORepository } from '../../../services/composite_slo';
+import {
+  FindCompositeSloByIdWithSources,
+  KibanaSavedObjectsCompositeSLORepository,
+} from '../../../services/composite_slo';
 import { DefaultCompositeSLIClient } from '../../../services/composite_slo/sli_client';
-import { CompositeSLOSourceRevisionMismatch, SLONotFound } from '../../../errors';
 
 const SHORT_WINDOW = 'SHORT_WINDOW';
 const LONG_WINDOW = 'LONG_WINDOW';
@@ -55,7 +57,6 @@ interface LookbackWindow {
 
 async function fetchSLIDataFrom(
   slo: SloORCompositeSlo,
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   lookbackWindows: LookbackWindow[]
 ) {
@@ -69,7 +70,6 @@ async function fetchSLIDataFrom(
 
 async function evaluateWindow(
   slo: SloORCompositeSlo,
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   windowDef: WindowSchema
 ) {
@@ -82,7 +82,7 @@ async function evaluateWindow(
     toDurationUnit(windowDef.shortWindow.unit)
   );
 
-  const sliData = await fetchSLIDataFrom(slo, soClient, esClient, [
+  const sliData = await fetchSLIDataFrom(slo, esClient, [
     { name: LONG_WINDOW, duration: longWindowDuration },
     { name: SHORT_WINDOW, duration: shortWindowDuration },
   ]);
@@ -106,12 +106,11 @@ async function evaluateWindow(
 
 async function evaluate(
   slo: SloORCompositeSlo,
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   params: BurnRateRuleParams
 ) {
   const evalWindow = memoize(async (windowDef: WindowSchema) =>
-    evaluateWindow(slo, soClient, esClient, windowDef)
+    evaluateWindow(slo, esClient, windowDef)
   );
   for (const windowDef of params.windows) {
     const result = await evalWindow(windowDef);
@@ -136,23 +135,11 @@ async function findSloOrCompositeSlo(
     return await sloRepository.findById(id);
   } catch (e) {
     const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
-    const compositeSlo = await compositeSloRepository.findById(id);
-    const sourceSlos = await sloRepository.findAllByIds(
-      compositeSlo.sources.map((source) => source.id)
+    const fetchCompositeSloByIdWithSources = new FindCompositeSloByIdWithSources(
+      compositeSloRepository,
+      sloRepository
     );
-    const sourcesWithSlo = compositeSlo.sources.map((source) => {
-      const sourceSlo = sourceSlos.find((subject) => subject.id === source.id);
-      if (!sourceSlo) {
-        throw new SLONotFound(`SLO [${source.id}] not found`);
-      }
-      if (sourceSlo.revision !== source.revision) {
-        throw new CompositeSLOSourceRevisionMismatch(
-          `SLO [${source.id}] revision is ${sourceSlo.revision} when it should be ${source.revision}`
-        );
-      }
-      return { ...source, slo: sourceSlo };
-    });
-    return { ...compositeSlo, sources: sourcesWithSlo };
+    return await fetchCompositeSloByIdWithSources.execute(id);
   }
 }
 
@@ -198,7 +185,7 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const result = await evaluate(slo, soClient, esClient.asCurrentUser, params);
+    const result = await evaluate(slo, esClient.asCurrentUser, params);
 
     if (result) {
       const {
