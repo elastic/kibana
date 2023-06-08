@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
+import { timeRangeRT, routeTimingMetadataRT } from '../../../shared';
 
 export const LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH =
   '/api/infra/log_analysis/results/latest_log_entry_category_datasets_stats';

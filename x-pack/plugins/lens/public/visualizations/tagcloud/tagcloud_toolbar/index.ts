@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NoPermissions } from './no_permissions';
+export { TagcloudToolbar } from './tagcloud_toolbar';

@@ -90,11 +90,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const cells = await row.findAllByCssSelector('[data-test-subj*="hostsView-tableRow-"]');
 
       // Retrieve content for each cell
-      const [title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory] = await Promise.all(
+      const [title, cpuUsage, diskLatency, rx, tx, memoryTotal, memory] = await Promise.all(
         cells.map((cell) => this.getHostsCellContent(cell))
       );
 
-      return { title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory };
+      return { title, cpuUsage, diskLatency, rx, tx, memoryTotal, memory };
     },
 
     async getHostsCellContent(cell: WebElementWrapper) {
@@ -285,7 +285,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // Sorting
     getDiskLatencyHeader() {
-      return testSubjects.find('tableHeaderCell_diskLatency_4');
+      return testSubjects.find('tableHeaderCell_diskLatency_3');
     },
 
     getTitleHeader() {

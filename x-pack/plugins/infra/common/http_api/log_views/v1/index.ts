@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './results';
-export * from './validation';
+export * from './get_log_view';
+export * from './put_log_view';

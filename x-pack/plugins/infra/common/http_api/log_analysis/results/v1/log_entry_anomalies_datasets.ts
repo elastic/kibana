@@ -6,14 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { persistedLogViewReferenceRT } from '../../../log_views';
+import { persistedLogViewReferenceRT } from '../../../../log_views';
 
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
   timeRangeRT,
   routeTimingMetadataRT,
-} from '../../shared';
+} from '../../../shared';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH =
   '/api/infra/log_analysis/results/log_entry_anomalies_datasets';
