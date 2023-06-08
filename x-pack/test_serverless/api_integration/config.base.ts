@@ -26,6 +26,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ],
       },
       testFiles: options.testFiles,
+      junit: options.junit,
     };
   };
 }
