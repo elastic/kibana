@@ -39,10 +39,25 @@ export const JsonEditor: FC<JobEditorProps> = ({
       width={width}
       height={height}
       languageId={mode}
+      languageConfiguration={{
+        autoClosingPairs: [
+          {
+            open: '{',
+            close: '}',
+          },
+        ],
+      }}
       options={{
         tabSize: 2,
         readOnly,
         automaticLayout: true,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        minimap: {
+          enabled: false,
+        },
+        scrollBeyondLastLine: false,
+        quickSuggestions: true,
       }}
       onChange={onChange}
     />
