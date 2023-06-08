@@ -18,6 +18,7 @@ import {
 } from '@kbn/maps-plugin/common';
 import { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
 import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+import { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -199,9 +200,8 @@ export class AnomalySource implements IVectorSource {
   isBoundsAware(): boolean {
     return false;
   }
-  // TODO: update to 'DataFilters' type once maps changes passing the argument is merged
-  // @ts-ignore
-  async getImmutableProperties(dataFilters: any): Promise<ImmutableSourceProperty[]> {
+
+  async getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]> {
     let explorerLink: string | undefined;
 
     try {
@@ -209,7 +209,7 @@ export class AnomalySource implements IVectorSource {
         page: ML_PAGES.ANOMALY_EXPLORER,
         pageState: {
           jobIds: [this._descriptor.jobId],
-          timeRange: dataFilters.timeRange,
+          timeRange: dataFilters.timeFilters,
         },
       });
     } catch (error) {
