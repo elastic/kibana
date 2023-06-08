@@ -43,17 +43,24 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
 const retrieveIntegrations = (
   specPattern: string[],
-  chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-    : 1,
-  chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-    : 0
 ) => {
   const integrationsPaths = globby.sync(specPattern);
-  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-  return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
+  if (process.env.RUN_ALL_TESTS === 'true') {
+    return integrationsPaths;
+  } else {
+    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+      : 1;
+    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+      : 0;
+    const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
+
+    return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
+  }
+
+
 };
 
 export const cli = () => {
