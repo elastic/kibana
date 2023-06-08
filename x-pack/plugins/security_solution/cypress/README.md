@@ -46,15 +46,25 @@ Please, before opening a PR with the new test, please make sure that the test fa
 ## Running the tests
 
 ### Run them locally
-Run the tests locally with the following command:
+Run the tests with the following yarn scripts:
 
-| Command | Description |
-| -- | -- |
-| `yarn cypress:open` | Starts a local ES and Kibana and runs the Cypress binary. All e2e specs are available to run via the UI |
-| `yarn cypress:explore:run` | Run the Explore cypress e2e tests via the command line. The Cypress UI will not open. |
-| `yarn cypress:investigations:run` | Run the Investigations cypress e2e tests via the command line. The Cypress UI will not open. |
-| `yarn cypress:investigations:run` | Run the Investigations cypress e2e tests via the command line. The Cypress UI will not open. |
-| `yarn cypress:run:cases` | Run the Cases cypress e2e tests via the command line. The Cypress UI will not open. |
+| Script Name | Description |
+| ----------- | ----------- |
+| cypress | Runs the default Cypress command |
+| cypress:open | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a local kibana and ES instance. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
+| cypress:open:ccs | Opens the Cypress UI and runs all tests in the `ccs_e2e` directory |
+| cypress:open:upgrade | Opens the Cypress UI and runs all tests in the `upgrade_e2e` directory |
+| cypress:run | Runs all tests in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
+| cypress:run:cases | Runs all tests under `explore/cases` in the `e2e` directory related to the Cases area team in headless mode |
+| cypress:run:reporter | Runs all tests with the specified configuration in headless mode and produces a report using `cypress-multi-reporters` |
+| cypress:run:respops | Runs all tests related to the Response Ops area team, specifically tests in `detection_alerts`, `detection_rules`, and `exceptions` directories in headless mode |
+| cypress:run:ccs | Runs all tests in the `ccs_e2e` directory in headless mode |
+| cypress:run:upgrade | Runs all tests in the `upgrade_e2e` directory in headless mode |
+| cypress:investigations:run | Runs all tests in the `e2e/investigations` directory in headless mode |
+| cypress:explore:run | Runs all tests in the `e2e/explore` directory in headless mode |
+| junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
+
+Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
 
 ### Execution modes
 
