@@ -10,12 +10,12 @@ import {
   mockAlerts,
   mockProcessMap,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import {
+import type {
   AlertStatusEventEntityIdMap,
   Process,
   ProcessMap,
   ProcessEvent,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { ALERT_STATUS } from '../../../common/constants';
 import {
   updateAlertEventStatus,

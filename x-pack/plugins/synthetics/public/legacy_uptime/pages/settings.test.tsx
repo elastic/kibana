@@ -10,6 +10,7 @@ import { isValidCertVal, SettingsPage } from './settings';
 import { render } from '../lib/helper/rtl_helpers';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import * as alertApi from '../state/api/alerts';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 describe('settings', () => {
   describe('form', () => {
@@ -30,7 +31,7 @@ describe('settings', () => {
     it('handles no spaces error', async () => {
       const { getByText, getByTestId } = render(<SettingsPage />);
 
-      expect(getByText('heartbeat-8*,heartbeat-7*,synthetics-*'));
+      expect(getByText(DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices));
 
       fireEvent.input(getByTestId('heartbeat-indices-input-loaded'), {
         target: { value: 'heartbeat-8*, synthetics-*' },
@@ -42,7 +43,7 @@ describe('settings', () => {
     it('it show select a connector flyout', async () => {
       const { getByText, getByTestId } = render(<SettingsPage />);
 
-      expect(getByText('heartbeat-8*,heartbeat-7*,synthetics-*'));
+      expect(getByText(DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices));
 
       fireEvent.click(getByTestId('createConnectorButton'));
       await waitFor(() => expect(getByText('Select a connector')));

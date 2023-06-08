@@ -54,7 +54,7 @@ describe('SessionView component', () => {
     render = () =>
       (renderResult = mockedContext.render(
         <SessionView
-          processIndex={TEST_PROCESS_INDEX}
+          index={TEST_PROCESS_INDEX}
           sessionStartTime={TEST_SESSION_START_TIME}
           sessionEntityId="test-entity-id"
         />
