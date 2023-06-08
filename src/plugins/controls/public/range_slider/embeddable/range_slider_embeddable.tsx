@@ -131,14 +131,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
-    console.log('initialize', this.unpublishedChanges);
     this.initialize();
   }
 
   private initialize = async () => {
     const initialValue = this.getInput().value;
     if (!initialValue) {
-      console.log('no initial value');
+      this.unpublishedChanges.next({ range: ['', ''] });
       this.setInitializationFinished();
     }
 
@@ -192,44 +191,30 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.getInput$()
         .pipe(distinctUntilChanged((a, b) => isEqual(a.value, b.value)))
         .subscribe(({ value }) => {
-          // console.log('value changed, output to unpublished');
           this.unpublishedChanges.next({ range: value });
         })
     );
 
     // debounce publishing of unpublished changes for smoother selection experience
     this.subscriptions.add(
-      this.unpublishedChanges.pipe(debounceTime(400)).subscribe(() => {
+      this.unpublishedChanges.pipe(debounceTime(750)).subscribe(() => {
         this.publishNewRange();
       })
     );
-
-    // // build filters when value change
-    // this.subscriptions.add(
-    //   this.getInput$()
-    //     .pipe(
-    //       debounceTime(400),
-    //       distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
-    //       skip(1) // skip the first input update because initial filters will be built by initialize.
-    //     )
-    //     .subscribe(this.buildFilter)
-    // );
   };
 
   public async publishNewRange() {
-    // console.log('publish changes');
     const { range } = this.unpublishedChanges.getValue();
-    if (!range) return;
+    if (!range) return; // this means there are no unpublished changes to publish
 
     const [newLowerBound, newUpperBound] = range;
-
     const updatedLowerBound =
       typeof newLowerBound === 'number' ? String(newLowerBound) : newLowerBound;
     const updatedUpperBound =
       typeof newUpperBound === 'number' ? String(newUpperBound) : newUpperBound;
     this.dispatch.setSelectedRange([updatedLowerBound, updatedUpperBound]);
     await this.buildFilter();
-    this.unpublishedChanges.next({});
+    this.unpublishedChanges.next({}); // clear out unpublished changes
   }
 
   private getCurrentDataViewAndField = async (): Promise<{
@@ -329,7 +314,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     }).catch((e) => {
       throw e;
     });
-    console.log('set min max', min, max);
     this.dispatch.setMinMax({
       min: `${min ?? ''}`,
       max: `${max ?? ''}`,
@@ -347,7 +331,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     filters: Filter[];
     query?: Query;
   }): Promise<{ min?: number; max?: number }> => {
-    console.log('fetch min max');
     const searchSource = await this.dataService.searchSource.create();
     searchSource.setField('size', 0);
     searchSource.setField('index', dataView);
@@ -483,8 +466,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.dispatch.publishFilters([rangeFilter]);
       this.dispatch.setErrorMessage(undefined);
     });
-
-    // clean this up so that it **returns filters** and doesn't publish them!!!
   };
 
   public reload = () => {

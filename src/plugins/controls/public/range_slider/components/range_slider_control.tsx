@@ -57,7 +57,10 @@ export const RangeSliderControl: FC = () => {
       className="rangeSlider__popoverOverride"
       anchorClassName="rangeSlider__anchorOverride"
       panelClassName="rangeSlider__panelOverride"
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={() => {
+        rangeSlider.publishNewRange();
+        setIsPopoverOpen(false);
+      }}
       anchorPosition="downCenter"
       attachToAnchor={false}
       disableFocusTrap

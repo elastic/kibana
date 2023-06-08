@@ -42,7 +42,7 @@ export const OptionsListPopover = ({
   const hideActionBar = optionsList.select((state) => state.explicitInput.hideActionBar);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
-  console.log('render');
+
   return (
     <>
       <div
