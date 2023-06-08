@@ -77,7 +77,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       {canUserEditList && (
         <EuiFlexItem>
           <EuiButton
-            data-test-subj={`${dataTestSubj || ''}ManageRulesButton`}
+            data-test-subj={`${dataTestSubj || ''}LinkRulesButton`}
             fill
             onClick={() => {
               if (typeof onManageRules === 'function') onManageRules();

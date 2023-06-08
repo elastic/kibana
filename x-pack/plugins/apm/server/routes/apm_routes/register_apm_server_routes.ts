@@ -170,6 +170,7 @@ export function registerRoutes({
           body: {
             message: error.message,
             attributes: {
+              data: {},
               _inspect: inspectableEsQueriesMap.get(request),
             },
           },
@@ -181,6 +182,7 @@ export function registerRoutes({
 
         if (Boom.isBoom(error)) {
           opts.statusCode = error.output.statusCode;
+          opts.body.attributes.data = error?.data;
         }
 
         // capture error with APM node agent
