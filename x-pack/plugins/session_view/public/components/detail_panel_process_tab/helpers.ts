@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventAction, Process, ProcessFields } from '../../../common/types/process_tree';
+import type { Process, ProcessFields } from '../../../common';
 import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
 import { DASH } from '../../constants';
 import { dataOrDash } from '../../utils/data_or_dash';
@@ -132,7 +132,7 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
   }
 
   processData.executable = executables.map((exe, i) => {
-    const action = i === 0 ? EventAction.fork : EventAction.exec;
+    const action = i === 0 ? 'fork' : 'exec';
 
     return [exe, `(${action})`];
   });
