@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { IKibanaResponse } from '@kbn/core/server';
 import { isRight } from 'fp-ts/lib/Either';
 import { schema } from '@kbn/config-schema';
 import { getJourneyScreenshotBlocks } from '../../lib/requests/get_journey_screenshot_blocks';
@@ -13,11 +14,21 @@ import { UMServerLibs } from '../../lib/lib';
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
+type ClientContract = Array<{
+  id: string;
+  synthetics: {
+    blob: string;
+    blob_mime: string;
+  };
+}>;
+
 function isStringArray(data: unknown): data is string[] {
   return isRight(t.array(t.string).decode(data));
 }
 
-export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory<ClientContract> = (
+  libs: UMServerLibs
+) => ({
   method: 'POST',
   path: API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
@@ -34,7 +45,7 @@ export const journeyScreenshotBlocksHandler = async ({
   response,
   request,
   uptimeEsClient,
-}: RouteContext | UptimeRouteContext) => {
+}: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ClientContract>> => {
   const { hashes: blockIds } = request.body;
 
   if (!isStringArray(blockIds)) return response.badRequest();
