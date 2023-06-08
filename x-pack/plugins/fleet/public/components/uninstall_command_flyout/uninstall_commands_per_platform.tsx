@@ -56,7 +56,12 @@ export const UninstallCommandsPerPlatform: React.FunctionComponent<Props> = ({ t
 
       <EuiSpacer size="l" />
 
-      <EuiCodeBlock fontSize="m" isCopyable paddingSize="m">
+      <EuiCodeBlock
+        fontSize="m"
+        isCopyable
+        paddingSize="m"
+        data-test-subj="uninstall-commands-flyout-code-block"
+      >
         {commands[platform]}
       </EuiCodeBlock>
     </>
