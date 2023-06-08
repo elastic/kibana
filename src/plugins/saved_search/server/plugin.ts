@@ -49,9 +49,9 @@ export class SavedSearchServerPlugin
       },
     });
 
-    const getSearchSourceMigrations = data.search.searchSource.getAllMigrations.bind(
-      data.search.searchSource
-    );
+    const searchSource = data.search.searchSource;
+
+    const getSearchSourceMigrations = searchSource.getAllMigrations.bind(searchSource);
     core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
 
     expressions.registerType(kibanaContext);

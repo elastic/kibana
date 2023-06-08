@@ -99,8 +99,6 @@ export {
   getFieldSubtypeNested,
 } from '@kbn/data-views-plugin/common';
 
-// export type { ExpressionFunctionKibanaContext } from '@kbn/saved-search-plugin/common';
-
 interface Arguments {
   q?: KibanaQueryOutput[] | null;
   filters?: KibanaFilter[] | null;

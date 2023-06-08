@@ -10,6 +10,8 @@ import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { KibanaContext } from './kibana_context_type';
+import { fromSavedSearchAttributes } from '../service/saved_searches_utils';
+import type { SavedSearchAttributes, SavedSearch } from '../types';
 
 import {
   getKibanaContextFn,
@@ -49,10 +51,20 @@ describe('kibanaContextFn', () => {
 
   it('merges and deduplicates queries from different sources', async () => {
     const { fn } = kibanaContextFn;
-    startServicesMock.getSavedSearch.mockResolvedValue({
-      attributes: {
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: JSON.stringify({
+    startServicesMock.getSavedSearch.mockResolvedValue(
+      fromSavedSearchAttributes(
+        'abc',
+        {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              query: [],
+            }),
+          },
+        } as SavedSearchAttributes,
+        [],
+        undefined,
+        {
+          getFields: () => ({
             query: [
               {
                 language: 'kuery',
@@ -79,12 +91,12 @@ describe('kibanaContextFn', () => {
                 },
               },
             ],
+            filter: [],
           }),
-        },
-      },
-      // todo
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+        } as unknown as SavedSearch['searchSource'],
+        {} as SavedSearch['sharingSavedObjectProps']
+      )
+    );
     const args = {
       ...emptyArgs,
       q: [

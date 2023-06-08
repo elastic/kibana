@@ -53,7 +53,7 @@ export const getKibanaContextFn = (
     name: 'kibana_context',
     type: 'kibana_context',
     inputTypes: ['kibana_context', 'null'],
-    help: i18n.translate('data.search.functions.kibana_context.help', {
+    help: i18n.translate('savedSearch.kibana_context.help', {
       defaultMessage: 'Updates kibana global context',
     }),
     args: {
@@ -61,28 +61,28 @@ export const getKibanaContextFn = (
         types: ['kibana_query', 'null'],
         multi: true,
         aliases: ['query', '_'],
-        help: i18n.translate('data.search.functions.kibana_context.q.help', {
+        help: i18n.translate('savedSearch.kibana_context.q.help', {
           defaultMessage: 'Specify Kibana free form text query',
         }),
       },
       filters: {
         types: ['kibana_filter', 'null'],
         multi: true,
-        help: i18n.translate('data.search.functions.kibana_context.filters.help', {
+        help: i18n.translate('savedSearch.kibana_context.filters.help', {
           defaultMessage: 'Specify Kibana generic filters',
         }),
       },
       timeRange: {
         types: ['timerange', 'null'],
         default: null,
-        help: i18n.translate('data.search.functions.kibana_context.timeRange.help', {
+        help: i18n.translate('savedSearch.kibana_context.timeRange.help', {
           defaultMessage: 'Specify Kibana time range filter',
         }),
       },
       savedSearchId: {
         types: ['string', 'null'],
         default: null,
-        help: i18n.translate('data.search.functions.kibana_context.savedSearchId.help', {
+        help: i18n.translate('savedSearch.kibana_context.savedSearchId.help', {
           defaultMessage: 'Specify saved search ID to be used for queries and filters',
         }),
       },
