@@ -17,8 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/test-jest-helpers",
     "@kbn/content-management-table-list-view-table"
   ],
   "exclude": [
