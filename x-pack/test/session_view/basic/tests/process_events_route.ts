@@ -143,6 +143,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
               .get(`${PROCESS_EVENTS_ROUTE}`)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
+              .set('Elastic-Api-Version', CURRENT_API_VERSION)
               .query({
                 index: MOCK_INDEX,
                 sessionEntityId: MOCK_SESSION_ENTITY_ID,
@@ -166,6 +167,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
               .get(`${PROCESS_EVENTS_ROUTE}`)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
+              .set('Elastic-Api-Version', CURRENT_API_VERSION)
               .query({
                 index: MOCK_INDEX,
                 sessionEntityId: MOCK_SESSION_ENTITY_ID,
