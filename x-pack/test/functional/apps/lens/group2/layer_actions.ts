@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(
         await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(false);
+      ).to.be(true);
 
       await PageObjects.lens.openLayerContextMenu(1);
       await testSubjects.click('lnsLayerSettings');
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
       expect(
         await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      ).to.be(false);
     });
 
     it('should add a new visualization layer and disable the sampling if max operation is chosen', async () => {
