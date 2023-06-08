@@ -21,6 +21,10 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
+import {
+  DataSeriesDatum,
+  XYChartSeriesIdentifier,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
 import { useSearch } from '../../hooks/use_search';
 import { DataDriftView } from './data_drift_view';
@@ -36,6 +40,8 @@ import {
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
+import { useEuiTheme } from '../../hooks/use_eui_theme';
+
 export const DataDriftDetectionPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
@@ -141,6 +147,12 @@ export const DataDriftDetectionPage: FC = () => {
     setWindowParameters(undefined);
   }
 
+  const euiTheme = useEuiTheme();
+  const colors = {
+    referenceColor: euiTheme.euiColorVis2,
+    productionColor: euiTheme.euiColorVis1,
+  };
+
   return (
     <EuiPageBody data-test-subj="aiopsDataDriftDetectionPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -169,6 +181,45 @@ export const DataDriftDetectionPage: FC = () => {
                   windowParameters={windowParameters}
                   baselineLabel={REFERENCE_LABEL}
                   deviationLabel={PRODUCTION_LABEL}
+                  barStyleAccessor={(
+                    datum: DataSeriesDatum,
+                    seriesIdentifier: XYChartSeriesIdentifier
+                  ) => {
+                    if (!windowParameters) return null;
+
+                    const start = datum.x;
+                    const end =
+                      (typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x) +
+                      (documentCountStats?.interval ?? 0);
+
+                    if (
+                      start >= windowParameters.baselineMin &&
+                      end <= windowParameters.baselineMax
+                    ) {
+                      return colors.referenceColor;
+                    }
+                    if (
+                      start >= windowParameters.deviationMin &&
+                      end <= windowParameters.deviationMax
+                    ) {
+                      return colors.productionColor;
+                    }
+
+                    return null;
+                  }}
+
+                  // baselineAnnotationStyle={{
+                  //   strokeWidth: 0,
+                  //   stroke: colors.referenceColor,
+                  //   fill: colors.referenceColor,
+                  //   opacity: 0.5,
+                  // }}
+                  // deviationAnnotationStyle={{
+                  //   strokeWidth: 0,
+                  //   stroke: colors.productionColor,
+                  //   fill: colors.productionColor,
+                  //   opacity: 0.5,
+                  // }}
                 />
               </EuiPanel>
             </EuiFlexItem>

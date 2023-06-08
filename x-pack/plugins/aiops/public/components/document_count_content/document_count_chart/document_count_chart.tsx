@@ -28,6 +28,10 @@ import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-util
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 
+import {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { BrushBadge } from './brush_badge';
@@ -51,7 +55,7 @@ export interface DocumentCountChartPoint {
   value: number;
 }
 
-interface DocumentCountChartProps {
+export interface DocumentCountChartProps {
   brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
@@ -67,6 +71,9 @@ interface DocumentCountChartProps {
   barHighlightColorOverride?: string;
   baselineLabel?: string;
   deviationLabel?: string;
+  baselineAnnotationStyle?: RectAnnotationSpec['style'];
+  deviationAnnotationStyle?: RectAnnotationSpec['style'];
+  barStyleAccessor?: BarStyleAccessor;
 }
 
 const SPEC_ID = 'document_count';
@@ -117,6 +124,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   barHighlightColorOverride,
   baselineLabel,
   deviationLabel,
+  baselineAnnotationStyle,
+  deviationAnnotationStyle,
+  barStyleAccessor,
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -424,6 +434,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               timeZone={timeZone}
               color={barColor}
               yNice
+              styleAccessor={barStyleAccessor}
             />
           )}
           {adjustedChartPointsSplit?.length && (
@@ -446,11 +457,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
                 id="aiopsBaseline"
                 min={windowParameters.baselineMin}
                 max={windowParameters.baselineMax}
+                style={baselineAnnotationStyle}
               />
               <DualBrushAnnotation
                 id="aiopsDeviation"
                 min={windowParameters.deviationMin}
                 max={windowParameters.deviationMax}
+                style={deviationAnnotationStyle}
               />
             </>
           )}

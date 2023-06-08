@@ -12,6 +12,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
 
+import { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { DocumentCountStats } from '../../../get_document_stats';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
@@ -38,6 +39,7 @@ export interface DocumentCountContentProps {
   barHighlightColorOverride?: string;
   baselineLabel?: string;
   deviationLabel?: string;
+  barStyleAccessor?: BarStyleAccessor;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
