@@ -15,7 +15,7 @@ import { decode } from '../route_state';
 
 export const useRestoreHistory = () => {
   const history = useHistory();
-  const location = useLocation();
+  const location = useLocation<string>();
   const dispatch = useDispatch();
 
   const { state: historyState } = location;
