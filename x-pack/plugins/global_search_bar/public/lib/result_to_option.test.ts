@@ -108,7 +108,12 @@ describe('resultToOption', () => {
       }
     };
 
+    const logSpy = jest.spyOn(console, 'warn').mockImplementation();
+
     const option = resultToOption(input, [], getTag);
+    expect(logSpy).toBeCalledWith(
+      'SearchBar: Tag with id "unknown" not found. Tag "unknown" is referenced by the search result "dashboard:id". Skipping displaying the missing tag.'
+    );
     expect(option.append).toMatchInlineSnapshot(`
       <ResultTagList
         searchTagIds={Array []}
