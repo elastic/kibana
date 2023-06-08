@@ -6,32 +6,17 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { every } from 'lodash';
-import { cluster, indices, privileges } from './monitoring_config';
+import { cluster, indices } from './monitoring_config';
 
 export async function hasLogMonitoringPrivileges(
   esClient: ElasticsearchClient
 ) {
-  const { index, cluster: clusterMonitor } =
-    await esClient.security.hasPrivileges({
-      body: {
-        index: indices,
-        cluster,
-      },
-    });
+  const res = await esClient.security.hasPrivileges({
+    body: {
+      index: indices,
+      cluster: [...cluster, 'manage_own_api_key'],
+    },
+  });
 
-  const hasPrivileges =
-    clusterMonitor.monitor &&
-    every(
-      index,
-      privileges.reduce(
-        (result, privilege) => ({
-          ...result,
-          [privilege]: true,
-        }),
-        {}
-      )
-    );
-
-  return hasPrivileges;
+  return res.has_all_requested;
 }
