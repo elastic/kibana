@@ -22,6 +22,9 @@ import {
   EuiStep,
   EuiSkeletonRectangle,
   EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import {
   StepPanel,
@@ -35,11 +38,14 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
   const { navigateToKibanaUrl } = useKibanaNavigation();
-  const { goBack, getState, setState, CurrentStep } = useWizard();
+  const { goBack, goToStep, getState, setState, CurrentStep } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
+  function onInspect() {
+    goToStep('inspect');
+  }
   function onContinue() {
     navigateToKibanaUrl('/app/logs/stream');
   }
@@ -184,6 +190,40 @@ export function InstallElasticAgent() {
         'xpack.observability_onboarding.installElasticAgent.title',
         { defaultMessage: 'Install shipper to collect data' }
       )}
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <EuiButton color="text" onClick={onBack}>
+              {i18n.translate('xpack.observability_onboarding.steps.back', {
+                defaultMessage: 'Back',
+              })}
+            </EuiButton>,
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onInspect}>
+                  {i18n.translate(
+                    'xpack.observability_onboardbacking.steps.inspect',
+                    { defaultMessage: 'Inspect' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  fill
+                  iconType="magnifyWithPlus"
+                  onClick={onContinue}
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.steps.exploreLogs',
+                    { defaultMessage: 'Explore logs' }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+          ]}
+        />
+      }
     >
       <StepPanelContent>
         <EuiText color="subdued">
@@ -492,20 +532,6 @@ export function InstallElasticAgent() {
           ]}
         />
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButton color="text" onClick={onBack}>
-            {i18n.translate('xpack.observability_onboarding.steps.back', {
-              defaultMessage: 'Back',
-            })}
-          </EuiButton>,
-          <EuiButton color="primary" fill onClick={onContinue}>
-            {i18n.translate('xpack.observability_onboarding.steps.continue', {
-              defaultMessage: 'Continue',
-            })}
-          </EuiButton>,
-        ]}
-      />
     </StepPanel>
   );
 }
