@@ -19,7 +19,10 @@ import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  getLatencyAggregationType,
+  LatencyAggregationType,
+} from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
@@ -99,7 +102,7 @@ export function TransactionsTable({
     query: {
       comparisonEnabled,
       offset,
-      latencyAggregationType,
+      latencyAggregationType: latencyAggregationTypeFromQuery,
       page: urlPage = 0,
       pageSize: urlPageSize = numberOfTransactionsPerPage,
       sortField: urlSortField = 'impact',
@@ -110,6 +113,10 @@ export function TransactionsTable({
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
     '/mobile-services/{serviceName}/overview'
+  );
+
+  const latencyAggregationType = getLatencyAggregationType(
+    latencyAggregationTypeFromQuery
   );
 
   const [tableOptions, setTableOptions] = useState<{

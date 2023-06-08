@@ -18497,7 +18497,6 @@
     "xpack.infra.hostsViewPage.table.averageTxColumnHeader": "TX（平均值）",
     "xpack.infra.hostsViewPage.table.diskLatencyColumnHeader": "磁盘延迟（平均值）",
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "名称",
-    "xpack.infra.hostsViewPage.table.operatingSystemColumnHeader": "操作系统",
     "xpack.infra.hostsViewPage.table.toggleDialogWithDetails": "切换具有详情的对话框",
     "xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.active": "活动",
     "xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.legend": "筛选依据",
