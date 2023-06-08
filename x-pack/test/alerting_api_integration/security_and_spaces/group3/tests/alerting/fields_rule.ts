@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getConsumerUnauthorizedErrorMessage, getUrlPrefix } from '../../../../common/lib';
+import { getUrlPrefix } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
