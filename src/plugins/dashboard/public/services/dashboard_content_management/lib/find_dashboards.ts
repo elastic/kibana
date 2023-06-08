@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SOWithMetadata } from '@kbn/content-management-utils';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
+import {
+  DashboardItem,
+  DashboardCrudTypes,
+  DashboardAttributes,
+} from '../../../../common/content_management';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
 
 export interface SearchDashboardsArgs {
   contentManagement: DashboardStartDependencies['contentManagement'];
@@ -23,7 +26,7 @@ export interface SearchDashboardsArgs {
 
 export interface SearchDashboardsResponse {
   total: number;
-  hits: Array<SOWithMetadata<DashboardAttributes>>;
+  hits: DashboardItem[];
 }
 
 export async function searchDashboards({

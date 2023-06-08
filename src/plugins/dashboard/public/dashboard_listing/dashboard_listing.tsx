@@ -17,7 +17,6 @@ import {
 } from '@kbn/content-management-table-list';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { SOWithMetadata } from '@kbn/content-management-utils';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
@@ -32,8 +31,8 @@ import {
 } from './_dashboard_listing_strings';
 import { pluginServices } from '../services/plugin_services';
 import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { DashboardItem } from '../../common/content_management';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
-import { DashboardAttributes } from '../../common/content_management';
 import { DashboardApplicationService } from '../services/application/types';
 import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
 
@@ -54,9 +53,7 @@ interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
   };
 }
 
-const toTableListViewSavedObject = (
-  hit: SOWithMetadata<DashboardAttributes>
-): DashboardSavedObjectUserContent => {
+const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUserContent => {
   const { title, description, timeRestore } = hit.attributes;
   return {
     type: 'dashboard',
@@ -166,7 +163,12 @@ export const DashboardListing = ({
       try {
         const deleteStartTime = window.performance.now();
 
-        await deleteDashboards(dashboardsToDelete.map(({ id }) => id));
+        await deleteDashboards(
+          dashboardsToDelete.map(({ id }) => {
+            dashboardSessionStorage.clearState(id);
+            return id;
+          })
+        );
 
         const deleteDuration = window.performance.now() - deleteStartTime;
         reportPerformanceMetricEvent(pluginServices.getServices().analytics, {

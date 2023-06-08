@@ -130,7 +130,6 @@ export const createExtract = (
           });
 
           delete panel.explicitInput.savedObjectId;
-          delete (panel.explicitInput as { type?: string }).type;
         }
 
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
