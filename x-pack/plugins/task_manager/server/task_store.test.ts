@@ -26,13 +26,32 @@ import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr } from './lib/result_type';
 
+const mockGetValidatedTaskInstance = jest.fn();
+jest.mock('./task_validator', () => {
+  return {
+    TaskValidator: jest.fn().mockImplementation(() => {
+      return {
+        getValidatedTaskInstance: mockGetValidatedTaskInstance,
+      };
+    }),
+  };
+});
+
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
 const adHocTaskCounter = new AdHocTaskCounter();
 
 const randomId = () => `id-${_.random(1, 20)}`;
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  jest.requireMock('./task_validator').TaskValidator.mockImplementation(() => {
+    return {
+      getValidatedTaskInstance: mockGetValidatedTaskInstance,
+    };
+  });
+  mockGetValidatedTaskInstance.mockImplementation((task) => task);
+});
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,7 +148,6 @@ describe('TaskStore', () => {
           scope: undefined,
           startedAt: null,
           state: '{"foo":"bar"}',
-          stateVersion: 1,
           status: 'idle',
           taskType: 'report',
           user: undefined,
@@ -152,7 +170,6 @@ describe('TaskStore', () => {
         scope: undefined,
         startedAt: null,
         state: { foo: 'bar' },
-        stateVersion: 1,
         status: 'idle',
         taskType: 'report',
         user: undefined,
@@ -464,6 +481,9 @@ describe('TaskStore', () => {
 
       const result = await store.update(task, { validate: true });
 
+      expect(mockGetValidatedTaskInstance).toHaveBeenCalledTimes(2);
+      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(1, task, 'write');
+      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(2, task, 'read');
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         'task',
         task.id,
@@ -477,7 +497,6 @@ describe('TaskStore', () => {
           scope: undefined,
           startedAt: null,
           state: JSON.stringify(task.state),
-          stateVersion: 1,
           status: task.status,
           taskType: task.taskType,
           user: undefined,
@@ -495,7 +514,6 @@ describe('TaskStore', () => {
         startedAt: null,
         user: undefined,
         version: '123',
-        stateVersion: 1,
       });
     });
 
@@ -528,31 +546,9 @@ describe('TaskStore', () => {
         }
       );
 
-      const result = await store.update(task, { validate: false });
+      await store.update(task, { validate: false });
 
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(
-        'task',
-        task.id,
-        {
-          attempts: task.attempts,
-          schedule: undefined,
-          params: JSON.stringify(task.params),
-          retryAt: null,
-          runAt: task.runAt.toISOString(),
-          scheduledAt: mockedDate.toISOString(),
-          scope: undefined,
-          startedAt: null,
-          state: JSON.stringify(task.state),
-          status: task.status,
-          taskType: task.taskType,
-          user: undefined,
-          ownerId: null,
-          traceparent: 'myTraceparent',
-        },
-        { version: '123', refresh: false }
-      );
-
-      expect(result.stateVersion).toBeUndefined();
+      expect(mockGetValidatedTaskInstance).not.toHaveBeenCalled();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -631,27 +627,9 @@ describe('TaskStore', () => {
         ],
       });
 
-      const result = await store.bulkUpdate([task], { validate: false });
+      await store.bulkUpdate([task], { validate: false });
 
-      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            id: 'task:324242',
-            type: 'task',
-            version: '123',
-            attributes: {
-              ..._.omit(task, 'version', 'id'),
-              state: '{"foo":"bar"}',
-              params: '{"hello":"world"}',
-              runAt: task.runAt.toISOString(),
-              scheduledAt: task.scheduledAt.toISOString(),
-            },
-          },
-        ],
-        { refresh: false }
-      );
-
-      expect(result[0].tag === 'ok' && result[0].value.stateVersion).toBeUndefined();
+      expect(mockGetValidatedTaskInstance).not.toHaveBeenCalled();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -1044,7 +1022,6 @@ describe('TaskStore', () => {
               scheduledAt: '2019-02-12T21:01:22.479Z',
               startedAt: null,
               state: '{"foo":"bar"}',
-              stateVersion: 1,
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
