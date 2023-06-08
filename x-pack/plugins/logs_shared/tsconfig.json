@@ -4,5 +4,14 @@
     "outDir": "target/types"
   },
   "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*", "types/**/*"],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/navigation-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/io-ts-utils",
+    "@kbn/data-plugin",
+  ]
 }
