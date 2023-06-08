@@ -150,7 +150,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ui-metric": "d227284528fd19904e9d972aea0a13716fc5fe24",
         "upgrade-assistant-ml-upgrade-operation": "421f52731cb24e242d70672ba4725e169277efb3",
         "upgrade-assistant-reindex-operation": "01f3c3e051659ace56492a73928987e717537a93",
-        "uptime-dynamic-settings": "a9e9c42d8c1b6643946f32558478b274de0f89e0",
+        "uptime-dynamic-settings": "b6756ff71d6b5258971b1c8fd433d167affbde52",
         "uptime-synthetics-api-key": "7ae976a461248f9dbd8442af14a179bdbc229eca",
         "url": "c923a4a5002a09c0080c9095e958f07d518e6704",
         "usage-counters": "48782b3bcb6b5a23ba6f2bfe3a380d835e68890a",
