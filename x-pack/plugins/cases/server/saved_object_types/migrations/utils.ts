@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import valid from 'semver/functions/valid';
+import gte from 'semver/functions/gte';
+
 import type {
   LogMeta,
   SavedObjectMigrationContext,
@@ -50,3 +53,13 @@ export function pipeMigrations<T>(...migrations: Array<CaseMigration<T>>): CaseM
   return (doc: SavedObjectUnsanitizedDoc<T>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }
+
+export const isDeferredMigration = (
+  minDeferredKibanaVersion: string,
+  migrationVersion: string
+): boolean =>
+  Boolean(
+    valid(migrationVersion) &&
+      valid(minDeferredKibanaVersion) &&
+      gte(migrationVersion, minDeferredKibanaVersion)
+  );

@@ -11,12 +11,12 @@ import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
-  SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import { CommentType } from '../../../common/api';
 import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
@@ -26,8 +26,8 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
-import { logError } from './utils';
-import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
+import { isDeferredMigration, logError } from './utils';
+import { GENERATED_ALERT, MIN_DEFERRED_KIBANA_VERSION, SUB_CASE_SAVED_OBJECT } from './constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 interface UnsanitizedComment {
@@ -63,8 +63,8 @@ export const createCommentsMigrations = (
 
   const embeddableMigrations = mapValues<
     MigrateFunctionsObject,
-    SavedObjectMigrationFn<{ comment?: string }>
-  >(lensMigrationObject, migrateByValueLensVisualizations) as MigrateFunctionsObject;
+    SavedObjectMigrationParams<{ comment?: string }, { comment?: string }>
+  >(lensMigrationObject, migrateByValueLensVisualizations);
 
   const commentsMigrations = {
     '7.11.0': (
@@ -119,39 +119,54 @@ export const createCommentsMigrations = (
   return mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations);
 };
 
-export const migrateByValueLensVisualizations =
-  (migrate: MigrateFunction): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
-  (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
-    if (doc.attributes.comment == null) {
-      return doc;
-    }
+export const migrateByValueLensVisualizations = (
+  migrate: MigrateFunction,
+  migrationVersion: string
+): SavedObjectMigrationParams<{ comment?: string }, { comment?: string }> => {
+  const deferred = isDeferredMigration(MIN_DEFERRED_KIBANA_VERSION, migrationVersion);
 
-    try {
-      const parsedComment = parseCommentString(doc.attributes.comment);
-      const migratedComment = parsedComment.children.map((comment) => {
-        if (isLensMarkdownNode(comment)) {
-          // casting here because ts complains that comment isn't serializable because LensMarkdownNode
-          // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-          return migrate(comment as SerializableRecord) as LensMarkdownNode;
-        }
+  return {
+    // @ts-expect-error: remove when core changes the types
+    deferred,
+    transform: (
+      doc: SavedObjectUnsanitizedDoc<{ comment?: string }>,
+      context: SavedObjectMigrationContext
+    ) => {
+      if (doc.attributes.comment == null) {
+        return doc;
+      }
 
-        return comment;
-      });
+      try {
+        const parsedComment = parseCommentString(doc.attributes.comment);
+        const migratedComment = parsedComment.children.map((comment) => {
+          if (isLensMarkdownNode(comment)) {
+            // casting here because ts complains that comment isn't serializable because LensMarkdownNode
+            // extends Node which has fields that conflict with SerializableRecord even though it is serializable
+            return migrate(comment as SerializableRecord) as LensMarkdownNode;
+          }
 
-      const migratedMarkdown = { ...parsedComment, children: migratedComment };
+          return comment;
+        });
 
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
-        },
-      };
-    } catch (error) {
-      logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
-      return doc;
-    }
+        const migratedMarkdown = { ...parsedComment, children: migratedComment };
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            comment: stringifyCommentWithoutTrailingNewline(
+              doc.attributes.comment,
+              migratedMarkdown
+            ),
+          },
+        };
+      } catch (error) {
+        logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
+        return doc;
+      }
+    },
   };
+};
 
 export const stringifyCommentWithoutTrailingNewline = (
   originalComment: string,

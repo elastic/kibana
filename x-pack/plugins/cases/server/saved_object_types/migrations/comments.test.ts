@@ -30,8 +30,15 @@ import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
+import { GENERATED_ALERT, MIN_DEFERRED_KIBANA_VERSION, SUB_CASE_SAVED_OBJECT } from './constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { omit, partition } from 'lodash';
+import gte from 'semver/functions/gte';
+import type {
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationParams,
+} from '@kbn/core-saved-objects-server';
 
 describe('comments migrations', () => {
   const contextMock = savedObjectsServiceMock.createMigrationContext();
@@ -108,7 +115,7 @@ describe('comments migrations', () => {
     jest.clearAllMocks();
   });
 
-  describe('lens embeddable migrations for by value panels', () => {
+  describe('lens migrations', () => {
     describe('7.14.0 remove time zone from Lens visualization date histogram', () => {
       const expectedLensVisualizationMigrated = {
         title: 'MyRenamedOps',
@@ -271,6 +278,55 @@ describe('comments migrations', () => {
         expect((columns[2] as { params: {} }).params).toEqual({ timeZone: 'do not delete' });
       });
     });
+
+    it('should marked lens migrations as deferred correctly', () => {
+      const lensEmbeddableFactory = makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      );
+
+      const lensMigrations = lensEmbeddableFactory().migrations;
+      const lensMigrationObject =
+        typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
+      const lensMigrationObjectWithFakeMigration = {
+        ...lensMigrationObject,
+        '8.9.0': jest.fn(),
+        '8.10.0': jest.fn(),
+      };
+
+      const lensVersions = Object.keys(lensMigrationObjectWithFakeMigration);
+      const [lensVersionToBeDeferred, lensVersionToNotBeDeferred] = partition(
+        lensVersions,
+        (version) => gte(version, MIN_DEFERRED_KIBANA_VERSION)
+      );
+
+      const migrations = createCommentsMigrations({
+        persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
+        lensEmbeddableFactory: () => ({
+          id: 'test',
+          migrations: lensMigrationObjectWithFakeMigration,
+        }),
+      });
+
+      for (const version of lensVersionToBeDeferred) {
+        const migration = migrations[version] as SavedObjectMigrationParams;
+        expect(migration.deferred).toBe(true);
+      }
+
+      for (const version of lensVersionToNotBeDeferred) {
+        const migration = migrations[version] as SavedObjectMigrationParams;
+        expect(migration.deferred).toBe(false);
+      }
+
+      const migrationsWithoutLens = omit<SavedObjectMigrationMap>(migrations, lensVersions);
+
+      for (const version of Object.keys(migrationsWithoutLens)) {
+        const migration = migrationsWithoutLens[version] as SavedObjectMigrationFn;
+
+        expect(migration).toEqual(expect.any(Function));
+      }
+    });
   });
 
   describe('handles errors', () => {
@@ -298,9 +354,9 @@ describe('comments migrations', () => {
     };
 
     it('logs an error when it fails to parse invalid json', () => {
-      const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction);
+      const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction, '0.0.0');
 
-      const result = commentMigrationFunction(caseComment, contextMock);
+      const result = commentMigrationFunction.transform(caseComment, contextMock);
       // the comment should remain unchanged when there is an error
       expect(result.attributes.comment).toEqual(comment);
 
@@ -322,7 +378,7 @@ describe('comments migrations', () => {
     describe('mergeSavedObjectMigrationMaps', () => {
       it('logs an error when the passed migration functions fails', () => {
         const migrationObj1 = {
-          '1.0.0': migrateByValueLensVisualizations(migrationFunction),
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
         } as unknown as MigrateFunctionsObject;
 
         const migrationObj2 = {
@@ -351,7 +407,7 @@ describe('comments migrations', () => {
 
       it('it does not log an error when the migration function does not use the context', () => {
         const migrationObj1 = {
-          '1.0.0': migrateByValueLensVisualizations(migrationFunction),
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
         } as unknown as MigrateFunctionsObject;
 
         const migrationObj2 = {
