@@ -11,6 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -62,23 +63,23 @@ export class CpuUsageRule extends BaseRule {
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
-    const stats = await fetchCpuUsageNodeStats(
+    const filterQuery = params.filterQuery
+      ? (JSON.parse(params.filterQuery) as QueryDslQueryContainer)
+      : undefined;
+
+    const stats = await fetchCpuUsageNodeStats({
       esClient,
-      clusters,
+      clusterUuids: clusters.map((cluster) => cluster.clusterUuid),
       startMs,
       endMs,
-      Globals.app.config.ui.max_bucket_size,
-      params.filterQuery
-    );
-    return stats.map((stat) => {
-      if (Globals.app.config.ui.container.elasticsearch.enabled) {
-        stat.cpuUsage =
-          (stat.containerUsage / (stat.containerPeriods * stat.containerQuota * 1000)) * 100;
-      }
+      filterQuery,
+    });
 
+    return stats.map((stat) => {
       return {
         clusterUuid: stat.clusterUuid,
-        shouldFire: stat.cpuUsage > params.threshold!,
+        // Should we throw if we failed to compute the cpuUsage?
+        shouldFire: stat.cpuUsage ? stat.cpuUsage > params.threshold! : false,
         severity: AlertSeverity.Danger,
         meta: stat,
         ccs: stat.ccs,
