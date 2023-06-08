@@ -180,8 +180,15 @@ describe('links', () => {
     });
   });
 
-  // this can be the default after removing endpointRbacEnabled feature flag
-  describe('endpointRbacEnabled links', () => {
+  describe('RBAC checks', () => {
+    it('should return all links for user with all sub-feature privileges', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+
+      expect(filteredLinks).toEqual(links);
+    });
+
     it('should hide Trusted Applications for user without privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({

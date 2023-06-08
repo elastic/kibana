@@ -163,7 +163,6 @@ export const links: LinkItem = {
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      experimentalKey: 'policyListEnabled',
     },
     {
       id: SecurityPageName.trustedApps,

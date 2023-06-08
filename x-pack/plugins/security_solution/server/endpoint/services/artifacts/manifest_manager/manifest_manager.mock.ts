@@ -90,7 +90,7 @@ export const buildManifestManagerContextMock = (
     ...fullOpts,
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
-    experimentalFeatures: parseExperimentalConfigValue([]),
+    experimentalFeatures: parseExperimentalConfigValue([]).features,
   };
 };
 
