@@ -176,7 +176,7 @@ Object {
                       >
                         <button
                           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -563,7 +563,7 @@ Object {
                     >
                       <button
                         class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -846,7 +846,7 @@ Object {
                       >
                         <button
                           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -1072,7 +1072,7 @@ Object {
                     >
                       <button
                         class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -1327,7 +1327,7 @@ Object {
                       >
                         <button
                           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -1526,7 +1526,7 @@ Object {
                     >
                       <button
                         class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
