@@ -499,6 +499,62 @@ describe('TaskStore', () => {
       });
     });
 
+    test(`doesn't go through validation process to inject stateVersion when validate:false`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: 'myTraceparent',
+      };
+
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return {
+            id,
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          };
+        }
+      );
+
+      const result = await store.update(task, { validate: false });
+
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'task',
+        task.id,
+        {
+          attempts: task.attempts,
+          schedule: undefined,
+          params: JSON.stringify(task.params),
+          retryAt: null,
+          runAt: task.runAt.toISOString(),
+          scheduledAt: mockedDate.toISOString(),
+          scope: undefined,
+          startedAt: null,
+          state: JSON.stringify(task.state),
+          status: task.status,
+          taskType: task.taskType,
+          user: undefined,
+          ownerId: null,
+          traceparent: 'myTraceparent',
+        },
+        { version: '123', refresh: false }
+      );
+
+      expect(result.stateVersion).toBeUndefined();
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
       const task = {
         runAt: mockedDate,
@@ -540,6 +596,62 @@ describe('TaskStore', () => {
         adHocTaskCounter,
         allowReadingInvalidState: false,
       });
+    });
+
+    test(`doesn't validate whenever validate:false is passed-in`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...task,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      const result = await store.bulkUpdate([task], { validate: false });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'task:324242',
+            type: 'task',
+            version: '123',
+            attributes: {
+              ..._.omit(task, 'version', 'id'),
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+              runAt: task.runAt.toISOString(),
+              scheduledAt: task.scheduledAt.toISOString(),
+            },
+          },
+        ],
+        { refresh: false }
+      );
+
+      expect(result[0].tag === 'ok' && result[0].value.stateVersion).toBeUndefined();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
