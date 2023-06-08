@@ -1233,18 +1233,6 @@
             "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
           },
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
           },
