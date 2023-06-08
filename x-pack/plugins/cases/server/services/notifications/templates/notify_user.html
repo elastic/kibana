@@ -5,51 +5,62 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="initial-scale=1.0" />
     <title>Cases</title>
+    <script src="https://unpkg.com/mustache@latest"></script>
     <style type="text/css">
-        /* Reset */
         #outlook a {
             padding: 0;
         }
 
         body {
-            width: 100% !important;
+            width: 100%;
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
             margin: 0;
             padding: 0;
-        }
-
-        .ExternalClass {
-            width: 100%;
-        }
-
-        .ExternalClass,
-        .ExternalClass p,
-        .ExternalClass span,
-        .ExternalClass font,
-        .ExternalClass td,
-        .ExternalClass div {
-            line-height: 100%;
+            max-width: 900px;
+            background-color: #FAFAFA;
+            justify-content: center;
         }
 
         .container {
             margin: 0;
             padding: 0;
-            width: 100% !important;
         }
 
         img {
-            outline: none;
             text-decoration: none;
             -ms-interpolation-mode: bicubic;
         }
 
         a {
-            border: 0;
+            text-decoration: none;
+            color: #00788a;
         }
 
-        a img {
-            border: 0;
+        a:hover {
+            text-decoration: underline;
+        }
+
+        h2,
+        h2 a,
+        h3,
+        h3 a,
+        h4,
+        h5,
+        h6,
+        .t_cht {
+            color: #000;
+        }
+
+        .ExternalClass p,
+        .ExternalClass span,
+        .ExternalClass font,
+        .ExternalClass td {
+            line-height: 100%;
+        }
+
+        .ExternalClass {
+            width: 100%;
         }
 
         table td {
@@ -59,16 +70,9 @@
         }
 
         table {
-            border-collapse: collapse;
+            border-collapse: separate;
             mso-table-lspace: 0pt;
             mso-table-rspace: 0pt;
-        }
-
-        /* Styles */
-        a,
-        a:visited {
-            text-decoration: underline;
-            color: #0077cc !important;
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
@@ -76,7 +80,6 @@
         body {
             font-family: Inter, Arial, sans-serif;
             font-size: 14px;
-            line-height: 20px;
             color: #343741;
         }
 
@@ -93,38 +96,20 @@
 
         h1 {
             font-size: 34px;
-            line-height: 40px;
         }
 
         h3 {
             font-size: 22px;
-            line-height: 24px;
         }
 
         h5 {
             font-size: 16px;
-            line-height: 24px;
         }
 
-        p,
-        ul,
-        ol {
-            line-height: 21px;
-            margin: 0 0 20px 0;
-        }
-
-        ul,
-        ol {
-            padding-left: 1.5em;
-        }
-
-        label {
-            display: block;
+        .badge {
             width: 112px;
             font-size: 12px;
-            line-height: 24px;
-            padding: 0px 16px;
-            border-radius: 12px;
+            padding: 4px 24px;
             text-transform: uppercase;
             text-align: center;
             align-items: center;
@@ -166,44 +151,37 @@
         }
 
         .tags {
-            display: flex;
             background-color: #E0E5EE;
+            margin-right: 15px;
             align-items: center;
             justify-content: center;
-            border-radius: 3px;
             padding: 1px 8px;
             width: 70px;
             height: 18px;
             font-size: 12px;
-            line-height: 16px;
         }
 
         .btn {
-            display: inline-block;
-            border-top: 10px solid #0077cc;
-            border-right: 20px solid #0077cc;
-            border-bottom: 10px solid #0077cc;
-            border-left: 20px solid #0077cc;
-            border-radius: 3px;
-            font-weight: bold;
-            font-size: 13px;
+            width: 245px;
+            height: 40px;
+            align-items: center;
+            font-weight: normal;
+            font-size: 14px;
             text-decoration: none;
-            line-height: 18px;
-            color: #ffffff !important;
-            background: #0077cc;
+            color: #ffffff;
+            background-color: #BD271E;
+            border: 1px solid #BD271E;
+            padding: 16px;
         }
     </style>
 </head>
 
-<body>
-
-    <table cellpadding="0" cellspacing="0" width="100%"
-        style="font-family: Inter, Arial, sans-serif; font-size: 14px; line-height: 21px;">
+<body id="notify_user_template" align="center">
+    <table cellpadding="0" cellspacing="0" align="center" border="0" width="100%"
+        style="font-family: Inter, Arial, sans-serif; font-size: 14px; width: 100%;">
         <tr>
             <td align="center" border="0" bgcolor="#FAFAFA">
-
-                <!-- Header -->
-                <table cellpadding="0" cellspacing="0" width="100%" style="width:100%;">
+                <table cellpadding="0" cellspacing="0" width="100%" style="width:100%;" align="center" border="0">
                     <tr>
                         <td style="padding: 30px 40px;">
                             <a href="https://www.elastic.co">
@@ -213,80 +191,87 @@
                         </td>
                     </tr>
                 </table>
-                <!-- /Header -->
 
-                <!-- Body -->
-                <table cellpadding="0" cellspacing="0" class="email-body">
+                <table cellpadding="0" cellspacing="0" class="email-body" align="center" border="0" width="100%"
+                    style="width: 100%">
                     <tr>
-                        <td style="padding: 30px;">
-                            <h1>Cases: Potential Evasion via Filter Manager</h1>
+                        <td style="padding: 30px;" width="100%">
+                            <h1>Cases: {{caseTitle}}</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding: 0px 30px; display: flex;">
-                            <label class="in-progress"> In-progress </label>
-                            <label class="critical" style="margin-left: 15px;"> Critical </label>
+                        <td style="padding: 0px 30px;" align="left">
+                            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;" align="center">
+                                <tr>
+                                    <td width="20%">
+                                        {{#styledStatus}} {{caseStatus}} {{/styledStatus}}
+                                    </td>
+                                    <td style="margin-left: 15px;" width="20%">
+                                        {{#styledSeverity}} {{caseSeverity}} {{/styledSeverity}}
+                                    </td>
+                                    <td style="margin-left: 15px;" width="20%"></td>
+                                    <td style="margin-left: 15px;" width="20%"></td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding: 40px 30px;">
+                        <td style="padding: 40px 30px;" width="100%">
                             <h3>You are assigned to an Elastic Case</h3>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding: 60px 30px 30px 30px;">
-                            <table>
-                                <tr style="display: flex;">
+                        <td style="margin: 0; padding: 60px 30px 30px 30px; line-height: 30px; mso-line-height-rule:exactly;" width="100%">
+                            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;" align="center">
+                                <tr>
                                     <td style="width: 120px;">
                                         <h5>Tags</h5>
                                     </td>
-                                    <td style="display: flex;">
-                                        <span class="tags">security</span>
-                                        <span class="tags" style="margin-left: 15px;">evasion</span>
+                                    <td>
+                                        {{#caseTags}}
+                                        <span class="tags">{{.}}</span>
+                                        {{/caseTags}}
+
                                     </td>
                                 </tr>
-                                <tr style="display: flex;">
+                                <tr>
+                                    <td style="width: 120px;">
+                                        <h5>Alerts</h5>
+                                    </td>
+                                    <td>
+                                        <span>{{caseAlerts}}</span>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td style="width: 120px;">
                                         <h5>Description</h5>
                                     </td>
-                                    <td style="display: flex; padding-left: 30px; ">
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel metus in
-                                            nibh consectetur malesuada. Ut ligula neque, ullamcorper et consequat ut,
-                                            commodo quis ex. Nam eleifend elementum mi, nec auctor ipsum dignissim quis.
-                                            Nunc ac sapien et eros accumsan laoreet. Integer sit amet nibh sit amet ante
-                                            vestibulum ornare. Nam ac mattis mi. Praesent tempor, orci sed commodo
-                                            posuere, odio sem posuere sapien, vitae sodales orci nunc nec mauris. Sed
-                                            augue nibh, blandit vel ultrices et, ornare eget nibh. Ut ac orci at massa
-                                            lacinia efficitur.
+                                    <td>
+                                        <span>{{caseDescription}}</span>
 
-                                            Proin quis eros non tortor fermentum luctus. Ut vitae enim consectetur,
-                                            maximus erat a, mollis purus. Mauris dictum et neque in porta. Vestibulum
-                                            fermentum eleifend posuere. Nulla eu bibendum leo. Nullam tempus, turpis ac
-                                            vulputate mattis, metus ipsum gravida orci, non accumsan libero urna id
-                                            lorem. Donec sagittis nibh ac purus molestie, sit amet convallis felis
-                                            bibendum. Phasellus vel nulla sagittis mauris eleifend hendrerit a ac velit.
-
-                                            Donec congue auctor dolor vel pellentesque. Duis et purus porttitor ex
-                                            convallis iaculis. Aenean semper urna justo, nec condimentum lectus dapibus
-                                            ac. Proin porta est eu metus luctus molestie. Maecenas gravida est leo, in
-                                            pulvinar magna mollis in. In malesuada blandit magna nec luctus. Quisque
-                                            nisl velit, porta quis turpis in, pretium vehicula nulla. Morbi et tempus
-                                            lacus.
-                                        </p>
-
+                                    </td>
+                                </tr>
+                            </table>
+                            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-top: 60px;"
+                                align="center">
+                                <tr>
+                                    <td align="center" width="100%">
+                                        <a href="{{& caseUrl}}">
+                                            <span class="btn">
+                                                View Elastic Case
+                                            </span>
+                                        </a>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                 </table>
-                <!-- /Body -->
 
-                <!-- Footer -->
-                <table cellpadding="0" cellspacing="0" border="0" class="container">
+                <table cellpadding="0" cellspacing="0" border="0" class="container" width="100%" style="width: 100%"
+                    align="center">
                     <tr>
-                        <td style="padding: 40px; font-size: 9px; line-height: 17px; color: #6d6d6d">
+                        <td style="padding: 40px; font-size: 9px; color: #6d6d6d">
                             <table cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td style="padding-bottom: 10px;">
@@ -314,7 +299,6 @@
                         </td>
                     </tr>
                 </table>
-                <!-- /Footer -->
             </td>
         </tr>
     </table>
