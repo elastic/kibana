@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { NodeLogsLocatorDependencies, NodeLogsLocatorParams } from './node_logs_locator';
 import { NODE_LOGS_LOCATOR_ID } from './node_logs_locator';
 
