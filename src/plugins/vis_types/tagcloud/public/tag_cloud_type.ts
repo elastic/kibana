@@ -13,6 +13,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
 import { TagCloudVisDependencies } from './plugin';
+import { convertToLens } from './convert_to_lens';
 
 export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependencies) => {
   return {
@@ -80,5 +81,11 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
       ],
     },
     requiresSearch: true,
+    navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+    getExpressionVariables: async (vis, timeFilter) => {
+      return {
+        canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+      };
+    },
   };
 };
