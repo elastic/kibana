@@ -6,7 +6,55 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import {
+  convertToLensModule,
+  getDataViewByIndexPatternId,
+} from '@kbn/visualizations-plugin/public';
+import { getDataViewsStart } from '../services';
+
 export const convertToLens = async (vis, timefilter) => {
-  console.log('tagcloud vis', vis);
-  return null;
+  if (!timefilter) {
+    return null;
+  }
+
+  const dataViews = getDataViewsStart();
+  const dataView = await getDataViewByIndexPatternId(vis.data.indexPattern?.id, dataViews);
+
+  if (!dataView) {
+    return null;
+  }
+
+  const { getColumnsFromVis, excludeMetaFromColumn } = await convertToLensModule;
+  const layers = getColumnsFromVis(vis, timefilter, dataView, {
+    splits: ['segment'],
+  });
+
+  if (layers === null) {
+    return null;
+  }
+
+  const [layerConfig] = layers;
+
+  const layerId = uuidv4();
+
+  const indexPatternId = dataView.id!;
+  return {
+    type: 'lnsTagcloud',
+    layers: [
+      {
+        indexPatternId,
+        layerId,
+        columns: layerConfig.columns.map(excludeMetaFromColumn),
+        columnOrder: [],
+      },
+    ],
+    configuration: {
+      maxFontSize: 72,
+      minFontSize: 18,
+      orientation: 'single',
+      showLabel: true,
+    },
+    indexPatternIds: [indexPatternId],
+  };
 }

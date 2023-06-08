@@ -19,6 +19,7 @@
     "@kbn/i18n",
     "@kbn/coloring",
     "@kbn/config-schema",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",

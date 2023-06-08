@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getColumnsFromVis } from './schemas';
-export { excludeMetaFromColumn } from './utils';
-export {
-  convertToFiltersColumn,
-  getPercentageColumnFormulaColumn,
-  getPalette,
-  getPaletteFromStopsWithColors,
-  getPercentageModeConfig,
-  createStaticValueColumn,
-} from '../../common/convert_to_lens/lib';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
+export const [getDataViewsStart, setDataViewsStart] =
+  createGetterSetter<DataViewsPublicPluginStart>('dataViews');

@@ -11,6 +11,8 @@ import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
 import {
   AggBasedColumn,
   CollapseFunction,
+  Column,
+  ColumnWithMeta,
   isCollapseFunction,
   SchemaConfig,
   SupportedAggregation,
@@ -187,4 +189,19 @@ export const getCustomBucketColumns = (
     }
   });
   return { customBucketColumns, customBucketsMap };
+};
+
+const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
+  if ((column as ColumnWithMeta).meta) {
+    return true;
+  }
+  return false;
+};
+
+export const excludeMetaFromColumn = (column: Column) => {
+  if (isColumnWithMeta(column)) {
+    const { meta, ...rest } = column;
+    return rest;
+  }
+  return column;
 };

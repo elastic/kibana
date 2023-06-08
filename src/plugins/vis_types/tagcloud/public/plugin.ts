@@ -9,14 +9,18 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-
 import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
 import { TagcloudPublicConfig } from '../config';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+}
+
+export interface TagCloudPluginStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /** @internal */
@@ -25,7 +29,15 @@ export interface TagCloudVisDependencies {
 }
 
 /** @internal */
-export class TagCloudPlugin implements Plugin<void, void> {
+export class TagCloudPlugin 
+  implements
+    Plugin<
+      void,
+      void,
+      TagCloudPluginSetupDependencies,
+      TagCloudPluginStartDependencies
+    >
+{
   initializerContext: PluginInitializerContext<TagcloudPublicConfig>;
 
   constructor(initializerContext: PluginInitializerContext<TagcloudPublicConfig>) {
@@ -45,5 +57,7 @@ export class TagCloudPlugin implements Plugin<void, void> {
     });
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, { dataViews }: TagCloudPluginStartDependencies) {
+    setDataViewsStart(dataViews);
+  }
 }
