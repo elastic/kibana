@@ -34,10 +34,10 @@ export default function (providerContext: FtrProviderContext) {
       log.info('installing/upgrading Endpoint fleet package');
       await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
-    loadTestFile(require.resolve('./endpoint_list'));
-    loadTestFile(require.resolve('./endpoint_telemetry'));
-    loadTestFile(require.resolve('./endpoint_permissions'));
-    loadTestFile(require.resolve('./responder'));
-    loadTestFile(require.resolve('./endpoint_solution_integrations'));
+    loadTestFile(require.resolve('./policy_list'));
+    loadTestFile(require.resolve('./policy_details'));
+    loadTestFile(require.resolve('./trusted_apps_list'));
+    loadTestFile(require.resolve('./fleet_integrations'));
+    loadTestFile(require.resolve('./artifact_entries_list'));
   });
 }
