@@ -1554,5 +1554,5 @@
       "@kbn/ambient-storybook-types"
     ]
   },
-  "exclude": ["tmp", "target/**/*", "node_modules"]
+  "exclude": ["tmp", "target/**/*", "node_modules/**/*"]
 }
