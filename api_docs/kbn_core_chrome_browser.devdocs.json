@@ -1491,6 +1491,22 @@
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [
+              "\nTemporarilly we allow href to be passed.\nOnce all the deeplinks will be exposed in packages we will not allow href anymore\nand force deeplink id to be passed"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1676,6 +1692,31 @@
             "label": "id",
             "description": [],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeSetProjectBreadcrumbsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeSetProjectBreadcrumbsParams",
+        "description": [],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeSetProjectBreadcrumbsParams.absolute",
+            "type": "boolean",
+            "tags": [],
+            "label": "absolute",
+            "description": [],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2630,6 +2671,23 @@
           }
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeProjectBreadcrumb",
+        "type": "Type",
+        "tags": [],
+        "label": "ChromeProjectBreadcrumb",
+        "description": [],
+        "signature": [
+          "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
+          "CommonProps",
+          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

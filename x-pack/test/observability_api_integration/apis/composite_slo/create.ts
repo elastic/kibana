@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
           createCompositeSLOInput({
             timeWindow: {
               duration: '30d',
-              isRolling: true,
+              type: 'rolling',
             },
             sources: [
               { id: 'f9072790-f97c-11ed-895c-170d13e61076', revision: 2, weight: 1 },

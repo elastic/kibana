@@ -59,8 +59,7 @@ export const actionStatusRequestHandler = function (
       esClient,
       endpointContext.service.getEndpointMetadataService(),
       logger,
-      agentIDs,
-      endpointContext.experimentalFeatures.pendingActionResponsesWithAck
+      agentIDs
     );
 
     return res.ok({

@@ -21,7 +21,6 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
@@ -32,7 +31,7 @@ import {
 
 import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
 import type { AppAction } from '../../../../../../common/store/actions';
-import { getEndpointListPath, getPoliciesPath } from '../../../../../common/routing';
+import { getPoliciesPath } from '../../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
@@ -62,7 +61,6 @@ export const PolicyFormLayout = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
-  const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
 
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
@@ -73,12 +71,10 @@ export const PolicyFormLayout = React.memo(() => {
     return [
       APP_UI_ID,
       {
-        path: isPolicyListEnabled
-          ? getPoliciesPath()
-          : getEndpointListPath({ name: 'endpointList' }),
+        path: getPoliciesPath(),
       },
     ];
-  }, [isPolicyListEnabled, routingOnCancelNavigateTo]);
+  }, [routingOnCancelNavigateTo]);
 
   // Handle showing update statuses
   useEffect(() => {
