@@ -177,6 +177,9 @@ for (const testSuite of testSuites) {
           // by setting chunks vars to value 1, which means all test will run in one job
           CLI_NUMBER: 1,
           CLI_COUNT: 1,
+          // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
+          // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
+          RUN_ALL_TESTS: 'true'
         },
       });
       break;
