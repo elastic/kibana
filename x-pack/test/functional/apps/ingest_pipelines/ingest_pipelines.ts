@@ -25,9 +25,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const security = getService('security');
-
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/157511
-  describe.skip('Ingest Pipelines', function () {
+  
+  describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
@@ -39,8 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Loads the app', async () => {
       log.debug('Checking for section heading to say Ingest Pipelines.');
 
-      const headingText = await pageObjects.ingestPipelines.emptyStateHeaderText();
-      expect(headingText).to.be('Start by creating a pipeline');
+      const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
+      expect(headingText).to.be('Ingest Pipelines');
     });
 
     describe('create pipeline', () => {
