@@ -23,12 +23,16 @@ import { APIReturnType } from '../../../../services/rest/create_call_api';
 type ApiKeyPayload =
   APIReturnType<'POST /internal/observability_onboarding/custom_logs/save'>;
 
+export type HasPrivileges = boolean;
+
 export function ApiKeyBanner({
+  hasPrivileges = true,
   status,
   payload,
   error,
 }: {
-  status: FETCH_STATUS | 'noPrivileges';
+  hasPrivileges?: boolean;
+  status: FETCH_STATUS;
   payload?: ApiKeyPayload;
   error?: IHttpFetchError<ResponseErrorBody>;
 }) {
@@ -153,7 +157,7 @@ export function ApiKeyBanner({
     </EuiCallOut>
   );
 
-  if (status === 'noPrivileges') {
+  if (!hasPrivileges) {
     return noPermissionsCallout;
   }
 

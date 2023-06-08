@@ -128,11 +128,8 @@ export function InstallElasticAgent() {
           monitoringRoleStatus !== FETCH_STATUS.LOADING && (
             <ApiKeyBanner
               payload={installShipperSetup}
-              status={
-                monitoringRole?.hasPrivileges
-                  ? installShipperSetupStatus
-                  : 'noPrivileges'
-              }
+              hasPrivileges={monitoringRole?.hasPrivileges}
+              status={installShipperSetupStatus}
               error={error}
             />
           )}
