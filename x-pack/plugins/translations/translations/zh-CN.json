@@ -12991,7 +12991,6 @@
     "xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title": "命名搜索应用程序",
     "xpack.enterpriseSearch.content.engines.createEngine.selectIndices.title": "选择索引",
     "xpack.enterpriseSearch.content.engines.createEngine.submit": "创建",
-    "xpack.enterpriseSearch.content.engines.createEngine.technicalPreviewCallOut.title": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.enterpriseSearch.content.engines.enginesList.empty.description": "下面我们指导您创建首个搜索应用程序。",
     "xpack.enterpriseSearch.content.engines.enginesList.empty.title": "创建您的首个搜索应用程序",
     "xpack.enterpriseSearch.content.engines.indices.addIndicesFlyout.updateError.title": "更新引擎时出错",

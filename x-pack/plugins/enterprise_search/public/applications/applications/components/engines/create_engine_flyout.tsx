@@ -139,7 +139,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
             >
               <FormattedMessage
                 id="xpack.enterpriseSearch.content.engines.createEngine.featureCallOut.description"
-                defaultMessage="This functionality is in beta and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in beta are not subject to the support SLA of official GA features."
+                defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features."
               />
             </EuiCallOut>
           </EuiFlexItem>
