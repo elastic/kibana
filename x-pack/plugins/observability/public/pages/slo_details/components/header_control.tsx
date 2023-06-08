@@ -27,7 +27,7 @@ import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_con
 import type { RulesParams } from '../../../locators/rules';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo: SLOWithSummaryResponse | null | undefined;
   isLoading: boolean;
 }
 

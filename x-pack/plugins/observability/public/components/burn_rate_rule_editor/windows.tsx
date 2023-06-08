@@ -33,7 +33,7 @@ import {
 import { WindowResult } from './validation';
 
 interface WindowProps extends WindowSchema {
-  slo?: SLOResponse | CompositeSLOResponse;
+  slo?: SLOResponse | CompositeSLOResponse | null;
   onChange: (windowDef: WindowSchema) => void;
   onDelete: (id: string) => void;
   disableDelete: boolean;
@@ -49,7 +49,7 @@ const ACTION_GROUP_OPTIONS = [
 
 export const calculateMaxBurnRateThreshold = (
   longWindow: Duration,
-  slo?: SLOResponse | CompositeSLOResponse
+  slo?: SLOResponse | CompositeSLOResponse | null
 ) => {
   return slo
     ? Math.floor(toMinutes(toDuration(slo.timeWindow.duration)) / toMinutes(longWindow))
@@ -196,7 +196,7 @@ const getErrorBudgetExhaustionText = (formattedHours: string) =>
   });
 
 export const createNewWindow = (
-  slo?: SLOResponse | CompositeSLOResponse,
+  slo?: SLOResponse | CompositeSLOResponse | null,
   partialWindow: Partial<WindowSchema> = {}
 ): WindowSchema => {
   const longWindow = partialWindow.longWindow || { value: 1, unit: 'h' };
@@ -214,7 +214,7 @@ export const createNewWindow = (
 interface WindowsProps {
   windows: WindowSchema[];
   onChange: (windows: WindowSchema[]) => void;
-  slo?: SLOResponse | CompositeSLOResponse;
+  slo?: SLOResponse | CompositeSLOResponse | null;
   errors: WindowResult[];
   totalNumberOfWindows?: number;
 }

@@ -11,7 +11,7 @@ import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kb
 import { toDuration } from '../../../utils/slo/duration';
 
 export function transformSloResponseToCreateSloInput(
-  values: SLOWithSummaryResponse | undefined
+  values: SLOWithSummaryResponse | null | undefined
 ): CreateSLOInput | undefined {
   if (!values) return undefined;
 

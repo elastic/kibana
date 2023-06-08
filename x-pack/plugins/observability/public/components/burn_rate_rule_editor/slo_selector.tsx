@@ -20,9 +20,9 @@ import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { useFetchCompositeSloList } from '../../hooks/composite_slo/use_fetch_composite_slo_list';
 
 interface Props {
-  initialSlo?: SLOResponse | CompositeSLOResponse;
+  initialSlo?: SLOResponse | CompositeSLOResponse | null;
   errors?: string[];
-  onSelected: (slo: SLOResponse | CompositeSLOResponse | undefined) => void;
+  onSelected: (slo: SLOResponse | CompositeSLOResponse | null | undefined) => void;
 }
 
 function SloSelector({ initialSlo, onSelected, errors }: Props) {

@@ -51,14 +51,14 @@ export function BurnRateRuleEditor(props: Props) {
     sloId: ruleParams?.sloId,
   });
 
-  const [selectedSlo, setSelectedSlo] = useState<CombinedSloResponse | undefined>(undefined);
+  const [selectedSlo, setSelectedSlo] = useState<CombinedSloResponse | null | undefined>(undefined);
 
   useEffect(() => {
     const hasInitialSlo = !loadingInitialSlo && initialSlo != null;
     setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
   }, [loadingInitialSlo, initialSlo, setRuleParams]);
 
-  const onSelectedSlo = (slo: CombinedSloResponse | undefined) => {
+  const onSelectedSlo = (slo: CombinedSloResponse | null | undefined) => {
     setSelectedSlo(slo);
     setRuleParams('sloId', slo?.id);
   };

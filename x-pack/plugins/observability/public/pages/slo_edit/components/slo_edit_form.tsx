@@ -41,7 +41,7 @@ import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { sloFeatureId } from '../../../../common';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo: SLOWithSummaryResponse | null | undefined;
 }
 
 export const maxWidth = 775;
@@ -73,7 +73,7 @@ export function SloEditForm({ slo }: Props) {
 
   const searchParams = new URLSearchParams(search);
 
-  const isEditMode = slo !== undefined;
+  const isEditMode = slo != null;
 
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);

@@ -88,7 +88,7 @@ export function SloDetailsPage() {
 
 function getBreadcrumbs(
   basePath: IBasePath,
-  slo: SLOWithSummaryResponse | undefined
+  slo: SLOWithSummaryResponse | null | undefined
 ): EuiBreadcrumbProps[] {
   return [
     {

@@ -12,7 +12,7 @@ import React from 'react';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo: SLOWithSummaryResponse | null | undefined;
   isLoading: boolean;
 }
 
