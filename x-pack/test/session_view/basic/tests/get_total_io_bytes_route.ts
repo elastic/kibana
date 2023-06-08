@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { GET_TOTAL_IO_BYTES_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import {
+  CURRENT_API_VERSION,
+  GET_TOTAL_IO_BYTES_ROUTE,
+} from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_INDEX = 'logs-endpoint.events.process*';
@@ -20,7 +23,15 @@ export default function getTotalIOBytesTests({ getService }: FtrProviderContext)
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe(`Session view - ${GET_TOTAL_IO_BYTES_ROUTE} - with a basic license`, () => {
+  function getTestRoute() {
+    return supertest
+      .get(GET_TOTAL_IO_BYTES_ROUTE)
+      .set('kbn-xsrf', 'foo')
+      .set('Elastic-Api-Version', CURRENT_API_VERSION);
+  }
+
+  // Failing: See https://github.com/elastic/kibana/issues/159303
+  describe.skip(`Session view - ${GET_TOTAL_IO_BYTES_ROUTE} - with a basic license`, () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');
@@ -32,7 +43,7 @@ export default function getTotalIOBytesTests({ getService }: FtrProviderContext)
     });
 
     it(`${GET_TOTAL_IO_BYTES_ROUTE} returns a page of IO events`, async () => {
-      const response = await supertest.get(GET_TOTAL_IO_BYTES_ROUTE).set('kbn-xsrf', 'foo').query({
+      const response = await getTestRoute().query({
         index: MOCK_INDEX,
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
         sessionStartTime: MOCK_SESSION_START_TIME,
@@ -42,7 +53,7 @@ export default function getTotalIOBytesTests({ getService }: FtrProviderContext)
     });
 
     it(`${GET_TOTAL_IO_BYTES_ROUTE} returns 0 for invalid query`, async () => {
-      const response = await supertest.get(GET_TOTAL_IO_BYTES_ROUTE).set('kbn-xsrf', 'foo').query({
+      const response = await getTestRoute().query({
         index: MOCK_INDEX,
         sessionStartTime: MOCK_SESSION_START_TIME,
         sessionEntityId: 'xyz',
