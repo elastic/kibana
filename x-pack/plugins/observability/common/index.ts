@@ -45,8 +45,6 @@ export {
 } from './progressive_loading';
 
 export const sloFeatureId = 'slo';
-export const thresholdFeatureId = 'threshold';
-
 export const casesFeatureId = 'observabilityCases';
 
 // The ID of the observability app. Should more appropriately be called

@@ -14,7 +14,7 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 
-import { thresholdFeatureId } from '../../../../common';
+import { observabilityFeatureId } from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 
@@ -208,7 +208,7 @@ export function thresholdRuleType(
         },
       ],
     },
-    producer: thresholdFeatureId,
+    producer: observabilityFeatureId,
     // TODO: check this one below
     // getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),//T
     alerts: MetricsRulesTypeAlertDefinition,
