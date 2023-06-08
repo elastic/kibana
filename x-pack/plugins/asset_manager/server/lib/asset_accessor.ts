@@ -9,8 +9,8 @@ import { Asset } from '../../common/types_api';
 import { AssetManagerConfig } from '../types';
 import { OptionsWithInjectedValues } from './accessors';
 import { GetHostsOptions } from './accessors/hosts';
-import { getHostsByAssets } from './accessors/hosts/getHostsByAssets';
-import { getHostsBySignals } from './accessors/hosts/getHostsBySignals';
+import { getHostsByAssets } from './accessors/hosts/get_hosts_by_assets';
+import { getHostsBySignals } from './accessors/hosts/get_hosts_by_signals';
 
 export interface AssetAccessorOptions {
   sourceIndices: AssetManagerConfig['sourceIndices'];
