@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { monaco } from '@kbn/monaco';
+
+export const languageConfiguration: monaco.languages.LanguageConfiguration = {
+  brackets: [
+    ['{', '}'],
+    ['[', ']'],
+    ['(', ')'],
+  ],
+
+  autoClosingPairs: [
+    { open: '{', close: '}' },
+    { open: '[', close: ']' },
+    { open: '(', close: ')' },
+    { open: '"', close: '"' },
+    { open: "'", close: "'" },
+  ],
+
+  surroundingPairs: [
+    { open: '{', close: '}' },
+    { open: '[', close: ']' },
+    { open: '(', close: ')' },
+    { open: '"', close: '"' },
+    { open: "'", close: "'" },
+  ],
+};
+
+export const lexerRules: monaco.languages.IMonarchLanguage = {
+  tokenizer: {
+    root: [
+      // %{SYNTAX}
+      [/(%\{)([^:}]+)(})/, ['string.openGrok', 'variable.syntax', 'string.closeGrok']],
+
+      // %{SYNTAX:ID}
+      [
+        /(%\{)([^:}]+)(:)([^:}]+)(})/,
+        [
+          'string.openGrok',
+          'variable.syntax',
+          'string.separator',
+          'variable.id',
+          'string.closeGrok',
+        ],
+      ],
+
+      // %{SYNTAX:ID:TYPE}
+      [
+        /(%\{)([^:}]+)(:)([^:}]+)(:)([^:}]+)(})/,
+        [
+          'string.openGrok',
+          'variable.syntax',
+          'string.separator',
+          'variable.id',
+          'string.separator',
+          'variable.type',
+          'string.closeGrok',
+        ],
+      ],
+    ],
+  },
+};
