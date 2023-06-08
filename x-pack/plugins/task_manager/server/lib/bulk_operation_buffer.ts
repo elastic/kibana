@@ -16,6 +16,7 @@ export interface BufferOptions {
   bufferMaxDuration?: number;
   bufferMaxOperations?: number;
   logger?: Logger;
+  validate: boolean;
 }
 
 export interface Entity {
@@ -39,7 +40,7 @@ const FLUSH = true;
 
 export function createBuffer<T extends Entity>(
   bulkOperation: BulkOperation<T>,
-  { bufferMaxDuration = 0, bufferMaxOperations = Number.MAX_VALUE, logger }: BufferOptions = {}
+  { bufferMaxDuration = 0, bufferMaxOperations = Number.MAX_VALUE, logger, validate }: BufferOptions
 ): Operation<T> {
   const flushBuffer = new Subject<void>();
 

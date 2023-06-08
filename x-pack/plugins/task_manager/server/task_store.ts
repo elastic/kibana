@@ -243,10 +243,14 @@ export class TaskStore {
    * @param {TaskDoc} doc
    * @returns {Promise<TaskDoc>}
    */
-  public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    // TODO: Should we force validation when claiming tasks? State could fail validation
-    const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write');
-    const attributes = taskInstanceToAttributes(validatedTaskInstance);
+  public async update(
+    doc: ConcreteTaskInstance,
+    options: { validate: boolean }
+  ): Promise<ConcreteTaskInstance> {
+    const taskInstance = options.validate
+      ? this.taskValidator.getValidatedTaskInstance(doc, 'write')
+      : doc;
+    const attributes = taskInstanceToAttributes(taskInstance);
 
     let updatedSavedObject;
     try {
@@ -264,14 +268,14 @@ export class TaskStore {
       throw e;
     }
 
-    const taskInstance = savedObjectToConcreteTaskInstance(
+    const result = savedObjectToConcreteTaskInstance(
       // The SavedObjects update api forces a Partial on the `attributes` on the response,
       // but actually returns the whole object that is passed to it, so as we know we're
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
-    return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
+    return options.validate ? this.taskValidator.getValidatedTaskInstance(result, 'read') : result;
   }
 
   /**
@@ -281,10 +285,15 @@ export class TaskStore {
    * @param {Array<TaskDoc>} docs
    * @returns {Promise<Array<TaskDoc>>}
    */
-  public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
+  public async bulkUpdate(
+    docs: ConcreteTaskInstance[],
+    options: { validate: boolean }
+  ): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write');
-      attrsById.set(doc.id, taskInstanceToAttributes(validatedTaskInstance));
+      const taskInstance = options.validate
+        ? this.taskValidator.getValidatedTaskInstance(doc, 'write')
+        : doc;
+      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance));
       return attrsById;
     }, new Map());
 
@@ -323,7 +332,10 @@ export class TaskStore {
           attributesByDocId.get(updatedSavedObject.id)!
         ),
       });
-      return asOk(this.taskValidator.getValidatedTaskInstance(taskInstance, 'read'));
+      const result = options.validate
+        ? this.taskValidator.getValidatedTaskInstance(taskInstance, 'read')
+        : taskInstance;
+      return asOk(result);
     });
   }
 

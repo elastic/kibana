@@ -462,7 +462,7 @@ describe('TaskStore', () => {
         }
       );
 
-      const result = await store.update(task);
+      const result = await store.update(task, { validate: true });
 
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         'task',
@@ -518,7 +518,9 @@ describe('TaskStore', () => {
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.update.mockRejectedValue(new Error('Failure'));
-      await expect(store.update(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      await expect(
+        store.update(task, { validate: true })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
@@ -559,9 +561,9 @@ describe('TaskStore', () => {
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
-      await expect(store.bulkUpdate([task])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
-      );
+      await expect(
+        store.bulkUpdate([task], { validate: true })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });

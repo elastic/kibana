@@ -14,7 +14,7 @@ describe('Buffered Task Store', () => {
   test('proxies the TaskStore for `maxAttempts` and `remove`', async () => {
     const taskStore = taskStoreMock.create();
     taskStore.bulkUpdate.mockResolvedValue([]);
-    const bufferedStore = new BufferedTaskStore(taskStore, {});
+    const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
 
     bufferedStore.remove('1');
     expect(taskStore.remove).toHaveBeenCalledWith('1');
@@ -23,19 +23,19 @@ describe('Buffered Task Store', () => {
   describe('update', () => {
     test("proxies the TaskStore's `bulkUpdate`", async () => {
       const taskStore = taskStoreMock.create();
-      const bufferedStore = new BufferedTaskStore(taskStore, {});
+      const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
 
       const task = taskManagerMock.createTask();
 
       taskStore.bulkUpdate.mockResolvedValue([asOk(task)]);
 
       expect(await bufferedStore.update(task)).toMatchObject(task);
-      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task]);
+      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task], { validate: true });
     });
 
     test('handles partially successfull bulkUpdates resolving each call appropriately', async () => {
       const taskStore = taskStoreMock.create();
-      const bufferedStore = new BufferedTaskStore(taskStore, {});
+      const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
 
       const tasks = [
         taskManagerMock.createTask(),
@@ -79,7 +79,7 @@ describe('Buffered Task Store', () => {
 
     test('handles multiple items with the same id', async () => {
       const taskStore = taskStoreMock.create();
-      const bufferedStore = new BufferedTaskStore(taskStore, {});
+      const bufferedStore = new BufferedTaskStore(taskStore, { validate: true });
 
       const duplicateIdTask = taskManagerMock.createTask();
       const tasks = [

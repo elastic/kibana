@@ -23,10 +23,10 @@ import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
-import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
   calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
@@ -1654,7 +1654,7 @@ describe('TaskManagerRunner', () => {
 
     const instance = mockInstance(opts.instance);
 
-    const store = taskStoreMock.create();
+    const store = bufferedTaskStoreMock.create();
     const usageCounter = usageCountersServiceMock.createSetupContract().createUsageCounter('test');
 
     store.update.mockResolvedValue(instance);
