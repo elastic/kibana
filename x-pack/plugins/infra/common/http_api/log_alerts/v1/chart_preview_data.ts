@@ -12,8 +12,8 @@ import {
   timeUnitRT,
   timeSizeRT,
   groupByRT,
-} from '../../alerting/logs/log_threshold/types';
-import { persistedLogViewReferenceRT } from '../../log_views';
+} from '../../../alerting/logs/log_threshold/types';
+import { persistedLogViewReferenceRT } from '../../../log_views';
 
 export const LOG_ALERTS_CHART_PREVIEW_DATA_PATH = '/api/infra/log_alerts/chart_preview_data';
 

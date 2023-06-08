@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { logViewReferenceRT } from '../../log_views';
+import { logViewReferenceRT } from '../../../log_views';
 
 export const LOG_ENTRIES_SUMMARY_PATH = '/api/log_entries/summary';
 
