@@ -14,7 +14,7 @@ import { UMServerLibs } from '../../lib/lib';
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
-type ClientContract = Array<{
+export type ClientContract = Array<{
   id: string;
   synthetics: {
     blob: string;

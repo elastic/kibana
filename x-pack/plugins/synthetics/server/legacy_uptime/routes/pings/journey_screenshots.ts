@@ -19,7 +19,7 @@ import {
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
-type ClientContract = Buffer | { screenshotRef: RefResult };
+export type ClientContract = Buffer | { screenshotRef: RefResult };
 
 function getSharedHeaders(stepName: string, totalSteps: number) {
   return {

@@ -71,7 +71,7 @@ export type UptimeRoute<ClientContract = unknown> = UMRouteDefinition<
 export type UMRestApiRouteFactory<ClientContract = unknown> = (
   libs: UMServerLibs
 ) => UptimeRoute<ClientContract>;
-export type SyntheticsRestApiRouteFactory<ClientContract = unknown> = (
+export type SyntheticsRestApiRouteFactory<ClientContract = any> = (
   libs: UMServerLibs
 ) => SyntheticsRoute<ClientContract>;
 export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => SyntheticsStreamingRoute;
@@ -81,7 +81,7 @@ export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => Synthetics
  * object that the Kibana platform can consume.
  */
 export type UMKibanaRouteWrapper = (
-  uptimeRoute: UptimeRoute<any>,
+  uptimeRoute: UptimeRoute<unknown>,
   server: UptimeServerSetup
 ) => UMKibanaRoute;
 
