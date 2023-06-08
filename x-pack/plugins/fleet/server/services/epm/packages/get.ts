@@ -122,6 +122,8 @@ export async function getPackages(
       )
     )
     .concat(uploadedPackagesNotInRegistry as Installable<any>)
+    // hides profiling collector and symbolizer packages
+    .filter((item) => item.id !== 'profiler_collector' && item.id !== 'profiler_symbolizer')
     .sort(sortByName);
 
   for (const pkg of packageList) {
@@ -523,7 +525,7 @@ export async function getPackageFromSource(options: {
     }
   }
   if (!res) {
-    throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
+    throw new FleetError(`package 3 info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {
     paths: res.paths,
