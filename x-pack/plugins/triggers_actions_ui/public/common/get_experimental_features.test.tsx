@@ -21,6 +21,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
         ruleTagFilter: true,
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
+        ruleKqlBar: true,
       },
     });
 
@@ -47,6 +48,10 @@ describe('getIsExperimentalFeatureEnabled', () => {
     result = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
     expect(result).toEqual(false);
+
+    result = getIsExperimentalFeatureEnabled('ruleKqlBar');
+
+    expect(result).toEqual(true);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(

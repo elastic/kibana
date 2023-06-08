@@ -13,21 +13,6 @@ import { AlertsField } from '../../../../types';
 
 jest.mock('../../../../common/lib/kibana');
 
-const fields = [
-  {
-    category: 'kibana',
-    name: AlertsField.uuid,
-  },
-  {
-    category: 'kibana',
-    name: AlertsField.name,
-  },
-  {
-    category: 'kibana',
-    name: AlertsField.reason,
-  },
-];
-
 const browserFields: BrowserFields = {
   kibana: {
     fields: {
