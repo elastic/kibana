@@ -8,6 +8,7 @@
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute } from '../..';
@@ -43,7 +44,9 @@ const PageWrapper: FC<PageProps> = () => {
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

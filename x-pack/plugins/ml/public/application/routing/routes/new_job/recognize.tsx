@@ -19,6 +19,7 @@ import { mlJobService } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
 import { loadSavedSearches } from '../../../util/index_utils';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const recognizeRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -58,9 +59,11 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
 
   return (
     <PageLoader context={context}>
-      {results ? (
-        <Page moduleId={id as string} existingGroupIds={results.existingJobsAndGroups.groupIds} />
-      ) : null}
+      <DataSourceContextProvider>
+        {results ? (
+          <Page moduleId={id as string} existingGroupIds={results.existingJobsAndGroups.groupIds} />
+        ) : null}
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

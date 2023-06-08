@@ -13,6 +13,7 @@ import { createPath, MlRoute, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_based/index_data_visualizer';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const indexBasedRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -41,7 +42,9 @@ const PageWrapper: FC = () => {
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

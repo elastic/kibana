@@ -23,6 +23,7 @@ import { useMlContext } from '../../../../../../../contexts/ml';
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const mlContext = useMlContext();
+  // TODO should use fieldFormats instead
   const dateFormat: string = mlContext.kibanaConfig.get('dateFormat');
   const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
 

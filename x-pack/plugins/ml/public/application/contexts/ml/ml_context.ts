@@ -17,6 +17,9 @@ export interface MlContextValue {
   // @deprecated currentSavedSearch is of SavedSearchSavedObject type, change to selectedSavedSearch
   deprecatedSavedSearchObj: SavedSearchSavedObject | null;
   selectedSavedSearch: SavedSearch | null;
+  /**
+   * @deprecated Use the data view contract from the Kibana context.
+   */
   dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
   kibanaVersion: string;

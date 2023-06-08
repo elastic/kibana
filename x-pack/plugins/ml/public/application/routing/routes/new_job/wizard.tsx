@@ -9,6 +9,7 @@ import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -205,9 +206,11 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
 
   return (
     <PageLoader context={context}>
-      {results ? (
-        <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
-      ) : null}
+      <DataSourceContextProvider>
+        {results ? (
+          <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
+        ) : null}
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

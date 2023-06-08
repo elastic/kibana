@@ -14,6 +14,7 @@ import { createPath, MlRoute, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { LogCategorizationPage as Page } from '../../../aiops/log_categorization';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const logCategorizationRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -42,7 +43,9 @@ const PageWrapper: FC = () => {
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

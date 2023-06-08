@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -57,7 +58,9 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
 
   return (
     <PageLoader context={context}>
-      <Page jobId={jobId} />
+      <DataSourceContextProvider>
+        <Page jobId={jobId} />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

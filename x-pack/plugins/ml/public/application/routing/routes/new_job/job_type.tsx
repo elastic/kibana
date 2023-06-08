@@ -16,6 +16,7 @@ import { useRouteResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/job_type';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { loadSavedSearches } from '../../../util/index_utils';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE),
@@ -41,7 +42,9 @@ const PageWrapper: FC = () => {
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

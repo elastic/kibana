@@ -25,6 +25,7 @@ interface Props {
 
 export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   const mlContext = useMlContext();
+  // TODO should use fieldFormats instead
   const dateFormat: string = mlContext.kibanaConfig.get('dateFormat');
 
   const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(timeRange.start));

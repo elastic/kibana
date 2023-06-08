@@ -6,18 +6,15 @@
  */
 
 import React, { FC } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
-
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { ExplainLogRateSpikesPage as Page } from '../../../aiops/explain_log_rate_spikes';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const explainLogRateSpikesRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -50,7 +47,9 @@ const PageWrapper: FC<PageProps> = ({ location, deps, ...restProps }) => {
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };
