@@ -11,11 +11,7 @@ import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
 import { collapseProcessTree } from './helpers';
 import { ProcessTreeLoadMoreButton } from '../process_tree_load_more_button';
-import {
-  AlertStatusEventEntityIdMap,
-  Process,
-  ProcessEventsPage,
-} from '../../../common/types/process_tree';
+import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '../../../common';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
