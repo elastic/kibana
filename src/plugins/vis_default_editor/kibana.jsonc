@@ -19,9 +19,9 @@
       "kibanaReact",
       "data",
       "fieldFormats",
-      "discover",
       "esUiShared",
-      "visualizations"
+      "visualizations",
+      "savedSearch"
     ]
   }
 }

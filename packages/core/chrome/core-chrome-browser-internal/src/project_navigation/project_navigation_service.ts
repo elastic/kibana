@@ -11,8 +11,11 @@ import {
   ChromeNavLinks,
   ChromeProjectNavigation,
   SideNavComponent,
+  ChromeProjectBreadcrumb,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
+import { createHomeBreadcrumb } from './home_breadcrumbs';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -24,6 +27,11 @@ export class ProjectNavigationService {
     current: SideNavComponent | null;
   }>({ current: null });
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
+
+  private projectBreadcrumbs$ = new BehaviorSubject<{
+    breadcrumbs: ChromeProjectBreadcrumb[];
+    params: ChromeSetProjectBreadcrumbsParams;
+  }>({ breadcrumbs: [], params: { absolute: false } });
 
   public start({ application, navLinks }: StartDeps) {
     // TODO: use application, navLink and projectNavigation$ to:
@@ -43,6 +51,33 @@ export class ProjectNavigationService {
       },
       getProjectSideNavComponent$: () => {
         return this.customProjectSideNavComponent$.asObservable();
+      },
+      setProjectBreadcrumbs: (
+        breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
+        params?: Partial<ChromeSetProjectBreadcrumbsParams>
+      ) => {
+        this.projectBreadcrumbs$.next({
+          breadcrumbs: Array.isArray(breadcrumbs) ? breadcrumbs : [breadcrumbs],
+          params: { absolute: false, ...params },
+        });
+      },
+      getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
+        return combineLatest([this.projectBreadcrumbs$, this.projectNavigation$]).pipe(
+          map(([breadcrumbs, projectNavigation]) => {
+            /* TODO: point home breadcrumb to the correct place */
+            const homeBreadcrumb = createHomeBreadcrumb({ homeHref: '/' });
+
+            if (breadcrumbs.params.absolute) {
+              return [homeBreadcrumb, ...breadcrumbs.breadcrumbs];
+            } else {
+              return [
+                homeBreadcrumb,
+                /* TODO: insert nav breadcrumbs based on projectNavigation and application path */
+                ...breadcrumbs.breadcrumbs,
+              ];
+            }
+          })
+        );
       },
     };
   }

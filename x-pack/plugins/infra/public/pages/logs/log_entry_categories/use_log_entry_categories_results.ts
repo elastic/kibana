@@ -80,7 +80,7 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, filteredDatasets, logViewReference, startTime, sortOptions]
+    [categoriesCount, endTime, filteredDatasets, logViewReference.logViewId, startTime, sortOptions]
   );
 
   const [getLogEntryCategoryDatasetsRequest, getLogEntryCategoryDatasets] = useTrackedPromise(
@@ -105,7 +105,7 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, logViewReference, startTime]
+    [categoriesCount, endTime, logViewReference.logViewId, startTime]
   );
 
   const isLoadingTopLogEntryCategories = useMemo(

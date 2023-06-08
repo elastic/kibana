@@ -224,8 +224,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.setMetricsGroupByTerms('bytes');
             await header.waitUntilLoadingHasFinished();
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
+            await header.waitUntilLoadingHasFinished();
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');
+            await header.waitUntilLoadingHasFinished();
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 

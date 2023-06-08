@@ -7,12 +7,10 @@
 
 import React, { useMemo } from 'react';
 
-import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { SummaryView } from './summary_view';
-
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { getSummaryRows } from './get_alert_summary_rows';
+import { SummaryView } from './summary_view';
 
 const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
@@ -30,7 +28,7 @@ const AlertSummaryViewComponent: React.FC<{
   );
 
   return (
-    <SummaryView rows={summaryRows} title={title} goToTable={goToTable} isReadOnly={isReadOnly} />
+    <SummaryView goToTable={goToTable} isReadOnly={isReadOnly} rows={summaryRows} title={title} />
   );
 };
 

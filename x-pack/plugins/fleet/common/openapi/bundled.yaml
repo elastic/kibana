@@ -191,6 +191,39 @@ paths:
           $ref: '#/components/responses/error'
       operationId: packages-get-verification-key-id
     parameters: []
+  /epm/bulk_assets:
+    post:
+      summary: Bulk get assets
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_bulk_assets_response'
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: bulk-get-assets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assetIds:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                  description: list of items necessary to fetch assets
+              required:
+                - assetIds
   /epm/categories:
     get:
       summary: List package categories
@@ -565,6 +598,7 @@ paths:
                           - not_installed
                       savedObject:
                         type: object
+                        deprecated: true
                       latestVersion:
                         type: string
                       keepPoliciesUpToDate:
@@ -967,6 +1001,7 @@ paths:
           name: kuery
           in: query
           required: false
+          deprecated: true
   /agent_status/data:
     get:
       summary: Get incoming agent data
@@ -3376,6 +3411,7 @@ components:
       name: kuery
       in: query
       required: false
+      deprecated: true
       schema:
         type: string
     show_inactive:
@@ -3396,6 +3432,7 @@ components:
       required: false
       schema:
         type: string
+        deprecated: true
     sort_order:
       name: sortOrder
       in: query
@@ -3474,6 +3511,60 @@ components:
           $ref: '#/components/schemas/settings'
       required:
         - item
+    saved_object_type:
+      title: Saved Object type
+      oneOf:
+        - type: string
+          enum:
+            - dashboard
+            - visualization
+            - search
+            - index_pattern
+            - map
+            - lens
+            - security_rule
+            - csp_rule_template
+            - ml_module
+            - tag
+            - osquery_pack_asset
+            - osquery_saved_query
+        - type: string
+          enum:
+            - index
+            - component_template
+            - ingest_pipeline
+            - index_template
+            - ilm_policy
+            - transform
+            - data_stream_ilm_policy
+            - ml_model
+    get_bulk_assets_response:
+      title: Bulk get assets response
+      type: object
+      deprecated: true
+      properties:
+        response:
+          type: array
+          items:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                type:
+                  $ref: '#/components/schemas/saved_object_type'
+                updatedAt:
+                  type: string
+                attributes:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+      required:
+        - items
     get_categories_response:
       title: Get categories response
       type: object
@@ -3535,6 +3626,7 @@ components:
           type: string
         savedObject:
           type: object
+          deprecated: true
       required:
         - description
         - download
@@ -4433,9 +4525,13 @@ components:
         agent:
           type: string
           nullable: true
-        download_source_id:
-          type: string
-          nullable: true
+        secret_references:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
       required:
         - id
         - outputs
