@@ -7,8 +7,14 @@
 
 import type { SavedObjectsMigrationLogger } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
+import { mockCaseComments } from '../../mocks';
 import { MIN_DEFERRED_KIBANA_VERSION } from './constants';
-import { isDeferredMigration, logError } from './utils';
+import {
+  isDeferredMigration,
+  isUserCommentSO,
+  logError,
+  isPersistableStateAttachmentSO,
+} from './utils';
 
 describe('migration utils', () => {
   const context = migrationMocks.createContext();
@@ -63,6 +69,26 @@ describe('migration utils', () => {
 
     it('should return false if the migration version is not a valid semver', () => {
       expect(isDeferredMigration(MIN_DEFERRED_KIBANA_VERSION, 'invalid')).toBe(false);
+    });
+  });
+
+  describe('isUserCommentSO', () => {
+    it('should return true if it is a user comment SO', () => {
+      expect(isUserCommentSO(mockCaseComments[0])).toBe(true);
+    });
+
+    it('should return false if it is not a user comment SO', () => {
+      expect(isUserCommentSO(mockCaseComments[3])).toBe(false);
+    });
+  });
+
+  describe('isPersistableStateAttachmentAttributes', () => {
+    it('should return true if it is a persistable attachment SO', () => {
+      expect(isPersistableStateAttachmentSO(mockCaseComments[6])).toBe(true);
+    });
+
+    it('should return false if it is not a persistable attachment SO', () => {
+      expect(isPersistableStateAttachmentSO(mockCaseComments[0])).toBe(false);
     });
   });
 });

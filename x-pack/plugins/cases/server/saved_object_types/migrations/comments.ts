@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd, cloneDeep, unset } from 'lodash';
+import { mapValues, trimEnd, cloneDeep, unset, isFunction } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type {
@@ -17,6 +17,7 @@ import type {
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import type { AttributesTypePersistableState, AttributesTypeUser } from '../../../common/api';
 import { CommentType } from '../../../common/api';
 import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
@@ -26,9 +27,15 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
-import { isDeferredMigration, logError } from './utils';
+import {
+  isDeferredMigration,
+  isPersistableStateAttachmentSO,
+  isUserCommentSO,
+  logError,
+} from './utils';
 import { GENERATED_ALERT, MIN_DEFERRED_KIBANA_VERSION, SUB_CASE_SAVED_OBJECT } from './constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface UnsanitizedComment {
   comment: string;
@@ -58,12 +65,11 @@ export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
   const lensMigrations = migrationDeps.lensEmbeddableFactory().migrations;
-  const lensMigrationObject =
-    typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
+  const lensMigrationObject = isFunction(lensMigrations) ? lensMigrations() : lensMigrations || {};
 
   const embeddableMigrations = mapValues<
     MigrateFunctionsObject,
-    SavedObjectMigrationParams<{ comment?: string }, { comment?: string }>
+    SavedObjectMigrationParams<AttachmentPersistedAttributes, AttachmentPersistedAttributes>
   >(lensMigrationObject, migrateByValueLensVisualizations);
 
   const commentsMigrations = {
@@ -122,50 +128,98 @@ export const createCommentsMigrations = (
 export const migrateByValueLensVisualizations = (
   migrate: MigrateFunction,
   migrationVersion: string
-): SavedObjectMigrationParams<{ comment?: string }, { comment?: string }> => {
+): SavedObjectMigrationParams<AttachmentPersistedAttributes, AttachmentPersistedAttributes> => {
   const deferred = isDeferredMigration(MIN_DEFERRED_KIBANA_VERSION, migrationVersion);
 
   return {
     // @ts-expect-error: remove when core changes the types
     deferred,
     transform: (
-      doc: SavedObjectUnsanitizedDoc<{ comment?: string }>,
+      doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>,
       context: SavedObjectMigrationContext
-    ) => {
-      if (doc.attributes.comment == null) {
-        return doc;
+    ): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
+      if (isUserCommentSO(doc)) {
+        return migrateLensComment({ migrate, doc, context });
       }
 
-      try {
-        const parsedComment = parseCommentString(doc.attributes.comment);
-        const migratedComment = parsedComment.children.map((comment) => {
-          if (isLensMarkdownNode(comment)) {
-            // casting here because ts complains that comment isn't serializable because LensMarkdownNode
-            // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-            return migrate(comment as SerializableRecord) as LensMarkdownNode;
-          }
-
-          return comment;
-        });
-
-        const migratedMarkdown = { ...parsedComment, children: migratedComment };
-
-        return {
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            comment: stringifyCommentWithoutTrailingNewline(
-              doc.attributes.comment,
-              migratedMarkdown
-            ),
-          },
-        };
-      } catch (error) {
-        logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
-        return doc;
+      if (isPersistableStateAttachmentSO(doc)) {
+        return migratePersistableLensAttachment({ migrate, doc, context });
       }
+
+      return Object.assign(doc, { references: doc.references ?? [] });
     },
   };
+};
+
+const migrateLensComment = ({
+  migrate,
+  doc,
+  context,
+}: {
+  migrate: MigrateFunction;
+  doc: SavedObjectUnsanitizedDoc<AttributesTypeUser>;
+  context: SavedObjectMigrationContext;
+}): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
+  try {
+    const parsedComment = parseCommentString(doc.attributes.comment);
+    const migratedComment = parsedComment.children.map((comment) => {
+      if (isLensMarkdownNode(comment)) {
+        // casting here because ts complains that comment isn't serializable because LensMarkdownNode
+        // extends Node which has fields that conflict with SerializableRecord even though it is serializable
+        return migrate(comment as SerializableRecord) as LensMarkdownNode;
+      }
+
+      return comment;
+    });
+
+    const migratedMarkdown = { ...parsedComment, children: migratedComment };
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
+      },
+      references: doc.references ?? [],
+    };
+  } catch (error) {
+    logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
+    return Object.assign(doc, { references: doc.references ?? [] });
+  }
+};
+
+const migratePersistableLensAttachment = ({
+  migrate,
+  doc,
+  context,
+}: {
+  migrate: MigrateFunction;
+  doc: SavedObjectUnsanitizedDoc<AttributesTypePersistableState>;
+  context: SavedObjectMigrationContext;
+}): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
+  try {
+    const { persistableStateAttachmentState } = doc.attributes;
+
+    const migratedLensAttachment = migrate(persistableStateAttachmentState);
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        persistableStateAttachmentState: migratedLensAttachment,
+      } as AttachmentPersistedAttributes,
+      references: doc.references ?? [],
+    };
+  } catch (error) {
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'persistable lens attachment',
+      docKey: 'comment',
+    });
+    return Object.assign(doc, { references: doc.references ?? [] });
+  }
 };
 
 export const stringifyCommentWithoutTrailingNewline = (

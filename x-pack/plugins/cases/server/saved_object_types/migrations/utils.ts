@@ -13,6 +13,9 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import type { AttributesTypePersistableState, AttributesTypeUser } from '../../../common/api';
+import { CommentType } from '../../../common/api';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {
@@ -63,3 +66,15 @@ export const isDeferredMigration = (
       valid(minDeferredKibanaVersion) &&
       gte(migrationVersion, minDeferredKibanaVersion)
   );
+
+export const isUserCommentSO = (
+  doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
+): doc is SavedObjectUnsanitizedDoc<AttributesTypeUser> => {
+  return doc.attributes.type === CommentType.user;
+};
+
+export const isPersistableStateAttachmentSO = (
+  doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
+): doc is SavedObjectUnsanitizedDoc<AttributesTypePersistableState> => {
+  return doc.attributes.type === CommentType.persistableState;
+};
