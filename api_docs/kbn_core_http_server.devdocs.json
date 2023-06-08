@@ -4010,6 +4010,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/mapping.ts"
               },
               {
@@ -4583,26 +4587,6 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-              },
-              {
-                "plugin": "sessionView",
-                "path": "x-pack/plugins/session_view/server/routes/alerts_route.ts"
-              },
-              {
-                "plugin": "sessionView",
-                "path": "x-pack/plugins/session_view/server/routes/io_events_route.ts"
-              },
-              {
-                "plugin": "sessionView",
-                "path": "x-pack/plugins/session_view/server/routes/process_events_route.ts"
-              },
-              {
-                "plugin": "sessionView",
-                "path": "x-pack/plugins/session_view/server/routes/alert_status_route.ts"
-              },
-              {
-                "plugin": "sessionView",
-                "path": "x-pack/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
               },
               {
                 "plugin": "snapshotRestore",
@@ -5645,6 +5629,14 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/uninstall_token/handlers.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/uninstall_token/handlers.test.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/get_route.test.ts"
               },
@@ -5983,6 +5975,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/fleet_proxies/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/uninstall_token/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -6596,10 +6592,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/search.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
@@ -7097,6 +7089,14 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -8481,6 +8481,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/package_policy/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -10127,10 +10131,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/delete_data_view.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/search.ts"
               },
               {
                 "plugin": "data",
@@ -14440,6 +14440,26 @@
                 "path": "x-pack/plugins/maps/server/routes.ts"
               },
               {
+                "plugin": "sessionView",
+                "path": "x-pack/plugins/session_view/server/routes/alerts_route.ts"
+              },
+              {
+                "plugin": "sessionView",
+                "path": "x-pack/plugins/session_view/server/routes/io_events_route.ts"
+              },
+              {
+                "plugin": "sessionView",
+                "path": "x-pack/plugins/session_view/server/routes/process_events_route.ts"
+              },
+              {
+                "plugin": "sessionView",
+                "path": "x-pack/plugins/session_view/server/routes/alert_status_route.ts"
+              },
+              {
+                "plugin": "sessionView",
+                "path": "x-pack/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/privileges.ts"
               },
@@ -14711,6 +14731,10 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/search.ts"
+              },
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/server/routes/explain_log_rate_spikes.ts"
@@ -15247,6 +15271,10 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/search.ts"
+              },
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
