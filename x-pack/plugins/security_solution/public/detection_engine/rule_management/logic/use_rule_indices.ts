@@ -6,19 +6,34 @@
  */
 
 import { useMemo } from 'react';
-import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
+import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
 
 export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndices?: string[]) => {
   const memoMlJobIds = useMemo(() => machineLearningJobId ?? [], [machineLearningJobId]);
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+  const { loading: mlJobLoading, jobs } = useSecurityJobs();
+  const memoSelectedMlJobs = useMemo(
+    () => jobs.filter(({ id }) => memoMlJobIds.includes(id)),
+    [jobs, memoMlJobIds]
+  );
+  const memoMlIndices = useMemo(
+    () => [
+      ...new Set(
+        memoSelectedMlJobs.reduce((acc, j) => {
+          const patterns = j.defaultIndexPattern.split(',');
+          return acc.concat(patterns);
+        }, [] as string[])
+      ),
+    ],
+    [memoSelectedMlJobs]
+  );
 
   const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    if (memoMlIndices.length > 0) {
+      return memoMlIndices;
     } else {
       return defaultRuleIndices ?? [];
     }
-  }, [jobs, defaultRuleIndices]);
+  }, [defaultRuleIndices, memoMlIndices]);
 
   return { mlJobLoading, ruleIndices: memoRuleIndices };
 };
