@@ -27,11 +27,13 @@ export interface GuideCardConstants {
   // see this issue https://github.com/elastic/kibana/issues/146672
   telemetryId: string;
   order: number;
+  icon: string;
 }
 
 export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
+    icon: 'wrench',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
@@ -47,6 +49,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'search',
+    icon: 'search',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
       defaultMessage: 'Add search to my website',
     }),
@@ -56,6 +59,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'search',
+    icon: 'database',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
@@ -71,6 +75,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
+    icon: 'logstashInput',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.logsObservability.title', {
       defaultMessage: 'Collect and analyze my logs',
     }),
@@ -83,6 +88,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
+    icon: 'apmTrace',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
@@ -101,6 +107,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
+    icon: 'visBarVertical',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title', {
       defaultMessage: 'Monitor my host metrics',
     }),
@@ -113,6 +120,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
+    icon: 'cluster',
     title: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title',
       {
@@ -125,6 +133,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
+    icon: 'securitySignal',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title"
@@ -140,6 +149,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
+    icon: 'inputOutput',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title"
@@ -158,6 +168,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
+    icon: 'lock',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"

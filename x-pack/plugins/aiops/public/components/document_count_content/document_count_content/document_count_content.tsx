@@ -33,7 +33,7 @@ export interface DocumentCountContentProps {
   totalCount: number;
   sampleProbability: number;
   windowParameters?: WindowParameters;
-  incomingInitialAnalysisStart?: number;
+  incomingInitialAnalysisStart?: number | WindowParameters;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -48,9 +48,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   incomingInitialAnalysisStart,
 }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
-  const [initialAnalysisStart, setInitialAnalysisStart] = useState<number | undefined>(
-    incomingInitialAnalysisStart
-  );
+  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
+    number | WindowParameters | undefined
+  >(incomingInitialAnalysisStart);
 
   useEffect(() => {
     setIsBrushCleared(windowParameters === undefined);

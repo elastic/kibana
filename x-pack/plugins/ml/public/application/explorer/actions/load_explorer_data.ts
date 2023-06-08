@@ -15,6 +15,7 @@ import { switchMap, map } from 'rxjs/operators';
 import { useCallback, useMemo } from 'react';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import {
   getDateFormatTz,
   getSelectionInfluencers,
@@ -32,7 +33,6 @@ import { ExplorerState } from '../reducers';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
-import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 

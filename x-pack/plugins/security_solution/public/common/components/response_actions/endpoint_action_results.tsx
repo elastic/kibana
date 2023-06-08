@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComment, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { LogsEndpointActionWithHosts } from '../../../../common/endpoint/types/actions';
@@ -45,34 +45,31 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
   const eventText = getCommentText(action.EndpointActions.data.command);
 
   const hostName = useMemo(
-    () => expandedAction?.hosts[expandedAction?.agents[0]].name,
-    [expandedAction?.agents, expandedAction?.hosts]
+    // we want to get the first and only hostname
+    () => (expandedAction?.hosts ? Object.values(expandedAction.hosts)[0].name : ''),
+    [expandedAction?.hosts]
   );
 
   return (
-    <>
-      <EuiSpacer size="s" />
-      <EuiComment
-        username={rule?.name}
-        timestamp={<FormattedRelative value={action['@timestamp']} />}
-        event={eventText}
-        data-test-subj={'endpoint-results-comment'}
-      >
-        {canAccessEndpointActionsLogManagement ? (
-          expandedAction ? (
-            <ActionsLogExpandedTray
-              action={expandedAction}
-              data-test-subj={`response-results-${hostName}`}
-            />
-          ) : (
-            <EuiLoadingSpinner />
-          )
+    <EuiComment
+      username={rule?.name}
+      timestamp={<FormattedRelative value={action['@timestamp']} />}
+      event={eventText}
+      data-test-subj={'endpoint-results-comment'}
+    >
+      {canAccessEndpointActionsLogManagement ? (
+        expandedAction ? (
+          <ActionsLogExpandedTray
+            action={expandedAction}
+            data-test-subj={`response-results-${hostName}`}
+          />
         ) : (
-          <ResponseActionsEmptyPrompt type="endpoint" />
-        )}
-      </EuiComment>
-      <EuiSpacer size="s" />
-    </>
+          <EuiLoadingSpinner />
+        )
+      ) : (
+        <ResponseActionsEmptyPrompt type="endpoint" />
+      )}
+    </EuiComment>
   );
 };
 

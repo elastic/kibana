@@ -117,8 +117,8 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {
-              goodEvents: 'slo.numerator',
-              totalEvents: 'slo.denominator',
+              goodEvents: 'slo.numerator>value',
+              totalEvents: 'slo.denominator>value',
             },
             script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
           },

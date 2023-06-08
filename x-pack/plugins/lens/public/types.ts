@@ -436,6 +436,7 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
+    nowInstant: Date,
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
