@@ -32,7 +32,7 @@ type Props = Pick<
 > &
   ValidationBurnRateRuleResult;
 
-function useFetchEitherSloDetails({ sloId }: { sloId: string }) {
+function useFetchSloOrCompositeSloDetails({ sloId }: { sloId: string }) {
   const { isLoading, slo } = useFetchSloDetails({
     sloId,
   });
@@ -47,7 +47,7 @@ function useFetchEitherSloDetails({ sloId }: { sloId: string }) {
 
 export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
-  const { isLoading: loadingInitialSlo, slo: initialSlo } = useFetchEitherSloDetails({
+  const { isLoading: loadingInitialSlo, slo: initialSlo } = useFetchSloOrCompositeSloDetails({
     sloId: ruleParams?.sloId,
   });
 
