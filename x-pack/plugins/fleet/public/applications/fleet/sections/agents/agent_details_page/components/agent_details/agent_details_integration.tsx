@@ -28,7 +28,7 @@ import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
-import { getInputStatusFromAgent } from './input_status_utils';
+import { getUnitsByPackage } from './input_status_utils';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__button {
@@ -128,7 +128,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     if (!agent.components) {
       return packageErrorUnits;
     }
-    return getInputStatusFromAgent(agent.components, packagePolicy).filter(
+    return getUnitsByPackage(agent.components, packagePolicy).filter(
       (u) => u.status === 'DEGRADED' || u.status === 'FAILED'
     );
   }, [agent.components, packagePolicy]);

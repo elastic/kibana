@@ -44,7 +44,7 @@ export class InputStatusFormatter {
   }
 }
 
-export const getInputStatusFromAgent = (
+export const getUnitsByPackage = (
   agentComponents: FleetServerAgentComponent[],
   packagePolicy: PackagePolicy
 ): FleetServerAgentComponentUnit[] => {
