@@ -21,6 +21,8 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 
 import { firstValueFrom } from 'rxjs';
+import useLifecycles from 'react-use/lib/useLifecycles';
+import { MlLicense } from '../../common/license';
 import { cacheDataViewsContract } from './util/index_utils';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
@@ -67,6 +69,7 @@ export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: Usag
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     isServerless,
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
+    mlLicense: new MlLicense(),
   };
 }
 
@@ -124,7 +127,18 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     savedObjectsManagement: deps.savedObjectsManagement,
     savedSearch: deps.savedSearch,
     ...coreStart,
+    mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
   };
+
+  useLifecycles(
+    function setupLicenseOnMount() {
+      setLicenseCache(services.mlServices.mlLicense);
+      services.mlServices.mlLicense.setup(deps.licensing.license$);
+    },
+    function destroyLicenseOnUnmount() {
+      services.mlServices.mlLicense.unsubscribe();
+    }
+  );
 
   const datePickerDeps = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
@@ -141,12 +155,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     <ApplicationUsageTrackingProvider>
       <I18nContext>
         <KibanaThemeProvider theme$={appMountParams.theme$}>
-          <KibanaContextProvider
-            services={{
-              ...services,
-              mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
-            }}
-          >
+          <KibanaContextProvider services={services}>
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
                 <MlRouter pageDeps={pageDeps} />
@@ -194,15 +203,12 @@ export const renderApp = (
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, () =>
-    ReactDOM.render(
-      <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
-      appMountParams.element
-    )
+  ReactDOM.render(
+    <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+    appMountParams.element
   );
 
   return () => {
-    mlLicense.unsubscribe();
     clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
     deps.data.search.session.clear();

@@ -11,6 +11,9 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { parse } from 'query-string';
+import { PLUGIN_ID } from '../../../common/constants/app';
+import { showExpiredLicenseWarning } from '../license/expired_warning';
+import { useMlLicenseInfo } from '../contexts/kibana';
 import { MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { getSavedSearch } from '../util/dependency_cache';
@@ -28,11 +31,13 @@ import { ML_PAGES } from '../../../common/constants/locator';
 
 /**
  * Resolves required dependencies for landing on the page
- * @param license
+ * and performs redirects if needed.
+ *
+ * @param requiredLicence
  * @param requiredCapabilities
  */
 export const useRouteResolver = (
-  license: 'full' | 'basic',
+  requiredLicence: 'full' | 'basic',
   requiredCapabilities: MlCapabilitiesKey[],
   customResolvers?: Resolvers
 ): { context: MlContextValue | null; results: ResolverResults } => {
@@ -46,12 +51,40 @@ export const useRouteResolver = (
 
   const {
     services: {
+      application: { navigateToApp },
       mlServices: { mlCapabilities },
       uiSettings,
       data: { dataViews },
       savedSearch: savedSearchService,
+      notifications,
     },
   } = useMlKibana();
+
+  const mlLicenseInfo = useMlLicenseInfo();
+
+  const licenseResolver = useCallback(async () => {
+    if (mlLicenseInfo.isMlEnabled === false || mlLicenseInfo.isMinimumLicense === false) {
+      // ML is not enabled or the license isn't at least basic
+      await navigateToApp('home');
+      return;
+    }
+    if (requiredLicence === 'full' && mlLicenseInfo.isFullLicense === false) {
+      // ML is enabled, but only with a basic or gold license
+      await navigateToApp(PLUGIN_ID, { path: ML_PAGES.DATA_VISUALIZER });
+      return;
+    }
+    // ML is enabled
+    if (mlLicenseInfo.hasLicenseExpired) {
+      showExpiredLicenseWarning();
+    }
+  }, [mlLicenseInfo, navigateToApp, requiredLicence]);
+
+  useEffect(
+    function trackLicense() {
+      licenseResolver();
+    },
+    [licenseResolver, mlLicenseInfo]
+  );
 
   useEffect(
     function refreshCapabilitiesOnMount() {
@@ -170,14 +203,17 @@ export const useRouteResolver = (
             kibanaConfig: uiSettings,
           } as MlContextValue);
         })
-        .catch((e) => {
-          // TODO add error handling
-          console.log(e, '___e___');
+        .catch((error) => {
+          // an unexpected error has occurred. This could be caused by an incorrect index pattern or saved search ID
+          notifications.toasts.addError(new Error(error), {
+            title: i18n.translate('xpack.ml.useResolver.errorTitle', {
+              defaultMessage: 'An error has occurred',
+            }),
+          });
         });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
-    // [dataViews, uiSettings, resolveDataSource, resolveCustomResolvers]
   );
 
   return { context, results };

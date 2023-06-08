@@ -11,6 +11,9 @@ import { MlLicense } from '../../../common/license';
 import { showExpiredLicenseWarning } from './expired_warning';
 import { PLUGIN_ID } from '../../../common/constants/app';
 
+/**
+ * TODO delete
+ */
 export class MlClientLicense extends MlLicense {
   constructor(private application: CoreStart['application']) {
     super();
