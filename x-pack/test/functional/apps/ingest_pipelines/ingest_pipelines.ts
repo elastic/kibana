@@ -25,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const security = getService('security');
-  
+
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
