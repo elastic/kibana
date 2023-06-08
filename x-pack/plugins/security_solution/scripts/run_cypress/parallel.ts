@@ -41,9 +41,7 @@ import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
-const retrieveIntegrations = (
-  specPattern: string[],
-) => {
+const retrieveIntegrations = (specPattern: string[]) => {
   const integrationsPaths = globby.sync(specPattern);
 
   if (process.env.RUN_ALL_TESTS === 'true') {
@@ -59,8 +57,6 @@ const retrieveIntegrations = (
 
     return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
   }
-
-
 };
 
 export const cli = () => {
