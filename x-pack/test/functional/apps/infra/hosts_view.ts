@@ -540,8 +540,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await Promise.all(
             [
               { metric: 'hostsCount', value: '3' },
-              { metric: 'cpu', value: '0.8%' },
-              { metric: 'memory', value: '16.25%' },
+              { metric: 'cpu', value: '1%' },
+              { metric: 'memory', value: '17%' },
               { metric: 'tx', value: 'N/A' },
               { metric: 'rx', value: 'N/A' },
             ].map(async ({ metric, value }) => {
