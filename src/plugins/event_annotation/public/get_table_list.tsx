@@ -44,6 +44,7 @@ export const getTableList = (
         }}
       >
         <EventAnnotationGroupTableList
+          toasts={services.core.notifications.toasts}
           savedObjectsTagging={services.savedObjectsTagging}
           uiSettings={services.core.uiSettings}
           eventAnnotationService={services.eventAnnotationService}

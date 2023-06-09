@@ -15,6 +15,7 @@ import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-br
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { EventAnnotationGroupConfig } from '../../common';
 import type { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { EventAnnotationGroupContent } from '../../common/types';
@@ -32,6 +33,7 @@ export const EventAnnotationGroupTableList = ({
   dataViews,
   createDataView,
   queryInputServices,
+  toasts,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
@@ -41,6 +43,7 @@ export const EventAnnotationGroupTableList = ({
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
+  toasts: IToasts;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -100,6 +103,7 @@ export const EventAnnotationGroupTableList = ({
           : eventAnnotationService.createAnnotationGroup(groupToEditInfo.group)
         ).then(() => {
           setGroupToEditInfo(undefined);
+          toasts.addSuccess(`Saved "${groupToEditInfo.group.title}"`);
           refreshList();
         })
       }
