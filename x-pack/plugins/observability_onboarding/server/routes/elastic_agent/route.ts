@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getObservabilityOnboardingState } from '../custom_logs/get_observability_onboarding_state';
-import { getESHosts } from '../custom_logs/get_es_hosts';
 import { generateYml } from './generate_yml';
+import { getCloudUrls } from '../custom_logs/get_cloud_urls';
+import { getFallbackUrls } from '../custom_logs/get_fallback_urls';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
@@ -23,10 +23,9 @@ const generateConfig = createObservabilityOnboardingServerRoute({
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
 
-    const esHost = getESHosts({
-      cloudSetup: plugins.cloud.setup,
-      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
-    });
+    const cloudId = plugins.cloud.setup.cloudId;
+    const { elasticsearchUrl } =
+      (cloudId && getCloudUrls(cloudId)) || getFallbackUrls(coreStart);
 
     const savedState = await getObservabilityOnboardingState({
       savedObjectsClient,
@@ -39,7 +38,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       logFilePaths: savedState?.state.logFilePaths,
       namespace: savedState?.state.namespace,
       apiKey: `${apiKeyId}:${apiKey}`,
-      esHost,
+      esHost: [elasticsearchUrl],
       logfileId: `custom-logs-${Date.now()}`,
     });
 

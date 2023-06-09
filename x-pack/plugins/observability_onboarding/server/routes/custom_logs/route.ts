@@ -6,16 +6,15 @@
  */
 
 import * as t from 'io-ts';
-import type { Client } from '@elastic/elasticsearch';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { getESHosts } from './get_es_hosts';
-import { getKibanaUrl } from './get_kibana_url';
 import { createShipperApiKey } from './create_shipper_api_key';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
 import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { getHasLogs } from './get_has_logs';
+import { getCloudUrls } from './get_cloud_urls';
+import { getFallbackUrls } from './get_fallback_urls';
 
 const ELASTIC_AGENT_VERSION = '8.8.0'; // This should be defined from a source with the latest public release
 
@@ -34,7 +33,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     apiKeyEncoded: string;
     apiEndpoint: string;
     scriptDownloadUrl: string;
-    esHost: string;
     elasticAgentVersion: string;
   }> {
     const {
@@ -47,14 +45,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       request,
     } = resources;
     const coreStart = await core.start();
-    const scriptDownloadUrl = getKibanaUrl(
-      coreStart,
-      '/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh'
-    );
-    const apiEndpoint = getKibanaUrl(
-      coreStart,
-      '/api/observability_onboarding'
-    );
     const {
       elasticsearch: { client },
     } = await context.core;
@@ -62,10 +52,12 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       client.asCurrentUser,
       name
     );
-    const [esHost] = getESHosts({
-      cloudSetup: plugins.cloud.setup,
-      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
-    });
+
+    const cloudId = plugins.cloud.setup.cloudId;
+    const { kibanaUrl } =
+      (cloudId && getCloudUrls(cloudId)) || getFallbackUrls(coreStart);
+    const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
+    const apiEndpoint = `${kibanaUrl}/api/observability_onboarding`;
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
@@ -76,11 +68,10 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     });
 
     return {
-      apiKeyId, // key the status off this
+      apiKeyId,
       apiKeyEncoded,
       apiEndpoint,
       scriptDownloadUrl,
-      esHost,
       elasticAgentVersion: ELASTIC_AGENT_VERSION,
     };
   },
