@@ -48,6 +48,8 @@ export const mockKibanaValues = {
     hasWorkplaceSearchAccess: true,
   },
   productFeatures: {
+    hasDocumentLevelSecurityEnabled: true,
+    hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
   },

@@ -41,6 +41,7 @@ const existingAlert = {
         us: '0',
       },
       flapping: false,
+      flapping_history: [true],
       instance: {
         id: 'alert-A',
       },
@@ -76,6 +77,7 @@ describe('buildOngoingAlert', () => {
             us: '36000000',
           },
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -125,6 +127,7 @@ describe('buildOngoingAlert', () => {
             us: '36000000',
           },
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -192,23 +195,132 @@ describe('buildOngoingAlert', () => {
     });
   });
 
-  test('should update alert document with latest maintenance window ids', () => {
-    const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('1');
-    legacyAlert.scheduleActions('error');
-    legacyAlert.setFlappingHistory([false, false, true, true]);
+  test('should update alert document with updated payload if specified', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('alert-A');
+    legacyAlert
+      .scheduleActions('warning')
+      .replaceState({ start: '0000-00-00T00:00:00.000Z', duration: '36000000' });
 
     expect(
-      buildOngoingAlert<{}, {}, {}, 'error' | 'warning', 'recovered'>({
+      buildOngoingAlert<
+        { count: number; url: string; kibana?: { alert?: { nested_field?: number } } },
+        {},
+        {},
+        'error' | 'warning',
+        'recovered'
+      >({
         alert: {
           ...existingAlert,
-          kibana: {
-            ...existingAlert.kibana,
-            alert: {
-              ...existingAlert.kibana.alert,
-              flapping_history: [true, false, false, false, true, true],
-              maintenance_window_ids: ['maint-1', 'maint-321'],
-            },
+          count: 1,
+          url: `https://url1`,
+        },
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+        payload: {
+          count: 2,
+          url: `https://url2`,
+          kibana: { alert: { nested_field: 2 } },
+        },
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-29T12:27:28.159Z',
+      count: 2,
+      kibana: {
+        alert: {
+          action_group: 'warning',
+          duration: {
+            us: '36000000',
           },
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          start: '2023-03-28T12:27:28.159Z',
+          rule,
+          status: 'active',
+          uuid: 'abcdefg',
+        },
+        space_ids: ['default'],
+      },
+      url: `https://url2`,
+    });
+  });
+
+  test('should update alert document with updated payload is specified but not overwrite any framework fields', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('alert-A');
+    legacyAlert
+      .scheduleActions('warning')
+      .replaceState({ start: '0000-00-00T00:00:00.000Z', duration: '36000000' });
+
+    expect(
+      buildOngoingAlert<
+        {
+          count: number;
+          url: string;
+          kibana?: { alert?: { action_group: string; nested_field?: number } };
+        },
+        {},
+        {},
+        'error' | 'warning',
+        'recovered'
+      >({
+        alert: {
+          ...existingAlert,
+          count: 1,
+          url: `https://url1`,
+        },
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+        payload: {
+          count: 2,
+          url: `https://url2`,
+          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+        },
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-29T12:27:28.159Z',
+      count: 2,
+      kibana: {
+        alert: {
+          action_group: 'warning',
+          duration: {
+            us: '36000000',
+          },
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          start: '2023-03-28T12:27:28.159Z',
+          rule,
+          status: 'active',
+          uuid: 'abcdefg',
+        },
+        space_ids: ['default'],
+      },
+      url: `https://url2`,
+    });
+  });
+
+  test('should not update alert document if no payload is specified', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('alert-A');
+    legacyAlert
+      .scheduleActions('warning')
+      .replaceState({ start: '0000-00-00T00:00:00.000Z', duration: '36000000' });
+
+    expect(
+      buildOngoingAlert<{ count: number; url: string }, {}, {}, 'error' | 'warning', 'recovered'>({
+        alert: {
+          ...existingAlert,
+          count: 1,
+          url: `https://url1`,
         },
         legacyAlert,
         rule: alertRule,
@@ -216,14 +328,15 @@ describe('buildOngoingAlert', () => {
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
+      count: 1,
       kibana: {
         alert: {
-          action_group: 'error',
+          action_group: 'warning',
           duration: {
-            us: '0',
+            us: '36000000',
           },
           flapping: false,
-          flapping_history: [false, false, true, true],
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -235,6 +348,7 @@ describe('buildOngoingAlert', () => {
         },
         space_ids: ['default'],
       },
+      url: `https://url1`,
     });
   });
 });

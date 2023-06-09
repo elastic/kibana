@@ -11,7 +11,7 @@
       { "id": "f9072790-f97c-11ed-895c-170d13e61076", "revision": 2, "weight": 1 }
     ],
     "tags": [],
-    "timeWindow": { "duration": "7d", "isRolling": true },
+    "timeWindow": { "duration": "7d", "type": "rolling" },
     "updatedAt": "2023-05-24T21:12:37.831Z"
   },
   "coreMigrationVersion": "8.8.0",

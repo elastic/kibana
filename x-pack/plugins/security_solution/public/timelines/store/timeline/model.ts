@@ -13,17 +13,19 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  TimelineEventsType,
-  TimelineType,
-  TimelineStatus,
   TimelineTabs,
   ScrollToTopEvent,
   SortColumnTimeline,
   ColumnHeaderOptions,
   DataProvider,
-  RowRendererId,
   SerializedFilterQuery,
+  TimelineEventsType,
 } from '../../../../common/types/timeline';
+import type {
+  RowRendererId,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/types/timeline/api';
 import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
