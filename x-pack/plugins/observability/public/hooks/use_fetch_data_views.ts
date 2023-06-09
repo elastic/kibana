@@ -25,8 +25,8 @@ export interface UseFetchDataViewsResponse {
 }
 
 interface FetchDataViewParams {
-  name: string;
-  size: number;
+  name?: string;
+  size?: number;
 }
 
 export function useFetchDataViews({
