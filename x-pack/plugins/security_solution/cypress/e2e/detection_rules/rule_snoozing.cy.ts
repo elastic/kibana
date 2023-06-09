@@ -180,7 +180,7 @@ describe('rule snoozing', () => {
         addEmailConnectorAndRuleAction('abc@example.com', 'Test action');
         saveEditedRule();
 
-        goToRuleEditSettings();
+        visitWithoutDateRange(ruleEditUrl(rule.id));
         goToActionsStepTab();
 
         cy.get(actionFormSelector(0)).should('be.visible');
