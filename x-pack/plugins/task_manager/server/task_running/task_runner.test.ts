@@ -1533,7 +1533,9 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledTimes(1);
       const instance = store.update.mock.calls[0][0];
 
-      expect(instance.runAt.getTime()).toBe(mockTaskInstance.runAt!.getTime() + 3000);
+      expect(instance.runAt.getTime()).toBe(
+        mockTaskInstance.runAt!.getTime() + mockedTaskConfig.skip.delay
+      );
       expect(instance.state).toEqual(mockTaskInstance.state);
       expect(instance.schedule).toEqual(mockTaskInstance.schedule);
       expect(instance.attempts).toBe(0);
