@@ -15,6 +15,7 @@ export async function getHostsBySignals(
   const hosts = await collectHosts({
     client: options.esClient,
     from: options.from,
+    // TODO: implement "to" for collectHosts
     sourceIndices: options.sourceIndices,
   });
   return {
