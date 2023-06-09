@@ -16,19 +16,32 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { Card, CardId, StepId } from './types';
+import { CardId, SectionId, StepId } from './types';
 import * as i18n from './translations';
 import { CardStep } from './card_step';
+import { getSections } from './sections';
 
 const CardItemComponent: React.FC<{
-  cardItem: Card;
   euiTheme: EuiThemeComputed;
   shadow?: string;
   stepsLeft?: number;
   timeInMins?: number;
-  onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+  onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
   finishedSteps: Record<CardId, Set<StepId>>;
-}> = ({ stepsLeft, timeInMins, shadow, cardItem, euiTheme, onStepClicked, finishedSteps }) => {
+  sectionId: SectionId;
+  cardId: CardId;
+}> = ({
+  stepsLeft,
+  timeInMins,
+  shadow,
+  euiTheme,
+  onStepClicked,
+  finishedSteps,
+  sectionId,
+  cardId,
+}) => {
+  const section = getSections()[sectionId];
+  const cardItem = section?.cards?.[cardId];
   const [expandCard, setExpandCard] = useState(false);
   const toggleCard = useCallback(
     (e) => {
@@ -37,7 +50,7 @@ const CardItemComponent: React.FC<{
     },
     [expandCard]
   );
-  return (
+  return cardItem ? (
     <EuiPanel
       hasBorder
       paddingSize="m"
@@ -102,6 +115,7 @@ const CardItemComponent: React.FC<{
               return (
                 <CardStep
                   key={step.id}
+                  sectionId={sectionId}
                   cardId={cardItem.id}
                   step={step}
                   onStepClicked={onStepClicked}
@@ -113,7 +127,7 @@ const CardItemComponent: React.FC<{
         )}
       </EuiFlexGroup>
     </EuiPanel>
-  );
+  ) : null;
 };
 
 CardItemComponent.displayName = 'CardItemComponent';

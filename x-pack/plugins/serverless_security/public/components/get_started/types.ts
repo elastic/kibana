@@ -20,7 +20,7 @@ export interface HeaderSection {
   title: string;
 }
 export interface Section {
-  cards?: Card[];
+  cards?: Record<string, Card>;
   description?: string;
   icon?: EuiIconProps;
   id: SectionId;
@@ -84,10 +84,15 @@ export enum GetMoreFromElasticSecurityCardId {
   respondToThreats = 'respondToThreats',
 }
 
+export interface ActiveCard {
+  id: CardId;
+  timeInMins: number;
+  stepsLeft: number;
+}
 export interface TogglePanelReducer {
   activeSections: Set<ProductId>;
   finishedSteps: Record<CardId, Set<StepId>>;
-  sections: Section[] | null;
+  activeCards: Record<CardId, ActiveCard> | null;
 }
 
 export interface TogglePanelAction {
@@ -97,11 +102,7 @@ export interface TogglePanelAction {
 
 export interface ToggleStepAction {
   type: GetStartedPageActions.AddFinishedStep;
-  payload: { cardId: CardId; stepId: StepId };
-}
-
-export interface InitSectionsAction {
-  type: GetStartedPageActions.InitSections;
+  payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
 }
 
 export interface Switch {
@@ -112,5 +113,4 @@ export interface Switch {
 export enum GetStartedPageActions {
   AddFinishedStep = 'addFinishedStep',
   ToggleSection = 'toggleSection',
-  InitSections = 'initSections',
 }

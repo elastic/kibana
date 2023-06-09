@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 
-import { Switch, GetStartedPageActions, StepId, CardId } from './types';
+import { Switch, GetStartedPageActions, StepId, CardId, SectionId } from './types';
 import * as i18n from './translations';
 import { ProductSwitch } from './product_switch';
 import { useSetUpCardSections } from './use_setup_cards';
 import { getStartedStorage } from '../../lib/get_started/storage';
-import { getActiveSectionsInitialStates, getFinishedStepsInitialStates, reducer } from './reducer';
+import {
+  getActiveCardsInitialStates,
+  getActiveSectionsInitialStates,
+  getFinishedStepsInitialStates,
+  reducer,
+} from './reducer';
 
 const TogglePanelComponent = () => {
   const { euiTheme } = useEuiTheme();
@@ -37,15 +42,27 @@ const TogglePanelComponent = () => {
     [getActiveProductsFromStorage]
   );
 
+  const activeCardsInitialStates = useMemo(
+    () =>
+      getActiveCardsInitialStates({
+        activeSections: activeSectionsInitialStates,
+        finishedSteps: finishedStepsInitialStates,
+      }),
+    [activeSectionsInitialStates, finishedStepsInitialStates]
+  );
+
   const [state, dispatch] = useReducer(reducer, {
     activeSections: activeSectionsInitialStates,
     finishedSteps: finishedStepsInitialStates,
-    sections: null,
+    activeCards: activeCardsInitialStates,
   });
   const { setUpSections } = useSetUpCardSections({ euiTheme, shadow });
   const onStepClicked = useCallback(
-    ({ stepId, cardId }: { stepId: StepId; cardId: CardId }) => {
-      dispatch({ type: GetStartedPageActions.AddFinishedStep, payload: { stepId, cardId } });
+    ({ stepId, cardId, sectionId }: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => {
+      dispatch({
+        type: GetStartedPageActions.AddFinishedStep,
+        payload: { stepId, cardId, sectionId },
+      });
       addFinishedStepToStorage(cardId, stepId);
     },
     [addFinishedStepToStorage]
@@ -53,7 +70,7 @@ const TogglePanelComponent = () => {
   const sectionNodes = setUpSections({
     onStepClicked,
     finishedSteps: state.finishedSteps,
-    sections: state.sections,
+    activeCards: state.activeCards,
   });
   const onProductSwitchChanged = useCallback(
     (section: Switch) => {
@@ -62,12 +79,6 @@ const TogglePanelComponent = () => {
     },
     [toggleActiveProductsInStorage]
   );
-
-  useEffect(() => {
-    if (!state.sections && state.activeSections.size > 0) {
-      dispatch({ type: GetStartedPageActions.InitSections });
-    }
-  }, [state.activeSections.size, state.sections]);
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">

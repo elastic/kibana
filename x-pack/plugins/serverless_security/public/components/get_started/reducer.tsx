@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { updateSections } from './helpers';
-import { sections } from './sections';
+import { setupCards, updateCard } from './helpers';
 import {
   CardId,
   GetStartedPageActions,
-  InitSectionsAction,
   ProductId,
   StepId,
   TogglePanelAction,
@@ -20,7 +18,7 @@ import {
 
 export const reducer = (
   state: TogglePanelReducer,
-  action: TogglePanelAction | ToggleStepAction | InitSectionsAction
+  action: TogglePanelAction | ToggleStepAction
 ): TogglePanelReducer => {
   if (action.type === GetStartedPageActions.ToggleSection) {
     const activeSections = new Set([...state.activeSections]);
@@ -34,7 +32,7 @@ export const reducer = (
     return {
       ...state,
       activeSections,
-      sections: updateSections(state.finishedSteps, activeSections),
+      activeCards: setupCards(state.finishedSteps, activeSections),
     };
   }
 
@@ -51,16 +49,16 @@ export const reducer = (
     return {
       ...state,
       finishedSteps,
-      sections: updateSections(finishedSteps, state.activeSections),
+      activeCards: updateCard({
+        finishedSteps,
+        activeSections: state.activeSections,
+        activeCards: state.activeCards,
+        cardId: action.payload.cardId,
+        sectionId: action.payload.sectionId,
+      }),
     };
   }
 
-  if (action.type === GetStartedPageActions.InitSections) {
-    return {
-      ...state,
-      sections: updateSections(state.finishedSteps, state.activeSections),
-    };
-  }
   return state;
 };
 
@@ -69,9 +67,9 @@ export const getFinishedStepsInitialStates = ({
 }: {
   finishedSteps: Record<CardId, StepId[]>;
 }): Record<CardId, Set<StepId>> => {
-  const initialStates = Object.entries(finishedSteps).reduce((acc, [key, stepIdsByCard]) => {
+  const initialStates = Object.entries(finishedSteps).reduce((acc, [cardId, stepIdsByCard]) => {
     if (stepIdsByCard) {
-      acc[key] = new Set(stepIdsByCard);
+      acc[cardId] = new Set(stepIdsByCard);
     }
     return acc;
   }, {} as Record<string, Set<StepId>>);
@@ -85,4 +83,10 @@ export const getActiveSectionsInitialStates = ({
   activeProducts: ProductId[];
 }) => new Set(activeProducts);
 
-export const getSectionsInitialStates = () => sections;
+export const getActiveCardsInitialStates = ({
+  activeSections,
+  finishedSteps,
+}: {
+  activeSections: Set<ProductId>;
+  finishedSteps: Record<CardId, Set<StepId>>;
+}) => setupCards(finishedSteps, activeSections);

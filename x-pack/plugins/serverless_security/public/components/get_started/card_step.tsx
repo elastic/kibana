@@ -18,15 +18,17 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
 
-import { CardId, Step, StepId } from './types';
+import { CardId, SectionId, Step, StepId } from './types';
 import step from './images/step.svg';
 
 const CardStepComponent: React.FC<{
+  sectionId: SectionId;
   cardId: CardId;
   step: Step;
-  onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+  onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
   finishedStepsByCard: Set<StepId>;
 }> = ({
+  sectionId,
   cardId,
   step: { id: stepId, title, badges, description, splitPanel },
   onStepClicked,
@@ -37,9 +39,9 @@ const CardStepComponent: React.FC<{
     (e) => {
       e.preventDefault();
       setExpandStep(!expandStep);
-      onStepClicked({ stepId, cardId });
+      onStepClicked({ stepId, cardId, sectionId });
     },
-    [cardId, expandStep, onStepClicked, stepId]
+    [cardId, expandStep, onStepClicked, sectionId, stepId]
   );
 
   return (

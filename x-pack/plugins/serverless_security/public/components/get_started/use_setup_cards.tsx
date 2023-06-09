@@ -9,9 +9,10 @@ import { EuiSpacer, EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { Card, CardId, Section, StepId } from './types';
+import { ActiveCard, CardId, SectionId, StepId } from './types';
 
 import { CardItem } from './card_item';
+import { getSections } from './sections';
 
 export const useSetUpCardSections = ({
   euiTheme,
@@ -22,21 +23,24 @@ export const useSetUpCardSections = ({
 }) => {
   const setUpCards = useCallback(
     ({
-      cards,
       onStepClicked,
       finishedSteps,
+      activeCards,
+      sectionId,
     }: {
-      cards: Card[] | undefined;
-      onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+      onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
       finishedSteps: Record<CardId, Set<StepId>>;
+      activeCards: Record<CardId, ActiveCard> | null;
+      sectionId: SectionId;
     }) =>
-      cards?.map<React.ReactNode>((cardItem) => (
+      Object.values(activeCards ?? {})?.map<React.ReactNode>((cardItem) => (
         <EuiFlexItem key={cardItem.id}>
           <CardItem
             data-test-subj={cardItem.id}
             stepsLeft={cardItem.stepsLeft}
             timeInMins={cardItem.timeInMins}
-            cardItem={cardItem}
+            sectionId={sectionId}
+            cardId={cardItem.id}
             shadow={shadow}
             euiTheme={euiTheme}
             onStepClicked={onStepClicked}
@@ -51,15 +55,20 @@ export const useSetUpCardSections = ({
     ({
       onStepClicked,
       finishedSteps,
-      sections,
+      activeCards,
     }: {
-      onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+      onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
       finishedSteps: Record<CardId, Set<StepId>>;
-      sections: Section[] | null;
+      activeCards: Record<CardId, ActiveCard> | null;
     }) =>
-      sections?.reduce<React.ReactNode[]>((acc, currentSection) => {
-        const cardNodes = setUpCards({ cards: currentSection.cards, onStepClicked, finishedSteps });
-        if (currentSection.cards && currentSection.cards.length > 0) {
+      Object.values(getSections()).reduce<React.ReactNode[]>((acc, currentSection) => {
+        const cardNodes = setUpCards({
+          sectionId: currentSection.id,
+          onStepClicked,
+          finishedSteps,
+          activeCards,
+        });
+        if (currentSection.cards) {
           acc.push(
             <EuiPanel
               color="plain"
