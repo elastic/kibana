@@ -355,6 +355,7 @@
     "@kbn/deeplinks-devtools": "link:packages/deeplinks/devtools",
     "@kbn/deeplinks-management": "link:packages/deeplinks/management",
     "@kbn/deeplinks-ml": "link:packages/deeplinks/ml",
+    "@kbn/deeplinks-observability": "link:packages/deeplinks/observability",
     "@kbn/deeplinks-search": "link:packages/deeplinks/search",
     "@kbn/default-nav-analytics": "link:packages/default-nav/analytics",
     "@kbn/default-nav-devtools": "link:packages/default-nav/devtools",

@@ -614,6 +614,8 @@
       "@kbn/deeplinks-management/*": ["packages/deeplinks/management/*"],
       "@kbn/deeplinks-ml": ["packages/deeplinks/ml"],
       "@kbn/deeplinks-ml/*": ["packages/deeplinks/ml/*"],
+      "@kbn/deeplinks-observability": ["packages/deeplinks/observability"],
+      "@kbn/deeplinks-observability/*": ["packages/deeplinks/observability/*"],
       "@kbn/deeplinks-search": ["packages/deeplinks/search"],
       "@kbn/deeplinks-search/*": ["packages/deeplinks/search/*"],
       "@kbn/default-nav-analytics": ["packages/default-nav/analytics"],
