@@ -186,11 +186,10 @@ export const initializeDashboard = async ({
      * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
      * from the query service. The order of the following lines is very important.
      */
-    const hasInheritedTimeRangeFromURL = Boolean(
-      kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time
-    );
-    if (hasInheritedTimeRangeFromURL || !timeRestore) {
-      initialInput.timeRange = timefilterService.getTime();
+    const inheritedTimeRange =
+      kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time;
+    if (inheritedTimeRange || !timeRestore) {
+      initialInput.timeRange = inheritedTimeRange;
     } else if (timeRestore) {
       if (timeRange) timefilterService.setTime(timeRange);
       if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
