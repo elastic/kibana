@@ -7,6 +7,7 @@
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -25,7 +26,6 @@ import {
   IErrorObject,
   OfExpression,
   ThresholdExpression,
-  WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import useToggle from 'react-use/lib/useToggle';
@@ -102,20 +102,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const isMetricPct = useMemo(() => Boolean(metric && metric.endsWith('.pct')), [metric]);
-
-  const updateAggType = useCallback(
-    (at: string) => {
-      setRuleParams(expressionId, {
-        ...expression,
-        aggType: at as MetricExpression['aggType'],
-        metric: ['custom', 'count'].includes(at) ? undefined : expression.metric,
-        customMetrics: at === 'custom' ? expression.customMetrics : undefined,
-        equation: at === 'custom' ? expression.equation : undefined,
-        label: at === 'custom' ? expression.label : undefined,
-      });
-    },
-    [expressionId, expression, setRuleParams]
-  );
 
   const updateMetric = useCallback(
     (m?: MetricExpression['metric']) => {
@@ -219,6 +205,20 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     name: f.name,
   }));
 
+  // for v8.9 we want to show only the Custom Equation. Use EuiExpression instead of WhenExpression */
+  // const updateAggType = useCallback(
+  //   (at: string) => {
+  //     setRuleParams(expressionId, {
+  //       ...expression,
+  //       aggType: at as MetricExpression['aggType'],
+  //       metric: ['custom', 'count'].includes(at) ? undefined : expression.metric,
+  //       customMetrics: at === 'custom' ? expression.customMetrics : undefined,
+  //       equation: at === 'custom' ? expression.equation : undefined,
+  //       label: at === 'custom' ? expression.label : undefined,
+  //     });
+  //   },
+  //   [expressionId, expression, setRuleParams]
+  // );
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
@@ -238,10 +238,22 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         <EuiFlexItem grow>
           <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
             <StyledExpression>
-              <WhenExpression
+              {/* for v8.9 we want to show only the Custom Equation. Use EuiExpression instead of WhenExpression */}
+              {/* <WhenExpression
                 customAggTypesOptions={aggregationType}
                 aggType={aggType}
                 onChangeSelectedAggType={updateAggType}
+              /> */}
+              <EuiExpression
+                data-test-subj="customEquationWhen"
+                description={i18n.translate(
+                  'xpack.observability.thresholdRule.expressionItems.descriptionLabel',
+                  {
+                    defaultMessage: 'when',
+                  }
+                )}
+                value={aggregationType.custom.text}
+                display={'inline'}
               />
             </StyledExpression>
             {!['count', 'custom'].includes(aggType) && (

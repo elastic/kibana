@@ -46,7 +46,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression = {
-  aggType: Aggregators.AVERAGE,
+  aggType: Aggregators.CUSTOM,
   comparator: Comparator.GT,
   threshold: [],
   timeSize: 1,
