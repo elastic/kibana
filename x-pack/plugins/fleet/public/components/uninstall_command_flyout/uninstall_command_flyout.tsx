@@ -88,7 +88,7 @@ const UninstallCommands = ({ policyId }: { policyId: string }) => {
     return <Loading size="l" />;
   }
 
-  const token: string | null = data?.items[0].token ?? null;
+  const token: string | null = data?.items?.[0]?.token ?? null;
 
   if (error || !token) {
     return (
