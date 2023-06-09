@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useRef } from 'react';
+import { debounce } from 'lodash';
+import React, { FC, useState, useRef, useMemo, useEffect } from 'react';
 
 import { EuiInputPopover } from '@elastic/eui';
 
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
 
-import './range_slider.scss';
 import { ControlError } from '../../control_group/component/control_error_component';
+import { RangeValue } from '../../../common/range_slider/types';
 import { RangeSliderButton } from './range_slider_button';
+import './range_slider.scss';
 
 export const RangeSliderControl: FC = () => {
   const rangeRef = useRef<EuiDualRangeRef>(null);
@@ -24,9 +26,29 @@ export const RangeSliderControl: FC = () => {
   const rangeSlider = useRangeSlider();
 
   const error = rangeSlider.select((state) => state.componentState.error);
+  const value = rangeSlider.select((state) => state.explicitInput.value);
+  const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
+
+  const debouncedOnChange = useMemo(
+    () =>
+      debounce((newRange: RangeValue) => {
+        rangeSlider.dispatch.setSelectedRange(newRange);
+      }, 750),
+    [rangeSlider.dispatch]
+  );
+
+  useEffect(() => {
+    debouncedOnChange(displayedValue);
+  }, [debouncedOnChange, displayedValue]);
+
+  useEffect(() => {
+    setDisplayedValue(value ?? ['', '']);
+  }, [value]);
 
   const button = (
     <RangeSliderButton
+      value={displayedValue}
+      onChange={setDisplayedValue}
       onClick={(event) => {
         // the popover should remain open if the click target is one of the number inputs
         if (isPopoverOpen && event.target instanceof HTMLInputElement) {
@@ -49,7 +71,6 @@ export const RangeSliderControl: FC = () => {
       anchorClassName="rangeSlider__anchorOverride"
       panelClassName="rangeSlider__panelOverride"
       closePopover={() => {
-        rangeSlider.publishNewRange();
         setIsPopoverOpen(false);
       }}
       anchorPosition="downCenter"
@@ -59,7 +80,7 @@ export const RangeSliderControl: FC = () => {
         rangeRef.current?.onResize(width);
       }}
     >
-      <RangeSliderPopover rangeRef={rangeRef} />
+      <RangeSliderPopover rangeRef={rangeRef} value={displayedValue} onChange={setDisplayedValue} />
     </EuiInputPopover>
   );
 };

@@ -105,10 +105,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   public dispatch: RangeSliderReduxEmbeddableTools['dispatch'];
   public onStateChange: RangeSliderReduxEmbeddableTools['onStateChange'];
 
-  private unpublishedChanges: BehaviorSubject<{
-    range?: [string | number, string | number];
-  }> = new BehaviorSubject({});
-
   private cleanupStateTools: () => void;
 
   constructor(
@@ -186,36 +182,17 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       })
     );
 
-    // write to unpublished changes when value changes
+    // build filters when value changes
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => isEqual(a.value, b.value)))
-        .subscribe(({ value }) => {
-          this.unpublishedChanges.next({ range: value ?? ['', ''] });
-        })
-    );
-
-    // debounce publishing of unpublished changes for smoother selection experience
-    this.subscriptions.add(
-      this.unpublishedChanges.pipe(debounceTime(750)).subscribe(() => {
-        this.publishNewRange();
-      })
+        .pipe(
+          // debounceTime(400),
+          distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
+          skip(1) // skip the first input update because initial filters will be built by initialize.
+        )
+        .subscribe(this.buildFilter)
     );
   };
-
-  public async publishNewRange() {
-    const { range } = this.unpublishedChanges.getValue();
-    if (!range || this.getState().componentState.error) return;
-
-    const [newLowerBound, newUpperBound] = range;
-    const updatedLowerBound =
-      typeof newLowerBound === 'number' ? String(newLowerBound) : newLowerBound;
-    const updatedUpperBound =
-      typeof newUpperBound === 'number' ? String(newUpperBound) : newUpperBound;
-    this.dispatch.setSelectedRange([updatedLowerBound, updatedUpperBound]);
-    await this.buildFilter();
-    this.unpublishedChanges.next({}); // clear out unpublished changes
-  }
 
   private getCurrentDataViewAndField = async (): Promise<{
     dataView?: DataView;

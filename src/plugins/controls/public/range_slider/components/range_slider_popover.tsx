@@ -22,14 +22,17 @@ import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/d
 
 import { pluginServices } from '../../services';
 import { RangeSliderStrings } from './range_slider_strings';
+import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 
 // Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created this annoying/verbose typing
 export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
 
 export const RangeSliderPopover: FC<{
+  value: RangeValue;
+  onChange: (newRange: RangeValue) => void;
   rangeRef?: Ref<EuiDualRangeRef>;
-}> = ({ rangeRef }) => {
+}> = ({ onChange, value, rangeRef }) => {
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
 
   // Controls Services Context
@@ -43,7 +46,6 @@ export const RangeSliderPopover: FC<{
 
   const id = rangeSlider.select((state) => state.explicitInput.id);
   const title = rangeSlider.select((state) => state.explicitInput.title);
-  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
 
   const min = rangeSlider.select((state) => state.componentState.min);
   const max = rangeSlider.select((state) => state.componentState.max);
@@ -114,7 +116,7 @@ export const RangeSliderPopover: FC<{
               min={rangeSliderMin}
               max={rangeSliderMax}
               onChange={([minSelection, maxSelection]) => {
-                rangeSlider.dispatch.setSelectedRange([String(minSelection), String(maxSelection)]);
+                onChange([String(minSelection), String(maxSelection)]);
               }}
               value={value}
               ticks={ticks}

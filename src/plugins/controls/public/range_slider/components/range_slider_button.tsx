@@ -10,13 +10,17 @@ import React from 'react';
 
 import { EuiFieldNumber, EuiFormControlLayoutDelimited } from '@elastic/eui';
 
+import './range_slider.scss';
+import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 
-import './range_slider.scss';
-
 export const RangeSliderButton = ({
+  value,
   onClick,
+  onChange,
 }: {
+  value: RangeValue;
+  onChange: (newRange: RangeValue) => void;
   onClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }) => {
   const rangeSlider = useRangeSlider();
@@ -26,7 +30,6 @@ export const RangeSliderButton = ({
   const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
 
   const id = rangeSlider.select((state) => state.explicitInput.id);
-  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
 
   const isLoading = rangeSlider.select((state) => state.output.loading);
 
@@ -43,7 +46,7 @@ export const RangeSliderButton = ({
           fullWidth
           value={value[0] === String(min) ? '' : value[0]}
           onChange={(event) => {
-            rangeSlider.dispatch.setSelectedRange([event.target.value, value[1]]);
+            onChange([event.target.value, value[1]]);
           }}
           placeholder={String(min)}
           isInvalid={isInvalid}
@@ -57,7 +60,7 @@ export const RangeSliderButton = ({
           fullWidth
           value={value[1] === String(max) ? '' : value[1]}
           onChange={(event) => {
-            rangeSlider.dispatch.setSelectedRange([value[0], event.target.value]);
+            onChange([value[0], event.target.value]);
           }}
           placeholder={String(max)}
           isInvalid={isInvalid}
