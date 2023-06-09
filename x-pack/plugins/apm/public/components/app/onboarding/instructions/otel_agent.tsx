@@ -164,7 +164,7 @@ export function OpenTelemetryInstructions({
   if (secretToken) {
     authHeaderValue = `Authorization=Bearer ${secretToken}`;
   } else {
-    authHeaderValue = `Authorization=ApiKey ${apiKeyDetails?.encodedKey}`;
+    authHeaderValue = `Authorization=ApiKey ${apiKeyDetails?.apiKey}`;
   }
   const items = [
     {

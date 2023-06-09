@@ -91,7 +91,7 @@ describe('APM Onboarding', () => {
       cy.intercept('GET', '/internal/apm/agent_status').as('agentStatus');
       cy.getByTestSubj('checkAgentStatus').click();
       cy.wait('@agentStatus');
-      cy.getByTestSubj('agentStatusWarningCallout');
+      cy.getByTestSubj('agentStatusWarningCallout').should('exist');
     });
 
     it('when data is present', () => {
@@ -104,7 +104,7 @@ describe('APM Onboarding', () => {
       cy.intercept('GET', '/internal/apm/agent_status').as('agentStatus');
       cy.getByTestSubj('checkAgentStatus').click();
       cy.wait('@agentStatus');
-      cy.getByTestSubj('agentStatusSuccessCallout');
+      cy.getByTestSubj('agentStatusSuccessCallout').should('exist');
       synthtrace.clean();
     });
   });
@@ -116,34 +116,34 @@ describe('APM Onboarding', () => {
       cy.intercept('POST', '/api/apm/agent_keys').as('createApiKey');
       cy.getByTestSubj('createApiKeyAndId').click();
       cy.wait('@createApiKey');
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('Django').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('Flask').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('Ruby on Rails').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('Rack').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('Go').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('Java').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('.NET').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('PHP').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('OpenTelemetry').click();
-      cy.getByTestSubj('apiKeySuccessCallout');
+      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
     });
 
     it('fails to create the key due to missing privileges', () => {
@@ -152,7 +152,12 @@ describe('APM Onboarding', () => {
       cy.intercept('POST', '/api/apm/agent_keys').as('createApiKey');
       cy.getByTestSubj('createApiKeyAndId').click();
       cy.wait('@createApiKey');
-      cy.getByTestSubj('apiKeyWarningCallout');
+      cy.getByTestSubj('apiKeyWarningCallout').should('exist');
+      cy.get('@createApiKey')
+        .its('response')
+        .then((res) => {
+          expect(res.statusCode).to.equal(403);
+        });
     });
   });
 });

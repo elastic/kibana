@@ -50,7 +50,6 @@ export function getDisplayText(id: INSTRUCTION_VARIANT) {
 export interface AgentApiKey {
   apiKey: string | null;
   id?: string;
-  encodedKey?: string;
   error: boolean;
   errorMessage?: string;
 }

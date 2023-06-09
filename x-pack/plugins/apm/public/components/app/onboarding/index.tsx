@@ -57,8 +57,7 @@ export function Onboarding() {
       );
 
       setAgentApiKey({
-        apiKey: agentKey.api_key,
-        encodedKey: agentKey.encoded,
+        apiKey: agentKey.encoded,
         id: agentKey.id,
         error: false,
       });
@@ -77,12 +76,12 @@ export function Onboarding() {
     try {
       setAgentStatusLoading(true);
       const agentStatusCheck = await callApmApi(
-        'GET /internal/apm/agent_status',
+        'GET /internal/apm/observability_overview/has_data',
         {
           signal: null,
         }
       );
-      setAgentStatus(agentStatusCheck.status);
+      setAgentStatus(agentStatusCheck.hasData);
     } catch (error) {
       setAgentStatus(false);
     } finally {
