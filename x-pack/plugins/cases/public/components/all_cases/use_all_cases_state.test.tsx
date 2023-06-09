@@ -55,8 +55,8 @@ const APP_ID = 'testAppId';
 const LOCALSTORAGE_QUERY_PARAMS_KEY = getQueryParamsLocalStorageKey(APP_ID);
 const LOCALSTORAGE_FILTER_OPTIONS_KEY = getFilterOptionsLocalStorageKey(APP_ID);
 
-// @ts-ignore
-const stringify = (parsedParams) => new URLSearchParams(parsedParams).toString();
+const stringify = (parsedParams: Record<string, string>) =>
+  new URLSearchParams(parsedParams).toString();
 
 describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
@@ -162,14 +162,14 @@ describe('useAllCasesQueryParams', () => {
     };
     const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
-    mockLocation.search = stringify(nonDefaultUrlParams);
+    mockLocation.search = stringify(nonDefaultUrlParams as unknown as Record<string, string>);
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search: stringify(expectedUrl),
+      search: stringify(expectedUrl as unknown as Record<string, string>),
     });
   });
 
@@ -209,7 +209,7 @@ describe('useAllCasesQueryParams', () => {
       perPage: DEFAULT_TABLE_LIMIT + 5,
     };
 
-    mockLocation.search = stringify(nonDefaultUrlParams);
+    mockLocation.search = stringify(nonDefaultUrlParams as unknown as Record<string, string>);
 
     localStorage.setItem(
       LOCALSTORAGE_QUERY_PARAMS_KEY,
@@ -261,14 +261,14 @@ describe('useAllCasesQueryParams', () => {
     });
 
     it('url perPage query param cannot be > 100', () => {
-      mockLocation.search = stringify({ perPage: 1000 });
+      mockLocation.search = stringify({ perPage: '1000' });
 
       renderHook(() => useAllCasesState(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: stringify({ ...URL_DEFAULTS, perPage: 100 }),
+        search: 'perPage=100&page=1&sortField=createdAt&sortOrder=desc&severity=all&status=all',
       });
 
       mockLocation.search = '';
@@ -294,7 +294,7 @@ describe('useAllCasesQueryParams', () => {
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: stringify({ ...URL_DEFAULTS }),
+        search: 'sortOrder=desc&page=1&perPage=10&sortField=createdAt&severity=all&status=all',
       });
     });
   });

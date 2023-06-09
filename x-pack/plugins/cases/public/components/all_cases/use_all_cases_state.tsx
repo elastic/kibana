@@ -37,8 +37,8 @@ export const getFilterOptionsLocalStorageKey = (appId: string) => {
   return `${appId}.${filteringKey}`;
 };
 
-// @ts-ignore
-const stringify = (parsedParams) => new URLSearchParams(parsedParams).toString();
+const stringify = (parsedParams: Record<string, string>) =>
+  new URLSearchParams(parsedParams).toString();
 const parse = (queryString: string) => Object.fromEntries(new URLSearchParams(queryString));
 
 const getQueryParams = (
@@ -208,7 +208,10 @@ export function useAllCasesState(
       try {
         const newHistory = {
           ...location,
-          search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
+          search: stringify({ ...parsedUrlParams, ...stateUrlParams } as unknown as Record<
+            string,
+            string
+          >),
         };
         history.replace(newHistory);
       } catch {
