@@ -1504,13 +1504,14 @@ describe('TaskManagerRunner', () => {
       });
     });
 
-    test('skips tasks', async () => {
+    test('skips tasks when the task run returns skip:true ', async () => {
       const mockTaskInstance: Partial<ConcreteTaskInstance> = {
         schedule: { interval: '10m' },
         status: TaskStatus.Running,
         startedAt: new Date(),
         enabled: true,
         state: { existingStatePAram: 'foo' },
+        runAt: new Date(),
       };
 
       const { runner, store } = await readyToRunStageSetup({
@@ -1532,7 +1533,7 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledTimes(1);
       const instance = store.update.mock.calls[0][0];
 
-      expect(instance.runAt.getTime()).toBe(3000); // as the runAt in taskInstance is epoch, getTime should return the delay
+      expect(instance.runAt.getTime()).toBe(mockTaskInstance.runAt!.getTime() + 3000);
       expect(instance.state).toEqual(mockTaskInstance.state);
       expect(instance.schedule).toEqual(mockTaskInstance.schedule);
       expect(instance.attempts).toBe(0);
