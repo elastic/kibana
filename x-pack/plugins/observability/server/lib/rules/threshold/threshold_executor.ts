@@ -120,7 +120,7 @@ export const createMetricThresholdExecutor = ({
       executionId,
     });
 
-    // TODO: check if we need to use "savedObjectsClient"
+    // TODO: check if we need to use "savedObjectsClient"=> https://github.com/elastic/kibana/issues/159340
     const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, dataViews } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (

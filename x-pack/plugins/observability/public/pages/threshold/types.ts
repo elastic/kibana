@@ -105,7 +105,7 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
-  // TODO:: check if needed
+  // TODO:: check if needed => https://github.com/elastic/kibana/issues/159340
   // ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
@@ -117,7 +117,7 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  // TODO:: check if needed
+  // TODO:: check if needed => https://github.com/elastic/kibana/issues/159340
   // telemetry: ITelemetryClient;
 }
 
