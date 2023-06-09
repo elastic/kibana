@@ -33,7 +33,7 @@ describe('UninstallCommandFlyout', () => {
     const renderer = createFleetTestRendererMock();
 
     return renderer.render(
-      <UninstallCommandFlyout onClose={() => {}} target="agent" policyId="-" {...props} />
+      <UninstallCommandFlyout onClose={() => {}} target="agent" policyId="policy_id" {...props} />
     );
   };
 
@@ -122,6 +122,13 @@ describe('UninstallCommandFlyout', () => {
       expect(uninstallInstructions).toHaveTextContent(
         'C:\\"Program Files"\\Elastic\\Agent\\elastic-agent.exe uninstall --uninstall-token 123456789'
       );
+    });
+
+    it('displays the selected policy id to the user', () => {
+      const renderResult = render();
+
+      const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
+      expect(policyIdHint.textContent).toBe('Valid for the following agent policy: policy_id');
     });
   });
 

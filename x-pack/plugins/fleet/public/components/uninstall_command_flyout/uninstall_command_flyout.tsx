@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCode,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -144,6 +145,16 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
         <EuiSpacer size="l" />
 
         {policyId && <UninstallCommands policyId={policyId} />}
+
+        <EuiSpacer size="l" />
+
+        <EuiText data-test-subj="uninstall-command-flyout-policy-id-hint">
+          <FormattedMessage
+            id="xpack.fleet.agentUninstallCommandFlyout.validForPolicyId"
+            defaultMessage="Valid for the following agent policy:"
+          />{' '}
+          <EuiCode>{policyId}</EuiCode>
+        </EuiText>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
