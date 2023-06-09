@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { update } from 'lodash';
 import { updateSections } from './helpers';
 import { sections } from './sections';
 import {
