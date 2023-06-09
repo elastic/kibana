@@ -18,6 +18,7 @@
       "embeddable",
       "features",
       "lens",
+      "logsShared",
       "observability",
       "observabilityShared",
       "ruleRegistry",

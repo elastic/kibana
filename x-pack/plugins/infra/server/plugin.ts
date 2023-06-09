@@ -24,7 +24,7 @@ import {
   LOGS_FEATURE_ID,
   METRICS_FEATURE_ID,
 } from '../common/constants';
-import { defaultLogViewsStaticConfig } from '../common/log_views';
+import { defaultLogViewsStaticConfig, LogViewAttributes } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -45,7 +45,7 @@ import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
-import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
+import { InfraSource, infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import {
   inventoryViewSavedObjectType,
@@ -65,6 +65,7 @@ import {
   InfraPluginStart,
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
+import { mapSourceToLogView } from './utils/map_source_to_log_view';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
@@ -181,7 +182,6 @@ export class InfraServerPlugin
     // register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
-    core.savedObjects.registerType(logViewSavedObjectType);
     core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
@@ -216,6 +216,12 @@ export class InfraServerPlugin
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
     plugins.features.registerKibanaFeature(LOGS_FEATURE);
+
+    // Register an handler to retrieve the fallback logView starting from a source configuration
+    plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
+      const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);
+      return mapSourceToLogView(sourceConfiguration);
+    });
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {

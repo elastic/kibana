@@ -55,10 +55,10 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
-  initLogEntriesHighlightsRoute(libs);
-  initLogEntriesSummaryRoute(libs);
-  initLogEntriesSummaryHighlightsRoute(libs);
-  initLogViewRoutes(libs);
+  // initLogEntriesHighlightsRoute(libs);
+  // initLogEntriesSummaryRoute(libs);
+  // initLogEntriesSummaryHighlightsRoute(libs);
+  // initLogViewRoutes(libs);
   initMetricExplorerRoute(libs);
   initMetricsExplorerViewRoutes(libs);
   initMetricsAPIRoute(libs);

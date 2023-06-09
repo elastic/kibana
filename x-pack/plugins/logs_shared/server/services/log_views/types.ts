@@ -28,7 +28,13 @@ export interface LogViewsServiceStartDeps {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export type LogViewFallbackHandler = ((sourceId: string) => Promise<LogView>) | null;
+export interface LogViewFallbackHandlerOptions {
+  soClient: SavedObjectsClientContract;
+}
+
+export type LogViewFallbackHandler =
+  | ((sourceId: string, options: LogViewFallbackHandlerOptions) => Promise<LogView>)
+  | null;
 
 export interface LogViewsServiceSetup {
   defineInternalLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): void;

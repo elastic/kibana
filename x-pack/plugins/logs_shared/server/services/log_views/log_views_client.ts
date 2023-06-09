@@ -140,7 +140,7 @@ export class LogViewsClient implements ILogViewsClient {
   }
 
   private async getLogViewFromLogsSharedSourceConfiguration(sourceId: string): Promise<LogView> {
-    this.logger.debug(`Trying to load log view from source configuration "${sourceId}"...`);
+    this.logger.debug(`Trying to load log view from fallback configuration "${sourceId}"...`);
 
     if (this.logViewFallbackHandler === null) {
       throw new LogViewFallbackUnregisteredError(
@@ -148,19 +148,7 @@ export class LogViewsClient implements ILogViewsClient {
       );
     }
 
-    return this.logViewFallbackHandler(sourceId);
-    // const sourceConfiguration = await this.infraSources.getSourceConfiguration(
-    //   this.savedObjectsClient,
-    //   sourceId
-    // );
-
-    // return {
-    //   id: sourceConfiguration.id,
-    //   version: sourceConfiguration.version,
-    //   updatedAt: sourceConfiguration.updatedAt,
-    //   origin: `infra-source-${sourceConfiguration.origin}`,
-    //   attributes: getAttributesFromSourceConfiguration(sourceConfiguration),
-    // };
+    return this.logViewFallbackHandler(sourceId, { soClient: this.savedObjectsClient });
   }
 
   private async resolveLogViewId(logViewId: string): Promise<string | null> {
@@ -201,22 +189,3 @@ const getLogViewFromSavedObject = (savedObject: SavedObject<unknown>): LogView =
     ),
   };
 };
-
-// export const getAttributesFromSourceConfiguration = ({
-//   configuration: { name, description, logIndices, logColumns },
-// }: LogsSharedSource): LogViewAttributes => ({
-//   name,
-//   description,
-//   logIndices: getLogIndicesFromSourceConfigurationLogIndices(logIndices),
-//   logColumns,
-// });
-
-// const getLogIndicesFromSourceConfigurationLogIndices = (
-//   logIndices: SourceConfigurationLogIndexReference
-// ): LogIndexReference =>
-//   logIndices.type === 'index_pattern'
-//     ? {
-//         type: 'data_view',
-//         dataViewId: logIndices.indexPatternId,
-//       }
-//     : logIndices;
