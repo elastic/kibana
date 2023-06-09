@@ -28,11 +28,19 @@ const FileDownloadButton = lazy(() =>
 );
 
 function getFileDownloadButton(fileId: string) {
-  return <FileDownloadButton fileId={fileId} isIcon={false} />;
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <FileDownloadButton fileId={fileId} isIcon={false} />
+    </Suspense>
+  );
 }
 
 function getFileDeleteButton(caseId: string, fileId: string) {
-  return <FileDeleteButton caseId={caseId} fileId={fileId} isIcon={false} />;
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <FileDeleteButton caseId={caseId} fileId={fileId} isIcon={false} />
+    </Suspense>
+  );
 }
 
 const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: string }) => [
