@@ -70,7 +70,7 @@ describe('StatefulFieldsBrowser', () => {
 
   describe('updateSelectedCategoryId', () => {
     beforeEach(() => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
     test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', async () => {
       const wrapper = mount(
@@ -110,7 +110,7 @@ describe('StatefulFieldsBrowser', () => {
 
       await waitFor(() => {
         wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-        jest.runOnlyPendingTimers();
+        jest.advanceTimersByTime(500);
         wrapper.update();
 
         expect(
@@ -127,7 +127,7 @@ describe('StatefulFieldsBrowser', () => {
           .last()
           .simulate('change', { target: { value: 'cloud' } });
 
-        jest.runOnlyPendingTimers();
+        jest.advanceTimersByTime(500);
         wrapper.update();
         expect(
           wrapper

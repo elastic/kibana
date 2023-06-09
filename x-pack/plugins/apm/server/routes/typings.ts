@@ -17,7 +17,10 @@ import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
-import { APMPluginDependencies } from '../types';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../types';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { UxUIFilters } from '../../typings/ui_filters';
 
@@ -62,9 +65,9 @@ export interface APMRouteHandlerResources {
     start: () => Promise<CoreStart>;
   };
   plugins: {
-    [key in keyof APMPluginDependencies]: {
-      setup: Required<APMPluginDependencies>[key]['setup'];
-      start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
+    [key in keyof APMPluginSetupDependencies]: {
+      setup: Required<APMPluginSetupDependencies>[key];
+      start: () => Promise<Required<APMPluginStartDependencies>[key]>;
     };
   };
   ruleDataClient: IRuleDataClient;

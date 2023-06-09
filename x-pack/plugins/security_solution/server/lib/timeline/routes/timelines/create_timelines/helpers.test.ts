@@ -37,7 +37,7 @@ const isImmutable = true;
 // Instead, we simply mock Date.now() via jest API and moment starts using it.
 // This affects all the tests in this file and doesn't affect tests in other files.
 // https://jestjs.io/docs/timer-mocks
-jest.useFakeTimers('modern').setSystemTime(new Date('2020-11-04T11:37:31.655Z'));
+jest.useFakeTimers().setSystemTime(new Date('2020-11-04T11:37:31.655Z'));
 
 jest.mock('../../../saved_object/timelines', () => ({
   persistTimeline: jest.fn().mockResolvedValue({

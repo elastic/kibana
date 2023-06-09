@@ -9,6 +9,7 @@ import { checkReferences, checkForDataLayerType } from './utils';
 import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
 import { layerTypes } from '../../../../../common';
+import { DateHistogramIndexPatternColumn } from '../date_histogram';
 
 // Mock prevents issue with circular loading
 jest.mock('..');
@@ -35,7 +36,6 @@ describe('utils', () => {
             columns: {
               ref: {
                 label: 'Label',
-                // @ts-expect-error test-only operation type
                 operationType: 'testReference',
                 isBucketed: false,
                 dataType: 'number',
@@ -57,7 +57,6 @@ describe('utils', () => {
             columns: {
               ref: {
                 label: 'Label',
-                // @ts-expect-error test-only operation type
                 operationType: 'testReference',
                 isBucketed: false,
                 dataType: 'number',
@@ -70,7 +69,7 @@ describe('utils', () => {
                 dataType: 'date',
                 sourceField: 'timestamp',
                 params: { interval: 'auto' },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
             columnOrder: ['invalid', 'ref'],
             indexPatternId: '',

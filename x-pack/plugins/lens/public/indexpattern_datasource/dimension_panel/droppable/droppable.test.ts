@@ -14,7 +14,12 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternLayer, IndexPatternPrivateState } from '../../types';
 import { documentField } from '../../document_field';
 import { OperationMetadata, DropType } from '../../../types';
-import { IndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
+import {
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  MedianIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '../../operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
 import { generateId } from '../../../id_generator';
 import { layerTypes } from '../../../../common';
@@ -128,7 +133,7 @@ const oneColumnLayer: IndexPatternLayer = {
         interval: '1d',
       },
       sourceField: 'timestamp',
-    },
+    } as DateHistogramIndexPatternColumn,
   },
   incompleteColumns: {},
 };
@@ -150,7 +155,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
         size: 10,
       },
       sourceField: 'src',
-    },
+    } as TermsIndexPatternColumn,
     col3: {
       label: 'Top values of dest',
       dataType: 'string',
@@ -164,7 +169,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
         size: 10,
       },
       sourceField: 'dest',
-    },
+    } as TermsIndexPatternColumn,
     col4: {
       label: 'Median of bytes',
       dataType: 'number',
@@ -416,7 +421,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 interval: '1d',
               },
               sourceField: 'timestamp',
-            },
+            } as DateHistogramIndexPatternColumn,
           },
         };
 
@@ -771,7 +776,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     interval: '1d',
                   },
                   sourceField: 'timestamp',
-                },
+                } as DateHistogramIndexPatternColumn,
                 col2: {
                   label: 'Top values of bar',
                   dataType: 'number',
@@ -783,7 +788,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     orderDirection: 'asc',
                     size: 5,
                   },
-                },
+                } as TermsIndexPatternColumn,
                 col3: {
                   operationType: 'average',
                   sourceField: 'memory',
@@ -1158,17 +1163,17 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Date histogram of timestamp',
                   dataType: 'date',
                   isBucketed: true,
-                } as IndexPatternColumn,
+                } as GenericIndexPatternColumn,
                 col2: {
                   label: 'Top values of bar',
                   dataType: 'number',
                   isBucketed: true,
-                } as IndexPatternColumn,
+                } as GenericIndexPatternColumn,
                 col3: {
                   label: 'Top values of memory',
                   dataType: 'number',
                   isBucketed: true,
-                } as IndexPatternColumn,
+                } as GenericIndexPatternColumn,
               },
             },
           },
@@ -1293,7 +1298,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 size: 10,
               },
               sourceField: 'src',
-            },
+            } as TermsIndexPatternColumn,
             col3: {
               label: 'Count',
               dataType: 'number',

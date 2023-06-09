@@ -124,7 +124,7 @@ describe('date_histogram', () => {
             interval: '42w',
           },
           sourceField: 'timestamp',
-        },
+        } as DateHistogramIndexPatternColumn,
       },
     };
   });
@@ -332,7 +332,7 @@ describe('date_histogram', () => {
               interval: 'd',
             },
             sourceField: 'other_timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
       const instance = shallow(
@@ -366,7 +366,7 @@ describe('date_histogram', () => {
               interval: 'auto',
             },
             sourceField: 'timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
 
@@ -401,7 +401,7 @@ describe('date_histogram', () => {
               interval: 'auto',
             },
             sourceField: 'timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
 
@@ -594,7 +594,7 @@ describe('date_histogram', () => {
               operationType: 'date_histogram',
               sourceField: 'missing',
               params: { interval: 'auto' },
-            },
+            } as DateHistogramIndexPatternColumn,
           }
         )
       ).toEqual('Missing field');

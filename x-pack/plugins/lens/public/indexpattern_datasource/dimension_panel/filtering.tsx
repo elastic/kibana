@@ -18,7 +18,7 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 import type { Query } from 'src/plugins/data/public';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { validateQuery } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
 import type { IndexPattern, IndexPatternLayer } from '../types';
@@ -54,7 +54,7 @@ export function Filtering({
   indexPattern,
   isInitiallyOpen,
 }: {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
   layer: IndexPatternLayer;

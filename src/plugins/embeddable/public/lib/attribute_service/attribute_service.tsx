@@ -92,7 +92,7 @@ export class AttributeService<
         ? await this.options.unwrapMethod(input.savedObjectId)
         : await this.defaultUnwrapMethod(input);
     }
-    return { attributes: input[ATTRIBUTE_SERVICE_KEY] };
+    return { attributes: (input as ValType)[ATTRIBUTE_SERVICE_KEY] };
   }
 
   public async wrapAttributes(
@@ -134,7 +134,7 @@ export class AttributeService<
 
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
     if (!this.inputIsRefType(input)) {
-      return input;
+      return input as ValType;
     }
     const { attributes } = await this.unwrapAttributes(input);
     const { savedObjectId, ...originalInputToPropagate } = input;
@@ -155,7 +155,7 @@ export class AttributeService<
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
         await this.options.checkForDuplicateTitle(props);
         try {
-          const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
+          const newAttributes = { ...(input as ValType)[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(
             newAttributes,
@@ -178,7 +178,11 @@ export class AttributeService<
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={get(saveOptions, 'saveModalTitle', input[ATTRIBUTE_SERVICE_KEY].title)}
+            title={get(
+              saveOptions,
+              'saveModalTitle',
+              (input as ValType)[ATTRIBUTE_SERVICE_KEY].title
+            )}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}

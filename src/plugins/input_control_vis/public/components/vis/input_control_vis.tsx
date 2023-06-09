@@ -25,6 +25,10 @@ function isRangeControl(control: RangeControl | ListControl): control is RangeCo
   return control.type === CONTROL_TYPES.RANGE;
 }
 
+interface UnknownControl {
+  type: string;
+}
+
 interface InputControlVisProps {
   stageFilter: (controlIndex: number, newValue: any) => void;
   submitFilters: () => void;
@@ -90,7 +94,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
           />
         );
       } else {
-        throw new Error(`Unhandled control type ${control!.type}`);
+        throw new Error(`Unhandled control type ${(control as UnknownControl)!.type}`);
       }
 
       return (

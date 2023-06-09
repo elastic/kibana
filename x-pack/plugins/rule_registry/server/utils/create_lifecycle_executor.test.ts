@@ -31,6 +31,7 @@ describe('createLifecycleExecutor', () => {
   it('wraps and unwraps the original executor state', async () => {
     const logger = loggerMock.create();
     const ruleDataClientMock = createRuleDataClientMock();
+    // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.ts(2590)
     const executor = createLifecycleExecutor(
       logger,
       ruleDataClientMock

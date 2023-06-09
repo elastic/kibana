@@ -125,7 +125,7 @@ export interface FieldEdiorProps {
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
   static contextType = contextType;
 
-  public readonly context!: IndexPatternManagmentContextValue;
+  public declare readonly context: IndexPatternManagmentContextValue;
 
   supportedLangs: estypes.ScriptLanguage[] = [];
   deprecatedLangs: estypes.ScriptLanguage[] = [];

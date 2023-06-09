@@ -10,7 +10,7 @@ import { once } from 'lodash';
 import { createHashHistory } from 'history';
 import type { ScopedHistory, AppMountParameters } from 'kibana/public';
 import type { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { DiscoverServices } from './build_services';
+import { DiscoverServices, HistoryLocationState } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
@@ -46,7 +46,7 @@ export const [getDocViewsRegistry, setDocViewsRegistry] =
  * Makes sure discover and context are using one instance of history.
  */
 export const getHistory = once(() => {
-  const history = createHashHistory();
+  const history = createHashHistory<HistoryLocationState>();
   history.listen(() => {
     // keep at least one listener so that `history.location` always in sync
   });

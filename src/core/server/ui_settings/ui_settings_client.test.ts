@@ -710,7 +710,7 @@ describe('ui settings', () => {
   describe('caching', () => {
     describe('read operations cache user config', () => {
       beforeEach(() => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers({ legacyFakeTimers: true });
       });
 
       afterEach(() => {

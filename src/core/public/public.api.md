@@ -42,6 +42,7 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { TransitionPromptHook } from 'history';
 import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import type { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -1609,13 +1610,13 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 
 // @public
 export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
-    constructor(parentHistory: History_2, basePath: string);
+    constructor(parentHistory: History_2<HistoryLocationState>, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | History_2.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
-    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
     goForward: () => void;

@@ -128,7 +128,6 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     page = { index: 0, size: 10 },
   }: {
     page?: { index: number; size: number };
-    sort?: { field: string; direction: string };
   }) => {
     const { index, size } = page;
 

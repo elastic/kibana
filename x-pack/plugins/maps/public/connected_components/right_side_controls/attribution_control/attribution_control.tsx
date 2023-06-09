@@ -53,7 +53,7 @@ export class AttributionControl extends Component<Props, State> {
       return;
     }
 
-    const uniqueAttributions = [];
+    const uniqueAttributions: Attribution[] = [];
     for (let i = 0; i < attributions.length; i++) {
       for (let j = 0; j < attributions[i].length; j++) {
         const testAttr = attributions[i][j];

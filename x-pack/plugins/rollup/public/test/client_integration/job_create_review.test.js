@@ -35,7 +35,7 @@ describe('Create Rollup Job, step 6: Review', () => {
   let component;
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     startMock = coreMock.createStart();
     setHttp(startMock.http);
   });

@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange } from '@elastic/eui';
-import { IndexPatternColumn } from '../indexpattern';
+import { GenericIndexPatternColumn } from '../indexpattern';
 
 const supportedFormats: Record<string, { title: string }> = {
   number: {
@@ -36,7 +36,7 @@ const defaultOption = {
 };
 
 interface FormatSelectorProps {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
 }
 
@@ -136,7 +136,7 @@ export function FormatSelector(props: FormatSelectorProps) {
                 onChange={(e) => {
                   setState({ decimalPlaces: Number(e.currentTarget.value) });
                   onChange({
-                    id: (selectedColumn.params as { format: { id: string } }).format.id,
+                    id: currentFormat.id,
                     params: {
                       decimals: Number(e.currentTarget.value),
                     },

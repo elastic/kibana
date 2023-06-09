@@ -104,7 +104,7 @@ describe('ExpressionRenderer', () => {
   });
 
   it('waits for debounce period if specified', () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const refreshSubject = new Subject();
     const loaderUpdate = jest.fn();
@@ -137,7 +137,7 @@ describe('ExpressionRenderer', () => {
   });
 
   it('should not update twice immediately after rendering', () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const refreshSubject = new Subject();
     const loaderUpdate = jest.fn();
@@ -166,7 +166,7 @@ describe('ExpressionRenderer', () => {
   });
 
   it('waits for debounce period on other loader option change if specified', () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const refreshSubject = new Subject();
     const loaderUpdate = jest.fn();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ValuesType } from 'utility-types';
+import { ValuesType, UnionToIntersection } from 'utility-types';
 import { estypes } from '@elastic/elasticsearch';
 
 type InvalidAggregationRequest = unknown;
@@ -21,11 +21,15 @@ type KeyOfSource<T> = Record<
   (T extends Record<string, { terms: { missing_bucket: true } }> ? null : never) | string | number
 >;
 
-type KeysOfSources<T extends any[]> = T extends [infer U, ...infer V]
-  ? KeyOfSource<U> & KeysOfSources<V>
-  : T extends Array<infer U>
-  ? KeyOfSource<U>
-  : {};
+type KeysOfSources<T extends any[]> = T extends [any]
+  ? KeyOfSource<T[0]>
+  : T extends [any, any]
+  ? KeyOfSource<T[0]> & KeyOfSource<T[1]>
+  : T extends [any, any, any]
+  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]>
+  : T extends [any, any, any, any]
+  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
+  : Record<string, null | string | number>;
 
 type CompositeKeysOf<TAggregationContainer extends estypes.AggregationsAggregationContainer> =
   TAggregationContainer extends {
@@ -35,6 +39,13 @@ type CompositeKeysOf<TAggregationContainer extends estypes.AggregationsAggregati
     : unknown;
 
 type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
+
+type TopMetricKeysOf<TAggregationContainer extends estypes.AggregationsAggregationContainer> =
+  TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
+    ? TField
+    : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
+    ? TField
+    : string;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>
   ? ValuesType<T>
@@ -532,12 +543,7 @@ export type AggregateOf<
   top_metrics: {
     top: Array<{
       sort: number[] | string[];
-      metrics: Record<
-        TAggregationContainer extends Record<string, { metrics: Array<{ field: infer TKeys }> }>
-          ? TKeys
-          : string,
-        string | number | null
-      >;
+      metrics: Record<TopMetricKeysOf<TAggregationContainer>, string | number | null>;
     }>;
   };
   weighted_avg: { value: number | null };
@@ -547,8 +553,8 @@ export type AggregateOf<
   // t_test: {} not defined
 })[ValidAggregationKeysOf<TAggregationContainer> & AggregationTypeName];
 
-type AggregateOfMap<TAggregationMap extends AggregationMap, TDocument> = {
-  [TAggregationName in keyof TAggregationMap]: TAggregationMap[TAggregationName] extends estypes.AggregationsAggregationContainer
+type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
+  [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends estypes.AggregationsAggregationContainer
     ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
@@ -567,7 +573,7 @@ type SearchResponseOf<
 > = SubAggregateOf<TAggregationRequest, TDocument>;
 
 // if aggregation response cannot be inferred, fall back to unknown
-type WrapAggregationResponse<T> = keyof T extends never
+type WrapAggregationResponse<T> = keyof UnionToIntersection<T> extends never
   ? { aggregations?: unknown }
   : { aggregations?: T };
 

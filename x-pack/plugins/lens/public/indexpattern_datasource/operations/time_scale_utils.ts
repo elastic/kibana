@@ -8,7 +8,7 @@
 import { unitSuffixesLong } from '../../../common/suffix_formatter';
 import type { TimeScaleUnit } from '../../../common/expressions';
 import type { IndexPatternLayer } from '../types';
-import type { IndexPatternColumn } from './definitions';
+import type { GenericIndexPatternColumn } from './definitions';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
@@ -44,7 +44,7 @@ export function adjustTimeScaleLabelSuffix(
   return `${cleanedLabel}${getSuffix(newTimeScale, newShift)}`;
 }
 
-export function adjustTimeScaleOnOtherColumnChange<T extends IndexPatternColumn>(
+export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPatternColumn>(
   layer: IndexPatternLayer,
   thisColumnId: string,
   changedColumnId: string

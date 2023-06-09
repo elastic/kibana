@@ -12,7 +12,7 @@ import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '../expression_functions';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 beforeEach(() => {
   jest.clearAllTimers();
@@ -81,7 +81,7 @@ describe('Execution abortion tests', () => {
 
     expect(result).toBe(null);
 
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   test('nested expressions are aborted when parent aborted', async () => {
@@ -150,6 +150,6 @@ describe('Execution abortion tests', () => {
     expect(aborted).toHaveBeenCalledTimes(1);
     expect(completed).toHaveBeenCalledTimes(0);
 
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 });

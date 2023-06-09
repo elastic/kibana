@@ -16,6 +16,7 @@ import { IndexPattern, IndexPatternLayer } from '../../types';
 import { StaticValueIndexPatternColumn } from './static_value';
 import { EuiFieldNumber } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
+import { TermsIndexPatternColumn } from './terms';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -65,7 +66,7 @@ describe('static_value', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'Static value: 23',
           dataType: 'number',
@@ -75,7 +76,7 @@ describe('static_value', () => {
           params: {
             value: '23',
           },
-        },
+        } as StaticValueIndexPatternColumn,
       },
     };
   });
@@ -256,7 +257,7 @@ describe('static_value', () => {
             scale: 'ratio',
             params: { value: '23' },
             references: [],
-          },
+          } as StaticValueIndexPatternColumn,
         })
       ).toEqual({
         label: 'Static value: 23',
@@ -303,7 +304,7 @@ describe('static_value', () => {
               scale: 'ratio',
               params: { value: '23' },
               references: [],
-            },
+            } as StaticValueIndexPatternColumn,
           },
           { value: '53' }
         )
@@ -351,7 +352,7 @@ describe('static_value', () => {
             params: {
               value: '0',
             },
-          },
+          } as StaticValueIndexPatternColumn,
         },
       } as IndexPatternLayer;
       const instance = shallow(
