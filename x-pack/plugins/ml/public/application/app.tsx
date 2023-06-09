@@ -124,9 +124,14 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     }
   );
 
-  // Wait for license to be retrieved before rendering the app.
+  // Wait for license and capabilities to be retrieved before rendering the app.
   const licenseReady = useObservable(services.mlServices.mlLicense.isLicenseReady$, false);
-  if (!licenseReady) return null;
+  const mlCapabilities = useObservable(
+    services.mlServices.mlCapabilities.capabilities$,
+    services.mlServices.mlCapabilities.getCapabilities()
+  );
+
+  if (!licenseReady || !mlCapabilities) return null;
 
   const datePickerDeps = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
