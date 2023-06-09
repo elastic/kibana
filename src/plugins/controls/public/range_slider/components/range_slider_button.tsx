@@ -48,6 +48,7 @@ export const RangeSliderButton = ({
           placeholder={String(min)}
           isInvalid={isInvalid}
           className={'rangeSliderAnchor__fieldNumber'}
+          data-test-subj={'rangeSlider__lowerBoundFieldNumber'}
         />
       }
       endControl={
@@ -61,6 +62,7 @@ export const RangeSliderButton = ({
           placeholder={String(max)}
           isInvalid={isInvalid}
           className={'rangeSliderAnchor__fieldNumber'}
+          data-test-subj={'rangeSlider__upperBoundFieldNumber'}
         />
       }
     />
