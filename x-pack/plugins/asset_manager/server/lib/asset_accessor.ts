@@ -12,13 +12,13 @@ import { GetHostsOptions } from './accessors/hosts';
 import { getHostsByAssets } from './accessors/hosts/get_hosts_by_assets';
 import { getHostsBySignals } from './accessors/hosts/get_hosts_by_signals';
 
-export interface AssetAccessorOptions {
+interface AssetAccessorClassOptions {
   sourceIndices: AssetManagerConfig['sourceIndices'];
   source: AssetManagerConfig['lockedSource'];
 }
 
 export class AssetAccessor {
-  constructor(private options: AssetAccessorOptions) {}
+  constructor(private options: AssetAccessorClassOptions) {}
 
   injectOptions<T extends object = {}>(options: T): OptionsWithInjectedValues<T> {
     return {
