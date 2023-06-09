@@ -26,6 +26,8 @@ import { act } from 'react-dom/test-utils';
 import { GroupEditorFlyout } from './group_editor_flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
+import { IToasts } from '@kbn/core-notifications-browser';
 
 describe('annotation list view', () => {
   const adHocDVId = 'ad-hoc';
@@ -45,6 +47,7 @@ describe('annotation list view', () => {
 
   let wrapper: ShallowWrapper<typeof EventAnnotationGroupTableList>;
   let mockEventAnnotationService: EventAnnotationServiceType;
+  let mockToasts: IToasts;
 
   beforeEach(() => {
     mockEventAnnotationService = {
@@ -63,6 +66,8 @@ describe('annotation list view', () => {
           }[key])
       ),
     } as Partial<IUiSettingsClient> as IUiSettingsClient;
+
+    mockToasts = toastsServiceMock.createStartContract();
 
     wrapper = shallow<typeof EventAnnotationGroupTableList>(
       <EventAnnotationGroupTableList
@@ -85,6 +90,7 @@ describe('annotation list view', () => {
         ]}
         createDataView={() => Promise.resolve({} as DataView)}
         queryInputServices={{} as QueryInputServices}
+        toasts={mockToasts}
       />
     );
   });
@@ -92,7 +98,7 @@ describe('annotation list view', () => {
   it('renders a table list view', () => {
     expect(wrapper.debug()).toMatchInlineSnapshot(`
       "<Fragment>
-        <Memo(TableListViewTableComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function (anonymous)]} onFetchSuccess={[Function: onFetchSuccess]} setPageDataTestSubject={[Function: setPageDataTestSubject]} />
+        <Memo(TableListViewTableComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" customTableColumn={{...}} entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function (anonymous)]} onFetchSuccess={[Function: onFetchSuccess]} setPageDataTestSubject={[Function: setPageDataTestSubject]} />
       </Fragment>"
     `);
   });

@@ -79,8 +79,7 @@ export function getEventAnnotationService(
       type: savedObject.type,
       updatedAt: savedObject.updatedAt ? savedObject.updatedAt : '',
       attributes: {
-        title: savedObject.attributes.title,
-        description: savedObject.attributes.description,
+        ...mapSavedObjectToGroupConfig(savedObject),
       },
     };
   };

@@ -24,6 +24,28 @@ import { GroupEditorFlyout } from './group_editor_flyout';
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
+const getCustomColumn = (dataViews: DataView[]) => {
+  const dataViewNameMap = Object.fromEntries(
+    dataViews.map((dataView) => [dataView.id, dataView.name ?? dataView.title])
+  );
+
+  return {
+    field: 'dataView',
+    name: i18n.translate('eventAnnotation.tableList.dataView', {
+      defaultMessage: 'Data view',
+    }),
+    sortable: false,
+    width: '150px',
+    render: (_field: string, record: EventAnnotationGroupContent) => (
+      <div>
+        {record.attributes.dataViewSpec
+          ? record.attributes.dataViewSpec.name
+          : dataViewNameMap[record.attributes.indexPatternId]}
+      </div>
+    ),
+  };
+};
+
 export const EventAnnotationGroupTableList = ({
   uiSettings,
   eventAnnotationService,
@@ -131,6 +153,7 @@ export const EventAnnotationGroupTableList = ({
         listingLimit={listingLimit}
         initialPageSize={initialPageSize}
         initialFilter={''}
+        customTableColumn={getCustomColumn(dataViews)}
         // emptyPrompt={noItemsFragment} TODO
         entityName={i18n.translate('eventAnnotation.tableList.entityName', {
           defaultMessage: 'annotation group',

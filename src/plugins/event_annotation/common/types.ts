@@ -101,7 +101,9 @@ export interface EventAnnotationGroupConfig {
   dataViewSpec?: DataViewSpec;
 }
 
-export type EventAnnotationGroupContent = UserContentCommonSchema;
+export type EventAnnotationGroupContent = UserContentCommonSchema & {
+  attributes: { indexPatternId: string; dataViewSpec?: DataViewSpec };
+};
 
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs
