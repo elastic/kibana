@@ -7,16 +7,17 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlObltOverviewPageProvider({ getService }: FtrProviderContext) {
+export function SvlObltOnboardingPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertPageHeaderExists() {
-      await testSubjects.existOrFail('obltOverviewPageHeader');
+    async assertSkipButtonExists() {
+      await testSubjects.existOrFail('obltOnboardingHomeSkipButton');
     },
 
-    async assertAlertsSectionExists() {
-      await testSubjects.existOrFail('obltOverviewAlerts');
+    async skipOnboarding() {
+      await testSubjects.click('obltOnboardingHomeSkipButton');
+      await testSubjects.missingOrFail('obltOnboardingHomeSkipButton');
     },
   };
 }
