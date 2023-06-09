@@ -70,7 +70,7 @@ export const PageLoader: FC<{ context: MlContextValue | null }> = ({ context, ch
   const isLoading = context === null;
   return (
     <EuiSkeletonText lines={10} isLoading={isLoading}>
-      <MlContext.Provider value={context!}>{children}</MlContext.Provider>
+      {!isLoading ? <MlContext.Provider value={context!}>{children}</MlContext.Provider> : null}
     </EuiSkeletonText>
   );
 };

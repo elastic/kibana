@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
 import { PLUGIN_ID } from '../../../common/constants/app';
@@ -29,7 +29,10 @@ export const useRouteResolver = (
   requiredCapabilities: MlCapabilitiesKey[],
   customResolvers?: Resolvers
 ): { context: MlContextValue | null; results: ResolverResults } => {
-  const [results, setResults] = useState<any>(null);
+  const customResolversRef = useRef(customResolvers);
+
+  const [results, setResults] = useState<ResolverResults>();
+  const [context, setContext] = useState<MlContextValue | null>(null);
 
   const {
     services: {
@@ -44,25 +47,22 @@ export const useRouteResolver = (
     },
   } = useMlKibana();
 
-  const context = useMemo<MlContextValue>(() => {
-    return {
-      dataViewsContract: dataViews,
-      kibanaConfig: uiSettings,
-    } as MlContextValue;
-  }, [dataViews, uiSettings]);
-
   const mlLicenseInfo = useMlLicenseInfo();
+
+  useMount(function refreshCapabilitiesOnMount() {
+    mlCapabilities.refreshCapabilities();
+  });
 
   const licenseResolver = useCallback(async () => {
     if (mlLicenseInfo.isMlEnabled === false || mlLicenseInfo.isMinimumLicense === false) {
       // ML is not enabled or the license isn't at least basic
       await navigateToApp('home');
-      return;
+      return Promise.reject();
     }
     if (requiredLicence === 'full' && mlLicenseInfo.isFullLicense === false) {
       // ML is enabled, but only with a basic or gold license
       await navigateToApp(PLUGIN_ID, { path: ML_PAGES.DATA_VISUALIZER });
-      return;
+      return Promise.reject();
     }
     // ML is enabled
     if (mlLicenseInfo.hasLicenseExpired) {
@@ -71,10 +71,6 @@ export const useRouteResolver = (
 
     return true;
   }, [mlLicenseInfo, navigateToApp, requiredLicence]);
-
-  useMount(function refreshCapabilitiesOnMount() {
-    mlCapabilities.refreshCapabilities();
-  });
 
   const redirectToMlAccessDeniedPage = useCallback(async () => {
     const redirectPage = mlLicenseInfo.hasLicenseExpired
@@ -91,59 +87,69 @@ export const useRouteResolver = (
   // Check if the user has all required permissions
   const capabilitiesResults = usePermissionCheck(requiredCapabilities);
 
-  useEffect(
-    function trackLicenseAndCapabilities() {
-      // First check the license
-      licenseResolver().then((licenseCheckResult) => {
-        if (licenseCheckResult === true) {
-          // Check required capabilities after
-          if (capabilitiesResults.some((v) => !v)) {
-            redirectToMlAccessDeniedPage();
-          }
-        }
-      });
-    },
-    [licenseResolver, mlLicenseInfo, capabilitiesResults, redirectToMlAccessDeniedPage]
-  );
+  const capabilitiesResolver = useCallback(async () => {
+    if (capabilitiesResults.some((v) => !v)) {
+      await redirectToMlAccessDeniedPage();
+      return Promise.reject();
+    }
+  }, [capabilitiesResults, redirectToMlAccessDeniedPage]);
 
   const resolveCustomResolvers = useCallback(async () => {
-    if (!customResolvers) return;
+    if (!customResolversRef.current) return;
 
-    const funcNames = Object.keys(customResolvers); // Object.entries gets this wrong?!
-    const funcs = Object.values(customResolvers); // Object.entries gets this wrong?!
+    const funcNames = Object.keys(customResolversRef.current); // Object.entries gets this wrong?!
+    const funcs = Object.values(customResolversRef.current); // Object.entries gets this wrong?!
     const tempResults = funcNames.reduce((p, c) => {
       p[c] = {};
       return p;
-    }, {} as ResolverResults);
+    }, {} as Exclude<ResolverResults, undefined>);
     const res = await Promise.all(funcs.map((r) => r()));
     res.forEach((r, i) => (tempResults[funcNames[i]] = r));
 
     return tempResults;
-  }, [customResolvers]);
+  }, []);
 
   useEffect(
-    function resolveOnMount() {
+    function resolveRequirements() {
       let mounted = true;
-      resolveCustomResolvers()
+
+      // Sequence is important
+      licenseResolver()
+        .then(capabilitiesResolver)
+        .then(resolveCustomResolvers)
         .then((customResults) => {
           if (mounted) {
+            setContext({
+              dataViewsContract: dataViews,
+              kibanaConfig: uiSettings,
+              initialized: true,
+            } as MlContextValue);
             setResults(customResults);
           }
         })
-        .catch((error) => {
-          notifications.toasts.addError(error, {
-            title: i18n.translate('xpack.ml.useResolver.errorTitle', {
-              defaultMessage: 'An error has occurred',
-            }),
-          });
+        .catch((rejectedValue) => {
+          if (rejectedValue instanceof Error) {
+            notifications.toasts.addError(rejectedValue, {
+              title: i18n.translate('xpack.ml.useResolver.errorTitle', {
+                defaultMessage: 'An error has occurred',
+              }),
+            });
+          }
         });
 
       return () => {
         mounted = false;
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [
+      licenseResolver,
+      mlLicenseInfo,
+      capabilitiesResolver,
+      notifications.toasts,
+      resolveCustomResolvers,
+      dataViews,
+      uiSettings,
+    ]
   );
 
   return { context, results };

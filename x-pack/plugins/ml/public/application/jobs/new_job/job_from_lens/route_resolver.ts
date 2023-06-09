@@ -22,7 +22,7 @@ import {
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 /**
- * TODO update route resovler to use Kibana context instead of the deps cache
+ * TODO update route resolver to use Kibana context instead of the deps cache
  */
 export async function resolver(
   lensSavedObjectId: string | undefined,

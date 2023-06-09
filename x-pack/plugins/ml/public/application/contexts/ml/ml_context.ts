@@ -16,6 +16,8 @@ export interface MlContextValue {
   dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
   kibanaVersion: string;
+
+  initialized: boolean;
 }
 
 export type SavedSearchQuery = object;

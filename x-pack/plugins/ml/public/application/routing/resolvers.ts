@@ -12,9 +12,11 @@ import { loadMlServerInfo } from '../services/ml_server_info';
 export interface Resolvers {
   [name: string]: () => Promise<any>;
 }
-export interface ResolverResults {
-  [name: string]: any;
-}
+export type ResolverResults =
+  | {
+      [name: string]: unknown;
+    }
+  | undefined;
 
 export const basicResolvers = (): Resolvers => ({
   getMlNodeCount,
