@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-export async function getLogsCount({
+export async function getHasLogs({
   dataset,
   namespace,
   esClient,
@@ -22,10 +22,10 @@ export async function getLogsCount({
       terminate_after: 1,
     });
     const total = hits.total as { value: number };
-    return total.value;
+    return total.value > 0;
   } catch (error) {
     if (error.statusCode === 404) {
-      return 0;
+      return false;
     }
     throw error;
   }

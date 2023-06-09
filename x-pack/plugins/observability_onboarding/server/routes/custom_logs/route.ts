@@ -15,7 +15,7 @@ import { saveObservabilityOnboardingState } from './save_observability_onboardin
 import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
-import { getLogsCount } from './get_logs_count';
+import { getHasLogs } from './get_has_logs';
 
 const ELASTIC_AGENT_VERSION = '8.8.0'; // This should be defined from a source with the latest public release
 
@@ -176,12 +176,12 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
       } = savedObservabilityOnboardingState;
       if (progress['ea-status'] === 'complete') {
         try {
-          const logsCount = await getLogsCount({
+          const hasLogs = await getHasLogs({
             dataset,
             namespace,
             esClient,
           });
-          if (logsCount > 0) {
+          if (hasLogs) {
             progress['logs-ingest'] = 'complete';
           } else {
             progress['logs-ingest'] = 'loading';
