@@ -6,7 +6,10 @@
  */
 
 import { NOTE_URL } from '../../../../common/constants';
-import type { NoteSavedObject, SavedNote } from '../../../../common/types/timeline/note';
+import type {
+  NoteSavedObject,
+  SavedObjectNote,
+} from '../../../../common/types/timeline/note/saved_object';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistNote = async ({
@@ -15,7 +18,7 @@ export const persistNote = async ({
   version,
   overrideOwner,
 }: {
-  note: SavedNote;
+  note: SavedObjectNote;
   noteId?: string | null;
   version?: string | null;
   overrideOwner?: boolean;

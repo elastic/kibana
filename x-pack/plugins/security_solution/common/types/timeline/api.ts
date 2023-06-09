@@ -24,8 +24,8 @@ import {
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
-import type { NoteResult } from './note';
-import { NoteSavedObjectToReturnRuntimeType } from './note';
+import type { NoteResult } from './note/api';
+import { SavedObjectNoteToReturnRuntimeType } from './note/saved_object';
 
 /*
  *  ColumnHeader Types
@@ -320,9 +320,9 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
     version: runtimeTypes.string,
   }),
   runtimeTypes.partial({
-    eventIdToNoteIds: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
+    eventIdToNoteIds: runtimeTypes.array(SavedObjectNoteToReturnRuntimeType),
     noteIds: runtimeTypes.array(runtimeTypes.string),
-    notes: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
+    notes: runtimeTypes.array(SavedObjectNoteToReturnRuntimeType),
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
     pinnedEventsSaveObject: runtimeTypes.array(PinnedEventToReturnSavedObjectRuntimeType),
   }),

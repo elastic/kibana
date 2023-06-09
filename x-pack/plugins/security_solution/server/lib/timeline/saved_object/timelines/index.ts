@@ -15,7 +15,7 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import type { NoteSavedObject } from '../../../../../common/types/timeline/note/saved_object';
 import type { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import type {
   AllTimelinesResponse,

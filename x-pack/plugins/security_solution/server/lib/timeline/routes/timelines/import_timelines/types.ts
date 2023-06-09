@@ -8,7 +8,7 @@ import type { BulkError } from '../../../../detection_engine/routes/utils';
 
 import type { SavedTimeline } from '../../../../../../common/types/timeline/api';
 import type { TimelineStatusActions } from '../../../utils/common';
-import type { NoteResult } from '../../../../../../common/types/timeline/note';
+import type { NoteResult } from '../../../../../../common/types/timeline/note/api';
 
 export type ImportedTimeline = SavedTimeline & {
   savedObjectId: string | null;

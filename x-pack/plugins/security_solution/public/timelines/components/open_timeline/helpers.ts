@@ -70,7 +70,7 @@ import {
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
 import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import type { NoteResult } from '../../../../common/types/timeline/note';
+import type { NoteResult } from '../../../../common/types/timeline/note/api';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 

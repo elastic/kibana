@@ -8,7 +8,7 @@
 import type { FrameworkRequest } from '../../../framework';
 import { persistNote } from './saved_object';
 import { getOverridableNote } from './get_overridable_note';
-import type { NoteResult } from '../../../../../common/types/timeline/note';
+import type { NoteResult } from '../../../../../common/types/timeline/note/api';
 
 export const persistNotes = async (
   frameworkRequest: FrameworkRequest,

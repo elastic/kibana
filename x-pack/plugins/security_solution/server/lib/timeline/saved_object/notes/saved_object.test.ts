@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import type { NoteSavedObject } from '../../../../../common/types/timeline/note/saved_object';
 
 import { pickSavedNote } from './saved_object';
 

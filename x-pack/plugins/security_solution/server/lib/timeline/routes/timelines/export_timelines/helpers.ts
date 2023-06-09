@@ -13,7 +13,7 @@ import type {
   ExportedNotes,
   ExportTimelineNotFoundError,
 } from '../../../../../../common/types/timeline/api';
-import type { NoteSavedObject } from '../../../../../../common/types/timeline/note';
+import type { NoteSavedObject } from '../../../../../../common/types/timeline/note/saved_object';
 import type { PinnedEventSavedObject } from '../../../../../../common/types/timeline/pinned_event';
 
 import type { FrameworkRequest } from '../../../../framework';

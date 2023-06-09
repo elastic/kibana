@@ -9,7 +9,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 import type { SavedTimeline } from '../../../../../common/types/timeline/api';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import type { NoteSavedObject } from '../../../../../common/types/timeline/note/saved_object';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 
