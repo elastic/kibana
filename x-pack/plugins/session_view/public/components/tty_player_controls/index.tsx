@@ -16,7 +16,7 @@ import {
   EuiRangeProps,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
-import { ProcessStartMarker, ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessStartMarker, ProcessEvent } from '../../../common';
 import { useStyles } from './styles';
 import {
   TTY_END,

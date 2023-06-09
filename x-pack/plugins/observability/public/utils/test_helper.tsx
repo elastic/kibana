@@ -37,6 +37,9 @@ const defaultConfig: ConfigSchema = {
       uptime: { enabled: false },
     },
   },
+  coPilot: {
+    enabled: false,
+  },
 };
 
 const queryClient = new QueryClient({

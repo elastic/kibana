@@ -23,6 +23,7 @@ export interface MonitorFilterState {
   projects?: string[];
   schedules?: string[];
   locations?: string[];
+  monitorQueryIds?: string[]; // Monitor Query IDs
 }
 
 export interface MonitorListPageState extends MonitorFilterState {
