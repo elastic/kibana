@@ -106,6 +106,9 @@ export async function getFullAgentPolicy(
       packageInfoCache,
       getOutputIdForAgentPolicy(dataOutput)
     ),
+    secret_references: (agentPolicy?.package_policies || []).flatMap(
+      (policy) => policy.secret_references || []
+    ),
     revision: agentPolicy.revision,
     agent: {
       download: {

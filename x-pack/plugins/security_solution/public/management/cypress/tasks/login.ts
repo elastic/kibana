@@ -206,14 +206,10 @@ export const loginWithRole = async (role: ROLE) => {
 
 export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   createCustomRoleAndUser(role, rolePrivileges);
-  const theUrl = Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: Cypress.env(ELASTICSEARCH_PASSWORD),
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
-  } as UrlObject);
+  const theUrl = new URL(String(Cypress.config().baseUrl));
+  theUrl.username = role;
+  theUrl.password = Cypress.env(ELASTICSEARCH_PASSWORD);
+
   cy.log(`origin: ${theUrl}`);
   request({
     body: {

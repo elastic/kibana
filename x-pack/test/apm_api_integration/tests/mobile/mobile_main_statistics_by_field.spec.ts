@@ -6,9 +6,125 @@
  */
 
 import expect from '@kbn/expect';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { generateMobileData } from './generate_mobile_data';
+
+const GALAXY_DURATION = 500;
+const HUAWEI_DURATION = 20;
+const TRANSACTIONS_COUNT = 3;
+const SERVICE_VERSIONS = ['1.0', '2.0'];
+const OS_VERSIONS = ['10', '11'];
+// we generate 3 transactions per each mobile device
+// timerange 15min, interval 5m, rate 1
+function calculateLatency(duration: number) {
+  return ((duration * TRANSACTIONS_COUNT) / TRANSACTIONS_COUNT) * 1000; // convert to microseconds
+}
+
+function calculateThroughput({ start, end }: { start: number; end: number }) {
+  const durationAsMinutes = (end - start) / 1000 / 60;
+  return TRANSACTIONS_COUNT / durationAsMinutes;
+}
+
+async function generateData({
+  start,
+  end,
+  synthtraceEsClient,
+}: {
+  start: number;
+  end: number;
+  synthtraceEsClient: ApmSynthtraceEsClient;
+}) {
+  const galaxy10 = apm
+    .mobileApp({
+      name: 'synth-android',
+      environment: 'production',
+      agentName: 'android/java',
+    })
+    .mobileDevice({ serviceVersion: SERVICE_VERSIONS[0] })
+    .deviceInfo({
+      manufacturer: 'Samsung',
+      modelIdentifier: 'SM-G973F',
+      modelName: 'Galaxy S10',
+    })
+    .osInfo({
+      osType: 'android',
+      osVersion: OS_VERSIONS[0],
+      osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
+      runtimeVersion: '2.1.0',
+    })
+    .setGeoInfo({
+      clientIp: '223.72.43.22',
+      cityName: 'Beijing',
+      continentName: 'Asia',
+      countryIsoCode: 'CN',
+      countryName: 'China',
+      regionIsoCode: 'CN-BJ',
+      regionName: 'Beijing',
+      location: { coordinates: [116.3861, 39.9143], type: 'Point' },
+    })
+    .setNetworkConnection({ type: 'wifi' });
+
+  const huaweiP2 = apm
+    .mobileApp({
+      name: 'synth-android',
+      environment: 'production',
+      agentName: 'android/java',
+    })
+    .mobileDevice({ serviceVersion: SERVICE_VERSIONS[1] })
+    .deviceInfo({
+      manufacturer: 'Huawei',
+      modelIdentifier: 'HUAWEI P2-0000',
+      modelName: 'HuaweiP2',
+    })
+    .osInfo({
+      osType: 'android',
+      osVersion: OS_VERSIONS[1],
+      osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
+      runtimeVersion: '2.1.0',
+    })
+    .setGeoInfo({
+      clientIp: '20.24.184.101',
+      cityName: 'Singapore',
+      continentName: 'Asia',
+      countryIsoCode: 'SG',
+      countryName: 'Singapore',
+      location: { coordinates: [103.8554, 1.3036], type: 'Point' },
+    })
+    .setNetworkConnection({
+      type: 'cell',
+      subType: 'edge',
+      carrierName: 'Osaka Gas Business Create Co., Ltd.',
+      carrierMNC: '17',
+      carrierICC: 'JP',
+      carrierMCC: '440',
+    });
+
+  return await synthtraceEsClient.index([
+    timerange(start, end)
+      .interval('5m')
+      .rate(1)
+      .generator((timestamp) => {
+        galaxy10.startNewSession();
+        huaweiP2.startNewSession();
+        return [
+          galaxy10
+            .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
+            .timestamp(timestamp)
+            .duration(500)
+            .success(),
+          huaweiP2
+            .transaction('Start View - View Appearing', 'huaweiP2 Activity')
+            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
+            .timestamp(timestamp)
+            .duration(20)
+            .success(),
+        ];
+      }),
+  ]);
+}
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
@@ -64,7 +180,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Mobile main statistics', { config: 'basic', archives: [] }, () => {
     before(async () => {
-      await generateMobileData({
+      await generateData({
         synthtraceEsClient,
         start,
         end,
@@ -74,6 +190,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     after(() => synthtraceEsClient.clean());
 
     describe('when data is loaded', () => {
+      const huaweiLatency = calculateLatency(HUAWEI_DURATION);
+      const galaxyLatency = calculateLatency(GALAXY_DURATION);
+      const huaweiThroughput = calculateThroughput({ start, end });
+      const galaxyThroughput = calculateThroughput({ start, end });
+
       it('returns the correct data for App version', async () => {
         const response = await getMobileMainStatisticsByField({
           serviceName: 'synth-android',
@@ -82,16 +203,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql(['1.1', '1.2', '2.3']);
+        expect(fieldValues).to.be.eql(SERVICE_VERSIONS);
 
         const latencyValues = response.mainStatistics.map((item) => item.latency);
 
-        expect(latencyValues).to.be.eql([172000, 20000, 20000]);
+        expect(latencyValues).to.be.eql([galaxyLatency, huaweiLatency]);
 
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
-        expect(throughputValues).to.be.eql([
-          1.0000011111123457, 0.20000022222246913, 0.20000022222246913,
-        ]);
+        expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
       });
       it('returns the correct data for Os version', async () => {
         const response = await getMobileMainStatisticsByField({
@@ -102,14 +221,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql(['10']);
+        expect(fieldValues).to.be.eql(OS_VERSIONS);
 
         const latencyValues = response.mainStatistics.map((item) => item.latency);
 
-        expect(latencyValues).to.be.eql([128571.42857142857]);
+        expect(latencyValues).to.be.eql([galaxyLatency, huaweiLatency]);
 
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
-        expect(throughputValues).to.be.eql([1.4000015555572838]);
+        expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
       });
       it('returns the correct data for Devices', async () => {
         const response = await getMobileMainStatisticsByField({
@@ -119,24 +238,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql([
-          'HUAWEI P2-0000',
-          'SM-G930F',
-          'SM-G973F',
-          'Pixel 7 Pro',
-          'Pixel 8',
-          'SM-G930F',
-        ]);
+        expect(fieldValues).to.be.eql(['HUAWEI P2-0000', 'SM-G973F']);
 
         const latencyValues = response.mainStatistics.map((item) => item.latency);
 
-        expect(latencyValues).to.be.eql([400000, 20000, 20000, 20000, 20000, 20000]);
+        expect(latencyValues).to.be.eql([huaweiLatency, galaxyLatency]);
 
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
-        expect(throughputValues).to.be.eql([
-          0.40000044444493826, 0.20000022222246913, 0.20000022222246913, 0.20000022222246913,
-          0.20000022222246913, 0.20000022222246913,
-        ]);
+        expect(throughputValues).to.be.eql([huaweiThroughput, galaxyThroughput]);
       });
     });
   });

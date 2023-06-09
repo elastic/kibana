@@ -50,15 +50,49 @@ export const getActionListMock = async ({
       .map(() => uuidv4());
 
     const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
+      const command = (commands?.[0] ?? 'isolate') as ResponseActionsApiCommandNames;
       return endpointActionGenerator.generateActionDetails({
         agents: [id],
-        command: (commands?.[0] ?? 'isolate') as ResponseActionsApiCommandNames,
+        command,
         id: actionId,
         isCompleted,
         isExpired,
         wasSuccessful,
         status,
         completedAt: isExpired ? undefined : new Date().toISOString(),
+        hosts: {
+          ...(command === 'upload'
+            ? {
+                [id]: { name: 'host name' },
+              }
+            : {}),
+        },
+        agentState: {
+          ...(command === 'upload'
+            ? {
+                [id]: {
+                  errors: undefined,
+                  wasSuccessful: true,
+                  isCompleted: true,
+                  completedAt: '2023-05-10T20:09:25.824Z',
+                },
+              }
+            : {}),
+        },
+        outputs: {
+          ...(command === 'upload'
+            ? {
+                [id]: {
+                  type: 'json',
+                  content: {
+                    code: 'ra_upload_file-success',
+                    path: 'some/path/to/file',
+                    disk_free_space: 123445,
+                  },
+                },
+              }
+            : {}),
+        },
       });
     });
     return actionDetails;

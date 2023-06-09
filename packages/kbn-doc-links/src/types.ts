@@ -117,12 +117,14 @@ export interface DocLinks {
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsAzureBlobStorage: string;
+    readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
+    readonly connectorsNative: string;
     readonly connectorsNetworkDrive: string;
     readonly connectorsOracle: string;
     readonly connectorsPostgreSQL: string;
@@ -136,6 +138,7 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly elser: string;
     readonly engines: string;
+    readonly indexApi: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
@@ -390,6 +393,7 @@ export interface DocLinks {
     indexAction: string;
     esQuery: string;
     indexThreshold: string;
+    maintenanceWindows: string;
     pagerDutyAction: string;
     preconfiguredConnectors: string;
     preconfiguredAlertHistoryConnector: string;
@@ -531,5 +535,8 @@ export interface DocLinks {
   };
   readonly synthetics: {
     readonly featureRoles: string;
+  };
+  readonly telemetry: {
+    readonly settings: string;
   };
 }

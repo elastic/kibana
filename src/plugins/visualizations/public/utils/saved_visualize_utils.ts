@@ -80,6 +80,7 @@ export function mapHitSource(
     image?: BaseVisType['image'];
     typeTitle?: BaseVisType['title'];
     error?: string;
+    readOnly?: boolean;
   } = {
     id,
     references,
@@ -108,6 +109,7 @@ export function mapHitSource(
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
   newAttributes.editUrl = `/edit/${id}`;
+  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
 
   return newAttributes;
 }

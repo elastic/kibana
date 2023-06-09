@@ -15,8 +15,11 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 import { AGENT_POLICY_INDEX } from '../../common';
-import type { PackagePolicySOAttributes, OutputSOAttributes } from '../../common/types';
-import type { AgentPolicySOAttributes } from '../types';
+import type {
+  AgentPolicySOAttributes,
+  PackagePolicySOAttributes,
+  OutputSOAttributes,
+} from '../types';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
 import {

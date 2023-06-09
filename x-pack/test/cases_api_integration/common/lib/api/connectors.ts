@@ -11,7 +11,7 @@ import http from 'http';
 import type SuperTest from 'supertest';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  CasesConfigureResponse,
+  Configuration,
   CaseConnector,
   ConnectorTypes,
   CasePostRequest,
@@ -221,7 +221,7 @@ export const createCaseWithConnector = async ({
 }): Promise<{
   postedCase: Case;
   connector: CreateConnectorResponse;
-  configuration: CasesConfigureResponse;
+  configuration: Configuration;
 }> => {
   const connector = await createConnector({
     supertest,

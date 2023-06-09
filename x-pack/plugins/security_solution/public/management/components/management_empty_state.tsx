@@ -21,7 +21,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiLink,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -128,7 +128,7 @@ const PolicyEmptyState = React.memo<{
 
             <EuiSpacer size="m" />
 
-            {authzLoading && <EuiLoadingContent lines={1} />}
+            {authzLoading && <EuiSkeletonText lines={1} />}
 
             {!authzLoading && canAccessFleet && (
               <>

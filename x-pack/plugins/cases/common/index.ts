@@ -42,6 +42,8 @@ export {
 export {
   CommentType,
   CaseStatuses,
+  CaseSeverity,
+  ConnectorTypes,
   getCasesFromAlertsUrl,
   throwErrors,
   ExternalReferenceStorageType,

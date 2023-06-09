@@ -17,7 +17,7 @@ import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
@@ -31,6 +31,7 @@ import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import {
+  InspectMonitorPortalNode,
   MonitorDetailsLinkPortalNode,
   MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
@@ -97,6 +98,7 @@ const getRoutes = (
             defaultMessage="Create Monitor"
           />
         ),
+        rightSideItems: [<OutPortal node={InspectMonitorPortalNode} />],
         children: (
           <FormattedMessage
             id="xpack.synthetics.addMonitor.pageHeader.description"
@@ -106,7 +108,7 @@ const getRoutes = (
                 <EuiLink
                   data-test-subj="syntheticsGetRoutesDocumentationLink"
                   target="_blank"
-                  href="#"
+                  href="https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html"
                 >
                   <FormattedMessage
                     id="xpack.synthetics.addMonitor.pageHeader.docsLink"
@@ -135,7 +137,10 @@ const getRoutes = (
             defaultMessage="Edit Monitor"
           />
         ),
-        rightSideItems: [<OutPortal node={MonitorTypePortalNode} />],
+        rightSideItems: [
+          <OutPortal node={MonitorTypePortalNode} />,
+          <OutPortal node={InspectMonitorPortalNode} />,
+        ],
         breadcrumbs: [
           {
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,

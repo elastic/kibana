@@ -6,6 +6,7 @@
  */
 
 import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+import type { PolicySecretReference } from './secret';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -91,19 +92,19 @@ export interface UpdatePackagePolicy extends NewPackagePolicy {
   version?: string;
 }
 
+// SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
   inputs: PackagePolicyInput[];
   version?: string;
   agents?: number;
   revision: number;
+  secret_references?: PolicySecretReference[];
   updated_at: string;
   updated_by: string;
   created_at: string;
   created_by: string;
 }
-
-export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
 
 export type DryRunPackagePolicy = NewPackagePolicy & {
   errors?: Array<{ key: string | undefined; message: string }>;

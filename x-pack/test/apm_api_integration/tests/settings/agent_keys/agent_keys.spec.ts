@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function createAgentKey(apiClient: ApmApiSupertest, privileges = allApplicationPrivileges) {
     return await apiClient({
-      endpoint: 'POST /api/apm/agent_keys',
+      endpoint: 'POST /api/apm/agent_keys 2023-05-22',
       params: {
         body: {
           name: agentKeyName,
@@ -54,8 +54,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const error = await expectToReject<ApmApiError>(() =>
             createAgentKey(apmApiClient.writeUser)
           );
-          expect(error.res.status).to.be(500);
+          expect(error.res.status).to.be(403);
           expect(error.res.body.message).contain('is missing the following requested privilege');
+          expect(error.res.body.attributes).to.eql({
+            _inspect: [],
+            data: {
+              missingPrivileges: allApplicationPrivileges,
+            },
+          });
         });
 
         it('should return an error when invalidating an agent key', async () => {
@@ -79,7 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const error = await expectToReject<ApmApiError>(() =>
               createAgentKey(apmApiClient.manageOwnAgentKeysUser, [privilege])
             );
-            expect(error.res.status).to.be(500);
+            expect(error.res.status).to.be(403);
             expect(error.res.body.message).contain('is missing the following requested privilege');
           });
         });

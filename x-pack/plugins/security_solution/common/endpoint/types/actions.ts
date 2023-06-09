@@ -133,6 +133,15 @@ export interface LogsEndpointAction {
   };
 }
 
+export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
+  EndpointActions: EndpointActionFields &
+    ActionRequestFields & {
+      data: EndpointActionData & {
+        hosts: Record<string, { name: string }>;
+      };
+    };
+}
+
 /**
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
@@ -189,6 +198,7 @@ export interface EndpointActionData<
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
   alert_id?: string[];
+  hosts?: Record<string, { name: string }>;
 }
 
 export interface FleetActionResponseData {
@@ -477,12 +487,10 @@ export interface ActionFileInfoApiResponse {
  * the action's parameters via the API route handler
  */
 export type ResponseActionUploadParameters = UploadActionApiRequestBody['parameters'] & {
-  file: {
-    sha256: string;
-    size: number;
-    file_name: string;
-    file_id: string;
-  };
+  file_sha256: string;
+  file_size: number;
+  file_name: string;
+  file_id: string;
 };
 
 export interface ResponseActionUploadOutputContent {

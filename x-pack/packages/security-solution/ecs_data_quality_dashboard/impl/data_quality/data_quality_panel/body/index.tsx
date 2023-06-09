@@ -40,6 +40,7 @@ interface Props {
     groupByField1: string;
   };
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -60,6 +61,7 @@ const BodyComponent: React.FC<Props> = ({
   formatNumber,
   getGroupByFieldsOnClick,
   ilmPhases,
+  isAssistantEnabled,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
@@ -112,6 +114,7 @@ const BodyComponent: React.FC<Props> = ({
           formatNumber={formatNumber}
           getGroupByFieldsOnClick={getGroupByFieldsOnClick}
           ilmPhases={ilmPhases}
+          isAssistantEnabled={isAssistantEnabled}
           openCreateCaseFlyout={openCreateCaseFlyout}
           patterns={patterns}
           patternIndexNames={patternIndexNames}

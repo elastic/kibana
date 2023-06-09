@@ -703,7 +703,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content_' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,
@@ -739,7 +739,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content-' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,

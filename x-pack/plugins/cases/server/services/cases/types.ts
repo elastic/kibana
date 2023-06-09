@@ -34,7 +34,6 @@ export interface DeleteCaseArgs extends GetCaseArgs, IndexRefresh {}
 
 export interface GetCasesArgs {
   caseIds: string[];
-  fields?: string[];
 }
 
 export interface FindCommentsArgs {

@@ -8,7 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
+import { createBrowserHistory } from 'history';
+
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
@@ -27,7 +28,9 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
+import type { CasesPluginSetup, CasesPluginStart, CasesUiSetup, CasesUiStart } from './types';
 import { registerInternalAttachments } from './internal_attachments';
+import { registerActions } from './components/visualizations/actions';
 
 /**
  * @public
@@ -56,7 +59,6 @@ export class CasesUiPlugin
     registerInternalAttachments(externalReferenceAttachmentTypeRegistry);
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
-
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: APP_ID,
@@ -124,6 +126,18 @@ export class CasesUiPlugin
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       getFilesClient: plugins.files.filesClientFactory.asScoped,
+    });
+
+    registerActions({
+      core,
+      plugins,
+      caseContextProps: {
+        externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+        getFilesClient: plugins.files.filesClientFactory.asScoped,
+      },
+      history: createBrowserHistory(),
+      storage: this.storage,
     });
 
     return {

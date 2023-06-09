@@ -12,6 +12,7 @@ import {
   RANGE_SLIDER_CONTROL,
   ControlWidth,
 } from '@kbn/controls-plugin/common';
+import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/types';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 
@@ -19,12 +20,13 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 
 const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
-  default: 'Please select a field',
+  default: 'No field selected yet',
   [OPTIONS_LIST_CONTROL]: 'Options list',
   [RANGE_SLIDER_CONTROL]: 'Range slider',
 };
 
 interface OptionsListAdditionalSettings {
+  searchTechnique?: OptionsListSearchTechnique;
   defaultSortType?: OptionsListSortingType;
   ignoreTimeout?: boolean;
   allowMultiple?: boolean;
@@ -345,12 +347,21 @@ export class DashboardPageControls extends FtrService {
   public async optionsListSetAdditionalSettings({
     ignoreTimeout,
     allowMultiple,
+    searchTechnique,
   }: OptionsListAdditionalSettings) {
     const getSettingTestSubject = (setting: string) =>
       `optionsListControl__${setting}AdditionalSetting`;
 
     if (allowMultiple) await this.testSubjects.click(getSettingTestSubject('allowMultiple'));
     if (ignoreTimeout) await this.testSubjects.click(getSettingTestSubject('runPastTimeout'));
+    if (searchTechnique) {
+      this.log.debug(`clicking search technique: ${searchTechnique}`);
+      await this.find.clickByCssSelector(
+        `[data-test-subj=${getSettingTestSubject(
+          `${searchTechnique}SearchOption`
+        )}] label[for="${searchTechnique}"]`
+      );
+    }
   }
 
   public async optionsListGetSelectionsString(controlId: string) {
@@ -559,10 +570,10 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async controlEditorCancel(confirm?: boolean) {
+  public async controlEditorCancel() {
     this.log.debug(`Canceling changes in control editor`);
     await this.testSubjects.click(`control-editor-cancel`);
-    if (confirm) {
+    if (await this.testSubjects.exists('confirmModalTitleText')) {
       await this.common.clickConfirmOnModal();
     }
   }
@@ -605,7 +616,7 @@ export class DashboardPageControls extends FtrService {
     }
     const dataViewName = (await this.testSubjects.find('open-data-view-picker')).getVisibleText();
     if (openAndCloseFlyout) {
-      await this.controlEditorCancel(true);
+      await this.controlEditorCancel();
     }
     return dataViewName;
   }

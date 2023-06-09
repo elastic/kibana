@@ -13,6 +13,7 @@ import {
   INDICATOR_APM_AVAILABILITY,
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
+  INDICATOR_CUSTOM_METRIC,
 } from '../../utils/slo/labels';
 
 export const SLI_OPTIONS: Array<{
@@ -22,6 +23,10 @@ export const SLI_OPTIONS: Array<{
   {
     value: 'sli.kql.custom',
     text: INDICATOR_CUSTOM_KQL,
+  },
+  {
+    value: 'sli.metric.custom',
+    text: INDICATOR_CUSTOM_METRIC,
   },
   {
     value: 'sli.apm.transactionDuration',
@@ -68,7 +73,32 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   timeWindow: {
     duration:
       TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
-    isRolling: true,
+    type: 'rolling',
+  },
+  tags: [],
+  budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
+  objective: {
+    target: 99,
+  },
+};
+
+export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
+  name: '',
+  description: '',
+  indicator: {
+    type: 'sli.metric.custom',
+    params: {
+      index: '',
+      filter: '',
+      good: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
+      total: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
+      timestampField: '',
+    },
+  },
+  timeWindow: {
+    duration:
+      TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
+    type: 'rolling',
   },
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,

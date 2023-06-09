@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/api';
-import { CommentRequestRt, throwErrors } from '../../../common/api';
+import { CommentRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -31,10 +26,6 @@ import { validateRegisteredAttachments } from './validators';
  */
 export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
   const { comment, caseId } = addArgs;
-  const query = pipe(
-    CommentRequestRt.decode(comment),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
 
   const {
     logger,
@@ -43,8 +34,11 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     externalReferenceAttachmentTypeRegistry,
   } = clientArgs;
 
-  decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
   try {
+    const query = decodeWithExcessOrThrow(CommentRequestRt)(comment);
+
+    decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
+
     const savedObjectID = SavedObjectsUtils.generateId();
 
     await authorization.ensureAuthorized({

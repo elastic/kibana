@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import moment from 'moment';
 import { Ping } from '../../../../../../common/runtime_types';
 import { MonitorFailedTests } from '../../monitor_details/monitor_errors/failed_tests';
@@ -15,7 +15,7 @@ export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
   const location = useSelectedLocation();
 
   if (!lastTestRun) {
-    return <EuiLoadingContent lines={3} />;
+    return <EuiSkeletonText lines={3} />;
   }
   const diff = moment(lastTestRun.monitor.timespan?.lt).diff(
     moment(lastTestRun.monitor.timespan?.gte),

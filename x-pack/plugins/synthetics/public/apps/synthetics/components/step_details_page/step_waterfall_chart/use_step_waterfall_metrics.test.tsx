@@ -12,7 +12,7 @@ import {
   BROWSER_TRACE_TYPE,
   useStepWaterfallMetrics,
 } from './use_step_waterfall_metrics';
-import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';
+import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 describe('useStepWaterfallMetrics', () => {

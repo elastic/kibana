@@ -9,7 +9,15 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-type TransformRowActionName = 'Clone' | 'Delete' | 'Discover' | 'Edit' | 'Reset' | 'Start' | 'Stop';
+type TransformRowActionName =
+  | 'Clone'
+  | 'Delete'
+  | 'Discover'
+  | 'Edit'
+  | 'Reset'
+  | 'Start'
+  | 'Stop'
+  | 'Reauthorize';
 
 export function TransformTableProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
@@ -464,6 +472,21 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    public async assertTransformRowActionMissing(
+      transformId: string,
+      action: TransformRowActionName
+    ) {
+      const selector = `transformAction${action}`;
+      await retry.tryForTime(60 * 1000, async () => {
+        await this.refreshTransformList();
+
+        await this.ensureTransformActionsMenuOpen(transformId);
+
+        await testSubjects.missingOrFail(selector, { timeout: 1000 });
+        await this.ensureTransformActionsMenuClosed();
+      });
+    }
+
     public async assertTransformRowActionEnabled(
       transformId: string,
       action: TransformRowActionName,
@@ -516,6 +539,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail('transformDeleteModal', { timeout: 60 * 1000 });
     }
 
+    public async assertTransformReauthorizeModalExists() {
+      await testSubjects.existOrFail('transformReauthorizeModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTransformReauthorizeModalNotExists() {
+      await testSubjects.missingOrFail('transformReauthorizeModal', { timeout: 60 * 1000 });
+    }
+
     public async assertTransformResetModalExists() {
       await testSubjects.existOrFail('transformResetModal', { timeout: 60 * 1000 });
     }
@@ -561,6 +592,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           // Checks that the tranform was deleted
           await this.filterWithSearchString(transformId, 0);
         }
+      });
+    }
+
+    public async confirmReauthorizeTransform() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertTransformReauthorizeModalExists();
+        await testSubjects.click('transformReauthorizeModal > confirmModalConfirmButton');
+        await this.assertTransformReauthorizeModalNotExists();
       });
     }
 

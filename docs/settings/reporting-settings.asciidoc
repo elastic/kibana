@@ -4,8 +4,11 @@
 ++++
 <titleabbrev>Reporting settings</titleabbrev>
 ++++
-:keywords: administrator, reference, setup, reporting
-:description: A reference of the reporting settings administrators configure in kibana.yml.
+
+:frontmatter-description: A reference of the reporting settings administrators configure in kibana.yml.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [reference] 
+:frontmatter-tags-user-goals: [configure]
 
 You can configure `xpack.reporting` settings in your `kibana.yml` to:
 

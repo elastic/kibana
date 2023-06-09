@@ -17,8 +17,7 @@ import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
   function executeJobFactoryFn(reporting, parentLogger) {
-    const config = reporting.getConfig();
-    const encryptionKey = config.get('encryptionKey');
+    const { encryptionKey } = reporting.getConfig();
 
     return async function runTask(jobId, job, cancellationToken, stream) {
       const jobLogger = parentLogger.get(`execute-job:${jobId}`);
@@ -28,15 +27,30 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
+        mergeMap(async (headers) => {
+          const fakeRequest = reporting.getFakeRequest(headers, job.spaceId, jobLogger);
+          const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest);
+          return getCustomLogo(uiSettingsClient, headers);
+        }),
         mergeMap(({ headers, logo }) => {
-          const urls = getFullUrls(config, job);
+          const urls = getFullUrls(reporting.getServerInfo(), reporting.getConfig(), job);
 
           const { browserTimezone, layout, title } = job;
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-          return generatePdfObservable(reporting, {
+          //  make a new function that will call reporting.getScreenshots
+          const snapshotFn = () =>
+            reporting.getScreenshots({
+              format: 'pdf',
+              title,
+              logo,
+              urls,
+              browserTimezone,
+              headers,
+              layout,
+            });
+          return generatePdfObservable(snapshotFn, {
             format: 'pdf',
             title,
             logo,

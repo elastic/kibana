@@ -64,7 +64,7 @@ export const LogsTabContent = () => {
           <LogsSearchBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogsLinkToStream startTimestamp={from} endTimestamp={to} query={logsLinkToStreamQuery} />
+          <LogsLinkToStream startTime={from} endTime={to} query={logsLinkToStreamQuery} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

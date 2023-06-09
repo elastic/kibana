@@ -317,6 +317,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
           },
           {
@@ -342,14 +350,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
           },
           {
             "plugin": "securitySolution",
@@ -753,6 +753,14 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
           },
@@ -767,14 +775,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
           },
           {
             "plugin": "securitySolution",
@@ -809,38 +809,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
           },
@@ -867,6 +835,30 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/api_client.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
           },
           {
             "plugin": "securitySolution",
@@ -874,6 +866,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
           },
           {
@@ -889,12 +889,12 @@
             "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
             "plugin": "lists",
@@ -1077,6 +1077,14 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
           },
@@ -1091,14 +1099,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
           },
           {
             "plugin": "securitySolution",

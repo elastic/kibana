@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 const idSpaceWithMl = 'space_with_ml';
@@ -24,9 +24,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(user: USER, space?: string): Promise<MlCapabilitiesResponse> {
     const { body, status } = await supertest
-      .get(`${space ? `/s/${space}` : ''}/api/ml/ml_capabilities`)
+      .get(`${space ? `/s/${space}` : ''}/internal/ml/ml_capabilities`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(200, status, body);
 
     return body;

@@ -17,6 +17,7 @@ import type {
   VersionedRoute,
   VersionedRouteConfig,
   IKibanaResponse,
+  RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
@@ -61,6 +62,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   private isPublic: boolean;
+  private isInternal: boolean;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
@@ -68,14 +70,22 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly options: VersionedRouteConfig<Method>
   ) {
     this.isPublic = this.options.access === 'public';
+    this.isInternal = !this.isPublic;
     this.router.router[this.method](
       {
         path: this.path,
         validate: passThroughValidation,
-        options: this.options,
+        options: this.getRouteConfigOptions(),
       },
       this.requestHandler
     );
+  }
+
+  private getRouteConfigOptions(): RouteConfigOptions<Method> {
+    return {
+      access: this.options.access,
+      ...this.options.options,
+    };
   }
 
   /** This method assumes that one or more versions handlers are registered  */
@@ -83,11 +93,8 @@ export class CoreVersionedRoute implements VersionedRoute {
     return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
   }
 
-  private getAvailableVersionsMessage(): string {
-    const versions = [...this.handlers.keys()];
-    return `Available versions are: ${
-      versions.length ? '[' + [...versions].join(', ') + ']' : '<none>'
-    }`;
+  private versionsToString(): string {
+    return this.handlers.size ? '[' + [...this.handlers.keys()].join(', ') + ']' : '<none>';
   }
 
   private requestHandler = async (
@@ -101,6 +108,13 @@ export class CoreVersionedRoute implements VersionedRoute {
         body: `No handlers registered for [${this.method}] [${this.path}].`,
       });
     }
+
+    if (!this.hasVersion(req) && (this.isInternal || this.router.isDev)) {
+      return res.badRequest({
+        body: `Please specify a version. Available versions: ${this.versionsToString()}`,
+      });
+    }
+
     const version = this.getVersion(req);
 
     const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
@@ -113,7 +127,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       return res.badRequest({
         body: `No version "${version}" available for [${this.method}] [${
           this.path
-        }]. ${this.getAvailableVersionsMessage()}`,
+        }]. Available versions are: ${this.versionsToString()}`,
       });
     }
 
@@ -170,6 +184,10 @@ export class CoreVersionedRoute implements VersionedRoute {
       response
     );
   };
+
+  private hasVersion(request: KibanaRequest): boolean {
+    return ELASTIC_HTTP_VERSION_HEADER in request.headers;
+  }
 
   private getVersion(request: KibanaRequest): ApiVersion {
     const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];

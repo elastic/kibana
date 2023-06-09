@@ -29,7 +29,7 @@ export const useSendUploadEndpointRequest = (
       formData.append('file', file, file.name);
 
       for (const [key, value] of Object.entries(payload)) {
-        formData.append(key, JSON.stringify(value));
+        formData.append(key, typeof value !== 'string' ? JSON.stringify(value) : value);
       }
 
       return http.post<ResponseActionApiResponse>(UPLOAD_ROUTE, {

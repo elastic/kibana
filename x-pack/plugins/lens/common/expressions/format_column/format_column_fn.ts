@@ -33,7 +33,10 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
               id: supportedFormats[format].formatId,
-              params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
+              params: {
+                pattern: supportedFormats[format].decimalsToPattern(decimals),
+                formatOverride: true,
+              },
             };
             return withParams(col, serializedFormat as Record<string, unknown>);
           } else if (format) {
@@ -56,6 +59,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         if (format && supportedFormats[format]) {
           const customParams = {
             pattern: supportedFormats[format].decimalsToPattern(decimals),
+            formatOverride: true,
           };
           // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"
           // property. Here the format is passed to this property to make it work properly
@@ -128,6 +132,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
             params: {
               ...col.meta.params,
               suffixString: suffix,
+              formatOverride: true,
             },
           },
         },

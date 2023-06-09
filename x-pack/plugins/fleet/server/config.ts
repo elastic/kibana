@@ -38,6 +38,9 @@ export const config: PluginConfigDescriptor = {
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
     },
+    internal: {
+      fleetServerStandalone: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -133,6 +136,7 @@ export const config: PluginConfigDescriptor = {
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+      testSecretsIndex: schema.maybe(schema.string()),
     }),
     packageVerification: schema.object({
       gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -162,6 +166,9 @@ export const config: PluginConfigDescriptor = {
     internal: schema.maybe(
       schema.object({
         disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+        fleetServerStandalone: schema.boolean({
           defaultValue: false,
         }),
       })

@@ -60,7 +60,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     render: (startDate: string, item: MaintenanceWindowFindResponse) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY HH:mm A')}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY hh:mm A')}</EuiFlexItem>
           {item.events.length > 1 ? (
             <EuiFlexItem grow={false}>
               <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
@@ -75,7 +75,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'eventEndTime',
     name: i18n.TABLE_END_TIME,
     dataType: 'date',
-    render: (endDate: string) => formatDate(endDate, 'MM/DD/YY HH:mm A'),
+    render: (endDate: string) => formatDate(endDate, 'MM/DD/YY hh:mm A'),
   },
 ];
 

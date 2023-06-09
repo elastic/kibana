@@ -36,9 +36,6 @@ jest.mock('../../../hooks/use_license', () => {
     },
   };
 });
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn((feature: string) => feature === 'endpointRbacEnabled'),
-}));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useHttpMock = _useHttp as jest.Mock;
@@ -93,6 +90,13 @@ describe('When using useEndpointPrivileges hook', () => {
     rerender();
 
     expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
+  });
+
+  it('should return initial state when no user authz', async () => {
+    (useCurrentUser as jest.Mock).mockReturnValue({});
+
+    render();
+    expect(result.current).toEqual({ ...getEndpointPrivilegesInitialState(), loading: false });
   });
 
   it.each([

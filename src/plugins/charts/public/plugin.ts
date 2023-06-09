@@ -45,7 +45,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
   public setup(core: CoreSetup, dependencies: SetupDependencies): ChartsPluginSetup {
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
-    this.themeService.init(core.uiSettings);
+    this.themeService.init(core.theme);
     this.legacyColorsService.init(core.uiSettings);
     this.palettes = this.paletteService.setup(this.legacyColorsService);
 

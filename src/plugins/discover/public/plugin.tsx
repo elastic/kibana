@@ -26,7 +26,7 @@ import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
@@ -39,6 +39,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -193,6 +194,7 @@ export interface DiscoverStartPlugins {
   expressions: ExpressionsStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
 }
@@ -248,7 +250,7 @@ export class DiscoverPlugin
           <React.Suspense
             fallback={
               <DeferredSpinner>
-                <EuiLoadingContent />
+                <EuiSkeletonText />
               </DeferredSpinner>
             }
           >
@@ -262,22 +264,25 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView }) => (
-        <React.Suspense
-          fallback={
-            <DeferredSpinner>
-              <EuiLoadingContent />
-            </DeferredSpinner>
-          }
-        >
-          <SourceViewer
-            index={hit.raw._index}
-            id={hit.raw._id}
-            dataView={dataView}
-            hasLineNumbers
-          />
-        </React.Suspense>
-      ),
+      component: ({ hit, dataView, query, textBasedHits }) => {
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiSkeletonText />
+              </DeferredSpinner>
+            }
+          >
+            <SourceViewer
+              index={hit.raw._index}
+              id={hit.raw._id ?? hit.id}
+              dataView={dataView}
+              textBasedHits={textBasedHits}
+              hasLineNumbers
+            />
+          </React.Suspense>
+        );
+      },
     });
 
     const {

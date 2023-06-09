@@ -35,10 +35,12 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
 };
 
 const serializeModelVersion = (modelVersion: ModelVersionSummary): string => {
+  const schemas = [modelVersion.schemas.forwardCompatibility];
   return [
     modelVersion.version,
     modelVersion.changeTypes.join(','),
     modelVersion.hasTransformation,
+    schemas.join(','),
     ...modelVersion.newMappings,
   ].join('|');
 };

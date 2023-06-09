@@ -10,6 +10,7 @@ import type {
   FieldConfig,
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ConnectorTypeFields } from '../../common/api';
 import { ConnectorTypes } from '../../common/api';
 import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
@@ -64,6 +65,79 @@ export const getConnectorsFormValidators = ({
     },
   ],
 });
+
+/**
+ * Fields without a value need to be transformed to null.
+ * Passing undefined for a field to the backed will throw an error.
+ * Fo that reason, we need to convert empty fields to null.
+ */
+
+export const getConnectorsFormSerializer = <T extends { fields: ConnectorTypeFields['fields'] }>(
+  data: T
+): T => {
+  if (data.fields) {
+    const serializedFields = convertEmptyValuesToNull(data.fields);
+
+    return {
+      ...data,
+      fields: serializedFields as ConnectorTypeFields['fields'],
+    };
+  }
+
+  return data;
+};
+
+export const convertEmptyValuesToNull = <T>(fields: T | null | undefined): T | null => {
+  if (fields) {
+    return Object.entries(fields).reduce((acc, [key, value]) => {
+      return {
+        ...acc,
+        [key]: isEmptyValue(value) ? null : value,
+      };
+    }, {} as T);
+  }
+
+  return null;
+};
+
+/**
+ * We cannot use lodash isEmpty util function
+ * because it will return true for primitive values
+ * like boolean or numbers
+ */
+
+export const isEmptyValue = (value: unknown) =>
+  value === null ||
+  value === undefined ||
+  (typeof value === 'object' && Object.keys(value).length === 0) ||
+  (typeof value === 'string' && value.trim().length === 0);
+
+/**
+ * Form html elements do not support null values.
+ * For that reason, we need to convert null values to
+ * undefined which is supported.
+ */
+
+export const getConnectorsFormDeserializer = <T extends { fields: ConnectorTypeFields['fields'] }>(
+  data: T
+): T => {
+  if (data.fields) {
+    const deserializedFields = Object.entries(data.fields).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: value === null ? undefined : value,
+      }),
+      {}
+    );
+
+    return {
+      ...data,
+      fields: deserializedFields as ConnectorTypeFields['fields'],
+    };
+  }
+
+  return data;
+};
 
 export const getConnectorIcon = (
   triggersActionsUi: CasesPluginStart['triggersActionsUi'],

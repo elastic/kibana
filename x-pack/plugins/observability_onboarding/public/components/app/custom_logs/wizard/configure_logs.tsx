@@ -20,10 +20,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useState } from 'react';
 import { useWizard } from '.';
 import { OptionalFormRow } from '../../../shared/optional_form_row';
@@ -35,6 +36,9 @@ import {
 import { getFilename, replaceSpecialChars } from './get_filename';
 
 export function ConfigureLogs() {
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
   const { goToStep, goBack, getState, setState } = useWizard();
   const wizardState = getState();
   const [datasetName, setDatasetName] = useState(wizardState.datasetName);
@@ -196,13 +200,13 @@ export function ConfigureLogs() {
                 id="advancedSettingsAccordion"
                 css={{
                   '.euiAccordion__buttonContent': {
-                    color: euiThemeVars.euiColorPrimaryText,
-                    fontSize: euiThemeVars.euiFontSizeXS,
+                    color: euiTheme.colors.primaryText,
+                    fontSize: xsFontSize,
                   },
                   '.euiAccordion__iconButton svg': {
-                    stroke: euiThemeVars.euiButtonTypes.primary,
-                    width: euiThemeVars.euiSizeM,
-                    height: euiThemeVars.euiSizeM,
+                    stroke: euiTheme.colors.primary,
+                    width: euiTheme.size.m,
+                    height: euiTheme.size.m,
                   },
                 }}
                 buttonContent={i18n.translate(

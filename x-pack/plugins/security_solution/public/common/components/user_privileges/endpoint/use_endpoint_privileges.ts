@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { isEmpty } from 'lodash';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { checkArtifactHasData } from '../../../../management/services/exceptions_list/check_artifact_has_data';
 import { HostIsolationExceptionsApiClient } from '../../../../management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -21,7 +22,6 @@ import {
   getEndpointAuthzInitialState,
 } from '../../../../../common/endpoint/service/authz';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -48,9 +48,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
 
-  const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
-  const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
-
   const [checkHostIsolationExceptionsDone, setCheckHostIsolationExceptionsDone] =
     useState<boolean>(false);
   const [hasHostIsolationExceptionsItems, setHasHostIsolationExceptionsItems] =
@@ -61,12 +58,12 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading,
-      ...(!loading && fleetAuthz
+      ...(!loading && fleetAuthz && !isEmpty(user)
         ? calculateEndpointAuthz(
             licenseService,
             fleetAuthz,
             userRoles,
-            isEndpointRbacEnabled || isEndpointRbacV1Enabled,
+            true,
             hasHostIsolationExceptionsItems
           )
         : getEndpointAuthzInitialState()),
@@ -80,8 +77,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
     fleetAuthz,
     licenseService,
     userRoles,
-    isEndpointRbacEnabled,
-    isEndpointRbacV1Enabled,
     hasHostIsolationExceptionsItems,
   ]);
 

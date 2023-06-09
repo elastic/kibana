@@ -19,7 +19,7 @@ import {
   createRuleWithExceptionEntries,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getRuleForSignalTesting,
   getSignalsById,
   waitForRuleSuccess,
@@ -31,6 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('Rule exception operators for data type double', () => {
     before(async () => {
@@ -51,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
       await deleteListsIndex(supertest, log);
@@ -489,7 +490,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('working against string values in the data set', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/155122
+      describe.skip('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
           await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);

@@ -54,7 +54,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     keywords: ['postgresql', 'sql', 'database', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
-      defaultMessage: 'Postgresql',
+      defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
   },

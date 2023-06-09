@@ -422,6 +422,69 @@ describe('xy_suggestions', () => {
     ]);
   });
 
+  test('suggests mixed xy chart keeping original subType when switching from another x y chart with multiple layers', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      allowMixed: true,
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first', 'second'],
+      state: {
+        legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            xAccessor: 'date',
+            accessors: ['bytes'],
+            splitAccessor: undefined,
+          },
+          {
+            layerId: 'second',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            xAccessor: undefined,
+            accessors: [],
+            splitAccessor: undefined,
+          },
+        ],
+      },
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+      'line', // line + line = line
+      'mixed', // any other combination is mixed
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+    ]);
+    expect(suggestions.map(({ state }) => state.layers.map((l) => l.layerId))).toEqual([
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+    ]);
+  });
+
   test('suggests all basic x y chart with date on x', () => {
     (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({

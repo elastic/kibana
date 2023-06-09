@@ -122,7 +122,6 @@ async function mountComponent(
     state: { columns: [], query, hideChart: false, interval: 'auto' },
     stateContainer,
     setExpandedDoc: jest.fn(),
-    persistDataView: jest.fn(),
     updateDataViewList: jest.fn(),
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
@@ -160,17 +159,6 @@ describe('Discover component', () => {
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
-  }, 10000);
-
-  test('the saved search title h1 gains focus on navigate', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const component = await mountComponent(dataViewWithTimefieldMock, undefined, {
-      attachTo: container,
-    });
-    expect(
-      component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
-    ).toHaveFocus();
   }, 10000);
 
   describe('sidebar', () => {

@@ -19,6 +19,10 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/datemath",
     "@kbn/ui-theme",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/i18n-react",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",

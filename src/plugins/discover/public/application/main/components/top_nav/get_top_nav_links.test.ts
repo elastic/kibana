@@ -16,9 +16,6 @@ const services = {
     discover: {
       save: true,
     },
-    advancedSettings: {
-      save: true,
-    },
   },
 } as unknown as DiscoverServices;
 
@@ -32,18 +29,10 @@ test('getTopNavLinks result', () => {
     services,
     state,
     isPlainRecord: false,
-    persistDataView: jest.fn(),
     adHocDataViews: [],
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
       Object {
         "description": "New Search",
         "id": "new",
@@ -93,18 +82,10 @@ test('getTopNavLinks result for sql mode', () => {
     services,
     state,
     isPlainRecord: true,
-    persistDataView: jest.fn(),
     adHocDataViews: [],
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
       Object {
         "description": "New Search",
         "id": "new",

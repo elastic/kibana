@@ -165,6 +165,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
+  // filters kuery
   const kuery = useMemo(() => {
     return getKuery({
       search,
@@ -348,14 +349,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }, {} as { [k: string]: AgentPolicy });
   }, [agentPolicies]);
 
-  const isAgentSelectable = (agent: Agent) => {
-    if (!agent.active) return false;
-    if (!agent.policy_id) return true;
-
-    const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isHosted = agentPolicy?.is_managed === true;
-    return !isHosted;
-  };
+  const isAgentSelectable = useCallback(
+    (agent: Agent) => {
+      if (!agent.active) return false;
+      if (!agent.policy_id) return true;
+      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const isHosted = agentPolicy?.is_managed === true;
+      return !isHosted;
+    },
+    [agentPoliciesIndexedById]
+  );
 
   const onSelectionChange = (newAgents: Agent[]) => {
     setSelectedAgents(newAgents);

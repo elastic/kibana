@@ -38,20 +38,8 @@ get:
         type: string
       example: now-1d
     - $ref: '../components/parameters/owner.yaml'
-    - name: page
-      in: query
-      description: The page number to return.
-      schema:
-        type: integer
-        default: 1
-      example: 1
-    - name: perPage
-      in: query
-      description: The number of cases to return per page.
-      schema:
-        type: integer
-        default: 20
-      example: 20
+    - $ref: '../components/parameters/page_index.yaml'
+    - $ref: '../components/parameters/page_size.yaml'
     - name: reporters
       in: query
       description: Filters the returned cases by the user name of the reporter.
@@ -87,16 +75,7 @@ get:
           - updatedAt
         default: createdAt
       example: updatedAt
-    - name: sortOrder
-      in: query
-      description: Determines the sort order.
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-        default: desc
-      example: asc
+    - $ref: '../components/parameters/sort_order.yaml'
     - name: status
       in: query
       description: Filters the returned cases by state.

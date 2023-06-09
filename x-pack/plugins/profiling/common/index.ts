@@ -27,8 +27,6 @@ export function getRoutePaths() {
     TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
-    CacheExecutables: `${BASE_ROUTE_PATH}/cache/executables`,
-    CacheStackFrames: `${BASE_ROUTE_PATH}/cache/stackframes`,
     HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
     HasSetupDataCollection: `${BASE_ROUTE_PATH}/setup/has_data`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,

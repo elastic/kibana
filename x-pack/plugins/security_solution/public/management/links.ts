@@ -60,7 +60,6 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const categories = [
   {
@@ -165,7 +164,6 @@ export const links: LinkItem = {
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      experimentalKey: 'policyListEnabled',
     },
     {
       id: SecurityPageName.trustedApps,
@@ -241,14 +239,8 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-
-  const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
-  const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
-
   const linksToExclude: SecurityPageName[] = [];
-
   const currentUser = await plugins.security.authc.getCurrentUser();
-
   const isPlatinumPlus = licenseService.isPlatinumPlus();
   let hasHostIsolationExceptions: boolean = isPlatinumPlus;
 
@@ -259,11 +251,12 @@ export const getManagementFilteredLinks = async (
   // may see failed HTTP requests in the browser console. This is the reason that
   // `hasKibanaPrivilege()` is used below.
   if (
+    currentUser &&
     !isPlatinumPlus &&
     fleetAuthz &&
     hasKibanaPrivilege(
       fleetAuthz,
-      isEndpointRbacEnabled,
+      true,
       currentUser.roles.includes('superuser'),
       'readHostIsolationExceptions'
     )
@@ -281,15 +274,16 @@ export const getManagementFilteredLinks = async (
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
-  } = fleetAuthz
-    ? calculateEndpointAuthz(
-        licenseService,
-        fleetAuthz,
-        currentUser.roles,
-        isEndpointRbacEnabled,
-        hasHostIsolationExceptions
-      )
-    : getEndpointAuthzInitialState();
+  } =
+    fleetAuthz && currentUser
+      ? calculateEndpointAuthz(
+          licenseService,
+          fleetAuthz,
+          currentUser.roles,
+          true,
+          hasHostIsolationExceptions
+        )
+      : getEndpointAuthzInitialState();
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);

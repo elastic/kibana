@@ -40,7 +40,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
   getRuleForSignalTesting,
   waitForRuleSuccess,
@@ -391,7 +391,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('406s when excess data sent', async () => {
+      it('400s when excess data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
           supertest,
@@ -405,7 +405,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          expectedHttpCode: 406,
+          expectedHttpCode: 400,
         });
       });
 
@@ -794,7 +794,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });

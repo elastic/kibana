@@ -11,7 +11,7 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { ProfilingESField } from '../../common/elasticsearch';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
-import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
+import { groupStackFrameMetadataByStackTrace } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -20,7 +20,7 @@ import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
 import { createCommonFilter } from './query';
-import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
+import { searchStackTraces } from './search_stacktraces';
 
 export async function topNElasticSearchQuery({
   client,
@@ -112,32 +112,26 @@ export async function topNElasticSearchQuery({
     };
   }
 
-  const stackTraceEvents = new Map<StackTraceID, number>();
-  let totalAggregatedStackTraces = 0;
+  const { stackTraces, executables, stackFrames } = await withProfilingSpan(
+    'search_stacktraces',
+    async () => {
+      const stackTraceIDs: Set<string> = new Set<string>();
+      for (let i = 0; i < groupByBuckets.length; i++) {
+        stackTraceIDs.add(String(groupByBuckets[i].key));
+      }
 
-  for (let i = 0; i < groupByBuckets.length; i++) {
-    const stackTraceID = String(groupByBuckets[i].key);
-    const count = Math.floor((groupByBuckets[i].count.value ?? 0) / eventsIndex.sampleRate);
-    totalAggregatedStackTraces += count;
-    stackTraceEvents.set(stackTraceID, count);
-  }
+      const stackTraceKuery = [...stackTraceIDs].join(' or ');
+      const stackTraceFilter = createCommonFilter({
+        timeFrom,
+        timeTo,
+        kuery: stackTraceKuery,
+      });
 
-  logger.info('total aggregated stacktraces: ' + totalAggregatedStackTraces);
-  logger.info('unique aggregated stacktraces: ' + stackTraceEvents.size);
-
-  const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
-    logger,
-    client,
-    events: stackTraceEvents,
-  });
-
-  const [stackFrames, executables] = await withProfilingSpan(
-    'get_stackframes_and_executables',
-    () => {
-      return Promise.all([
-        mgetStackFrames({ logger, client, stackFrameIDs: stackFrameDocIDs }),
-        mgetExecutables({ logger, client, executableIDs: executableDocIDs }),
-      ]);
+      return searchStackTraces({
+        client,
+        filter: stackTraceFilter,
+        sampleSize: targetSampleSize,
+      });
     }
   );
 

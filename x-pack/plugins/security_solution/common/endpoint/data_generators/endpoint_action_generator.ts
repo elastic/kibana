@@ -274,12 +274,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       >;
 
       uploadActionDetails.parameters = {
-        file: {
-          file_id: 'file-x-y-z',
-          file_name: 'foo.txt',
-          size: 1234,
-          sha256: 'file-hash-sha-256',
-        },
+        file_id: 'file-x-y-z',
+        file_name: 'foo.txt',
+        file_size: 1234,
+        file_sha256: 'file-hash-sha-256',
       };
 
       uploadActionDetails.outputs = {

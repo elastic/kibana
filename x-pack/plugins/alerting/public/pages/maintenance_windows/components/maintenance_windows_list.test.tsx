@@ -116,10 +116,10 @@ describe('MaintenanceWindowsList', () => {
     expect(result.getAllByText('Archived')).toHaveLength(1);
 
     // check the startDate formatting
-    expect(result.getAllByText('04/05/23 00:00 AM')).toHaveLength(4);
+    expect(result.getAllByText('04/05/23 12:00 AM')).toHaveLength(4);
 
     // check the endDate formatting
-    expect(result.getAllByText('05/05/23 00:00 AM')).toHaveLength(4);
+    expect(result.getAllByText('05/05/23 12:00 AM')).toHaveLength(4);
 
     // check if action menu is there
     expect(result.getAllByTestId('table-actions-icon-button')).toHaveLength(items.length);
