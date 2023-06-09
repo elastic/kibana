@@ -14,6 +14,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
+import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
@@ -73,25 +74,27 @@ const MetricsApp: React.FC<{
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
       >
-        <SourceProvider sourceId="default">
-          <Router history={history}>
-            <Switch>
-              <Route path="/link-to" component={LinkToMetricsPage} />
-              {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
-              )}
-              {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
-              )}
-              {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-              )}
-              {uiCapabilities?.infrastructure?.show && (
-                <Route path="/" component={InfrastructurePage} />
-              )}
-            </Switch>
-          </Router>
-        </SourceProvider>
+        <CoPilotContextProvider value={plugins.observability.getCoPilotService()}>
+          <SourceProvider sourceId="default">
+            <Router history={history}>
+              <Switch>
+                <Route path="/link-to" component={LinkToMetricsPage} />
+                {uiCapabilities?.infrastructure?.show && (
+                  <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
+                )}
+                {uiCapabilities?.infrastructure?.show && (
+                  <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
+                )}
+                {uiCapabilities?.infrastructure?.show && (
+                  <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
+                )}
+                {uiCapabilities?.infrastructure?.show && (
+                  <Route path="/" component={InfrastructurePage} />
+                )}
+              </Switch>
+            </Router>
+          </SourceProvider>
+        </CoPilotContextProvider>
       </CommonInfraProviders>
     </CoreProviders>
   );
