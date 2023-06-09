@@ -9,11 +9,9 @@ import { EuiSpacer, EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { Card, CardId, ProductId, StepId } from './types';
+import { Card, CardId, Section, StepId } from './types';
 
 import { CardItem } from './card_item';
-
-import { sections } from './sections';
 
 export const useSetUpCardSections = ({
   euiTheme,
@@ -23,90 +21,76 @@ export const useSetUpCardSections = ({
   shadow?: string;
 }) => {
   const setUpCards = useCallback(
-    (
-      cards: Card[] | undefined,
-      activeSections: Set<ProductId>,
-      onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void,
-      finishedSteps: Record<CardId, Set<StepId>>
-    ) =>
-      cards?.reduce<React.ReactNode[]>((acc, cardItem) => {
-        if (cardItem?.activeConditions?.some((condition) => activeSections.has(condition))) {
-          const stepsDone = finishedSteps[cardItem.id] ?? new Set();
-          const timeInMins =
-            cardItem?.steps?.reduce(
-              (totalMin, { timeInMinutes, id: stepId }) =>
-                (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
-              0
-            ) ?? 0;
-          const stepsLeft = (cardItem?.steps?.length ?? 0) - (stepsDone?.size ?? 0);
-
-          acc.push(
-            <EuiFlexItem key={cardItem.id}>
-              <CardItem
-                data-test-subj={cardItem.id}
-                stepsLeft={stepsLeft}
-                timeInMins={timeInMins}
-                cardItem={cardItem}
-                shadow={shadow}
-                euiTheme={euiTheme}
-                onStepClicked={onStepClicked}
-                finishedSteps={finishedSteps}
-              />
-            </EuiFlexItem>
-          );
-        }
-        return acc;
-      }, []),
+    ({
+      cards,
+      onStepClicked,
+      finishedSteps,
+    }: {
+      cards: Card[] | undefined;
+      onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+      finishedSteps: Record<CardId, Set<StepId>>;
+    }) =>
+      cards?.map<React.ReactNode>((cardItem) => (
+        <EuiFlexItem key={cardItem.id}>
+          <CardItem
+            data-test-subj={cardItem.id}
+            stepsLeft={cardItem.stepsLeft}
+            timeInMins={cardItem.timeInMins}
+            cardItem={cardItem}
+            shadow={shadow}
+            euiTheme={euiTheme}
+            onStepClicked={onStepClicked}
+            finishedSteps={finishedSteps}
+          />
+        </EuiFlexItem>
+      )),
     [euiTheme, shadow]
   );
 
   const setUpSections = useCallback(
-    (
-      activeSections: Set<ProductId>,
-      addFinishedStep: (params: { stepId: StepId; cardId: CardId }) => void,
-      finishedSteps: Record<CardId, Set<StepId>>
-    ) =>
-      activeSections.size > 0
-        ? sections.reduce<React.ReactNode[]>((acc, currentSection) => {
-            const cardNodes = setUpCards(
-              currentSection.cards,
-              activeSections,
-              addFinishedStep,
-              finishedSteps
-            );
-            if (cardNodes && cardNodes.length > 0) {
-              acc.push(
-                <EuiPanel
-                  color="plain"
-                  element="div"
-                  grow={false}
-                  paddingSize="none"
-                  hasShadow={false}
-                  borderRadius="none"
-                  css={css`
-                    margin: ${euiTheme.size.l} 0;
-                  `}
-                  key={currentSection.id}
-                >
-                  <EuiTitle size="xxs">
-                    <span>{currentSection.title}</span>
-                  </EuiTitle>
-                  <EuiSpacer size="m" />
-                  <EuiFlexGroup
-                    gutterSize="m"
-                    direction="column"
-                    css={css`
-                      ${euiTheme.size.base}
-                    `}
-                  >
-                    {cardNodes}
-                  </EuiFlexGroup>
-                </EuiPanel>
-              );
-            }
-            return acc;
-          }, [])
-        : null,
+    ({
+      onStepClicked,
+      finishedSteps,
+      sections,
+    }: {
+      onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
+      finishedSteps: Record<CardId, Set<StepId>>;
+      sections: Section[] | null;
+    }) =>
+      sections?.reduce<React.ReactNode[]>((acc, currentSection) => {
+        const cardNodes = setUpCards({ cards: currentSection.cards, onStepClicked, finishedSteps });
+        if (currentSection.cards && currentSection.cards.length > 0) {
+          acc.push(
+            <EuiPanel
+              color="plain"
+              element="div"
+              grow={false}
+              paddingSize="none"
+              hasShadow={false}
+              borderRadius="none"
+              css={css`
+                margin: ${euiTheme.size.l} 0;
+              `}
+              key={currentSection.id}
+            >
+              <EuiTitle size="xxs">
+                <span>{currentSection.title}</span>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup
+                gutterSize="m"
+                direction="column"
+                css={css`
+                  ${euiTheme.size.base}
+                `}
+              >
+                {cardNodes}
+              </EuiFlexGroup>
+            </EuiPanel>
+          );
+        }
+        return acc;
+      }, []),
     [euiTheme.size.base, euiTheme.size.l, setUpCards]
   );
 

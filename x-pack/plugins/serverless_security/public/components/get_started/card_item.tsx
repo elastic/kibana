@@ -24,8 +24,8 @@ const CardItemComponent: React.FC<{
   cardItem: Card;
   euiTheme: EuiThemeComputed;
   shadow?: string;
-  stepsLeft: number;
-  timeInMins: number;
+  stepsLeft?: number;
+  timeInMins?: number;
   onStepClicked: (params: { stepId: StepId; cardId: CardId }) => void;
   finishedSteps: Record<CardId, Set<StepId>>;
 }> = ({ stepsLeft, timeInMins, shadow, cardItem, euiTheme, onStepClicked, finishedSteps }) => {

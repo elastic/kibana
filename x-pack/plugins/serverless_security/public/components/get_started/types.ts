@@ -52,6 +52,8 @@ export interface Card {
   id: CardId;
   steps?: Step[];
   title: string;
+  timeInMins?: number;
+  stepsLeft?: number;
 }
 
 export enum ProductId {
@@ -85,6 +87,7 @@ export enum GetMoreFromElasticSecurityCardId {
 export interface TogglePanelReducer {
   activeSections: Set<ProductId>;
   finishedSteps: Record<CardId, Set<StepId>>;
+  sections: Section[] | null;
 }
 
 export interface TogglePanelAction {
