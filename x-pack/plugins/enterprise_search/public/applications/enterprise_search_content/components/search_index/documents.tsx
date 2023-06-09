@@ -44,7 +44,7 @@ export const SearchIndexDocuments: React.FC = () => {
   const indexToShow =
     selectedIndexType === 'content-index'
       ? indexName
-      : indexName.replace('search-', 'access-control-');
+      : indexName.replace('search-', '.search-acl-filter-');
 
   const shouldShowAccessControlSwitcher =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
