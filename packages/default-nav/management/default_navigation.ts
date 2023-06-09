@@ -56,7 +56,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
     },
     {
       id: 'stack_management',
-      title: i18n.translate('defaultNavigation.management.integrationManagement', {
+      title: i18n.translate('defaultNavigation.management.stackManagement', {
         defaultMessage: 'Stack management',
       }),
       children: [
@@ -76,7 +76,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
         },
         {
           id: 'data',
-          title: i18n.translate('defaultNavigation.management.integrationManagement', {
+          title: i18n.translate('defaultNavigation.management.stackManagementData', {
             defaultMessage: 'Data',
           }),
           children: [
