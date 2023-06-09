@@ -25,12 +25,6 @@ export function useFleetPermissions() {
   };
 }
 
-export function useCanUpdatePrivateMonitor(monitor: EncryptedSyntheticsMonitor) {
-  const { canSaveIntegrations } = useFleetPermissions();
-
-  return canUpdatePrivateMonitor(monitor, canSaveIntegrations);
-}
-
 export function useCanManagePrivateLocation() {
   const { canSaveIntegrations, canReadAgentPolicies } = useFleetPermissions();
 

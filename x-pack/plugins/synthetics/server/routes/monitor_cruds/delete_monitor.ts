@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { deletePermissionError } from '../../synthetics_service/private_location/synthetics_private_location';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -78,17 +77,6 @@ export const deleteMonitor = async ({
     savedObjectsClient,
     server
   );
-
-  const { locations } = monitor.attributes;
-
-  const hasPrivateLocation = locations.filter((loc) => !loc.isServiceManaged);
-
-  if (hasPrivateLocation.length > 0) {
-    await syntheticsMonitorClient.privateLocationAPI.checkPermissions(
-      request,
-      deletePermissionError(monitor.attributes.name)
-    );
-  }
 
   try {
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

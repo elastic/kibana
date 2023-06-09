@@ -98,7 +98,7 @@ export class SyntheticsMonitorClient {
     allPrivateLocations: PrivateLocation[],
     spaceId: string
   ) {
-    const { request, savedObjectsClient } = routeContext;
+    const { request } = routeContext;
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
       [];
 
@@ -146,7 +146,6 @@ export class SyntheticsMonitorClient {
     const privateEditPromise = this.privateLocationAPI.editMonitors(
       privateConfigs,
       request,
-      savedObjectsClient,
       allPrivateLocations,
       spaceId
     );
@@ -168,12 +167,7 @@ export class SyntheticsMonitorClient {
     savedObjectsClient: SavedObjectsClientContract,
     spaceId: string
   ) {
-    const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
-      monitors,
-      request,
-      savedObjectsClient,
-      spaceId
-    );
+    const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, request, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
       monitors.map((monitor) => ({ monitor, configId: monitor.config_id, params: {} }))
@@ -256,7 +250,6 @@ export class SyntheticsMonitorClient {
       await this.privateLocationAPI.editMonitors(
         privateConfigs,
         request,
-        savedObjectsClient,
         allPrivateLocations,
         spaceId
       );
@@ -401,7 +394,6 @@ export class SyntheticsMonitorClient {
     );
     const privatePromise = this.privateLocationAPI.inspectPackagePolicy({
       privateConfig: privateConfigs?.[0],
-      savedObjectsClient,
       allPrivateLocations,
       spaceId,
     });

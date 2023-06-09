@@ -24,20 +24,12 @@ export const FleetPermissionsCallout = () => {
  */
 export const NoPermissionsTooltip = ({
   canEditSynthetics = true,
-  canUpdatePrivateMonitor = true,
-  canAddPrivateMonitor = true,
   children,
 }: {
   canEditSynthetics?: boolean;
-  canUpdatePrivateMonitor?: boolean;
-  canAddPrivateMonitor?: boolean;
   children: ReactNode;
 }) => {
-  const disabledMessage = getRestrictionReasonLabel(
-    canEditSynthetics,
-    canUpdatePrivateMonitor,
-    canAddPrivateMonitor
-  );
+  const disabledMessage = getRestrictionReasonLabel(canEditSynthetics);
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>
@@ -49,18 +41,8 @@ export const NoPermissionsTooltip = ({
   return <>{children}</>;
 };
 
-function getRestrictionReasonLabel(
-  canEditSynthetics = true,
-  canUpdatePrivateMonitor = true,
-  canAddPrivateMonitor = true
-): string | undefined {
-  return !canEditSynthetics
-    ? CANNOT_PERFORM_ACTION_SYNTHETICS
-    : !canUpdatePrivateMonitor
-    ? CANNOT_PERFORM_ACTION_FLEET
-    : !canAddPrivateMonitor
-    ? PRIVATE_LOCATIONS_NOT_ALLOWED_MESSAGE
-    : undefined;
+function getRestrictionReasonLabel(canEditSynthetics = true): string | undefined {
+  return !canEditSynthetics ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined;
 }
 
 export const NEED_PERMISSIONS_PRIVATE_LOCATIONS = i18n.translate(
@@ -92,25 +74,9 @@ export const CANNOT_SAVE_INTEGRATION_LABEL = i18n.translate(
   }
 );
 
-const CANNOT_PERFORM_ACTION_FLEET = i18n.translate(
-  'xpack.synthetics.monitorManagement.noFleetPermission',
-  {
-    defaultMessage:
-      'You are not authorized to perform this action. It requires the "All" Kibana privilege for Integrations.',
-  }
-);
-
 export const CANNOT_PERFORM_ACTION_SYNTHETICS = i18n.translate(
   'xpack.synthetics.monitorManagement.noSyntheticsPermissions',
   {
     defaultMessage: 'You do not have sufficient permissions to perform this action.',
-  }
-);
-
-const PRIVATE_LOCATIONS_NOT_ALLOWED_MESSAGE = i18n.translate(
-  'xpack.synthetics.monitorManagement.privateLocationsNotAllowedMessage',
-  {
-    defaultMessage:
-      'You do not have permission to add monitors to private locations. Contact your administrator to request access.',
   }
 );
