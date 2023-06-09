@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { CasesClient } from '@kbn/cases-plugin/server';
+import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
+import type {
+  ActionDetails,
+  EndpointActionDataParameterTypes,
+} from '../../../../../common/endpoint/types';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+
+export type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
+  command: ResponseActionsApiCommandNames;
+  user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
+  rule_id?: string;
+  rule_name?: string;
+  error?: string;
+  hosts?: Record<string, { name: string }>;
+};
+
+export interface CreateActionMetadata {
+  casesClient?: CasesClient;
+  minimumLicenseRequired?: LicenseType;
+  enableActionsWithErrors?: boolean;
+}
+
+export interface ActionCreateService {
+  createActionFromAlert: (payload: CreateActionPayload) => Promise<ActionDetails>;
+  createAction: <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
+    payload: CreateActionPayload,
+    metadata: CreateActionMetadata
+  ) => Promise<ActionDetails<TOutputContent, TParameters>>;
+}
