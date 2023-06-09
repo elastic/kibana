@@ -12,6 +12,7 @@ export interface ConnectorClientSideDefinition {
   externalAuthDocsUrl?: string;
   externalDocsUrl: string;
   icon: string;
+  platinumOnly?: boolean;
 }
 
 export type ConnectorDefinition = ConnectorClientSideDefinition & ConnectorServerSideDefinition;

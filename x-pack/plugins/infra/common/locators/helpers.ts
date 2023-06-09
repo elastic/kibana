@@ -5,28 +5,23 @@
  * 2.0.
  */
 
-import { interpret } from 'xstate';
-import { waitFor } from 'xstate/lib/waitFor';
 import { flowRight } from 'lodash';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import { findInventoryFields } from '../../common/inventory_models';
-import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../common/constants';
-import {
-  createLogViewStateMachine,
-  DEFAULT_LOG_VIEW,
-  replaceLogViewInQueryString,
-} from '../observability_logs/log_view_state';
-import { replaceLogFilterInQueryString } from '../observability_logs/log_stream_query_state';
-import { replaceLogPositionInQueryString } from '../observability_logs/log_stream_position_state/src/url_state_storage_service';
-import type { TimeRange } from '../../common/time';
+import { findInventoryFields } from '../inventory_models';
+import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../constants';
+import type { TimeRange } from '../time';
 import type { LogsLocatorParams } from './logs_locator';
-import type { InfraClientCoreSetup } from '../types';
-import type {
+import type { InfraClientCoreSetup } from '../../public/types';
+import {
+  DEFAULT_LOG_VIEW,
   LogViewColumnConfiguration,
   LogViewReference,
+  replaceLogFilterInQueryString,
+  replaceLogPositionInQueryString,
+  replaceLogViewInQueryString,
   ResolvedLogView,
-} from '../../common/log_views';
+} from '../log_views';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
 
 interface LocationToDiscoverParams {
@@ -62,16 +57,12 @@ export const getLocationToDiscover = async ({
   core,
   timeRange,
   filter,
-  logView,
+  logView = DEFAULT_LOG_VIEW,
 }: LocationToDiscoverParams) => {
   const [, plugins, pluginStart] = await core.getStartServices();
   const { discover } = plugins;
   const { logViews } = pluginStart;
-
-  const machine = createLogViewStateMachine({
-    initialContext: { logViewReference: logView || DEFAULT_LOG_VIEW },
-    logViews: logViews.client,
-  });
+  const resolvedLogView = await logViews.client.getResolvedLogView(logView);
 
   const discoverParams: DiscoverAppLocatorParams = {
     ...(timeRange ? { from: timeRange.startTime, to: timeRange.endTime } : {}),
@@ -85,31 +76,11 @@ export const getLocationToDiscover = async ({
       : {}),
   };
 
-  let discoverLocation;
-
-  const service = interpret(machine).start();
-  const doneState = await waitFor(
-    service,
-    (state) =>
-      state.matches('checkingStatus') ||
-      state.matches('resolvedPersistedLogView') ||
-      state.matches('resolvedInlineLogView') ||
-      state.matches('loadingFailed') ||
-      state.matches('resolutionFailed') ||
-      state.matches('checkingStatusFailed')
+  const discoverLocation = await constructDiscoverLocation(
+    discover,
+    discoverParams,
+    resolvedLogView
   );
-
-  service.stop();
-
-  if ('resolvedLogView' in doneState.context) {
-    discoverLocation = await constructDiscoverLocation(
-      discover,
-      discoverParams,
-      doneState.context.resolvedLogView
-    );
-  } else {
-    discoverLocation = await constructDiscoverLocation(discover, discoverParams);
-  }
 
   if (!discoverLocation) {
     throw new Error('Discover location not found');

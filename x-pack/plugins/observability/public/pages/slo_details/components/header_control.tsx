@@ -115,7 +115,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
       );
 
-      cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+      cloneSlo({ slo: newSlo, originalSloId: slo.id });
 
       navigate(basePath.prepend(paths.observability.slos));
     }
