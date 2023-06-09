@@ -223,6 +223,8 @@ export function Chart({
     isPlainRecord,
   });
   const LensSaveModalComponent = services.lens.SaveModalComponent;
+  const canSaveVisualization =
+    chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
 
   return (
     <EuiFlexGroup
@@ -273,7 +275,7 @@ export function Chart({
                     />
                   </EuiFlexItem>
                 )}
-                {isPlainRecord && (
+                {canSaveVisualization && (
                   <>
                     <EuiFlexItem grow={false} css={chartToolButtonCss}>
                       <EuiToolTip
@@ -377,7 +379,7 @@ export function Chart({
           {appendHistogram}
         </EuiFlexItem>
       )}
-      {isSaveModalVisible && lensAttributesContext.attributes && (
+      {canSaveVisualization && isSaveModalVisible && lensAttributesContext.attributes && (
         <LensSaveModalComponent
           initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
           onSave={() => {}}
