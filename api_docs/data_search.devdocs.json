@@ -23720,13 +23720,27 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.AggParamsSignificantTerms.shardSize",
+            "type": "number",
+            "tags": [],
+            "label": "shardSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/significant_terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.AggParamsSignificantTerms.exclude",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "exclude",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/significant_terms.ts",
             "deprecated": false,
@@ -23735,12 +23749,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsSignificantTerms.include",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "include",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/significant_terms.ts",
             "deprecated": false,

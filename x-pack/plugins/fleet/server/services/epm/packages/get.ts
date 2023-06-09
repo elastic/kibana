@@ -27,6 +27,7 @@ import type {
   PackageUsageStats,
   Installable,
   PackageDataStreamTypes,
+  PackageList,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -146,7 +147,7 @@ export async function getPackages(
     return newPkg;
   });
 
-  return packageListWithoutStatus;
+  return packageListWithoutStatus as PackageList;
 }
 
 interface GetInstalledPackagesOptions {

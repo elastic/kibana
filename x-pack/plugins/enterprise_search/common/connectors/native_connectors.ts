@@ -656,7 +656,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: 9090,
       },
-      user: {
+      username: {
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,

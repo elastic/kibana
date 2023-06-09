@@ -69,7 +69,6 @@
     "@kbn/logging",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
-    "@kbn/securitysolution-ecs",
     "@kbn/licensing-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server",
