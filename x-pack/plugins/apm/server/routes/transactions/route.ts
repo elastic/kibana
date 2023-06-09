@@ -30,6 +30,7 @@ import {
   getServiceTransactionGroups,
   ServiceTransactionGroupsResponse,
 } from '../services/get_service_transaction_groups';
+import { getServiceTranactionGroupsAlerts } from '../services/get_service_transaction_groups_alerts';
 import {
   getServiceTransactionGroupDetailedStatisticsPeriods,
   ServiceTransactionGroupDetailedStatisticsResponse,
@@ -171,6 +172,54 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       start,
       end,
       offset,
+    });
+  },
+});
+
+const transactionGroupsAlertsRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/transactions/groups/alerts',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        useDurationSummary: toBooleanRt,
+        transactionType: t.string,
+        latencyAggregationType: latencyAggregationTypeRt,
+      }),
+      transactionDataSourceRt,
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources): Promise<ServiceTransactionGroupsResponse> => {
+    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const {
+      path: { serviceName },
+      query: {
+        environment,
+        kuery,
+        latencyAggregationType,
+        transactionType,
+        start,
+        end,
+      },
+    } = params;
+
+    return getServiceTranactionGroupsAlerts({
+      environment,
+      kuery,
+      apmEventClient,
+      serviceName,
+      transactionType,
+      latencyAggregationType,
+      start,
+      end,
     });
   },
 });
@@ -488,6 +537,7 @@ const transactionChartsColdstartRateByTransactionNameRoute =
 export const transactionRouteRepository = {
   ...transactionGroupsMainStatisticsRoute,
   ...transactionGroupsDetailedStatisticsRoute,
+  ...transactionGroupsAlertsRoute,
   ...transactionLatencyChartsRoute,
   ...transactionTraceSamplesRoute,
   ...transactionChartsBreakdownRoute,

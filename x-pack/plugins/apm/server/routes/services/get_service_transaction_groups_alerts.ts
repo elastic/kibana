@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  AggregationsCardinalityAggregate,
+  AggregationsFilterAggregate,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
+  kqlQuery,
+  termQuery,
+  rangeQuery,
+} from '@kbn/observability-plugin/server';
+import {
+  ALERT_RULE_PRODUCER,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_RULE_PARAMETERS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
+
+interface ServiceTransactionGroupAlertsAggResponse {
+  buckets: Array<
+    AggregationsFilterAggregate & {
+      key: string;
+      alerts_count: AggregationsCardinalityAggregate;
+    }
+  >;
+}
+
+export type ServiceTransactionGroupAlertsResponse = Array<{
+  serviceName: string;
+  alertsCount: number;
+}>;
+
+export async function getServiceTranactionGroupsAlerts({
+  apmAlertsClient,
+  kuery,
+  transactionNames,
+  serviceName,
+  latencyAggregationType,
+  start,
+  end,
+  environment,
+}: {
+  apmAlertsClient: ApmAlertsClient;
+  kuery?: string;
+  serviceName?: string;
+  transactionNames: string[];
+  latencyAggregationType: LatencyAggregationType,
+  start: number;
+  end: number;
+  environment?: string;
+}): Promise<ServiceTransactionGroupAlertsAggResponse> {
+  const ALERT_RULE_PARAMETERS_AGGREGATION_TYPE =  `${ALERT_RULE_PARAMETERS}.aggregationType`
+  const params = {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+          ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+          ...termQuery(ALERT_RULE_PARAMETERS_AGGREGATION_TYPE, ALERT_STATUS_ACTIVE),
+          ...rangeQuery(start, end),
+          ...kqlQuery(kuery),
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(TRANSACTION_TYPE, serviceName),
+          ...environmentQuery(environment),
+        ],
+      },
+    },
+    aggs: {
+      transaction_groups: {
+        terms: {
+          field: TRANSACTION_NAME,
+          include: transactionNames,
+          size: transactionNames.length,
+        },
+        aggs: {
+          alerts_count: {
+            cardinality: {
+              field: ALERT_UUID,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const response = await apmAlertsClient.search(params);
+
+  const buckets = response.aggregations?.transaction_groups.buckets ?? [];
+
+  const servicesTransactionGroupsAlertsCount =
+    buckets.map((bucket) => ({
+      transactionName: bucket.key as string;
+      alertsCount: bucket.alerts_count.value,
+    }));
+
+  return servicesTransactionGroupsAlertsCount;
+}
