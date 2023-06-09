@@ -95,7 +95,12 @@ export const ProgressControls: FC<ProgressControlProps> = ({
       </EuiFlexItem>
       {progress === 1 && !isBrushCleared ? (
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="aiopsResetButton" size="s" onClick={onReset} color="text">
+          <EuiButton
+            data-test-subj="aiopsClearSelectionBadge"
+            size="s"
+            onClick={onReset}
+            color="text"
+          >
             <FormattedMessage id="xpack.aiops.resetLabel" defaultMessage="Reset" />
           </EuiButton>
         </EuiFlexItem>
