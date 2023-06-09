@@ -37,10 +37,8 @@ export function getKibanaContext(
 
     const [{ savedObjects }, { data }] = await getStartServices();
     return {
-      // todo this likely needs to be removed
       getSavedSearch: async (id: string) => {
         const searchSourceCreate = (await data.search.searchSource.asScoped(request)).create;
-        // const spacesClient = spaces?.spacesService?.createSpacesClient(request);
         const getSavedSrch = async (searchId: string) => {
           const so = await savedObjects
             .getScopedClient(request)

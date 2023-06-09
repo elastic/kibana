@@ -11,7 +11,7 @@ import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common
 // these won't exist in shared
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-// all good from here
+
 import { i18n } from '@kbn/i18n';
 import type { SavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
@@ -48,6 +48,7 @@ export const getSavedSearch = async (
         JSON.stringify({
           targetType: SAVED_SEARCH_TYPE,
           sourceId: savedSearchId,
+          // front end only
           targetSpace: (await spaces?.getActiveSpace())?.id,
         })
       )

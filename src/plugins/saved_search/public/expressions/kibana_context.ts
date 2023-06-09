@@ -7,7 +7,6 @@
  */
 
 import { StartServicesAccessor } from '@kbn/core/public';
-// import { PersistenceAPI } from '@kbn/data-views-plugin/common';
 import { getKibanaContextFn } from '../../common';
 import { SavedSearchPublicPluginStart, SavedSearchPublicStartDependencies } from '../plugin';
 
@@ -35,10 +34,7 @@ export function getKibanaContext({
   >;
 }) {
   return getKibanaContextFn(async () => {
-    const serv = await getStartServices();
-    // console.log('HERE!!!', serv);
-    return {
-      getSavedSearch: serv[2].get.bind(serv[2].get), // serv[0].savedObjects.client.get.bind(serv[0].savedObjects.client),
-    };
+    const [, , { get: getSavedSearch }] = await getStartServices();
+    return { getSavedSearch };
   });
 }

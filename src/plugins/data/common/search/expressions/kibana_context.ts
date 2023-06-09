@@ -15,13 +15,6 @@ import {
   KibanaFilter,
   KibanaQueryOutput,
 } from '../..';
-/*
-import { SavedSearch } from '../types';
-
-export interface KibanaContextStartDependencies {
-  getSavedSearch: (id: string) => Promise<SavedSearch>;
-}
-*/
 
 interface Arguments {
   q?: KibanaQueryOutput[] | null;

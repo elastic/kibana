@@ -97,6 +97,7 @@ export class SavedSearchPublicPlugin
         >;
       })
     );
+
     expressions.registerType(kibanaContext);
 
     return {};
