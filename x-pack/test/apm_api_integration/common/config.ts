@@ -8,12 +8,13 @@
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { getApmApiClient } from '@kbn/apm-plugin/server/test_helpers/apm_api_client/get_apm_api_client';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
-import { bootstrapApmSynthtrace } from './bootstrap_apm_synthtrace';
+import { createApmApiClient } from './apm_api_supertest';
+import { bootstrapApmSynthtrace, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
@@ -32,6 +33,7 @@ export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 type ApmApiClientKey =
   | 'noAccessUser'
   | 'readUser'
+  | 'adminUser'
   | 'writeUser'
   | 'annotationWriterUser'
   | 'noMlAccessUser'
@@ -50,6 +52,9 @@ export interface CreateTest {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+    synthtraceKibanaClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<ApmSynthtraceKibanaClient>;
     apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };
@@ -73,6 +78,7 @@ export function createTestConfig(
     const kibanaServer = servers.kibana as UrlObject;
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
+    const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
 
     return {
       testFiles: [require.resolve('../tests')],
@@ -83,8 +89,9 @@ export function createTestConfig(
         apmFtrConfig: () => config,
         registry: RegistryProvider,
         synthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return bootstrapApmSynthtrace(context, kibanaServerUrl);
+          return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
         },
+        synthtraceKibanaClient: () => synthtraceKibanaClient,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);
@@ -103,6 +110,10 @@ export function createTestConfig(
             readUser: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.viewerUser,
+            }),
+            adminUser: await getApmApiClient({
+              kibanaServer,
+              username: 'elastic',
             }),
             writeUser: await getApmApiClient({
               kibanaServer,

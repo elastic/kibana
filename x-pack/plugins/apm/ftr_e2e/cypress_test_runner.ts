@@ -64,6 +64,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const res = await cypressExecution({
     ...cypressCliArgs,
     project: cypressProjectPath,
+    browser: 'chrome',
     config: {
       e2e: {
         baseUrl: kibanaUrlWithoutAuth,

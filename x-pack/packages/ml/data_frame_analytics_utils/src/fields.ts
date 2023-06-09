@@ -19,64 +19,45 @@ import { DataFrameAnalyticsConfig } from './types';
 
 /**
  * ES id _id
- *
- * @export
- * @typedef {EsId}
  */
 export type EsId = string;
 
 /**
  * ES source _source
- *
- * @export
- * @typedef {EsDocSource}
  */
 export type EsDocSource = Record<string, any>;
 
 /**
  * ES field name
- *
- * @export
- * @typedef {EsFieldName}
  */
 export type EsFieldName = string;
 
 /**
  * ES doc
- *
- * @export
- * @interface EsDoc
- * @typedef {EsDoc}
- * @extends {Record<string, any>}
  */
 export interface EsDoc extends Record<string, any> {
   /**
    * ES _id
-   * @type {EsId}
    */
   _id: EsId;
   /**
    * ES _source
-   * @type {EsDocSource}
    */
   _source: EsDocSource;
 }
 
 /**
  * Max columns
- * @type {10}
  */
 export const MAX_COLUMNS = 10;
 
 /**
  * Default regression columns
- * @type {8}
  */
 export const DEFAULT_REGRESSION_COLUMNS = 8;
 
 /**
  * Set of basic numerical types
- * @type {*}
  */
 export const BASIC_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.UNSIGNED_LONG,
@@ -88,7 +69,6 @@ export const BASIC_NUMERICAL_TYPES = new Set([
 
 /**
  * Set of extended numerical types
- * @type {*}
  */
 export const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.DOUBLE,
@@ -99,14 +79,12 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
 
 /**
  * ES field name for copy of the doc _id
- * @type {"ml__id_copy"}
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
 
 /**
  * ES field name for ML's incremental id
- * @type {"ml__incremental_id"}
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__INCREMENTAL_ID = 'ml__incremental_id';
