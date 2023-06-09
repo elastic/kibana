@@ -11,7 +11,7 @@ import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_
 
 export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndices?: string[]) => {
   const memoMlJobIds = useMemo(() => machineLearningJobId ?? [], [machineLearningJobId]);
-  const { loading: mlJobLoading, jobs } = useSecurityJobs();
+  const { loading: mlSecurityJobLoading, jobs } = useSecurityJobs();
   const memoSelectedMlJobs = useMemo(
     () => jobs.filter(({ id }) => memoMlJobIds.includes(id)),
     [jobs, memoMlJobIds]
@@ -22,7 +22,8 @@ export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndic
     () => memoSelectedMlJobs.filter(({ isInstalled }) => isInstalled).map((j) => j.id),
     [memoSelectedMlJobs]
   );
-  const { jobs: installedJobs } = useGetInstalledJob(memoInstalledMlJobs);
+  const { loading: mlInstalledJobLoading, jobs: installedJobs } =
+    useGetInstalledJob(memoInstalledMlJobs);
   const memoMlIndices = useMemo(() => {
     const installedJobsIndices = installedJobs.map((j) => `.ml-anomalies-${j.results_index_name}`);
     return [...new Set(installedJobsIndices)];
@@ -36,5 +37,8 @@ export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndic
     }
   }, [defaultRuleIndices, memoMlIndices]);
 
-  return { mlJobLoading, ruleIndices: memoRuleIndices };
+  return {
+    mlJobLoading: mlSecurityJobLoading || mlInstalledJobLoading,
+    ruleIndices: memoRuleIndices,
+  };
 };
