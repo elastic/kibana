@@ -286,6 +286,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     }).catch((e) => {
       throw e;
     });
+
+    this.dispatch.setLoading(false);
     this.dispatch.setMinMax({
       min: `${min ?? '-Infinity'}`,
       max: `${max ?? 'Infinity'}`,
@@ -350,6 +352,9 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       componentState: { min: availableMin, max: availableMax },
       explicitInput: { query, timeRange, filters = [], ignoreParentSettings, value },
     } = this.getState();
+
+    if (!value) return;
+    // console.log('build filter', value);
     const [selectedMin, selectedMax] = value ?? ['', ''];
     const hasData = availableMin !== undefined && availableMax !== undefined;
     const hasLowerSelection = !isEmpty(selectedMin);

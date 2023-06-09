@@ -42,6 +42,7 @@ export const RangeSliderControl: FC = () => {
   }, [debouncedOnChange, displayedValue]);
 
   useEffect(() => {
+    // console.log('value changed');
     setDisplayedValue(value ?? ['', '']);
   }, [value]);
 
