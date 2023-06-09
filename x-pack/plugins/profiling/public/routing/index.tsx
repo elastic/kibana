@@ -214,6 +214,9 @@ const routes = {
                 }),
                 defaults: {
                   query: {
+                    comparisonRangeFrom: 'now-15m',
+                    comparisonRangeTo: 'now',
+                    comparisonKuery: '',
                     comparisonMode: ComparisonMode.Absolute,
                     normalizationMode: NormalizationMode.Time,
                   },
