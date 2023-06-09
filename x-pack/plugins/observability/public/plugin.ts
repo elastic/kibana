@@ -60,6 +60,8 @@ import {
 } from './rules/create_observability_rule_type_registry';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
+import { type CoPilotService } from './typings/co_pilot';
 
 export interface ConfigSchema {
   unsafe: {
@@ -74,6 +76,9 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
+  };
+  coPilot?: {
+    enabled?: boolean;
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -124,6 +129,8 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+
+  private coPilotService: CoPilotService | undefined;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -314,6 +321,11 @@ export class Plugin
       )
     );
 
+    this.coPilotService = createCoPilotService({
+      enabled: !!config.coPilot?.enabled,
+      http: coreSetup.http,
+    });
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -321,6 +333,7 @@ export class Plugin
       rulesLocator,
       ruleDetailsLocator,
       sloDetailsLocator,
+      getCoPilotService: () => this.coPilotService!,
     };
   }
 
@@ -350,6 +363,7 @@ export class Plugin
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

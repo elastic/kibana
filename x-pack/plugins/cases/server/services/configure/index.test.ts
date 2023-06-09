@@ -29,6 +29,7 @@ import { getNoneCaseConnector } from '../../common/utils';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import { createESJiraConnector, createJiraConnector } from '../test_utils';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
+import { unset } from 'lodash';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,
@@ -741,6 +742,96 @@ describe('CaseConfigureService', () => {
             "type": ".none",
           }
         `);
+      });
+    });
+  });
+
+  describe('Decoding requests', () => {
+    describe('post', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue({
+          attributes: createConfigPostParams(createJiraConnector()),
+          id: '1',
+          type: CASE_CONFIGURE_SAVED_OBJECT,
+          references: [],
+        });
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const attributes = createConfigPostParams(createJiraConnector());
+
+        await expect(
+          service.post({
+            unsecuredSavedObjectsClient,
+            attributes,
+            id: '1',
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('throws if closure_type is omitted', async () => {
+        const attributes = createConfigPostParams(createJiraConnector());
+        unset(attributes, 'closure_type');
+
+        await expect(
+          service.post({
+            unsecuredSavedObjectsClient,
+            attributes,
+            id: '1',
+          })
+        ).rejects.toThrow(`Invalid value "undefined" supplied to "closure_type"`);
+      });
+
+      it('strips out excess attributes', async () => {
+        const attributes = { ...createConfigPostParams(createJiraConnector()), foo: 'bar' };
+
+        await expect(
+          service.post({
+            unsecuredSavedObjectsClient,
+            attributes,
+            id: '1',
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('patch', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
+        );
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const updatedAttributes = createConfigPostParams(createJiraConnector());
+
+        await expect(
+          service.patch({
+            configurationId: '1',
+            unsecuredSavedObjectsClient,
+            updatedAttributes,
+            originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('strips out excess attributes', async () => {
+        const updatedAttributes = { ...createConfigPostParams(createJiraConnector()), foo: 'bar' };
+
+        await expect(
+          service.patch({
+            configurationId: '1',
+            unsecuredSavedObjectsClient,
+            updatedAttributes,
+            originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+        expect(persistedAttributes).not.toHaveProperty('foo');
       });
     });
   });
