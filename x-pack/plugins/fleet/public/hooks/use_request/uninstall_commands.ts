@@ -19,13 +19,15 @@ export const useGetUninstallTokens = ({
   page,
   perPage,
 }: GetUninstallTokensRequest['query'] = {}) => {
+  const query: GetUninstallTokensRequest['query'] = {
+    policyId,
+    page,
+    perPage,
+  };
+
   return useRequest<GetUninstallTokensResponse>({
     method: 'get',
     path: uninstallTokensRouteService.getListPath(),
-    query: {
-      policyId,
-      page,
-      perPage,
-    } as GetUninstallTokensRequest['query'],
+    query,
   });
 };
