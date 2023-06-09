@@ -11,9 +11,12 @@ import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { IRuleTypeAlerts, RuleType } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
+import {
+  createGetSummarizedAlertsFn,
+  createLifecycleExecutor,
+  IRuleDataClient,
+} from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-
 import { observabilityFeatureId } from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
@@ -70,7 +73,8 @@ export function thresholdRuleType(
   createLifecycleRuleExecutor: CreateLifecycleExecutor,
   basePath: IBasePath,
   config: ObservabilityConfig,
-  logger: Logger
+  logger: Logger,
+  ruleDataClient: IRuleDataClient
 ) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
@@ -121,6 +125,11 @@ export function thresholdRuleType(
     ),
     equation: schema.maybe(schema.string()),
     label: schema.maybe(schema.string()),
+  });
+  const getSummarizedAlerts = createGetSummarizedAlertsFn({
+    ruleDataClient,
+    useNamespace: false,
+    isLifecycleAlert: false,
   });
 
   const groupActionVariableDescription = i18n.translate(
@@ -209,8 +218,7 @@ export function thresholdRuleType(
       ],
     },
     producer: observabilityFeatureId,
-    // TODO: check this one below
-    // getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),//T
+    getSummarizedAlerts: getSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
   };
 }

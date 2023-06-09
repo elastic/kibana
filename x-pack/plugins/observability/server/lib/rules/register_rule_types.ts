@@ -77,7 +77,13 @@ export function registerRuleTypes(
     );
 
     alertingPlugin.registerType(
-      thresholdRuleType(createLifecycleRuleExecutorThreshold, basePath, config, logger)
+      thresholdRuleType(
+        createLifecycleRuleExecutorThreshold,
+        basePath,
+        config,
+        logger,
+        ruleDataClientThreshold
+      )
     );
   }
 }
