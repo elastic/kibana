@@ -26,11 +26,15 @@ export const getOptionFromPrompt = ({
   value: id,
   inputDisplay: (
     <EuiText
+      color="subdued"
+      data-test-subj="systemPromptText"
       css={css`
         overflow: hidden;
+        &:hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
       `}
-      color="subdued"
-      data-test-subj="inputDisplay"
     >
       {content}
     </EuiText>

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
-  'xpack.elasticAssistant.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
+  'xpack.securitySolution.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
   {
     defaultMessage:
       'You are a helpful, expert assistant who only answers questions about Elastic Security.',
@@ -16,21 +16,21 @@ export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
 );
 
 export const USE_THE_FOLLOWING_CONTEXT_TO_ANSWER = i18n.translate(
-  'xpack.elasticAssistant.assistant.content.prompts.system.useTheFollowingContextToAnswer',
+  'xpack.securitySolution.assistant.content.prompts.system.useTheFollowingContextToAnswer',
   {
     defaultMessage: 'Use the following context to answer questions:',
   }
 );
 
 export const IF_YOU_DONT_KNOW_THE_ANSWER = i18n.translate(
-  'xpack.elasticAssistant.assistant.content.prompts.system.ifYouDontKnowTheAnswer',
+  'xpack.securitySolution.assistant.content.prompts.system.ifYouDontKnowTheAnswer',
   {
     defaultMessage: 'Do not answer questions unrelated to Elastic Security.',
   }
 );
 
 export const SUPERHERO_PERSONALITY = i18n.translate(
-  'xpack.elasticAssistant.assistant.content.prompts.system.superheroPersonality',
+  'xpack.securitySolution.assistant.content.prompts.system.superheroPersonality',
   {
     defaultMessage:
       'Provide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert.',
@@ -41,7 +41,7 @@ export const DEFAULT_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSIST
 ${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 
 export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
-  'xpack.elasticAssistant.assistant.content.prompts.system.defaultSystemPromptName',
+  'xpack.securitySolution.assistant.content.prompts.system.defaultSystemPromptName',
   {
     defaultMessage: 'Default system prompt',
   }
@@ -52,7 +52,7 @@ ${SUPERHERO_PERSONALITY}
 ${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 
 export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
-  'xpack.elasticAssistant.assistant.content.prompts.system.superheroSystemPromptName',
+  'xpack.securitySolution.assistant.content.prompts.system.superheroSystemPromptName',
   {
     defaultMessage: 'Enhanced system prompt',
   }

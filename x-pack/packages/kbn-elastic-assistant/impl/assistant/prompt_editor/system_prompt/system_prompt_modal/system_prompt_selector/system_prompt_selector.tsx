@@ -15,63 +15,75 @@ import {
   EuiHighlight,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { Prompt } from '../../../../../..';
 import * as i18n from './translations';
-import { QuickPrompt } from '../types';
+import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
+
+export const SYSTEM_PROMPT_SELECTOR_CLASSNAME = 'systemPromptSelector';
 
 interface Props {
-  onQuickPromptDeleted: (quickPromptTitle: string) => void;
-  onQuickPromptSelectionChange: (quickPrompt?: QuickPrompt | string) => void;
-  quickPrompts: QuickPrompt[];
-  selectedQuickPrompt?: QuickPrompt;
+  onSystemPromptDeleted: (systemPromptTitle: string) => void;
+  onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
+  systemPrompts: Prompt[];
+  selectedSystemPrompt?: Prompt;
 }
 
-export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boolean }>;
+export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
+  isDefault: boolean;
+  isNewConversationDefault: boolean;
+}>;
 
 /**
- * Selector for choosing and deleting Quick Prompts
+ * Selector for choosing and deleting System Prompts
  */
-export const QuickPromptSelector: React.FC<Props> = React.memo(
-  ({ quickPrompts, onQuickPromptDeleted, onQuickPromptSelectionChange, selectedQuickPrompt }) => {
+export const SystemPromptSelector: React.FC<Props> = React.memo(
+  ({
+    systemPrompts,
+    onSystemPromptDeleted,
+    onSystemPromptSelectionChange,
+    selectedSystemPrompt,
+  }) => {
     // Form options
-    const [options, setOptions] = useState<QuickPromptSelectorOption[]>(
-      quickPrompts.map((qp) => ({
+    const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
+      systemPrompts.map((sp) => ({
         value: {
-          isDefault: qp.isDefault ?? false,
+          isDefault: sp.isDefault ?? false,
+          isNewConversationDefault: sp.isNewConversationDefault ?? false,
         },
-        label: qp.title,
-        color: qp.color,
+        label: sp.name,
       }))
     );
-    const selectedOptions = useMemo<QuickPromptSelectorOption[]>(() => {
-      return selectedQuickPrompt
+    const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
+      return selectedSystemPrompt
         ? [
             {
               value: {
-                isDefault: true,
+                isDefault: selectedSystemPrompt.isDefault ?? false,
+                isNewConversationDefault: selectedSystemPrompt.isNewConversationDefault ?? false,
               },
-              label: selectedQuickPrompt.title,
-              color: selectedQuickPrompt.color,
+              label: selectedSystemPrompt.name,
             },
           ]
         : [];
-    }, [selectedQuickPrompt]);
+    }, [selectedSystemPrompt]);
 
     const handleSelectionChange = useCallback(
-      (quickPromptSelectorOption: QuickPromptSelectorOption[]) => {
-        const newQuickPrompt =
-          quickPromptSelectorOption.length === 0
+      (systemPromptSelectorOption: SystemPromptSelectorOption[]) => {
+        const newSystemPrompt =
+          systemPromptSelectorOption.length === 0
             ? undefined
-            : quickPrompts.find((qp) => qp.title === quickPromptSelectorOption[0]?.label) ??
-              quickPromptSelectorOption[0]?.label;
-        onQuickPromptSelectionChange(newQuickPrompt);
+            : systemPrompts.find((sp) => sp.name === systemPromptSelectorOption[0]?.label) ??
+              systemPromptSelectorOption[0]?.label;
+        onSystemPromptSelectionChange(newSystemPrompt);
       },
-      [onQuickPromptSelectionChange, quickPrompts]
+      [onSystemPromptSelectionChange, systemPrompts]
     );
 
-    // Callback for when user types to create a new quick prompt
+    // Callback for when user types to create a new system prompt
     const onCreateOption = useCallback(
       (searchValue, flattenedOptions = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
@@ -81,7 +93,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         const normalizedSearchValue = searchValue.trim().toLowerCase();
         const optionExists =
           flattenedOptions.findIndex(
-            (option: QuickPromptSelectorOption) =>
+            (option: SystemPromptSelectorOption) =>
               option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
@@ -100,7 +112,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     // Callback for when user selects a quick prompt
     const onChange = useCallback(
-      (newOptions: QuickPromptSelectorOption[]) => {
+      (newOptions: SystemPromptSelectorOption[]) => {
         if (newOptions.length === 0) {
           handleSelectionChange([]);
         } else if (options.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
@@ -117,13 +129,13 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         if (selectedOptions?.[0]?.label === label) {
           handleSelectionChange([]);
         }
-        onQuickPromptDeleted(label);
+        onSystemPromptDeleted(label);
       },
-      [handleSelectionChange, onQuickPromptDeleted, options, selectedOptions]
+      [handleSelectionChange, onSystemPromptDeleted, options, selectedOptions]
     );
 
     const renderOption: (
-      option: QuickPromptSelectorOption,
+      option: SystemPromptSelectorOption,
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue, contentClassName) => {
@@ -132,21 +144,44 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         <EuiFlexGroup
           alignItems="center"
           justifyContent="spaceBetween"
+          component={'span'}
           className={'parentFlexGroup'}
         >
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            component={'span'}
+            css={css`
+              max-width: 50%;
+            `}
+          >
             <EuiHealth color={color}>
               <span className={contentClassName}>
-                <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+                <EuiHighlight
+                  search={searchValue}
+                  css={css`
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 50%;
+                  `}
+                >
+                  {label}
+                </EuiHighlight>
               </span>
             </EuiHealth>
           </EuiFlexItem>
+          {value?.isNewConversationDefault && (
+            <EuiFlexItem grow={false} component={'span'}>
+              <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
+                <EuiIcon type={'starFilled'} />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
           {!value?.isDefault && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="right" content={i18n.DELETE_QUICK_PROMPT_}>
+            <EuiFlexItem grow={false} component={'span'}>
+              <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
                 <EuiButtonIcon
                   iconType="cross"
-                  aria-label={i18n.DELETE_QUICK_PROMPT_}
+                  aria-label={i18n.DELETE_SYSTEM_PROMPT}
                   color="danger"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
@@ -168,18 +203,20 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
-        aria-label={i18n.QUICK_PROMPT_SELECTOR}
-        placeholder={i18n.QUICK_PROMPT_SELECTOR}
+        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
+        aria-label={i18n.SYSTEM_PROMPT_SELECTOR}
+        placeholder={i18n.SYSTEM_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
-        singleSelection={true}
+        singleSelection={{ asPlainText: true }}
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChange}
         onCreateOption={onCreateOption}
         renderOption={renderOption}
+        autoFocus
       />
     );
   }
 );
 
-QuickPromptSelector.displayName = 'QuickPromptSelector';
+SystemPromptSelector.displayName = 'SystemPromptSelector';
