@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { ExecutionContextSearch } from '@kbn/saved-search-plugin/common';
 import {
   ExecutionContext,
   ExpressionFunctionDefinition,

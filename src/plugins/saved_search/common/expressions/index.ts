@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { kibanaContext } from './kibana_context_type';
+export {
+  kibanaContext,
+  type ExpressionValueSearchContext,
+  type ExecutionContextSearch,
+} from './kibana_context_type';

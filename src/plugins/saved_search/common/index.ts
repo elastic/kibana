@@ -28,4 +28,8 @@ export {
   type ExpressionFunctionKibanaContext,
   getKibanaContextFn,
 } from './expressions/kibana_context';
-export type { KibanaContext, ExecutionContextSearch } from './expressions/kibana_context_type';
+export type {
+  KibanaContext,
+  ExecutionContextSearch,
+  ExpressionValueSearchContext,
+} from './expressions/kibana_context_type';

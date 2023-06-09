@@ -8,11 +8,8 @@
 
 import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 
-import {
-  AggsStart,
-  DataViewsContract,
-  ExpressionValueSearchContext,
-} from '@kbn/data-plugin/common';
+import { AggsStart, DataViewsContract } from '@kbn/data-plugin/common';
+import { ExpressionValueSearchContext } from '@kbn/saved-search-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EventAnnotationService } from '..';
 import { getFetchEventAnnotations } from '.';
@@ -20,6 +17,7 @@ import { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from '../.
 import { EventAnnotationStartDependencies } from '../plugin';
 import { of as mockOf } from 'rxjs';
 import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
+
 jest.mock('../../common/fetch_event_annotations/handle_request', () => {
   const original = jest.requireActual('../../common/fetch_event_annotations/handle_request');
   return {
