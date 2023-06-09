@@ -72,10 +72,27 @@ describe('UninstallCommandFlyout', () => {
     });
   });
 
-  describe('when successfully fetching uninstall tokens', () => {
+  describe('when fetching the tokens is successful', () => {
+    it('shows loading spinner while fetching', () => {
+      const mockReturn: MockReturnType = {
+        isLoading: true,
+        error: null,
+        data: null,
+      };
+      useGetUninstallTokensMock.mockReturnValue(mockReturn);
+
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId('loadingSpinner')).toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('uninstall-commands-flyout-code-block')
+      ).not.toBeInTheDocument();
+    });
+
     it('renders buttons for Linux/Mac and for Windows', () => {
       const renderResult = render();
 
+      expect(renderResult.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
       const platformsButtonGroup = renderResult.getByTestId(
         'uninstall-commands-flyout-platforms-btn-group'
       );
@@ -108,24 +125,8 @@ describe('UninstallCommandFlyout', () => {
     });
   });
 
-  describe('fetching', () => {
-    it('shows loading spinner while fetching', () => {
-      const mockReturn: MockReturnType = {
-        isLoading: true,
-        error: null,
-        data: null,
-      };
-      useGetUninstallTokensMock.mockReturnValue(mockReturn);
-
-      const renderResult = render();
-
-      expect(renderResult.queryByTestId('loadingSpinner')).toBeInTheDocument();
-      expect(
-        renderResult.queryByTestId('uninstall-commands-flyout-code-block')
-      ).not.toBeInTheDocument();
-    });
-
-    it('shows error message when fetch was unsuccessful', () => {
+  describe('when fetching the tokens is unsuccessful', () => {
+    it('shows error message when fetching returns an error', () => {
       const mockReturn: MockReturnType = {
         isLoading: false,
         error: new Error('received error message'),
