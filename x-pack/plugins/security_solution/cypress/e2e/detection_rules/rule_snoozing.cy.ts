@@ -165,7 +165,8 @@ describe('rule snoozing', () => {
     });
   });
 
-  describe('Rule editing page / actions tab', () => {
+  // SKIPPED: https://github.com/elastic/kibana/issues/159349
+  describe.skip('Rule editing page / actions tab', () => {
     beforeEach(() => {
       deleteConnectors();
     });
