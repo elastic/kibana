@@ -12,6 +12,8 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
+import { pick } from 'lodash';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
@@ -72,7 +74,13 @@ import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import type { ReauthorizeTransformRequestSchema, SimpleSOAssetAttributes } from '../../types';
+import type {
+  ReauthorizeTransformRequestSchema,
+  SimpleSOAssetAttributes,
+  PackageListItem,
+  PackageList,
+  PackageInfo,
+} from '../../types';
 import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
 import { getDataStreams } from '../../services/epm/data_streams';
 import { allowedAssetTypesLookup } from '../../../common/constants';
@@ -109,9 +117,9 @@ export const getListHandler: FleetRequestHandler<
       savedObjectsClient,
       ...request.query,
     });
-
+    const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
     const body: GetPackagesResponse = {
-      items: res,
+      items: flattenedRes,
       response: res,
     };
     return response.ok({
@@ -291,9 +299,10 @@ export const getInfoHandler: FleetRequestHandler<
       ignoreUnverified,
       prerelease,
     });
+    const flattenedRes = soToInstallationInfo(res) as PackageInfo;
 
     const body: GetInfoResponse = {
-      item: res,
+      item: flattenedRes,
     };
     return response.ok({ body });
   } catch (error) {
@@ -593,4 +602,20 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
+};
+
+// Don't expose the whole SO in the API response, only selected fields
+const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
+  if ('savedObject' in pkg) {
+    const installationInfo = {
+      ...pick(pkg.savedObject, ['created_at', 'updated_at', 'version', 'namespaces', 'type']),
+      ...pkg.savedObject?.attributes,
+    };
+    return {
+      // When savedObject gets deprecated, replace `pkg` with `...omit(pkg, 'savedObject')`
+      ...pkg,
+      installationInfo,
+    };
+  }
+  return pkg;
 };

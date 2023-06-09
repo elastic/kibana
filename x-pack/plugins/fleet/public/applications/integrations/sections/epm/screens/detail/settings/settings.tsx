@@ -456,8 +456,8 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                             {...packageInfo}
                             installSource={
                               'savedObject' in packageInfo &&
-                              packageInfo.savedObject?.attributes.install_source
-                                ? packageInfo.savedObject.attributes.install_source
+                              packageInfo.installationInfo?.install_source
+                                ? packageInfo.installationInfo.install_source
                                 : ''
                             }
                           />
