@@ -96,9 +96,9 @@ const CardItemComponent: React.FC<{
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {expandCard && cardItem?.steps && (
+        {expandCard && cardItem.steps && (
           <EuiFlexItem>
-            {cardItem?.steps?.map((step) => {
+            {cardItem.steps.map((step) => {
               return (
                 <CardStep
                   key={step.id}

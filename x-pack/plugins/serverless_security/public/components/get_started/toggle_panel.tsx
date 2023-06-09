@@ -14,7 +14,7 @@ import { Switch, GetStartedPageActions, StepId, CardId } from './types';
 import * as i18n from './translations';
 import { ProductSwitch } from './product_switch';
 import { useSetUpCardSections } from './use_setup_cards';
-import { useStorage } from './use_storage';
+import { getStartedStorage } from '../../lib/get_started/storage';
 import { getActiveSectionsInitialStates, getFinishedStepsInitialStates, reducer } from './reducer';
 
 const TogglePanelComponent = () => {
@@ -26,7 +26,7 @@ const TogglePanelComponent = () => {
     getActiveProductsFromStorage,
     toggleActiveProductsInStorage,
     addFinishedStepToStorage,
-  } = useStorage();
+  } = getStartedStorage;
   const finishedStepsInitialStates = useMemo(
     () => getFinishedStepsInitialStates({ finishedSteps: getAllFinishedStepsFromStorage() }),
     [getAllFinishedStepsFromStorage]

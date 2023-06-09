@@ -46,7 +46,7 @@ export interface Step {
 export type CardId = GetSetUpCardId | GetMoreFromElasticSecurityCardId;
 
 export interface Card {
-  activeConditions?: ProductId[];
+  productTypeRequired?: ProductId[];
   description?: string | React.ReactNode;
   icon?: EuiIconProps;
   id: CardId;

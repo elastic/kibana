@@ -23,32 +23,35 @@ export const reducer = (
   action: TogglePanelAction | ToggleStepAction | InitSectionsAction
 ): TogglePanelReducer => {
   if (action.type === GetStartedPageActions.ToggleSection) {
-    if (state.activeSections.has(action.payload?.section)) {
-      state.activeSections.delete(action.payload?.section);
+    const activeSections = new Set([...state.activeSections]);
+
+    if (activeSections.has(action.payload?.section)) {
+      activeSections.delete(action.payload?.section);
     } else {
-      state.activeSections.add(action.payload?.section);
+      activeSections.add(action.payload?.section);
     }
-    const newActiveSections = new Set([...state.activeSections]);
+
     return {
       ...state,
-      activeSections: newActiveSections,
-      sections: updateSections(state.finishedSteps, newActiveSections),
+      activeSections,
+      sections: updateSections(state.finishedSteps, activeSections),
     };
   }
 
   if (action.type === GetStartedPageActions.AddFinishedStep) {
-    if (!state.finishedSteps[action.payload.cardId]) {
-      state.finishedSteps[action.payload.cardId] = new Set();
-    }
-    state.finishedSteps[action.payload.cardId].add(action.payload.stepId);
-    const newFinishedSteps = {
+    const finishedSteps = {
       ...state.finishedSteps,
-      [action.payload.cardId]: new Set([...state.finishedSteps[action.payload.cardId]]),
+      [action.payload.cardId]: state.finishedSteps[action.payload.cardId]
+        ? new Set([...state.finishedSteps[action.payload.cardId]])
+        : new Set(),
     };
+
+    finishedSteps[action.payload.cardId].add(action.payload.stepId);
+
     return {
       ...state,
-      finishedSteps: newFinishedSteps,
-      sections: updateSections(newFinishedSteps, state.activeSections),
+      finishedSteps,
+      sections: updateSections(finishedSteps, state.activeSections),
     };
   }
 
@@ -64,30 +67,22 @@ export const reducer = (
 export const getFinishedStepsInitialStates = ({
   finishedSteps,
 }: {
-  finishedSteps: Record<CardId, Record<StepId, boolean>>;
+  finishedSteps: Record<CardId, StepId[]>;
 }): Record<CardId, Set<StepId>> => {
-  const initialStates = Object.entries(finishedSteps).reduce((acc, [key, value]) => {
-    if (value) {
-      acc[key] = new Set([...Object.keys(value)]);
+  const initialStates = Object.entries(finishedSteps).reduce((acc, [key, stepIdsByCard]) => {
+    if (stepIdsByCard) {
+      acc[key] = new Set(stepIdsByCard);
     }
     return acc;
-  }, {} as Record<string, Set<string>>);
+  }, {} as Record<string, Set<StepId>>);
 
-  return initialStates as Record<CardId, Set<StepId>>;
+  return initialStates;
 };
 
 export const getActiveSectionsInitialStates = ({
   activeProducts,
 }: {
-  activeProducts: Record<ProductId, boolean>;
-}) => {
-  const activeProductIds = [ProductId.analytics, ProductId.cloud, ProductId.endpoint];
-  return activeProductIds.reduce((acc, key) => {
-    if (activeProducts[key]) {
-      acc.add(key);
-    }
-    return acc;
-  }, new Set<ProductId>());
-};
+  activeProducts: ProductId[];
+}) => new Set(activeProducts);
 
 export const getSectionsInitialStates = () => sections;

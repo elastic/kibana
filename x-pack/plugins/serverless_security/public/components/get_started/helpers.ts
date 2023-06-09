@@ -15,7 +15,10 @@ export const updateSections = (
   activeSections.size > 0
     ? getSectionsInitialStates()?.reduce((acc, currentSection) => {
         const cardsInCurrentSection = currentSection.cards?.reduce((accCards, currentCard) => {
-          if (currentCard?.activeConditions?.some((condition) => activeSections.has(condition))) {
+          if (
+            !currentCard.productTypeRequired ||
+            currentCard?.productTypeRequired?.some((condition) => activeSections.has(condition))
+          ) {
             const stepsDone = finishedSteps[currentCard.id] ?? new Set();
             currentCard.timeInMins = currentCard?.steps?.reduce(
               (totalMin, { timeInMinutes, id: stepId }) =>
