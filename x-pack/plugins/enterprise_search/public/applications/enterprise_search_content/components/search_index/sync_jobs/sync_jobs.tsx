@@ -9,28 +9,37 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SyncStatus } from '../../../../../../common/types/connectors';
+import { SyncJobType, SyncStatus } from '../../../../../../common/types/connectors';
 
 import { FormattedDateTime } from '../../../../shared/formatted_date_time';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { pageToPagination } from '../../../../shared/pagination/page_to_pagination';
 import { durationToText } from '../../../utils/duration_to_text';
 
-import { syncStatusToColor, syncStatusToText } from '../../../utils/sync_status_to_text';
+import {
+  syncJobTypeToText,
+  syncStatusToColor,
+  syncStatusToText,
+} from '../../../utils/sync_status_to_text';
 
 import { IndexViewLogic } from '../index_view_logic';
 
 import { SyncJobFlyout } from './sync_job_flyout';
+import { SyncJobsAccessControlTable } from './sync_jobs_access_control_table';
 import { SyncJobsViewLogic, SyncJobView } from './sync_jobs_view_logic';
 
 export const SyncJobs: React.FC = () => {
-  const { connectorId } = useValues(IndexViewLogic);
+  const { connectorId, hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
   const { syncJobs, syncJobsLoading, syncJobsPagination } = useValues(SyncJobsViewLogic);
   const { fetchSyncJobs } = useActions(SyncJobsViewLogic);
+  const { productFeatures } = useValues(KibanaLogic);
   const [syncJobFlyout, setSyncJobFlyout] = useState<SyncJobView | undefined>(undefined);
+  const [selectedSyncJobCategory, setSelectedSyncJobCategory] = useState<string>('content');
+  const shouldShowAccessSyncs =
+    true || (productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature);
 
   useEffect(() => {
     if (connectorId) {
@@ -38,6 +47,7 @@ export const SyncJobs: React.FC = () => {
         connectorId,
         from: syncJobsPagination.from ?? 0,
         size: syncJobsPagination.size ?? 10,
+        type: 'content',
       });
     }
   }, [connectorId]);
@@ -78,6 +88,19 @@ export const SyncJobs: React.FC = () => {
       truncateText: true,
     },
     {
+      field: 'job_type',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.syncJobType.columnTitle', {
+        defaultMessage: 'Content sync type',
+      }),
+      render: (syncType: SyncJobType) => {
+        const syncJobTypeText = syncJobTypeToText(syncType);
+        if (syncJobTypeText.length === 0) return null;
+        return <EuiBadge color="hollow">{syncJobTypeText}</EuiBadge>;
+      },
+      sortable: true,
+      truncateText: true,
+    },
+    {
       field: 'status',
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.syncStatus.columnTitle', {
         defaultMessage: 'Status',
@@ -114,20 +137,45 @@ export const SyncJobs: React.FC = () => {
   return (
     <>
       <SyncJobFlyout onClose={() => setSyncJobFlyout(undefined)} syncJob={syncJobFlyout} />
-      <EuiBasicTable
-        data-test-subj="entSearchContent-index-syncJobs-table"
-        items={syncJobs}
-        columns={columns}
-        hasActions
-        onChange={({ page: { index, size } }: { page: { index: number; size: number } }) => {
-          if (connectorId) {
-            fetchSyncJobs({ connectorId, from: index * size, size });
-          }
-        }}
-        pagination={pageToPagination(syncJobsPagination)}
-        tableLayout="fixed"
-        loading={syncJobsLoading}
-      />
+      {shouldShowAccessSyncs && (
+        <EuiButtonGroup
+          legend={'Select sync job type to display.'}
+          name={'Sync job type'}
+          idSelected={selectedSyncJobCategory}
+          onChange={(optionId) => {
+            setSelectedSyncJobCategory(optionId);
+          }}
+          options={[
+            {
+              id: 'content',
+              label: 'Content syncs',
+            },
+
+            {
+              id: 'access_control',
+              label: 'Access control syncs',
+            },
+          ]}
+        />
+      )}
+      {selectedSyncJobCategory === 'content' ? (
+        <EuiBasicTable
+          data-test-subj="entSearchContent-index-syncJobs-table"
+          items={syncJobs}
+          columns={columns}
+          hasActions
+          onChange={({ page: { index, size } }: { page: { index: number; size: number } }) => {
+            if (connectorId) {
+              fetchSyncJobs({ connectorId, from: index * size, size });
+            }
+          }}
+          pagination={pageToPagination(syncJobsPagination)}
+          tableLayout="fixed"
+          loading={syncJobsLoading}
+        />
+      ) : (
+        <SyncJobsAccessControlTable />
+      )}
     </>
   );
 };
