@@ -634,13 +634,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
 function useReportingState(errors: UserMessage[]): {
   isRenderComplete: boolean;
-  hasDynamicError: boolean;
   setIsRenderComplete: (state: boolean) => void;
-  setDynamicError: (state: boolean) => void;
   nodeRef: React.RefObject<HTMLDivElement>;
 } {
   const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
-  const [hasDynamicError, setDynamicError] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -649,7 +646,7 @@ function useReportingState(errors: UserMessage[]): {
     }
   }, [isRenderComplete, errors]);
 
-  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
+  return { isRenderComplete, setIsRenderComplete, nodeRef };
 }
 
 export const VisualizationWrapper = ({
@@ -682,9 +679,9 @@ export const VisualizationWrapper = ({
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
 }) => {
   const context = useLensSelector(selectExecutionContext);
+  const hasDynamicError = useRef<boolean>(false);
   // Used for reporting
-  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
-    useReportingState(errors);
+  const { isRenderComplete, setIsRenderComplete, nodeRef } = useReportingState(errors);
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
       query: context.query,
@@ -763,7 +760,7 @@ export const VisualizationWrapper = ({
       data-render-complete={isRenderComplete}
       data-shared-item=""
       data-render-error={
-        hasDynamicError
+        hasDynamicError.current
           ? i18n.translate('xpack.lens.editorFrame.dataFailure', {
               defaultMessage: `An error occurred when loading data.`,
             })
@@ -795,8 +792,8 @@ export const VisualizationWrapper = ({
             ? [errorMessage]
             : [];
 
-          if (!hasDynamicError) {
-            setDynamicError(true);
+          if (!hasDynamicError.current) {
+            hasDynamicError.current = true;
           }
 
           return (
