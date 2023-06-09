@@ -327,17 +327,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
     } = this.getState();
 
-    if (this.controlGroup) {
-      if (!lastSavedControlGroupInput) {
-        this.controlGroup.updateInput(getDefaultControlGroupInput());
-      } else if (
-        !persistableControlGroupInputIsEqual(
-          this.controlGroup.getInput(),
-          lastSavedControlGroupInput
-        )
-      ) {
-        this.controlGroup.updateInput(lastSavedControlGroupInput);
-      }
+    if (
+      this.controlGroup &&
+      !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
+    ) {
+      this.controlGroup.updateInput(lastSavedControlGroupInput ?? getDefaultControlGroupInput());
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
