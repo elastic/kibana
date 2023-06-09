@@ -17,7 +17,8 @@
     "@kbn/deeplinks-devtools",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-ml",
-    "@kbn/deeplinks-management"
+    "@kbn/deeplinks-management",
+    "@kbn/deeplinks-search"
   ],
   "exclude": [
     "target/**/*",
