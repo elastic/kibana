@@ -33,7 +33,6 @@ export const writeActionToIndices = async ({
   agents,
   esClient,
   endpointContext,
-  logger,
   minimumLicenseRequired,
   payload,
 }: {
@@ -41,10 +40,10 @@ export const writeActionToIndices = async ({
   agents: string[];
   esClient: ElasticsearchClient;
   endpointContext: EndpointAppContext;
-  logger: Logger;
   minimumLicenseRequired: LicenseType;
   payload: CreateActionPayload;
 }): Promise<void> => {
+  const logger = endpointContext.logFactory.get('createResponseAction');
   const licenseService = endpointContext.service.getLicenseService();
 
   const doc: LogsEndpointAction = {
@@ -80,7 +79,6 @@ export const writeActionToIndices = async ({
   // try to create action request record in .logs-endpoint.actions DS as the current user
   // (from >= v7.16, use this check to ensure the current user has privileges to write to the new index)
   // and allow only users with superuser privileges to write to fleet indices
-  // const logger = endpointContext.logFactory.get('host-isolation');
   const doesLogsEndpointActionsDsExist = await doLogsEndpointActionDsExists({
     esClient,
     logger,

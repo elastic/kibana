@@ -54,8 +54,6 @@ export const actionCreateService = (
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
     }
 
-    const logger = endpointContext.logFactory.get('hostIsolation');
-
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(payload.endpoint_ids)]; // dedupe
     const endpointData = await endpointContext.service
@@ -64,16 +62,14 @@ export const actionCreateService = (
 
     const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
 
-    // create an Action ID and dispatch it to ES & Fleet Server
+    // create an Action ID and use that to dispatch action to ES & Fleet Server
     const actionID = uuidv4();
-    // const alertActionError = checkForAlertErrors();
 
     await writeActionToIndices({
       actionID,
       agents,
       esClient,
       endpointContext,
-      logger,
       minimumLicenseRequired,
       payload,
     });
