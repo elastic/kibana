@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { useRouteResolver } from './use_resolver';
 import { MlLicenseInfo } from '../../../common/license/ml_license';
@@ -15,20 +15,44 @@ jest.mock('../capabilities/check_capabilities');
 
 describe('useResolver', () => {
   afterEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-  afterEach(() => {
-    jest.advanceTimersByTime(0);
-    jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
-  it('should redirect to home page if ML is disabled', async () => {
+  it('should redirect to the home page if ML is disabled', async () => {
     (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: false,
     });
-
-    renderHook(() => useRouteResolver('full', ['canCreateJob']));
-
+    const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    await act(async () => {
+      await waitForNextUpdate();
+    });
     expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
+  });
+
+  it('should redirect to the home page if license is not sufficient', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: true,
+      isMinimumLicense: false,
+    });
+    const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+    expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
+  });
+
+  it('should redirect to the data viz page if license is not full', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: true,
+      isMinimumLicense: true,
+      isFullLicense: false,
+    });
+    const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+    expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('ml', {
+      path: 'datavisualizer',
+    });
   });
 });
