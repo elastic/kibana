@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { NoData } from '../../../../components/empty_states';
 import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
@@ -20,6 +21,7 @@ const PAGE_SIZE_OPTIONS = [5, 10, 20];
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
   const { onSubmit } = useUnifiedSearchContext();
+  const isFixedLayout = useIsWithinMaxBreakpoint('l');
 
   const {
     columns,
@@ -37,6 +39,7 @@ export const HostsTable = () => {
     <>
       <EuiBasicTable
         data-test-subj="hostsView-table"
+        tableLayout={isFixedLayout ? 'fixed' : 'auto'}
         pagination={{
           pageIndex: pagination.pageIndex ?? 0,
           pageSize: pagination.pageSize ?? DEFAULT_PAGE_SIZE,

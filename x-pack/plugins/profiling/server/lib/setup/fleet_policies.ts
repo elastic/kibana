@@ -11,6 +11,7 @@ import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services
 import { getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
 import { PartialSetupState } from '../../../common/setup';
+import { PackageInputType } from '../..';
 
 async function createIngestAPIKey(esClient: ElasticsearchClient) {
   const apiKeyResponse = await esClient.security.createApiKey({
@@ -125,10 +126,47 @@ export async function validateCollectorPackagePolicy({
   };
 }
 
+export function generateSecretToken() {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < 16; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters.charAt(randomIndex);
+  }
+
+  return result;
+}
+
+export function getVarsFor({
+  config,
+  includeSecretToken,
+}: {
+  config: PackageInputType;
+  includeSecretToken: boolean;
+}) {
+  const configKeys = Object.keys(config) as Array<keyof PackageInputType>;
+  if (includeSecretToken) {
+    configKeys.push('secret_token');
+  }
+
+  return configKeys.reduce<
+    Partial<Record<keyof PackageInputType, { type: 'text' | 'bool'; value: any }>>
+  >((acc, currKey) => {
+    const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
+    const type = typeof value === 'boolean' ? 'bool' : 'text';
+    return {
+      ...acc,
+      [currKey]: { type, value },
+    };
+  }, {});
+}
+
 export async function createCollectorPackagePolicy({
   client,
   soClient,
   packagePolicyClient,
+  config,
 }: ProfilingSetupOptions) {
   const packageName = 'profiler_collector';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
@@ -148,6 +186,9 @@ export async function createCollectorPackagePolicy({
         enabled: true,
         streams: [],
         type: 'pf-elastic-collector',
+        vars: config?.collector
+          ? getVarsFor({ config: config.collector, includeSecretToken: true })
+          : {},
       },
     ],
   };
@@ -175,6 +216,7 @@ export async function createSymbolizerPackagePolicy({
   client,
   soClient,
   packagePolicyClient,
+  config,
 }: ProfilingSetupOptions) {
   const packageName = 'profiler_symbolizer';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
@@ -194,6 +236,10 @@ export async function createSymbolizerPackagePolicy({
         enabled: true,
         streams: [],
         type: 'pf-elastic-symbolizer',
+        // doesnt have secret token
+        vars: config?.symbolizer
+          ? getVarsFor({ config: config.symbolizer, includeSecretToken: false })
+          : {},
       },
     ],
   };
