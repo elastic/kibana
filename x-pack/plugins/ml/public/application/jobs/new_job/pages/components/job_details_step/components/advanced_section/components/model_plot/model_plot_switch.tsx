@@ -8,10 +8,10 @@
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { MMLCallout } from '../mml_callout';
-import { ML_JOB_AGGREGATION } from '../../../../../../../../../../../common/constants/aggregation_types';
 import { isCategorizationJobCreator } from '../../../../../../../common/job_creator';
 
 export const ModelPlotSwitch: FC = () => {
