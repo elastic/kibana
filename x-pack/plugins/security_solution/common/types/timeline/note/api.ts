@@ -12,7 +12,7 @@ import type { Maybe } from '../../../search_strategy/common';
 
 import { unionWithNullType } from '../../../utility_types';
 
-export const NoteServerRepresentation = runtimeTypes.intersection([
+export const BareNote = runtimeTypes.intersection([
   runtimeTypes.type({
     timelineId: unionWithNullType(runtimeTypes.string),
   }),
@@ -26,20 +26,16 @@ export const NoteServerRepresentation = runtimeTypes.intersection([
   }),
 ]);
 
-export interface NoteServerRepresentationType
-  extends runtimeTypes.TypeOf<typeof NoteServerRepresentation> {}
+export interface BareNoteType extends runtimeTypes.TypeOf<typeof BareNote> {}
 
 /**
  * This type represents a note type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
-export type NoteServerRepresentationWithoutExternalRefs = Omit<
-  NoteServerRepresentationType,
-  'timelineId'
->;
+export type BareNoteWithoutExternalRefs = Omit<BareNoteType, 'timelineId'>;
 
-export const NoteToReturnRuntimeType = runtimeTypes.intersection([
-  NoteServerRepresentation,
+export const NoteRuntimeType = runtimeTypes.intersection([
+  BareNote,
   runtimeTypes.type({
     noteId: runtimeTypes.string,
     version: runtimeTypes.string,
@@ -49,12 +45,12 @@ export const NoteToReturnRuntimeType = runtimeTypes.intersection([
   }),
 ]);
 
-export interface NoteResult extends runtimeTypes.TypeOf<typeof NoteToReturnRuntimeType> {}
+export interface Note extends runtimeTypes.TypeOf<typeof NoteRuntimeType> {}
 
 export interface ResponseNote {
   code?: Maybe<number>;
 
   message?: Maybe<string>;
 
-  note: NoteResult;
+  note: Note;
 }

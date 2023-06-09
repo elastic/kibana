@@ -24,8 +24,8 @@ import {
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
-import type { NoteResult } from './note/api';
-import { NoteToReturnRuntimeType } from './note/api';
+import type { Note } from './note/api';
+import { NoteRuntimeType } from './note/api';
 
 /*
  *  ColumnHeader Types
@@ -320,9 +320,9 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
     version: runtimeTypes.string,
   }),
   runtimeTypes.partial({
-    eventIdToNoteIds: runtimeTypes.array(NoteToReturnRuntimeType),
+    eventIdToNoteIds: runtimeTypes.array(NoteRuntimeType),
     noteIds: runtimeTypes.array(runtimeTypes.string),
-    notes: runtimeTypes.array(NoteToReturnRuntimeType),
+    notes: runtimeTypes.array(NoteRuntimeType),
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
     pinnedEventsSaveObject: runtimeTypes.array(PinnedEventToReturnSavedObjectRuntimeType),
   }),
@@ -437,8 +437,8 @@ export const sortTimeline = runtimeTypes.type({
  * Import/export timelines
  */
 
-export type ExportedGlobalNotes = Array<Exclude<NoteResult, 'eventId'>>;
-export type ExportedEventNotes = NoteResult[];
+export type ExportedGlobalNotes = Array<Exclude<Note, 'eventId'>>;
+export type ExportedEventNotes = Note[];
 
 export interface ExportedNotes {
   eventNotes: ExportedEventNotes;
@@ -606,7 +606,7 @@ export interface TimelineResult {
   dateRange?: Maybe<DateRangePickerResult>;
   description?: Maybe<string>;
   eqlOptions?: Maybe<EqlOptionsResult>;
-  eventIdToNoteIds?: Maybe<NoteResult[]>;
+  eventIdToNoteIds?: Maybe<Note[]>;
   eventType?: Maybe<string>;
   excludedRowRendererIds?: Maybe<RowRendererId[]>;
   favorite?: Maybe<FavoriteTimelineResult[]>;
@@ -614,7 +614,7 @@ export interface TimelineResult {
   kqlMode?: Maybe<string>;
   kqlQuery?: Maybe<SerializedFilterQueryResult>;
   indexNames?: Maybe<string[]>;
-  notes?: Maybe<NoteResult[]>;
+  notes?: Maybe<Note[]>;
   noteIds?: Maybe<string[]>;
   pinnedEventIds?: Maybe<string[]>;
   pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;

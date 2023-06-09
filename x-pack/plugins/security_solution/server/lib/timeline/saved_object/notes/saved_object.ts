@@ -18,9 +18,9 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
-  NoteResult,
-  NoteServerRepresentationType,
-  NoteServerRepresentationWithoutExternalRefs,
+  Note,
+  BareNoteType,
+  BareNoteWithoutExternalRefs,
   ResponseNote,
 } from '../../../../../common/types/timeline/note/api';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
@@ -59,14 +59,14 @@ export const deleteNote = async ({
   await savedObjectsClient.delete(noteSavedObjectType, noteId);
 };
 
-export const getNote = async (request: FrameworkRequest, noteId: string): Promise<NoteResult> => {
+export const getNote = async (request: FrameworkRequest, noteId: string): Promise<Note> => {
   return getSavedNote(request, noteId);
 };
 
 export const getNotesByTimelineId = async (
   request: FrameworkRequest,
   timelineId: string
-): Promise<NoteResult[]> => {
+): Promise<Note[]> => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
     hasReference: { type: timelineSavedObjectType, id: timelineId },
@@ -83,7 +83,7 @@ export const persistNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: NoteServerRepresentationType;
+  note: BareNoteType;
   overrideOwner?: boolean;
 }): Promise<ResponseNote> => {
   try {
@@ -100,7 +100,7 @@ export const persistNote = async ({
     return await updateNote({ request, noteId, note, overrideOwner });
   } catch (err) {
     if (getOr(null, 'output.statusCode', err) === 403) {
-      const noteToReturn: NoteResult = {
+      const noteToReturn: Note = {
         ...note,
         noteId: uuidv1(),
         version: '',
@@ -125,7 +125,7 @@ const createNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: NoteServerRepresentationType;
+  note: BareNoteType;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -151,11 +151,11 @@ const createNote = async ({
     : shallowCopyOfNote;
 
   const { transformedFields: migratedAttributes, references } =
-    noteFieldsMigrator.extractFieldsToReferences<NoteServerRepresentationWithoutExternalRefs>({
+    noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
 
-  const createdNote = await savedObjectsClient.create<NoteServerRepresentationWithoutExternalRefs>(
+  const createdNote = await savedObjectsClient.create<BareNoteWithoutExternalRefs>(
     noteSavedObjectType,
     migratedAttributes,
     {
@@ -183,13 +183,13 @@ const updateNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string;
-  note: NoteServerRepresentationType;
+  note: BareNoteType;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
-  const existingNote = await savedObjectsClient.get<NoteServerRepresentationWithoutExternalRefs>(
+  const existingNote = await savedObjectsClient.get<BareNoteWithoutExternalRefs>(
     noteSavedObjectType,
     noteId
   );
@@ -197,7 +197,7 @@ const updateNote = async ({
   const noteWithCreator = overrideOwner ? pickSavedNote(noteId, note, userInfo) : note;
 
   const { transformedFields: migratedPatchAttributes, references } =
-    noteFieldsMigrator.extractFieldsToReferences<NoteServerRepresentationWithoutExternalRefs>({
+    noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
       existingReferences: existingNote.references,
     });
@@ -228,7 +228,7 @@ const updateNote = async ({
 
 const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObject = await savedObjectsClient.get<NoteServerRepresentationWithoutExternalRefs>(
+  const savedObject = await savedObjectsClient.get<BareNoteWithoutExternalRefs>(
     noteSavedObjectType,
     NoteId
   );
@@ -240,9 +240,7 @@ const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
 
 const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObjects = await savedObjectsClient.find<NoteServerRepresentationWithoutExternalRefs>(
-    options
-  );
+  const savedObjects = await savedObjectsClient.find<BareNoteWithoutExternalRefs>(options);
 
   return {
     totalCount: savedObjects.total,
@@ -257,7 +255,7 @@ const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsF
 export const convertSavedObjectToSavedNote = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
-): NoteResult =>
+): Note =>
   pipe(
     SavedObjectNoteRuntimeType.decode(savedObject),
     map((savedNote) => ({
@@ -273,7 +271,7 @@ export const convertSavedObjectToSavedNote = (
 
 export const pickSavedNote = (
   noteId: string | null,
-  savedNote: NoteServerRepresentationType,
+  savedNote: BareNoteType,
   userInfo: AuthenticatedUser | null
 ) => {
   if (noteId == null) {
