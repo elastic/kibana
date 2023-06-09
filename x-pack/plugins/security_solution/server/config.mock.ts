@@ -11,13 +11,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: Array<keyof ExperimentalFeatures> = [
-    // Remove property below once `get-file` FF is enabled or removed
-    'responseActionGetFileEnabled',
-    // remove property below once `execute` FF is enabled or removed
-    'responseActionExecuteEnabled',
-    'responseActionUploadEnabled',
-  ];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -32,7 +26,7 @@ export const createMockConfig = (): ConfigType => {
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,
 
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
   };
 };
@@ -45,7 +39,7 @@ const withExperimentalFeature = (
   return {
     ...config,
     enableExperimental,
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
   };
 };
 

@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
-} from '../../../../common/http_api/log_analysis';
+} from '../../../../common/http_api';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { DeleteJobsResponsePayload } from './api/ml_cleanup';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
