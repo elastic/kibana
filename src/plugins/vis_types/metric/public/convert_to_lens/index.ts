@@ -27,7 +27,8 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const { getColumnsFromVis, getPalette, getPercentageModeConfig, excludeMetaFromColumn } = await convertToLensModule;
+  const { getColumnsFromVis, getPalette, getPercentageModeConfig, excludeMetaFromColumn } =
+    await convertToLensModule;
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.metric);
   const layers = getColumnsFromVis(

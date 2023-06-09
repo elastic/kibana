@@ -14,7 +14,6 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plu
 import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
-import { convertToLens } from '../convert_to_lens';
 
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,
