@@ -48,6 +48,7 @@ export class ServerlessSecurityPlugin
 
     securitySolution.setIsSidebarEnabled(false);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
+    serverless.setProjectHome('/app/security');
     serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
 
     return {};
