@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { SloStatusBadge } from '../../../../../components/slo/slo_status_badge';
@@ -17,27 +18,30 @@ export interface Props {
 }
 
 export function CompositeSloBadges({ isLoading, compositeSlo }: Props) {
+  const loadingLabel = i18n.translate('xpack.observability.slo.compositeSlo.loadingLabelSkeleton', {
+    defaultMessage: 'Loading',
+  });
   return (
     <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
       {isLoading ? (
         <>
           <EuiSkeletonRectangle
             isLoading
-            contentAriaLabel="Loading"
+            contentAriaLabel={loadingLabel}
             width="54.16px"
             height="20px"
             borderRadius="s"
           />
           <EuiSkeletonRectangle
             isLoading
-            contentAriaLabel="Loading"
+            contentAriaLabel={loadingLabel}
             width="54.16px"
             height="20px"
             borderRadius="s"
           />
           <EuiSkeletonRectangle
             isLoading
-            contentAriaLabel="Loading"
+            contentAriaLabel={loadingLabel}
             width="54.16px"
             height="20px"
             borderRadius="s"
