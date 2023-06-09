@@ -18,7 +18,7 @@ import { throwErrors } from '../../../common/runtime_types';
 import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
 import { parseFilterQuery } from '../../utils/serialized_query';
-import { UsageCollector } from '../../usage/usage_collector';
+// import { UsageCollector } from '../../usage/usage_collector';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -50,7 +50,7 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: LogsShared
           parseFilterQuery(query)
         );
 
-        UsageCollector.countLogs();
+        // UsageCollector.countLogs();
 
         return response.ok({
           body: logEntriesV1.logEntriesSummaryResponseRT.encode({

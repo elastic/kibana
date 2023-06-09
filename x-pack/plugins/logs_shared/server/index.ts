@@ -6,11 +6,11 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { LogsSharedPlugin } from './plugin';
-import { LogsSharedConfig } from './types';
+import { config, LogsSharedPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext<LogsSharedConfig>) {
-  return new LogsSharedPlugin(initializerContext);
+export type { LogsSharedPluginSetup, LogsSharedPluginStart, LogsSharedConfig } from './types';
+export { config };
+
+export function plugin(context: PluginInitializerContext) {
+  return new LogsSharedPlugin(context);
 }
-
-export type { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';

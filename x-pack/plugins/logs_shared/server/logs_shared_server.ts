@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogsSharedLibs } from './lib/logs_shared_types';
+import { LogsSharedBackendLibs } from './lib/logs_shared_types';
 import {
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryHighlightsRoute,
@@ -13,7 +13,7 @@ import {
 } from './routes/log_entries';
 import { initLogViewRoutes } from './routes/log_views';
 
-export const initLogsSharedServer = (libs: LogsSharedLibs) => {
+export const initLogsSharedServer = (libs: LogsSharedBackendLibs) => {
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);

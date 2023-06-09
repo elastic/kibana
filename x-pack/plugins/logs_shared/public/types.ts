@@ -7,9 +7,7 @@
 
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-export interface LogsSharedPluginSetup {
-  getGreeting: () => string;
-}
+export interface LogsSharedPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsSharedPluginStart {}
 

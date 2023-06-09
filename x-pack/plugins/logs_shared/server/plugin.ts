@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import {
+  PluginInitializerContext,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginConfigDescriptor,
+} from '@kbn/core/server';
 
+import { schema } from '@kbn/config-schema';
 import {
   LogsSharedConfig,
   LogsSharedPluginCoreSetup,
@@ -23,6 +30,27 @@ import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_t
 import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
+import { LogEntriesService } from './services/log_entries';
+import { publicConfigKeys } from '../common/plugin_config_types';
+
+export const config: PluginConfigDescriptor<LogsSharedConfig> = {
+  schema: schema.object({
+    sources: schema.maybe(
+      schema.object({
+        default: schema.maybe(
+          schema.object({
+            fields: schema.maybe(
+              schema.object({
+                message: schema.maybe(schema.arrayOf(schema.string())),
+              })
+            ),
+          })
+        ),
+      })
+    ),
+  }),
+  exposeToBrowser: publicConfigKeys,
+};
 
 export class LogsSharedPlugin
   implements
@@ -71,6 +99,9 @@ export class LogsSharedPlugin
 
     // Register server side APIs
     initLogsSharedServer(this.libs);
+
+    const logEntriesService = new LogEntriesService();
+    logEntriesService.setup(core, plugins);
 
     return {
       logViews,
