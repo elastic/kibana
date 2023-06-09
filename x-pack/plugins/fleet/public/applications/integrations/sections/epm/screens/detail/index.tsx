@@ -175,7 +175,8 @@ export function Detail() {
 
   const updateAvailable =
     packageInfo &&
-    packageInfo?.installationInfo &&
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<

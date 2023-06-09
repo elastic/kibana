@@ -455,7 +455,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                           <ReinstallButton
                             {...packageInfo}
                             installSource={
-                              'savedObject' in packageInfo &&
+                              'installationInfo' in packageInfo &&
                               packageInfo.installationInfo?.install_source
                                 ? packageInfo.installationInfo.install_source
                                 : ''

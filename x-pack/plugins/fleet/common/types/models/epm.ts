@@ -438,7 +438,6 @@ export type InstallationInfo = {
   type: string;
   created_at?: string;
   updated_at?: string;
-  version?: string;
   namespaces?: string[];
 } & Installation;
 

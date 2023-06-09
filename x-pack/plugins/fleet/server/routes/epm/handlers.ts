@@ -608,7 +608,7 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
 const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
   if ('savedObject' in pkg) {
     const installationInfo = {
-      ...pick(pkg.savedObject, ['created_at', 'updated_at', 'version', 'namespaces', 'type']),
+      ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
       ...pkg.savedObject?.attributes,
     };
     return {
