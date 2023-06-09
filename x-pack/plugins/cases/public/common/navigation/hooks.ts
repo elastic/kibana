@@ -14,22 +14,20 @@ import { useCasesContext } from '../../components/cases_context/use_cases_contex
 import type { ICasesDeepLinkId } from './deep_links';
 import type { CaseViewPathParams, CaseViewPathSearchParams } from './paths';
 import { generateCaseViewPath } from './paths';
-
-const stringify = (parsedParams: Record<string, string>) =>
-  new URLSearchParams(parsedParams).toString();
-const parse = (queryString: string) => Object.fromEntries(new URLSearchParams(queryString));
+import { stringifyToURL, parseURL } from '../../components/utils';
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
 
 export function useUrlParams() {
   const { search } = useLocation();
-  const [urlParams, setUrlParams] = useState<CaseViewPathSearchParams>(() => parse(search));
+  const [urlParams, setUrlParams] = useState<CaseViewPathSearchParams>(() => parseURL(search));
   const toUrlParams = useCallback(
-    (params: CaseViewPathSearchParams = urlParams) => stringify(params as Record<string, string>),
+    (params: CaseViewPathSearchParams = urlParams) =>
+      stringifyToURL(params as Record<string, string>),
     [urlParams]
   );
   useEffect(() => {
-    setUrlParams(parse(search));
+    setUrlParams(parseURL(search));
   }, [search]);
   return {
     urlParams,
