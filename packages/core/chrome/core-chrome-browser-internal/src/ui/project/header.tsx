@@ -31,7 +31,7 @@ import React, { createRef, useState } from 'react';
 import { Router } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
+import { Observable, debounceTime } from 'rxjs';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -100,7 +100,8 @@ const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
 const Logo = (
   props: Pick<Props, 'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath'>
 ) => {
-  const loadingCount = useObservable(props.loadingCount$, 0);
+  const loadingCount = useObservable(props.loadingCount$.pipe(debounceTime(50)), 0);
+
   const homeHref = useObservable(props.homeHref$, '/app/home');
   const { logo } = headerCss;
 
