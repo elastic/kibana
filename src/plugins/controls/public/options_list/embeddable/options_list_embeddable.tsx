@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, merge, filter, Subject, Subscription } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
@@ -209,7 +209,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           )
         )
         .subscribe(async ({ selectedOptions, existsSelected }) => {
-          if (!selectedOptions && existsSelected === undefined) return;
           if (!selectedOptions || isEmpty(selectedOptions)) {
             this.dispatch.clearValidAndInvalidSelections({});
           } else {
@@ -236,9 +235,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
      * debounce filter publications for a split second for a smoother selection/deselection user experience
      */
     this.subscriptions.add(
-      this.unpublishedChanges.pipe(debounceTime(750)).subscribe(() => {
-        this.publishNewSelections();
-      })
+      this.unpublishedChanges
+        .pipe(
+          debounceTime(750),
+          filter((changes) => !isEmpty(changes))
+        )
+        .subscribe(() => {
+          this.publishNewSelections();
+        })
     );
   };
 
