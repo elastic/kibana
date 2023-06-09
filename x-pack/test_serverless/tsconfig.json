@@ -12,6 +12,6 @@
     "@kbn/expect",
     "@kbn/test",
     "@kbn/apm-plugin",
-    "@kbn/apm-synthtrace-client"
+    "@kbn/repo-info"
   ]
 }

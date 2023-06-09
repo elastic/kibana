@@ -126,6 +126,7 @@
     "@kbn/maps-vector-tile-utils",
     "@kbn/core-http-common",
     "@kbn/slo-schema",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/core-saved-objects-common"
   ]
 }
