@@ -11,7 +11,7 @@ import useMount from 'react-use/lib/useMount';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { showExpiredLicenseWarning } from '../license/expired_warning';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
-import { MlCapabilitiesKey } from '../../../common/types/capabilities';
+import { type MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import type { ResolverResults, Resolvers } from './resolvers';
 import type { MlContextValue } from '../contexts/ml';

@@ -38,13 +38,22 @@ export const kibanaContextMock = {
   services: {
     uiSettings: { get: jest.fn() },
     chrome: { recentlyAccessed: { add: jest.fn() } },
-    application: { navigateToApp: jest.fn() },
+    application: { navigateToApp: jest.fn(), navigateToUrl: jest.fn() },
     http: {
       basePath: {
         get: jest.fn(),
       },
     },
     share: {
+      url: {
+        locators: {
+          get: jest.fn(() => {
+            return {
+              getUrl: jest.fn(),
+            };
+          }),
+        },
+      },
       urlGenerators: { getUrlGenerator: jest.fn() },
     },
     data: dataPluginMock.createStartContract(),
