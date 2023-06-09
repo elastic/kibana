@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { SuperTest } from 'supertest';
+import type { EsArchiver } from '@kbn/es-archiver';
 import type { Client } from '@elastic/elasticsearch';
 import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -47,7 +48,7 @@ const getTestTitle = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAli
 
 export function disableLegacyUrlAliasesTestSuiteFactory(
   es: Client,
-  esArchiver: any,
+  esArchiver: EsArchiver,
   supertest: SuperTest<any>
 ) {
   const expectResponseBody =
@@ -101,13 +102,9 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
+        before(() => esArchiver.emptyKibanaIndex());
         before(() =>
           esArchiver.load(
-            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );

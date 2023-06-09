@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { EsArchiver } from '@kbn/es-archiver';
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { without, uniq } from 'lodash';
@@ -60,7 +61,7 @@ const getTestTitle = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpa
 
 export function updateObjectsSpacesTestSuiteFactory(
   es: Client,
-  esArchiver: any,
+  esArchiver: EsArchiver,
   supertest: SuperTest<any>
 ) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
@@ -146,13 +147,9 @@ export function updateObjectsSpacesTestSuiteFactory(
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
+        before(() => esArchiver.emptyKibanaIndex());
         before(() =>
           esArchiver.load(
-            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );

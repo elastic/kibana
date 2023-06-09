@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
+import type { EsArchiver } from '@kbn/es-archiver';
 import type { Client } from '@elastic/elasticsearch';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
@@ -30,7 +31,11 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
-export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
+export function deleteTestSuiteFactory(
+  es: Client,
+  esArchiver: EsArchiver,
+  supertest: SuperTest<any>
+) {
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -149,13 +154,9 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     (describeFn: DescribeFn) =>
     (description: string, { user = {}, spaceId, tests }: DeleteTestDefinition) => {
       describeFn(description, () => {
-        beforeEach(async () => {
-          await esArchiver.load(
-            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
-        });
-        afterEach(() =>
-          esArchiver.unload(
+        beforeEach(() => esArchiver.emptyKibanaIndex());
+        beforeEach(() =>
+          esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );
