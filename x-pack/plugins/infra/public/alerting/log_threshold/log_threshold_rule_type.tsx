@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { lazy } from 'react';
 import type { LogsLocatorParams } from '../../../common/locators';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
