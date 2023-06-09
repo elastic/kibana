@@ -22,6 +22,7 @@ export enum CoPilotPromptId {
   ApmExplainError = 'apmExplainError',
   LogsExplainMessage = 'logsExplainMessage',
   LogsFindSimilar = 'logsFindSimilar',
+  ExplainLogSpike = 'explainLogSpike',
 }
 
 const PERF_GPT_SYSTEM_MESSAGE = {
@@ -60,6 +61,15 @@ const logEntryRt = t.type({
     t.type({
       field: t.string,
       value: t.array(t.any),
+    })
+  ),
+});
+
+const significantFieldValuesRt = t.type({
+  fields: t.array(
+    t.type({
+      field: t.string,
+      value: t.string,
     })
   ),
 });
@@ -216,6 +226,23 @@ export const coPilotPrompts = {
         LOGS_SYSTEM_MESSAGE,
         {
           content: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the \`message\` field: ${message}`,
+          role: 'user',
+        },
+      ];
+    },
+  }),
+  [CoPilotPromptId.ExplainLogSpike]: prompt({
+    params: t.type({
+      significantFieldValues: significantFieldValuesRt,
+    }),
+    messages: ({ significantFieldValues }) => {
+      return [
+        LOGS_SYSTEM_MESSAGE,
+        {
+          content: `You are an observability expert being consulted about an alert raised on elastic observability suite.
+          There has been an alert on spike of logs. The spike mainly consists of logs with field log.level with value “ERROR” and field message with value “MongoNetworkError: failed to connect to server… ok first connect”.
+          Please advice on what could be the 3 top causes and remediations for this alert.  Format your response on bullets.
+          `,
           role: 'user',
         },
       ];

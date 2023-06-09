@@ -26,6 +26,7 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { get } from 'lodash';
+import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import {
@@ -49,7 +50,7 @@ const AlertDetailsAppSection = ({
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
   const [selectedSeries, setSelectedSeries] = useState<string>('');
-  const { uiSettings } = useKibanaContextForPlugin().services;
+  const { uiSettings, observability } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
@@ -254,12 +255,14 @@ const AlertDetailsAppSection = ({
   };
 
   return (
-    <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
-      {getLogRatioChart()}
-      {getLogCountChart()}
-      {getLogsHistoryChart()}
-      {getExplainLogRateSpikesSection()}
-    </EuiFlexGroup>
+    <CoPilotContextProvider value={observability.getCoPilotService()}>
+      <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
+        {getLogRatioChart()}
+        {getLogCountChart()}
+        {getExplainLogRateSpikesSection()}
+        {getLogsHistoryChart()}
+      </EuiFlexGroup>
+    </CoPilotContextProvider>
   );
 };
 // eslint-disable-next-line import/no-default-export

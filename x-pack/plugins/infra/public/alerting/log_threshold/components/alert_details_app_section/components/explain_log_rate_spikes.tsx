@@ -16,18 +16,20 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { ExplainLogRateSpikesContent } from '@kbn/aiops-plugin/public';
 
 import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public';
+import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
+import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   CountRuleParams,
   PartialRuleParams,
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
-import { DEFAULT_LOG_VIEW } from '../../../../../observability_logs/log_view_state/src/defaults';
 import { getESQuery } from '../query';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
+import { DEFAULT_LOG_VIEW } from '../../../../../../common/log_views';
 
 export interface AlertDetailsExplainLogRateSpikesSectionProps {
   rule: Rule<PartialRuleParams>;
@@ -74,6 +76,34 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   const timeRange = { min: moment(alert.start).subtract(20, 'minutes'), max: moment(new Date()) };
 
+  const coPilotService = useCoPilot();
+
+  const significantFieldValues = {
+    fields: [
+      {
+        field: 'log.level',
+        value: 'ERROR',
+      },
+    ],
+  };
+
+  const explainLogSpikeParams = significantFieldValues
+    ? { significantFieldValues: { fields: significantFieldValues.fields } }
+    : undefined;
+
+  // const explainLogSpikeParams = useMemo(() => {
+  //   return significantFieldValues
+  //     ? { significantFieldValues: { fields: significantFieldValues.fields } }
+  //     : undefined;
+  // }, [significantFieldValues]);
+
+  const explainLogSpikeTitle = i18n.translate(
+    'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
+    {
+      defaultMessage: 'Why is there a spike?',
+    }
+  );
+
   return (
     <EuiPanel hasBorder={true} data-test-subj="explainLogRateSpikesAlertDetails">
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -112,6 +142,18 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
             />
           )}
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {coPilotService?.isEnabled() && explainLogSpikeParams ? (
+          <EuiFlexItem grow={false}>
+            <CoPilotPrompt
+              coPilot={coPilotService}
+              title={explainLogSpikeTitle}
+              params={explainLogSpikeParams}
+              promptId={CoPilotPromptId.ExplainLogSpike}
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </EuiPanel>
   );
