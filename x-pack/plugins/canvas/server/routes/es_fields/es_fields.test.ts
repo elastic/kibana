@@ -28,7 +28,7 @@ describe('Retrieve ES Fields', () => {
     const routerDeps = getMockedRouterDeps();
     initializeESFieldsRoute(routerDeps);
 
-    routeHandler = routerDeps.router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.versioned.get.mock.calls[0][1];
   });
 
   it(`returns 200 with fields from existing index/data view`, async () => {

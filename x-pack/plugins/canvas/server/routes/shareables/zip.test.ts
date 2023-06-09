@@ -30,7 +30,7 @@ describe('Zips Canvas shareables runtime together with workpad', () => {
   beforeEach(() => {
     const routerDeps = getMockedRouterDeps();
     initializeZipShareableWorkpadRoute(routerDeps);
-    routeHandler = routerDeps.router.post.mock.calls[0][1];
+    routeHandler = routerDeps.router.versioned.post.mock.calls[0][1];
   });
 
   afterAll(() => {

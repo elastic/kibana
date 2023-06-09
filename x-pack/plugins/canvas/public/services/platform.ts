@@ -33,11 +33,6 @@ export interface CanvasPlatformService {
   setFullscreen: ChromeStart['setIsVisible'];
   redirectLegacyUrl?: SpacesPluginStart['ui']['redirectLegacyUrl'];
   getLegacyUrlConflict?: SpacesPluginStart['ui']['components']['getLegacyUrlConflict'];
-
-  // TODO: these should go away.  We want thin accessors, not entire objects.
-  // Entire objects are hard to mock, and hide our dependency on the external service.
-  getSavedObjects: () => SavedObjectsStart;
-  getSavedObjectsClient: () => SavedObjectsClientContract;
   getUISettings: () => IUiSettingsClient;
   getHttp: () => HttpStart;
   getSavedObjectsManagement: () => SavedObjectsManagementPluginStart;

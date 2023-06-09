@@ -26,7 +26,7 @@ describe('GET workpad', () => {
     const routerDeps = getMockedRouterDeps();
     initializeGetWorkpadRoute(routerDeps);
 
-    routeHandler = routerDeps.router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.versioned.get.mock.calls[0][1];
   });
 
   afterEach(() => {

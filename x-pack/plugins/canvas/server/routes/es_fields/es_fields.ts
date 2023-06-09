@@ -20,39 +20,44 @@ const ESFieldsRequestSchema = schema.object({
 export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${API_ROUTE}/es_fields`,
-      validate: {
-        query: ESFieldsRequestSchema,
-      },
-    },
-    catchErrorHandler(async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { index, fields } = request.query;
-
-      const config = {
-        index,
-        fields: fields || '*',
-      };
-
-      const esFields = await client.fieldCaps(config).then((resp) => {
-        return mapValues(resp.fields, (types) => {
-          if (keys(types).length > 1) {
-            return 'conflict';
-          }
-
-          try {
-            return normalizeType(keys(types)[0]);
-          } catch (e) {
-            return 'unsupported';
-          }
-        });
-      });
-
-      return response.ok({
-        body: esFields,
-      });
+      access: 'internal',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { query: ESFieldsRequestSchema },
+        },
+      },
+      catchErrorHandler(async (context, request, response) => {
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const { index, fields } = request.query;
+
+        const config = {
+          index,
+          fields: fields || '*',
+        };
+
+        const esFields = await client.fieldCaps(config).then((resp) => {
+          return mapValues(resp.fields, (types) => {
+            if (keys(types).length > 1) {
+              return 'conflict';
+            }
+
+            try {
+              return normalizeType(keys(types)[0]);
+            } catch (e) {
+              return 'unsupported';
+            }
+          });
+        });
+
+        return response.ok({
+          body: esFields,
+        });
+      })
+    );
 }
