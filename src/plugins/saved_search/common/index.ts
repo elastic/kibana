@@ -24,12 +24,4 @@ export enum VIEW_MODE {
 export { SavedSearchType } from './constants';
 export { LATEST_VERSION } from './constants';
 
-export {
-  type ExpressionFunctionKibanaContext,
-  getKibanaContextFn,
-} from './expressions/kibana_context';
-export type {
-  KibanaContext,
-  ExecutionContextSearch,
-  ExpressionValueSearchContext,
-} from './expressions/kibana_context_type';
+export { getKibanaContextFn } from './expressions/kibana_context';

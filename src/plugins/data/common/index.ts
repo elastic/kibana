@@ -9,18 +9,6 @@
 // TODO: https://github.com/elastic/kibana/issues/109904
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import {
-  ExecutionContextSearch,
-  KibanaContext,
-  KibanaFilter,
-} from './search/expressions/kibana_context_type';
-
-export type { KibanaQueryOutput } from './search/expressions/kibana_context_type';
-import { KibanaQueryOutput } from './search/expressions/kibana_context_type';
-import { KibanaTimerangeOutput } from './search/expressions';
-
 export { DEFAULT_QUERY_LANGUAGE, KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from './constants';
 export type { ValueSuggestionsMethod } from './constants';
 export { DatatableUtilitiesService } from './datatable_utilities';
@@ -98,18 +86,3 @@ export {
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
 } from '@kbn/data-views-plugin/common';
-
-interface Arguments {
-  q?: KibanaQueryOutput[] | null;
-  filters?: KibanaFilter[] | null;
-  timeRange?: KibanaTimerangeOutput | null;
-  savedSearchId?: string | null;
-}
-
-export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
-  'kibana_context',
-  KibanaContext | null,
-  Arguments,
-  Promise<KibanaContext>,
-  ExecutionContext<Adapters, ExecutionContextSearch>
->;

@@ -7,10 +7,8 @@
  */
 import { Filter } from '@kbn/es-query';
 import { ExpressionValueBoxed, ExpressionValueFilter } from '@kbn/expressions-plugin/common';
-import type { Query, TimeRange, DataViewField } from '../..';
-import { adaptToExpressionValueFilter } from '../..';
-
-// todo remove this file, I think
+import { Query, TimeRange } from '../../query';
+import { adaptToExpressionValueFilter, DataViewField } from '../..';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ExecutionContextSearch = {

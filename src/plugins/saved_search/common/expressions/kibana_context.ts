@@ -8,35 +8,17 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/server';
-import { KibanaTimerangeOutput } from '@kbn/data-plugin/common';
-import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
-import { KibanaQueryOutput } from './kibana_context_type';
+import { ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
 import { SavedSearch } from '../types';
 
 export interface KibanaContextStartDependencies {
   getSavedSearch: (id: string) => Promise<SavedSearch>;
 }
-
-interface Arguments {
-  q?: KibanaQueryOutput[] | null;
-  filters?: KibanaFilter[] | null;
-  timeRange?: KibanaTimerangeOutput | null;
-  savedSearchId?: string | null;
-}
-
-export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
-  'kibana_context',
-  KibanaContext | null,
-  Arguments,
-  Promise<KibanaContext>,
-  ExecutionContext<Adapters, ExecutionContextSearch>
->;
 
 const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
   uniqBy<Query>(

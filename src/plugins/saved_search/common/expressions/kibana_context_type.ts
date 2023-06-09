@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter } from '@kbn/es-query';
-import { ExpressionValueBoxed, ExpressionValueFilter } from '@kbn/expressions-plugin/common';
-import type { Query, TimeRange, DataViewField } from '@kbn/data-plugin/common';
-import { adaptToExpressionValueFilter } from '@kbn/data-plugin/common';
 
+import { ExpressionValueFilter } from '@kbn/expressions-plugin/common';
+import { adaptToExpressionValueFilter, KibanaContext } from '@kbn/data-plugin/common';
+
+/*
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ExecutionContextSearch = {
   filters?: Filter[];
@@ -30,6 +30,7 @@ export type KibanaField = ExpressionValueBoxed<'kibana_field', DataViewField>;
 // TODO: These two are exported for legacy reasons - remove them eventually.
 export type KIBANA_CONTEXT_NAME = 'kibana_context';
 export type KibanaContext = ExpressionValueSearchContext;
+*/
 
 export const kibanaContext = {
   name: 'kibana_context',

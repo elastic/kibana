@@ -113,8 +113,12 @@ import {
 } from '../..';
 import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
-import { EsdslExpressionFunctionDefinition, filtersToAst, queryToAst } from '../expressions';
-import { ExpressionFunctionKibanaContext } from '../..';
+import {
+  EsdslExpressionFunctionDefinition,
+  ExpressionFunctionKibanaContext,
+  filtersToAst,
+  queryToAst,
+} from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [

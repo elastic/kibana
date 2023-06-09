@@ -12,10 +12,10 @@ import {
   AggsStart,
   DataView,
   DataViewSpec,
+  ExpressionValueSearchContext,
   parseEsInterval,
   AggConfigs,
 } from '@kbn/data-plugin/common';
-import { ExpressionValueSearchContext } from '@kbn/saved-search-plugin/common';
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';

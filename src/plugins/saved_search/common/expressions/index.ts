@@ -8,6 +8,6 @@
 
 export {
   kibanaContext,
-  type ExpressionValueSearchContext,
-  type ExecutionContextSearch,
+  // type ExpressionValueSearchContext,
+  // type ExecutionContextSearch,
 } from './kibana_context_type';
