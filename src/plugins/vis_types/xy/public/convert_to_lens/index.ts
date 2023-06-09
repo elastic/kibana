@@ -7,7 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { CollapseFunction } from '@kbn/visualizations-plugin/common';
+import { CollapseFunction, Column } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getVisSchemas,
