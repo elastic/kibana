@@ -22,7 +22,9 @@ import {
 import { FieldsConfig, to, from } from './shared';
 
 const { maxLengthField } = fieldValidators;
+
 const MAX_DATASET_LENGTH = 100;
+const MAX_NAMESPACE_LENGTH = 100;
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field configs */
@@ -93,7 +95,7 @@ const fieldsConfig: FieldsConfig = {
     validations: [
       {
         validator: maxLengthField({
-          length: MAX_DATASET_LENGTH,
+          length: MAX_NAMESPACE_LENGTH,
           message: i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.rerouteForm.namespaceLengthError',
             {
