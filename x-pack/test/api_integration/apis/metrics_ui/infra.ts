@@ -89,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: [
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
+              { name: 'host.ip', value: null },
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
@@ -120,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: [
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
+              { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.4563333333333333 }],
             name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
@@ -128,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: [
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
+              { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.32066666666666666 }],
             name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
@@ -136,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: [
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
+              { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.2346666666666667 }],
             name: 'gke-observability-8--observability-8--bc1afd95-nhhw',

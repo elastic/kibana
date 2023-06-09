@@ -26,7 +26,6 @@ import {
   CASE_DETAILS_PAGE_TITLE,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
-  CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME,
   CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT,
   CASE_DETAILS_USERNAMES,
   PARTICIPANTS,
@@ -50,7 +49,7 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../tasks/create_new_case';
-import { loginWithUser, visitWithoutDateRange } from '../../tasks/login';
+import { loginWithUser, visit, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL, OVERVIEW_URL } from '../../urls/navigation';
 
@@ -99,8 +98,7 @@ describe('Cases', () => {
     const expectedTags = this.mycase.tags.join('');
     cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', this.mycase.name);
     cy.get(CASE_DETAILS_STATUS).should('have.text', 'Open');
-    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME).should('have.text', this.mycase.reporter);
-    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT).should('have.text', 'added description');
+    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT).should('have.text', 'Description');
     cy.get(CASE_DETAILS_DESCRIPTION).should(
       'have.text',
       `${this.mycase.description} ${this.mycase.timeline.title}`
@@ -123,7 +121,7 @@ describe('Cases', () => {
     cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
 
-    cy.visit(OVERVIEW_URL);
+    visit(OVERVIEW_URL);
     cy.get(OVERVIEW_CASE_NAME).should('have.text', this.mycase.name);
     cy.get(OVERVIEW_CASE_DESCRIPTION).should(
       'have.text',

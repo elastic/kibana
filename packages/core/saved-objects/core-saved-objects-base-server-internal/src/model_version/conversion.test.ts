@@ -11,6 +11,7 @@ import {
   virtualVersionToModelVersion,
   modelVersionToVirtualVersion,
   assertValidModelVersion,
+  assertValidVirtualVersion,
 } from './conversion';
 
 describe('isVirtualModelVersion', () => {
@@ -101,5 +102,21 @@ describe('assertValidModelVersion', () => {
   it('returns the model version as a number', () => {
     expect(assertValidModelVersion(4)).toEqual(4);
     expect(assertValidModelVersion('3')).toEqual(3);
+  });
+});
+
+describe('assertValidVirtualVersion', () => {
+  it('throws if the provided value is not a valid semver', () => {
+    expect(() => assertValidVirtualVersion('foooo')).toThrowErrorMatchingInlineSnapshot(
+      `"Virtual versions must be valid semver versions"`
+    );
+    expect(() => assertValidVirtualVersion('1.2.3.4.5.6.7')).toThrowErrorMatchingInlineSnapshot(
+      `"Virtual versions must be valid semver versions"`
+    );
+  });
+
+  it('returns the virtual version', () => {
+    expect(assertValidVirtualVersion('7.17.5')).toEqual('7.17.5');
+    expect(assertValidVirtualVersion('10.3.0')).toEqual('10.3.0');
   });
 });

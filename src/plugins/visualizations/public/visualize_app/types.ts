@@ -39,7 +39,7 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -107,6 +107,7 @@ export interface VisualizeServices extends CoreStart {
   scopedHistory: ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  savedSearch: SavedSearchPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
@@ -122,6 +123,7 @@ export interface VisInstance {
   embeddableHandler: VisualizeEmbeddableContract;
   panelTitle?: string;
   panelDescription?: string;
+  panelTimeRange?: TimeRange;
 }
 
 export type SavedVisInstance = VisInstance;

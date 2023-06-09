@@ -48,12 +48,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
       ],
     } as unknown as SavedObjectsFindResponse);
 
-    const startDate = new Date().toISOString();
-
-    const result = await getActiveMaintenanceWindows(mockContext, {
-      start: startDate,
-      interval: '1h',
-    });
+    const result = await getActiveMaintenanceWindows(mockContext);
 
     const findCallParams = savedObjectsClient.find.mock.calls[0][0];
 
@@ -65,33 +60,11 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
           "filter": Array [
             Object {
               "bool": Object {
-                "filter": Array [
+                "minimum_should_match": 1,
+                "should": Array [
                   Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "range": Object {
-                            "maintenance-window.attributes.events": Object {
-                              "gte": "2023-02-26T00:00:00.000Z",
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "range": Object {
-                            "maintenance-window.attributes.events": Object {
-                              "lte": "2023-02-26T01:00:00.000Z",
-                            },
-                          },
-                        },
-                      ],
+                    "match": Object {
+                      "maintenance-window.attributes.events": "2023-02-26T00:00:00.000Z",
                     },
                   },
                 ],
@@ -131,12 +104,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
       saved_objects: [],
     } as unknown as SavedObjectsFindResponse);
 
-    const startDate = new Date().toISOString();
-
-    const result = await getActiveMaintenanceWindows(mockContext, {
-      start: startDate,
-      interval: '4d',
-    });
+    const result = await getActiveMaintenanceWindows(mockContext);
 
     const findCallParams = savedObjectsClient.find.mock.calls[0][0];
 
@@ -147,33 +115,11 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
           "filter": Array [
             Object {
               "bool": Object {
-                "filter": Array [
+                "minimum_should_match": 1,
+                "should": Array [
                   Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "range": Object {
-                            "maintenance-window.attributes.events": Object {
-                              "gte": "2023-02-26T00:00:00.000Z",
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "range": Object {
-                            "maintenance-window.attributes.events": Object {
-                              "lte": "2023-03-02T00:00:00.000Z",
-                            },
-                          },
-                        },
-                      ],
+                    "match": Object {
+                      "maintenance-window.attributes.events": "2023-02-26T00:00:00.000Z",
                     },
                   },
                 ],
@@ -203,17 +149,12 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
 
     savedObjectsClient.find.mockRejectedValueOnce('something went wrong');
 
-    const startDate = new Date().toISOString();
-
     await expect(async () => {
-      await getActiveMaintenanceWindows(mockContext, {
-        start: startDate,
-        interval: '4d',
-      });
+      await getActiveMaintenanceWindows(mockContext);
     }).rejects.toThrowError();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
-      'Failed to find active maintenance window by interval: 4d with start date: 2023-02-26T00:00:00.000Z, Error: something went wrong'
+      'Failed to find active maintenance window by interval, Error: something went wrong'
     );
   });
 });

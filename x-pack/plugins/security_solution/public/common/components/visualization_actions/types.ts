@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  DatatableVisualizationState,
+  FieldBasedIndexPatternColumn,
+  FormBasedPersistedState,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
@@ -62,16 +68,16 @@ export interface LensEmbeddableComponentProps {
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
-  height?: string;
+  height?: number; // px
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
   lensAttributes?: LensAttributes;
   onLoad?: OnEmbeddableLoaded;
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
-  width?: string;
+  width?: string | number;
   withActions?: boolean;
 }
 
@@ -142,4 +148,42 @@ export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> 
     total: number;
     hits: Hit[];
   };
+}
+
+export interface SavedObjectReference {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export interface LensDataTableAttributes<TVisType, TVisState> {
+  description?: string;
+  references: SavedObjectReference[];
+  visualizationType: TVisType;
+  state: {
+    query: Query;
+    globalPalette?: {
+      activePaletteId: string;
+      state?: unknown;
+    };
+    filters: Filter[];
+    adHocDataViews?: Record<string, DataViewSpec>;
+    internalReferences?: SavedObjectReference[];
+    datasourceStates: {
+      formBased: FormBasedPersistedState;
+    };
+    visualization: TVisState;
+  };
+  title: string;
+}
+
+export interface LensDataTableEmbeddable {
+  attributes: LensDataTableAttributes<'lnsDatatable', DatatableVisualizationState>;
+  id: string;
+  timeRange: { from: string; to: string; fromStr: string; toStr: string };
+}
+
+export interface LensEmbeddableDataTableColumn extends FieldBasedIndexPatternColumn {
+  operationType: string;
+  params?: unknown;
 }

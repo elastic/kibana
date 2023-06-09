@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
@@ -20,11 +21,9 @@ import { getServiceLocationsRoute } from './synthetics_service/get_service_locat
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
 import {
   disableSyntheticsRoute,
-  enableSyntheticsRoute,
   getSyntheticsEnablementRoute,
 } from './synthetics_service/enablement';
 import {
-  getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorOverviewRoute,
   getSyntheticsMonitorRoute,
 } from './monitor_cruds/get_monitor';
@@ -46,12 +45,16 @@ import {
 } from '../legacy_uptime/routes';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { addSyntheticsParamsRoute } from './settings/add_param';
+import { deleteSyntheticsParamsRoute } from './settings/delete_param';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 import { createNetworkEventsRoute } from './network_events';
 import { addPrivateLocationRoute } from './settings/private_locations/add_private_location';
 import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
 import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
+import { getSyntheticsFilters } from './filters/filters';
+import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
+import { getLocationMonitors } from './settings/private_locations/get_location_monitors';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -61,7 +64,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
   editSyntheticsMonitorRoute,
-  enableSyntheticsRoute,
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,
   getSyntheticsProjectMonitorsRoute,
@@ -80,6 +82,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsParamsRoute,
   editSyntheticsParamsRoute,
   addSyntheticsParamsRoute,
+  deleteSyntheticsParamsRoute,
   syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
@@ -93,7 +96,10 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   deletePackagePolicyRoute,
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
+  getLocationMonitors,
   getPrivateLocationsRoute,
+  getSyntheticsFilters,
+  inspectSyntheticsMonitorRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

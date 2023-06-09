@@ -496,7 +496,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   },
   inference: {
     FieldsComponent: Inference,
-    forLicenseAtLeast: 'platinum',
     docLinkPath: '/inference-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.inference', {
       defaultMessage: 'Inference',

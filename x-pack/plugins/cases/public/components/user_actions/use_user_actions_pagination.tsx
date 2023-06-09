@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
-import type { CaseUserActions } from '../../containers/types';
+import type { UserActionUI } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 interface UserActionsPagination {
@@ -32,12 +32,12 @@ export const useUserActionsPagination = ({
 
   const showBottomList = lastPage > 1;
 
-  const infiniteCaseUserActions = useMemo<CaseUserActions[]>(() => {
+  const infiniteCaseUserActions = useMemo<UserActionUI[]>(() => {
     if (!caseInfiniteUserActionsData?.pages?.length || isLoadingInfiniteUserActions) {
       return [];
     }
 
-    const userActionsData: CaseUserActions[] = [];
+    const userActionsData: UserActionUI[] = [];
 
     caseInfiniteUserActionsData.pages.forEach((page) => userActionsData.push(...page.userActions));
 

@@ -50,12 +50,15 @@ describe('links', () => {
 
   const getPlugins = (
     roles: string[],
-    fleetAuthzOverrides: DeepPartial<FleetAuthz> = {}
+    fleetAuthzOverrides: DeepPartial<FleetAuthz> = {},
+    noUserAuthz: boolean = false
   ): StartPlugins => {
     return {
       security: {
         authc: {
-          getCurrentUser: jest.fn().mockReturnValue({ roles }),
+          getCurrentUser: noUserAuthz
+            ? jest.fn().mockReturnValue('')
+            : jest.fn().mockReturnValue({ roles }),
         },
       },
       fleet: {
@@ -85,6 +88,24 @@ describe('links', () => {
 
     const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
     expect(filteredLinks).toEqual(links);
+  });
+
+  it('should not return any endpoint management link for user with all sub-feature privileges when no user authz', async () => {
+    const filteredLinks = await getManagementFilteredLinks(
+      coreMockStarted,
+      getPlugins([], {}, true)
+    );
+    expect(filteredLinks).toEqual(
+      getLinksWithout(
+        SecurityPageName.blocklist,
+        SecurityPageName.endpoints,
+        SecurityPageName.eventFilters,
+        SecurityPageName.hostIsolationExceptions,
+        SecurityPageName.policies,
+        SecurityPageName.responseActionsHistory,
+        SecurityPageName.trustedApps
+      )
+    );
   });
 
   describe('Action Logs', () => {
@@ -125,9 +146,6 @@ describe('links', () => {
 
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
       licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
@@ -166,9 +184,6 @@ describe('links', () => {
 
       fakeHttpServices.get.mockResolvedValue({ total: 100 });
       licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
@@ -201,31 +216,7 @@ describe('links', () => {
     });
   });
 
-  // this can be removed after removing endpointRbacEnabled feature flag
-  describe('without endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: false },
-      });
-    });
-
-    it('shows Trusted Applications for non-superuser, too', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
-
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
-
-      expect(filteredLinks).toEqual(links);
-    });
-  });
-
-  // this can be the default after removing endpointRbacEnabled feature flag
-  describe('with endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
-    });
-
+  describe('RBAC checks', () => {
     it('should return all links for user with all sub-feature privileges', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 

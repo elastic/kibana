@@ -115,6 +115,7 @@ export const SyncJobs: React.FC = () => {
     <>
       <SyncJobFlyout onClose={() => setSyncJobFlyout(undefined)} syncJob={syncJobFlyout} />
       <EuiBasicTable
+        data-test-subj="entSearchContent-index-syncJobs-table"
         items={syncJobs}
         columns={columns}
         hasActions

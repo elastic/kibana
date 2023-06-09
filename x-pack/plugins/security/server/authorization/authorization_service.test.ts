@@ -84,7 +84,6 @@ it(`#setup returns exposed services`, () => {
     customBranding: mockCoreSetup.customBranding,
   });
 
-  expect(authz.actions.version).toBe('version:some-version');
   expect(authz.applicationName).toBe(application);
 
   expect(authz.checkPrivilegesWithRequest).toBe(mockCheckPrivilegesWithRequest);

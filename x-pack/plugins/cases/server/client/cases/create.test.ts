@@ -77,4 +77,22 @@ describe('create', () => {
       });
     });
   });
+
+  describe('Attributes', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should throw an error with an excess field exists', async () => {
+      await expect(
+        // @ts-expect-error foo is an invalid field
+        create({ ...theCase, foo: 'bar' }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: invalid keys \\"foo\\""`
+      );
+    });
+  });
 });

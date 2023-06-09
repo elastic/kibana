@@ -23,7 +23,6 @@ import type {
   IRouter,
   RequestHandler,
   VersionedRouter,
-  IRouterWithVersion,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
@@ -131,7 +130,7 @@ interface RouterOptions {
  * @internal
  */
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
-  implements IRouterWithVersion<Context>
+  implements IRouter<Context>
 {
   public routes: Array<Readonly<RouterRoute>> = [];
   public get: IRouter<Context>['get'];

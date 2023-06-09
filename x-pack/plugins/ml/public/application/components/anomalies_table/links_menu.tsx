@@ -22,13 +22,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
+import {
+  isCategorizationAnomaly,
+  isRuleSupported,
+  type MlCustomUrlAnomalyRecordDoc,
+  type MlKibanaUrlConfig,
+  type MlAnomaliesTableRecord,
+} from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import {
-  formatHumanReadableDateTimeSeconds,
-  timeFormatter,
-} from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
@@ -41,27 +45,21 @@ import {
   getDateFormatTz,
   SourceIndicesWithGeoFields,
 } from '../../explorer/explorer_utils';
-import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import type {
-  CustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
-} from '../../../../common/types/custom_urls';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 interface LinksMenuProps {
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   bounds: TimeRangeBounds;
   showMapsLink: boolean;
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
-  showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
+  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord) => void;
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
@@ -83,7 +81,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     return mlJobService.getJob(props.anomaly.jobId);
   }, [props.anomaly.jobId]);
 
-  const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
+  const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const index = job.datafeed_config.indices[0];
     const dataViewId = await getDataViewIdFromName(index);
 
@@ -121,7 +119,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const getAnomalySourceMapsLink = async (
-    anomaly: AnomaliesTableRecord,
+    anomaly: MlAnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
     const index = job.datafeed_config.indices[0];
@@ -287,7 +285,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(props.anomaly)]);
 
-  const openCustomUrl = (customUrl: KibanaUrlConfig) => {
+  const openCustomUrl = (customUrl: MlKibanaUrlConfig) => {
     const { anomaly, interval, isAggregatedData } = props;
 
     // eslint-disable-next-line no-console
@@ -295,7 +293,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = cloneDeep(anomaly.source) as CustomUrlAnomalyRecordDoc;
+    const record = cloneDeep(anomaly.source) as MlCustomUrlAnomalyRecordDoc;
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval =
@@ -376,7 +374,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     } else {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
-      const urlPath = getUrlForRecord(customUrl, record as CustomUrlAnomalyRecordDoc);
+      const urlPath = getUrlForRecord(customUrl, record as MlCustomUrlAnomalyRecordDoc);
       openCustomUrlWindow(urlPath, customUrl, basePath);
     }
   };

@@ -127,7 +127,7 @@ describe('ProjectMonitorFormatter', () => {
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfig = jest.fn();
+  syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
 
@@ -149,6 +149,13 @@ describe('ProjectMonitorFormatter', () => {
 
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
+  const routeContext = {
+    savedObjectsClient: soClient,
+    server: serverMock,
+    syntheticsMonitorClient: monitorClient,
+    request: kibanaRequest,
+  } as any;
+
   jest.spyOn(locationsUtil, 'getAllLocations').mockImplementation(
     async () =>
       ({
@@ -161,12 +168,9 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
+      routeContext,
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -210,11 +214,8 @@ describe('ProjectMonitorFormatter', () => {
       projectId: 'test-project',
       spaceId: 'default-space',
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
+      routeContext,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -254,15 +255,18 @@ describe('ProjectMonitorFormatter', () => {
       },
     } as any;
 
+    soClient.bulkCreate.mockImplementation(async () => {
+      return {
+        saved_objects: [],
+      };
+    });
+
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -301,11 +305,8 @@ describe('ProjectMonitorFormatter', () => {
       projectId: 'test-project',
       spaceId: 'default-space',
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -345,11 +346,8 @@ describe('ProjectMonitorFormatter', () => {
       projectId: 'test-project',
       spaceId: 'default-space',
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -385,7 +383,7 @@ describe('ProjectMonitorFormatter', () => {
 
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
-    monitorClient.addMonitors = jest.fn().mockReturnValue({});
+    monitorClient.addMonitors = jest.fn().mockReturnValue([]);
 
     const telemetrySpy = jest
       .spyOn(telemetryHooks, 'sendTelemetryEvents')
@@ -395,11 +393,8 @@ describe('ProjectMonitorFormatter', () => {
       projectId: 'test-project',
       spaceId: 'default-space',
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);

@@ -21,7 +21,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -38,6 +37,7 @@ import {
   getThresholdRuleForSignalTesting,
   waitForRulePartialFailure,
   createRule,
+  deleteAllAlerts,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import {
@@ -53,6 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rules', () => {
     describe('creating rules', () => {
@@ -69,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -123,11 +124,14 @@ export default ({ getService }: FtrProviderContext) => {
          this pops up again elsewhere.
         */
         it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-          const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send(simpleRule)
+            .send(rule)
             .expect(200);
 
           await waitForRuleSuccess({ supertest, log, id: body.id });
@@ -161,11 +165,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
-          const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send(simpleRule)
+            .send(rule)
             .expect(200);
 
           await waitForRuleSuccess({ supertest, log, id: body.id });
@@ -509,7 +516,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override'

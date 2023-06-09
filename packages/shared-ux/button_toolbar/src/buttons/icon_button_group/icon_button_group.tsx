@@ -77,6 +77,7 @@ export const IconButtonGroup = ({ buttons, legend }: Props) => {
       onChange={onChangeIconsMulti}
       type="multi"
       isIconOnly
+      css={iconButtonGroupStyles.buttonGroup}
     />
   );
 };

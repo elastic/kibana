@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Authentication Host Table Component rendering it renders the host authentication table 1`] = `
-.c2 {
-  margin-top: 8px;
-}
-
 .c2 .siemSubtitle__item {
   color: #7a7f89;
   font-size: 12px;

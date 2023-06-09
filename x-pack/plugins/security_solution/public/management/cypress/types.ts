@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { ActionDetails } from '../../../common/endpoint/types';
 import type { CyLoadEndpointDataOptions } from './support/plugin_handlers/endpoint_data_loader';
 
 type PossibleChainable =
@@ -41,5 +42,15 @@ export type ReturnTypeFromChainable<C extends PossibleChainable> = C extends Cyp
   : never;
 
 export type IndexEndpointHostsCyTaskOptions = Partial<
-  { count: number } & Pick<CyLoadEndpointDataOptions, 'version' | 'os'>
+  { count: number; withResponseActions: boolean; numResponseActions?: number } & Pick<
+    CyLoadEndpointDataOptions,
+    'version' | 'os' | 'isolation'
+  >
 >;
+
+export interface HostActionResponse {
+  data: {
+    action: ActionDetails;
+    state: { state?: 'success' | 'failure' };
+  };
+}

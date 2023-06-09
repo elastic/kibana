@@ -39,7 +39,7 @@ interface AddFileProps {
 const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
   const { owner, permissions } = useCasesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
-  const { isLoading, createAttachments } = useCreateAttachments();
+  const { isLoading, mutateAsync: createAttachments } = useCreateAttachments();
   const refreshAttachmentsTable = useRefreshCaseViewPage();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -68,7 +68,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         await createAttachments({
           caseId,
           caseOwner: owner[0],
-          data: [
+          attachments: [
             {
               type: CommentType.externalReference,
               externalReferenceId: file.id,
@@ -89,9 +89,9 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
               },
             },
           ],
-          updateCase: refreshAttachmentsTable,
-          throwOnError: true,
         });
+
+        refreshAttachmentsTable();
 
         showSuccessToast(i18n.SUCCESSFUL_UPLOAD_FILE_NAME(file.fileJSON.name));
       } catch (error) {

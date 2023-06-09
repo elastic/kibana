@@ -11,7 +11,7 @@ import { links as detectionLinks } from '../../detections/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
-import { threatHuntingLandingLinks } from '../../landing_pages/links';
+import { exploreLinks } from '../../explore/links';
 import { gettingStartedLinks } from '../../overview/links';
 import { rootLinks as cloudSecurityPostureRootLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
@@ -25,10 +25,10 @@ export const links = Object.freeze([
   cloudSecurityPostureRootLinks,
   timelinesLinks,
   casesLinks,
-  threatHuntingLandingLinks,
+  exploreLinks,
+  indicatorsLinks,
   gettingStartedLinks,
   managementLinks,
-  indicatorsLinks,
 ]);
 
 export const getFilteredLinks = async (
@@ -43,9 +43,9 @@ export const getFilteredLinks = async (
     cloudSecurityPostureRootLinks,
     timelinesLinks,
     casesLinks,
-    threatHuntingLandingLinks,
+    exploreLinks,
+    indicatorsLinks,
     gettingStartedLinks,
     managementFilteredLinks,
-    indicatorsLinks,
   ]);
 };

@@ -49,7 +49,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             title={iconTitle}
             size="s"
             css={css`
-              color: ${euiTheme.colors.emptyShade};
+              color: transparent;
               font-size: ${xsFontSize};
               height: ${euiTheme.size.l} !important;
               .euiButtonEmpty__content {
@@ -68,22 +68,29 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <div>
-        {messages.map(({ shortMessage, longMessage }, index) => (
-          <aside
-            key={`${shortMessage}-${index}`}
-            css={css`
-              padding: ${index > 0 ? 0 : euiTheme.size.base} ${euiTheme.size.base}
-                ${index > 0 ? euiTheme.size.s : 0};
-            `}
-          >
-            {index ? <EuiHorizontalRule margin="s" /> : null}
-            <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
-              <h3>{shortMessage}</h3>
-            </EuiTitle>
-            <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
-          </aside>
-        ))}
+      <div
+        css={css`
+          max-width: 280px;
+        `}
+      >
+        {messages.map(({ shortMessage, longMessage }, index) => {
+          return (
+            <>
+              {index ? <EuiHorizontalRule margin="none" /> : null}
+              <aside
+                key={`${shortMessage}-${index}`}
+                css={css`
+                  padding: ${euiTheme.size.base};
+                `}
+              >
+                <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
+                  <h3>{shortMessage}</h3>
+                </EuiTitle>
+                <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
+              </aside>
+            </>
+          );
+        })}
       </div>
     </EuiPopover>
   );

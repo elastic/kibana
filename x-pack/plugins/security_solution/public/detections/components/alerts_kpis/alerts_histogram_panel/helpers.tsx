@@ -9,8 +9,12 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
+import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];
 
@@ -119,3 +123,61 @@ export const buildCombinedQueries = (query?: string) => {
     return [];
   }
 };
+
+interface CreateResetGroupByFieldActionProps {
+  callback?: () => void;
+  order?: number;
+}
+
+type CreateResetGroupByFieldAction = (params?: CreateResetGroupByFieldActionProps) => Action;
+export const createResetGroupByFieldAction: CreateResetGroupByFieldAction = ({
+  callback,
+  order,
+} = {}) => ({
+  id: 'resetGroupByField',
+  getDisplayName(): string {
+    return RESET_GROUP_BY_FIELDS;
+  },
+  getIconType(): string | undefined {
+    return 'editorRedo';
+  },
+  type: 'actionButton',
+  async isCompatible(): Promise<boolean> {
+    return true;
+  },
+  async execute({
+    embeddable,
+  }: ActionExecutionContext<{
+    embeddable: Embeddable<LensDataTableEmbeddable>;
+  }>): Promise<void> {
+    callback?.();
+
+    const input = embeddable.getInput();
+    const {
+      attributes: {
+        state: {
+          visualization: { columns },
+        },
+      },
+    } = input;
+
+    // Unhide all the columns
+    embeddable.updateInput({
+      ...input,
+      attributes: {
+        ...input.attributes,
+        state: {
+          ...input.attributes.state,
+          visualization: {
+            ...input.attributes.state.visualization,
+            columns: columns.map((c) => ({
+              ...c,
+              hidden: false,
+            })),
+          },
+        },
+      },
+    });
+  },
+  order,
+});

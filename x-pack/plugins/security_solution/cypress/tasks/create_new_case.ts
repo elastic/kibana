@@ -70,9 +70,9 @@ export const fillJiraConnectorOptions = (jiraConnector: JiraConnectorOptions) =>
   cy.get(CONNECTOR_SELECTOR).click({ force: true });
   cy.get(SELECT_JIRA).click({ force: true });
   cy.get(SELECT_ISSUE_TYPE).should('exist');
+  cy.get(SELECT_ISSUE_TYPE).select(jiraConnector.issueType);
 
   cy.get(SELECT_PRIORITY).should('exist');
-  cy.get(SELECT_ISSUE_TYPE).select(jiraConnector.issueType);
   cy.get(SELECT_PRIORITY).select(jiraConnector.priority);
 };
 

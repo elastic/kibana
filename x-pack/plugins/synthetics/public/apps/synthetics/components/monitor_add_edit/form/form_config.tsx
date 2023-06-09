@@ -39,10 +39,13 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
     components: [
       FIELD(readOnly)[ConfigKey.USERNAME],
       FIELD(readOnly)[ConfigKey.PASSWORD],
-      FIELD(readOnly)[ConfigKey.PROXY_URL],
       FIELD(readOnly)[ConfigKey.REQUEST_METHOD_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_BODY_CHECK],
+      FIELD(readOnly)[ConfigKey.PROXY_URL],
+      FIELD(readOnly)[ConfigKey.PROXY_HEADERS],
+      FIELD(readOnly)[ConfigKey.MODE],
+      FIELD(readOnly)[ConfigKey.IPV4],
     ],
   },
   responseConfig: {
@@ -58,6 +61,7 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
     components: [
       FIELD(readOnly)[ConfigKey.RESPONSE_HEADERS_INDEX],
       FIELD(readOnly)[ConfigKey.RESPONSE_BODY_INDEX],
+      FIELD(readOnly)[ConfigKey.RESPONSE_BODY_MAX_BYTES],
     ],
   },
   responseChecks: {
@@ -75,6 +79,7 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
       FIELD(readOnly)[ConfigKey.RESPONSE_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE],
       FIELD(readOnly)[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE],
+      FIELD(readOnly)[ConfigKey.RESPONSE_JSON_CHECK],
     ],
   },
 });
@@ -93,6 +98,8 @@ export const TCP_ADVANCED = (readOnly: boolean) => ({
     components: [
       FIELD(readOnly)[`${ConfigKey.PROXY_URL}__tcp`],
       FIELD(readOnly)[ConfigKey.REQUEST_SEND_CHECK],
+      FIELD(readOnly)[ConfigKey.MODE],
+      FIELD(readOnly)[ConfigKey.IPV4],
     ],
   },
   responseChecks: {
@@ -106,6 +113,21 @@ export const TCP_ADVANCED = (readOnly: boolean) => ({
       }
     ),
     components: [FIELD(readOnly)[ConfigKey.RESPONSE_RECEIVE_CHECK]],
+  },
+});
+
+export const ICMP_ADVANCED = (readOnly: boolean) => ({
+  requestConfig: {
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfigICMP.title', {
+      defaultMessage: 'Request configuration',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.requestConfigICMP.description',
+      {
+        defaultMessage: 'Configure the payload sent to the remote host.',
+      }
+    ),
+    components: [FIELD(readOnly)[ConfigKey.MODE], FIELD(readOnly)[ConfigKey.IPV4]],
   },
 });
 
@@ -264,6 +286,6 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
-    advanced: [DEFAULT_DATA_OPTIONS(readOnly)],
+    advanced: [DEFAULT_DATA_OPTIONS(readOnly), ICMP_ADVANCED(readOnly).requestConfig],
   },
 });

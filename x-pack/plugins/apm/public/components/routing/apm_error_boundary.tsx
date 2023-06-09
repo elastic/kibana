@@ -14,17 +14,26 @@ import { ApmPluginStartDeps } from '../../plugin';
 
 export function ApmErrorBoundary({ children }: { children?: React.ReactNode }) {
   const location = useLocation();
-  return <ErrorBoundary key={location.pathname}>{children}</ErrorBoundary>;
+  return <ErrorBoundary pathname={location.pathname}>{children}</ErrorBoundary>;
 }
 
 class ErrorBoundary extends React.Component<
-  { children?: React.ReactNode },
+  { children?: React.ReactNode; pathname: string },
   { error?: Error },
   {}
 > {
   public state: { error?: Error } = {
     error: undefined,
   };
+
+  componentDidUpdate(prevProps: { pathname: string }) {
+    if (
+      this.props.pathname !== prevProps.pathname &&
+      this.state.error !== undefined
+    ) {
+      this.setState({ error: undefined });
+    }
+  }
 
   static getDerivedStateFromError(error: Error) {
     return { error };
@@ -66,7 +75,6 @@ function ErrorWithTemplate({ error }: { error: Error }) {
   );
 }
 
-function DummyComponent({ error }: { error: Error }) {
+function DummyComponent({ error }: { error: Error }): any {
   throw error;
-  return <div />;
 }

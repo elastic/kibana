@@ -27,8 +27,9 @@ describe('kibana_usage', () => {
   });
 
   const kibanaIndex = '.kibana-tests';
+  const getIndicesForTypes = () => Promise.resolve([kibanaIndex]);
 
-  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, kibanaIndex));
+  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, getIndicesForTypes));
   afterAll(() => jest.clearAllTimers());
 
   afterEach(() => getSavedObjectsCountsMock.mockReset());

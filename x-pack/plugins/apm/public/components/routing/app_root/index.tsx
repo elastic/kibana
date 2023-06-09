@@ -12,15 +12,14 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  HeaderMenuPortal,
-  InspectorContextProvider,
-} from '@kbn/observability-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -56,6 +55,9 @@ export function ApmAppRoot({
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
+  const coPilotService =
+    apmPluginContextValue.plugins.observability.getCoPilotService();
+
   return (
     <RedirectAppLinks
       application={core.application}
@@ -68,38 +70,42 @@ export function ApmAppRoot({
           <i18nCore.Context>
             <TimeRangeIdContextProvider>
               <RouterProvider history={history} router={apmRouter as any}>
-                <ApmErrorBoundary>
-                  <RedirectDependenciesToDependenciesInventory>
-                    <RedirectWithDefaultEnvironment>
-                      <RedirectWithDefaultDateRange>
-                        <RedirectWithOffset>
-                          <TrackPageview>
-                            <UpdateExecutionContextOnRouteChange>
-                              <BreadcrumbsContextProvider>
-                                <UrlParamsProvider>
-                                  <LicenseProvider>
-                                    <AnomalyDetectionJobsContextProvider>
-                                      <InspectorContextProvider>
-                                        <ApmThemeProvider>
-                                          <MountApmHeaderActionMenu />
+                <CoPilotContextProvider value={coPilotService}>
+                  <ApmErrorBoundary>
+                    <RedirectDependenciesToDependenciesInventory>
+                      <RedirectWithDefaultEnvironment>
+                        <RedirectWithDefaultDateRange>
+                          <RedirectWithOffset>
+                            <TrackPageview>
+                              <UpdateExecutionContextOnRouteChange>
+                                <BreadcrumbsContextProvider>
+                                  <UrlParamsProvider>
+                                    <LicenseProvider>
+                                      <AnomalyDetectionJobsContextProvider>
+                                        <InspectorContextProvider>
+                                          <ApmThemeProvider>
+                                            <MountApmHeaderActionMenu />
 
-                                          <Route
-                                            component={ScrollToTopOnPathChange}
-                                          />
-                                          <RouteRenderer />
-                                        </ApmThemeProvider>
-                                      </InspectorContextProvider>
-                                    </AnomalyDetectionJobsContextProvider>
-                                  </LicenseProvider>
-                                </UrlParamsProvider>
-                              </BreadcrumbsContextProvider>
-                            </UpdateExecutionContextOnRouteChange>
-                          </TrackPageview>
-                        </RedirectWithOffset>
-                      </RedirectWithDefaultDateRange>
-                    </RedirectWithDefaultEnvironment>
-                  </RedirectDependenciesToDependenciesInventory>
-                </ApmErrorBoundary>
+                                            <Route
+                                              component={
+                                                ScrollToTopOnPathChange
+                                              }
+                                            />
+                                            <RouteRenderer />
+                                          </ApmThemeProvider>
+                                        </InspectorContextProvider>
+                                      </AnomalyDetectionJobsContextProvider>
+                                    </LicenseProvider>
+                                  </UrlParamsProvider>
+                                </BreadcrumbsContextProvider>
+                              </UpdateExecutionContextOnRouteChange>
+                            </TrackPageview>
+                          </RedirectWithOffset>
+                        </RedirectWithDefaultDateRange>
+                      </RedirectWithDefaultEnvironment>
+                    </RedirectDependenciesToDependenciesInventory>
+                  </ApmErrorBoundary>
+                </CoPilotContextProvider>
               </RouterProvider>
             </TimeRangeIdContextProvider>
           </i18nCore.Context>

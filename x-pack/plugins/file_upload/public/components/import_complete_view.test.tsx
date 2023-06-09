@@ -33,6 +33,11 @@ jest.mock('../kibana_services', () => ({
       get: jest.fn(),
     };
   },
+  getSettings: () => {
+    return {
+      get: jest.fn(),
+    };
+  },
 }));
 
 test('Should render success', () => {

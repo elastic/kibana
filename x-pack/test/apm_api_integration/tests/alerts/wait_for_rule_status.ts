@@ -53,3 +53,33 @@ export async function waitForDocumentInIndex<T>({
     { retries: 10 }
   );
 }
+
+export async function waitForAlertInIndex<T>({
+  es,
+  indexName,
+  ruleId,
+}: {
+  es: Client;
+  indexName: string;
+  ruleId: string;
+}): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
+  return pRetry(
+    async () => {
+      const response = await es.search<T>({
+        index: indexName,
+        body: {
+          query: {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
+            },
+          },
+        },
+      });
+      if (response.hits.hits.length === 0) {
+        throw new Error('No hits found');
+      }
+      return response;
+    },
+    { retries: 10 }
+  );
+}

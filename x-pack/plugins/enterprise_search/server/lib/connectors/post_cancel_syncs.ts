@@ -68,6 +68,5 @@ ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}
     doc: { last_sync_status: SyncStatus.CANCELED, sync_now: false },
     id: connectorId,
     index: CONNECTORS_INDEX,
-    refresh: 'wait_for',
   });
 };

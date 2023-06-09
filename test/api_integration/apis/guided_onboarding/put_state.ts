@@ -21,15 +21,16 @@ import {
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
 import { testGuideId } from '@kbn/guided-onboarding';
 import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
+import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides, createPluginState } from './helpers';
 
-const putStatePath = `/api/guided_onboarding/state`;
+const putStatePath = `${API_BASE_PATH}/state`;
 export default function testPutState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('PUT /api/guided_onboarding/state', () => {
+  describe(`PUT ${putStatePath}`, () => {
     afterEach(async () => {
       // Clean up saved objects
       await kibanaServer.savedObjects.clean({

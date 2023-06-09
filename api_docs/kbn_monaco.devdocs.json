@@ -588,7 +588,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"type\" | \"keyword\" | \"property\" | \"method\" | \"field\" | \"class\" | \"constructor\""
+              "\"type\" | \"keyword\" | \"property\" | \"field\" | \"method\" | \"class\" | \"constructor\""
             ],
             "path": "packages/kbn-monaco/src/painless/types.ts",
             "deprecated": false,
@@ -756,7 +756,7 @@
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"type\" | \"keyword\" | \"property\" | \"method\" | \"field\" | \"class\" | \"constructor\""
+          "\"type\" | \"keyword\" | \"property\" | \"field\" | \"method\" | \"class\" | \"constructor\""
         ],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,

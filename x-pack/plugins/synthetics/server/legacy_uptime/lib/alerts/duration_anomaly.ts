@@ -13,8 +13,7 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
-import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
+import { getSeverityType, type MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { UptimeEsClient } from '../lib';
 import {
   updateState,
@@ -37,7 +36,7 @@ import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_va
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
-export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
+export const getAnomalySummary = (anomaly: MlAnomaliesTableRecord, monitorInfo: Ping) => {
   return {
     severity: getSeverityType(anomaly.severity),
     severityScore: Math.round(anomaly.severity),

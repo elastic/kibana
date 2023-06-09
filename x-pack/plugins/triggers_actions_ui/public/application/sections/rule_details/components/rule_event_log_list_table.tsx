@@ -52,6 +52,7 @@ import {
 } from '../../common/components/with_bulk_rule_api_operations';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
+import { RefreshToken } from './types';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -102,7 +103,7 @@ export type RuleEventLogListOptions = 'stackManagement' | 'default';
 export type RuleEventLogListCommonProps = {
   ruleId: string;
   localStorageKey?: string;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   initialPageSize?: number;
   // Duplicating these properties is extremely silly but it's the only way to get Jest to cooperate with the way this component is structured
   overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
@@ -142,7 +143,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   const [search, setSearch] = useState<string>('');
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | undefined>();
-  const [internalRefreshToken, setInternalRefreshToken] = useState<number | undefined>(
+  const [internalRefreshToken, setInternalRefreshToken] = useState<RefreshToken | undefined>(
     refreshToken
   );
   const [showFromAllSpaces, setShowFromAllSpaces] = useState(false);
@@ -298,7 +299,14 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 
   const onRefresh = () => {
-    setInternalRefreshToken(Date.now());
+    setInternalRefreshToken({
+      resolve: () => {
+        /* noop */
+      },
+      reject: () => {
+        /* noop */
+      },
+    });
     loadEventLogs();
   };
 

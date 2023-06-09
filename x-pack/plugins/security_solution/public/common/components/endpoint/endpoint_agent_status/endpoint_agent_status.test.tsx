@@ -344,7 +344,7 @@ describe('When showing Endpoint Agent Status', () => {
     });
 
     it('should keep agent status up to date when autoRefresh is true', async () => {
-      renderProps.autoFresh = true;
+      renderProps.autoRefresh = true;
       apiMocks.responseProvider.metadataDetails.mockReturnValueOnce(endpointDetails);
 
       const { getByTestId } = render();

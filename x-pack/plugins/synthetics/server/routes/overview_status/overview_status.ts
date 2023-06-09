@@ -70,6 +70,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
 
   const {
     enabledMonitorQueryIds,
+    disabledMonitorQueryIds,
     allIds,
     disabledCount,
     maxPeriod,
@@ -112,6 +113,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     disabledMonitorsCount,
     projectMonitorsCount,
     enabledMonitorQueryIds,
+    disabledMonitorQueryIds,
     disabledCount,
     up,
     down,

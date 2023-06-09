@@ -164,7 +164,7 @@ describe('validateActions', () => {
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Failed to validate actions due to the following error: Action throttle cannot be shorter than the schedule interval of 1m: default (1s)"'
+      '"Failed to validate actions due to the following error: Action frequency cannot be shorter than the schedule interval of 1m: default (1s)"'
     );
   });
 

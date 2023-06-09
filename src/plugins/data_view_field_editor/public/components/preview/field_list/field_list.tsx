@@ -189,6 +189,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
         renderEmptyResult()
       ) : (
         <VirtualList
+          className="eui-scrollBar"
           style={{ overflowX: 'hidden' }}
           width="100%"
           height={listHeight}

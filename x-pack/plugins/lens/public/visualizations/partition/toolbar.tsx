@@ -22,17 +22,13 @@ import {
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieLayerState, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
 import { LegendDisplay } from '../../../common/constants';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
-import {
-  ToolbarPopover,
-  LegendSettingsPopover,
-  useDebouncedValue,
-  PalettePicker,
-} from '../../shared_components';
+import { ToolbarPopover, LegendSettingsPopover, PalettePicker } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 import { CollapseSetting } from '../../shared_components/collapse_setting';

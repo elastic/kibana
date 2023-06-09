@@ -27,8 +27,8 @@ import { renderApp, renderHeaderActions } from '.';
 
 describe('renderApp', () => {
   const kibanaDeps = {
-    params: coreMock.createAppMountParameters(),
     core: coreMock.createStart(),
+    params: coreMock.createAppMountParameters(),
     plugins: {
       charts: chartPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),

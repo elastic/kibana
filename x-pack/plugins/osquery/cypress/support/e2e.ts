@@ -36,6 +36,7 @@ declare global {
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
+      clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
     }
   }
 }
@@ -47,6 +48,11 @@ Cypress.Commands.add('getBySel', (selector, ...args) =>
 // finds elements that start with the given selector
 Cypress.Commands.add('getBySelContains', (selector, ...args) =>
   cy.get(`[data-test-subj^="${selector}"]`, ...args)
+);
+
+Cypress.Commands.add(
+  'clickOutside',
+  () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
 // Alternatively you can use CommonJS syntax:

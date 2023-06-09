@@ -23,7 +23,13 @@ export enum DisplayType {
   NUMERIC = 'numeric',
   TOGGLE = 'toggle',
   DROPDOWN = 'dropdown',
-  CHECKBOX = 'checkbox',
+}
+
+export enum FieldType {
+  STRING = 'str',
+  INTEGER = 'int',
+  LIST = 'list',
+  BOOLEAN = 'bool',
 }
 
 export interface ConnectorConfigProperties {
@@ -36,6 +42,9 @@ export interface ConnectorConfigProperties {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  type: FieldType;
+  ui_restrictions: string[];
+  validations: string[];
   value: string | number | boolean | null;
 }
 
@@ -151,15 +160,25 @@ export enum TriggerMethod {
   SCHEDULED = 'scheduled',
 }
 
+export enum SyncJobType {
+  FULL = 'full',
+  INCREMENTAL = 'incremental',
+  ACCESS_CONTROL = 'access_control',
+}
+
 export enum FeatureName {
   FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
   FILTERING_RULES = 'filtering_rules',
+  DOCUMENT_LEVEL_SECURITY = 'document_level_security',
+  INCREMENTAL_SYNC = 'incremental_sync',
   SYNC_RULES = 'sync_rules',
 }
 
 export type ConnectorFeatures = Partial<{
+  [FeatureName.DOCUMENT_LEVEL_SECURITY]: { enabled: boolean };
   [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
   [FeatureName.FILTERING_RULES]: boolean;
+  [FeatureName.INCREMENTAL_SYNC]: { enabled: boolean };
   [FeatureName.SYNC_RULES]: {
     advanced?: {
       enabled: boolean;
@@ -182,6 +201,9 @@ export interface Connector {
   index_name: string;
   is_native: boolean;
   language: string | null;
+  last_access_control_sync_scheduled_at: string | null;
+  last_access_control_sync_status: SyncStatus | null;
+  last_incremental_sync_scheduled_at: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
   last_sync_scheduled_at: string | null;
@@ -219,10 +241,12 @@ export interface ConnectorSyncJob {
   id: string;
   indexed_document_count: number;
   indexed_document_volume: number;
+  job_type: SyncJobType;
   last_seen: string | null;
   metadata: Record<string, unknown>;
   started_at: string | null;
   status: SyncStatus;
+  total_document_count: number | null;
   trigger_method: TriggerMethod;
   worker_hostname: string | null;
 }

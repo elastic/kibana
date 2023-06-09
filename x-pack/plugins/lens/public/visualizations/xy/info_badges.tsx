@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { InfoBadge } from '../../shared_components/info_badges/info_badge';
 import { FramePublicAPI, VisualizationInfo } from '../../types';
 import { XYAnnotationLayerConfig } from './types';
 
@@ -21,30 +20,25 @@ export function IgnoredGlobalFiltersEntries({
   visualizationInfo: VisualizationInfo;
   dataViews: FramePublicAPI['dataViews'];
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {layers.map((layer, layerIndex) => {
         const dataView = dataViews.indexPatterns[layer.indexPatternId];
+        const layerInfo = visualizationInfo.layers.find(({ layerId }) => layerId === layer.layerId);
         const layerTitle =
-          visualizationInfo.layers.find(({ layerId, label }) => layerId === layer.layerId)?.label ||
+          layerInfo?.label ||
           i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
             defaultMessage: 'Annotations',
           });
+        const layerPalette = layerInfo?.palette;
         return (
-          <li
-            key={`${layerTitle}-${dataView}-${layerIndex}`}
-            data-test-subj={`lns-feature-badges-ignoreGlobalFilters-${layerIndex}`}
-            css={css`
-              margin: ${euiTheme.size.base} 0 0;
-            `}
-          >
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{layerTitle}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </li>
+          <InfoBadge
+            title={layerTitle}
+            index={layerIndex}
+            dataView={dataView.id}
+            palette={layerPalette}
+            data-test-subj-prefix="lns-feature-badges-ignoreGlobalFilters"
+          />
         );
       })}
     </>

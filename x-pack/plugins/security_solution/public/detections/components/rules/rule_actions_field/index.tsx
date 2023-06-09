@@ -31,6 +31,8 @@ import {
   FORM_CUSTOM_FREQUENCY_OPTION,
   FORM_ERRORS_TITLE,
   FORM_ON_ACTIVE_ALERT_OPTION,
+  FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+  FORM_SUMMARY_BODY_MESSAGE,
 } from './translations';
 
 const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
@@ -77,11 +79,10 @@ const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
 interface Props {
   field: FieldHook;
   messageVariables: ActionVariables;
+  summaryMessageVariables: ActionVariables;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
-const DEFAULT_ACTION_MESSAGE =
-  'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
 const FieldErrorsContainer = styled.div`
   p {
@@ -110,7 +111,11 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
+export const RuleActionsField: React.FC<Props> = ({
+  field,
+  messageVariables,
+  summaryMessageVariables,
+}) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
@@ -230,6 +235,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       getActionForm({
         actions,
         messageVariables,
+        summaryMessageVariables,
         defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
@@ -237,8 +243,8 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionFrequencyProperty: setActionFrequency,
         setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
-        defaultActionMessage: DEFAULT_ACTION_MESSAGE,
-        defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
+        defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+        defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
@@ -249,6 +255,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       actions,
       getActionForm,
       messageVariables,
+      summaryMessageVariables,
       setActionFrequency,
       setActionIdByIndex,
       setActionParamsProperty,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { Query, Filter } from '@kbn/es-query';
 import { EuiButton } from '@elastic/eui';
-import { useDashboardAppLink } from '../hooks/use_dashboard_app_link';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EDIT_DASHBOARD_BUTTON_TITLE } from '../pages/details/translations';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 
 export interface EditDashboardButtonComponentProps {
   filters?: Filter[];
@@ -31,24 +31,33 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
   timeRange,
 }) => {
   const {
-    services: { uiSettings },
+    services: { dashboard },
   } = useKibana();
+  const { navigateTo } = useNavigation();
 
-  const { onClick } = useDashboardAppLink({
-    query,
-    filters,
-    timeRange,
-    uiSettings,
-    savedObjectId,
-  });
-
+  const onClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      const url = dashboard?.locator?.getRedirectUrl({
+        query,
+        filters,
+        timeRange,
+        dashboardId: savedObjectId,
+        viewMode: ViewMode.EDIT,
+      });
+      if (url) {
+        navigateTo({ url });
+      }
+    },
+    [dashboard?.locator, query, filters, timeRange, savedObjectId, navigateTo]
+  );
   return (
     <EuiButton
       color="primary"
+      data-test-subj="dashboardEditButton"
       fill
       iconType="pencil"
       onClick={onClick}
-      data-test-subj="dashboardEditButton"
     >
       {EDIT_DASHBOARD_BUTTON_TITLE}
     </EuiButton>

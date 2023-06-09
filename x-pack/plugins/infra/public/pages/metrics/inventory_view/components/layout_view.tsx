@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { useInventoryViews } from '../../../../hooks/use_inventory_views';
 import { SnapshotNode } from '../../../../../common/http_api';
-import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
 import { Layout } from './layout';
 
 interface Props {
@@ -18,6 +18,6 @@ interface Props {
 }
 
 export const LayoutView = (props: Props) => {
-  const { shouldLoadDefault, currentView } = useSavedViewContext();
-  return <Layout shouldLoadDefault={shouldLoadDefault} currentView={currentView} {...props} />;
+  const { currentView } = useInventoryViews();
+  return <Layout currentView={currentView} {...props} />;
 };

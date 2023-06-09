@@ -7,7 +7,7 @@
  */
 
 import { OptionsListEmbeddable, OptionsListEmbeddableFactory } from '../../public';
-import { OptionsListComponentState, OptionsListReduxState } from '../../public/options_list/types';
+import { OptionsListComponentState } from '../../public/options_list/types';
 import { ControlFactory, ControlOutput } from '../../public/types';
 import { OptionsListEmbeddableInput } from './types';
 
@@ -17,13 +17,13 @@ const mockOptionsListComponentState = {
   searchString: { value: '', valid: true },
   field: undefined,
   totalCardinality: 0,
-  availableOptions: {
-    woof: { doc_count: 100 },
-    bark: { doc_count: 75 },
-    meow: { doc_count: 50 },
-    quack: { doc_count: 25 },
-    moo: { doc_count: 5 },
-  },
+  availableOptions: [
+    { value: 'woof', docCount: 100 },
+    { value: 'bark', docCount: 75 },
+    { value: 'meow', docCount: 50 },
+    { value: 'quack', docCount: 25 },
+    { value: 'moo', docCount: 5 },
+  ],
   invalidSelections: [],
   allowExpensiveQueries: true,
   popoverOpen: false,
@@ -44,7 +44,10 @@ const mockOptionsListOutput = {
   loading: false,
 } as ControlOutput;
 
-export const mockOptionsListEmbeddable = async (partialState?: Partial<OptionsListReduxState>) => {
+export const mockOptionsListEmbeddable = async (partialState?: {
+  explicitInput?: Partial<OptionsListEmbeddableInput>;
+  componentState?: Partial<OptionsListComponentState>;
+}) => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory();
   const optionsListControlFactory = optionsListFactoryStub as unknown as ControlFactory;
   optionsListControlFactory.getDefaultInput = () => ({});

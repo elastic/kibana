@@ -670,6 +670,7 @@ export const LensTopNavMenu = ({
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
                   newDescription: contextFromEmbeddable ? initialContext.description : '',
+                  panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
                   saveToLibrary:
@@ -1079,6 +1080,8 @@ export const LensTopNavMenu = ({
       dataViewPickerComponentProps={dataViewPickerProps}
       showDatePicker={
         indexPatterns.some((ip) => ip.isTimeBased()) ||
+        // always show the timepicker for text based languages
+        isOnTextBasedMode ||
         Boolean(
           allLoaded &&
             activeDatasourceId &&

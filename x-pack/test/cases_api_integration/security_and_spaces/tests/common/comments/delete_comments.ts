@@ -15,7 +15,7 @@ import {
 } from '../../../../common/lib/alerts';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -128,12 +128,12 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createSignalsIndex(supertest, log);
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0], signals.hits.hits[1]];
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });

@@ -12,6 +12,7 @@ export type QueryLanguageType = 'lucene' | 'kuery';
 
 export interface AlertsSearchBarProps {
   appName: string;
+  disableQueryLanguageSwitcher?: boolean;
   featureIds: ValidFeatureId[];
   rangeFrom?: string;
   rangeTo?: string;
@@ -22,7 +23,11 @@ export interface AlertsSearchBarProps {
   showSubmitButton?: boolean;
   placeholder?: string;
   submitOnBlur?: boolean;
-  onQueryChange: (query: {
+  onQueryChange?: (query: {
+    dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+    query?: string;
+  }) => void;
+  onQuerySubmit: (query: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
   }) => void;

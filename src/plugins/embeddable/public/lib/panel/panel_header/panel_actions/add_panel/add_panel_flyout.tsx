@@ -30,6 +30,7 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   showCreateNewMenu?: boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
+  onAddPanel?: (id: string) => void;
 }
 
 interface State {
@@ -101,7 +102,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
       throw new EmbeddableFactoryNotFoundError(savedObjectType);
     }
 
-    this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+    const embeddable = await this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
       factoryForSavedObjectType.type,
       { savedObjectId }
     );
@@ -109,6 +110,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     this.doTelemetryForAddEvent(this.props.container.type, factoryForSavedObjectType, so);
 
     this.showToast(name);
+    if (this.props.onAddPanel) {
+      this.props.onAddPanel(embeddable.id);
+    }
   };
 
   private doTelemetryForAddEvent(

@@ -30,6 +30,7 @@ import {
   createSearchAfterReturnType,
   makeFloatString,
   getUnprocessedExceptionsWarnings,
+  getMaxSignalsWarning,
 } from '../utils/utils';
 import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
@@ -129,6 +130,9 @@ export const eqlExecutor = async ({
       );
 
       addToSearchAfterReturn({ current: result, next: createResult });
+    }
+    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
+      result.warningMessages.push(getMaxSignalsWarning());
     }
     return result;
   });

@@ -8,35 +8,16 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
+import { compileConfigStack } from './compile_config_stack';
+import { getConfigFromFiles } from '@kbn/config';
 
-/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
-/** @type {ServerlessProjectMode[]} */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
-
-/**
- * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | null}
- */
-function getServerlessProjectMode(opts) {
-  if (!opts.serverless) {
-    return null;
-  }
-
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
-    return opts.serverless;
-  }
-
-  throw new Error(
-    `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
-  );
-}
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 function canRequire(path) {
   try {
@@ -51,9 +32,6 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = '@kbn/cli-dev-mode';
-const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
-
 const getBootstrapScript = (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
     // need dynamic require to exclude it from production build
@@ -66,68 +44,16 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
-const pathCollector = function () {
+function pathCollector() {
   const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
-};
+}
 
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
-
-/**
- * @param {string} name The config file name
- * @returns {boolean} Whether the file exists
- */
-function configFileExists(name) {
-  const path = resolve(getConfigDirectory(), name);
-  try {
-    return statSync(path).isFile();
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return false;
-    }
-
-    throw err;
-  }
-}
-
-/**
- * @returns {boolean} Whether the distribution can run in Serverless mode
- */
-function isServerlessCapableDistribution() {
-  // For now, checking if the `serverless.yml` config file exists should be enough
-  // We could also check the following as well, but I don't think it's necessary:
-  // VALID_SERVERLESS_PROJECT_MODE.some((projectType) => configFileExists(`serverless.${projectType}.yml`))
-  return configFileExists('serverless.yml');
-}
-
-/**
- * @param {string} name
- * @param {string[]} configs
- * @param {'push' | 'unshift'} method
- */
-function maybeAddConfig(name, configs, method) {
-  if (configFileExists(name)) {
-    configs[method](resolve(getConfigDirectory(), name));
-  }
-}
-
-/**
- * @returns {string[]}
- */
-function getEnvConfigs() {
-  const val = process.env.KBN_CONFIG_PATHS;
-  if (typeof val === 'string') {
-    return val
-      .split(',')
-      .filter((v) => !!v)
-      .map((p) => resolve(p.trim()));
-  }
-  return [];
-}
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
@@ -251,11 +177,12 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
+      )
+      .option(
+        '--serverless [oblt|security|es]',
+        'Start Kibana in a specific serverless project mode. ' +
+          'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
-  }
-
-  if (isServerlessCapableDistribution()) {
-    command.option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -278,25 +205,17 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
+    const configs = compileConfigStack({
+      configOverrides: opts.config,
+      devConfig: opts.devConfig,
+      dev: opts.dev,
+      serverless: opts.serverless,
+    });
+
+    const configsEvaluted = getConfigFromFiles(configs);
+    const isServerlessMode = !!(configsEvaluted.serverless || opts.serverless);
+
     const unknownOptions = this.getUnknownOptions();
-    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
-    const serverlessMode = getServerlessProjectMode(opts);
-
-    // we "unshift" .serverless. config so that it only overrides defaults
-    if (serverlessMode) {
-      maybeAddConfig(`serverless.yml`, configs, 'push');
-      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
-    }
-
-    // .dev. configs are "pushed" so that they override all other config files
-    if (opts.dev && opts.devConfig !== false) {
-      maybeAddConfig('kibana.dev.yml', configs, 'push');
-      if (serverlessMode) {
-        maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
-      }
-    }
-
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -315,7 +234,7 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
-      serverless: !!opts.serverless,
+      serverless: isServerlessMode,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode

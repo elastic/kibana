@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 
@@ -34,5 +35,24 @@ describe('FilePreview', () => {
     );
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+  });
+
+  it('pressing escape calls closePreview', async () => {
+    const closePreview = jest.fn();
+
+    appMockRender.render(<FilePreview closePreview={closePreview} selectedFile={basicFileMock} />);
+
+    await waitFor(() =>
+      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+        id: basicFileMock.id,
+        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+      })
+    );
+
+    expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+
+    userEvent.keyboard('{esc}');
+
+    await waitFor(() => expect(closePreview).toHaveBeenCalled());
   });
 });

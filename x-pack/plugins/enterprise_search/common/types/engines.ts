@@ -26,7 +26,7 @@ export interface EnterpriseSearchEngineDetails {
 }
 
 export interface EnterpriseSearchEngineIndex {
-  count: number;
+  count: number | null;
   health: HealthStatus | 'unknown';
   name: string;
 }

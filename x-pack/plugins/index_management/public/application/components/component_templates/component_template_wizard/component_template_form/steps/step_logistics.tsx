@@ -209,7 +209,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               path="_meta"
               component={JsonEditorField}
               componentProps={{
-                euiCodeEditorProps: {
+                codeEditorProps: {
                   ['data-test-subj']: 'metaEditor',
                   height: '200px',
                   'aria-label': i18n.translate(

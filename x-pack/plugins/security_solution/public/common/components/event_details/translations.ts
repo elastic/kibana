@@ -70,9 +70,12 @@ export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.
   defaultMessage: 'Osquery Results',
 });
 
-export const ENDPOINT_VIEW = i18n.translate('xpack.securitySolution.eventDetails.endpointView', {
-  defaultMessage: 'Endpoint Results',
-});
+export const RESPONSE_ACTIONS_VIEW = i18n.translate(
+  'xpack.securitySolution.eventDetails.responseActionsView',
+  {
+    defaultMessage: 'Response Results',
+  }
+);
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
   defaultMessage: 'Field',
@@ -146,3 +149,65 @@ export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
 });
+
+export const ENDPOINT_COMMANDS = Object.freeze({
+  isolated: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.isolate', {
+    defaultMessage: 'isolated the host',
+  }),
+  released: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.release', {
+    defaultMessage: 'released the host',
+  }),
+  generic: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.generic', {
+      values: { command },
+      defaultMessage: 'executed command {command}',
+    }),
+});
+
+export const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {
+  defaultMessage: 'summary',
+});
+
+export const TIMELINE_VIEW = i18n.translate('xpack.securitySolution.eventDetails.timelineView', {
+  defaultMessage: 'Timeline',
+});
+
+export const ALERT_SUMMARY_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.alertSummaryViewConversationId',
+  {
+    defaultMessage: 'Alert summary',
+  }
+);
+
+export const ALERT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
+  i18n.translate('xpack.securitySolution.alertSummaryView.alertSummaryViewContextDescription', {
+    defaultMessage: 'Alert (from {view})',
+    values: { view },
+  });
+
+export const ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.alertSummaryViewContextTooltip',
+  {
+    defaultMessage: 'Add this alert as context',
+  }
+);
+
+export const EVENT_SUMMARY_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.eventSummaryViewConversationId',
+  {
+    defaultMessage: 'Event summary',
+  }
+);
+
+export const EVENT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
+  i18n.translate('xpack.securitySolution.alertSummaryView.eventSummaryViewContextDescription', {
+    defaultMessage: 'Event (from {view})',
+    values: { view },
+  });
+
+export const EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.eventSummaryViewContextTooltip',
+  {
+    defaultMessage: 'Add this event as context',
+  }
+);

@@ -410,7 +410,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): CommonHostInfo {
     const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
-      Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
+      Endpoint: {
+        policy: { applied: this.randomChoice(APPLIED_POLICIES) },
+      },
     });
 
     return { agent, elastic, host, Endpoint };
@@ -521,6 +523,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           entity_id: sessionEntryLeader,
           name: 'fake entry',
           pid: Math.floor(Math.random() * 1000),
+          start: [new Date(0).toISOString()],
         },
         session_leader: {
           entity_id: sessionEntryLeader,
@@ -559,6 +562,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
   }
 
@@ -661,6 +668,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
 
     // shellcode_thread memory alert have an additional process field
@@ -863,6 +874,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
     return newAlert;
   }
@@ -949,6 +964,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       ...detailRecordForEventType,
       event: {
         category: options.eventCategory ? options.eventCategory : ['process'],
+        outcome: options.eventCategory?.includes('authentication')
+          ? this.randomChoice(['success', 'failure'])
+          : '',
         kind: 'event',
         type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
@@ -971,6 +989,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           entity_id: sessionEntryLeader,
           name: 'fake entry',
           pid: Math.floor(Math.random() * 1000),
+          start: [new Date(0).toISOString()],
         },
         session_leader: {
           entity_id: sessionEntryLeader,
@@ -1596,6 +1615,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
       agents: 0,
+      is_protected: false,
     };
   }
 

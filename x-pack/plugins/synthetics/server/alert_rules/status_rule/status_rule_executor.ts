@@ -10,6 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import {
   getAllMonitors,
@@ -34,7 +35,8 @@ export interface StaleDownConfig extends OverviewStatusMetaData {
   isLocationRemoved?: boolean;
 }
 
-export interface AlertOverviewStatus extends Omit<OverviewStatus, 'disabledCount'> {
+export interface AlertOverviewStatus
+  extends Omit<OverviewStatus, 'disabledCount' | 'disabledMonitorQueryIds'> {
   staleDownConfigs: Record<string, StaleDownConfig>;
 }
 
@@ -60,7 +62,9 @@ export class StatusRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = new UptimeEsClient(this.soClient, scopedClient);
+    this.esClient = new UptimeEsClient(this.soClient, scopedClient, {
+      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+    });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
@@ -194,7 +198,10 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        if (!locations.some((l) => l.label === downConfig.location)) {
+        const isLocationRemoved = !locations.some(
+          (l) => l.id === this.getLocationId(downConfig.location)
+        );
+        if (isLocationRemoved) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];
         }

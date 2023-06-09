@@ -14,7 +14,12 @@ import type {
   GetAgentPoliciesResponse,
   GetAgentsResponse,
 } from '@kbn/fleet-plugin/common';
-import { AGENT_API_ROUTES, agentPolicyRouteService, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_API_ROUTES,
+  agentPolicyRouteService,
+  agentRouteService,
+  AGENTS_INDEX,
+} from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
@@ -26,7 +31,10 @@ import type {
   EnrollmentAPIKey,
   GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
+  PostAgentUnenrollResponse,
 } from '@kbn/fleet-plugin/common/types';
+import nodeFetch from 'node-fetch';
+import semver from 'semver';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -235,4 +243,136 @@ export const getAgentVersionMatchingCurrentStack = async (
   }
 
   return version;
+};
+
+interface ElasticArtifactSearchResponse {
+  manifest: {
+    'last-update-time': string;
+    'seconds-since-last-update': number;
+  };
+  packages: {
+    [packageFileName: string]: {
+      architecture: string;
+      os: string[];
+      type: string;
+      asc_url: string;
+      sha_url: string;
+      url: string;
+    };
+  };
+}
+
+/**
+ * Retrieves the download URL to the Linux installation package for a given version of the Elastic Agent
+ * @param version
+ * @param closestMatch
+ * @param log
+ */
+export const getAgentDownloadUrl = async (
+  version: string,
+  /**
+   * When set to true a check will be done to determine the latest version of the agent that
+   * is less than or equal to the `version` provided
+   */
+  closestMatch: boolean = false,
+  log?: ToolingLog
+): Promise<string> => {
+  const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  const agentFile = `elastic-agent-${agentVersion}-linux-${downloadArch}.tar.gz`;
+  const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
+
+  log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
+
+  const searchResult: ElasticArtifactSearchResponse = await nodeFetch(artifactSearchUrl).then(
+    (response) => {
+      if (!response.ok) {
+        throw new Error(
+          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactSearchUrl})`
+        );
+      }
+
+      return response.json();
+    }
+  );
+
+  log?.verbose(searchResult);
+
+  if (!searchResult.packages[agentFile]) {
+    throw new Error(`Unable to find an Agent download URL for version [${agentVersion}]`);
+  }
+
+  return searchResult.packages[agentFile].url;
+};
+
+/**
+ * Given a stack version number, function will return the closest Agent download version available
+ * for download. THis could be the actual version passed in or lower.
+ * @param version
+ */
+export const getLatestAgentDownloadVersion = async (
+  version: string,
+  log?: ToolingLog
+): Promise<string> => {
+  const artifactsUrl = 'https://artifacts-api.elastic.co/v1/versions';
+  const semverMatch = `<=${version}`;
+  const artifactVersionsResponse: { versions: string[] } = await nodeFetch(artifactsUrl).then(
+    (response) => {
+      if (!response.ok) {
+        throw new Error(
+          `Failed to retrieve list of versions from elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactsUrl})`
+        );
+      }
+
+      return response.json();
+    }
+  );
+
+  const stackVersionToArtifactVersion: Record<string, string> =
+    artifactVersionsResponse.versions.reduce((acc, artifactVersion) => {
+      const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
+      acc[stackVersion] = artifactVersion;
+      return acc;
+    }, {} as Record<string, string>);
+
+  log?.verbose(
+    `Versions found from [${artifactsUrl}]:\n${JSON.stringify(
+      stackVersionToArtifactVersion,
+      null,
+      2
+    )}`
+  );
+
+  const matchedVersion = semver.maxSatisfying(
+    Object.keys(stackVersionToArtifactVersion),
+    semverMatch
+  );
+
+  if (!matchedVersion) {
+    throw new Error(`Unable to find a semver version that meets ${semverMatch}`);
+  }
+
+  return stackVersionToArtifactVersion[matchedVersion];
+};
+
+/**
+ * Un-enrolls a Fleet agent
+ *
+ * @param kbnClient
+ * @param agentId
+ * @param force
+ */
+export const unEnrollFleetAgent = async (
+  kbnClient: KbnClient,
+  agentId: string,
+  force = false
+): Promise<PostAgentUnenrollResponse> => {
+  const { data } = await kbnClient.request<PostAgentUnenrollResponse>({
+    method: 'POST',
+    path: agentRouteService.getUnenrollPath(agentId),
+    body: { revoke: force },
+  });
+
+  return data;
 };

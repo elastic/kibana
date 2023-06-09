@@ -217,6 +217,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
               closePopover={closePopover}
               panelPaddingSize="none"
               anchorPosition="downCenter"
+              data-test-subj="table-actions-popover"
             >
               <EuiContextMenuPanel items={items} />
             </EuiPopover>

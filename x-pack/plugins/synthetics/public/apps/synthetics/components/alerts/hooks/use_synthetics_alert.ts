@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

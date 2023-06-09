@@ -12,14 +12,15 @@ import {
   niceTimeFormatter,
   Position,
   Settings,
-  TooltipValue,
+  TooltipProps,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { getChartTheme } from '../../../../utils/get_chart_theme';
@@ -64,7 +65,7 @@ export const MetricsExplorerChart = ({
   onTimeChange,
 }: Props) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useIsDarkMode();
   const { metrics } = options;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const handleTimeChange: BrushEndListener = ({ x }) => {
@@ -81,9 +82,9 @@ export const MetricsExplorerChart = ({
       ? niceTimeFormatter([firstRow.timestamp, lastRow.timestamp])
       : (value: number) => `${value}`;
   }, [series.rows]);
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+      ({ value }) => moment(value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };

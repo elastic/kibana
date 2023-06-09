@@ -20,6 +20,7 @@ export type { ChangePointDetectionAppStateProps } from './components/change_poin
 
 export {
   ExplainLogRateSpikes,
+  ExplainLogRateSpikesContent,
   LogCategorization,
   ChangePointDetection,
 } from './shared_lazy_components';

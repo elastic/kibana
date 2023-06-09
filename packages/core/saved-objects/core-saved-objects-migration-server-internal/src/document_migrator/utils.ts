@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { isFunction } from 'lodash';
 import Semver from 'semver';
-import {
-  SavedObjectMigrationFn,
+import type {
+  SavedObjectMigration,
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { Logger } from '@kbn/logging';
 import { MigrationLogger } from '../core/migration_logger';
+import { maxVersion } from './pipelines/utils';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { type Transform, type TransformFn, TransformType } from './types';
 
@@ -31,7 +33,7 @@ const TRANSFORM_PRIORITY = [
 export function convertMigrationFunction(
   version: string,
   type: SavedObjectsType,
-  migrationFn: SavedObjectMigrationFn,
+  migration: SavedObjectMigration,
   log: Logger
 ): TransformFn {
   const context = Object.freeze({
@@ -43,7 +45,8 @@ export function convertMigrationFunction(
 
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const result = migrationFn(doc, context);
+      const transformFn = isFunction(migration) ? migration : migration.transform;
+      const result = transformFn(doc, context);
 
       // A basic check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
@@ -82,4 +85,22 @@ export function transformComparator(a: Transform, b: Transform) {
   }
 
   return Semver.compare(a.version, b.version) || aPriority - bPriority;
+}
+
+/**
+ * Returns true if the given document has an higher version that the last known version, false otherwise
+ */
+export function downgradeRequired(
+  doc: SavedObjectUnsanitizedDoc,
+  latestVersions: Record<TransformType, string>
+): boolean {
+  const docTypeVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
+  const latestMigrationVersion = maxVersion(
+    latestVersions[TransformType.Migrate],
+    latestVersions[TransformType.Convert]
+  );
+  if (!docTypeVersion || !latestMigrationVersion) {
+    return false;
+  }
+  return Semver.gt(docTypeVersion, latestMigrationVersion);
 }

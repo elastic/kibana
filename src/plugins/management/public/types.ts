@@ -27,8 +27,9 @@ export interface DefinedSections {
   stack: ManagementSection;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ManagementStart {}
+export interface ManagementStart {
+  setIsSidebarEnabled: (enabled: boolean) => void;
+}
 
 export interface ManagementSectionsStartPrivate {
   getSectionsEnabled: () => ManagementSection[];

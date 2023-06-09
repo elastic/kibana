@@ -15,3 +15,5 @@ export type {
 } from './table_list_view';
 
 export { TableListViewProvider, TableListViewKibanaProvider } from './services';
+
+export type { RowActions } from './types';

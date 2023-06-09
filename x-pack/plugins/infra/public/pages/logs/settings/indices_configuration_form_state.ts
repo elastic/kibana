@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   LogDataViewReference,
   LogIndexNameReference,

@@ -175,7 +175,7 @@ export async function validateActions(
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
         defaultMessage:
-          'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
+          'Action frequency cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
         values: {
           scheduleIntervalText: data.schedule.interval,
           groups: actionsWithInvalidThrottles

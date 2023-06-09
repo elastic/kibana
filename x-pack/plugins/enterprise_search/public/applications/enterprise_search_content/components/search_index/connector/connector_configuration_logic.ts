@@ -7,12 +7,15 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   ConnectorConfiguration,
   ConnectorStatus,
   Dependency,
   DependencyLookup,
   DisplayType,
+  FieldType,
   SelectOption,
 } from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
@@ -59,6 +62,7 @@ export interface ConfigEntry {
   default_value: string | number | boolean | null;
   depends_on: Dependency[];
   display: DisplayType;
+  is_valid: boolean;
   key: string;
   label: string;
   options: SelectOption[];
@@ -66,21 +70,32 @@ export interface ConfigEntry {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  type: FieldType;
+  ui_restrictions: string[];
+  validation_errors: string[];
+  validations?: string[];
   value: string | number | boolean | null;
 }
 
 /**
  *
- * Sorts the connector configuration by specified order (if present)
+ * Sorts and filters the connector configuration
+ *
+ * Sorting is done by specified order (if present)
  * otherwise by alphabetic order of keys
  *
+ * Filtering is done on any fields with ui_restrictions
+ * or that have not had their dependencies met
+ *
  */
-function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
-  return Object.keys(config)
+function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
+  const sortedConfig = Object.keys(config)
     .map(
       (key) =>
         ({
+          is_valid: true,
           key,
+          validation_errors: [],
           ...config[key],
         } as ConfigEntry)
     )
@@ -97,15 +112,81 @@ function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry
       }
       return a.key.localeCompare(b.key);
     });
+
+  const dependencyLookup: DependencyLookup = sortedConfig.reduce(
+    (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
+      ...prev,
+      [configEntry.key]: configEntry.value,
+    }),
+    {}
+  );
+
+  return sortedConfig.filter(
+    (configEntry) =>
+      (configEntry.ui_restrictions ?? []).length <= 0 &&
+      dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
+  );
+}
+
+function validateConnectorConfiguration(config: ConfigEntry[]): ConfigEntry[] {
+  return config.map((configEntry) => {
+    const label = configEntry.label;
+
+    configEntry.validation_errors = [];
+
+    if (configEntry.type === FieldType.INTEGER && !validIntInput(configEntry.value)) {
+      configEntry.validation_errors.push(
+        i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.config.invalidInteger',
+          {
+            defaultMessage: '{label} must be an integer.',
+            values: { label },
+          }
+        )
+      );
+    }
+
+    configEntry.is_valid = configEntry.validation_errors.length <= 0;
+
+    return configEntry;
+  });
+}
+
+function validIntInput(value: string | number | boolean | null): boolean {
+  // reject non integers (including x.0 floats), but don't validate if empty
+  return (value !== null || value !== '') &&
+    (isNaN(Number(value)) ||
+      !Number.isSafeInteger(Number(value)) ||
+      ensureStringType(value).indexOf('.') >= 0)
+    ? false
+    : true;
+}
+
+function ensureCorrectTyping(
+  type: FieldType,
+  value: string | number | boolean | null
+): string | number | boolean | null {
+  switch (type) {
+    case FieldType.INTEGER:
+      return validIntInput(value) ? ensureIntType(value) : value;
+    case FieldType.BOOLEAN:
+      return ensureBooleanType(value);
+    default:
+      return ensureStringType(value);
+  }
 }
 
 export function ensureStringType(value: string | number | boolean | null): string {
-  return String(value);
+  return value !== null ? String(value) : '';
 }
 
-export function ensureNumberType(value: string | number | boolean | null): number {
-  const numberValue = Number(value);
-  return isNaN(numberValue) ? 0 : numberValue;
+export function ensureIntType(value: string | number | boolean | null): number | null {
+  // int is null-safe to prevent empty values from becoming zeroes
+  if (value === null || value === '') {
+    return null;
+  }
+
+  return parseInt(String(value), 10);
 }
 
 export function ensureBooleanType(value: string | number | boolean | null): boolean {
@@ -116,6 +197,10 @@ export function dependenciesSatisfied(
   dependencies: Dependency[],
   dependencyLookup: DependencyLookup
 ): boolean {
+  if (!dependencies) {
+    return true;
+  }
+
   for (const dependency of dependencies) {
     if (dependency.value !== dependencyLookup[dependency.field]) {
       return false;
@@ -245,6 +330,10 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
+            type,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            ui_restrictions,
+            validations,
             value,
           }
         ) => ({
@@ -259,7 +348,10 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
-            value,
+            type,
+            ui_restrictions,
+            validations: validations ?? [],
+            value: display ? ensureCorrectTyping(type, value) : value, // only check type if field had a specified eui element
           },
         }),
         setLocalConfigState: (_, { configState }) => configState,
@@ -276,11 +368,14 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState: ConnectorConfiguration) => sortConnectorConfiguration(configState),
+      (configState: ConnectorConfiguration) => sortAndFilterConnectorConfiguration(configState),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) => sortConnectorConfiguration(configState),
+      (configState) => {
+        const config = sortAndFilterConnectorConfiguration(configState);
+        return validateConnectorConfiguration(config);
+      },
     ],
   }),
 });

@@ -16,8 +16,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiHealth,
   EuiToolTip,
@@ -28,7 +26,7 @@ import { Status } from '@kbn/cases-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import type { Case } from '../../../common/ui/types';
+import type { CaseUI } from '../../../common/ui/types';
 import type { ActionConnector } from '../../../common/api';
 import { CaseStatuses, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
@@ -47,13 +45,9 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { AssigneesColumn } from './assignees_column';
 
 type CasesColumns =
-  | EuiTableActionsColumnType<Case>
-  | EuiTableComputedColumnType<Case>
-  | EuiTableFieldDataColumnType<Case>;
-
-const MediumShadeText = styled.p`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
-`;
+  | EuiTableActionsColumnType<CaseUI>
+  | EuiTableComputedColumnType<CaseUI>
+  | EuiTableFieldDataColumnType<CaseUI>;
 
 const LINE_CLAMP = 3;
 const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
@@ -80,7 +74,7 @@ export interface GetCasesColumn {
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
   connectors?: ActionConnector[];
-  onRowClick?: (theCase: Case) => void;
+  onRowClick?: (theCase: CaseUI) => void;
   showSolutionColumn?: boolean;
   disableActions?: boolean;
 }
@@ -102,7 +96,7 @@ export const useCasesColumns = ({
   const { actions } = useActions({ disableActions });
 
   const assignCaseAction = useCallback(
-    async (theCase: Case) => {
+    async (theCase: CaseUI) => {
       if (onRowClick) {
         onRowClick(theCase);
       }
@@ -115,7 +109,7 @@ export const useCasesColumns = ({
       field: 'title',
       name: i18n.NAME,
       sortable: true,
-      render: (title: string, theCase: Case) => {
+      render: (title: string, theCase: CaseUI) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = isSelectorView ? (
             theCase.title
@@ -124,16 +118,8 @@ export const useCasesColumns = ({
               <TruncatedText text={theCase.title} />
             </CaseDetailsLink>
           );
-          return theCase.status !== CaseStatuses.closed ? (
-            caseDetailsLinkComponent
-          ) : (
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>{caseDetailsLinkComponent}</EuiFlexItem>
-              <EuiFlexItem>
-                <MediumShadeText>{i18n.CLOSED}</MediumShadeText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
+
+          return caseDetailsLinkComponent;
         }
         return getEmptyTagValue();
       },
@@ -145,7 +131,7 @@ export const useCasesColumns = ({
     columns.push({
       field: 'assignees',
       name: i18n.ASSIGNEES,
-      render: (assignees: Case['assignees']) => (
+      render: (assignees: CaseUI['assignees']) => (
         <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
       ),
       width: '180px',
@@ -156,7 +142,7 @@ export const useCasesColumns = ({
     columns.push({
       field: 'tags',
       name: i18n.TAGS,
-      render: (tags: Case['tags']) => {
+      render: (tags: CaseUI['tags']) => {
         if (tags != null && tags.length > 0) {
           const clampedBadges = (
             <LineClampedEuiBadgeGroup data-test-subj="case-table-column-tags">
@@ -207,7 +193,7 @@ export const useCasesColumns = ({
       align: RIGHT_ALIGNMENT,
       field: 'totalAlerts',
       name: ALERTS,
-      render: (totalAlerts: Case['totalAlerts']) =>
+      render: (totalAlerts: CaseUI['totalAlerts']) =>
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
@@ -241,7 +227,7 @@ export const useCasesColumns = ({
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',
       name: i18n.COMMENTS,
-      render: (totalComment: Case['totalComment']) =>
+      render: (totalComment: CaseUI['totalComment']) =>
         totalComment != null
           ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
           : getEmptyTagValue(),
@@ -253,7 +239,7 @@ export const useCasesColumns = ({
       field: 'closedAt',
       name: i18n.CLOSED_ON,
       sortable: true,
-      render: (closedAt: Case['closedAt']) => {
+      render: (closedAt: CaseUI['closedAt']) => {
         if (closedAt != null) {
           return (
             <span data-test-subj={`case-table-column-closedAt`}>
@@ -269,7 +255,7 @@ export const useCasesColumns = ({
       field: 'createdAt',
       name: i18n.CREATED_ON,
       sortable: true,
-      render: (createdAt: Case['createdAt']) => {
+      render: (createdAt: CaseUI['createdAt']) => {
         if (createdAt != null) {
           return (
             <span data-test-subj={`case-table-column-createdAt`}>
@@ -287,7 +273,7 @@ export const useCasesColumns = ({
       field: 'updatedAt',
       name: i18n.UPDATED_ON,
       sortable: true,
-      render: (updatedAt: Case['updatedAt']) => {
+      render: (updatedAt: CaseUI['updatedAt']) => {
         if (updatedAt != null) {
           return (
             <span data-test-subj="case-table-column-updatedAt">
@@ -304,7 +290,7 @@ export const useCasesColumns = ({
     columns.push(
       {
         name: i18n.EXTERNAL_INCIDENT,
-        render: (theCase: Case) => {
+        render: (theCase: CaseUI) => {
           if (theCase.id != null) {
             return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
           }
@@ -316,7 +302,7 @@ export const useCasesColumns = ({
         field: 'status',
         name: i18n.STATUS,
         sortable: true,
-        render: (status: Case['status']) => {
+        render: (status: CaseUI['status']) => {
           if (status != null) {
             return <Status status={status} />;
           }
@@ -330,7 +316,7 @@ export const useCasesColumns = ({
     field: 'severity',
     name: i18n.SEVERITY,
     sortable: true,
-    render: (severity: Case['severity']) => {
+    render: (severity: CaseUI['severity']) => {
       if (severity != null) {
         const severityData = severities[severity ?? CaseSeverity.LOW];
         return (
@@ -349,7 +335,7 @@ export const useCasesColumns = ({
   if (isSelectorView) {
     columns.push({
       align: RIGHT_ALIGNMENT,
-      render: (theCase: Case) => {
+      render: (theCase: CaseUI) => {
         if (theCase.id != null) {
           return (
             <EuiButton
@@ -376,7 +362,7 @@ export const useCasesColumns = ({
 };
 
 interface Props {
-  theCase: Case;
+  theCase: CaseUI;
   connectors: ActionConnector[];
 }
 

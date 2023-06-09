@@ -51,6 +51,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="entSearchContent-connector-configuration-editConfiguration"
                       data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
                       onClick={() => setIsEditing(!isEditing)}
                     >

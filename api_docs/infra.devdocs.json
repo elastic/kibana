@@ -325,6 +325,20 @@
       "children": [
         {
           "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.inventoryViews",
+          "type": "Object",
+          "tags": [],
+          "label": "inventoryViews",
+          "description": [],
+          "signature": [
+            "InventoryViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-public.InfraClientStartExports.logViews",
           "type": "Object",
           "tags": [],
@@ -339,6 +353,20 @@
         },
         {
           "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.metricsExplorerViews",
+          "type": "Object",
+          "tags": [],
+          "label": "metricsExplorerViews",
+          "description": [],
+          "signature": [
+            "MetricsExplorerViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-public.InfraClientStartExports.telemetry",
           "type": "Object",
           "tags": [],
@@ -346,6 +374,20 @@
           "description": [],
           "signature": [
             "ITelemetryClient"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.locators",
+          "type": "Object",
+          "tags": [],
+          "label": "locators",
+          "description": [],
+          "signature": [
+            "InfraLocators"
           ],
           "path": "x-pack/plugins/infra/public/types.ts",
           "deprecated": false,
@@ -660,6 +702,20 @@
       "children": [
         {
           "parentPluginId": "infra",
+          "id": "def-server.InfraPluginStart.inventoryViews",
+          "type": "Object",
+          "tags": [],
+          "label": "inventoryViews",
+          "description": [],
+          "signature": [
+            "InventoryViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-server.InfraPluginStart.logViews",
           "type": "Object",
           "tags": [],
@@ -667,6 +723,20 @@
           "description": [],
           "signature": [
             "LogViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginStart.metricsExplorerViews",
+          "type": "Object",
+          "tags": [],
+          "label": "metricsExplorerViews",
+          "description": [],
+          "signature": [
+            "MetricsExplorerViewsServiceStart"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,

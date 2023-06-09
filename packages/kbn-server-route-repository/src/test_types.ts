@@ -17,7 +17,7 @@ function assertType<TShape = never>(value: TShape) {
 // If a params codec is not set, its type should not be available in
 // the request handler.
 createServerRouteFactory<{}, {}>()({
-  endpoint: 'endpoint_without_params',
+  endpoint: 'GET /internal/endpoint_without_params',
   handler: async (resources) => {
     // @ts-expect-error Argument of type '{}' is not assignable to parameter of type '{ params: any; }'.
     assertType<{ params: any }>(resources);
@@ -27,7 +27,7 @@ createServerRouteFactory<{}, {}>()({
 // If a params codec is set, its type _should_ be available in the
 // request handler.
 createServerRouteFactory<{}, {}>()({
-  endpoint: 'endpoint_with_params',
+  endpoint: 'GET /internal/endpoint_with_params',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -40,7 +40,7 @@ createServerRouteFactory<{}, {}>()({
 
 // Resources should be passed to the request handler.
 createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
-  endpoint: 'endpoint_with_params',
+  endpoint: 'GET /internal/endpoint_with_params',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -54,7 +54,7 @@ createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
 
 // Create options are available when registering a route.
 createServerRouteFactory<{}, { options: { tags: string[] } }>()({
-  endpoint: 'endpoint_with_params',
+  endpoint: 'GET /internal/endpoint_with_params',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -68,11 +68,31 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
   },
 });
 
+// Public APIs should be versioned
+createServerRouteFactory<{}, { options: { tags: string[] } }>()({
+  // @ts-expect-error
+  endpoint: 'GET /api/endpoint_with_params',
+  options: {
+    // @ts-expect-error
+    tags: [],
+  },
+  // @ts-expect-error
+  handler: async (resources) => {},
+});
+
+createServerRouteFactory<{}, { options: { tags: string[] } }>()({
+  endpoint: 'GET /api/endpoint_with_params 2023-05-22',
+  options: {
+    tags: [],
+  },
+  handler: async (resources) => {},
+});
+
 const createServerRoute = createServerRouteFactory<{}, {}>();
 
 const repository = {
   ...createServerRoute({
-    endpoint: 'endpoint_without_params',
+    endpoint: 'GET /internal/endpoint_without_params',
     handler: async () => {
       return {
         noParamsForMe: true,
@@ -80,7 +100,7 @@ const repository = {
     },
   }),
   ...createServerRoute({
-    endpoint: 'endpoint_with_params',
+    endpoint: 'GET /internal/endpoint_with_params',
     params: t.type({
       path: t.type({
         serviceName: t.string,
@@ -93,7 +113,7 @@ const repository = {
     },
   }),
   ...createServerRoute({
-    endpoint: 'endpoint_with_optional_params',
+    endpoint: 'GET /internal/endpoint_with_optional_params',
     params: t.partial({
       query: t.partial({
         serviceName: t.string,
@@ -112,9 +132,9 @@ type TestRepository = typeof repository;
 // EndpointOf should return all valid endpoints of a repository
 
 assertType<Array<EndpointOf<TestRepository>>>([
-  'endpoint_with_params',
-  'endpoint_without_params',
-  'endpoint_with_optional_params',
+  'GET /internal/endpoint_with_params',
+  'GET /internal/endpoint_without_params',
+  'GET /internal/endpoint_with_optional_params',
 ]);
 
 // @ts-expect-error Type '"this_endpoint_does_not_exist"' is not assignable to type '"endpoint_without_params" | "endpoint_with_params" | "endpoint_with_optional_params"'
@@ -122,11 +142,11 @@ assertType<Array<EndpointOf<TestRepository>>>(['this_endpoint_does_not_exist']);
 
 // ReturnOf should return the return type of a request handler.
 
-assertType<ReturnOf<TestRepository, 'endpoint_without_params'>>({
+assertType<ReturnOf<TestRepository, 'GET /internal/endpoint_without_params'>>({
   noParamsForMe: true,
 });
 
-const noParamsInvalid: ReturnOf<TestRepository, 'endpoint_without_params'> = {
+const noParamsInvalid: ReturnOf<TestRepository, 'GET /internal/endpoint_without_params'> = {
   // @ts-expect-error type '{ paramsForMe: boolean; }' is not assignable to type '{ noParamsForMe: boolean; }'.
   paramsForMe: true,
 };
@@ -140,21 +160,21 @@ const client: TestClient = {} as any;
 // It should respect any additional create options.
 
 // @ts-expect-error Property 'timeout' is missing
-client('endpoint_without_params', {});
+client('GET /internal/endpoint_without_params', {});
 
-client('endpoint_without_params', {
+client('GET /internal/endpoint_without_params', {
   timeout: 1,
 });
 
 // It does not allow params for routes without a params codec
-client('endpoint_without_params', {
+client('GET /internal/endpoint_without_params', {
   // @ts-expect-error Object literal may only specify known properties, and 'params' does not exist in type
   params: {},
   timeout: 1,
 });
 
 // It requires params for routes with a params codec
-client('endpoint_with_params', {
+client('GET /internal/endpoint_with_params', {
   params: {
     // @ts-expect-error property 'serviceName' is missing in type '{}'
     path: {},
@@ -163,12 +183,12 @@ client('endpoint_with_params', {
 });
 
 // Params are optional if the codec has no required keys
-client('endpoint_with_optional_params', {
+client('GET /internal/endpoint_with_optional_params', {
   timeout: 1,
 });
 
 // If optional, an error will still occur if the params do not match
-client('endpoint_with_optional_params', {
+client('GET /internal/endpoint_with_optional_params', {
   timeout: 1,
   params: {
     // @ts-expect-error Object literal may only specify known properties, and 'path' does not exist in type
@@ -177,7 +197,7 @@ client('endpoint_with_optional_params', {
 });
 
 // The return type is correctly inferred
-client('endpoint_with_params', {
+client('GET /internal/endpoint_with_params', {
   params: {
     path: {
       serviceName: '',

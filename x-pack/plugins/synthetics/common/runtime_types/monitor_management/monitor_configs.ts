@@ -54,15 +54,15 @@ export const MonacoEditorLangIdCodec = tEnum<MonacoEditorLangId>(
 );
 export type MonacoEditorLangIdType = t.TypeOf<typeof MonacoEditorLangIdCodec>;
 
-export enum Mode {
+export enum CodeEditorMode {
   FORM = 'form',
   JSON = 'json',
   PLAINTEXT = 'text',
   XML = 'xml',
 }
 
-export const ModeCodec = tEnum<Mode>('Mode', Mode);
-export type ModeType = t.TypeOf<typeof ModeCodec>;
+export const CodeEditorModeCodec = tEnum<CodeEditorMode>('CodeEditorMode', CodeEditorMode);
+export type CodeEditorModeType = t.TypeOf<typeof CodeEditorModeCodec>;
 
 export enum ContentType {
   JSON = 'application/json',
@@ -127,3 +127,16 @@ export enum FormMonitorType {
 }
 
 export const FormMonitorTypeCodec = tEnum<FormMonitorType>('FormMonitorType', FormMonitorType);
+
+export enum Mode {
+  ANY = 'any',
+  ALL = 'all',
+}
+export const ModeCodec = tEnum<Mode>('Mode', Mode);
+export type ModeType = t.TypeOf<typeof ModeCodec>;
+
+export const ResponseCheckJSONCodec = t.interface({
+  description: t.string,
+  expression: t.string,
+});
+export type ResponseCheckJSON = t.TypeOf<typeof ResponseCheckJSONCodec>;

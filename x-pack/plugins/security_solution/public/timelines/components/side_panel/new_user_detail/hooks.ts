@@ -117,7 +117,7 @@ export const useManagedUser = (userName: string) => {
     }
   }, [from, search, to, userName, isInitializing]);
 
-  const { data: installedIntegrations } = useInstalledIntegrations({
+  const { data: installedIntegrations, isLoading: loadingIntegrations } = useInstalledIntegrations({
     packages: [MANAGED_USER_PACKAGE_NAME],
   });
 
@@ -156,7 +156,7 @@ export const useManagedUser = (userName: string) => {
   return useMemo(
     () => ({
       details: managedUserDetails,
-      isLoading: loadingManagedUser,
+      isLoading: loadingManagedUser || loadingIntegrations,
       isIntegrationEnabled,
       firstSeen: {
         date: firstSeen,
@@ -167,6 +167,7 @@ export const useManagedUser = (userName: string) => {
     [
       firstSeen,
       isIntegrationEnabled,
+      loadingIntegrations,
       lastSeen,
       loadingFirstSeen,
       loadingLastSeen,

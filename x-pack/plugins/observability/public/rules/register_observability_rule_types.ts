@@ -12,7 +12,7 @@ import { SLO_ID_FIELD } from '../../common/field_names/infra_metrics';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { SLO_BURN_RATE_RULE_ID } from '../../common/constants';
-import { validateBurnRateRule } from '../components/app/burn_rate_rule_editor/validation';
+import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
@@ -31,9 +31,9 @@ export const registerObservabilityRuleTypes = (
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return '/unknown/docs';
+      return 'https://www.elastic.co/guide/en/observability/current/slo-burn-rate-alert.html';
     },
-    ruleParamsExpression: lazy(() => import('../components/app/burn_rate_rule_editor')),
+    ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
     validate: validateBurnRateRule,
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(

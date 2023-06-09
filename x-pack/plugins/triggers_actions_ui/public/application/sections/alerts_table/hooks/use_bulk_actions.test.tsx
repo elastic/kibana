@@ -264,7 +264,7 @@ describe('bulk action hooks', () => {
           Object {
             "data-test-subj": "attach-new-case",
             "disableOnQuery": true,
-            "disabledLabel": "Add to case is not supported for this selection",
+            "disabledLabel": "Add to new case",
             "key": "attach-new-case",
             "label": "Add to new case",
             "onClick": [Function],
@@ -272,7 +272,7 @@ describe('bulk action hooks', () => {
           Object {
             "data-test-subj": "attach-existing-case",
             "disableOnQuery": true,
-            "disabledLabel": "Add to case is not supported for this selection",
+            "disabledLabel": "Add to existing case",
             "key": "attach-existing-case",
             "label": "Add to existing case",
             "onClick": [Function],

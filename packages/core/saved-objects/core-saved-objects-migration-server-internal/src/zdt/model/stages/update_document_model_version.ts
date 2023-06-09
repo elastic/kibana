@@ -24,7 +24,7 @@ export const updateDocumentModelVersion: ModelStage<
     controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES',
     currentIndexMeta: setMetaDocMigrationComplete({
       meta: state.currentIndexMeta,
-      versions: context.typeModelVersions,
+      versions: context.typeVirtualVersions,
     }),
   };
 };

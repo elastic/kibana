@@ -41,8 +41,8 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
           setLoadingPageFilters(false);
           return;
         }
-        setLoadingPageFilters(false);
       }
+      setLoadingPageFilters(false);
     })();
   }, [dataViewId, dataViewService]);
 

@@ -24,7 +24,7 @@ const groupById = {
   [groupingId]: {
     ...defaultGroup,
     options: groupingOptions,
-    activeGroup: 'host.name',
+    activeGroups: ['host.name'],
   },
 };
 
@@ -54,7 +54,7 @@ describe('grouping reducer', () => {
       JSON.stringify(groupingState.groupById)
     );
   });
-  it('updateActiveGroup', () => {
+  it('updateActiveGroups', () => {
     const { result } = renderHook(() =>
       useReducer(groupsReducerWithStorage, {
         ...initialState,
@@ -62,40 +62,11 @@ describe('grouping reducer', () => {
       })
     );
     let [groupingState, dispatch] = result.current;
-    expect(groupingState.groupById[groupingId].activeGroup).toEqual('host.name');
+    expect(groupingState.groupById[groupingId].activeGroups).toEqual(['host.name']);
     act(() => {
-      dispatch(groupActions.updateActiveGroup({ id: groupingId, activeGroup: 'user.name' }));
+      dispatch(groupActions.updateActiveGroups({ id: groupingId, activeGroups: ['user.name'] }));
     });
     [groupingState, dispatch] = result.current;
-    expect(groupingState.groupById[groupingId].activeGroup).toEqual('user.name');
-  });
-  it('updateGroupActivePage', () => {
-    const { result } = renderHook(() =>
-      useReducer(groupsReducerWithStorage, {
-        ...initialState,
-        groupById,
-      })
-    );
-    let [groupingState, dispatch] = result.current;
-    expect(groupingState.groupById[groupingId].activePage).toEqual(0);
-    act(() => {
-      dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage: 12 }));
-    });
-    [groupingState, dispatch] = result.current;
-    expect(groupingState.groupById[groupingId].activePage).toEqual(12);
-  });
-  it('updateGroupItemsPerPage', () => {
-    const { result } = renderHook(() => useReducer(groupsReducerWithStorage, initialState));
-    let [groupingState, dispatch] = result.current;
-    act(() => {
-      dispatch(groupActions.updateGroupOptions({ id: groupingId, newOptionList: groupingOptions }));
-    });
-    [groupingState, dispatch] = result.current;
-    expect(groupingState.groupById[groupingId].itemsPerPage).toEqual(25);
-    act(() => {
-      dispatch(groupActions.updateGroupItemsPerPage({ id: groupingId, itemsPerPage: 12 }));
-    });
-    [groupingState, dispatch] = result.current;
-    expect(groupingState.groupById[groupingId].itemsPerPage).toEqual(12);
+    expect(groupingState.groupById[groupingId].activeGroups).toEqual(['user.name']);
   });
 });

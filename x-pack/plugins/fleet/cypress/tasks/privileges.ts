@@ -160,6 +160,18 @@ export const FleetNoneIntegrAllUser: User = {
   roles: [FleetNoneIntegrAllRole.name],
 };
 
+export const BuiltInEditorUser: User = {
+  username: 'editor_user',
+  password: 'password',
+  roles: ['editor'],
+};
+
+export const BuiltInViewerUser: User = {
+  username: 'viewer_user',
+  password: 'password',
+  roles: ['viewer'],
+};
+
 const getUserInfo = (user: User): UserInfo => ({
   username: user.username,
   full_name: user.username.replace('_', ' '),
@@ -170,7 +182,7 @@ export enum ROLES {
   elastic = 'elastic',
 }
 
-export const createUsersAndRoles = (users: User[], roles: Role[]) => {
+export const createRoles = (roles: Role[]) => {
   const envUser = getEnvAuth();
   for (const role of roles) {
     cy.log(`Creating role: ${JSON.stringify(role)}`);
@@ -183,6 +195,28 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
       .its('status')
       .should('eql', 204);
   }
+};
+
+export const deleteRoles = (roles: Role[]) => {
+  const envUser = getEnvAuth();
+
+  for (const role of roles) {
+    cy.log(`Deleting role: ${JSON.stringify(role)}`);
+    cy.request({
+      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      method: 'DELETE',
+      url: constructUrlWithUser(envUser, `/api/security/role/${role.name}`),
+      failOnStatusCode: false,
+    })
+      .its('status')
+      .should('oneOf', [204, 404]);
+  }
+};
+
+// This function can also be used to create users with built-in roles
+// see https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html
+export const createUsers = (users: User[]) => {
+  const envUser = getEnvAuth();
 
   for (const user of users) {
     const userInfo = getUserInfo(user);
@@ -204,7 +238,7 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
   }
 };
 
-export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
+export const deleteUsers = (users: User[]) => {
   const envUser = getEnvAuth();
   for (const user of users) {
     cy.log(`Deleting user: ${JSON.stringify(user)}`);
@@ -217,16 +251,14 @@ export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
       .its('status')
       .should('oneOf', [204, 404]);
   }
+};
 
-  for (const role of roles) {
-    cy.log(`Deleting role: ${JSON.stringify(role)}`);
-    cy.request({
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-      method: 'DELETE',
-      url: constructUrlWithUser(envUser, `/api/security/role/${role.name}`),
-      failOnStatusCode: false,
-    })
-      .its('status')
-      .should('oneOf', [204, 404]);
-  }
+export const createUsersAndRoles = (users: User[], roles: Role[]) => {
+  createUsers(users);
+  createRoles(roles);
+};
+
+export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
+  deleteUsers(users);
+  deleteRoles(roles);
 };

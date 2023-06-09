@@ -13,6 +13,7 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 
 export function SloEditFormObjectiveSectionTimeslices() {
   const { control, getFieldState } = useFormContext<CreateSLOInput>();
+
   return (
     <EuiFlexGrid columns={3}>
       <EuiFlexItem>
@@ -34,7 +35,6 @@ export function SloEditFormObjectiveSectionTimeslices() {
           }
         >
           <Controller
-            shouldUnregister
             name="objective.timesliceTarget"
             control={control}
             defaultValue={95}
@@ -78,7 +78,6 @@ export function SloEditFormObjectiveSectionTimeslices() {
           }
         >
           <Controller
-            shouldUnregister
             name="objective.timesliceWindow"
             defaultValue="1"
             control={control}

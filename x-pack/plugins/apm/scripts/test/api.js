@@ -39,7 +39,8 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .option('grep-files', {
     alias: 'files',
-    type: 'string',
+    type: 'array',
+    string: true,
     description: 'Specify the files to run',
   })
   .option('inspect', {
@@ -107,7 +108,7 @@ function runTests() {
   childProcess.execSync(cmd, {
     cwd: path.join(__dirname),
     stdio: 'inherit',
-    env: { ...process.env, APM_TEST_GREP_FILES: grepFiles },
+    env: { ...process.env, APM_TEST_GREP_FILES: JSON.stringify(grepFiles) },
   });
 }
 

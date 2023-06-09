@@ -12,18 +12,24 @@ import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_NAMESPACE,
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
+import { mapKeys, snakeCase } from 'lodash/fp';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
+import { AlertDocument, createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+
+export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
 const augmentAlerts = <T>({
   alerts,
@@ -44,6 +50,9 @@ const augmentAlerts = <T>({
         [ALERT_START]: currentTimeOverride ?? new Date(),
         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
         [VERSION]: kibanaVersion,
+        ...(options?.maintenanceWindowIds?.length
+          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
+          : {}),
         ...commonRuleFields,
         ...alert._source,
       },
@@ -56,7 +65,7 @@ const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) =>
 };
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
-  ({ logger, ruleDataClient }) =>
+  ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
     return {
       ...type,
@@ -124,6 +133,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 if (filteredAlerts.length === 0) {
                   return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
+                } else if (maxAlerts === 0) {
+                  return { createdAlerts: [], errors: {}, alertsWereTruncated: true };
                 }
 
                 let enrichedAlerts = filteredAlerts;
@@ -160,17 +171,43 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return { createdAlerts: [], errors: {}, alertsWereTruncated };
                 }
 
-                return {
-                  createdAlerts: augmentedAlerts
-                    .map((alert, idx) => {
-                      const responseItem = response.body.items[idx].create;
-                      return {
-                        _id: responseItem?._id ?? '',
-                        _index: responseItem?._index ?? '',
-                        ...alert._source,
-                      };
+                const createdAlerts = augmentedAlerts
+                  .map((alert, idx) => {
+                    const responseItem = response.body.items[idx].create;
+                    return {
+                      _id: responseItem?._id ?? '',
+                      _index: responseItem?._index ?? '',
+                      ...alert._source,
+                    };
+                  })
+                  .filter((_, idx) => response.body.items[idx].create?.status === 201)
+                  // Security solution's EQL rule consists of building block alerts which should be filtered out.
+                  // Building block alerts have additional "kibana.alert.group.index" attribute which is absent for the root alert.
+                  .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
+
+                createdAlerts.forEach((alert) =>
+                  options.services.alertFactory
+                    .create(alert._id)
+                    .replaceState({
+                      signals_count: 1,
                     })
-                    .filter((_, idx) => response.body.items[idx].create?.status === 201),
+                    .scheduleActions(type.defaultActionGroupId, {
+                      rule: mapKeys(snakeCase, {
+                        ...options.params,
+                        name: options.rule.name,
+                        id: options.rule.id,
+                      }),
+                      results_link: type.getViewInAppRelativeUrl?.({
+                        rule: { ...options.rule, params: options.params },
+                        start: Date.parse(alert[TIMESTAMP]),
+                        end: Date.parse(alert[TIMESTAMP]),
+                      }),
+                      alerts: [formatAlert?.(alert) ?? alert],
+                    })
+                );
+
+                return {
+                  createdAlerts,
                   errors: errorAggregator(response.body, [409]),
                   alertsWereTruncated,
                 };
@@ -325,21 +362,47 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return { createdAlerts: [], errors: {} };
                 }
 
-                return {
-                  createdAlerts: augmentedAlerts
-                    .map((alert, idx) => {
-                      const responseItem =
-                        bulkResponse.body.items[idx + duplicateAlerts.length].create;
-                      return {
-                        _id: responseItem?._id ?? '',
-                        _index: responseItem?._index ?? '',
-                        ...alert._source,
-                      };
+                const createdAlerts = augmentedAlerts
+                  .map((alert, idx) => {
+                    const responseItem =
+                      bulkResponse.body.items[idx + duplicateAlerts.length].create;
+                    return {
+                      _id: responseItem?._id ?? '',
+                      _index: responseItem?._index ?? '',
+                      ...alert._source,
+                    };
+                  })
+                  .filter(
+                    (_, idx) =>
+                      bulkResponse.body.items[idx + duplicateAlerts.length].create?.status === 201
+                  )
+                  // Security solution's EQL rule consists of building block alerts which should be filtered out.
+                  // Building block alerts have additional "kibana.alert.group.index" attribute which is absent for the root alert.
+                  .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
+
+                createdAlerts.forEach((alert) =>
+                  options.services.alertFactory
+                    .create(alert._id)
+                    .replaceState({
+                      signals_count: 1,
                     })
-                    .filter(
-                      (_, idx) =>
-                        bulkResponse.body.items[idx + duplicateAlerts.length].create?.status === 201
-                    ),
+                    .scheduleActions(type.defaultActionGroupId, {
+                      rule: mapKeys(snakeCase, {
+                        ...options.params,
+                        name: options.rule.name,
+                        id: options.rule.id,
+                      }),
+                      results_link: type.getViewInAppRelativeUrl?.({
+                        rule: { ...options.rule, params: options.params },
+                        start: Date.parse(alert[TIMESTAMP]),
+                        end: Date.parse(alert[TIMESTAMP]),
+                      }),
+                      alerts: [formatAlert?.(alert) ?? alert],
+                    })
+                );
+
+                return {
+                  createdAlerts,
                   errors: errorAggregator(bulkResponse.body, [409]),
                 };
               } else {
@@ -356,6 +419,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
         ruleDataClient,
         useNamespace: true,
         isLifecycleAlert: false,
+        formatAlert: formatAlert as (alert: AlertDocument) => AlertDocument,
       })(),
     };
   };

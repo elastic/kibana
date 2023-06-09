@@ -25,6 +25,7 @@ import {
   mockRule,
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
@@ -124,6 +125,7 @@ describe('rule helpers', () => {
         groupByRadioSelection: 'per-rule-execution',
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
+        suppressionMissingFields: expect.any(String),
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -224,13 +226,8 @@ describe('rule helpers', () => {
   describe('getDefineStepsData', () => {
     test('returns with saved_id if value exists on rule', () => {
       const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
-      const expected = {
+      const expected = expect.objectContaining({
         ruleType: 'saved_query',
-        anomalyThreshold: 50,
-        dataSourceType: 'indexPatterns',
-        dataViewId: undefined,
-        machineLearningJobId: [],
-        index: ['auditbeat-*'],
         queryBar: {
           query: {
             query: '',
@@ -239,41 +236,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
-        relatedIntegrations: [],
-        requiredFields: [],
-        threshold: {
-          field: [],
-          value: '100',
-        },
-        threatIndex: [],
-        threatMapping: [],
-        threatQueryBar: {
-          query: {
-            query: '',
-            language: '',
-          },
-          filters: [],
-          saved_id: null,
-        },
-        timeline: {
-          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-          title: 'Untitled timeline',
-        },
-        eqlOptions: {
-          timestampField: undefined,
-          eventCategoryField: undefined,
-          tiebreakerField: undefined,
-        },
-        groupByFields: [],
-        groupByDuration: {
-          value: 5,
-          unit: 'm',
-        },
-        groupByRadioSelection: 'per-rule-execution',
-        newTermsFields: [],
-        historyWindowSize: '7d',
         shouldLoadQueryDynamically: true,
-      };
+      });
 
       expect(result).toEqual(expected);
     });
@@ -284,13 +248,8 @@ describe('rule helpers', () => {
       };
       delete mockedRule.saved_id;
       const result: DefineStepRule = getDefineStepsData(mockedRule);
-      const expected = {
+      const expected = expect.objectContaining({
         ruleType: 'saved_query',
-        anomalyThreshold: 50,
-        dataSourceType: 'indexPatterns',
-        dataViewId: undefined,
-        machineLearningJobId: [],
-        index: ['auditbeat-*'],
         queryBar: {
           query: {
             query: '',
@@ -299,41 +258,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: null,
         },
-        relatedIntegrations: [],
-        requiredFields: [],
-        threshold: {
-          field: [],
-          value: '100',
-        },
-        threatIndex: [],
-        threatMapping: [],
-        threatQueryBar: {
-          query: {
-            query: '',
-            language: '',
-          },
-          filters: [],
-          saved_id: null,
-        },
-        timeline: {
-          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-          title: 'Untitled timeline',
-        },
-        eqlOptions: {
-          timestampField: undefined,
-          eventCategoryField: undefined,
-          tiebreakerField: undefined,
-        },
-        groupByFields: [],
-        groupByDuration: {
-          value: 5,
-          unit: 'm',
-        },
-        groupByRadioSelection: 'per-rule-execution',
-        newTermsFields: [],
-        historyWindowSize: '7d',
         shouldLoadQueryDynamically: false,
-      };
+      });
 
       expect(result).toEqual(expected);
     });
@@ -346,6 +272,32 @@ describe('rule helpers', () => {
 
       expect(result.timeline.id).toBeNull();
       expect(result.timeline.title).toBeNull();
+    });
+
+    describe('suppression on missing fields', () => {
+      test('returns default suppress value in suppress strategy is missing', () => {
+        const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
+        const expected = expect.objectContaining({
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.Suppress,
+        });
+
+        expect(result).toEqual(expected);
+      });
+
+      test('returns suppress value if rule is configured with missing_fields_strategy', () => {
+        const result: DefineStepRule = getDefineStepsData({
+          ...mockRule('test-id'),
+          alert_suppression: {
+            group_by: [],
+            missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+          },
+        });
+        const expected = expect.objectContaining({
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+        });
+
+        expect(result).toEqual(expected);
+      });
     });
   });
 

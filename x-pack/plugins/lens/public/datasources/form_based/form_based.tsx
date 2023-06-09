@@ -17,12 +17,12 @@ import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ES_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
@@ -168,7 +168,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const uiSettings = core.uiSettings;
+  const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
 
@@ -186,7 +186,7 @@ export function getFormBasedDatasource({
       return loadInitialState({
         persistedState,
         references,
-        defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+        defaultIndexPatternId: uiSettings.get('defaultIndex'),
         storage,
         initialContext,
         indexPatternRefs,
@@ -425,8 +425,16 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
+    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
+      toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        uiSettings,
+        dateRange,
+        nowInstant,
+        searchSessionId
+      ),
 
     renderLayerSettings(domElement, props) {
       render(
@@ -535,6 +543,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -564,6 +573,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -576,7 +586,6 @@ export function getFormBasedDatasource({
                 uiSettings={uiSettings}
                 storage={storage}
                 fieldFormats={fieldFormats}
-                savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
@@ -599,18 +608,32 @@ export function getFormBasedDatasource({
       const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <LayerPanel
-            onChangeIndexPattern={(indexPatternId) => {
-              triggerActionOnIndexPatternChange({
-                indexPatternId,
-                state: props.state,
-                layerId: props.layerId,
-                uiActions,
-              });
-              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
-            }}
-            {...otherProps}
-          />
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                share,
+              }}
+            >
+              <LayerPanel
+                onChangeIndexPattern={(indexPatternId) => {
+                  triggerActionOnIndexPatternChange({
+                    indexPatternId,
+                    state: props.state,
+                    layerId: props.layerId,
+                    uiActions,
+                  });
+                  onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
+                }}
+                {...otherProps}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
         </KibanaThemeProvider>,
         domElement
       );
@@ -838,7 +861,8 @@ export function getFormBasedDatasource({
             layer,
             columnId,
             frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
-            frameDatasourceAPI.dateRange
+            frameDatasourceAPI.dateRange,
+            uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
         }
       );

@@ -41,7 +41,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     (callApmApi) => {
       if (newConfig.service.name) {
         return callApmApi(
-          'GET /api/apm/settings/agent-configuration/environments',
+          'GET /api/apm/settings/agent-configuration/environments 2023-05-22',
           {
             params: {
               query: { serviceName: omitAllOption(newConfig.service.name) },
@@ -65,7 +65,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       }
 
       const { agentName } = await callApmApi(
-        'GET /api/apm/settings/agent-configuration/agent_name',
+        'GET /api/apm/settings/agent-configuration/agent_name 2023-05-22',
         {
           params: { query: { serviceName } },
         }

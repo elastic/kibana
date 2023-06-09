@@ -25,6 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
+import { isQueryValid } from '@kbn/visualization-ui-components/public';
 import type { DateRange } from '../../../common/types';
 import type {
   FramePublicAPI,
@@ -58,7 +59,6 @@ import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import { isQueryValid } from '../../shared_components';
 import { ReducedSamplingSectionEntries } from './info_badges';
 
 function isMinOrMaxColumn(
@@ -101,7 +101,8 @@ export function isColumnInvalid(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined
+  dateRange: DateRange | undefined,
+  targetBars: number
 ) {
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
@@ -111,7 +112,9 @@ export function isColumnInvalid(
   const referencesHaveErrors =
     true &&
     'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern, dateRange).filter(Boolean).length);
+    Boolean(
+      getReferencesErrors(layer, column, indexPattern, dateRange, targetBars).filter(Boolean).length
+    );
 
   const operationErrorMessages =
     operationDefinition &&
@@ -120,7 +123,8 @@ export function isColumnInvalid(
       columnId,
       indexPattern,
       dateRange,
-      operationDefinitionMap
+      operationDefinitionMap,
+      targetBars
     );
 
   // it looks like this is just a back-stop since we prevent
@@ -138,7 +142,8 @@ function getReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined
+  dateRange: DateRange | undefined,
+  targetBars: number
 ) {
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
@@ -148,7 +153,8 @@ function getReferencesErrors(
       referenceId,
       indexPattern,
       dateRange,
-      operationDefinitionMap
+      operationDefinitionMap,
+      targetBars
     );
   });
 }

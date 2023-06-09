@@ -6,15 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiCallOut,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPage,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
@@ -22,6 +16,7 @@ import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../../types';
 
 export interface DocProps {
   /**
@@ -44,6 +39,10 @@ export interface DocProps {
    * Discover main view url
    */
   referrer?: string;
+  /**
+   * Records fetched from text based query
+   */
+  textBasedHits?: DataTableRecord[];
 }
 
 export function Doc(props: DocProps) {
@@ -51,11 +50,6 @@ export function Doc(props: DocProps) {
   const [reqState, hit] = useEsDocSearch(props);
   const { locator, chrome, docLinks } = useDiscoverServices();
   const indexExistsLink = docLinks.links.apis.indexExists;
-
-  const singleDocTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    singleDocTitle.current?.focus();
-  }, []);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -70,15 +64,13 @@ export function Doc(props: DocProps) {
         id="singleDocTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSingleDocTitle"
-        tabIndex={-1}
-        ref={singleDocTitle}
       >
         {i18n.translate('discover.doc.pageTitle', {
           defaultMessage: 'Single document - #{id}',
           values: { id: props.id },
         })}
       </h1>
-      <EuiPageContent>
+      <EuiPageBody panelled paddingSize="l" panelProps={{ role: 'main' }}>
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
             color="danger"
@@ -150,7 +142,7 @@ export function Doc(props: DocProps) {
             <DocViewer hit={hit} dataView={dataView} />
           </div>
         )}
-      </EuiPageContent>
+      </EuiPageBody>
     </EuiPage>
   );
 }

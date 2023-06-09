@@ -38,6 +38,7 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { registerActionFileUploadRoute } from './file_upload_handler';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -144,37 +145,33 @@ export function registerResponseActionRoutes(
     )
   );
 
-  // `get-file` currently behind FF
-  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
-    router.post(
-      {
-        path: GET_FILE_ROUTE,
-        validate: EndpointActionGetFileSchema,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      },
-      withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
-        logger,
-        responseActionRequestHandler(endpointContext, 'get-file')
-      )
-    );
-  }
+  router.post(
+    {
+      path: GET_FILE_ROUTE,
+      validate: EndpointActionGetFileSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canWriteFileOperations'] },
+      logger,
+      responseActionRequestHandler(endpointContext, 'get-file')
+    )
+  );
 
-  // `execute` currently behind FF (planned for 8.8)
-  if (endpointContext.experimentalFeatures.responseActionExecuteEnabled) {
-    router.post(
-      {
-        path: EXECUTE_ROUTE,
-        validate: ExecuteActionRequestSchema,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      },
-      withEndpointAuthz(
-        { all: ['canWriteExecuteOperations'] },
-        logger,
-        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
-      )
-    );
-  }
+  router.post(
+    {
+      path: EXECUTE_ROUTE,
+      validate: ExecuteActionRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canWriteExecuteOperations'] },
+      logger,
+      responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+    )
+  );
+
+  registerActionFileUploadRoute(router, endpointContext);
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -195,7 +192,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     try {
       action = await endpointContext.service
         .getActionCreateService()
-        .createAction({ ...req.body, command, user }, casesClient);
+        .createAction({ ...req.body, command, user }, { casesClient });
     } catch (err) {
       return res.customError({
         statusCode: 500,

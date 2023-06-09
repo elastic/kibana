@@ -17,6 +17,9 @@ import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { validateAgents, validateEndpointLicense } from './validate';
+import type { LicenseService } from '../../../../../common/license/license';
 import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../../common/constants';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -35,6 +38,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionsExecuteParameters,
+  EndpointActionDataParameterTypes,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
 import type { FeatureKeys } from '../../feature_usage';
@@ -51,31 +55,61 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
 ]);
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
+type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
+  command: ResponseActionsApiCommandNames;
+  user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
+  rule_id?: string;
+  rule_name?: string;
+  error?: string;
+  hosts?: Record<string, { name: string }>;
+};
 
-export class ActionCreateService {
-  constructor(private esClient: ElasticsearchClient, private endpointContext: EndpointAppContext) {}
+interface CreateActionMetadata {
+  casesClient?: CasesClient;
+  minimumLicenseRequired?: LicenseType;
+  enableActionsWithErrors?: boolean;
+}
 
-  async createAction(
-    payload: TypeOf<typeof ResponseActionBodySchema> & {
-      command: ResponseActionsApiCommandNames;
-      user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
-      rule_id?: string;
-      rule_name?: string;
-    },
-    casesClient?: CasesClient
-  ): Promise<ActionDetails> {
+export interface ActionCreateService {
+  createActionFromAlert: (payload: CreateActionPayload) => Promise<ActionDetails>;
+  createAction: <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
+    payload: CreateActionPayload,
+    metadata: CreateActionMetadata
+  ) => Promise<ActionDetails<TOutputContent, TParameters>>;
+}
+
+export const actionCreateService = (
+  esClient: ElasticsearchClient,
+  endpointContext: EndpointAppContext
+): ActionCreateService => {
+  const createActionFromAlert = async (payload: CreateActionPayload): Promise<ActionDetails> => {
+    return createAction({ ...payload }, { minimumLicenseRequired: 'enterprise' });
+  };
+
+  const createAction = async <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
+    payload: CreateActionPayload,
+    { casesClient, minimumLicenseRequired = 'basic' }: CreateActionMetadata
+  ): Promise<ActionDetails<TOutputContent, TParameters>> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
-      this.endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
+      endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
     }
 
-    const logger = this.endpointContext.logFactory.get('hostIsolation');
+    const licenseService = endpointContext.service.getLicenseService();
+
+    const logger = endpointContext.logFactory.get('hostIsolation');
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(payload.endpoint_ids)]; // dedupe
-    const endpointData = await this.endpointContext.service
+    const endpointData = await endpointContext.service
       .getEndpointMetadataService()
-      .getMetadataForEndpoints(this.esClient, endpointIDs);
+      .getMetadataForEndpoints(esClient, endpointIDs);
 
     const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
 
@@ -99,10 +133,16 @@ export class ActionCreateService {
       return payload.parameters ?? undefined;
     };
 
+    const alertActionError = checkForAlertErrors({
+      agents,
+      licenseService,
+      minimumLicenseRequired,
+    });
+
     const doc = {
       '@timestamp': moment().toISOString(),
       agent: {
-        id: agents,
+        id: payload.endpoint_ids,
       },
       EndpointActions: {
         action_id: actionID,
@@ -113,12 +153,21 @@ export class ActionCreateService {
           command: payload.command,
           comment: payload.comment ?? undefined,
           ...(payload.alert_ids ? { alert_id: payload.alert_ids } : {}),
+          ...(payload.hosts ? { hosts: payload.hosts } : {}),
           parameters: getActionParameters() ?? undefined,
         },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {
         id: payload.user ? payload.user.username : 'unknown',
       },
+      ...(alertActionError
+        ? {
+            error: {
+              code: '400',
+              message: alertActionError,
+            },
+          }
+        : {}),
       ...(payload.rule_id && payload.rule_name
         ? { rule: { id: payload.rule_id, name: payload.rule_name } }
         : {}),
@@ -130,7 +179,7 @@ export class ActionCreateService {
     // and allow only users with superuser privileges to write to fleet indices
     // const logger = endpointContext.logFactory.get('host-isolation');
     const doesLogsEndpointActionsDsExist = await doLogsEndpointActionDsExists({
-      esClient: this.esClient,
+      esClient,
       logger,
       dataStreamName: ENDPOINT_ACTIONS_DS,
     });
@@ -138,11 +187,14 @@ export class ActionCreateService {
     // if the new endpoint indices/data streams exists
     // write the action request to the new endpoint index
     if (doesLogsEndpointActionsDsExist) {
-      logsEndpointActionsResult = await this.esClient.index<LogsEndpointAction>(
+      logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
         {
           index: ENDPOINT_ACTIONS_INDEX,
           body: {
             ...doc,
+            agent: {
+              id: payload.endpoint_ids,
+            },
           },
           refresh: 'wait_for',
         },
@@ -153,62 +205,63 @@ export class ActionCreateService {
       }
     }
 
-    // add signature to doc
-    const fleetActionDoc = {
-      ...doc.EndpointActions,
-      '@timestamp': doc['@timestamp'],
-      agents,
-      timeout: 300, // 5 minutes
-      user_id: doc.user.id,
-    };
-    const fleetActionDocSignature = await this.endpointContext.service
-      .getMessageSigningService()
-      .sign(fleetActionDoc);
-    const signedFleetActionDoc = {
-      ...fleetActionDoc,
-      signed: {
-        data: fleetActionDocSignature.data.toString('base64'),
-        signature: fleetActionDocSignature.signature,
-      },
-    };
-
-    // write actions to .fleet-actions index
-    try {
-      fleetActionIndexResult = await this.esClient.index<EndpointAction>(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: signedFleetActionDoc,
-          refresh: 'wait_for',
+    if (!doc.error) {
+      // add signature to doc
+      const fleetActionDoc = {
+        ...doc.EndpointActions,
+        '@timestamp': doc['@timestamp'],
+        agents,
+        timeout: 300, // 5 minutes
+        user_id: doc.user.id,
+      };
+      const fleetActionDocSignature = await endpointContext.service
+        .getMessageSigningService()
+        .sign(fleetActionDoc);
+      const signedFleetActionDoc = {
+        ...fleetActionDoc,
+        signed: {
+          data: fleetActionDocSignature.data.toString('base64'),
+          signature: fleetActionDocSignature.signature,
         },
-        {
-          meta: true,
-        }
-      );
-
-      if (fleetActionIndexResult.statusCode !== 201) {
-        throw new Error(fleetActionIndexResult.body.result);
-      }
-    } catch (e) {
-      // create entry in .logs-endpoint.action.responses-default data stream
-      // when writing to .fleet-actions fails
-      if (doesLogsEndpointActionsDsExist) {
-        await createFailedActionResponseEntry({
-          esClient: this.esClient,
-          doc: {
-            '@timestamp': moment().toISOString(),
-            agent: doc.agent,
-            EndpointActions: {
-              action_id: doc.EndpointActions.action_id,
-              completed_at: moment().toISOString(),
-              started_at: moment().toISOString(),
-              data: doc.EndpointActions.data,
-            },
+      };
+      // write actions to .fleet-actions index
+      try {
+        fleetActionIndexResult = await esClient.index<EndpointAction>(
+          {
+            index: AGENT_ACTIONS_INDEX,
+            body: signedFleetActionDoc,
+            refresh: 'wait_for',
           },
-          logger,
-        });
-      }
+          {
+            meta: true,
+          }
+        );
 
-      throw e;
+        if (fleetActionIndexResult.statusCode !== 201) {
+          throw new Error(fleetActionIndexResult.body.result);
+        }
+      } catch (e) {
+        // create entry in .logs-endpoint.action.responses-default data stream
+        // when writing to .fleet-actions fails
+        if (doesLogsEndpointActionsDsExist) {
+          await createFailedActionResponseEntry({
+            esClient,
+            doc: {
+              '@timestamp': moment().toISOString(),
+              agent: doc.agent,
+              EndpointActions: {
+                action_id: doc.EndpointActions.action_id,
+                completed_at: moment().toISOString(),
+                started_at: moment().toISOString(),
+                data: doc.EndpointActions.data,
+              },
+            },
+            logger,
+          });
+        }
+
+        throw e;
+      }
     }
 
     if (casesClient) {
@@ -259,17 +312,22 @@ export class ActionCreateService {
     const actionId = returnActionIdCommands.includes(payload.command) ? { action: actionID } : {};
 
     const data = await getActionDetailsById(
-      this.esClient,
-      this.endpointContext.service.getEndpointMetadataService(),
+      esClient,
+      endpointContext.service.getEndpointMetadataService(),
       actionID
     );
 
     return {
       ...actionId,
       ...data,
-    };
-  }
-}
+    } as ActionDetails<TOutputContent, TParameters>;
+  };
+
+  return {
+    createAction,
+    createActionFromAlert,
+  };
+};
 
 const createFailedActionResponseEntry = async ({
   esClient,
@@ -294,4 +352,21 @@ const createFailedActionResponseEntry = async ({
   } catch (e) {
     logger.error(e);
   }
+};
+
+interface CheckForAlertsArgs {
+  agents: string[];
+  licenseService: LicenseService;
+  minimumLicenseRequired: LicenseType;
+}
+
+const checkForAlertErrors = ({
+  agents,
+  licenseService,
+  minimumLicenseRequired = 'basic',
+}: CheckForAlertsArgs): string | undefined => {
+  const licenseError = validateEndpointLicense(licenseService, minimumLicenseRequired);
+  const agentsError = validateAgents(agents);
+
+  return licenseError || agentsError;
 };

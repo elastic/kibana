@@ -8,6 +8,7 @@
 import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
@@ -52,6 +53,7 @@ export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'>
   onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
   newDescription?: string;
   newTags?: string[];
+  panelTimeRange?: TimeRange;
 };
 
 export function App({
@@ -70,6 +72,7 @@ export function App({
   initialContext,
   theme$,
   coreStart,
+  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -110,6 +113,7 @@ export function App({
     isLoading,
     isSaveable,
     visualization,
+    annotationGroups,
   } = useLensSelector((state) => state.lens);
 
   const selectorDependencies = useMemo(
@@ -177,7 +181,9 @@ export function App({
           persistedDoc,
           lastKnownDoc,
           data.query.filterManager.inject.bind(data.query.filterManager),
-          datasourceMap
+          datasourceMap,
+          visualizationMap,
+          annotationGroups
         ) &&
         (isSaveable || persistedDoc)
       ) {
@@ -206,6 +212,8 @@ export function App({
     application.capabilities.visualize.save,
     data.query.filterManager,
     datasourceMap,
+    visualizationMap,
+    annotationGroups,
   ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
@@ -371,7 +379,14 @@ export function App({
         initialDocFromContext,
         persistedDoc,
       ].map((refDoc) =>
-        isLensEqual(refDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap)
+        isLensEqual(
+          refDoc,
+          lastKnownDoc,
+          data.query.filterManager.inject,
+          datasourceMap,
+          visualizationMap,
+          annotationGroups
+        )
       );
       if (initialDocFromContextUnchanged || currentDocHasBeenSavedInLens) {
         onAppLeave((actions) => {
@@ -383,6 +398,7 @@ export function App({
       }
     }
   }, [
+    annotationGroups,
     application,
     data.query.filterManager.inject,
     datasourceMap,
@@ -391,6 +407,7 @@ export function App({
     lastKnownDoc,
     onAppLeave,
     persistedDoc,
+    visualizationMap,
   ]);
 
   const navigateToVizEditor = useCallback(() => {
@@ -419,7 +436,6 @@ export function App({
         dataViews,
         uiActions,
         core: { http, notifications, uiSettings },
-        data,
         contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
@@ -434,7 +450,7 @@ export function App({
           }
         },
       }),
-    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
+    [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
   const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
@@ -457,17 +473,14 @@ export function App({
       }
       if (locator && shortUrls) {
         // This is a stripped down version of what the share URL plugin is doing
-        const relativeUrl = await shortUrls.create({ locator, params });
-        const absoluteShortUrl = application.getUrlForApp('', {
-          path: `/r/s/${relativeUrl.data.slug}`,
-          absolute: true,
-        });
+        const shortUrl = await shortUrls.createWithLocator({ locator, params });
+        const absoluteShortUrl = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
         shareURLCache.current = { params: cacheKey, url: absoluteShortUrl };
         return absoluteShortUrl;
       }
       return '';
     },
-    [locator, application, shortUrls]
+    [locator, shortUrls]
   );
 
   const returnToOriginSwitchLabelForContext =
@@ -597,7 +610,9 @@ export function App({
               persistedDoc,
               lastKnownDoc,
               data.query.filterManager.inject.bind(data.query.filterManager),
-              datasourceMap
+              datasourceMap,
+              visualizationMap,
+              annotationGroups
             )
           }
           goBackToOriginatingApp={goBackToOriginatingApp}

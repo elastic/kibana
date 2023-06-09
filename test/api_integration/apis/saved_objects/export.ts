@@ -26,7 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    after(() => kibanaServer.spaces.delete(SPACE_ID));
+    after(async () => {
+      await kibanaServer.spaces.delete(SPACE_ID);
+    });
 
     describe('basic amount of saved objects', () => {
       it('should return objects in dependency order', async () => {
@@ -576,6 +578,47 @@ export default function ({ getService }: FtrProviderContext) {
           // @ts-expect-error TS complains about using `anotherCustomVisId` before it is assigned
           .delete(`/s/${SPACE_ID}/api/saved_objects/visualization/${anotherCustomVisId}`)
           .expect(200);
+      });
+    });
+
+    describe('should retain the managed property value of exported saved objects', () => {
+      before(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+          { space: SPACE_ID }
+        );
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
+          { space: SPACE_ID }
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
+          { space: SPACE_ID }
+        );
+      });
+      it('should retain all existing saved object properties', async () => {
+        // we're specifically asserting that the `managed` property isn't overwritten during export.
+        await supertest
+          .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
+          .send({
+            type: ['config', 'index-pattern'],
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = ndjsonToObject(resp.text);
+            expect(objects).to.have.length(3);
+            expect(objects[0]).to.have.property('id', '6cda943f-a70e-43d4-b0cb-feb1b624cb62');
+            expect(objects[0]).to.have.property('type', 'index-pattern');
+            expect(objects[0]).to.have.property('managed', true);
+            expect(objects[1]).to.have.property('id', 'c1818992-bb2c-4a9a-b276-83ada7cce03e');
+            expect(objects[1]).to.have.property('type', 'config');
+            expect(objects[1]).to.have.property('managed', false);
+            expect(objects[2]).to.have.property('exportedCount', 2);
+            expect(objects[2]).to.have.property('missingRefCount', 0);
+            expect(objects[2].missingReferences).to.have.length(0);
+          });
       });
     });
   });

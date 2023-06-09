@@ -33,9 +33,10 @@ export const checkRecognizer = async ({
   signal,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> =>
   KibanaServices.get().http.fetch<RecognizerModule[]>(
-    `/api/ml/modules/recognize/${indexPatternName}`,
+    `/internal/ml/modules/recognize/${indexPatternName}`,
     {
       method: 'GET',
+      version: '1',
       asSystemRequest: true,
       signal,
     }
@@ -50,8 +51,9 @@ export const checkRecognizer = async ({
  * @throws An error if response is not OK
  */
 export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> =>
-  KibanaServices.get().http.fetch<Module[]>(`/api/ml/modules/get_module/${moduleId}`, {
+  KibanaServices.get().http.fetch<Module[]>(`/internal/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
+    version: '1',
     asSystemRequest: true,
     signal,
   });
@@ -75,9 +77,10 @@ export const setupMlJob = async ({
   prefix = '',
 }: MlSetupArgs): Promise<SetupMlResponse> => {
   const response = await KibanaServices.get().http.fetch<SetupMlResponse>(
-    `/api/ml/modules/setup/${configTemplate}`,
+    `/internal/ml/modules/setup/${configTemplate}`,
     {
       method: 'POST',
+      version: '1',
       body: JSON.stringify({
         prefix,
         groups,
@@ -110,9 +113,10 @@ export const startDatafeeds = async ({
   start: number;
 }): Promise<StartDatafeedResponse> => {
   const response = await KibanaServices.get().http.fetch<StartDatafeedResponse>(
-    '/api/ml/jobs/force_start_datafeeds',
+    '/internal/ml/jobs/force_start_datafeeds',
     {
       method: 'POST',
+      version: '1',
       body: JSON.stringify({
         datafeedIds,
         ...(start !== 0 && { start }),
@@ -138,9 +142,10 @@ export const stopDatafeeds = async ({
   datafeedIds: string[];
 }): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
   const stopDatafeedsResponse = await KibanaServices.get().http.fetch<StopDatafeedResponse>(
-    '/api/ml/jobs/stop_datafeeds',
+    '/internal/ml/jobs/stop_datafeeds',
     {
       method: 'POST',
+      version: '1',
       body: JSON.stringify({
         datafeedIds,
       }),
@@ -150,9 +155,10 @@ export const stopDatafeeds = async ({
 
   const datafeedPrefix = 'datafeed-';
   const closeJobsResponse = await KibanaServices.get().http.fetch<CloseJobsResponse>(
-    '/api/ml/jobs/close_jobs',
+    '/internal/ml/jobs/close_jobs',
     {
       method: 'POST',
+      version: '1',
       body: JSON.stringify({
         jobIds: datafeedIds.map((dataFeedId) =>
           dataFeedId.startsWith(datafeedPrefix)

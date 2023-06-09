@@ -3045,7 +3045,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
+      `"Failed to validate actions due to the following error: Action frequency cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3122,7 +3122,7 @@ describe('create()', () => {
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Failed to validate actions due to the following 2 errors:
       - Actions missing frequency parameters: group3
-      - Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"
+      - Action frequency cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"
     `);
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();

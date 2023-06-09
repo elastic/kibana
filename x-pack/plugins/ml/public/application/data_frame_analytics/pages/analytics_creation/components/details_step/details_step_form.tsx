@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useRef, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +17,8 @@ import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validat
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
+import { useMlContext } from '../../../../../contexts/ml';
+import { DetailsStepTimeField } from './details_step_time_field';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 
@@ -36,6 +38,10 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks, notifications },
   } = useMlKibana();
+
+  const mlContext = useMlContext();
+  const { currentDataView } = mlContext;
+
   const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;
   const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
@@ -51,6 +57,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdInvalidMaxLength,
     jobIdValid,
     resultsField,
+    timeFieldName,
   } = form;
 
   const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
@@ -60,6 +67,39 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     (cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined) ||
       (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
   );
+  const [dataViewAvailableTimeFields, setDataViewAvailableTimeFields] = useState<string[]>([]);
+
+  const onTimeFieldChanged = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value;
+      // If the value is an empty string, it's not a valid selection
+      if (value === '') {
+        return;
+      }
+      // Find the time field based on the selected value
+      // this is to account for undefined when user chooses not to use a date field
+      const timeField = dataViewAvailableTimeFields.find((col) => col === value);
+
+      setFormState({ timeFieldName: timeField });
+    },
+    [dataViewAvailableTimeFields, setFormState]
+  );
+
+  useEffect(() => {
+    // Default timeFieldName to the source data view's time field if it exists
+    if (currentDataView !== undefined) {
+      setFormState({ timeFieldName: currentDataView.timeFieldName });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Get possible timefields for the results data view
+    if (currentDataView !== undefined) {
+      const timefields = currentDataView.fields.filter((f) => f.type === 'date').map((f) => f.name);
+      setDataViewAvailableTimeFields(timefields);
+    }
+  }, [currentDataView, setFormState]);
 
   const forceInput = useRef<HTMLInputElement | null>(null);
 
@@ -337,6 +377,13 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       )}
+      {destinationIndexNameValid && dataViewAvailableTimeFields.length > 0 ? (
+        <DetailsStepTimeField
+          dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+          dataViewTimeField={timeFieldName}
+          onTimeFieldChanged={onTimeFieldChanged}
+        />
+      ) : null}
       <EuiSpacer />
       <ContinueButton
         isDisabled={isStepInvalid}

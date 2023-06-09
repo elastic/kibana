@@ -12,6 +12,8 @@
       "actions",
       "alerting",
       "cases",
+      "data",
+      "fleet",
       "embeddable",
       "discover",
       "dataViews",
@@ -38,7 +40,6 @@
       "fleet",
       "kibanaReact",
       "kibanaUtils",
-      "ml",
       "observability",
       "spaces",
       "indexLifecycleManagement"

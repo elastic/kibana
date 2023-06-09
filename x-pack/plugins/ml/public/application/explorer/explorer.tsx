@@ -19,7 +19,7 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiAccordion,
   EuiBadge,
@@ -713,11 +713,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
                       <EuiSpacer size={'m'} />
 
-                      {loading ? (
-                        <EuiLoadingContent lines={10} />
-                      ) : (
+                      <EuiSkeletonText lines={10} isLoading={loading}>
                         <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
-                      )}
+                      </EuiSkeletonText>
                     </div>
                   </EuiResizablePanel>
 

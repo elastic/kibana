@@ -10,6 +10,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useUrlState } from '@kbn/ml-url-state';
+import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
@@ -18,7 +19,6 @@ import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 
 export const analyticsJobExplorationRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -46,7 +46,6 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     undefined,
     deps.config,
     deps.dataViewsContract,
-    deps.getSavedSearchDeps,
     basicResolvers(deps)
   );
 

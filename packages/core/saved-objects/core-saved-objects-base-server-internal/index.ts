@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { DEFAULT_INDEX_TYPES_MAP } from './src/constants';
 export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
 export {
   getProperty,
@@ -14,6 +15,7 @@ export {
   getTypes,
   type IndexMapping,
   type IndexMappingMeta,
+  type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,
   type IndexMappingMigrationStateMeta,
 } from './src/mappings';
@@ -38,23 +40,32 @@ export type {
   KibanaMigratorStatus,
   MigrationResult,
   MigrationStatus,
+  MigrateDocumentOptions,
 } from './src/migration';
 export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
 export {
   modelVersionVirtualMajor,
+  globalSwitchToModelVersionAt,
   assertValidModelVersion,
   isVirtualModelVersion,
   virtualVersionToModelVersion,
   modelVersionToVirtualVersion,
   getModelVersionMapForTypes,
   getLatestModelVersion,
+  getCurrentVirtualVersion,
+  getLatestMigrationVersion,
+  getVirtualVersionMap,
   type ModelVersionMap,
-  compareModelVersions,
+  type VirtualVersionMap,
+  compareVirtualVersions,
   type CompareModelVersionMapParams,
   type CompareModelVersionStatus,
   type CompareModelVersionDetails,
   type CompareModelVersionResult,
-  getModelVersionsFromMappings,
-  getModelVersionsFromMappingMeta,
+  getVirtualVersionsFromMappings,
+  getVirtualVersionsFromMappingMeta,
   getModelVersionDelta,
+  buildModelVersionTransformFn,
+  aggregateMappingAdditions,
+  convertModelVersionBackwardConversionSchema,
 } from './src/model_version';

@@ -11,7 +11,7 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileUserInfo } from '@kbn/user-profile-components';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { getCaseViewPath } from '../../common/utils';
 import type { NotificationService, NotifyArgs } from './types';
 
@@ -46,12 +46,12 @@ export class EmailNotificationService implements NotificationService {
     this.publicBaseUrl = publicBaseUrl;
   }
 
-  private static getTitle(theCase: CaseSavedObject) {
+  private static getTitle(theCase: CaseSavedObjectTransformed) {
     return `[Elastic][Cases] ${theCase.attributes.title}`;
   }
 
   private static getMessage(
-    theCase: CaseSavedObject,
+    theCase: CaseSavedObjectTransformed,
     spaceId: string,
     publicBaseUrl?: IBasePath['publicBaseUrl']
   ) {

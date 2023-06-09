@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
+
+export const assetTypeRT = rt.union([
+  rt.literal('k8s.pod'),
+  rt.literal('k8s.cluster'),
+  rt.literal('k8s.node'),
+]);
+
+export type AssetType = rt.TypeOf<typeof assetTypeRT>;
+
 export type AssetKind = 'unknown' | 'node';
-export type AssetType = 'k8s.pod' | 'k8s.cluster' | 'k8s.node';
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -52,6 +61,7 @@ export interface Asset extends ECSDocument {
   'asset.status'?: AssetStatus;
   'asset.parents'?: string | string[];
   'asset.children'?: string | string[];
+  'asset.references'?: string | string[];
   'asset.namespace'?: string;
 }
 
@@ -120,3 +130,15 @@ export interface AssetFilters {
   from?: string;
   to?: string;
 }
+
+export const relationRT = rt.union([
+  rt.literal('ancestors'),
+  rt.literal('descendants'),
+  rt.literal('references'),
+]);
+
+export type Relation = rt.TypeOf<typeof relationRT>;
+export type RelationField = keyof Pick<
+  Asset,
+  'asset.children' | 'asset.parents' | 'asset.references'
+>;

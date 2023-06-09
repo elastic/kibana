@@ -6,8 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import seedrandom from 'seedrandom';
-import { StackTraceID } from '../../common/profiling';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { ProjectTimeQuery } from './query';
 
@@ -94,32 +92,4 @@ export async function findDownsampledIndex({
 
   logger.info('sampleCountFromPow6 ' + sampleCountFromInitialExp);
   return getSampledTraceEventsIndex(index, sampleSize, sampleCountFromInitialExp, initialExp);
-}
-
-export function downsampleEventsRandomly(
-  stackTraceEvents: Map<StackTraceID, number>,
-  p: number,
-  seed: string
-): number {
-  let totalCount = 0;
-
-  // Make the RNG predictable to get reproducible results.
-  const random = seedrandom(seed);
-
-  for (const [id, count] of stackTraceEvents) {
-    let newCount = 0;
-    for (let i = 0; i < count; i++) {
-      if (random() < p) {
-        newCount++;
-      }
-    }
-    if (newCount) {
-      stackTraceEvents.set(id, newCount);
-      totalCount += newCount;
-    } else {
-      stackTraceEvents.delete(id);
-    }
-  }
-
-  return totalCount;
 }

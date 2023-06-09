@@ -57,7 +57,7 @@ describe('getLicenseCheckForRuleType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered'> = {
+  const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -195,7 +195,7 @@ describe('ensureLicenseForRuleType()', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const ruleType: RuleType<never, never, never, never, never, string, string> = {
+  const ruleType: RuleType<never, never, never, never, never, string, string, {}> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -311,6 +311,53 @@ describe('getIsSecurityEnabled()', () => {
     });
     license.next(basicLicense);
     expect(licenseState.getIsSecurityEnabled()).toEqual(false);
+  });
+});
+
+describe('ensureLicenseForMaintenanceWindow()', () => {
+  let license: Subject<ILicense>;
+  let licenseState: ILicenseState;
+  beforeEach(() => {
+    license = new Subject();
+    licenseState = new LicenseState(license);
+  });
+
+  test('should throw if license is not defined', () => {
+    expect(() =>
+      licenseState.ensureLicenseForMaintenanceWindow()
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Maintenance window is disabled because license information is not available at this time."`
+    );
+  });
+
+  test('should throw if license is not available', () => {
+    license.next(createUnavailableLicense());
+    expect(() =>
+      licenseState.ensureLicenseForMaintenanceWindow()
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Maintenance window is disabled because license information is not available at this time."`
+    );
+  });
+
+  test('should throw if license is not platinum', () => {
+    const goldLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'gold' },
+    });
+    license.next(goldLicense);
+
+    expect(() =>
+      licenseState.ensureLicenseForMaintenanceWindow()
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options."`
+    );
+  });
+
+  test('should not throw when license is valid', () => {
+    const platinumLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'platinum' },
+    });
+    license.next(platinumLicense);
+    licenseState.ensureLicenseForMaintenanceWindow();
   });
 });
 

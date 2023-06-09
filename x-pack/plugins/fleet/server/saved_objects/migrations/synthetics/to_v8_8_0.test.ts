@@ -114,7 +114,7 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
   });
 
   describe('throttling migration', () => {
-    it('handles throtling config for throttling: false', () => {
+    it('handles throttling config for throttling: false', () => {
       const actual = migration(getBrowserPolicy('false'), {} as SavedObjectMigrationContext);
       expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
         'false'
@@ -162,6 +162,18 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
         upload: 3,
         latency: 20,
       });
+    });
+  });
+
+  describe('location id migration', () => {
+    it('set run from id as agent policy id', () => {
+      const actual = migration(httpPolicy, {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[0]?.streams[0]?.vars?.location_id?.value).toEqual(
+        'fa2e69b0-dec6-11ed-8746-c5b1a1a12ec1'
+      );
+      expect(actual.attributes?.inputs[0]?.streams[0]?.compiled_stream?.location_id).toEqual(
+        'fa2e69b0-dec6-11ed-8746-c5b1a1a12ec1'
+      );
     });
   });
 });

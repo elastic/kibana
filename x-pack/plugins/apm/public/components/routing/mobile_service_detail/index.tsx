@@ -55,7 +55,7 @@ export function page({
   };
 }
 
-export const mobileServiceDetail = {
+export const mobileServiceDetailRoute = {
   '/mobile-services/{serviceName}': {
     element: (
       <ApmTimeRangeMetadataContextProvider>
@@ -146,6 +146,7 @@ export const mobileServiceDetail = {
             osVersion: t.string,
             appVersion: t.string,
             netConnectionType: t.string,
+            mobileSelectedTab: t.string,
           }),
         }),
         children: {

@@ -19,6 +19,18 @@ import type {
 } from '@kbn/lens-plugin/public';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
+export interface LensRequestData {
+  dataViewId?: string;
+  timeField?: string;
+  timeInterval?: string;
+  breakdownField?: string;
+}
+
+export interface LensAttributesContext {
+  attributes: TypedLensByValueInput['attributes'];
+  requestData: LensRequestData;
+}
+
 export const getLensAttributes = ({
   title,
   filters,
@@ -35,7 +47,7 @@ export const getLensAttributes = ({
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
   suggestion: Suggestion | undefined;
-}) => {
+}): LensAttributesContext => {
   const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
   let columnOrder = ['date_column', 'count_column'];
@@ -169,8 +181,7 @@ export const getLensAttributes = ({
           yRight: false,
         },
       };
-
-  return {
+  const attributes = {
     title:
       title ??
       i18n.translate('unifiedHistogram.lensTitle', {
@@ -196,4 +207,14 @@ export const getLensAttributes = ({
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];
+
+  return {
+    attributes,
+    requestData: {
+      dataViewId: dataView.id,
+      timeField: dataView.timeFieldName,
+      timeInterval,
+      breakdownField: breakdownField?.name,
+    },
+  };
 };

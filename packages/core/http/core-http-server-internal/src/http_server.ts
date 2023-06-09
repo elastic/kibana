@@ -43,6 +43,10 @@ import type {
   HttpAuth,
   IAuthHeadersStorage,
 } from '@kbn/core-http-server';
+import { performance } from 'perf_hooks';
+import { isBoom } from '@hapi/boom';
+import { identity } from 'lodash';
+import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -54,6 +58,62 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
+
+/**
+ * Adds ELU timings for the executed function to the current's context transaction
+ *
+ * @param path The request path
+ * @param log  Logger
+ */
+function startEluMeasurement<T>(
+  path: string,
+  log: Logger,
+  eluMonitorOptions: IHttpEluMonitorConfig | undefined
+): () => void {
+  if (!eluMonitorOptions?.enabled) {
+    return identity;
+  }
+
+  const startUtilization = performance.eventLoopUtilization();
+  const start = performance.now();
+
+  return function stopEluMeasurement() {
+    const { active, utilization } = performance.eventLoopUtilization(startUtilization);
+
+    apm.currentTransaction?.addLabels(
+      {
+        event_loop_utilization: utilization,
+        event_loop_active: active,
+      },
+      false
+    );
+
+    const duration = performance.now() - start;
+
+    const { elu: eluThreshold, ela: elaThreshold } = eluMonitorOptions.logging.threshold;
+
+    if (
+      eluMonitorOptions.logging.enabled &&
+      active >= eluMonitorOptions.logging.threshold.ela &&
+      utilization >= eluMonitorOptions.logging.threshold.elu
+    ) {
+      log.warn(
+        `Event loop utilization for ${path} exceeded threshold of ${elaThreshold}ms (${Math.round(
+          active
+        )}ms out of ${Math.round(duration)}ms) and ${eluThreshold * 100}% (${Math.round(
+          utilization * 100
+        )}%) `,
+        {
+          labels: {
+            request_path: path,
+            event_loop_active: active,
+            event_loop_utilization: utilization,
+          },
+        }
+      );
+    }
+  };
+}
 
 /** @internal */
 export interface HttpServerSetup {
@@ -350,7 +410,27 @@ export class HttpServer {
     config: HttpConfig,
     executionContext?: InternalExecutionContextSetup
   ) {
+    this.server!.ext('onPreResponse', (request, responseToolkit) => {
+      const stop = (request.app as KibanaRequestState).measureElu;
+
+      if (!stop) {
+        return responseToolkit.continue;
+      }
+
+      if (isBoom(request.response)) {
+        stop();
+      } else {
+        request.response.events.once('finish', () => {
+          stop();
+        });
+      }
+
+      return responseToolkit.continue;
+    });
+
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
+
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
@@ -366,6 +446,7 @@ export class HttpServer {
         ...(request.app ?? {}),
         requestId,
         requestUuid: uuidv4(),
+        measureElu: stop,
         // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
         // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
         traceId: apm.currentTraceIds['trace.id'],

@@ -9,7 +9,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { getQueryEntityFieldNames, getSupportedFieldNames } from './utils';
 

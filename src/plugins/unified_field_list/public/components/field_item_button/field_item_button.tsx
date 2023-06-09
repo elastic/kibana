@@ -14,6 +14,7 @@ import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 import { FieldIcon, getFieldIconProps } from '../field_icon';
+import { fieldNameWildcardMatcher } from '../../utils/field_name_wildcard_matcher';
 import './field_item_button.scss';
 
 /**
@@ -135,7 +136,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           content={removeFieldFromWorkspaceTooltip}
         >
           <EuiButtonIcon
-            data-test-subj={`unifiedFieldListItem_removeField-${field.name}`}
+            data-test-subj={`fieldToggle-${field.name}`}
             aria-label={removeFieldFromWorkspaceTooltip}
             {...(buttonRemoveFieldFromWorkspaceProps || {})}
             className={classnames(
@@ -158,7 +159,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           content={addFieldToWorkspaceTooltip}
         >
           <EuiButtonIcon
-            data-test-subj={`unifiedFieldListItem_addField-${field.name}`}
+            data-test-subj={`fieldToggle-${field.name}`}
             aria-label={addFieldToWorkspaceTooltip}
             {...(buttonAddFieldToWorkspaceProps || {})}
             className={classnames(fieldActionClassName, buttonAddFieldToWorkspaceProps?.className)}
@@ -178,7 +179,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   return (
     <FieldButton
       key={`field-item-button-${field.name}`}
-      dataTestSubj={dataTestSubj}
+      dataTestSubj={dataTestSubj || `field-${field.name}-showDetails`}
       size={size || 's'}
       className={classes}
       isActive={isActive}
@@ -194,7 +195,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       fieldIcon={<FieldIcon {...iconProps} />}
       fieldName={
         <EuiHighlight
-          search={fieldSearchHighlight || ''}
+          search={getSearchHighlight(displayName, fieldSearchHighlight)}
           title={title}
           data-test-subj={`field-${field.name}`}
         >
@@ -229,4 +230,16 @@ function FieldConflictInfoIcon() {
       />
     </EuiToolTip>
   );
+}
+
+function getSearchHighlight(displayName: string, fieldSearchHighlight?: string): string {
+  const searchHighlight = fieldSearchHighlight || '';
+  if (
+    searchHighlight.includes('*') &&
+    fieldNameWildcardMatcher({ name: displayName }, searchHighlight)
+  ) {
+    return displayName;
+  }
+
+  return searchHighlight;
 }

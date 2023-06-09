@@ -9,7 +9,7 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import type {
   UseThreatIntelligenceParams,
-  UseThreatIntelligenceValue,
+  UseThreatIntelligenceResult,
 } from './use_fetch_threat_intelligence';
 import { useFetchThreatIntelligence } from './use_fetch_threat_intelligence';
 import { useInvestigationTimeEnrichment } from '../../../common/containers/cti/event_enrichment';
@@ -41,9 +41,9 @@ const dataFormattedForFieldBrowser = [
 ];
 
 describe('useFetchThreatIntelligence', () => {
-  let hookResult: RenderHookResult<UseThreatIntelligenceParams, UseThreatIntelligenceValue>;
+  let hookResult: RenderHookResult<UseThreatIntelligenceParams, UseThreatIntelligenceResult>;
 
-  it('should render 1 match detected and 1 field enriched', () => {
+  it('return render 1 match detected and 1 field enriched', () => {
     (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
       result: {
         enrichments: [
@@ -69,6 +69,7 @@ describe('useFetchThreatIntelligence', () => {
     });
 
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(1);
@@ -77,7 +78,7 @@ describe('useFetchThreatIntelligence', () => {
     expect(hookResult.result.current.threatEnrichmentsCount).toEqual(1);
   });
 
-  it('should render 2 matches detected and 2 fields enriched', () => {
+  it('should return 2 matches detected and 2 fields enriched', () => {
     (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
       result: {
         enrichments: [
@@ -118,6 +119,7 @@ describe('useFetchThreatIntelligence', () => {
     });
 
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(2);
@@ -126,7 +128,7 @@ describe('useFetchThreatIntelligence', () => {
     expect(hookResult.result.current.threatEnrichmentsCount).toEqual(2);
   });
 
-  it('should render 0 field enriched', () => {
+  it('should return 0 field enriched', () => {
     (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
       result: {
         enrichments: [
@@ -144,6 +146,7 @@ describe('useFetchThreatIntelligence', () => {
     });
 
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(1);
@@ -152,7 +155,7 @@ describe('useFetchThreatIntelligence', () => {
     expect(hookResult.result.current.threatEnrichmentsCount).toEqual(0);
   });
 
-  it('should render 0 match detected', () => {
+  it('should return 0 match detected', () => {
     (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
       result: {
         enrichments: [
@@ -171,6 +174,7 @@ describe('useFetchThreatIntelligence', () => {
     });
 
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toEqual(undefined);
@@ -186,6 +190,7 @@ describe('useFetchThreatIntelligence', () => {
     });
 
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toEqual(undefined);
@@ -206,6 +211,7 @@ describe('useFetchThreatIntelligence', () => {
     hookResult = renderHook(() =>
       useFetchThreatIntelligence({ dataFormattedForFieldBrowser: null })
     );
+
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(true);
     expect(hookResult.result.current.threatMatches).toEqual(undefined);

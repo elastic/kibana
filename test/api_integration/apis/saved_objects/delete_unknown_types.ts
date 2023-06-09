@@ -7,6 +7,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  ANALYTICS_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -32,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const fetchIndexContent = async () => {
       const body = await es.search<{ type: string }>({
-        index: '.kibana',
+        index: [MAIN_SAVED_OBJECT_INDEX, ANALYTICS_SAVED_OBJECT_INDEX],
         body: {
           size: 100,
         },

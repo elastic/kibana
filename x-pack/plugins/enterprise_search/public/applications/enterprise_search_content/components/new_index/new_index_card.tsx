@@ -29,19 +29,13 @@ export interface MethodCardOptions {
   title: EuiCardProps['title'];
 }
 
-const NO_DEVELOPMENT_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.content.newIndex.methodCard.noDevelopment.label',
-  {
-    defaultMessage: 'No development required',
-  }
-);
-
 const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
   [INGESTION_METHOD_IDS.CRAWLER]: {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.description',
       {
-        defaultMessage: 'Discover, extract, index, and sync all of your website content',
+        defaultMessage:
+          'Discover, extract, and index searchable content from websites and knowledge bases',
       }
     ),
     footer: {
@@ -51,7 +45,12 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
           defaultMessage: 'Use a web crawler',
         }
       ),
-      label: NO_DEVELOPMENT_LABEL,
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.nocodeLabel',
+        {
+          defaultMessage: 'No code',
+        }
+      ),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CRAWLER),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.crawler.title', {
@@ -63,7 +62,7 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
       'xpack.enterpriseSearch.content.newIndex.methodCard.connector.description',
       {
         defaultMessage:
-          'Use the connector framework to quickly build connectors for custom data sources',
+          'Extract, transform, index and sync data from a data source via native or customized connectors',
       }
     ),
     footer: {
@@ -73,7 +72,6 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
           defaultMessage: 'Use a connector',
         }
       ),
-      label: NO_DEVELOPMENT_LABEL,
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CONNECTOR),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.connector.title', {
@@ -91,9 +89,6 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
       buttonLabel: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.label', {
         defaultMessage: 'Use the API',
       }),
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.footer', {
-        defaultMessage: 'Some development required',
-      }),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.API),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.title', {
@@ -109,15 +104,21 @@ export const NewIndexCard: React.FC<NewIndexCardProps> = ({ onSelect, isSelected
 
   return (
     <EuiCard
+      data-test-subj="entSearch-content-newIndexCard-cardBody"
       hasBorder
       icon={<EuiIcon type={icon} size="xxl" />}
       title={title}
       description={<EuiTextColor color="subdued">{description}</EuiTextColor>}
       footer={
         <>
-          <EuiBadge color="hollow">{footer.label}</EuiBadge>
-          <EuiSpacer size="m" />
+          {footer.label && (
+            <>
+              <EuiBadge color="hollow">{footer.label}</EuiBadge>
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiButton
+            data-test-subj={`entSearchContent-newIndexCard-button-${type}`}
             fullWidth
             onClick={onSelect}
             color={isSelected ? 'success' : 'primary'}

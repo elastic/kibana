@@ -21,6 +21,8 @@ import {
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { PLUGIN_FEATURE } from '../common/constants';
 import type {
   AppPluginStartDependencies,
   GuidedOnboardingPluginSetup,
@@ -43,11 +45,12 @@ export class GuidedOnboardingPlugin
   ): GuidedOnboardingPluginStart {
     const { chrome, http, theme, application, notifications, uiSettings } = core;
 
+    // Guided onboarding UI is only available on cloud and if the access to the Kibana feature is granted
+    const isEnabled = !!(cloud?.isCloudEnabled && application.capabilities[PLUGIN_FEATURE].enabled);
     // Initialize services
-    apiService.setup(http, !!cloud?.isCloudEnabled);
+    apiService.setup(http, isEnabled);
 
-    // Guided onboarding UI is only available on cloud
-    if (cloud?.isCloudEnabled) {
+    if (isEnabled) {
       chrome.navControls.registerExtension({
         order: 1000,
         mount: (target) =>

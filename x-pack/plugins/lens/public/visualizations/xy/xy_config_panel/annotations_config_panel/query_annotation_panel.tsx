@@ -13,12 +13,15 @@ import React from 'react';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import {
   FieldOption,
+  FilterQueryInput,
   FieldOptionValue,
   FieldPicker,
-  FilterQueryInput,
-} from '../../../../shared_components';
+} from '@kbn/visualization-ui-components/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LENS_APP_NAME } from '../../../../../common/constants';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
+import { LensAppServices } from '../../../../app_plugin/types';
 
 export const defaultQuery: Query = {
   query: '',
@@ -85,7 +88,9 @@ export const ConfigPanelQueryAnnotation = ({
             onChange({ filter: { type: 'kibana_query', ...query } });
           }}
           data-test-subj="lnsXY-annotation-query-based-query-input"
-          indexPattern={currentIndexPattern}
+          dataView={currentIndexPattern}
+          appName={LENS_APP_NAME}
+          queryInputServices={useKibana<LensAppServices>().services}
         />
       </EuiFormRow>
 

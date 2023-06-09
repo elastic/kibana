@@ -41,7 +41,7 @@ export interface ListingRouteProps {
 }
 
 export function ListingRoute({
-  deps: { chrome, savedObjectsClient, coreStart, capabilities, addBasePath, uiSettings },
+  deps: { chrome, contentClient, coreStart, capabilities, addBasePath, uiSettings },
 }: ListingRouteProps) {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -60,7 +60,7 @@ export function ListingRoute({
   const findItems = useCallback(
     (search: string) => {
       return findSavedWorkspace(
-        { savedObjectsClient, basePath: coreStart.http.basePath },
+        { contentClient, basePath: coreStart.http.basePath },
         search,
         listingLimit
       ).then(({ total, hits }) => ({
@@ -68,7 +68,7 @@ export function ListingRoute({
         hits: hits.map(toTableListViewSavedObject),
       }));
     },
-    [coreStart.http.basePath, listingLimit, savedObjectsClient]
+    [coreStart.http.basePath, listingLimit, contentClient]
   );
 
   const editItem = useCallback(
@@ -81,11 +81,11 @@ export function ListingRoute({
   const deleteItems = useCallback(
     async (savedWorkspaces: Array<{ id: string }>) => {
       await deleteSavedWorkspace(
-        savedObjectsClient,
+        contentClient,
         savedWorkspaces.map((cur) => cur.id!)
       );
     },
-    [savedObjectsClient]
+    [contentClient]
   );
 
   return (

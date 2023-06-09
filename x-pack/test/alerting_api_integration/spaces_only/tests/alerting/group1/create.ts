@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '@kbn/alerting-plugin/server/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -213,7 +214,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
       const esResponse = await es.get<SavedObject<RawRule>>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: `alert:${response.body.id}`,
         },
         { meta: true }

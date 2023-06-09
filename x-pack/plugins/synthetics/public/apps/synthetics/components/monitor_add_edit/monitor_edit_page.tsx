@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
+import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { EditMonitorNotFound } from './edit_monitor_not_found';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
@@ -23,7 +23,7 @@ import { MonitorForm } from './form';
 import { LocationsLoadingError } from './locations_loading_error';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
-import { getMonitorAPI } from '../../state/monitor_management/api';
+import { getDecryptedMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 
@@ -42,7 +42,7 @@ export const MonitorEditPage: React.FC = () => {
   }, [locationsLoaded, dispatch]);
 
   const { data, loading, error } = useFetcher(() => {
-    return getMonitorAPI({ id: monitorId });
+    return getDecryptedMonitorAPI({ id: monitorId });
   }, []);
 
   const monitorNotFoundError = useMonitorNotFound(
@@ -99,6 +99,7 @@ export const MonitorEditPage: React.FC = () => {
         <MonitorDetailsLinkPortal
           configId={data?.attributes[ConfigKey.CONFIG_ID]}
           name={data?.attributes.name}
+          updateUrl={false}
         />
       </MonitorForm>
     </>

@@ -132,5 +132,17 @@ describe('Doc table row component', () => {
       toggleButton.simulate('click');
       expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeTruthy();
     });
+
+    it('should hide the single/surrounding views for text based languages', () => {
+      const props = {
+        ...defaultProps,
+        isPlainRecord: true,
+      };
+      const component = mountComponent(props);
+      const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
+      toggleButton.simulate('click');
+      expect(findTestSubject(component, 'docTableRowDetailsTitle').text()).toBe('Expanded row');
+      expect(findTestSubject(component, 'docTableRowAction').length).toBeFalsy();
+    });
   });
 });

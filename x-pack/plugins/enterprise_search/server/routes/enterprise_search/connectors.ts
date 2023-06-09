@@ -14,6 +14,7 @@ import {
   FilteringPolicy,
   FilteringRule,
   FilteringRuleRule,
+  SyncJobType,
 } from '../../../common/types/connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -22,6 +23,7 @@ import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs
 import { cancelSyncs } from '../../lib/connectors/post_cancel_syncs';
 import { updateFiltering } from '../../lib/connectors/put_update_filtering';
 import { updateFilteringDraft } from '../../lib/connectors/put_update_filtering_draft';
+import { putUpdateNative } from '../../lib/connectors/put_update_native';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorNameAndDescription } from '../../lib/connectors/update_connector_name_and_description';
@@ -150,7 +152,44 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(client, request.params.connectorId, request.body.nextSyncConfig);
+      await startConnectorSync(
+        client,
+        request.params.connectorId,
+        SyncJobType.FULL,
+        request.body.nextSyncConfig
+      );
+      return response.ok();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/start_incremental_sync',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await startConnectorSync(client, request.params.connectorId, SyncJobType.INCREMENTAL);
+      return response.ok();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/start_access_control_sync',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await startConnectorSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
       return response.ok();
     })
   );
@@ -227,7 +266,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       path: '/internal/enterprise_search/connectors/default_pipeline',
       validate: {},
     },
-    elasticsearchErrorHandler(log, async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await getDefaultPipeline(client);
       return response.ok({ body: result });
@@ -380,6 +419,26 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         // We're relying on the schema in the validator above to flag if something goes wrong
         filteringRules: filtering_rules as FilteringRule[],
       });
+      return result ? response.ok({ body: result }) : response.conflict();
+    })
+  );
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/native',
+      validate: {
+        body: schema.object({
+          is_native: schema.boolean(),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const connectorId = decodeURIComponent(request.params.connectorId);
+      const { is_native } = request.body;
+      const result = await putUpdateNative(client, connectorId, is_native);
       return result ? response.ok({ body: result }) : response.conflict();
     })
   );

@@ -24,6 +24,7 @@ export interface IPanelPlacementArgs {
   width: number;
   height: number;
   currentPanels: { [key: string]: DashboardPanelState };
+  scrollToPanel?: boolean;
 }
 
 export interface IPanelPlacementBesideArgs extends IPanelPlacementArgs {

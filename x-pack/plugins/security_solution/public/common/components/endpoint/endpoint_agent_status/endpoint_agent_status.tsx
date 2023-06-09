@@ -22,7 +22,6 @@ import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoin
 import { getEmptyValue } from '../../empty_value';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 import type { HostInfo, EndpointPendingActions } from '../../../../../common/endpoint/types';
@@ -138,7 +137,7 @@ export interface EndpointAgentStatusByIdProps {
    * If set to `true` (Default), then the endpoint status and isolation/action counts will
    * be kept up to date by querying the API periodically
    */
-  autoFresh?: boolean;
+  autoRefresh?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -150,9 +149,9 @@ export interface EndpointAgentStatusByIdProps {
  * instead in order to avoid duplicate API calls.
  */
 export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
-  ({ endpointAgentId, autoFresh, 'data-test-subj': dataTestSubj }) => {
+  ({ endpointAgentId, autoRefresh, 'data-test-subj': dataTestSubj }) => {
     const { data } = useGetEndpointDetails(endpointAgentId, {
-      refetchInterval: autoFresh ? DEFAULT_POLL_INTERVAL : false,
+      refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
     });
 
     const emptyValue = (
@@ -169,7 +168,7 @@ export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
       <EndpointAgentStatus
         endpointHostInfo={data}
         data-test-subj={dataTestSubj}
-        autoRefresh={autoFresh}
+        autoRefresh={autoRefresh}
       />
     );
   }
@@ -187,9 +186,6 @@ interface EndpointHostResponseActionsStatusProps {
 const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatusProps>(
   ({ pendingActions, isIsolated, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const isPendingStatusDisabled = useIsExperimentalFeatureEnabled(
-      'disableIsolationUIPendingStatuses'
-    );
 
     interface PendingActionsState {
       actionList: Array<{ label: string; count: number }>;
@@ -268,15 +264,6 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
         </EuiBadge>
       );
     }, [dataTestSubj]);
-
-    if (isPendingStatusDisabled) {
-      // If nothing is pending and host is not currently isolated, then render nothing
-      if (!isIsolated) {
-        return null;
-      }
-
-      return isolatedBadge;
-    }
 
     // If nothing is pending
     if (totalPending === 0) {

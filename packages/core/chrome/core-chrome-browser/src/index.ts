@@ -26,4 +26,14 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
-export type { ChromeBadge, ChromeUserBanner } from './types';
+export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
+
+export type {
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
+  ChromeProjectNavigationLink,
+  SideNavCompProps,
+  SideNavComponent,
+  ChromeSetProjectBreadcrumbsParams,
+  ChromeProjectBreadcrumb,
+} from './project_navigation';

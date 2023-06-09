@@ -40,6 +40,10 @@
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/content-management-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/object-versioning",
   ],
   "exclude": [
     "target/**/*",

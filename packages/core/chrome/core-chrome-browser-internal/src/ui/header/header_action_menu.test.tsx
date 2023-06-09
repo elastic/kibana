@@ -11,7 +11,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
-import { HeaderActionMenu } from './header_action_menu';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
 
 type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 
@@ -26,7 +26,7 @@ describe('HeaderActionMenu', () => {
   });
 
   const refresh = () => {
-    new Promise(async (resolve, reject) => {
+    new Promise((resolve, reject) => {
       try {
         if (component) {
           act(() => {
@@ -53,26 +53,35 @@ describe('HeaderActionMenu', () => {
       return unmount;
     };
 
-  it('mounts the current value of the provided observable', async () => {
-    component = mount(<HeaderActionMenu actionMenu$={menuMount$} />);
+  it('mounts the current value of the provided observable', () => {
+    const TestComponent = () => {
+      const mounter = useHeaderActionMenuMounter(menuMount$);
+      return <HeaderActionMenu mounter={mounter} />;
+    };
+    component = mount(<TestComponent />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
     });
-    await refresh();
+    refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
       `"<div data-test-subj=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
     );
   });
 
-  it('clears the content of the component when emitting undefined', async () => {
-    component = mount(<HeaderActionMenu actionMenu$={menuMount$} />);
+  it('clears the content of the component when emitting undefined', () => {
+    const TestComponent = () => {
+      const mounter = useHeaderActionMenuMounter(menuMount$);
+      return <HeaderActionMenu mounter={mounter} />;
+    };
+
+    component = mount(<TestComponent />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
     });
-    await refresh();
+    refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
       `"<div data-test-subj=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
@@ -81,20 +90,24 @@ describe('HeaderActionMenu', () => {
     act(() => {
       menuMount$.next(undefined);
     });
-    await refresh();
+    refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
       `"<div data-test-subj=\\"headerAppActionMenu\\"></div>"`
     );
   });
 
-  it('updates the dom when a new mount point is emitted', async () => {
-    component = mount(<HeaderActionMenu actionMenu$={menuMount$} />);
+  it('updates the dom when a new mount point is emitted', () => {
+    const TestComponent = () => {
+      const mounter = useHeaderActionMenuMounter(menuMount$);
+      return <HeaderActionMenu mounter={mounter} />;
+    };
+    component = mount(<TestComponent />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
     });
-    await refresh();
+    refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
       `"<div data-test-subj=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
@@ -103,20 +116,24 @@ describe('HeaderActionMenu', () => {
     act(() => {
       menuMount$.next(createMountPoint('BAR'));
     });
-    await refresh();
+    refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
       `"<div data-test-subj=\\"headerAppActionMenu\\"><div>BAR</div></div>"`
     );
   });
 
-  it('calls the previous mount point `unmount` when mounting a new mount point', async () => {
-    component = mount(<HeaderActionMenu actionMenu$={menuMount$} />);
+  it('calls the previous mount point `unmount` when mounting a new mount point', () => {
+    const TestComponent = () => {
+      const mounter = useHeaderActionMenuMounter(menuMount$);
+      return <HeaderActionMenu mounter={mounter} />;
+    };
+    component = mount(<TestComponent />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
     });
-    await refresh();
+    refresh();
 
     expect(Object.keys(unmounts)).toEqual(['FOO']);
     expect(unmounts.FOO).not.toHaveBeenCalled();
@@ -124,7 +141,7 @@ describe('HeaderActionMenu', () => {
     act(() => {
       menuMount$.next(createMountPoint('BAR'));
     });
-    await refresh();
+    refresh();
 
     expect(Object.keys(unmounts)).toEqual(['FOO', 'BAR']);
     expect(unmounts.FOO).toHaveBeenCalledTimes(1);

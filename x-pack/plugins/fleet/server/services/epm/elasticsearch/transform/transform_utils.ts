@@ -19,11 +19,14 @@ export const getDestinationIndexAliases = (aliasSettings: unknown): TransformAli
 
   if (!aliasSettings) return aliases;
 
-  // If in form of
+  // Can be in form of {
+  //   'alias1': null,
+  //   'alias2': { move_on_creation: false }
+  // }
   if (isPopulatedObject<string, { move_on_creation?: boolean }>(aliasSettings)) {
     Object.keys(aliasSettings).forEach((alias) => {
       if (aliasSettings.hasOwnProperty(alias) && typeof alias === 'string') {
-        const moveOnCreation = aliasSettings[alias].move_on_creation === true;
+        const moveOnCreation = aliasSettings[alias]?.move_on_creation === true;
         aliases.push({ alias, move_on_creation: moveOnCreation });
       }
     });

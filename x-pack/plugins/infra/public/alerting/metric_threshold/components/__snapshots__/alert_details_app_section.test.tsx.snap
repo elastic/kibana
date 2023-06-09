@@ -34,6 +34,7 @@ Array [
     "groupBy": Array [
       "host.hostname",
     ],
+    "hideTitle": true,
     "source": Object {
       "id": "default",
     },

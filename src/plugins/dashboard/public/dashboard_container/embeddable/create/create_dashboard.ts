@@ -27,46 +27,20 @@ import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
+import { LoadDashboardFromSavedObjectReturn } from '../../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 /**
- *
- * @param creationOptions
+ * Builds a new Dashboard from scratch.
  */
 export const createDashboard = async (
-  embeddableId: string,
   creationOptions?: DashboardCreationOptions,
   dashboardCreationStartTime?: number,
   savedObjectId?: string
 ): Promise<DashboardContainer> => {
-  // --------------------------------------------------------------------------------------
-  // Unpack services & Options
-  // --------------------------------------------------------------------------------------
   const {
-    dashboardSessionStorage,
-    embeddable: { getEmbeddableFactory },
-    data: {
-      dataViews,
-      query: queryService,
-      search: { session },
-    },
+    data: { dataViews },
     dashboardSavedObject: { loadDashboardStateFromSavedObject },
   } = pluginServices.getServices();
-
-  const {
-    queryString,
-    filterManager,
-    timefilter: { timefilter: timefilterService },
-  } = queryService;
-
-  const {
-    searchSessionSettings,
-    unifiedSearchSettings,
-    validateLoadedSavedObject,
-    useControlGroupIntegration,
-    useUnifiedSearchIntegration,
-    initialInput: overrideInput,
-    useSessionStorageIntegration,
-  } = creationOptions ?? {};
 
   // --------------------------------------------------------------------------------------
   // Create method which allows work to be done on the dashboard container when it's ready.
@@ -83,12 +57,9 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
-
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
   const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
-  const dashboardSavedObjectPromise = savedObjectId
-    ? loadDashboardStateFromSavedObject({ id: savedObjectId })
-    : Promise.resolve(undefined);
+  const dashboardSavedObjectPromise = loadDashboardStateFromSavedObject({ id: savedObjectId });
 
   const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
     reduxEmbeddablePackagePromise,
@@ -96,17 +67,82 @@ export const createDashboard = async (
     defaultDataViewAssignmentPromise,
   ]);
 
-  // --------------------------------------------------------------------------------------
-  // Run validations.
-  // --------------------------------------------------------------------------------------
   if (!defaultDataView) {
     throw new Error('Dashboard requires at least one data view before it can be initialized.');
   }
 
+  // --------------------------------------------------------------------------------------
+  // Initialize Dashboard integrations
+  // --------------------------------------------------------------------------------------
+  const { input, searchSessionId } = await initializeDashboard({
+    loadDashboardReturn: savedObjectResult,
+    untilDashboardReady,
+    creationOptions,
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Build and return the dashboard container.
+  // --------------------------------------------------------------------------------------
+  const dashboardContainer = new DashboardContainer(
+    input,
+    reduxEmbeddablePackage,
+    searchSessionId,
+    savedObjectResult?.dashboardInput,
+    dashboardCreationStartTime,
+    undefined,
+    creationOptions,
+    savedObjectId
+  );
+  dashboardContainerReady$.next(dashboardContainer);
+  return dashboardContainer;
+};
+
+/**
+ * Initializes a Dashboard and starts all of its integrations
+ */
+export const initializeDashboard = async ({
+  loadDashboardReturn,
+  untilDashboardReady,
+  creationOptions,
+  controlGroup,
+}: {
+  loadDashboardReturn: LoadDashboardFromSavedObjectReturn;
+  untilDashboardReady: () => Promise<DashboardContainer>;
+  creationOptions?: DashboardCreationOptions;
+  controlGroup?: ControlGroupContainer;
+}) => {
+  const {
+    dashboardSessionStorage,
+    embeddable: { getEmbeddableFactory },
+    data: {
+      query: queryService,
+      search: { session },
+    },
+  } = pluginServices.getServices();
+  const {
+    queryString,
+    filterManager,
+    timefilter: { timefilter: timefilterService },
+  } = queryService;
+
+  const {
+    getInitialInput,
+    searchSessionSettings,
+    unifiedSearchSettings,
+    validateLoadedSavedObject,
+    useControlGroupIntegration,
+    useUnifiedSearchIntegration,
+    useSessionStorageIntegration,
+  } = creationOptions ?? {};
+  const overrideInput = getInitialInput?.();
+
+  // --------------------------------------------------------------------------------------
+  // Run validation.
+  // --------------------------------------------------------------------------------------
   if (
-    savedObjectResult &&
+    loadDashboardReturn &&
     validateLoadedSavedObject &&
-    !validateLoadedSavedObject(savedObjectResult)
+    !validateLoadedSavedObject(loadDashboardReturn)
   ) {
     throw new Error('Dashboard failed saved object result validation');
   }
@@ -116,7 +152,7 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardSessionStorage.getState(savedObjectId);
+    return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
   })();
 
   // --------------------------------------------------------------------------------------
@@ -124,10 +160,9 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
-    ...(savedObjectResult?.dashboardInput ?? {}),
+    ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
     ...overrideInput,
-    id: embeddableId,
   });
 
   initialInput.executionContext = {
@@ -166,8 +201,7 @@ export const createDashboard = async (
     }
 
     untilDashboardReady().then((dashboardContainer) => {
-      const stopSyncingUnifiedSearchState =
-        syncUnifiedSearchState.bind(dashboardContainer)(kbnUrlStateStorage);
+      const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(dashboardContainer)();
       dashboardContainer.stopSyncingWithUnifiedSearch = () => {
         stopSyncingUnifiedSearchState();
         stopSyncingQueryServiceStateWithUrl();
@@ -178,8 +212,13 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
-  const incomingEmbeddable = creationOptions?.incomingEmbeddable;
+  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
   if (incomingEmbeddable) {
+    const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
+      container.setScrollToPanelId(id);
+      container.setHighlightPanelId(id);
+    };
+
     initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
     if (
       incomingEmbeddable.embeddableId &&
@@ -200,17 +239,25 @@ export const createDashboard = async (
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
+      untilDashboardReady().then((container) =>
+        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
+      );
     } else {
       // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
-      untilDashboardReady().then((container) =>
-        container.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
-      );
+      untilDashboardReady().then(async (container) => {
+        const embeddable = await container.addNewEmbeddable(
+          incomingEmbeddable.type,
+          incomingEmbeddable.input
+        );
+        scrolltoIncomingEmbeddable(container, embeddable.id);
+      });
     }
   }
 
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
   // --------------------------------------------------------------------------------------
+  let initialSearchSessionId;
   if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
@@ -223,7 +270,7 @@ export const createDashboard = async (
     }
     const existingSession = session.getSessionId();
 
-    const initialSearchSessionId =
+    initialSearchSessionId =
       sessionIdToRestore ??
       (existingSession && incomingEmbeddable ? existingSession : session.start());
 
@@ -232,7 +279,6 @@ export const createDashboard = async (
         creationOptions?.searchSessionSettings
       );
     });
-    initialInput.searchSessionId = initialSearchSessionId;
   }
 
   // --------------------------------------------------------------------------------------
@@ -245,7 +291,7 @@ export const createDashboard = async (
       ControlGroupContainer
     >(CONTROL_GROUP_TYPE);
     const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-    const controlGroup = await controlsGroupFactory?.create({
+    const fullControlGroupInput = {
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultControlGroupInput(),
       ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
@@ -253,9 +299,15 @@ export const createDashboard = async (
       viewMode,
       filters,
       query,
-    });
-    if (!controlGroup || isErrorEmbeddable(controlGroup)) {
-      throw new Error('Error in control group startup');
+    };
+    if (controlGroup) {
+      controlGroup.updateInputAndReinitialize(fullControlGroupInput);
+    } else {
+      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput);
+      if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
+        throw new Error('Error in control group startup');
+      }
+      controlGroup = newControlGroup;
     }
 
     untilDashboardReady().then((dashboardContainer) => {
@@ -269,21 +321,17 @@ export const createDashboard = async (
   // Start the data views integration.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
-    dashboardContainer.subscriptions.add(startSyncingDashboardDataViews.bind(dashboardContainer)());
+    dashboardContainer.integrationSubscriptions.add(
+      startSyncingDashboardDataViews.bind(dashboardContainer)()
+    );
   });
 
   // --------------------------------------------------------------------------------------
-  // Build and return the dashboard container.
+  // Start animating panel transforms 500 ms after dashboard is created.
   // --------------------------------------------------------------------------------------
-  const dashboardContainer = new DashboardContainer(
-    initialInput,
-    reduxEmbeddablePackage,
-    savedObjectResult?.dashboardInput,
-    dashboardCreationStartTime,
-    undefined,
-    creationOptions,
-    savedObjectId
+  untilDashboardReady().then((dashboard) =>
+    setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
-  dashboardContainerReady$.next(dashboardContainer);
-  return dashboardContainer;
+
+  return { input: initialInput, searchSessionId: initialSearchSessionId };
 };

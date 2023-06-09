@@ -98,3 +98,10 @@ export const ADD_CONTROLS_MAX_LIMIT = i18n.translate(
     defaultMessage: 'Maximum of 4 controls can be added.',
   }
 );
+
+export const URL_PARAM_ARRAY_EXCEPTION_MSG = i18n.translate(
+  'xpack.securitySolution.filtersGroup.urlParam.arrayError',
+  {
+    defaultMessage: 'Page filter URL Params must be an array',
+  }
+);

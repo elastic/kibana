@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
-import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import { AutoRefreshButton } from './components/auto_refresh_button';
-import { paths } from '../../config/paths';
-import type { ObservabilityAppServices } from '../../application/types';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
+import { paths } from '../../config/paths';
 
 export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const { isInitialLoading, isLoading, sloList } = useFetchSloList();
+  const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
 
   const { total } = sloList || {};
 
@@ -47,6 +45,12 @@ export function SlosPage() {
     },
   ]);
 
+  useEffect(() => {
+    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
+      navigateToUrl(basePath.prepend(paths.observability.slosWelcome));
+    }
+  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
+
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
@@ -57,10 +61,6 @@ export function SlosPage() {
 
   if (isInitialLoading) {
     return null;
-  }
-
-  if ((!isLoading && total === 0) || !hasAtLeast('platinum')) {
-    return <SloListWelcomePrompt />;
   }
 
   return (

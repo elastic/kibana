@@ -8,6 +8,7 @@
 import rison from '@kbn/rison';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
@@ -88,3 +89,7 @@ export function getEditPath(
 export function getFullPath(id?: string) {
   return `/app/${PLUGIN_ID}${id ? getEditPath(id) : getBasePath()}`;
 }
+
+export const LENS_APP_NAME = i18n.translate('xpack.lens.queryInput.appName', {
+  defaultMessage: 'Lens',
+});

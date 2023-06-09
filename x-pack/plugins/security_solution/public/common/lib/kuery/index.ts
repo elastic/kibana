@@ -97,6 +97,15 @@ export const getBrowserFieldPath = (field: string, browserFields: BrowserFields)
   return [splitFields[0], 'fields', field];
 };
 
+export const getFieldEsTypes = (field: string, browserFields: BrowserFields): string[] => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  if (browserField != null) {
+    return browserField.esTypes;
+  }
+  return [];
+};
+
 export const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);
   const browserField = get(pathBrowserField, browserFields);

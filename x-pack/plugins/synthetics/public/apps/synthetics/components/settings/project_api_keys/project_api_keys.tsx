@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiText, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { HelpCommands } from './help_commands';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { fetchServiceAPIKey } from '../../../state/monitor_management/api';

@@ -71,6 +71,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Comment',
       }
     ),
+    hostname: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.hostname',
+      {
+        defaultMessage: 'Hostname',
+      }
+    ),
   },
 });
 

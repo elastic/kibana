@@ -76,6 +76,14 @@ export const EDIT_DESCRIPTION = i18n.translate('xpack.cases.caseView.edit.descri
   defaultMessage: 'Edit description',
 });
 
+export const COLLAPSE_DESCRIPTION = i18n.translate('xpack.cases.caseView.description.collapse', {
+  defaultMessage: 'Collapse description',
+});
+
+export const EXPAND_DESCRIPTION = i18n.translate('xpack.cases.caseView.description.expand', {
+  defaultMessage: 'Expand description',
+});
+
 export const QUOTE = i18n.translate('xpack.cases.caseView.edit.quote', {
   defaultMessage: 'Quote',
 });

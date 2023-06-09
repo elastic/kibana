@@ -16,6 +16,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiI18nNumber,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -32,15 +33,17 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { getFlag } from '../../../utils/get_flag';
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
 import {
   ExploreTableColumns,
   ExploreTableItem,
   ExploreTables,
   SearchTermsTable,
-  TopClickedTable,
-  TopReferrersTable,
+  ClickedTable,
+  ReferrersTable,
   WorsePerformersTable,
+  LocationsTable,
 } from '../analytics_collection_explore_table_types';
 
 import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';
@@ -63,7 +66,7 @@ const tabs: Array<{ id: ExploreTables; name: string }> = [
     ),
   },
   {
-    id: ExploreTables.TopClicked,
+    id: ExploreTables.Clicked,
     name: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.topClickedTab',
       { defaultMessage: 'Top clicked results' }
@@ -77,7 +80,14 @@ const tabs: Array<{ id: ExploreTables; name: string }> = [
     ),
   },
   {
-    id: ExploreTables.TopReferrers,
+    id: ExploreTables.Locations,
+    name: i18n.translate(
+      'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.locationsTab',
+      { defaultMessage: 'Locations' }
+    ),
+  },
+  {
+    id: ExploreTables.Referrers,
     name: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.referrersTab',
       { defaultMessage: 'Referrers' }
@@ -86,9 +96,10 @@ const tabs: Array<{ id: ExploreTables; name: string }> = [
 ];
 
 const tableSettings: {
+  [ExploreTables.Clicked]: TableSetting<ClickedTable>;
+  [ExploreTables.Locations]: TableSetting<LocationsTable>;
+  [ExploreTables.Referrers]: TableSetting<ReferrersTable>;
   [ExploreTables.SearchTerms]: TableSetting<SearchTermsTable>;
-  [ExploreTables.TopClicked]: TableSetting<TopClickedTable>;
-  [ExploreTables.TopReferrers]: TableSetting<TopReferrersTable>;
   [ExploreTables.WorsePerformers]: TableSetting<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
@@ -149,7 +160,7 @@ const tableSettings: {
       },
     },
   },
-  [ExploreTables.TopClicked]: {
+  [ExploreTables.Clicked]: {
     columns: [
       {
         field: ExploreTableColumns.page,
@@ -184,7 +195,7 @@ const tableSettings: {
       },
     },
   },
-  [ExploreTables.TopReferrers]: {
+  [ExploreTables.Referrers]: {
     columns: [
       {
         field: ExploreTableColumns.page,
@@ -219,7 +230,48 @@ const tableSettings: {
       },
     },
   },
+  [ExploreTables.Locations]: {
+    columns: [
+      {
+        field: ExploreTableColumns.location,
+        name: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.location',
+          { defaultMessage: 'Location' }
+        ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string, data: LocationsTable) =>
+          (
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiText>
+                <h3>{getFlag(data.countryISOCode)}</h3>
+              </EuiText>
+              <EuiText size="s" color={euiTheme.colors.primaryText}>
+                <p>{value}</p>
+              </EuiText>
+            </EuiFlexGroup>
+          ),
+        sortable: true,
+        truncateText: true,
+      },
+      {
+        align: 'right',
+        field: ExploreTableColumns.sessions,
+        name: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.session',
+          { defaultMessage: 'Session' }
+        ),
+        sortable: true,
+        truncateText: true,
+      },
+    ],
+    sorting: {
+      sort: {
+        direction: 'desc',
+        field: ExploreTableColumns.sessions,
+      },
+    },
+  },
 };
+const MAX_ITEMS = 10000;
 
 export const AnalyticsCollectionExplorerTable = () => {
   const { euiTheme } = useEuiTheme();
@@ -242,6 +294,8 @@ export const AnalyticsCollectionExplorerTable = () => {
   const handleTableChange = ({ sort, page }: Criteria<ExploreTableItem>) => {
     onTableChange({ page, sort });
   };
+  const startNumberItemsOnPage = pageSize * pageIndex + (items.length ? 1 : 0);
+  const endNumberItemsOnPage = pageSize * pageIndex + items.length;
 
   useEffect(() => {
     if (!selectedTable) {
@@ -277,6 +331,7 @@ export const AnalyticsCollectionExplorerTable = () => {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             isClearable
+            isLoading={isLoading}
             incremental
             fullWidth
           />
@@ -284,19 +339,33 @@ export const AnalyticsCollectionExplorerTable = () => {
           <EuiSpacer size="xl" />
 
           <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.analytics.collectionsView.explorer.tableSummary"
-              defaultMessage="Showing {items} of {totalItemsCount}"
-              values={{
-                items: (
-                  <strong>
-                    {pageSize * pageIndex + Number(!!items.length)}-
-                    {pageSize * pageIndex + items.length}
-                  </strong>
-                ),
-                totalItemsCount,
-              }}
-            />
+            {totalItemsCount > MAX_ITEMS ? (
+              <FormattedMessage
+                id="xpack.enterpriseSearch.analytics.collectionsView.explorer.tableSummaryIndeterminate"
+                defaultMessage="Showing {items} of first {maxItemsCount} results"
+                values={{
+                  items: (
+                    <strong>
+                      {startNumberItemsOnPage}-{endNumberItemsOnPage}
+                    </strong>
+                  ),
+                  maxItemsCount: <EuiI18nNumber value={MAX_ITEMS} />,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.enterpriseSearch.analytics.collectionsView.explorer.tableSummary"
+                defaultMessage="Showing {items} of {totalItemsCount}"
+                values={{
+                  items: (
+                    <strong>
+                      {startNumberItemsOnPage}-{endNumberItemsOnPage}
+                    </strong>
+                  ),
+                  totalItemsCount,
+                }}
+              />
+            )}
           </EuiText>
 
           <EuiSpacer size="m" />
@@ -314,7 +383,7 @@ export const AnalyticsCollectionExplorerTable = () => {
               pageSize,
               pageSizeOptions: [10, 20, 50],
               showPerPageOptions: true,
-              totalItemCount: totalItemsCount,
+              totalItemCount: Math.min(totalItemsCount, MAX_ITEMS),
             }}
             onChange={handleTableChange}
           />

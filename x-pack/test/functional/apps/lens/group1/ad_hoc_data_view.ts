@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timeToVisualize',
     'common',
     'discover',
+    'unifiedFieldList',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
@@ -218,7 +219,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit(doc["bytes"].value.toString())`
       );
-      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
       expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);

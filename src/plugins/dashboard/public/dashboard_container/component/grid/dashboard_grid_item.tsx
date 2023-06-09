@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
@@ -56,6 +56,8 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       embeddable: { EmbeddablePanel: PanelComponent },
     } = pluginServices.getServices();
     const container = useDashboardContainer();
+    const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
+    const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -66,11 +68,23 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
 
+    useLayoutEffect(() => {
+      if (typeof ref !== 'function' && ref?.current) {
+        if (scrollToPanelId === id) {
+          container.scrollToPanel(ref.current);
+        }
+        if (highlightPanelId === id) {
+          container.highlightPanel(ref.current);
+        }
+      }
+    }, [id, container, scrollToPanelId, highlightPanelId, ref]);
+
     return (
       <div
         style={{ ...style, zIndex: focusedPanelId === id ? 2 : 'auto' }}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
+        id={`panel-${id}`}
         ref={ref}
         {...rest}
       >

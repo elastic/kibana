@@ -25,7 +25,7 @@ import {
 } from '../../../../../common/descriptor_types';
 import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import { MvtVectorLayer } from './mvt_vector_layer';
-import { ITermJoinSource } from '../../../sources/term_join_source';
+import { IJoinSource } from '../../../sources/join_sources';
 
 const defaultConfig = {
   urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
@@ -178,7 +178,7 @@ describe('isLayerLoading', () => {
             return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
           },
           getRightJoinSource: () => {
-            return {} as unknown as ITermJoinSource;
+            return {} as unknown as IJoinSource;
           },
         } as unknown as InnerJoin,
       ],
@@ -217,7 +217,7 @@ describe('isLayerLoading', () => {
             return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
           },
           getRightJoinSource: () => {
-            return {} as unknown as ITermJoinSource;
+            return {} as unknown as IJoinSource;
           },
         } as unknown as InnerJoin,
       ],

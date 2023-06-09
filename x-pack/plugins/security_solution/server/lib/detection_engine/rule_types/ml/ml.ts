@@ -24,6 +24,7 @@ import {
   addToSearchAfterReturn,
   createErrorsFromShard,
   createSearchAfterReturnType,
+  getMaxSignalsWarning,
   mergeReturns,
 } from '../utils/utils';
 import type { SetupPlugins } from '../../../../plugin';
@@ -102,8 +103,17 @@ export const mlExecutor = async ({
       anomalyThreshold: ruleParams.anomalyThreshold,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
+      maxSignals: tuple.maxSignals,
       exceptionFilter,
     });
+
+    if (
+      anomalyResults.hits.total &&
+      typeof anomalyResults.hits.total !== 'number' &&
+      anomalyResults.hits.total.value > tuple.maxSignals
+    ) {
+      result.warningMessages.push(getMaxSignalsWarning());
+    }
 
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,

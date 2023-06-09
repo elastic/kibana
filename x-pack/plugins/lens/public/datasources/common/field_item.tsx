@@ -18,7 +18,7 @@ import {
   FieldStats,
   FieldPopover,
   FieldPopoverHeader,
-  FieldPopoverVisualize,
+  FieldPopoverFooter,
   FieldItemButton,
   type GetCustomFieldType,
 } from '@kbn/unified-field-list-plugin/public';
@@ -342,7 +342,7 @@ function FieldItemPopoverContents(
       />
 
       {dataViewField.type === 'geo_point' || dataViewField.type === 'geo_shape' ? (
-        <FieldPopoverVisualize
+        <FieldPopoverFooter
           field={dataViewField}
           dataView={{ ...indexPattern, toSpec: () => indexPattern.spec } as unknown as DataView}
           originatingApp={APP_ID}

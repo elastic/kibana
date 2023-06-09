@@ -204,10 +204,6 @@ class ReportListingUi extends Component<Props, State> {
           throw error;
         }
       }
-
-      // Since the contents of the table have changed, we must reset the pagination
-      // and re-fetch. Otherwise, the Nth page we are on could be empty of jobs.
-      this.setState(() => ({ page: 0 }), this.fetchJobs);
     };
 
     return (

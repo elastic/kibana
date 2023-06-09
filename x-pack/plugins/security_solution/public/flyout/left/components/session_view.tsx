@@ -16,18 +16,23 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useLeftPanelContext } from '../context';
 
 export const SESSION_VIEW_ID = 'session_view';
-const SESSION_ENTITY_ID = 'process.entry_leader.entity_id';
+export const SESSION_ENTITY_ID = 'process.entry_leader.entity_id';
+export const SESSION_START_TIME = 'process.entry_leader.start';
+export const KIBANA_ANCESTOR_INDEX = 'kibana.alert.ancestors.index';
 
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const SessionView: FC = () => {
   const { sessionView } = useKibana().services;
-  const { getFieldsData } = useLeftPanelContext();
+  const { getFieldsData, indexName } = useLeftPanelContext();
 
+  const ancestorIndex = getField(getFieldsData(KIBANA_ANCESTOR_INDEX)); // e.g in case of alert, we want to grab it's origin index
   const sessionEntityId = getField(getFieldsData(SESSION_ENTITY_ID));
+  const sessionStartTime = getField(getFieldsData(SESSION_START_TIME));
+  const index = ancestorIndex || indexName;
 
-  if (!sessionEntityId) {
+  if (!index || !sessionEntityId || !sessionStartTime) {
     return (
       <EuiEmptyPrompt
         iconType="error"
@@ -42,7 +47,9 @@ export const SessionView: FC = () => {
   return (
     <div data-test-subj={SESSION_VIEW_TEST_ID}>
       {sessionView.getSessionView({
+        index,
         sessionEntityId,
+        sessionStartTime,
         isFullScreen: true,
       })}
     </div>

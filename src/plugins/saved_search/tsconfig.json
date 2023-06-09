@@ -17,6 +17,11 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/i18n",
     "@kbn/config-schema",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/object-versioning",
+    "@kbn/content-management-utils",
+    "@kbn/content-management-plugin",
   ],
   "exclude": [
     "target/**/*",

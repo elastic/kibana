@@ -12,8 +12,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/154726
-  describe.skip('Observability alerts / Add to case >', function () {
+  describe('Observability alerts / Add to case >', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -26,7 +25,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('When user has all priviledges for cases', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156312
+    describe.skip('When user has all privileges for cases', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -42,15 +42,20 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('renders case options in the overflow menu', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
+        await retry.try(async () => {
+          await observability.alerts.common.openActionsMenuForRow(0);
+        });
+
         await retry.try(async () => {
           await observability.alerts.addToCase.getAddToExistingCaseSelectorOrFail();
           await observability.alerts.addToCase.getAddToNewCaseSelectorOrFail();
         });
       });
 
-      it('opens a flyout when Add to new case is clicked', async () => {
-        await observability.alerts.addToCase.addToNewCaseButtonClick();
+      it('opens a flyout when "Add to new case" is clicked', async () => {
+        await retry.try(async () => {
+          await observability.alerts.addToCase.addToNewCaseButtonClick();
+        });
 
         await retry.try(async () => {
           await observability.alerts.addToCase.getCreateCaseFlyoutOrFail();
@@ -59,7 +64,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('opens a modal when Add to existing case is clicked', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
+        await retry.try(async () => {
+          await observability.alerts.common.openActionsMenuForRow(0);
+        });
 
         await retry.try(async () => {
           await observability.alerts.addToCase.addToExistingCaseButtonClick();
@@ -84,7 +91,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('does not render case options in the overflow menu', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
+        await retry.try(async () => {
+          await observability.alerts.common.openActionsMenuForRow(0);
+        });
         await retry.try(async () => {
           await observability.alerts.addToCase.missingAddToExistingCaseSelectorOrFail();
           await observability.alerts.addToCase.missingAddToNewCaseSelectorOrFail();

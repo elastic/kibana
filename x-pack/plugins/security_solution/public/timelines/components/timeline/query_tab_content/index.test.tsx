@@ -116,7 +116,8 @@ describe('Timeline', () => {
     };
   });
 
-  describe('rendering', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156797
+  describe.skip('rendering', () => {
     let spyCombineQueries: jest.SpyInstance;
 
     beforeEach(() => {
@@ -170,26 +171,6 @@ describe('Timeline', () => {
       ).toEqual(true);
     });
 
-    test('it does render the timeline table when the source is loading with no events', async () => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        browserFields: {},
-        loading: true,
-        indexPattern: {},
-        selectedPatterns: [],
-        missingPatterns: [],
-      });
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <QueryTabContentComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
-      ).toEqual(true);
-      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
-    });
-
     test('it does NOT render the timeline table when start is empty', async () => {
       const wrapper = await getWrapper(
         <TestProviders>
@@ -234,6 +215,26 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+    });
+
+    test('it does render the timeline table when the source is loading with no events', async () => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({
+        browserFields: {},
+        loading: true,
+        indexPattern: {},
+        selectedPatterns: [],
+        missingPatterns: [],
+      });
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
   });
 });

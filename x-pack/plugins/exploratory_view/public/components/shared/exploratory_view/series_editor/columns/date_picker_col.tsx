@@ -50,7 +50,7 @@ export function DatePickerCol({ seriesId, series }: Props) {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <strong>
-            {i18n.translate('xpack.exploratoryView.overview.exploratoryView.noDataAvailable', {
+            {i18n.translate('xpack.exploratoryView.noDataAvailable', {
               defaultMessage: 'No {dataType} data available.',
               values: {
                 dataType: series.dataType,
@@ -78,10 +78,4 @@ export function DatePickerCol({ seriesId, series }: Props) {
 
 const Wrapper = styled.div`
   width: 100%;
-  .euiSuperDatePicker__flexWrapper {
-    width: 100%;
-    > .euiFlexItem {
-      margin-right: 0;
-    }
-  }
 `;

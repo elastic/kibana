@@ -88,5 +88,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     ) {
       await testSubjects.click(tab);
     },
+
+    async clickNextButton() {
+      await testSubjects.click('nextButton');
+    },
   };
 }

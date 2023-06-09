@@ -14,7 +14,7 @@ import {
 import { SYNTHETICS_API_URLS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('GetMonitorsOverview', function () {
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       await security.role.create(roleName, {
         kibana: [

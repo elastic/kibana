@@ -74,10 +74,12 @@ export const useLensAttributes = ({
     return visualizationAttributes;
   }, [dataView, formulaAPI, options, type, visualizationType]);
 
-  const injectFilters = (data: {
-    timeRange: TimeRange;
+  const injectFilters = ({
+    filters,
+    query = { language: 'kuery', query: '' },
+  }: {
     filters: Filter[];
-    query: Query;
+    query?: Query;
   }): LensAttributes | null => {
     if (!attributes) {
       return null;
@@ -86,8 +88,8 @@ export const useLensAttributes = ({
       ...attributes,
       state: {
         ...attributes.state,
-        query: data.query,
-        filters: [...attributes.state.filters, ...data.filters],
+        query,
+        filters: [...attributes.state.filters, ...filters],
       },
     };
   };
@@ -99,7 +101,7 @@ export const useLensAttributes = ({
   }: {
     timeRange: TimeRange;
     filters: Filter[];
-    query: Query;
+    query?: Query;
   }) => {
     return {
       openInLens: {
@@ -121,7 +123,7 @@ export const useLensAttributes = ({
           return true;
         },
         async execute(_context: ActionExecutionContext): Promise<void> {
-          const injectedAttributes = injectFilters({ timeRange, filters, query });
+          const injectedAttributes = injectFilters({ filters, query });
           if (injectedAttributes) {
             navigateToPrefilledEditor(
               {

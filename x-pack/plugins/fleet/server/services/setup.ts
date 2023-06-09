@@ -12,7 +12,11 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { AUTO_UPDATE_PACKAGES, FILE_STORAGE_INTEGRATION_NAMES } from '../../common/constants';
+import {
+  AUTO_UPDATE_PACKAGES,
+  FILE_STORAGE_INTEGRATION_NAMES,
+  FLEET_ELASTIC_AGENT_PACKAGE,
+} from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type {
   DefaultPackagesInstallationError,
@@ -118,10 +122,8 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
-  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    logger.debug('Setting up Fleet Elasticsearch assets');
-    await ensureFleetGlobalEsAssets(soClient, esClient);
-  }
+  logger.debug('Setting up Fleet Elasticsearch assets');
+  await ensureFleetGlobalEsAssets(soClient, esClient);
 
   await ensureFleetFileUploadIndices(soClient, esClient);
   // Ensure that required packages are always installed even if they're left out of the config
@@ -173,6 +175,19 @@ async function createSetupSideEffects(
   }
   await appContextService.getMessageSigningService()?.generateKeyPair();
 
+  logger.debug('Generating Agent uninstall tokens');
+  if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    logger.warn(
+      'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
+    );
+  }
+  await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+
+  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    logger.debug('Checking for and encrypting plain text uninstall tokens');
+    await appContextService.getUninstallTokenService()?.encryptTokens();
+  }
+
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
 
@@ -207,8 +222,10 @@ export async function ensureFleetFileUploadIndices(
     pkgNames: [...FILE_STORAGE_INTEGRATION_NAMES],
   });
 
-  if (!installedFileUploadIntegrations.length) return [];
   const integrationNames = installedFileUploadIntegrations.map(({ name }) => name);
+  if (!integrationNames.includes(FLEET_ELASTIC_AGENT_PACKAGE)) {
+    integrationNames.push(FLEET_ELASTIC_AGENT_PACKAGE);
+  }
   logger.debug(`Ensuring file upload write indices for ${integrationNames}`);
   return ensureFileUploadWriteIndices({
     esClient,

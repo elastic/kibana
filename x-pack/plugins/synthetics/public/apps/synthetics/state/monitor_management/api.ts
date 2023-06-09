@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitor,
@@ -23,6 +24,23 @@ export const createMonitorAPI = async ({
   return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
 };
 
+export interface MonitorInspectResponse {
+  publicConfigs: any[];
+  privateConfig: PackagePolicy | null;
+}
+
+export const inspectMonitorAPI = async ({
+  monitor,
+  hideParams,
+}: {
+  hideParams?: boolean;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+}): Promise<{ result: MonitorInspectResponse; decodedCode: string }> => {
+  return await apiService.post(API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, undefined, {
+    hideParams,
+  });
+};
+
 export const updateMonitorAPI = async ({
   monitor,
   id,
@@ -33,12 +51,14 @@ export const updateMonitorAPI = async ({
   return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
 };
 
-export const getMonitorAPI = async ({
+export const getDecryptedMonitorAPI = async ({
   id,
 }: {
   id: string;
 }): Promise<DecryptedSyntheticsMonitorSavedObject> => {
-  return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
+  return await apiService.get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id), {
+    decrypted: true,
+  });
 };
 
 export const fetchServiceAPIKey = async (): Promise<{

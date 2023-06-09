@@ -14,12 +14,11 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
 export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
+
+  // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
+
   kubernetesEnabled: true,
-  disableIsolationUIPendingStatuses: false,
-  pendingActionResponsesWithAck: true,
-  policyListEnabled: true,
-  policyResponseInFleetEnabled: true,
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
   alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
@@ -32,11 +31,6 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
-
-  /**
-   * Enables the Endpoint response actions console in various areas of the app
-   */
-  responseActionsConsoleEnabled: true,
 
   /**
    * Enables the insights module for related alerts by process ancestry
@@ -74,29 +68,14 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsEnabled: false,
 
   /**
-   * Enables endpoint package level rbac
-   */
-  endpointRbacEnabled: true,
-
-  /**
-   * Enables endpoint package level rbac for response actions only.
-   * if endpointRbacEnabled is enabled, it will take precedence.
-   */
-  endpointRbacV1Enabled: true,
-  /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
   alertDetailsPageEnabled: false,
 
   /**
-   * Enables the `get-file` endpoint response action
+   * Enables the `upload` endpoint response action (v8.9)
    */
-  responseActionGetFileEnabled: true,
-
-  /**
-   * Enables the `execute` endpoint response action
-   */
-  responseActionExecuteEnabled: false,
+  responseActionUploadEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -107,6 +86,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new security flyout over the current alert details flyout
    */
   securityFlyoutEnabled: false,
+
+  /**
+   * Enables the Elastic Security Assistant
+   */
+  assistantEnabled: false,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
@@ -129,12 +113,20 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   newUserDetailsFlyout: false,
+
+  /**
+   * Enables Protections/Detections Coverage Overview page (Epic link https://github.com/elastic/security-team/issues/2905)
+   *
+   * This flag aims to facilitate the development process as the feature may not make it to 8.9 release.
+   *
+   * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
+   */
+  detectionsCoverageOverview: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
-const SecuritySolutionInvalidExperimentalValue = class extends Error {};
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
@@ -144,25 +136,27 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
  */
-export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
+export const parseExperimentalConfigValue = (
+  configValue: string[]
+): { features: ExperimentalFeatures; invalid: string[] } => {
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
+  const invalidKeys: string[] = [];
 
   for (const value of configValue) {
-    if (!isValidExperimentalValue(value)) {
-      throw new SecuritySolutionInvalidExperimentalValue(`[${value}] is not valid.`);
+    if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
+      invalidKeys.push(value);
+    } else {
+      enabledFeatures[value as keyof ExperimentalFeatures] = true;
     }
-
-    enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
   return {
-    ...allowedExperimentalValues,
-    ...enabledFeatures,
+    features: {
+      ...allowedExperimentalValues,
+      ...enabledFeatures,
+    },
+    invalid: invalidKeys,
   };
-};
-
-export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
-  return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

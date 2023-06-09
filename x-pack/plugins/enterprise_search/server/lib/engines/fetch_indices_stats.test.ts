@@ -12,49 +12,36 @@ describe('fetchIndicesStats lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
+        get: jest.fn(),
         stats: jest.fn(),
       },
     },
     asInternalUser: {},
   };
-  const indices = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
-  const indicesStats = {
+  const indices = ['test-index-name-1'];
+
+  const getAllAvailableIndexResponse = {
+    'test-index-name-1': { aliases: { test_alias_name: {} } },
+  };
+
+  const indexStats = {
     indices: {
       'test-index-name-1': {
         health: 'GREEN',
-        primaries: { docs: [{}] },
-        status: 'open',
-        total: {
+        primaries: {
           docs: {
             count: 200,
             deleted: 0,
           },
         },
-        uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
-      },
-      'test-index-name-2': {
-        health: 'YELLOW',
-        primaries: { docs: [{}] },
-        status: 'closed',
-        total: {
-          docs: {
-            count: 0,
-            deleted: 0,
-          },
-        },
-        uuid: 'QOLLiZ_mGRiDYD30D2-p8B',
-      },
-      'test-index-name-3': {
-        health: 'RED',
-        primaries: { docs: [{}] },
         status: 'open',
         total: {
           docs: {
-            count: 150,
+            count: 400,
             deleted: 0,
           },
         },
-        uuid: 'QYLLiZ_fGRiDYD3082-e7',
+        uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
       },
     },
   };
@@ -64,32 +51,63 @@ describe('fetchIndicesStats lib function', () => {
       health: 'GREEN',
       name: 'test-index-name-1',
     },
-    {
-      count: 0,
-      health: 'YELLOW',
-      name: 'test-index-name-2',
-    },
-    {
-      count: 150,
-      health: 'RED',
-      name: 'test-index-name-3',
-    },
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return hydrated indices', async () => {
-    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indicesStats);
-
+  it('should return hydrated indices for all available and open indices', async () => {
+    mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
+    mockClient.asCurrentUser.indices.stats.mockResolvedValueOnce(indexStats);
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
     ).resolves.toEqual(fetchIndicesStatsResponse);
+  });
 
-    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      index: indices,
-      metric: ['docs'],
-    });
+  it('should return count : null, health: unknown for closed index ', async () => {
+    mockClient.asCurrentUser.indices.get.mockImplementationOnce(() =>
+      Object.assign(getAllAvailableIndexResponse, {
+        // test-index-name-2 is the closed index here
+        'test-index-name-2': {
+          aliases: { test_alias_name: {} },
+          settings: { index: { verified_before_close: 'true' } },
+        },
+      })
+    );
+
+    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
+
+    await expect(
+      fetchIndicesStats(mockClient as unknown as IScopedClusterClient, [
+        ...indices,
+        'test-index-name-2',
+      ])
+    ).resolves.toEqual([
+      ...fetchIndicesStatsResponse,
+      {
+        count: null,
+        health: 'unknown',
+        name: 'test-index-name-2',
+      },
+    ]);
+  });
+  it('should return count : null, health: unknown for deleted index ', async () => {
+    mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => getAllAvailableIndexResponse);
+    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
+
+    await expect(
+      fetchIndicesStats(mockClient as unknown as IScopedClusterClient, [
+        ...indices,
+        'test-index-name-3',
+      ])
+    ).resolves.toEqual([
+      ...fetchIndicesStatsResponse,
+      {
+        count: null,
+        health: 'unknown',
+        name: 'test-index-name-3',
+      },
+    ]);
   });
 });

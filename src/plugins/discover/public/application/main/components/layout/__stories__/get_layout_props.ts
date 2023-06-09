@@ -12,6 +12,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { createHashHistory } from 'history';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -22,8 +23,7 @@ import {
 } from '../../../services/discover_data_state_container';
 import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
 import { esHits } from '../../../../../__mocks__/es_hits';
-import { SavedSearch } from '../../../../..';
-import { DiscoverLayoutProps } from '../types';
+import { DiscoverLayoutProps } from '../discover_layout';
 import {
   DiscoverStateContainer,
   getDiscoverStateContainer,
