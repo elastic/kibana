@@ -36,6 +36,10 @@ const defaultConfig: ConfigSchema = {
       metrics: { enabled: false },
       uptime: { enabled: false },
     },
+    thresholdRule: { enabled: false },
+  },
+  coPilot: {
+    enabled: false,
   },
 };
 
