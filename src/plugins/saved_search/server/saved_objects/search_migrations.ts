@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { flow, get, mapValues } from 'lodash';
 import type {
-  SavedObjectAttributes, // todo deprecated
+  SavedObjectAttributes,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
 } from '@kbn/core/server';

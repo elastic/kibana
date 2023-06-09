@@ -8,7 +8,7 @@
 
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-// these won't exist in shared
+// these won't exist in on server
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 

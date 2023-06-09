@@ -29,7 +29,7 @@ export class SavedSearchesService {
     const { search, contentManagement, spaces, savedObjectsTaggingOss } = this.deps;
     const getViaCm = (id: string) =>
       contentManagement.get<SavedSearchCrudTypes['GetIn'], SavedSearchCrudTypes['GetOut']>({
-        contentTypeId: SavedSearchType, // todo this might be the wrong one
+        contentTypeId: SavedSearchType,
         id,
       });
 

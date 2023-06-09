@@ -89,7 +89,6 @@ export interface DataViewsServiceDeps {
   /**
    * Saved objects client interface wrapped in a common interface
    */
-  // todo
   savedObjectsClient: PersistenceAPI;
   /**
    * Wrapper around http call functionality so it can be used on client or server
