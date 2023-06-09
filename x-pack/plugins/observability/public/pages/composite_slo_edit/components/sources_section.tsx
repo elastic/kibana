@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,9 +29,9 @@ interface Props {
 }
 
 export function SourcesSection({ isEditMode }: Props) {
-  const { control, watch } = useFormContext<CreateCompositeSLOForm>();
+  const { control } = useFormContext<CreateCompositeSLOForm>();
   const {
-    fields: sources,
+    fields: sourceFields,
     append,
     remove,
   } = useFieldArray({
@@ -46,14 +47,8 @@ export function SourcesSection({ isEditMode }: Props) {
     append({ id: '', revision: 1, weight: 1 });
   };
 
-  const isAddDisabled = sources?.length >= 30;
-  const isDeleteDisabled = sources?.length === 1;
-
-  const watchResult = watch('sources');
-  const haveSameBudgetingMethod = watchResult.every(
-    (s) =>
-      s._data !== undefined && s._data.budgetingMethod === watchResult[0]._data?.budgetingMethod
-  );
+  const isAddDisabled = sourceFields?.length >= 30;
+  const isDeleteDisabled = sourceFields?.length === 1;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
@@ -75,18 +70,20 @@ export function SourcesSection({ isEditMode }: Props) {
           </EuiFormRow>
         </EuiFlexItem>
 
+        <EuiText size="s" color="warning">
+          Select SLOs with the same time window and budgeting method.
+        </EuiText>
+
         <EuiFlexGroup direction="column" gutterSize="s">
-          {sources?.map((source, index) => (
+          {sourceFields?.map((sourceField, index) => (
             <SourceRow
-              key={source.id}
+              key={sourceField.id}
               index={index}
               isDeleteDisabled={isDeleteDisabled}
               onDeleteSource={handleDeleteSource(index)}
             />
           ))}
         </EuiFlexGroup>
-
-        <pre>Same budgeting method: {JSON.stringify(haveSameBudgetingMethod, null, 2)}</pre>
 
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={0}>

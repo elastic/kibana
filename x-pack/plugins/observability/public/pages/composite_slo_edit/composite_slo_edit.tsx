@@ -59,10 +59,10 @@ export function CompositeSloEditPage() {
       pageHeader={{
         pageTitle: compositeSlo
           ? i18n.translate('xpack.observability.compositeSloForm.editPageTitle', {
-              defaultMessage: 'Edit composite SLO',
+              defaultMessage: 'Edit Composite SLO',
             })
           : i18n.translate('xpack.observability.compositeSloForm.createPageTitle', {
-              defaultMessage: 'Create new composite SLO',
+              defaultMessage: 'Create new Composite SLO',
             }),
         rightSideItems: [<FeedbackButton />],
         bottomBorder: false,

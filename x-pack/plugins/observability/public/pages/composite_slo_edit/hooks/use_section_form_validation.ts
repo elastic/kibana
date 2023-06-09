@@ -5,31 +5,47 @@
  * 2.0.
  */
 
-import { CreateCompositeSLOInput } from '@kbn/slo-schema';
-import { UseFormGetFieldState, UseFormGetValues } from 'react-hook-form';
+import { UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
+import { CreateCompositeSLOForm } from '../helpers/process_form_values';
 
 interface Props {
-  getFieldState: UseFormGetFieldState<CreateCompositeSLOInput>;
-  getValues: UseFormGetValues<CreateCompositeSLOInput>;
+  getFieldState: UseFormGetFieldState<CreateCompositeSLOForm>;
+  getValues: UseFormGetValues<CreateCompositeSLOForm>;
+  watch: UseFormWatch<CreateCompositeSLOForm>;
 }
 
-export function useSectionFormValidation({ getFieldState, getValues }: Props) {
-  const isSourceSectionValid: boolean = true;
+export function useSectionFormValidation({ getFieldState, getValues, watch }: Props) {
+  const sources = watch('sources');
+  const firstSource = sources[0];
 
-  const isObjectiveSectionValid = (
-    [
-      'budgetingMethod',
-      'timeWindow.duration',
-      'objective.target',
-      'objective.timesliceTarget',
-      'objective.timesliceWindow',
-    ] as const
-  ).every((field) => getFieldState(field).error === undefined);
+  const hasValidNumberOfSources = sources.length >= 2 && sources.length <= 30;
+  const haveSameBudgetingMethod = sources.every(
+    (source) =>
+      !!source._data &&
+      !!firstSource._data &&
+      source._data.budgetingMethod === firstSource._data.budgetingMethod &&
+      // timeslices window are undefined for occurrences, or should be the same time window for timeslices
+      source._data.objective.timesliceWindow === firstSource._data.objective.timesliceWindow
+  );
+  const haveSameTimeWindow = sources.every(
+    (source) =>
+      !!source._data &&
+      !!firstSource._data &&
+      source._data.timeWindow.type === firstSource._data.timeWindow.type &&
+      source._data.timeWindow.duration === firstSource._data.timeWindow.duration
+  );
+
+  const isSourcesSectionValid =
+    hasValidNumberOfSources && haveSameBudgetingMethod && haveSameTimeWindow;
+
+  const isObjectiveSectionValid = (['objective.target'] as const).every(
+    (field) => getFieldState(field).error === undefined
+  );
 
   const isDescriptionSectionValid = !getFieldState('name').invalid && getValues('name') !== '';
 
   return {
-    isSourceSectionValid,
+    isSourcesSectionValid,
     isObjectiveSectionValid,
     isDescriptionSectionValid,
   };

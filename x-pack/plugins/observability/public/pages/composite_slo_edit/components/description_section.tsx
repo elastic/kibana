@@ -28,7 +28,7 @@ export function DescriptionSection({ isEditMode }: Props) {
             fullWidth
             isInvalid={getFieldState('name').invalid}
             label={i18n.translate('xpack.observability.slo.compositeSloForm.description.name', {
-              defaultMessage: 'Composite SLO name',
+              defaultMessage: 'Name',
             })}
           >
             <Controller
@@ -42,7 +42,7 @@ export function DescriptionSection({ isEditMode }: Props) {
                   isInvalid={fieldState.invalid}
                   placeholder={i18n.translate(
                     'xpack.observability.slo.compositeSloForm.description.namePlaceholder',
-                    { defaultMessage: 'Name for the composite SLO' }
+                    { defaultMessage: 'Enter a name' }
                   )}
                 />
               )}

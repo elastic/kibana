@@ -20,6 +20,7 @@ import {
   transformValuesToCreateInput,
   transformValuesToUpdateInput,
 } from '../helpers/process_form_values';
+import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { DescriptionSection } from './description_section';
 import { ObjectiveSection } from './objective_section';
 import { SourcesSection } from './sources_section';
@@ -43,7 +44,13 @@ export function CompositeSloForm({ compositeSlo }: Props) {
     values: transformResponseToInput(compositeSlo),
     mode: 'all',
   });
-  const { getValues, trigger, watch } = methods;
+  const { getFieldState, getValues, trigger, watch } = methods;
+
+  const { isSourcesSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
+    useSectionFormValidation({
+      getFieldState,
+      getValues,
+    });
 
   const { mutateAsync: createCompositeSlo, isLoading: isCreating } = useCreateCompositeSlo();
   const { mutateAsync: updateCompositeSlo, isLoading: isUpdating } = useUpdateCompositeSlo();
@@ -82,27 +89,24 @@ export function CompositeSloForm({ compositeSlo }: Props) {
                 defaultMessage: 'Add source SLOs',
               }),
               children: <SourcesSection isEditMode={isEditMode} />,
-              status: 'incomplete',
+              status: isSourcesSectionValid ? 'complete' : 'incomplete',
             },
             {
               title: i18n.translate('xpack.observability.slo.compositeSloForm.objectives.title', {
                 defaultMessage: 'Set objective',
               }),
               children: <ObjectiveSection isEditMode={isEditMode} />,
-              status: 'incomplete',
+              status: isObjectiveSectionValid ? 'complete' : 'incomplete',
             },
             {
               title: i18n.translate('xpack.observability.slo.compositeSloForm.description.title', {
-                defaultMessage: 'Describe composite SLO',
+                defaultMessage: 'Describe Composite SLO',
               }),
               children: <DescriptionSection isEditMode={isEditMode} />,
-              status: 'incomplete',
+              status: isDescriptionSectionValid ? 'complete' : 'incomplete',
             },
           ]}
         />
-
-        <pre>{JSON.stringify(watch(), null, 2)}</pre>
-        <EuiSpacer size="m" />
 
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiButton
@@ -114,10 +118,10 @@ export function CompositeSloForm({ compositeSlo }: Props) {
           >
             {isEditMode
               ? i18n.translate('xpack.observability.slo.compositeSloForm.editButton', {
-                  defaultMessage: 'Update composite SLO',
+                  defaultMessage: 'Update Composite SLO',
                 })
               : i18n.translate('xpack.observability.slo.compositeSloForm.createButton', {
-                  defaultMessage: 'Create composite SLO',
+                  defaultMessage: 'Create Composite SLO',
                 })}
           </EuiButton>
 
@@ -133,6 +137,8 @@ export function CompositeSloForm({ compositeSlo }: Props) {
             })}
           </EuiButtonEmpty>
         </EuiFlexGroup>
+
+        <pre>{JSON.stringify(watch(), null, 2)}</pre>
       </EuiFlexGroup>
     </FormProvider>
   );
