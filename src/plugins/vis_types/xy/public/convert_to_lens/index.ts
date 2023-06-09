@@ -72,8 +72,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     (param) => param.show && visSchemas.metric.some((m) => m.aggId?.split('.')[0] === param.data.id)
   );
 
-  const { getColumnsFromVis, createStaticValueColumn } =
-    await convertToLensModule;
+  const { getColumnsFromVis, createStaticValueColumn } = await convertToLensModule;
   const dataLayers = getColumnsFromVis(
     vis,
     timefilter,

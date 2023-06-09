@@ -29,12 +29,8 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     return null;
   }
 
-  const {
-    getColumnsFromVis,
-    createStaticValueColumn,
-    getPalette,
-    getPercentageModeConfig,
-  } = await convertToLensModule;
+  const { getColumnsFromVis, createStaticValueColumn, getPalette, getPercentageModeConfig } =
+    await convertToLensModule;
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 

@@ -28,8 +28,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
     return null;
   }
 
-  const { getColumnsFromVis, convertToFiltersColumn } =
-    await convertToLensModule;
+  const { getColumnsFromVis, convertToFiltersColumn } = await convertToLensModule;
   const layers = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: ['segment'],
     splits: ['group'],

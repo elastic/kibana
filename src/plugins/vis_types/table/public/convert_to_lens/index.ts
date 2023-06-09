@@ -31,8 +31,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const { getColumnsFromVis, getPercentageColumnFormulaColumn } =
-    await convertToLensModule;
+  const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await convertToLensModule;
   const layers = getColumnsFromVis(
     vis,
     timefilter,
