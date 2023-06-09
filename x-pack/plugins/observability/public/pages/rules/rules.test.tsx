@@ -42,6 +42,9 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         uptime: { enabled: false },
       },
     },
+    coPilot: {
+      enabled: false,
+    },
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
