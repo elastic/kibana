@@ -16,8 +16,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 
-const devTools = getPresets('devtools');
-
 const navigationTree: NavigationTreeDefinition = {
   body: [
     { type: 'cloudLink', preset: 'projects' },
@@ -41,7 +39,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          children: devTools.children[0].children,
+          children: getPresets('devtools').children[0].children,
         },
         {
           id: 'explore',
@@ -50,25 +48,13 @@ const navigationTree: NavigationTreeDefinition = {
           }),
           children: [
             {
-              id: 'explore_discover',
-              title: i18n.translate('xpack.serverlessSearch.nav.explore.discover', {
-                defaultMessage: 'Discover',
-              }),
-              href: '/app/discover',
+              link: 'discover',
             },
             {
-              id: 'explore_dashboard',
-              title: i18n.translate('xpack.serverlessSearch.nav.explore.dashboard', {
-                defaultMessage: 'Dashboard',
-              }),
-              href: '/app/dashboards',
+              link: 'dashboards',
             },
             {
-              id: 'explore_visualize_library',
-              title: i18n.translate('xpack.serverlessSearch.nav.explore.visualizeLibrary', {
-                defaultMessage: 'Visualize Library',
-              }),
-              href: '/app/visualize',
+              link: 'visualize',
             },
           ],
         },
@@ -79,20 +65,18 @@ const navigationTree: NavigationTreeDefinition = {
           }),
           children: [
             {
-              id: 'content_indices',
               title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
                 defaultMessage: 'Indices',
               }),
               // TODO: this will be updated to a new Indices page
-              href: '/app/management/data/index_management/indices',
+              link: 'management:index_management',
             },
             {
-              id: 'content_transforms',
               title: i18n.translate('xpack.serverlessSearch.nav.content.transforms', {
                 defaultMessage: 'Transforms',
               }),
               // TODO: this will be updated to a new Transforms page
-              href: '/app/management/ingest/ingest_pipelines',
+              link: 'management:ingest_pipelines',
             },
             {
               id: 'content_indexing_api',
@@ -111,11 +95,7 @@ const navigationTree: NavigationTreeDefinition = {
           }),
           children: [
             {
-              id: 'security_api_keys',
-              title: i18n.translate('xpack.serverlessSearch.nav.security.apiKeys', {
-                defaultMessage: 'API Keys',
-              }),
-              href: '/app/management/security/api_keys',
+              link: 'management:api_keys',
             },
           ],
         },

@@ -27,28 +27,28 @@ export type IntegrationsDeepLinkId = IntegrationsAppId | FleetAppId | OsQueryApp
 // Management
 export type ManagementAppId = typeof MANAGEMENT_APP_ID;
 export type ManagementId =
+  | 'api_keys'
+  | 'cases'
   | 'cross_cluster_replication'
+  | 'dataViews'
   | 'index_lifecycle_management'
   | 'index_management'
   | 'ingest_pipelines'
+  | 'jobsListLink'
+  | 'objects'
   | 'pipelines'
   | 'remote_clusters'
+  | 'reporting'
   | 'rollup_jobs'
+  | 'settings'
   | 'snapshot_restore'
+  | 'spaces'
+  | 'tags'
   | 'transform'
-  // Alerts and insights
-  | 'cases'
-  | 'jobsListLink'
   | 'triggersActions'
   | 'triggersActionsConnectors'
-  | 'reporting'
-  | 'watcher'
-  // Kibana
-  | 'dataViews'
-  | 'objects'
-  | 'tags'
-  | 'spaces'
-  | 'settings';
+  | 'watcher';
+
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
 
 // Combined
