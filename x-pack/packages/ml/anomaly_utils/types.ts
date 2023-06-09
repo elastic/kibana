@@ -26,16 +26,11 @@ export interface MlInfluencer {
 
 /**
  * Alias of MlAnomalyRecordDoc
- * @export
- * @typedef {MLAnomalyDoc}
  */
 export type MLAnomalyDoc = MlAnomalyRecordDoc;
 
 /**
  * MlRecordForInfluencer, an alias based on MlAnomalyRecordDoc.
- *
- * @export
- * @typedef {MlRecordForInfluencer}
  */
 export type MlRecordForInfluencer = MlAnomalyRecordDoc;
 
@@ -359,30 +354,21 @@ export interface MlAnomaliesTableRecord {
 export interface MlAnomaliesTableRecordExtended extends MlAnomaliesTableRecord {
   /**
    * The detector name.
-   * @type {string}
    */
   detector: string;
   /**
    * The length of the rule.
-   * @type {?number}
    */
   rulesLength?: number;
 }
 
 /**
  * Union type for partitiion field types.
- *
- * @export
- * @typedef {MlPartitionFieldsType}
  */
 export type MlPartitionFieldsType = typeof ML_PARTITION_FIELDS[number];
 
 /**
  * Anomaly record document for categorizer stats.
- *
- * @export
- * @interface MlAnomalyCategorizerStatsDoc
- * @typedef {MlAnomalyCategorizerStatsDoc}
  */
 export interface MlAnomalyCategorizerStatsDoc {
   /**
@@ -393,89 +379,73 @@ export interface MlAnomalyCategorizerStatsDoc {
 
   /**
    * The identifier for the anomaly detection job.
-   * @type {string}
    */
   job_id: string;
 
   /**
    * The type of the result document.
-   * @type {'categorizer_stats'}
    */
   result_type: 'categorizer_stats';
 
   /**
    * The field used to segment the analysis.
    * When you use this property, you have completely independent baselines for each value of this field.
-   * @type {?string}
    */
   partition_field_name?: string;
 
   /**
    * The value of the partition field.
-   * @type {?string}
    */
   partition_field_value?: string;
 
   /**
    * The number of documents.
-   * @type {number}
    */
   categorized_doc_count: number;
 
   /**
    * The total number of categories.
-   * @type {number}
    */
   total_category_count: number;
 
   /**
    * The number of frequent categories.
-   * @type {number}
    */
   frequent_category_count: number;
 
   /**
    * The number of rare categories.
-   * @type {number}
    */
   rare_category_count: number;
 
   /**
    * The number of dead categories.
-   * @type {number}
    */
   dead_category_count: number;
 
   /**
    * The number of failed categories.
-   * @type {number}
    */
   failed_category_count: number;
 
   /**
    * The categorization status.
-   * @type {('ok' | 'warn')}
    */
   categorization_status: 'ok' | 'warn';
 
   /**
    * The log time.
-   * @type {number}
    */
   log_time: number;
 
   /**
    * The start time of the bucket for which these results were calculated.
-   * @type {number}
    */
   timestamp: number;
 }
 
 /**
  * Union type for entity field types.
- *
- * @export
- * @typedef {MlEntityFieldType}
  */
 export type MlEntityFieldType = 'partition_field' | 'over_field' | 'by_field';
 
