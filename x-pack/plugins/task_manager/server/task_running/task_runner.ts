@@ -321,19 +321,7 @@ export class TaskManagerRunner implements TaskRunner {
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
 
-      let resultToValidate;
-      if (result?.skip) {
-        resultToValidate = {
-          state: this.instance.task.state,
-          runAt: moment(this.instance.task.runAt)
-            .add(this.taskConfig.skip.delay, 'millisecond')
-            .toDate(),
-        };
-      } else {
-        resultToValidate = result;
-      }
-
-      const validatedResult = this.validateResult(resultToValidate);
+      const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
       );
@@ -564,11 +552,21 @@ export class TaskManagerRunner implements TaskRunner {
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(
         ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
-          const { startedAt, schedule } = this.instance.task;
+          const { startedAt, schedule, state: taskState } = this.instance.task;
+          let processedRunAt =
+            runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!;
+          let processedState = state;
+
+          if (unwrap(result).skip) {
+            processedRunAt = moment(this.instance.task.runAt)
+              .add(this.taskConfig.skip.delay, 'millisecond')
+              .toDate();
+            processedState = taskState;
+          }
+
           return asOk({
-            runAt:
-              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
-            state,
+            runAt: processedRunAt,
+            state: processedState,
             schedule: reschedule ?? schedule,
             attempts,
             status: TaskStatus.Idle,
