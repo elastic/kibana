@@ -11,8 +11,34 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('GenerativeAiConnectorFields renders', () => {
+  beforeAll(() => {
+    useKibanaMock().services.application.navigateToUrl = jest.fn();
+    useKibana().services.dashboard = {
+      findDashboardsService: jest.fn().mockResolvedValue({
+        findByTitle: jest.fn().mockResolvedValue({
+          id: 'test',
+        }),
+      }),
+    } as unknown as DashboardStart;
+
+    jest.fn().mockResolvedValue({ findByTitle: jest.fn().mockResolvedValue({ id: '123' }) });
+    useKibanaMock().services.spaces = {
+      getActiveSpace: jest.fn().mockResolvedValue({
+        id: 'test',
+      }),
+    } as unknown as SpacesPluginStart;
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('open ai connector fields are rendered', async () => {
     const actionConnector = {
       actionTypeId: '.gen-ai',
@@ -36,7 +62,9 @@ describe('GenerativeAiConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    });
     expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(actionConnector.config.apiUrl);
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
@@ -70,7 +98,9 @@ describe('GenerativeAiConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    });
     expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(actionConnector.config.apiUrl);
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
