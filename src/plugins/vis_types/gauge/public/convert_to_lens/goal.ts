@@ -28,8 +28,14 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
     return null;
   }
 
-  const { getColumnsFromVis, getPalette, getPercentageModeConfig, createStaticValueColumn, excludeMetaFromColumn } = await convertToLensModule;
-  
+  const {
+    getColumnsFromVis,
+    getPalette,
+    getPercentageModeConfig,
+    createStaticValueColumn,
+    excludeMetaFromColumn,
+  } = await convertToLensModule;
+
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
   const layers = getColumnsFromVis(
