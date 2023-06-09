@@ -13,8 +13,8 @@ import styled from 'styled-components';
 import type { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 
 const StyledEuiFieldText = styled(EuiFieldText)`
   padding-left: 12px;
