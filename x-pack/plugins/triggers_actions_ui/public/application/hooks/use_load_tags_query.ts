@@ -57,7 +57,7 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
   };
 
   const getNextPageParam = (lastPage: GetRuleTagsResponse) => {
-    const totalPages = Math.ceil(lastPage.total / lastPage.perPage);
+    const totalPages = Math.min(1, Math.ceil(lastPage.total / lastPage.perPage));
     if (totalPages === lastPage.page) {
       return;
     }
