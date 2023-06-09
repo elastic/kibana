@@ -61,6 +61,10 @@ properties:
   is_protected:
     description: Indicates whether the agent policy has tamper protection enabled. Default false.
     type: boolean
+  overrides:
+    type: object
+    description: Overrides agent policy keys. Overriding inputs is not allowed.
+    nullable: true
 required:
   - id
   - status
