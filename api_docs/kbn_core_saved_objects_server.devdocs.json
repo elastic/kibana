@@ -8172,7 +8172,7 @@
             "tags": [],
             "label": "changes",
             "description": [
-              "\nThe list of changes associated with this version.\n\nModel version changes are defined via low-level components, allowing to use composition\nto describe the list of changes bound to a given version. Composition also allows to more\neasily merge changes from multiple source when needed.\n"
+              "\nThe list of changes associated with this version.\n\nModel version changes are defined via low-level components, allowing to use composition\nto describe the list of changes bound to a given version.\n"
             ],
             "signature": [
               {

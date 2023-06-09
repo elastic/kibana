@@ -184,13 +184,19 @@ const CommentAttributesWithoutRefsRt = rt.union([
   AttributesTypePersistableStateRt,
 ]);
 
-export const CommentRequestRt = rt.union([
+const BasicCommentRequestRt = rt.union([
   ContextTypeUserRt,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
   ExternalReferenceNoSORt,
-  ExternalReferenceSORt,
   PersistableStateAttachmentRt,
+]);
+
+export const CommentRequestRt = rt.union([BasicCommentRequestRt, ExternalReferenceSORt]);
+
+export const CommentRequestWithoutRefsRt = rt.union([
+  BasicCommentRequestRt,
+  ExternalReferenceSOWithoutRefsRt,
 ]);
 
 export const CommentRt = rt.intersection([
