@@ -59,7 +59,7 @@ export const registerObservabilityRuleTypes = (
       description: i18n.translate(
         'xpack.observability.threshold.rule.alertFlyout.alertDescription',
         {
-          defaultMessage: '[NEW OBSERVABILITY] - Alert when threshold breached.',
+          defaultMessage: 'Alert when threshold breached.',
         }
       ),
       iconClass: 'bell',
