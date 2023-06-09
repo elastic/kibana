@@ -32,7 +32,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
             defaultMessage: 'Getting started',
           }),
-          href: '/app/elasticsearch',
+          link: 'serverlessElasticsearch',
         },
         {
           id: 'dev_tools',
@@ -84,7 +84,7 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Indexing API',
               }),
               // TODO: this page does not exist yet, linking to getting started for now
-              href: '/app/elasticsearch',
+              link: 'serverlessElasticsearch',
             },
           ],
         },

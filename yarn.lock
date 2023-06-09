@@ -4063,6 +4063,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-search@link:packages/deeplinks/search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/default-nav-analytics@link:packages/default-nav/analytics":
   version "0.0.0"
   uid ""
