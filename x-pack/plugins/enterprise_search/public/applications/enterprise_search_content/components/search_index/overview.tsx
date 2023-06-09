@@ -69,7 +69,7 @@ export const SearchIndexOverview: React.FC = () => {
             title={i18n.translate(
               'xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.title',
               {
-                defaultMessage: 'Native connectors are no longer supported outside Elastic Cloud',
+                defaultMessage: 'Native connectors are now only supported on Elastic Cloud',
               }
             )}
           >
@@ -78,7 +78,7 @@ export const SearchIndexOverview: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.title"
-                  defaultMessage="Convert this native connector to a {link}, to be self-managed on your own infrastructure."
+                  defaultMessage="To continue using this connector, you'll need to convert  it to a {link}, that you'll self-manage on your own infrastructure."
                   values={{
                     link: (
                       <EuiLink href={docLinks.buildConnector} target="_blank">
