@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { superUser, obsOnlySpacesAll } from '../../../common/lib/authentication/users';
+import { obsOnlySpacesAll } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
@@ -45,17 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
             obsOnlySpacesAll,
             'metrics.alert.threshold'
           );
-          expect(aadFields.slice(0, 2)).to.eql(expectedResult);
-          expect(aadFields.length > 2).to.be(true);
-          for (const field of aadFields) {
-            expectToBeFieldDescriptor(field);
-          }
-        });
-      });
-
-      it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
-        await retry.try(async () => {
-          const aadFields = await getAADFieldsByRuleType(superUser, 'metrics.alert.threshold');
           expect(aadFields.slice(0, 2)).to.eql(expectedResult);
           expect(aadFields.length > 2).to.be(true);
           for (const field of aadFields) {
