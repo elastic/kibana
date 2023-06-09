@@ -77,6 +77,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     return {
       core: coreContext,
 
+      getServerBasePath: () => core.http.basePath.serverBasePath,
+
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
         if (!endpointAuthz) {
           // eslint-disable-next-line require-atomic-updates
