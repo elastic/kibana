@@ -47,7 +47,7 @@ export const SavedObjectNoteRuntimeType = runtimeTypes.intersection([
   }),
 ]);
 
-interface SavedObjectNote extends runtimeTypes.TypeOf<typeof SavedNoteRuntimeType> {}
+export interface SavedObjectNote extends runtimeTypes.TypeOf<typeof SavedNoteRuntimeType> {}
 
 /**
  * This type represents a note type stored in a saved object that does not include any fields that reference

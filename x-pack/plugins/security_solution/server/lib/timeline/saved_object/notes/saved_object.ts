@@ -156,9 +156,18 @@ const createNote = async ({
       data: noteWithCreator,
     });
 
+  const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
+    eventId: migratedAttributes.eventId,
+    note: migratedAttributes.note,
+    created: migratedAttributes.created,
+    createdBy: migratedAttributes.createdBy,
+    updated: migratedAttributes.updated,
+    updatedBy: migratedAttributes.updatedBy,
+  };
+
   const createdNote = await savedObjectsClient.create<SavedObjectNoteWithoutExternalRefs>(
     noteSavedObjectType,
-    migratedAttributes,
+    noteAttributes,
     {
       references,
     }
@@ -203,15 +212,19 @@ const updateNote = async ({
       existingReferences: existingNote.references,
     });
 
-  const updatedNote = await savedObjectsClient.update(
-    noteSavedObjectType,
-    noteId,
-    migratedPatchAttributes,
-    {
-      version: existingNote.version || undefined,
-      references,
-    }
-  );
+  const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
+    eventId: migratedPatchAttributes.eventId,
+    note: migratedPatchAttributes.note,
+    created: migratedPatchAttributes.created,
+    createdBy: migratedPatchAttributes.createdBy,
+    updated: migratedPatchAttributes.updated,
+    updatedBy: migratedPatchAttributes.updatedBy,
+  };
+
+  const updatedNote = await savedObjectsClient.update(noteSavedObjectType, noteId, noteAttributes, {
+    version: existingNote.version || undefined,
+    references,
+  });
 
   const populatedNote = noteFieldsMigrator.populateFieldsFromReferencesForPatch({
     dataBeforeRequest: note,
@@ -259,12 +272,20 @@ export const convertSavedObjectToSavedNote = (
 ): Note =>
   pipe(
     SavedObjectNoteRuntimeType.decode(savedObject),
-    map((savedNote) => ({
-      noteId: savedNote.id,
-      version: savedNote.version,
-      timelineVersion,
-      ...savedNote.attributes,
-    })),
+    map((savedNote) => {
+      return {
+        noteId: savedNote.id,
+        version: savedNote.version,
+        timelineVersion,
+        timelineId: savedNote.attributes.timelineId,
+        eventId: savedNote.attributes.eventId,
+        note: savedNote.attributes.note,
+        created: savedNote.attributes.created,
+        createdBy: savedNote.attributes.createdBy,
+        updated: savedNote.attributes.updated,
+        updatedBy: savedNote.attributes.updatedBy,
+      };
+    }),
     fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
