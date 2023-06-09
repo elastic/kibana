@@ -354,5 +354,76 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )
       ).to.eql(['opbeans-java_production_request_DispatcherServlet#doGet']);
     });
+
+    it('transaction_duration with empty service name, transaction name and transaction type', async () => {
+      const options = {
+        params: {
+          query: {
+            start,
+            end,
+            serviceName: '',
+            transactionName: '',
+            transactionType: '',
+            environment: 'ENVIRONMENT_ALL',
+            interval: '5m',
+          },
+        },
+      };
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(
+        response.body.latencyChartPreview.map(
+          (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+        )
+      ).to.eql([
+        'opbeans-rum_testing_page-load',
+        'opbeans-node_testing_Worker',
+        'opbeans-dotnet_production_request',
+        'opbeans-java_production_request',
+        'opbeans-python_production_celery',
+        'opbeans-go_testing_request',
+        'opbeans-python_production_request',
+        'opbeans-node_testing_request',
+        'opbeans-ruby_production_request',
+      ]);
+    });
+
+    it('transaction_duration with empty service name, transaction name, transaction type and group by on transaction name', async () => {
+      const options = {
+        params: {
+          query: {
+            start,
+            end,
+            serviceName: '',
+            transactionName: '',
+            transactionType: '',
+            environment: 'ENVIRONMENT_ALL',
+            interval: '5m',
+            groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+          },
+        },
+      };
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(
+        response.body.latencyChartPreview
+          .map((item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name)
+          .slice(0, 5)
+      ).to.eql([
+        'opbeans-dotnet_production_request_GET Orders/Get',
+        'opbeans-rum_testing_page-load_/orders',
+        'opbeans-java_production_request_DispatcherServlet#doGet',
+        'opbeans-python_production_celery_opbeans.tasks.sync_customers',
+        'opbeans-go_testing_request_GET /api/orders',
+      ]);
+    });
   });
 }
