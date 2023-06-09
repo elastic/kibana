@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useRouteResolver } from './use_resolver';
 import { MlLicenseInfo } from '../../../common/license/ml_license';
 
@@ -18,41 +19,55 @@ describe('useResolver', () => {
     jest.clearAllMocks();
   });
 
-  it('should redirect to the home page if ML is disabled', async () => {
+  it('redirects to the home page if ML is disabled', async () => {
     (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: false,
     });
     const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canCreateJob']));
-    await act(async () => {
-      await waitForNextUpdate();
-    });
+    await waitForNextUpdate();
     expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
   });
 
-  it('should redirect to the home page if license is not sufficient', async () => {
+  it('redirects to the home page if license is not sufficient', async () => {
     (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: false,
     });
     const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canCreateJob']));
-    await act(async () => {
-      await waitForNextUpdate();
-    });
+    await waitForNextUpdate();
     expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
   });
 
-  it('should redirect to the data viz page if license is not full', async () => {
+  it('redirects to the data viz page if license is not full', async () => {
     (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: true,
       isFullLicense: false,
     });
     const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canCreateJob']));
-    await act(async () => {
-      await waitForNextUpdate();
-    });
+    await waitForNextUpdate();
     expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('ml', {
       path: 'datavisualizer',
     });
+  });
+
+  it('does not redirect if license requirements are met', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: true,
+      isMinimumLicense: true,
+      isFullLicense: false,
+    });
+    const { waitForNextUpdate } = renderHook(() => useRouteResolver('basic', []));
+    await waitForNextUpdate();
+    expect(useMlKibana().services.application.navigateToApp).not.toHaveBeenCalledWith();
+    expect(useMlKibana().services.application.navigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('redirects to the access denied page if some required capabilities are missing', async () => {
+    (usePermissionCheck as jest.Mock<boolean[]>).mockReturnValueOnce([false]);
+
+    const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canGetCalendars']));
+    await waitForNextUpdate();
+    expect(useMlKibana().services.application.navigateToUrl).toHaveBeenCalled();
   });
 });
