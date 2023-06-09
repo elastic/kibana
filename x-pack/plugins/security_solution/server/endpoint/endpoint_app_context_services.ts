@@ -40,7 +40,6 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import type { actionCreateService } from './services/actions';
 import type { ActionCreateService } from './services/actions/create/types';
 
 export interface EndpointAppContextServiceSetupContract {
@@ -65,7 +64,7 @@ export interface EndpointAppContextServiceStartContract {
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
-  actionCreateService: ReturnType<typeof actionCreateService> | undefined;
+  actionCreateService: ActionCreateService | undefined;
   cloud: CloudSetup;
 }
 
