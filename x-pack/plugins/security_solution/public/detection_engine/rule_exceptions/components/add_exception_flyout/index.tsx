@@ -537,7 +537,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 <h3>{i18n.COMMENTS_SECTION_TITLE(newComment ? 1 : 0)}</h3>
               </SectionHeader>
             }
-            initialIsOpen={!!newComment} // TODO: Ask yara if this the expected behavior
+            initialIsOpen={!!newComment}
             newCommentValue={newComment}
             newCommentOnChange={setComment}
           />
