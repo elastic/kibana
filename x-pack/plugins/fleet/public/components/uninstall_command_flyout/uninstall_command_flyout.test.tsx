@@ -130,6 +130,14 @@ describe('UninstallCommandFlyout', () => {
       const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
       expect(policyIdHint.textContent).toBe('Valid for the following agent policy: policy_id');
     });
+
+    it('displays the selected policy id only if it is provided', () => {
+      const renderResult = render({ policyId: undefined });
+
+      expect(
+        renderResult.queryByTestId('uninstall-command-flyout-policy-id-hint')
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('when fetching the tokens is unsuccessful', () => {
