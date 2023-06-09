@@ -105,8 +105,13 @@ function NavigationGroupComp<
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId> & NavigationBucketProps) {
   if (props.preset) {
-    const { id, title, link, icon, children, ...rest } = props;
-    return <NavigationBucket {...rest} />;
+    return (
+      <NavigationBucket
+        preset={props.preset}
+        nodeDefinition={props.nodeDefinition}
+        defaultIsCollapsed={props.defaultIsCollapsed}
+      />
+    );
   }
 
   const { preset, nodeDefinition, ...rest } = props;

@@ -21,6 +21,7 @@ import {
   defaultManagementNavGroup,
   defaultMlNavGroup,
 } from '../../mocks/src/default_navigation.test.helpers';
+import { navLinksMock } from '../../mocks/src/navlinks';
 
 const defaultProps = {
   homeRef: 'https://elastic.co',
@@ -147,6 +148,7 @@ describe('<DefaultNavigation />', () => {
 
     test('should read the title from deeplink', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
+        ...navLinksMock,
         {
           id: 'item1',
           title: 'Title from deeplink',
@@ -321,6 +323,7 @@ describe('<DefaultNavigation />', () => {
   describe('builds the full navigation tree when only custom project is provided', () => {
     test('reading the title from config or deeplink', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
+        ...navLinksMock,
         {
           id: 'item2',
           title: 'Title from deeplink!',

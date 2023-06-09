@@ -27,7 +27,7 @@ export const defaultNavigation: AnalyticsNodeDefinition = {
           link: 'discover',
         },
         {
-          link: 'dashboard',
+          link: 'dashboards',
         },
         {
           link: 'visualize',
