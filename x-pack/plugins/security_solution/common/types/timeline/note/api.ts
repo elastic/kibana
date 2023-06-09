@@ -12,7 +12,7 @@ import type { Maybe } from '../../../search_strategy/common';
 
 import { unionWithNullType } from '../../../utility_types';
 
-export const BareNote = runtimeTypes.intersection([
+export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
     timelineId: unionWithNullType(runtimeTypes.string),
   }),
@@ -26,16 +26,16 @@ export const BareNote = runtimeTypes.intersection([
   }),
 ]);
 
-export interface BareNoteType extends runtimeTypes.TypeOf<typeof BareNote> {}
+export interface BareNote extends runtimeTypes.TypeOf<typeof BareNoteSchema> {}
 
 /**
  * This type represents a note type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
-export type BareNoteWithoutExternalRefs = Omit<BareNoteType, 'timelineId'>;
+export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
 
 export const NoteRuntimeType = runtimeTypes.intersection([
-  BareNote,
+  BareNoteSchema,
   runtimeTypes.type({
     noteId: runtimeTypes.string,
     version: runtimeTypes.string,
