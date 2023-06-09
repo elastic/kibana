@@ -37,7 +37,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/security-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/navigation-plugin",
     "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/utility-types",
@@ -69,7 +68,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/observability-shared-plugin",
     "@kbn/exploratory-view-plugin",
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }

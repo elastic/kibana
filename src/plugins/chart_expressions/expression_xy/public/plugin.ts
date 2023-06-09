@@ -12,7 +12,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
@@ -37,7 +37,7 @@ export interface XYPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginStart;
-  eventAnnotation: EventAnnotationPluginSetup;
+  eventAnnotation: EventAnnotationPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 

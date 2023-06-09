@@ -385,9 +385,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
                   defaultMessage="Pipelines"
                 />
-                <EuiNotificationBadge>
-                  {isPopulatedObject(pipelines) ? Object.keys(pipelines!).length : 0}
-                </EuiNotificationBadge>
+                {isPopulatedObject(pipelines) ? (
+                  <EuiNotificationBadge>{Object.keys(pipelines).length}</EuiNotificationBadge>
+                ) : null}
               </>
             ),
             content: (

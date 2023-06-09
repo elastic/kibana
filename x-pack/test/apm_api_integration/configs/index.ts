@@ -20,6 +20,7 @@ const apmFtrConfigs = {
     kibanaConfig: {
       'xpack.apm.forceSyntheticSource': 'true',
       'logging.loggers': [apmDebugLogger],
+      'server.publicBaseUrl': 'http://mockedPublicBaseUrl',
     },
   },
   trial: {

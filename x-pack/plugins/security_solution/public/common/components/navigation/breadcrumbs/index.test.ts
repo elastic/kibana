@@ -21,6 +21,7 @@ import { updateAppLinks } from '../../../links';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { AlertDetailRouteType } from '../../../../detections/pages/alert_details/types';
 import { UsersTableType } from '../../../../explore/users/store/model';
+import { UpsellingService } from '../../../lib/upsellings';
 
 const mockUseRouteSpy = jest.fn();
 jest.mock('../../../utils/route/use_route_spy', () => ({
@@ -171,6 +172,7 @@ describe('Navigation Breadcrumbs', () => {
           crud: true,
         },
       },
+      upselling: new UpsellingService(),
     });
   });
 

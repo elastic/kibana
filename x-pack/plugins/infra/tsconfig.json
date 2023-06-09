@@ -66,6 +66,7 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/aiops-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/core-http-server",
   ],
   "exclude": ["target/**/*"]
 }

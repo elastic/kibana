@@ -7,6 +7,7 @@
 
 import {
   formatDurationFromTimeUnitChar,
+  getAlertUrl,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
@@ -18,6 +19,7 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { asyncForEach } from '@kbn/std';
 import { firstValueFrom } from 'rxjs';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
@@ -53,6 +55,7 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
 export function registerErrorCountRuleType({
   alerting,
+  alertsLocator,
   basePath,
   config$,
   logger,
@@ -72,6 +75,7 @@ export function registerErrorCountRuleType({
       validate: { params: errorCountParamsSchema },
       actionVariables: {
         context: [
+          apmActionVariables.alertDetailsUrl,
           apmActionVariables.environment,
           apmActionVariables.interval,
           apmActionVariables.reason,
@@ -86,7 +90,12 @@ export function registerErrorCountRuleType({
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ params: ruleParams, services, spaceId }) => {
+      executor: async ({
+        params: ruleParams,
+        services,
+        spaceId,
+        startedAt,
+      }) => {
         const predefinedGroupby = [SERVICE_NAME, SERVICE_ENVIRONMENT];
 
         const allGroupbyFields = Array.from(
@@ -95,7 +104,12 @@ export function registerErrorCountRuleType({
 
         const config = await firstValueFrom(config$);
 
-        const { savedObjectsClient, scopedClusterClient } = services;
+        const {
+          getAlertUuid,
+          getAlertStartedDate,
+          savedObjectsClient,
+          scopedClusterClient,
+        } = services;
 
         const indices = await getApmIndices({
           config,
@@ -166,11 +180,14 @@ export function registerErrorCountRuleType({
             };
           }) ?? [];
 
-        errorCountResults
-          .filter((result) => result.errorCount >= ruleParams.threshold)
-          .forEach((result) => {
+        await asyncForEach(
+          errorCountResults.filter(
+            (result) => result.errorCount >= ruleParams.threshold
+          ),
+          async (result) => {
             const { errorCount, sourceFields, groupByFields, bucketKey } =
               result;
+            const alertId = bucketKey.join('_');
             const alertReason = formatErrorCountReason({
               threshold: ruleParams.threshold,
               measured: errorCount,
@@ -179,48 +196,59 @@ export function registerErrorCountRuleType({
               groupByFields,
             });
 
+            const alert = services.alertWithLifecycle({
+              id: alertId,
+              fields: {
+                [PROCESSOR_EVENT]: ProcessorEvent.error,
+                [ALERT_EVALUATION_VALUE]: errorCount,
+                [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
+                [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
+                [ALERT_REASON]: alertReason,
+                ...sourceFields,
+                ...groupByFields,
+              },
+            });
+
             const relativeViewInAppUrl = getAlertUrlErrorCount(
               groupByFields[SERVICE_NAME],
               getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
                 SERVICE_ENVIRONMENT
               ]
             );
-
             const viewInAppUrl = addSpaceIdToPath(
               basePath.publicBaseUrl,
               spaceId,
               relativeViewInAppUrl
             );
-
+            const indexedStartedAt =
+              getAlertStartedDate(alertId) ?? startedAt.toISOString();
+            const alertUuid = getAlertUuid(alertId);
+            const alertDetailsUrl = await getAlertUrl(
+              alertUuid,
+              spaceId,
+              indexedStartedAt,
+              alertsLocator,
+              basePath.publicBaseUrl
+            );
             const groupByActionVariables =
               getGroupByActionVariables(groupByFields);
 
-            services
-              .alertWithLifecycle({
-                id: bucketKey.join('_'),
-                fields: {
-                  [PROCESSOR_EVENT]: ProcessorEvent.error,
-                  [ALERT_EVALUATION_VALUE]: errorCount,
-                  [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
-                  [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
-                  [ALERT_REASON]: alertReason,
-                  ...sourceFields,
-                  ...groupByFields,
-                },
-              })
-              .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-                interval: formatDurationFromTimeUnitChar(
-                  ruleParams.windowSize,
-                  ruleParams.windowUnit as TimeUnitChar
-                ),
-                reason: alertReason,
-                threshold: ruleParams.threshold,
-                errorGroupingKey: ruleParams.errorGroupingKey, // When group by doesn't include error.grouping_key, the context.error.grouping_key action variable will contain value of the Error Grouping Key filter
-                triggerValue: errorCount,
-                viewInAppUrl,
-                ...groupByActionVariables,
-              });
-          });
+            alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
+              alertDetailsUrl,
+              interval: formatDurationFromTimeUnitChar(
+                ruleParams.windowSize,
+                ruleParams.windowUnit as TimeUnitChar
+              ),
+              reason: alertReason,
+              threshold: ruleParams.threshold,
+              // When group by doesn't include error.grouping_key, the context.error.grouping_key action variable will contain value of the Error Grouping Key filter
+              errorGroupingKey: ruleParams.errorGroupingKey,
+              triggerValue: errorCount,
+              viewInAppUrl,
+              ...groupByActionVariables,
+            });
+          }
+        );
 
         return { state: {} };
       },
