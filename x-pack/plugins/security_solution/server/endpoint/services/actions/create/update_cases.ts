@@ -49,9 +49,9 @@ export const updateCases = async ({
 
   // Update all cases with a comment
   if (caseIDs.length > 0) {
-    const targets = endpointData.map((endpt: HostMetadata) => ({
-      hostname: endpt.host.hostname,
-      endpointId: endpt.agent.id,
+    const targets = endpointData.map((endpoint: HostMetadata) => ({
+      hostname: endpoint.host.hostname,
+      endpointId: endpoint.agent.id,
     }));
 
     await Promise.all(
