@@ -143,8 +143,6 @@ def functionalXpack(Map params = [:]) {
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressChrome', './test/scripts/jenkins_security_solution_cypress_chrome.sh'))
-        // Temporarily disabled to figure out test flake
-        // task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressFirefox', './test/scripts/jenkins_security_solution_cypress_firefox.sh'))
       }
     }
 
