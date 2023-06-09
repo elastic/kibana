@@ -125,11 +125,7 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 export const getSecurityBaseKibanaSubFeatureIds = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => [
-  SecuritySubFeatureId.endpointList,
   SecuritySubFeatureId.hostIsolationExceptions,
-  SecuritySubFeatureId.eventFilters,
-  SecuritySubFeatureId.policyManagement,
-  SecuritySubFeatureId.responseActionsHistory,
   SecuritySubFeatureId.hostIsolation,
 ];
 
@@ -175,7 +171,14 @@ export const getSecurityAppFeaturesConfig = (
     },
 
     [AppFeatureSecurityKey.endpointExceptions]: {
-      subFeatureIds: [SecuritySubFeatureId.trustedApplications, SecuritySubFeatureId.blocklist],
+      subFeatureIds: [
+        SecuritySubFeatureId.trustedApplications,
+        SecuritySubFeatureId.blocklist,
+        SecuritySubFeatureId.eventFilters,
+        SecuritySubFeatureId.policyManagement,
+        SecuritySubFeatureId.endpointList,
+        SecuritySubFeatureId.responseActionsHistory,
+      ],
       subFeaturesPrivileges: [
         {
           id: 'host_isolation_exceptions_all',
