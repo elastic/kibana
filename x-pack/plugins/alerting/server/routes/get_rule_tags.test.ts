@@ -12,24 +12,15 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { getRuleTagsRoute } from './get_rule_tags';
 
-import {} from '../../common/rule_tags_aggregation';
-
 const rulesClient = rulesClientMock.create();
 
 jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('../../common/rule_tags_aggregation', () => ({
-  ...jest.requireActual('../../common/rule_tags_aggregation'),
-  formatRuleTagsAggregationResult: jest.fn(),
-}));
-
 beforeEach(() => {
   jest.resetAllMocks();
 });
-
-const { formatRuleTagsAggregationResult } = jest.requireMock('../../common/rule_tags_aggregation');
 
 describe('getRuleTagsRoute', () => {
   it('aggregates rule tags with proper parameters', async () => {
@@ -41,10 +32,6 @@ describe('getRuleTagsRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/_tags"`);
-
-    const aggregateResult = { ruleTags: ['a', 'b', 'c'] };
-
-    formatRuleTagsAggregationResult.mockReturnValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -123,8 +110,6 @@ describe('getRuleTagsRoute', () => {
     getRuleTagsRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
-
-    formatRuleTagsAggregationResult.mockReturnValueOnce({ ruleTags: ['a', 'b', 'c', 'd'] });
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

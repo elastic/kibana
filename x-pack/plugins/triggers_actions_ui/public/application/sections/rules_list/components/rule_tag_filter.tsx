@@ -172,21 +172,21 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
 
   const {
     tags = EMPTY_TAGS,
-    afterKey,
     isLoading,
+    hasNextPage,
     fetchNextPage,
   } = useLoadTagsQuery({
     enabled: canLoadRules,
     refresh,
-    filter: searchText,
+    search: searchText,
   });
 
   const fetchNext = useCallback(async () => {
-    if (afterKey) {
+    if (hasNextPage && !isLoading) {
       await fetchNextPage();
       observerRef.current?.disconnect();
     }
-  }, [fetchNextPage, afterKey]);
+  }, [fetchNextPage, hasNextPage, isLoading]);
 
   useEffect(() => {
     return () => observerRef.current?.disconnect();

@@ -44,7 +44,6 @@ export * from './rule_snooze_type';
 export * from './rrule_type';
 export * from './maintenance_window';
 export * from './default_rule_aggregation';
-export * from './rule_tags_aggregation';
 
 export { mappingFromFieldMap, getComponentTemplateFromFieldMap } from './alert_schema';
 
