@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { safeLoad } from 'js-yaml';
 
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 
