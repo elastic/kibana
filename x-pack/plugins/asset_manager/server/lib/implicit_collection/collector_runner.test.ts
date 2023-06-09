@@ -10,6 +10,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CollectorRunner } from './collector_runner';
 import { CollectorOptions } from './collectors';
 import { Asset } from '../../../common/types_api';
+import { INDEX_DEFAULTS } from '../../types';
 
 const getMockClient = () => ({
   bulk: jest.fn().mockResolvedValue({ errors: false }),
@@ -28,6 +29,7 @@ describe(__filename, () => {
       outputClient: getMockClient() as unknown as ElasticsearchClient,
       logger: getMockLogger(),
       intervalMs: 1,
+      sourceIndices: INDEX_DEFAULTS,
     });
 
     const collector1 = jest.fn(async (opts: CollectorOptions) => {
@@ -52,6 +54,7 @@ describe(__filename, () => {
       inputClient: getMockClient() as unknown as ElasticsearchClient,
       logger: getMockLogger(),
       intervalMs: 1,
+      sourceIndices: INDEX_DEFAULTS,
     });
 
     const collector1 = jest.fn(async (opts: CollectorOptions) => {
@@ -77,6 +80,7 @@ describe(__filename, () => {
       inputClient: getMockClient() as unknown as ElasticsearchClient,
       logger: getMockLogger(),
       intervalMs: 1,
+      sourceIndices: INDEX_DEFAULTS,
     });
 
     const collector = jest.fn(async (opts: CollectorOptions) => {

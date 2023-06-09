@@ -35,6 +35,7 @@ export class CollectorRunner {
         from: now - this.options.intervalMs,
         client: this.options.inputClient,
         transaction,
+        sourceIndices: this.options.sourceIndices,
       };
 
       const assets = await collector(collectorOptions)

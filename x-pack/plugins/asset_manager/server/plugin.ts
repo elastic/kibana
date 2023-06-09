@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import {
   Plugin,
   CoreSetup,
@@ -21,34 +20,9 @@ import { upsertTemplate } from './lib/manage_index_templates';
 import { startImplicitCollection } from './lib/implicit_collection';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
+import { AssetManagerConfig, configSchema } from './types';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
-
-const configSchema = schema.object({
-  alphaEnabled: schema.maybe(schema.boolean()),
-  implicitCollection: schema.maybe(
-    schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      interval: schema.duration({ defaultValue: '5m' }),
-      input: schema.maybe(
-        schema.object({
-          hosts: schema.string(),
-          username: schema.string(),
-          password: schema.string(),
-        })
-      ),
-      output: schema.maybe(
-        schema.object({
-          hosts: schema.string(),
-          username: schema.string(),
-          password: schema.string(),
-        })
-      ),
-    })
-  ),
-});
-
-export type AssetManagerConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<AssetManagerConfig> = {
   schema: configSchema,
@@ -106,6 +80,7 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
         outputClient,
         intervalMs: this.config.implicitCollection.interval.asMilliseconds(),
         logger: this.context.logger.get('implicit_collection'),
+        sourceIndices: this.config.sourceIndices,
       });
     }
   }
