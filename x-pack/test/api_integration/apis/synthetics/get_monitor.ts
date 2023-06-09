@@ -91,9 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&monitorQueryIds=${id2}`)
           .expect(200);
 
-        const resultMonitorIds = resp.body.monitors.map(
-          ({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id
-        );
+        const resultMonitorIds = resp.body.monitors.map(({ id }: Partial<MonitorFields>) => id);
         expect(resultMonitorIds.length).eql(1);
         expect(resultMonitorIds).eql([id2]);
       });
@@ -107,9 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(200);
 
-        const resultMonitorIds = resp.body.monitors.map(
-          ({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id
-        );
+        const resultMonitorIds = resp.body.monitors.map(({ id }: Partial<MonitorFields>) => id);
 
         expect(resultMonitorIds.length).eql(2);
         expect(resultMonitorIds).eql([id2, id3]);
@@ -140,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const resultMonitorIds = resp.body.monitors
-          .map(({ attributes: { id } }: { attributes: Partial<MonitorFields> }) => id)
+          .map(({ id }: Partial<MonitorFields>) => id)
           .filter((id: string, index: number, arr: string[]) => arr.indexOf(id) === index); // Filter only unique
         expect(resultMonitorIds.length).eql(2);
         expect(resultMonitorIds).eql([customHeartbeatId0, customHeartbeatId1]);
