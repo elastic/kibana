@@ -35,7 +35,10 @@ import {
   getDomain,
   useDateFormatter,
 } from './chart_preview_helper';
-import { NUM_BUCKETS_FOR_PREVIEW_CHART } from '../../../../../common/rules/apm_rule_types';
+import {
+  INTERVAL_MULTIPLIER_FOR_LOOKBACK,
+  NUMBER_OF_TIME_SERIES_FOR_PREVIEW_CHART,
+} from '../../../../../common/rules/apm_rule_types';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -84,7 +87,7 @@ export function ChartPreview({
       const bMax = Math.max(...b.data.map((point) => point.y as number));
       return bMax - aMax;
     });
-    return sortedSeries.slice(0, NUM_BUCKETS_FOR_PREVIEW_CHART);
+    return sortedSeries.slice(0, NUMBER_OF_TIME_SERIES_FOR_PREVIEW_CHART);
   }, [series]);
 
   const barSeries = useMemo(() => {
@@ -121,7 +124,7 @@ export function ChartPreview({
 
   const dateFormatter = useDateFormatter(xMin, xMax);
 
-  const lookback = timeSize * NUM_BUCKETS_FOR_PREVIEW_CHART;
+  const lookback = timeSize * INTERVAL_MULTIPLIER_FOR_LOOKBACK;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   const rectDataValues: RectAnnotationDatum[] = [
