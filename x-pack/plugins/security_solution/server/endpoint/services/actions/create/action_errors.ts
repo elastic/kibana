@@ -6,6 +6,7 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { EcsError } from '@kbn/ecs';
 import { validateAgents, validateEndpointLicense } from './validate';
 import type { LicenseService } from '../../../../../common/license/license';
 
@@ -20,8 +21,8 @@ export const addErrorsToActionIfAny = ({
 }):
   | {
       error: {
-        code: string;
-        message: unknown;
+        code: EcsError['code'];
+        message: EcsError['message'];
       };
     }
   | undefined => {
