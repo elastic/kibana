@@ -15,7 +15,6 @@ export const TEMPLATE_TYPE = `${CANVAS_TYPE}-template`;
 export const CANVAS_APP = 'canvas';
 export const APP_ROUTE = '/app/canvas';
 export const APP_ROUTE_WORKPAD = `${APP_ROUTE}#/workpad`;
-export const API_ROUTE = '/api/canvas';
 export const INTERNAL_API_ROUTE = '/internal/canvas';
 export const API_ROUTE_WORKPAD = `${INTERNAL_API_ROUTE}/workpad`;
 export const API_ROUTE_WORKPAD_EXPORT = `${API_ROUTE_WORKPAD}/export`;

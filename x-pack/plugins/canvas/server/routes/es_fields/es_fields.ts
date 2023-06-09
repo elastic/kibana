@@ -7,7 +7,7 @@
 
 import { mapValues, keys } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { API_ROUTE } from '../../../common/lib';
+import { INTERNAL_API_ROUTE } from '../../../common/lib';
 import { catchErrorHandler } from '../catch_error_handler';
 import { normalizeType } from '../../../common/lib/request/normalize_type';
 import { RouteInitializerDeps } from '..';
@@ -22,7 +22,7 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
 
   router.versioned
     .get({
-      path: `${API_ROUTE}/es_fields`,
+      path: `${INTERNAL_API_ROUTE}/es_fields`,
       access: 'internal',
     })
     .addVersion(
