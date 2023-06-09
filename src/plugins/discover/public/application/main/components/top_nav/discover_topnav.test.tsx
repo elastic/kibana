@@ -13,7 +13,7 @@ import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { Query } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
@@ -22,12 +22,12 @@ setHeaderActionMenuMounter(jest.fn());
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({
-    services: jest.requireActual('../../../../__mocks__/services').discoverServiceMock,
+    services: mockDiscoverService,
   }),
 }));
 
 function getProps(savePermissions = true): DiscoverTopNavProps {
-  discoverServiceMock.capabilities.discover!.save = savePermissions;
+  mockDiscoverService.capabilities.discover!.save = savePermissions;
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.internalState.transitions.setDataView(dataViewMock);
 
@@ -53,7 +53,7 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect', 'save']);
+    expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect', 'save']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
@@ -65,6 +65,6 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu).props();
     const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect']);
+    expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect']);
   });
 });
