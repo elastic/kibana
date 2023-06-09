@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogsSharedLibs } from './lib/infra_types';
+import { LogsSharedLibs } from './lib/logs_shared_types';
 import {
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryHighlightsRoute,

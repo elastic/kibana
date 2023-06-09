@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import {
   LogsSharedConfig,
+  LogsSharedPluginCoreSetup,
   LogsSharedPluginSetup,
   LogsSharedPluginStart,
   LogsSharedServerPluginSetupDeps,
@@ -16,6 +17,12 @@ import {
 } from './types';
 import { logViewSavedObjectType } from './saved_objects';
 import { initLogsSharedServer } from './logs_shared_server';
+import { LogViewsService } from './services/log_views';
+import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
+import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
+import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
+import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
+import { defaultLogViewsStaticConfig } from '../common/log_views';
 
 export class LogsSharedPlugin
   implements
@@ -28,6 +35,7 @@ export class LogsSharedPlugin
 {
   private readonly config: LogsSharedConfig;
   private readonly logger: Logger;
+  private libs!: LogsSharedBackendLibs;
   private logViews: LogViewsService;
 
   constructor(context: PluginInitializerContext<LogsSharedConfig>) {
@@ -37,13 +45,29 @@ export class LogsSharedPlugin
     this.logViews = new LogViewsService(this.logger.get('logViews'));
   }
 
-  public setup(core: CoreSetup, plugins: LogsSharedServerPluginSetupDeps) {
-    // TODO: init framework
+  public setup(core: LogsSharedPluginCoreSetup, plugins: LogsSharedServerPluginSetupDeps) {
+    const framework = new KibanaFramework(core, this.config, plugins);
 
     const logViews = this.logViews.setup();
 
     // Register saved objects
     core.savedObjects.registerType(logViewSavedObjectType);
+
+    const domainLibs: LogsSharedDomainLibs = {
+      logEntries: new LogsSharedLogEntriesDomain(new LogsSharedKibanaLogEntriesAdapter(framework), {
+        framework,
+        getStartServices: () => core.getStartServices(),
+      }),
+    };
+
+    this.libs = {
+      ...domainLibs,
+      basePath: core.http.basePath,
+      configuration: this.config,
+      framework,
+      getStartServices: () => core.getStartServices(),
+      logger: this.logger,
+    };
 
     // Register server side APIs
     initLogsSharedServer(this.libs);
@@ -55,7 +79,6 @@ export class LogsSharedPlugin
 
   public start(core: CoreStart, plugins: LogsSharedServerPluginStartDeps) {
     const logViews = this.logViews.start({
-      infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
       dataViews: plugins.dataViews,
       elasticsearch: core.elasticsearch,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -37,3 +37,8 @@ export interface LogsSharedServerPluginStartDeps {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
 }
+
+/**
+ * @internal
+ */
+export type LogsSharedPluginRequestHandlerContext = RequestHandlerContext;

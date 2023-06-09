@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'logsShared';
-export const PLUGIN_NAME = 'logsShared';
+export * from './log_entries_domain';
