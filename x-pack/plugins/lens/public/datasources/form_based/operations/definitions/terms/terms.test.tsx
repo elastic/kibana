@@ -262,6 +262,39 @@ describe('terms', () => {
       );
     });
 
+    it('should return significant terms expression when ordered by significance', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: {
+            ...termsColumn.params,
+            accuracyMode: true,
+            include: ['C.'],
+            exclude: ['U.'],
+            orderBy: { type: 'significant' },
+          },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggSignificantTerms',
+          arguments: expect.objectContaining({
+            field: ['source'],
+            size: [3],
+            shardSize: [1000],
+            include: ['C.'],
+            exclude: ['U.'],
+          }),
+        })
+      );
+    });
+
     it('should pass orderAgg correctly', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
       const esAggsFn = termsOperation.toEsAggsFn(
@@ -1973,6 +2006,37 @@ describe('terms', () => {
       expect(select2.prop('disabled')).toEqual(true);
     });
 
+    it('should disable missing bucket and other bucket setting when ordered by significance', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={{
+            ...(layer.columns.col1 as TermsIndexPatternColumn),
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              orderBy: { type: 'significant' },
+            },
+          }}
+        />
+      );
+
+      const select1 = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select1.prop('disabled')).toEqual(true);
+
+      const select2 = instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select2.prop('disabled')).toEqual(true);
+    });
+
     describe('accuracy mode', () => {
       const renderWithAccuracy = (accuracy: boolean, rareTerms: boolean) =>
         shallow(
@@ -2180,6 +2244,7 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
         'rare',
+        'significant',
         'custom',
       ]);
     });

@@ -95,6 +95,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
         layerId,
         columns: columns.map(excludeMetaFromColumn),
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration: getConfiguration(
