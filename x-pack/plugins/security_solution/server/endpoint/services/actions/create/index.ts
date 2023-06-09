@@ -38,10 +38,6 @@ export const actionCreateService = (
   esClient: ElasticsearchClient,
   endpointContext: EndpointAppContext
 ): ActionCreateService => {
-  const createActionFromAlert = async (payload: CreateActionPayload): Promise<ActionDetails> => {
-    return createAction({ ...payload }, { minimumLicenseRequired: 'enterprise' });
-  };
-
   const createAction = async <
     TOutputContent extends object = object,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
@@ -91,6 +87,7 @@ export const actionCreateService = (
 
   return {
     createAction,
-    createActionFromAlert,
+    createActionFromAlert: (payload) =>
+      createAction(payload, { minimumLicenseRequired: 'enterprise' }),
   };
 };
