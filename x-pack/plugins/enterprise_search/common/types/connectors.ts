@@ -61,7 +61,7 @@ export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigPrope
 
 export interface ConnectorScheduling {
   enabled: boolean;
-  interval: string;
+  interval: string; // interval has crontab syntax
 }
 
 export interface CustomScheduling {
@@ -190,7 +190,6 @@ export type ConnectorFeatures = Partial<{
 }> | null;
 
 export interface SchedulingConfiguraton {
-  // interval has crontab syntax
   access_control: ConnectorScheduling;
   full: ConnectorScheduling;
   incremental: ConnectorScheduling;
