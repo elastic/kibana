@@ -8,6 +8,6 @@
 
 export const DISCOVER_APP_ID = 'discover';
 
-export const DASHBOARD_APP_ID = 'dashboard';
+export const DASHBOARD_APP_ID = 'dashboards';
 
 export const VISUALIZE_APP_ID = 'visualize';
