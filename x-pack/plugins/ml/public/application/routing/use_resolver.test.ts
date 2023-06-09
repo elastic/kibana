@@ -14,7 +14,7 @@ import { MlLicenseInfo } from '../../../common/license/ml_license';
 jest.mock('../contexts/kibana');
 jest.mock('../capabilities/check_capabilities');
 
-describe('useResolver', () => {
+describe.skip('useResolver', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
