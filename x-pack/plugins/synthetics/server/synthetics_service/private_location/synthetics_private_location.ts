@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
@@ -106,7 +106,6 @@ export class SyntheticsPrivateLocation {
   async createPackagePolicies(
     configs: PrivateConfig[],
     request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract,
     privateLocations: PrivateLocation[],
     spaceId: string
   ) {

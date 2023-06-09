@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import {
   INSUFFICIENT_FLEET_PERMISSIONS,
   ProjectMonitorFormatter,
@@ -123,6 +123,9 @@ describe('ProjectMonitorFormatter', () => {
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
+    coreStart: {
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+    },
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);

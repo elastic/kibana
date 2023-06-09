@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import {
@@ -18,6 +18,7 @@ import {
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocation = {
@@ -52,15 +53,6 @@ describe('SyntheticsPrivateLocation', () => {
     username: '',
   } as unknown as HeartbeatConfig;
 
-  const savedObjectsClientMock = {
-    bulkUpdate: jest.fn(),
-    get: jest.fn().mockReturnValue({
-      attributes: {
-        locations: [mockPrivateLocation],
-      },
-    }),
-  } as unknown as SavedObjectsClientContract;
-
   const serverMock: UptimeServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
@@ -87,66 +79,62 @@ describe('SyntheticsPrivateLocation', () => {
         getSpaceId: jest.fn().mockReturnValue('nonDefaultSpace'),
       },
     },
+    coreStart: {
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+    },
   } as unknown as UptimeServerSetup;
 
-  it.each([
-    [true, 'Unable to create Synthetics package policy template for private location'],
-    [
-      false,
-      'Unable to create Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
-    ],
-  ])('throws errors for create monitor', async (writeIntegrationPolicies, error) => {
-    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
-      ...serverMock,
-      fleet: {
-        ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+  it.each([[true, 'Unable to create Synthetics package policy template for private location']])(
+    'throws errors for create monitor',
+    async (writeIntegrationPolicies, error) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          authz: {
+            fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+          },
         },
-      },
-    });
+      });
 
-    try {
-      await syntheticsPrivateLocation.createPackagePolicies(
-        [{ config: testConfig, globalParams: {} }],
-        {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
-        [mockPrivateLocation],
-        'test-space'
-      );
-    } catch (e) {
-      expect(e).toEqual(new Error(error));
+      try {
+        await syntheticsPrivateLocation.createPackagePolicies(
+          [{ config: testConfig, globalParams: {} }],
+          {} as unknown as KibanaRequest,
+          [mockPrivateLocation],
+          'test-space'
+        );
+      } catch (e) {
+        expect(e).toEqual(new Error(error));
+      }
     }
-  });
+  );
 
-  it.each([
-    [true, 'Unable to create Synthetics package policy template for private location'],
-    [
-      false,
-      'Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
-    ],
-  ])('throws errors for edit monitor', async (writeIntegrationPolicies, error) => {
-    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
-      ...serverMock,
-      fleet: {
-        ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+  it.each([[true, 'Unable to create Synthetics package policy template for private location']])(
+    'throws errors for edit monitor',
+    async (writeIntegrationPolicies, error) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          authz: {
+            fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+          },
         },
-      },
-    });
+      });
 
-    try {
-      await syntheticsPrivateLocation.editMonitors(
-        [{ config: testConfig, globalParams: {} }],
-        {} as unknown as KibanaRequest,
-        [mockPrivateLocation],
-        'test-space'
-      );
-    } catch (e) {
-      expect(e).toEqual(new Error(error));
+      try {
+        await syntheticsPrivateLocation.editMonitors(
+          [{ config: testConfig, globalParams: {} }],
+          {} as unknown as KibanaRequest,
+          [mockPrivateLocation],
+          'test-space'
+        );
+      } catch (e) {
+        expect(e).toEqual(new Error(error));
+      }
     }
-  });
+  );
 
   it.each([
     [

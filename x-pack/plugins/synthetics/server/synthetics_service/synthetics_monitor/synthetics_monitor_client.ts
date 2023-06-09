@@ -77,7 +77,6 @@ export class SyntheticsMonitorClient {
     const newPolicies = this.privateLocationAPI.createPackagePolicies(
       privateConfigs,
       request,
-      savedObjectsClient,
       allPrivateLocations,
       spaceId
     );
