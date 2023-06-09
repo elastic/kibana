@@ -45,8 +45,8 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  threshold_rule: schema.object({
-    group_by_page_size: schema.number({ defaultValue: 10_000 }),
+  thresholdRule: schema.object({
+    groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
   coPilot: schema.maybe(observabilityCoPilotConfig),

@@ -183,7 +183,7 @@ export const createMetricThresholdExecutor = ({
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
-    const compositeSize = config.threshold_rule.group_by_page_size;
+    const compositeSize = config.thresholdRule.groupByPageSize;
     const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
