@@ -373,14 +373,9 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private buildFilter = async () => {
     const {
       componentState: { min: availableMin, max: availableMax },
-      explicitInput: {
-        query,
-        timeRange,
-        filters = [],
-        ignoreParentSettings,
-        value: [selectedMin, selectedMax],
-      },
+      explicitInput: { query, timeRange, filters = [], ignoreParentSettings, value },
     } = this.getState();
+    const [selectedMin, selectedMax] = value ?? ['', ''];
     const hasData = availableMin !== undefined && availableMax !== undefined;
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);

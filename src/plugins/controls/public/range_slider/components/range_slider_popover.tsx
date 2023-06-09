@@ -108,21 +108,27 @@ export const RangeSliderPopover: FC<{
         responsive={false}
       >
         <EuiFlexItem>
-          <EuiDualRange
-            id={id}
-            min={rangeSliderMin}
-            max={rangeSliderMax}
-            onChange={([minSelection, maxSelection]) => {
-              rangeSlider.dispatch.setSelectedRange([String(minSelection), String(maxSelection)]);
-            }}
-            value={value}
-            ticks={ticks}
-            levels={levels}
-            showTicks
-            fullWidth
-            ref={rangeRef}
-            data-test-subj="rangeSlider__slider"
-          />
+          {min !== -Infinity && max !== Infinity ? (
+            <EuiDualRange
+              id={id}
+              min={rangeSliderMin}
+              max={rangeSliderMax}
+              onChange={([minSelection, maxSelection]) => {
+                rangeSlider.dispatch.setSelectedRange([String(minSelection), String(maxSelection)]);
+              }}
+              value={value}
+              ticks={ticks}
+              levels={levels}
+              showTicks
+              fullWidth
+              ref={rangeRef}
+              data-test-subj="rangeSlider__slider"
+            />
+          ) : (
+            <EuiText size="s" data-test-subj="rangeSlider__helpText">
+              {RangeSliderStrings.popover.getNoAvailableDataHelpText()}
+            </EuiText>
+          )}
           {isInvalid && (
             <EuiText size="s" data-test-subj="rangeSlider__helpText">
               {RangeSliderStrings.popover.getNoDataHelpText()}

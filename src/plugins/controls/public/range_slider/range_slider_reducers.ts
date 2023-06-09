@@ -16,9 +16,9 @@ import { RangeSliderReduxState } from './types';
 import { RangeValue } from '../../common/range_slider/types';
 
 export const getDefaultComponentState = (): RangeSliderReduxState['componentState'] => ({
-  min: '',
-  max: '',
   isInvalid: false,
+  min: -Infinity,
+  max: Infinity,
 });
 
 export const rangeSliderReducers = {
