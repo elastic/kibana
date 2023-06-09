@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-export interface LogsSharedConfig {
-  sources?: {
-    default?: {
-      fields?: {
-        message?: string[];
-      };
-    };
-  };
-}
+export interface LogsSharedConfig {}
 
 export const publicConfigKeys = {
   sources: true,

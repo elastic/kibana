@@ -11,7 +11,6 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { CoreSetup, IRouter, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type {
-  LogsSharedConfig,
   LogsSharedPluginRequestHandlerContext,
   LogsSharedServerPluginSetupDeps,
   LogsSharedServerPluginStartDeps,
@@ -36,7 +35,6 @@ export class KibanaFramework {
 
   constructor(
     core: CoreSetup<LogsSharedServerPluginStartDeps>,
-    config: LogsSharedConfig,
     plugins: LogsSharedServerPluginSetupDeps
   ) {
     this.router = core.http.createRouter();

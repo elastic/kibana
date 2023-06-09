@@ -22,7 +22,6 @@ import {
 } from '../../../common/log_views';
 
 export interface LogViewsServiceStartDeps {
-  config: LogViewsStaticConfig;
   dataViews: DataViewsServerPluginStart;
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
@@ -36,9 +35,12 @@ export type LogViewFallbackHandler =
   | ((sourceId: string, options: LogViewFallbackHandlerOptions) => Promise<LogView>)
   | null;
 
+export type SetLogViewsStaticConfig = (config: LogViewsStaticConfig) => void;
+
 export interface LogViewsServiceSetup {
   defineInternalLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): void;
   registerLogViewFallbackHandler: (handler: LogViewFallbackHandler) => void;
+  setLogViewsStaticConfig: SetLogViewsStaticConfig;
 }
 
 export interface LogViewsServiceStart {

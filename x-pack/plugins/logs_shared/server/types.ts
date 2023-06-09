@@ -13,8 +13,6 @@ import {
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
 
-export type { LogsSharedConfig } from '../common/plugin_config_types';
-
 export type LogsSharedPluginCoreSetup = CoreSetup<
   LogsSharedServerPluginStartDeps,
   LogsSharedPluginStart

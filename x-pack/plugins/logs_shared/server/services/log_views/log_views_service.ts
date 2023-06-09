@@ -11,7 +11,13 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { defaultLogViewAttributes, LogView, LogViewAttributes } from '../../../common/log_views';
+import {
+  defaultLogViewAttributes,
+  defaultLogViewsStaticConfig,
+  LogView,
+  LogViewAttributes,
+  LogViewsStaticConfig,
+} from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import {
   LogViewFallbackHandler,
@@ -23,6 +29,7 @@ import {
 export class LogViewsService {
   private internalLogViews: Map<string, LogView> = new Map();
   private logViewFallbackHandler: LogViewFallbackHandler | null = null;
+  private logViewsStaticConfig: LogViewsStaticConfig = defaultLogViewsStaticConfig;
 
   constructor(private readonly logger: Logger) {}
 
@@ -41,16 +48,18 @@ export class LogViewsService {
       registerLogViewFallbackHandler: (handler) => {
         this.logViewFallbackHandler = handler;
       },
+      setLogViewsStaticConfig: (config: LogViewsStaticConfig) => {
+        this.logViewsStaticConfig = config;
+      },
     };
   }
 
   public start({
-    config,
     dataViews,
     elasticsearch,
     savedObjects,
   }: LogViewsServiceStartDeps): LogViewsServiceStart {
-    const { internalLogViews, logger, logViewFallbackHandler } = this;
+    const { internalLogViews, logger, logViewFallbackHandler, logViewsStaticConfig } = this;
 
     return {
       getClient(
@@ -64,7 +73,7 @@ export class LogViewsService {
           savedObjectsClient,
           logViewFallbackHandler,
           internalLogViews,
-          config
+          logViewsStaticConfig
         );
       },
       getScopedClient(request: KibanaRequest) {

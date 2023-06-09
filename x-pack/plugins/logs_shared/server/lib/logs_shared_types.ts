@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
-import { LogsSharedConfig, LogsSharedPluginStartServicesAccessor } from '../types';
+import { LogsSharedPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { LogsSharedLogEntriesDomain } from './domains/log_entries_domain';
 
@@ -17,7 +17,6 @@ export interface LogsSharedDomainLibs {
 
 export interface LogsSharedBackendLibs extends LogsSharedDomainLibs {
   basePath: IBasePath;
-  configuration: LogsSharedConfig;
   framework: KibanaFramework;
   getStartServices: LogsSharedPluginStartServicesAccessor;
   logger: Logger;

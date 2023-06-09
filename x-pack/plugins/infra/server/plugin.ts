@@ -24,7 +24,7 @@ import {
   LOGS_FEATURE_ID,
   METRICS_FEATURE_ID,
 } from '../common/constants';
-import { defaultLogViewsStaticConfig, LogViewAttributes } from '../common/log_views';
+import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -45,13 +45,9 @@ import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
-import { InfraSource, infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
+import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import {
-  inventoryViewSavedObjectType,
-  logViewSavedObjectType,
-  metricsExplorerViewSavedObjectType,
-} from './saved_objects';
+import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
 import { InventoryViewsService } from './services/inventory_views';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
@@ -221,6 +217,10 @@ export class InfraServerPlugin
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
       const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);
       return mapSourceToLogView(sourceConfiguration);
+    });
+    plugins.logsShared.logViews.setLogViewsStaticConfig({
+      messageFields:
+        this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
     });
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [

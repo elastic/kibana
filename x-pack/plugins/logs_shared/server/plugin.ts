@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  PluginInitializerContext,
-  CoreStart,
-  Plugin,
-  Logger,
-  PluginConfigDescriptor,
-} from '@kbn/core/server';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { schema } from '@kbn/config-schema';
 import {
-  LogsSharedConfig,
   LogsSharedPluginCoreSetup,
   LogsSharedPluginSetup,
   LogsSharedPluginStart,
@@ -29,28 +21,7 @@ import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapt
 import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
 import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
-import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { LogEntriesService } from './services/log_entries';
-import { publicConfigKeys } from '../common/plugin_config_types';
-
-export const config: PluginConfigDescriptor<LogsSharedConfig> = {
-  schema: schema.object({
-    sources: schema.maybe(
-      schema.object({
-        default: schema.maybe(
-          schema.object({
-            fields: schema.maybe(
-              schema.object({
-                message: schema.maybe(schema.arrayOf(schema.string())),
-              })
-            ),
-          })
-        ),
-      })
-    ),
-  }),
-  exposeToBrowser: publicConfigKeys,
-};
 
 export class LogsSharedPlugin
   implements
@@ -61,20 +32,18 @@ export class LogsSharedPlugin
       LogsSharedServerPluginStartDeps
     >
 {
-  private readonly config: LogsSharedConfig;
   private readonly logger: Logger;
   private libs!: LogsSharedBackendLibs;
   private logViews: LogViewsService;
 
-  constructor(context: PluginInitializerContext<LogsSharedConfig>) {
-    this.config = context.config.get();
+  constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
 
     this.logViews = new LogViewsService(this.logger.get('logViews'));
   }
 
   public setup(core: LogsSharedPluginCoreSetup, plugins: LogsSharedServerPluginSetupDeps) {
-    const framework = new KibanaFramework(core, this.config, plugins);
+    const framework = new KibanaFramework(core, plugins);
 
     const logViews = this.logViews.setup();
 
@@ -91,7 +60,6 @@ export class LogsSharedPlugin
     this.libs = {
       ...domainLibs,
       basePath: core.http.basePath,
-      configuration: this.config,
       framework,
       getStartServices: () => core.getStartServices(),
       logger: this.logger,
@@ -113,11 +81,6 @@ export class LogsSharedPlugin
       savedObjects: core.savedObjects,
       dataViews: plugins.dataViews,
       elasticsearch: core.elasticsearch,
-      config: {
-        messageFields:
-          this.config.sources?.default?.fields?.message ??
-          defaultLogViewsStaticConfig.messageFields,
-      },
     });
 
     return { logViews };
