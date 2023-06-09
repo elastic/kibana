@@ -31,7 +31,7 @@ describe('MenuItems', () => {
     );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('LinkedRulesMenuItems')).toHaveTextContent('Linked to 1 rules');
-    expect(wrapper.getByTestId('ManageRulesButton')).toBeInTheDocument();
+    expect(wrapper.getByTestId('LinkRulesButton')).toBeInTheDocument();
     expect(wrapper.getByTestId('MenuActionsButtonIcon')).toBeInTheDocument();
   });
   it('should not render linkedRules HeaderMenu component, instead should render a text', () => {
@@ -101,7 +101,7 @@ describe('MenuItems', () => {
       />
     );
     expect(wrapper).toMatchSnapshot();
-    expect(wrapper.queryByTestId('ManageRulesButton')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('LinkRulesButton')).not.toBeInTheDocument();
   });
   it('should call onManageRules', () => {
     const wrapper = render(
@@ -115,7 +115,7 @@ describe('MenuItems', () => {
         onManageRules={onManageRules}
       />
     );
-    fireEvent.click(wrapper.getByTestId('ManageRulesButton'));
+    fireEvent.click(wrapper.getByTestId('LinkRulesButton'));
     expect(onManageRules).toHaveBeenCalled();
   });
   it('should call onExportModalOpen', () => {

@@ -21,9 +21,9 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { RawEventData } from '../../../../common/types/response_actions';
 import { useResponseActionsView } from './response_actions_view';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import type { RawEventData } from './types';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';

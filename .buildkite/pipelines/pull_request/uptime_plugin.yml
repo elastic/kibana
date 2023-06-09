@@ -1,0 +1,15 @@
+steps:
+  - command: .buildkite/scripts/steps/functional/uptime_plugin.sh
+    label: 'Uptime @elastic/synthetics Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    artifact_paths:
+      - 'x-pack/plugins/synthetics/e2e/.journeys/**/*'
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
