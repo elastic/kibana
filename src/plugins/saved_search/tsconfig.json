@@ -25,7 +25,6 @@
     "@kbn/es-query",
     "@kbn/utility-types-jest",
     "@kbn/expressions-plugin",
-    "@kbn/inspector-plugin",
   ],
   "exclude": [
     "target/**/*",

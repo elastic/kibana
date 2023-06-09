@@ -38,7 +38,6 @@
     "@kbn/datemath",
     "@kbn/mapbox-gl",
     "@kbn/config-schema",
-    "@kbn/saved-search-plugin",
   ],
   "exclude": [
     "target/**/*",
