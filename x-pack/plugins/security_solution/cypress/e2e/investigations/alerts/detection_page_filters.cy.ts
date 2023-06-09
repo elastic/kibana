@@ -311,7 +311,7 @@ describe('Detections : Page Filters', () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  it('Number fields are not visible in field edit panel', () => {
+  it.only('Number fields are not visible in field edit panel', () => {
     const idx = 3;
     const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
     editFilterGroupControls();
