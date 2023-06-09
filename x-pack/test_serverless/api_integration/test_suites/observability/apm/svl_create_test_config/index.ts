@@ -11,7 +11,10 @@ import { getApmApiClient } from '@kbn/apm-plugin/server/test_helpers/apm_api_cli
 import { UrlObject, format } from 'url';
 import { CreateTestConfigOptions } from '../../../../../shared/types';
 import { services } from '../../../../services';
-import { bootstrapApmSynthtrace } from '../../../../../../test/apm_api_integration/common/bootstrap_apm_synthtrace';
+import {
+  bootstrapApmSynthtrace,
+  getApmSynthtraceKibanaClient,
+} from '../../../../../../test/apm_api_integration/common/bootstrap_apm_synthtrace';
 import { InheritedFtrProviderContext } from '../../../../../apm_api_integration/common/ftr_provider_context';
 
 interface ApmFtrConfig extends CreateTestConfigOptions {
@@ -33,6 +36,8 @@ export function createTestConfig(options: ApmFtrConfig) {
     const kibanaServer = servers.kibana as UrlObject;
     const kibanaServerUrl = format(kibanaServer);
 
+    const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
+
     return {
       testFiles,
       servers,
@@ -42,16 +47,17 @@ export function createTestConfig(options: ApmFtrConfig) {
           return {
             writeUser: await getApmApiClient({
               kibanaServer,
-              username: ApmUsername.editorUser,
+              username: ApmUsername.elastic,
             }),
           };
         },
         synthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return bootstrapApmSynthtrace(context, kibanaServerUrl);
+          return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
         },
       },
       esTestCluster: {
         ...esTestCluster,
+        // override xpack.security.enabled since it's required for Fleet
         serverArgs: [...esTestCluster.serverArgs, 'xpack.security.enabled=true'],
       },
       kbnTestServer: {

@@ -8,6 +8,7 @@
 import { PrivilegeType } from '../../../common/privilege_type';
 
 export enum ApmUsername {
+  elastic = 'elastic',
   noAccessUser = 'no_access_user',
   viewerUser = 'viewer',
   editorUser = 'editor',

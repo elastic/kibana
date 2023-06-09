@@ -14,7 +14,6 @@ const apmDebugLogger = {
 };
 
 const kibanaConfig = {
-  'xpack.spaces.enabled': 'false',
   'logging.loggers': [apmDebugLogger],
 };
 

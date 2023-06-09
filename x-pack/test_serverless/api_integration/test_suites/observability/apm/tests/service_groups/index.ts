@@ -10,12 +10,6 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  /*
-   * This is a placeholder test to demonstrate usage.
-   * This test case is actually already covered in the `serverless` plugin tests
-   * and should be replaced with something specific to the security project
-   * once it modifies / adds / disables Kibana APIs.
-   */
   describe('Service groups fallback to default space id', function () {
     const apmApiClient = getService('apmApiClient');
 
