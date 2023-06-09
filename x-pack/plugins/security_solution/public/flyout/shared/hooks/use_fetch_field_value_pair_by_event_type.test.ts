@@ -25,8 +25,10 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/hooks/use_selector');
 jest.mock('../../../common/containers/use_global_time');
 
-const field = 'host.name';
-const values = ['values'];
+const highlightedField = {
+  name: 'field',
+  values: ['values'],
+};
 const isActiveTimelines = true;
 const type = {
   eventKind: EventKind.alert,
@@ -54,7 +56,7 @@ describe('useFetchFieldValuePairByEventType', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchFieldValuePairByEventType({ field, values, isActiveTimelines, type })
+      useFetchFieldValuePairByEventType({ highlightedField, isActiveTimelines, type })
     );
 
     expect(hookResult.result.current.loading).toBeTruthy();
@@ -70,7 +72,7 @@ describe('useFetchFieldValuePairByEventType', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchFieldValuePairByEventType({ field, values, isActiveTimelines, type })
+      useFetchFieldValuePairByEventType({ highlightedField, isActiveTimelines, type })
     );
 
     expect(hookResult.result.current.loading).toBeFalsy();
@@ -86,7 +88,7 @@ describe('useFetchFieldValuePairByEventType', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchFieldValuePairByEventType({ field, values, isActiveTimelines, type })
+      useFetchFieldValuePairByEventType({ highlightedField, isActiveTimelines, type })
     );
 
     expect(hookResult.result.current.loading).toBeFalsy();

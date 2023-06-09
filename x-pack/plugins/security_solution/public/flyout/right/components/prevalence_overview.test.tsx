@@ -22,8 +22,10 @@ jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
 jest.mock('../../shared/hooks/use_fetch_unique_by_field');
 jest.mock('../hooks/use_prevalence');
 
-const field = 'field';
-const values = ['value'];
+const highlightedField = {
+  name: 'field',
+  values: ['values'],
+};
 const scopeId = 'scopeId';
 const callbackIfNull = jest.fn();
 
@@ -58,8 +60,7 @@ describe('<PrevalenceOverview />', () => {
       empty: false,
       prevalenceRows: [
         <PrevalenceOverviewRow
-          field={field}
-          values={values}
+          highlightedField={highlightedField}
           scopeId={scopeId}
           callbackIfNull={callbackIfNull}
           data-test-subj={'test'}
@@ -104,8 +105,7 @@ describe('<PrevalenceOverview />', () => {
       empty: false,
       prevalenceRows: [
         <PrevalenceOverviewRow
-          field={field}
-          values={values}
+          highlightedField={highlightedField}
           scopeId={scopeId}
           callbackIfNull={callbackIfNull}
           data-test-subj={'test'}

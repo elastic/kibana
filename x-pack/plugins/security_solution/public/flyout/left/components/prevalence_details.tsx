@@ -36,8 +36,7 @@ import { useLeftPanelContext } from '../context';
 import { EventKind } from '../../shared/hooks/use_fetch_field_value_pair_by_event_type';
 
 interface PrevalenceDetailsTableCell {
-  field: string;
-  values: string[];
+  highlightedField: { name: string; values: string[] };
   scopeId: string;
 }
 
@@ -60,8 +59,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
-        field={data.field}
-        values={data.values}
+        highlightedField={data.highlightedField}
         scopeId={data.scopeId}
         type={{
           eventKind: EventKind.signal,
@@ -76,8 +74,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
-        field={data.field}
-        values={data.values}
+        highlightedField={data.highlightedField}
         scopeId={data.scopeId}
         type={{
           eventKind: EventKind.signal,
@@ -92,8 +89,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
-        field={data.field}
-        values={data.values}
+        highlightedField={data.highlightedField}
         scopeId={data.scopeId}
         aggregationField={'host.name'}
       />
@@ -105,8 +101,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
-        field={data.field}
-        values={data.values}
+        highlightedField={data.highlightedField}
         scopeId={data.scopeId}
         aggregationField={'user.name'}
       />
@@ -130,8 +125,10 @@ export const PrevalenceDetails: React.FC = () => {
     });
 
     const getCellRenderFields = (summaryRow: AlertSummaryRow): PrevalenceDetailsTableCell => ({
-      field: summaryRow.description.data.field,
-      values: summaryRow.description.values || [],
+      highlightedField: {
+        name: summaryRow.description.data.field,
+        values: summaryRow.description.values || [],
+      },
       scopeId,
     });
 

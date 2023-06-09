@@ -14,8 +14,10 @@ import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_fi
 jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
 jest.mock('../../shared/hooks/use_fetch_unique_by_field');
 
-const field = 'field';
-const values = ['values'];
+const highlightedField = {
+  name: 'field',
+  values: ['values'],
+};
 const scopeId = 'scopeId';
 const dataTestSubj = 'test';
 const iconDataTestSubj = 'testIcon';
@@ -38,17 +40,18 @@ describe('<PrevalenceOverviewRow />', () => {
 
     const { getByTestId, getAllByText, queryByTestId } = render(
       <PrevalenceOverviewRow
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         callbackIfNull={() => {}}
         data-test-subj={dataTestSubj}
       />
     );
 
+    const { name, values } = highlightedField;
+
     expect(getByTestId(iconDataTestSubj)).toBeInTheDocument();
     expect(getByTestId(valueDataTestSubj)).toBeInTheDocument();
-    expect(getAllByText(`${field}, ${values} is uncommon`)).toHaveLength(1);
+    expect(getAllByText(`${name}, ${values} is uncommon`)).toHaveLength(1);
     expect(queryByTestId(colorDataTestSubj)).not.toBeInTheDocument();
   });
 
@@ -67,8 +70,7 @@ describe('<PrevalenceOverviewRow />', () => {
 
     const { queryAllByAltText } = render(
       <PrevalenceOverviewRow
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         callbackIfNull={callbackIfNull}
         data-test-subj={dataTestSubj}
@@ -94,8 +96,7 @@ describe('<PrevalenceOverviewRow />', () => {
 
     const { queryAllByAltText } = render(
       <PrevalenceOverviewRow
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         callbackIfNull={callbackIfNull}
         data-test-subj={dataTestSubj}
@@ -120,8 +121,7 @@ describe('<PrevalenceOverviewRow />', () => {
 
     const { getByTestId } = render(
       <PrevalenceOverviewRow
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         callbackIfNull={() => {}}
         data-test-subj={dataTestSubj}

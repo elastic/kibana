@@ -22,8 +22,10 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/hooks/use_selector');
 jest.mock('../../../common/containers/use_global_time');
 
-const field = 'host.name';
-const values = ['values'];
+const highlightedField = {
+  name: 'field',
+  values: ['values'],
+};
 const isActiveTimelines = true;
 const aggregationField = 'aggregationField';
 
@@ -48,7 +50,11 @@ describe('useFetchFieldValuePairWithAggregation', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchFieldValuePairWithAggregation({ field, values, isActiveTimelines, aggregationField })
+      useFetchFieldValuePairWithAggregation({
+        highlightedField,
+        isActiveTimelines,
+        aggregationField,
+      })
     );
 
     expect(hookResult.result.current.loading).toBeTruthy();
@@ -64,7 +70,11 @@ describe('useFetchFieldValuePairWithAggregation', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchFieldValuePairWithAggregation({ field, values, isActiveTimelines, aggregationField })
+      useFetchFieldValuePairWithAggregation({
+        highlightedField,
+        isActiveTimelines,
+        aggregationField,
+      })
     );
 
     expect(hookResult.result.current.loading).toBeFalsy();
@@ -80,7 +90,11 @@ describe('useFetchFieldValuePairWithAggregation', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchFieldValuePairWithAggregation({ field, values, isActiveTimelines, aggregationField })
+      useFetchFieldValuePairWithAggregation({
+        highlightedField,
+        isActiveTimelines,
+        aggregationField,
+      })
     );
 
     expect(hookResult.result.current.loading).toBeFalsy();

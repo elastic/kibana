@@ -18,13 +18,9 @@ const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is belo
 
 export interface PrevalenceOverviewRowProps {
   /**
-   * Highlighted field
-   */
-  field: string;
-  /**
-   * Highlighted field value
-   */
-  values: string[];
+   * The highlighted field name and values
+   * */
+  highlightedField: { name: string; values: string[] };
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -45,8 +41,7 @@ export interface PrevalenceOverviewRowProps {
  * the row will render null.
  */
 export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
-  field,
-  values,
+  highlightedField,
   scopeId,
   callbackIfNull,
   'data-test-subj': dataTestSubj,
@@ -58,8 +53,7 @@ export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
     error: hostsError,
     count: hostsCount,
   } = useFetchFieldValuePairWithAggregation({
-    field,
-    values,
+    highlightedField,
     isActiveTimelines,
     aggregationField: HOST_FIELD,
   });
@@ -70,11 +64,13 @@ export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
     count: uniqueHostsCount,
   } = useFetchUniqueByField({ field: HOST_FIELD });
 
+  const { name, values } = highlightedField;
+
   // prevalence is number of host(s) where the field/value pair was found divided by the total number of hosts in the environment
   const prevalence = hostsCount / uniqueHostsCount;
   const loading = hostsLoading || uniqueHostsLoading;
   const error = hostsError || uniqueHostsError;
-  const text = `${field}, ${values} ${PREVALENCE_ROW_UNCOMMON}`;
+  const text = `${name}, ${values} ${PREVALENCE_ROW_UNCOMMON}`;
 
   // we do not want to render the row is the prevalence is Infinite, 0 or above the decided threshold
   const shouldNotRender =

@@ -19,13 +19,9 @@ import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_fi
 
 export interface PrevalenceDetailsPrevalenceCellProps {
   /**
-   * The field name
+   * The highlighted field name and values
    * */
-  field: string;
-  /**
-   * The field values
-   */
-  values: string[];
+  highlightedField: { name: string; values: string[] };
   /**
    * The scope id
    */
@@ -41,8 +37,7 @@ export interface PrevalenceDetailsPrevalenceCellProps {
  * which displays the prevalence percentage for host.name and user.name fields.
  */
 export const PrevalenceDetailsPrevalenceCell: VFC<PrevalenceDetailsPrevalenceCellProps> = ({
-  field,
-  values,
+  highlightedField,
   scopeId,
   aggregationField,
 }) => {
@@ -51,8 +46,7 @@ export const PrevalenceDetailsPrevalenceCell: VFC<PrevalenceDetailsPrevalenceCel
     error: aggregationError,
     count: aggregationCount,
   } = useFetchFieldValuePairWithAggregation({
-    field,
-    values,
+    highlightedField,
     isActiveTimelines: scopeId === TimelineId.active,
     aggregationField,
   });

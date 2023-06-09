@@ -36,13 +36,9 @@ export interface EventType {
 
 export interface UseFetchFieldValuePairByEventTypeParams {
   /**
-   * The field name
-   */
-  field: string;
-  /**
-   * The field values
-   */
-  values: string[];
+   * The highlighted field name and values
+   * */
+  highlightedField: { name: string; values: string[] };
   /**
    * True is the current timeline is active ('timeline-1')
    */
@@ -73,8 +69,7 @@ export interface UseFetchFieldValuePairByEventTypeResult {
  * Hook to retrieve all the unique hosts in the environment that have the field/value pair, using ReactQuery.
  */
 export const useFetchFieldValuePairByEventType = ({
-  field,
-  values,
+  highlightedField,
   isActiveTimelines,
   type,
 }: UseFetchFieldValuePairByEventTypeParams): UseFetchFieldValuePairByEventTypeResult => {
@@ -90,10 +85,12 @@ export const useFetchFieldValuePairByEventType = ({
   const globalTime = useGlobalTime();
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
 
-  const req: IEsSearchRequest = buildSearchRequest(field, values, from, to, type);
+  const { name, values } = highlightedField;
+
+  const req: IEsSearchRequest = buildSearchRequest(name, values, from, to, type);
 
   const { data, isLoading, isError } = useQuery(
-    [QUERY_KEY, field, values, from, to, type],
+    [QUERY_KEY, name, values, from, to, type],
     () => createFetchData<RawResponse>(searchService, req),
     {
       select: (res) => res.hits.total,

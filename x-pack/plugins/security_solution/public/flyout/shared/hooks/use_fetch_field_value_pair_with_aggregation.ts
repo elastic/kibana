@@ -20,13 +20,9 @@ const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 
 export interface UseFetchFieldValuePairWithAggregationParams {
   /**
-   * The field name
-   */
-  field: string;
-  /**
-   * The field values
-   */
-  values: string[];
+   * The highlighted field name and values
+   * */
+  highlightedField: { name: string; values: string[] };
   /**
    *
    */
@@ -58,8 +54,7 @@ export interface UseFetchFieldValuePairWithAggregationResult {
  * Foe example, passing 'host.name' via the aggregationField props will return the number of unique hosts in the environment that have the field/value pair.
  */
 export const useFetchFieldValuePairWithAggregation = ({
-  field,
-  values,
+  highlightedField,
   isActiveTimelines,
   aggregationField,
 }: UseFetchFieldValuePairWithAggregationParams): UseFetchFieldValuePairWithAggregationResult => {
@@ -75,10 +70,12 @@ export const useFetchFieldValuePairWithAggregation = ({
   const globalTime = useGlobalTime();
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
 
-  const searchRequest = buildSearchRequest(field, values, from, to, aggregationField);
+  const { name, values } = highlightedField;
+
+  const searchRequest = buildSearchRequest(name, values, from, to, aggregationField);
 
   const { data, isLoading, isError } = useQuery(
-    [QUERY_KEY, field, values, from, to, aggregationField],
+    [QUERY_KEY, name, values, from, to, aggregationField],
     () => createFetchData<RawAggregatedDataResponse>(searchService, searchRequest),
     {
       select: (res) => res.aggregations[AGG_KEY].buckets.length,

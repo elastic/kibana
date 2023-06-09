@@ -19,8 +19,10 @@ import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_fi
 jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
 jest.mock('../../shared/hooks/use_fetch_unique_by_field');
 
-const field = 'field';
-const values = ['values'];
+const highlightedField = {
+  name: 'field',
+  values: ['values'],
+};
 const scopeId = 'scopeId';
 const aggregationField = 'aggregationField';
 
@@ -39,8 +41,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
 
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         aggregationField={aggregationField}
       />
@@ -63,8 +64,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
 
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         aggregationField={aggregationField}
       />
@@ -87,8 +87,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
 
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         aggregationField={aggregationField}
       />
@@ -111,8 +110,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
 
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         aggregationField={aggregationField}
       />
@@ -135,8 +133,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
 
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         aggregationField={aggregationField}
       />
@@ -159,8 +156,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
 
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
-        field={field}
-        values={values}
+        highlightedField={highlightedField}
         scopeId={scopeId}
         aggregationField={aggregationField}
       />

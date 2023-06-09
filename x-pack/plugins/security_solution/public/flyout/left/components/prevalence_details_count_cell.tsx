@@ -19,13 +19,9 @@ import { TimelineId } from '../../../../common/types';
 
 export interface PrevalenceDetailsCountCellProps {
   /**
-   * The field name
+   * The highlighted field name and values
    * */
-  field: string;
-  /**
-   * The field values
-   */
-  values: string[];
+  highlightedField: { name: string; values: string[] };
   /**
    * The scope id
    */
@@ -44,14 +40,12 @@ export interface PrevalenceDetailsCountCellProps {
  * For the alert columns, type should have "signal" for its eventKind property, and include should be true.
  */
 export const PrevalenceDetailsCountCell: VFC<PrevalenceDetailsCountCellProps> = ({
-  field,
-  values,
+  highlightedField,
   scopeId,
   type,
 }) => {
   const { loading, error, count } = useFetchFieldValuePairByEventType({
-    field,
-    values,
+    highlightedField,
     isActiveTimelines: scopeId === TimelineId.active,
     type,
   });
