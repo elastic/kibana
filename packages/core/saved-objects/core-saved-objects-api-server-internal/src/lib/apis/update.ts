@@ -179,3 +179,13 @@ export const performUpdate = async <T>(
     attributes
   );
 };
+/**
+updateResult:
+  Omit<SavedObject,
+    "created_at",
+    "migrationVersion",
+    "coreMigrationVersion",
+    "typeMigrationVersion",
+    "managed",
+  > && { 'originId' }
+*/

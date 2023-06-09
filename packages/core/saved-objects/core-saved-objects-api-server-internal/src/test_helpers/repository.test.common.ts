@@ -702,6 +702,9 @@ export const bulkUpdateSuccess = async (
   return result;
 };
 
+export const expectBWCUpdateResult = ({
+
+})
 export const expectUpdateResult = ({
   type,
   id,

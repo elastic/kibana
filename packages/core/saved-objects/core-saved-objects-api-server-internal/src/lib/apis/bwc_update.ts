@@ -12,10 +12,7 @@ import {
   type SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
-import {
-  decodeRequestVersion,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
@@ -197,6 +194,15 @@ export const performBWCUpdate = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
   }
   // CREATE THE RESPONSE
+  const upsertUpdateResult = encryptionHelper.optionallyDecryptAndRedactSingleResult(
+    serializer.rawToSavedObject<T>(
+      { ...rawUpsert!, ...createBody },
+      { migrationVersionCompatibility }
+    ),
+    authorizationResult?.typeMap,
+    attributes
+  );
+  return upsertUpdateResult;
 
   // FINISHED UPSERT CASE
 
@@ -211,7 +217,7 @@ export const performBWCUpdate = async <T>(
 
   logger.info('update requested: original doc found');
 
-  const document = getSavedObjectFromSource<T>(registry, type, id, rawDoc, {
+  const document = getSavedObjectFromSource<T>(registry, type, id, rawDoc!, {
     migrationVersionCompatibility,
   });
   try {
@@ -273,71 +279,20 @@ export const performBWCUpdate = async <T>(
   }
 
   // CREATE THE RESPONSE
-
-  // FINISHED "PARTIAL UPDATE" CASE (indexing the full doc from client-side update)
-  /* =================  ORIGINAL CODE ================= */
-  // return (
-  //   rawUpsert ??
-  //   encryptionHelper.optionallyDecryptAndRedactSingleResult(
-  //     serializerHelper.rawToSavedObject<T>(
-  //       { ...rawUpsert, ...createBody },
-  //       { migrationVersionCompatibility }
-  //     ),
-  //     authorizationResult?.typeMap,
-  //     attributes
-  //   )
-  // );
-
-  // const updateCallBody = await client
-  //   .update<unknown, unknown, SavedObjectsRawDocSource>({
-  //     id: serializer.generateRawId(namespace, type, id),
-  //     index: commonHelper.getIndexForType(type),
-  //     ...getExpectedVersionProperties(version),
-  //     refresh,
-  //     retry_on_conflict: retryOnConflict,
-  //     body: {
-  //       doc,
-  //       ...(rawUpsert && { upsert: rawUpsert._source }),
-  //     },
-  //     _source_includes: ['namespace', 'namespaces', 'originId'],
-  //     require_alias: true,
-  //   })
-  //   .catch((err) => {
-  //     if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
-  //       throw err;
-  //     }
-  //     if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-  //       // see "404s from missing index" above
-  //       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-  //     }
-  //     throw err;
-  //   });
-
-  // old after update call
-  // const { originId } = updateCallBody.get?._source ?? {};
-  // let namespaces: string[] = [];
-  // if (!registry.isNamespaceAgnostic(type)) {
-  //   namespaces = updateCallBody.get?._source.namespaces ?? [
-  //     SavedObjectsUtils.namespaceIdToString(updateCallBody.get?._source.namespace),
-  //   ];
-  // }
-  // NEXT: construct the return stuff SavedObjectsUpdateResponse somehow from the API response
-
-  /* =================  ORIGINAL CREATE RESPONSE CODE ================= */
-  const result = {
-    id: createBody?._id,
-    type,
-    updated_at: time,
-    version: encodeHitVersion(createBody),
-    namespaces: preflightCheckNamespacesResult?.savedObjectNamespaces,
-    ...(rawUpsert!._source.originId && { originId: rawUpsert!._source.originId }),
-    references,
-    attributes,
-  } as SavedObject<T>;
-
-  return encryptionHelper.optionallyDecryptAndRedactSingleResult(
-    result,
+  const partialUpdateResult = encryptionHelper.optionallyDecryptAndRedactSingleResult(
+    serializer.rawToSavedObject<T>({ ...raw, ...indexBody }, { migrationVersionCompatibility }),
     authorizationResult?.typeMap,
     attributes
   );
+  return partialUpdateResult;
+
+  // FINISHED "PARTIAL UPDATE" CASE (indexing the full doc from client-side update)
 };
+
+/**
+I can combine final result generation with:
+combined = upsert ? rawUpsert : raw
+responseBody = upsert ? createBody : indexBody
+
+serializer.rawToSavedObject<T>({...combined, responseBody})
+ */

@@ -76,7 +76,7 @@ import {
   performFind,
   performBulkGet,
   performGet,
-  performUpdate,
+  // performUpdate,
   performBulkUpdate,
   performRemoveReferencesTo,
   performOpenPointInTime,
@@ -85,6 +85,7 @@ import {
   performResolve,
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
+  performBWCUpdate,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
 
@@ -405,7 +406,16 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
-    return await performUpdate(
+    // return await performUpdate(
+    //   {
+    //     type,
+    //     id,
+    //     attributes,
+    //     options,
+    //   },
+    //   this.apiExecutionContext
+    // );
+    return await performBWCUpdate(
       {
         type,
         id,
