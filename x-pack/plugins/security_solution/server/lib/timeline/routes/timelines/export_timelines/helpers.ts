@@ -14,7 +14,7 @@ import type {
   ExportTimelineNotFoundError,
 } from '../../../../../../common/types/timeline/api';
 import type { Note } from '../../../../../../common/types/timeline/note/api';
-import type { PinnedEventSavedObject } from '../../../../../../common/types/timeline/pinned_event';
+import type { PinnedEvent } from '../../../../../../common/types/timeline/pinned_event/api';
 
 import type { FrameworkRequest } from '../../../../framework';
 import * as noteLib from '../../../saved_object/notes';
@@ -38,9 +38,7 @@ const getGlobalEventNotesByTimelineId = (currentNotes: Note[]): ExportedNotes =>
   }, initialNotes);
 };
 
-const getPinnedEventsIdsByTimelineId = (
-  currentPinnedEvents: PinnedEventSavedObject[]
-): string[] => {
+const getPinnedEventsIdsByTimelineId = (currentPinnedEvents: PinnedEvent[]): string[] => {
   return currentPinnedEvents.map((event) => event.eventId) ?? [];
 };
 
@@ -62,7 +60,7 @@ const getTimelinesFromObjects = async (
 
   const myNotes = notes.reduce<Note[]>((acc, note) => [...acc, ...note], []);
 
-  const myPinnedEventIds = pinnedEvents.reduce<PinnedEventSavedObject[]>(
+  const myPinnedEventIds = pinnedEvents.reduce<PinnedEvent[]>(
     (acc, pinnedEventId) => [...acc, ...pinnedEventId],
     []
   );

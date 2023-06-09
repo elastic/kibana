@@ -16,7 +16,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { Note } from '../../../../../common/types/timeline/note/api';
-import type { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
+import type { PinnedEvent } from '../../../../../common/types/timeline/pinned_event/api';
 import type {
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
@@ -685,7 +685,7 @@ export const convertStringToBase64 = (text: string): string => Buffer.from(text)
 
 export const timelineWithReduxProperties = (
   notes: Note[],
-  pinnedEvents: PinnedEventSavedObject[],
+  pinnedEvents: PinnedEvent[],
   timeline: TimelineSavedObject,
   userName: string
 ): TimelineSavedObject => ({

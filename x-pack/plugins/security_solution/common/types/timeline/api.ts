@@ -12,8 +12,8 @@ import { stringEnum, unionWithNullType } from '../../utility_types';
 
 import type { Maybe } from '../../search_strategy';
 import { Direction } from '../../search_strategy';
-import type { PinnedEvent } from './pinned_event';
-import { PinnedEventToReturnSavedObjectRuntimeType } from './pinned_event';
+import type { PinnedEvent } from './pinned_event/api';
+import { PinnedEventRuntimeType } from './pinned_event/api';
 import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
@@ -324,7 +324,7 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
     noteIds: runtimeTypes.array(runtimeTypes.string),
     notes: runtimeTypes.array(NoteRuntimeType),
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
-    pinnedEventsSaveObject: runtimeTypes.array(PinnedEventToReturnSavedObjectRuntimeType),
+    pinnedEventsSaveObject: runtimeTypes.array(PinnedEventRuntimeType),
   }),
 ]);
 
