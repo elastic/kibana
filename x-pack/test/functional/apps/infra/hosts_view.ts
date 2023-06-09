@@ -388,7 +388,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         [
           { metric: 'hostsCount', value: '6' },
-          { metric: 'cpu', value: '0.8%' },
+          { metric: 'cpu', value: '1%' },
           { metric: 'memory', value: '16.81%' },
           { metric: 'tx', value: 'N/A' },
           { metric: 'rx', value: 'N/A' },
