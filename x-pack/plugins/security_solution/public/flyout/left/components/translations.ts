@@ -92,3 +92,45 @@ export const RESPONSE_TITLE = i18n.translate('xpack.securitySolution.flyout.resp
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
   defaultMessage: 'There are no response actions defined for this event.',
 });
+
+export const CORRELATIONS_TIMESTAMP_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.timestampColumnTitle',
+  {
+    defaultMessage: 'Timestamp',
+  }
+);
+
+export const CORRELATIONS_RULE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.ruleColumnTitle',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const CORRELATIONS_REASON_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.reasonColumnTitle',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
+export const CORRELATIONS_SEVERITY_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.severityColumnTitle',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const CORRELATIONS_CASE_NAME_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.caseNameColumnTitle',
+  {
+    defaultMessage: 'Case Name',
+  }
+);
+
+export const CORRELATIONS_CASE_STATUS_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.caseStatusColumnTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);

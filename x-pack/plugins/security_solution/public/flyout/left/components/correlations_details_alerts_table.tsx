@@ -13,30 +13,31 @@ import { isRight } from 'fp-ts/lib/Either';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
+import * as i18n from './translations';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export const columns = [
   {
     field: '@timestamp',
-    name: 'Timestamp',
+    name: i18n.CORRELATIONS_TIMESTAMP_COLUMN_TITLE,
     truncateText: true,
     dataType: 'date' as const,
     render: (value: string) => formatDate(value, TIMESTAMP_DATE_FORMAT),
   },
   {
     field: 'kibana.alert.rule.name',
-    name: 'Rule',
+    name: i18n.CORRELATIONS_RULE_COLUMN_TITLE,
     truncateText: true,
   },
   {
     field: 'kibana.alert.reason',
-    name: 'Reason',
+    name: i18n.CORRELATIONS_REASON_COLUMN_TITLE,
     truncateText: true,
   },
   {
     field: 'kibana.alert.severity',
-    name: 'Severity',
+    name: i18n.CORRELATIONS_SEVERITY_COLUMN_TITLE,
     truncateText: true,
     render: (value: string) => {
       const decodedSeverity = Severity.decode(value);

@@ -30,6 +30,7 @@ import {
   CORRELATIONS_DETAILS_BY_SOURCE_TEST_ID,
   CORRELATIONS_DETAILS_ERROR_TEST_ID,
 } from './test_ids';
+import { CorrelationsCasesTable } from './correlations_cases_table';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -62,6 +63,7 @@ export const CorrelationsDetails: React.FC = () => {
     ancestryAlertsIds,
     alertsBySessionIds,
     sameSourceAlertsIds,
+    cases,
   } = useCorrelations({
     eventId,
     dataAsNestedObject,
@@ -130,6 +132,12 @@ export const CorrelationsDetails: React.FC = () => {
           data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_TEST_ID}
           alertIds={alertsBySessionIds}
         />
+      </EntityPanel>
+
+      <EuiSpacer />
+
+      <EntityPanel title={`${cases.length} related cases`} iconType={'warning'} expandable={true}>
+        <CorrelationsCasesTable cases={cases} />
       </EntityPanel>
     </>
   );
