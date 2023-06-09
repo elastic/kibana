@@ -33,10 +33,10 @@ export const RangeSliderButton = ({
   return (
     <EuiFormControlLayoutDelimited
       fullWidth
+      onClick={onClick}
       isLoading={isLoading}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${id}`}
-      onClick={onClick}
       startControl={
         <EuiFieldNumber
           controlOnly

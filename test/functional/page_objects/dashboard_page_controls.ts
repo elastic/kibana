@@ -625,10 +625,7 @@ export class DashboardPageControls extends FtrService {
       attribute
     );
   }
-  public async rangeSliderGetDualRangeAttribute(controlId: string, attribute: string) {
-    this.log.debug(`Getting range slider dual range ${attribute} for ${controlId}`);
-    return await this.testSubjects.getAttribute(`rangeSlider__slider`, attribute);
-  }
+
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
     await this.testSubjects.setValue(
@@ -666,8 +663,10 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async rangeSliderWaitForLoading() {
-    await this.testSubjects.waitForDeleted('range-slider-loading-spinner');
+  public async rangeSliderWaitForLoading(controlId: string) {
+    await this.find.waitForDeletedByCssSelector(
+      `[data-test-subj="range-slider-control-${controlId}"] .euiLoadingSpinner`
+    );
   }
 
   public async rangeSliderClearSelection(controlId: string) {

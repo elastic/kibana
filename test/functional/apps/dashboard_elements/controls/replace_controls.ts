@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const replaceWithRangeSlider = async (controlId: string) => {
     await changeFieldType(controlId, 'weightLbs', RANGE_SLIDER_CONTROL);
     await retry.try(async () => {
-      await dashboardControls.rangeSliderWaitForLoading();
+      await dashboardControls.rangeSliderWaitForLoading(controlId);
       await dashboardControls.verifyControlType(controlId, 'range-slider-control');
     });
   };
@@ -89,8 +89,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataViewTitle: 'animals-*',
           fieldName: 'weightLbs',
         });
-        await dashboardControls.rangeSliderWaitForLoading();
         controlId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderWaitForLoading(controlId);
       });
 
       afterEach(async () => {

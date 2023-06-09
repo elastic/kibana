@@ -63,7 +63,12 @@ interface RangeSliderDataFetchProps {
 }
 
 const fieldMissingError = (fieldName: string) =>
-  new Error(`field ${fieldName} not found in index pattern`);
+  new Error(
+    i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
+      defaultMessage: 'Could not locate field: {fieldName}',
+      values: { fieldName },
+    })
+  );
 
 export const RangeSliderControlContext = createContext<RangeSliderEmbeddable | null>(null);
 export const useRangeSlider = (): RangeSliderEmbeddable => {
@@ -139,19 +144,18 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.setInitializationFinished();
     }
 
-    this.runRangeSliderQuery()
-      .catch((e) => {
-        batch(() => {
-          this.dispatch.setLoading(false);
-          this.dispatch.setErrorMessage(e.message);
-        });
-      })
-      .then(async () => {
-        if (initialValue) {
-          this.setInitializationFinished();
-        }
-        this.setupSubscriptions();
+    try {
+      await this.runRangeSliderQuery();
+      if (initialValue) {
+        this.setInitializationFinished();
+      }
+    } catch (e) {
+      batch(() => {
+        this.dispatch.setLoading(false);
+        this.dispatch.setErrorMessage(e.message);
       });
+    }
+    this.setupSubscriptions();
   };
 
   private setupSubscriptions = () => {
@@ -172,15 +176,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     // fetch available min/max when input changes
     this.subscriptions.add(
-      dataFetchPipe.subscribe(async () =>
-        this.runRangeSliderQuery()
-          .catch((e) => {
-            this.dispatch.setErrorMessage(e.message);
-          })
-          .then(async () => {
-            await this.buildFilter();
-          })
-      )
+      dataFetchPipe.subscribe(async () => {
+        try {
+          await this.runRangeSliderQuery();
+          await this.buildFilter();
+        } catch (e) {
+          this.dispatch.setErrorMessage(e.message);
+        }
+      })
     );
 
     // write to unpublished changes when value changes
@@ -202,7 +205,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   public async publishNewRange() {
     const { range } = this.unpublishedChanges.getValue();
-    if (!range) return; // this means there are no unpublished changes to publish
+    if (!range || this.getState().componentState.error) return;
 
     const [newLowerBound, newUpperBound] = range;
     const updatedLowerBound =
@@ -243,12 +246,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       try {
         this.field = this.dataView.getFieldByName(fieldName);
         if (this.field === undefined) {
-          throw new Error(
-            i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
-              defaultMessage: 'Could not locate field: {fieldName}',
-              values: { fieldName },
-            })
-          );
+          throw fieldMissingError(fieldName);
         }
 
         this.dispatch.setField(this.field?.toSpec());
@@ -312,8 +310,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       throw e;
     });
     this.dispatch.setMinMax({
-      min: `${min ?? ''}`,
-      max: `${max ?? ''}`,
+      min: `${min ?? '-Infinity'}`,
+      max: `${max ?? 'Infinity'}`,
     });
   };
 
