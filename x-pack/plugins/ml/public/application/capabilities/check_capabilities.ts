@@ -6,16 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, combineLatest, timer, from, type Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, type Subscription, timer } from 'rxjs';
 import { distinctUntilChanged, retry, switchMap, tap } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
+import { useMemo, useRef } from 'react';
 import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
 import {
-  MlCapabilities,
   getDefaultCapabilities,
+  MlCapabilities,
   MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
@@ -96,14 +97,19 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
     },
   } = useMlKibana();
 
+  // Memoize argument, in case it's an array to preserve the reference.
+  const requestedCapabilities = useRef(capability);
+
   const capabilities = useObservable(
     mlCapabilitiesService.capabilities$,
     mlCapabilitiesService.getCapabilities()
   );
 
-  return Array.isArray(capability)
-    ? capability.map((c) => capabilities[c])
-    : capabilities[capability];
+  return useMemo(() => {
+    return Array.isArray(requestedCapabilities.current)
+      ? requestedCapabilities.current.map((c) => capabilities[c])
+      : capabilities[requestedCapabilities.current];
+  }, [capabilities]);
 }
 
 export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
