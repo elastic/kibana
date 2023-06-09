@@ -77,7 +77,7 @@ export const SearchIndexOverview: React.FC = () => {
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.title"
+                  id="xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.content"
                   defaultMessage="To continue using this connector, you'll need to convert  it to a {link}, that you'll self-manage on your own infrastructure."
                   values={{
                     link: (
