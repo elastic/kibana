@@ -73,7 +73,7 @@ export const GroupEditorFlyout = ({
   return (
     <EuiFlyout onClose={onClose} size={'s'}>
       <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
-        <EuiTitle>
+        <EuiTitle size="s">
           <h2 id={flyoutHeadingId}>
             <FormattedMessage
               id="eventAnnotation.groupEditorFlyout.title"

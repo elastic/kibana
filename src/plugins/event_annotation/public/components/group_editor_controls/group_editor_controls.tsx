@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSelect, EuiText, EuiTextArea } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+  EuiText,
+  EuiTextArea,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -78,8 +86,8 @@ export const GroupEditorControls = ({
 
   return !selectedAnnotation ? (
     <>
-      <EuiText
-        size="s"
+      <EuiTitle
+        size="xs"
         css={css`
           margin-bottom: ${euiThemeVars.euiSize};
         `}
@@ -87,7 +95,7 @@ export const GroupEditorControls = ({
         <h4>
           <FormattedMessage id="eventAnnotation.groupEditor.details" defaultMessage="Details" />
         </h4>
-      </EuiText>
+      </EuiTitle>
       <EuiForm>
         <EuiFormRow
           label={i18n.translate('eventAnnotation.groupEditor.title', {
@@ -109,6 +117,14 @@ export const GroupEditorControls = ({
           label={i18n.translate('eventAnnotation.groupEditor.description', {
             defaultMessage: 'Description',
           })}
+          labelAppend={
+            <EuiText color="subdued" size="xs">
+              <FormattedMessage
+                id="eventAnnotation.groupEditor.optional"
+                defaultMessage="Optional"
+              />
+            </EuiText>
+          }
         >
           <EuiTextArea
             data-test-subj="annotationGroupDescription"
@@ -124,6 +140,7 @@ export const GroupEditorControls = ({
         <EuiFormRow>
           <TagSelector
             initialSelection={group.tags}
+            markOptional
             onTagsSelected={(tags: string[]) =>
               update({
                 ...group,

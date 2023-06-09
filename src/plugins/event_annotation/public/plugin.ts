@@ -64,7 +64,7 @@ export class EventAnnotationPlugin
 
     dependencies.visualizations.listingViewRegistry.add({
       title: i18n.translate('eventAnnotation.listingViewTitle', {
-        defaultMessage: 'Annotation Groups',
+        defaultMessage: 'Annotation groups',
       }),
       id: ANNOTATIONS_LISTING_VIEW_ID,
       getTableList: async (props) => {

@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import {
   TabbedTableListView,
   TableListTabParentProps,
   TableListTab,
 } from './tabbed_table_list_view';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiTab } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 
 // Mock the necessary props for the component
@@ -22,16 +22,20 @@ const title = 'Test Title';
 const description = 'Test Description';
 const headingId = 'test-heading-id';
 const children = <div>Test Children</div>;
+
+const tableList1 = 'Test Table List 1';
+const tableList2 = 'Test Table List 2';
+
 const tabs: TableListTab[] = [
   {
     title: 'Tab 1',
     id: 'tab-1',
-    getTableList: async (props: TableListTabParentProps) => <div>Test Table List 1</div>,
+    getTableList: async (props: TableListTabParentProps) => <div>{tableList1}</div>,
   },
   {
     title: 'Tab 2',
     id: 'tab-2',
-    getTableList: async (props: TableListTabParentProps) => <div>Test Table List 2</div>,
+    getTableList: async (props: TableListTabParentProps) => <div>{tableList2}</div>,
   },
 ];
 
@@ -85,13 +89,14 @@ describe('TabbedTableListView', () => {
         changeActiveTab={() => {}}
       />
     );
-    expect(wrapper.find(EuiTab).length).toEqual(tabs.length);
+
+    expect(wrapper.find(EuiPageTemplate.Header).prop('tabs')).toHaveLength(2);
   });
 
-  it('should switch tabs when a tab is clicked', () => {
+  it('should switch tabs when props change', async () => {
     const changeActiveTab = jest.fn();
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <TabbedTableListView
         title={title}
         description={description}
@@ -103,16 +108,9 @@ describe('TabbedTableListView', () => {
       />
     );
 
-    const getTab = (index: number) => wrapper.find(EuiTab).at(index);
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(getTab(0).prop('isSelected')).toBeTruthy();
-    expect(getTab(1).prop('isSelected')).toBeFalsy();
-
-    act(() => {
-      getTab(1).simulate('click');
-    });
-
-    expect(changeActiveTab).toHaveBeenCalledWith('tab-2');
+    expect(wrapper.find(EuiPageTemplate.Section).text()).toContain(tableList1);
 
     act(() => {
       wrapper.setProps({
@@ -120,7 +118,8 @@ describe('TabbedTableListView', () => {
       });
     });
 
-    expect(getTab(0).prop('isSelected')).toBeFalsy();
-    expect(getTab(1).prop('isSelected')).toBeTruthy();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(wrapper.find(EuiPageTemplate.Section).text()).toContain(tableList2);
   });
 });
