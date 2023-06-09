@@ -17,13 +17,15 @@ import {
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { SecurityProductTypes } from '../../../common/config';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Props {}
+interface Props {
+  productTypes: SecurityProductTypes;
+}
 
 const icons = ['Kibana', 'Kibana', 'Kibana'];
 
-export const GetStartedComponent: React.FC<Props> = ({}) => {
+export const GetStartedComponent: React.FC<Props> = ({ productTypes }) => {
   const cardNodes = useMemo(
     () =>
       icons.map(function (item, index) {
@@ -47,7 +49,12 @@ export const GetStartedComponent: React.FC<Props> = ({}) => {
             <EuiTitle size="xs">
               <h3>
                 {i18n.translate('xpack.serverlessSecurity.getStarted.subTitle', {
-                  defaultMessage: `Let’s  get started`,
+                  defaultMessage: `Let’s  get started with {productType}`,
+                  values: {
+                    productType: productTypes
+                      .map((product) => `${product.product_line} ${product.product_tier}`)
+                      .join(', '),
+                  },
                 })}
               </h3>
             </EuiTitle>
