@@ -16,14 +16,18 @@ import {
   getApmSynthtraceKibanaClient,
 } from '../../../../../../test/apm_api_integration/common/bootstrap_apm_synthtrace';
 import { InheritedFtrProviderContext } from '../../../../../apm_api_integration/common/ftr_provider_context';
+import { RegistryServerlessProvider } from '../../../../../../test/apm_api_integration/common/registry_serverless';
 
 interface ApmFtrConfig extends CreateTestConfigOptions {
+  serverlessProject: 'oblt';
+  testFiles: string[];
   kibanaConfig?: Record<string, any>;
   name: string;
+  license: 'trial' | 'basic';
 }
-export function createTestConfig(options: ApmFtrConfig) {
+export function createTestConfig(config: ApmFtrConfig) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const { serverlessProject, testFiles, kibanaConfig } = options;
+    const { serverlessProject, testFiles, kibanaConfig, license } = config;
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../../../../shared/config.base.ts')
     );
@@ -41,8 +45,10 @@ export function createTestConfig(options: ApmFtrConfig) {
     return {
       testFiles,
       servers,
+      servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],
       services: {
         ...services,
+        apmFtrConfig: () => config,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           return {
             writeUser: await getApmApiClient({
@@ -54,9 +60,12 @@ export function createTestConfig(options: ApmFtrConfig) {
         synthtraceEsClient: (context: InheritedFtrProviderContext) => {
           return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
         },
+        registry: RegistryServerlessProvider,
+        synthtraceKibanaClient: () => synthtraceKibanaClient,
       },
       esTestCluster: {
         ...esTestCluster,
+        license,
         // override xpack.security.enabled since it's required for Fleet
         serverArgs: [...esTestCluster.serverArgs, 'xpack.security.enabled=true'],
       },

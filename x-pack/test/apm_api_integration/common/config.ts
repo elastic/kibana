@@ -13,7 +13,6 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
-import { createApmApiClient } from './apm_api_supertest';
 import { bootstrapApmSynthtrace, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
 import {
   FtrProviderContext,
@@ -113,7 +112,7 @@ export function createTestConfig(
             }),
             adminUser: await getApmApiClient({
               kibanaServer,
-              username: 'elastic',
+              username: ApmUsername.elastic,
             }),
             writeUser: await getApmApiClient({
               kibanaServer,

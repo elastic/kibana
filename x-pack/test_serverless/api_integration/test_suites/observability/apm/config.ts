@@ -20,5 +20,6 @@ const kibanaConfig = {
 export default createTestConfig({
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./tests')],
+  license: 'trial',
   kibanaConfig,
 });
