@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { LogViewReference } from '../../common/log_views';
-import type { TimeRange } from '../../common/time';
-import type { InfraClientCoreSetup } from '../types';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { LogViewReference } from '../log_views';
+import type { TimeRange } from '../time';
+import type { InfraClientCoreSetup } from '../../public/types';
 
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 

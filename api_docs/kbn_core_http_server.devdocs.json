@@ -14408,6 +14408,10 @@
                 "path": "x-pack/plugins/ml/server/routes/management.ts"
               },
               {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
               },
@@ -14650,6 +14654,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "transform",
@@ -15036,6 +15044,10 @@
                 "path": "x-pack/plugins/ml/server/routes/alerting.ts"
               },
               {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
               },
@@ -15196,6 +15208,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
               },
@@ -15306,6 +15322,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "maps",
