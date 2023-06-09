@@ -15,8 +15,8 @@ import type { ICasesDeepLinkId } from './deep_links';
 import type { CaseViewPathParams, CaseViewPathSearchParams } from './paths';
 import { generateCaseViewPath } from './paths';
 
-// @ts-ignore
-const stringify = (parsedParams) => new URLSearchParams(parsedParams).toString();
+const stringify = (parsedParams: Record<string, string>) =>
+  new URLSearchParams(parsedParams).toString();
 const parse = (queryString: string) => Object.fromEntries(new URLSearchParams(queryString));
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
@@ -25,7 +25,7 @@ export function useUrlParams() {
   const { search } = useLocation();
   const [urlParams, setUrlParams] = useState<CaseViewPathSearchParams>(() => parse(search));
   const toUrlParams = useCallback(
-    (params: CaseViewPathSearchParams = urlParams) => stringify(params),
+    (params: CaseViewPathSearchParams = urlParams) => stringify(params as Record<string, string>),
     [urlParams]
   );
   useEffect(() => {
