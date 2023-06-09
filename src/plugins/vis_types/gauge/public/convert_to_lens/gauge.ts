@@ -7,32 +7,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  Column,
-  ColumnWithMeta,
-  PercentageModeConfigWithMinMax,
-} from '@kbn/visualizations-plugin/common';
+import { PercentageModeConfigWithMinMax } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { getDataViewsStart } from '../services';
 import { ConvertGaugeVisToLensVisualization } from './types';
-
-export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
-  if ((column as ColumnWithMeta).meta) {
-    return true;
-  }
-  return false;
-};
-
-export const excludeMetaFromColumn = (column: Column) => {
-  if (isColumnWithMeta(column)) {
-    const { meta, ...rest } = column;
-    return rest;
-  }
-  return column;
-};
+import { getConfiguration } from './configurations/gauge';
 
 export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -46,10 +28,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     return null;
   }
 
-  const [
-    { getColumnsFromVis, createStaticValueColumn, getPalette, getPercentageModeConfig },
-    { getConfiguration },
-  ] = await Promise.all([convertToLensModule, import('./configurations/gauge')]);
+  const { getColumnsFromVis, createStaticValueColumn, getPalette, getPercentageModeConfig, excludeMetaFromColumn } = await convertToLensModule;
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 

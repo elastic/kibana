@@ -7,32 +7,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  Column,
-  ColumnWithMeta,
-  PercentageModeConfigWithMinMax,
-} from '@kbn/visualizations-plugin/common';
+import { PercentageModeConfigWithMinMax } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { getDataViewsStart } from '../services';
 import { ConvertGoalVisToLensVisualization } from './types';
-
-export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
-  if ((column as ColumnWithMeta).meta) {
-    return true;
-  }
-  return false;
-};
-
-export const excludeMetaFromColumn = (column: Column) => {
-  if (isColumnWithMeta(column)) {
-    const { meta, ...rest } = column;
-    return rest;
-  }
-  return column;
-};
+import { getConfiguration } from './configurations/goal';
 
 export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -46,11 +28,8 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
     return null;
   }
 
-  const [
-    { getColumnsFromVis, getPalette, getPercentageModeConfig, createStaticValueColumn },
-    { getConfiguration },
-  ] = await Promise.all([convertToLensModule, import('./configurations/goal')]);
-
+  const { getColumnsFromVis, getPalette, getPercentageModeConfig, createStaticValueColumn, excludeMetaFromColumn } = await convertToLensModule;
+  
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
   const layers = getColumnsFromVis(
