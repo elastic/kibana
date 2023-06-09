@@ -8,7 +8,7 @@
 import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ComparisonMode, NormalizationMode } from '../../components/normalization_menu';
+import { NormalizationMode } from '../../components/normalization_menu';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
