@@ -71,6 +71,11 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
     bool: {
       must: [
         {
+          terms: {
+            _tier: ['data_hot', 'data_warm'],
+          },
+        },
+        {
           range: {
             '@timestamp': {
               gte: 'now-5m',

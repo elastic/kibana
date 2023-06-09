@@ -30,18 +30,24 @@ export const OptInMessage: React.FC<OptInMessageProps> = ({
     <React.Fragment>
       <FormattedMessage
         id="telemetry.dataManagementDisclaimerPrivacy"
-        defaultMessage="Usage collection (also known as Telemetry) is {optInStatus}.
+        defaultMessage="{optInStatus}
           This allows us to learn what our users are most interested in, so we can improve our products and services.
           Refer to our {privacyStatementLink}."
         values={{
           optInStatus: (
-            <em>
+            <strong>
               {telemetryService.isOptedIn ? (
-                <FormattedMessage id="telemetry.enabledStatus" defaultMessage="enabled" />
+                <FormattedMessage
+                  id="telemetry.enabledStatus"
+                  defaultMessage="Usage collection is enabled."
+                />
               ) : (
-                <FormattedMessage id="telemetry.disabledStatus" defaultMessage="disabled" />
+                <FormattedMessage
+                  id="telemetry.disabledStatus"
+                  defaultMessage="Usage collection is disabled."
+                />
               )}
-            </em>
+            </strong>
           ),
           privacyStatementLink: (
             /* eslint-disable-next-line @elastic/eui/href-or-on-click */
