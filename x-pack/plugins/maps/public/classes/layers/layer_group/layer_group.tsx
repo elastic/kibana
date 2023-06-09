@@ -25,7 +25,7 @@ import {
   StyleDescriptor,
   StyleMetaDescriptor,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../../sources/source';
+import { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
 import { getLayersExtent } from '../../../actions/get_layers_extent';
 import { ILayer, LayerIcon } from '../layer';
@@ -261,10 +261,6 @@ export class LayerGroup implements ILayer {
 
   getQuery(): Query | null {
     return null;
-  }
-
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    return [];
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
