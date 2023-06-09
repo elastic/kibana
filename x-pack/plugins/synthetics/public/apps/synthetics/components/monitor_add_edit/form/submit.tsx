@@ -85,11 +85,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
           <RunTestButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-          <NoPermissionsTooltip
-            canEditSynthetics={canEditSynthetics}
-            canAddPrivateMonitor={isEdit}
-            canUpdatePrivateMonitor={!isEdit}
-          >
+          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
             <EuiButton
               fill
               isLoading={loading}

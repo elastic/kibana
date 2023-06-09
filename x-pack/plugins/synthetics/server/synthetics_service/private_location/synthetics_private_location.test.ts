@@ -140,7 +140,6 @@ describe('SyntheticsPrivateLocation', () => {
       await syntheticsPrivateLocation.editMonitors(
         [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
         [mockPrivateLocation],
         'test-space'
       );
@@ -172,7 +171,6 @@ describe('SyntheticsPrivateLocation', () => {
       await syntheticsPrivateLocation.deleteMonitors(
         [testConfig],
         {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
         'test-space'
       );
     } catch (e) {
