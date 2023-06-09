@@ -21,6 +21,7 @@ import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { casesPath } from '../../common';
+import { LandingPage } from '../pages/landing/landing';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -60,7 +61,7 @@ export const routes = {
   },
   '/landing': {
     handler: () => {
-      return <SimpleRedirect to="/overview" />;
+      return <LandingPage />;
     },
     params: {},
     exact: true,
