@@ -658,7 +658,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
-            spaces: plugins.spaces?.spacesService,
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
