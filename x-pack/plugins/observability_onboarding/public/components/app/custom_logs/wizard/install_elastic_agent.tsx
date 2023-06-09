@@ -361,7 +361,9 @@ export function InstallElasticAgent() {
                     )}
                     checked={wizardState.autoDownloadConfig}
                     onChange={onAutoDownloadConfig}
-                    disabled={isInstallStarted}
+                    disabled={
+                      isInstallStarted || !monitoringRole?.hasPrivileges
+                    }
                   />
                   {isInstallStarted && (
                     <>
