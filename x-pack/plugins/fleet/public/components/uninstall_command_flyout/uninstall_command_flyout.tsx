@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../hooks';
 
-import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_commands';
+import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_tokens';
 
 import { Error } from '../error';
 import { Loading } from '../loading';

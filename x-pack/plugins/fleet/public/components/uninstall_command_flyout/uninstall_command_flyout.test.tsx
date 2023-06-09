@@ -13,14 +13,14 @@ import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec
 
 import { createFleetTestRendererMock } from '../../mock';
 
-import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_commands';
+import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_tokens';
 
 import type { RequestError } from '../../hooks';
 
 import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
 
-jest.mock('../../hooks/use_request/uninstall_commands', () => ({
+jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
   useGetUninstallTokens: jest.fn(),
 }));
 
