@@ -31,6 +31,7 @@ import { getRoutePaths } from '../../common';
 import {
   areResourcesSetup,
   createDefaultSetupState,
+  logSetupState,
   mergePartialSetupStates,
 } from '../../common/setup';
 
@@ -94,6 +95,8 @@ export function registerSetupRoute({
         const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
         const mergedState = mergePartialSetupStates(state, partialStates);
 
+        logSetupState(logger, mergedState);
+
         return response.ok({
           body: {
             has_setup: areResourcesSetup(mergedState),
@@ -156,6 +159,8 @@ export function registerSetupRoute({
         ];
         const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
         const mergedState = mergePartialSetupStates(state, partialStates);
+
+        logSetupState(logger, mergedState);
 
         if (areResourcesSetup(mergedState)) {
           return response.ok();

@@ -7,6 +7,7 @@
 
 import { merge } from 'lodash';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { Logger } from '@kbn/core/server';
 
 export interface SetupState {
   cloud: {
@@ -82,6 +83,20 @@ export function createDefaultSetupState(): SetupState {
       configured: false,
     },
   };
+}
+
+export function logSetupState(logger: Logger, state: SetupState) {
+  logger.info(`cloud.available = ${state.cloud.available}`);
+  logger.info(`cloud.required = ${state.cloud.required}`);
+  logger.info(`data.available = ${state.data.available}`);
+  logger.info(`packages.installed = ${state.packages.installed}`);
+  logger.info(`permissions.configured = ${state.permissions.configured}`);
+  logger.info(`policies.apm.installed = ${state.policies.apm.installed}`);
+  logger.info(`policies.collector.installed = ${state.policies.collector.installed}`);
+  logger.info(`policies.symbolizer.installed = ${state.policies.symbolizer.installed}`);
+  logger.info(`resource_management.enabled = ${state.resource_management.enabled}`);
+  logger.info(`resources.created = ${state.resources.created}`);
+  logger.info(`settings.configured = ${state.settings.configured}`);
 }
 
 export function areResourcesSetup(state: SetupState): boolean {
