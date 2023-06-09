@@ -25,7 +25,7 @@ const QueryInput: FC<{
     <EuiFormRow
       fullWidth
       label={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textExpansion.queryInput', {
-        defaultMessage: 'Query',
+        defaultMessage: 'Search query',
       })}
     >
       <EuiFieldText

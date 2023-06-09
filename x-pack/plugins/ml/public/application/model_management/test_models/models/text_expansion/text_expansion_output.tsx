@@ -10,6 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
   EuiHorizontalRule,
+  EuiIcon,
   EuiInMemoryTable,
   EuiSpacer,
   EuiStat,
@@ -39,7 +40,7 @@ export const TextExpansionOutput: FC<{
         .sort((a, b) => b.response.score - a.response.score)
         .map(({ response, inputText }) => (
           <>
-            <Token response={response} />
+            <DocumentResult response={response} />
             <EuiHorizontalRule />
           </>
         ))}
@@ -47,7 +48,7 @@ export const TextExpansionOutput: FC<{
   );
 };
 
-export const Token: FC<{
+export const DocumentResult: FC<{
   response: FormattedTextExpansionResponse;
 }> = ({ response }) => {
   const tokens = response.adjustedTokenWeights
@@ -56,9 +57,8 @@ export const Token: FC<{
     .slice(0, 5)
     .map(({ token, value }) => ({ token, value: roundToDecimalPlace(value, 3) }));
 
-  const { euiColorMediumShade } = euiThemeVars;
+  const statInfo = getResultStatFormatting(response);
 
-  const color = response.score === 0 ? euiColorMediumShade : 'success';
   return (
     <>
       {response.text !== undefined ? (
@@ -66,19 +66,21 @@ export const Token: FC<{
           <EuiStat
             title={roundToDecimalPlace(response.score, 3)}
             textAlign="left"
-            titleColor={color}
-            // description={null}
+            titleColor={statInfo.color}
             description={
-              <EuiTextColor color={color}>
+              <EuiTextColor color={statInfo.color}>
                 <span>
-                  {/* <EuiIcon type color={color} /> Score */}
-                  Score
+                  {statInfo.icon !== null ? (
+                    <EuiIcon type={statInfo.icon} color={statInfo.color} />
+                  ) : null}
+                  {statInfo.text}
                 </span>
               </EuiTextColor>
             }
           />
+
           <EuiSpacer size="s" />
-          <span css={response.score === 0 ? { color } : {}}>{response.text}</span>
+          <span css={{ color: statInfo.textColor }}>{response.text}</span>
           <EuiSpacer size="s" />
         </>
       ) : null}
@@ -123,3 +125,42 @@ export const Token: FC<{
     </>
   );
 };
+
+interface ResultStatFormatting {
+  color: string;
+  textColor: string;
+  text: string | null;
+  icon: string | null;
+}
+
+function getResultStatFormatting(response: FormattedTextExpansionResponse): ResultStatFormatting {
+  const { euiColorMediumShade, euiTextSubduedColor, euiTextColor } = euiThemeVars;
+
+  if (response.score >= 5) {
+    return {
+      color: 'success',
+      textColor: euiTextColor,
+      icon: 'check',
+      text: i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.goodMatch',
+        { defaultMessage: 'Good match' }
+      ),
+    };
+  }
+
+  if (response.score > 0) {
+    return {
+      color: euiTextSubduedColor,
+      textColor: euiTextColor,
+      text: null,
+      icon: null,
+    };
+  }
+
+  return {
+    color: euiColorMediumShade,
+    textColor: euiColorMediumShade,
+    text: null,
+    icon: null,
+  };
+}

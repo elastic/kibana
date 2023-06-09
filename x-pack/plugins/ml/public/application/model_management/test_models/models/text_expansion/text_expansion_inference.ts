@@ -21,14 +21,12 @@ export interface TextExpansionPair {
   value: number;
 }
 
-export interface TextExpansionInferenceThing {
+export interface FormattedTextExpansionResponse {
   text: string;
   score: number;
   originalTokenWeights: TextExpansionPair[];
   adjustedTokenWeights: TextExpansionPair[];
 }
-
-export type FormattedTextExpansionResponse = TextExpansionInferenceThing;
 
 export type TextExpansionResponse = InferResponse<
   FormattedTextExpansionResponse,
