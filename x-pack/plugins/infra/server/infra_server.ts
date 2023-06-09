@@ -22,12 +22,6 @@ import {
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
 } from './routes/log_analysis';
-import {
-  initLogEntriesHighlightsRoute,
-  initLogEntriesSummaryHighlightsRoute,
-  initLogEntriesSummaryRoute,
-} from './routes/log_entries';
-import { initLogViewRoutes } from './routes/log_views';
 import { initMetadataRoute } from './routes/metadata';
 import { initMetricsAPIRoute } from './routes/metrics_api';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
