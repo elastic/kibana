@@ -70,7 +70,7 @@ steps:
           limit: 3
 
   - command: SERVERLESS_ENVIRONMENT=observability .buildkite/scripts/steps/functional/serverless_ftr.sh
-    label: 'Serverless observability Tests'
+    label: 'Serverless Observability Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
