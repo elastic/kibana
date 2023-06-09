@@ -558,9 +558,7 @@ export class TaskManagerRunner implements TaskRunner {
           let processedState = state;
 
           if (unwrap(result).skip) {
-            processedRunAt = moment(this.instance.task.runAt)
-              .add(this.taskConfig.skip.delay, 'millisecond')
-              .toDate();
+            processedRunAt = moment().add(this.taskConfig.skip.delay, 'millisecond').toDate();
             processedState = taskState;
           }
 
