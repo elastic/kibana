@@ -24,7 +24,7 @@ import type {
   ResponseActionsExecuteParameters,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
-import { doLogsEndpointActionDsExists } from '../../../utils';
+import { doLogsEndpointActionDsExists, wrapErrorIfNeeded } from '../../../utils';
 import { addErrorsToActionIfAny } from './action_errors';
 import type { CreateActionPayload } from './types';
 
@@ -186,12 +186,18 @@ const createFailedActionResponseEntry = async ({
         },
       },
     });
-  } catch (e) {
-    logger.error(e);
+  } catch (error) {
+    logger.error(wrapErrorIfNeeded(error));
   }
 };
 
-const addRuleInfoToAction = (payload: CreateActionPayload) => {
+const addRuleInfoToAction = (
+  payload: CreateActionPayload
+):
+  | {
+      rule?: { id: string; name: string };
+    }
+  | undefined => {
   if (payload.rule_id && payload.rule_name) {
     return { rule: { id: payload.rule_id, name: payload.rule_name } };
   }

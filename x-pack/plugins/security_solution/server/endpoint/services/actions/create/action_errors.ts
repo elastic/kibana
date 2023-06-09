@@ -17,7 +17,14 @@ export const addErrorsToActionIfAny = ({
   agents: string[];
   licenseService: LicenseService;
   minimumLicenseRequired: LicenseType;
-}) => {
+}):
+  | {
+      error: {
+        code: string;
+        message: unknown;
+      };
+    }
+  | undefined => {
   const licenseError = validateEndpointLicense(licenseService, minimumLicenseRequired);
   const agentsError = validateAgents(agents);
   const alertActionError = licenseError || agentsError;
