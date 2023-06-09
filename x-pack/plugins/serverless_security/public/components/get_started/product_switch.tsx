@@ -41,12 +41,12 @@ const ProductSwitchComponent: React.FC<{
           label={item.label}
           onChange={() => onProductSwitchChanged(item)}
           css={css`
-            padding-left: 10px;
+            padding-left: ${euiTheme.base * 0.625}px;
           `}
           checked={activeSections.has(item.id)}
         />
       )),
-    [activeSections, onProductSwitchChanged]
+    [activeSections, euiTheme.base, onProductSwitchChanged]
   );
 
   return (
