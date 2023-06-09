@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { COMPOSITE_METHOD_OPTIONS } from '../constants';
@@ -27,7 +28,7 @@ interface Props {
 }
 
 export function SourcesSection({ isEditMode }: Props) {
-  const { control } = useFormContext<CreateCompositeSLOForm>();
+  const { control, watch } = useFormContext<CreateCompositeSLOForm>();
   const {
     fields: sources,
     append,
@@ -47,6 +48,12 @@ export function SourcesSection({ isEditMode }: Props) {
 
   const isAddDisabled = sources?.length >= 30;
   const isDeleteDisabled = sources?.length === 1;
+
+  const watchResult = watch('sources');
+  const haveSameBudgetingMethod = watchResult.every(
+    (s) =>
+      s._data !== undefined && s._data.budgetingMethod === watchResult[0]._data?.budgetingMethod
+  );
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
@@ -78,6 +85,8 @@ export function SourcesSection({ isEditMode }: Props) {
             />
           ))}
         </EuiFlexGroup>
+
+        <pre>Same budgeting method: {JSON.stringify(haveSameBudgetingMethod, null, 2)}</pre>
 
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={0}>

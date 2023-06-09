@@ -14,8 +14,8 @@ import {
 } from '@kbn/slo-schema';
 import { toDuration } from '../../../utils/slo/duration';
 
-export type CreateCompositeSLOForm = CreateCompositeSLOInput & {
-  sources: Array<CreateCompositeSLOInput['sources'][0] & { _data?: SLOWithSummaryResponse }>;
+export type CreateCompositeSLOForm = Omit<CreateCompositeSLOInput, 'sources'> & {
+  sources: Array<{ id: string; revision: number; weight: number; _data?: SLOWithSummaryResponse }>;
 };
 
 export function transformResponseToInput(
