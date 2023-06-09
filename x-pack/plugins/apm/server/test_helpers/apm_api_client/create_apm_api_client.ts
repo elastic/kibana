@@ -8,23 +8,26 @@
 import { format } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
+import { formatRequest } from '@kbn/server-route-repository';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { APIEndpoint } from '@kbn/apm-plugin/server';
-import { formatRequest } from '@kbn/server-route-repository';
+} from '../../../public/services/rest/create_call_apm_api';
+import type { APIEndpoint } from '../..';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';
       endpoint: TEndpoint;
-    } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
+    } & APIClientRequestParamsOf<TEndpoint> & {
+        params?: { query?: { _inspect?: boolean } };
+      }
   ): Promise<SupertestReturnType<TEndpoint>> => {
     const { endpoint, type } = options;
 
-    const params = 'params' in options ? (options.params as Record<string, any>) : {};
+    const params =
+      'params' in options ? (options.params as Record<string, any>) : {};
 
     const { method, pathname, version } = formatRequest(endpoint, params.path);
     const url = format({ pathname, query: params?.query });
