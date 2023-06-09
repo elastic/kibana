@@ -7,9 +7,9 @@
 
 import React, { FC, useContext, useState, useEffect, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { Field, Aggregation, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field, Aggregation, AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 
 // The display label used for an aggregation e.g. sum(bytes).

@@ -6,7 +6,7 @@
  */
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../../common/types/timeline/api';
 
 import {
   serverMock,

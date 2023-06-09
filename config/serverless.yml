@@ -36,3 +36,6 @@ telemetry.allowChangingOptInStatus: false
 server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includeSubDomains
 # Disable embedding for serverless MVP
 server.securityResponseHeaders.disableEmbedding: true
+
+# Enforce single "default" space
+xpack.spaces.maxSpaces: 1
