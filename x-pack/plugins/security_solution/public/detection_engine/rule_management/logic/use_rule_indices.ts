@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 
 export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndices?: string[]) => {
   const memoMlJobIds = useMemo(() => machineLearningJobId ?? [], [machineLearningJobId]);
@@ -15,17 +16,17 @@ export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndic
     () => jobs.filter(({ id }) => memoMlJobIds.includes(id)),
     [jobs, memoMlJobIds]
   );
-  const memoMlIndices = useMemo(
-    () => [
-      ...new Set(
-        memoSelectedMlJobs.reduce((acc, j) => {
-          const patterns = j.defaultIndexPattern.split(',');
-          return acc.concat(patterns);
-        }, [] as string[])
-      ),
-    ],
+
+  // Filter jobs that are installed. For those jobs we can get the index pattern from `job.results_index_name` field
+  const memoInstalledMlJobs = useMemo(
+    () => memoSelectedMlJobs.filter(({ isInstalled }) => isInstalled).map((j) => j.id),
     [memoSelectedMlJobs]
   );
+  const { jobs: installedJobs } = useGetInstalledJob(memoInstalledMlJobs);
+  const memoMlIndices = useMemo(() => {
+    const installedJobsIndices = installedJobs.map((j) => `.ml-anomalies-${j.results_index_name}`);
+    return [...new Set(installedJobsIndices)];
+  }, [installedJobs]);
 
   const memoRuleIndices = useMemo(() => {
     if (memoMlIndices.length > 0) {
