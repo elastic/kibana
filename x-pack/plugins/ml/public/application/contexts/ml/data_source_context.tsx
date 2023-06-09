@@ -6,11 +6,13 @@
  */
 
 import React, { type FC, useCallback, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { DataViewAndSavedSearch } from '../../util/index_utils';
 import { useMlKibana } from '../kibana';
@@ -36,7 +38,7 @@ export const DataSourceContext = React.createContext<DataSourceContextValue>(
  */
 export const DataSourceContextProvider: FC = ({ children }) => {
   const [value, setValue] = useState<DataSourceContextValue>();
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error>();
 
   const location = useLocation();
   const {
@@ -132,13 +134,27 @@ export const DataSourceContextProvider: FC = ({ children }) => {
       });
   }, [resolveDataSource]);
 
-  if (!value) return null;
+  if (!value && !error) return null;
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.dataSourceContext.errorTitle"
+              defaultMessage="Unable to fetch data view or saved search"
+            />
+          </h2>
+        }
+        body={<p>{error.message}</p>}
+      />
+    );
   }
 
-  return <DataSourceContext.Provider value={value}>{children}</DataSourceContext.Provider>;
+  return <DataSourceContext.Provider value={value!}>{children}</DataSourceContext.Provider>;
 };
 
 export const useDataSource = () => {
