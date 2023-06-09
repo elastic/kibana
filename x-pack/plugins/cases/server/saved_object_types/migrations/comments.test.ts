@@ -30,10 +30,9 @@ import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { GENERATED_ALERT, MIN_DEFERRED_KIBANA_VERSION, SUB_CASE_SAVED_OBJECT } from './constants';
+import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { omit, partition } from 'lodash';
-import gte from 'semver/functions/gte';
 import type {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
@@ -298,7 +297,7 @@ describe('comments migrations', () => {
       const lensVersions = Object.keys(lensMigrationObjectWithFakeMigration);
       const [lensVersionToBeDeferred, lensVersionToNotBeDeferred] = partition(
         lensVersions,
-        (version) => gte(version, MIN_DEFERRED_KIBANA_VERSION)
+        (version) => ['8.9.0', '8.10.0'].includes(version)
       );
 
       const migrations = createCommentsMigrations({
@@ -312,11 +311,13 @@ describe('comments migrations', () => {
       for (const version of lensVersionToBeDeferred) {
         const migration = migrations[version] as SavedObjectMigrationParams;
         expect(migration.deferred).toBe(true);
+        expect(migration.transform).toEqual(expect.any(Function));
       }
 
       for (const version of lensVersionToNotBeDeferred) {
         const migration = migrations[version] as SavedObjectMigrationParams;
         expect(migration.deferred).toBe(false);
+        expect(migration.transform).toEqual(expect.any(Function));
       }
 
       const migrationsWithoutLens = omit<SavedObjectMigrationMap>(migrations, lensVersions);
