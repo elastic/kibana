@@ -585,7 +585,15 @@
             "section": "def-common.CaseUI",
             "text": "CaseUI"
           },
-          " | undefined) => void) | undefined; onClose?: (() => void) | undefined; }"
+          " | undefined) => void) | undefined; onClose?: ((theCase?: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CaseUI",
+            "text": "CaseUI"
+          },
+          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,

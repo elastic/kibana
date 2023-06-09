@@ -36,7 +36,7 @@ export class ServerlessSecurityPlugin
     _core: CoreSetup,
     setupDeps: ServerlessSecurityPluginSetupDependencies
   ): ServerlessSecurityPluginSetup {
-    registerUpsellings(setupDeps.securitySolution.upselling, this.config.productLineIds);
+    registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
     return {};
   }
 

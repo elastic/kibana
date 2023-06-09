@@ -46,3 +46,7 @@ export const CORRELATIONS_DETAILS_BY_SOURCE_TEST_ID =
 
 export const CORRELATIONS_DETAILS_BY_SESSION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}AlertsBySessionTable` as const;
+
+export const RESPONSE_BASE_TEST_ID = `${PREFIX}Responses` as const;
+export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_BASE_TEST_ID}Details` as const;
+export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;
