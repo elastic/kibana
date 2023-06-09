@@ -142,6 +142,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     try {
       await this.runRangeSliderQuery();
+      await this.buildFilter();
       if (initialValue) {
         this.setInitializationFinished();
       }
@@ -187,7 +188,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.getInput$()
         .pipe(
           // debounceTime(400),
-          distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
+          distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
           skip(1) // skip the first input update because initial filters will be built by initialize.
         )
         .subscribe(this.buildFilter)
@@ -287,7 +288,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       throw e;
     });
 
-    this.dispatch.setLoading(false);
     this.dispatch.setMinMax({
       min: `${min ?? '-Infinity'}`,
       max: `${max ?? 'Infinity'}`,
@@ -353,8 +353,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       explicitInput: { query, timeRange, filters = [], ignoreParentSettings, value },
     } = this.getState();
 
-    if (!value) return;
-    // console.log('build filter', value);
     const [selectedMin, selectedMax] = value ?? ['', ''];
     const hasData = availableMin !== undefined && availableMax !== undefined;
     const hasLowerSelection = !isEmpty(selectedMin);
