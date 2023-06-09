@@ -197,10 +197,6 @@ const routes = {
                       comparisonRangeFrom: t.string,
                       comparisonRangeTo: t.string,
                       comparisonKuery: t.string,
-                      comparisonMode: t.union([
-                        t.literal(ComparisonMode.Absolute),
-                        t.literal(ComparisonMode.Relative),
-                      ]),
                       normalizationMode: t.union([
                         t.literal(NormalizationMode.Scale),
                         t.literal(NormalizationMode.Time),
@@ -217,7 +213,6 @@ const routes = {
                     comparisonRangeFrom: 'now-15m',
                     comparisonRangeTo: 'now',
                     comparisonKuery: '',
-                    comparisonMode: ComparisonMode.Absolute,
                     normalizationMode: NormalizationMode.Time,
                   },
                 },

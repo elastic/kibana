@@ -9,9 +9,7 @@ import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { DifferentialComparisonMode } from '../../../components/differential_comparison_mode';
 import {
-  ComparisonMode,
   NormalizationMenu,
   NormalizationMode,
   NormalizationOptions,
@@ -36,7 +34,6 @@ export function DifferentialTopNFunctionsView() {
       sortDirection,
       sortField,
       comparisonKuery,
-      comparisonMode,
       normalizationMode,
       comparisonRangeFrom,
       comparisonRangeTo,
@@ -60,9 +57,10 @@ export function DifferentialTopNFunctionsView() {
 
   const comparisonTime = totalSeconds / totalComparisonSeconds;
 
+  const baselineTime = 1;
   const normalizationOptions: NormalizationOptions = {
     baselineScale: baseline,
-    baselineTime: 1,
+    baselineTime,
     comparisonScale: comparison,
     comparisonTime,
   };
@@ -114,25 +112,6 @@ export function DifferentialTopNFunctionsView() {
 
   const profilingRouter = useProfilingRouter();
 
-  function onChangeComparisonMode(nextComparisonMode: ComparisonMode) {
-    if (!('comparisonRangeFrom' in query)) {
-      return;
-    }
-
-    profilingRouter.push(routePath, {
-      path,
-      query: {
-        ...query,
-        ...(nextComparisonMode === ComparisonMode.Absolute
-          ? {
-              comparisonMode: ComparisonMode.Absolute,
-              normalizationMode,
-            }
-          : { comparisonMode: ComparisonMode.Relative }),
-      },
-    });
-  }
-
   function onChangeNormalizationMode(
     nextNormalizationMode: NormalizationMode,
     options: NormalizationOptions
@@ -154,6 +133,8 @@ export function DifferentialTopNFunctionsView() {
     });
   }
 
+  const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -161,23 +142,11 @@ export function DifferentialTopNFunctionsView() {
           <PrimaryAndComparisonSearchBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <DifferentialComparisonMode
-                comparisonMode={comparisonMode}
-                onChange={onChangeComparisonMode}
-              />
-            </EuiFlexItem>
-            {comparisonMode === ComparisonMode.Absolute && (
-              <EuiFlexItem grow={false}>
-                <NormalizationMenu
-                  mode={normalizationMode}
-                  options={normalizationOptions}
-                  onChange={onChangeNormalizationMode}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <NormalizationMenu
+            mode={normalizationMode}
+            options={normalizationOptions}
+            onChange={onChangeNormalizationMode}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s">
@@ -199,6 +168,7 @@ export function DifferentialTopNFunctionsView() {
                   }}
                   totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                   isDifferentialView={true}
+                  baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
                 />
               </AsyncComponent>
             </EuiFlexItem>
@@ -224,6 +194,8 @@ export function DifferentialTopNFunctionsView() {
                       comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
                     }
                     isDifferentialView={true}
+                    baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+                    comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
                   />
                 </AsyncComponent>
               </EuiFlexItem>

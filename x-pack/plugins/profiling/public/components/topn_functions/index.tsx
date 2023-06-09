@@ -92,7 +92,7 @@ function SampleStat({
   diffSamples?: number;
   totalSamples: number;
 }) {
-  const samplesLabel = `${samples.toLocaleString()}`;
+  const samplesLabel = samples.toLocaleString();
 
   if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;
@@ -142,6 +142,12 @@ interface Props {
   comparisonTopNFunctions?: TopNFunctions;
   totalSeconds: number;
   isDifferentialView: boolean;
+  baselineScaleFactor?: number;
+  comparisonScaleFactor?: number;
+}
+
+function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
+  return value * scaleFactor;
 }
 
 export function TopNFunctionsTable({
@@ -152,6 +158,8 @@ export function TopNFunctionsTable({
   comparisonTopNFunctions,
   totalSeconds,
   isDifferentialView,
+  baselineScaleFactor,
+  comparisonScaleFactor,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
 
@@ -175,6 +183,11 @@ export function TopNFunctionsTable({
     return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
       const comparisonRow = comparisonDataById?.[topN.Id];
 
+      const topNCountExclusiveScaled = scaleValue({
+        value: topN.CountExclusive,
+        scaleFactor: baselineScaleFactor,
+      });
+
       const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
       const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
       const totalSamples = topN.CountExclusive;
@@ -189,31 +202,43 @@ export function TopNFunctionsTable({
             })
           : undefined;
 
-      const diff =
-        comparisonTopNFunctions && comparisonRow
-          ? {
-              rank: topN.Rank - comparisonRow.Rank,
-              samples: topN.CountExclusive - comparisonRow.CountExclusive,
-              exclusiveCPU:
-                exclusiveCPU -
-                (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-              inclusiveCPU:
-                inclusiveCPU -
-                (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
-            }
-          : undefined;
+      function calculateDiff() {
+        if (comparisonTopNFunctions && comparisonRow) {
+          const comparisonCountExclusiveScaled = scaleValue({
+            value: comparisonRow.CountExclusive,
+            scaleFactor: comparisonScaleFactor,
+          });
+
+          return {
+            rank: topN.Rank - comparisonRow.Rank,
+            samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
+            exclusiveCPU:
+              exclusiveCPU -
+              (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+            inclusiveCPU:
+              inclusiveCPU -
+              (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+          };
+        }
+      }
 
       return {
         rank: topN.Rank,
         frame: topN.Frame,
-        samples: topN.CountExclusive,
+        samples: topNCountExclusiveScaled,
         exclusiveCPU,
         inclusiveCPU,
         impactEstimates,
-        diff,
+        diff: calculateDiff(),
       };
     });
-  }, [topNFunctions, comparisonTopNFunctions, totalSeconds]);
+  }, [
+    topNFunctions,
+    comparisonTopNFunctions,
+    totalSeconds,
+    comparisonScaleFactor,
+    baselineScaleFactor,
+  ]);
 
   const theme = useEuiTheme();
 

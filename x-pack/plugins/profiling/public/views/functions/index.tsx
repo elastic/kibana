@@ -49,8 +49,6 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
           comparisonRangeFrom: query.rangeFrom,
           comparisonRangeTo: query.rangeTo,
           comparisonKuery: query.kuery,
-          comparisonMode:
-            'comparisonMode' in query ? query.comparisonMode : ComparisonMode.Absolute,
           normalizationMode:
             'normalizationMode' in query ? query.normalizationMode : NormalizationMode.Time,
         },
