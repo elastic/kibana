@@ -4947,7 +4947,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"significant\"; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
