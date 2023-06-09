@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import { asPercentage } from '../../utils/formatters/as_percentage';
-import util from 'react';
 
 export function TooltipRow({
   value,
@@ -18,7 +17,7 @@ export function TooltipRow({
   formatDifferenceAsPercentage,
   showDifference,
   formatValue,
-  prependValue,
+  prependValue = '',
 }: {
   value: number;
   label: string | React.ReactElement;
@@ -28,9 +27,9 @@ export function TooltipRow({
   formatValue?: (value: number) => string;
   prependValue?: string;
 }) {
-  const valueLabel =
-    (prependValue ? prependValue : '') +
-    (formatValue ? formatValue(Math.abs(value)) : value.toString());
+  const valueLabel = `${prependValue}${
+    formatValue ? formatValue(Math.abs(value)) : value.toString()
+  }`;
   const comparisonLabel =
     formatValue && isNumber(comparison) ? formatValue(comparison) : comparison?.toString();
 

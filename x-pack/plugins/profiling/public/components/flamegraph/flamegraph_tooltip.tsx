@@ -80,7 +80,7 @@ export function FlameGraphTooltip({
         })
       : undefined;
 
-  const prependString = (samplingRate == 1.0) ? ' ' : '~';
+  const prependString = samplingRate === 1.0 ? ' ' : '~';
 
   return (
     <TooltipContainer>

@@ -30,6 +30,7 @@ export interface Props {
   };
   totalSamples: number;
   totalSeconds: number;
+  samplingRate: number;
 }
 
 export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samplingRate }: Props) {
@@ -85,7 +86,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
   });
 
   // Are the results sampled? If yes, prepend a '~'.
-  const prependString = (samplingRate ?? 1.0) == 1.0 ? '' : '~';
+  const prependString = (samplingRate ?? 1.0) === 1.0 ? undefined : '~';
 
   const impactRows = getImpactRows({
     countInclusive,

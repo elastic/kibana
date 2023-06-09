@@ -55,15 +55,13 @@ export function createTopNFunctions(
   let totalCount = 0;
   const topNFunctions = new Map<FrameGroupID, TopNFunctionAndFrameGroup>();
   // The factor to apply to sampled events to scale the estimated result correctly.
-  console.log("samplingRate: " + samplingRate);
   const scalingFactor = 1.0 / samplingRate;
-  console.log("scalingFactor: " + scalingFactor);
 
   // Collect metadata and inclusive + exclusive counts for each distinct frame.
-  for (let [stackTraceID, count] of events) {
+  for (const [stackTraceID, count] of events) {
     const uniqueFrameGroupsPerEvent = new Set<FrameGroupID>();
-    count *= scalingFactor;
-    totalCount += count;
+    const scaledCount = count * scalingFactor;
+    totalCount += scaledCount;
 
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
@@ -113,12 +111,12 @@ export function createTopNFunctions(
 
       if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
         uniqueFrameGroupsPerEvent.add(frameGroupID);
-        topNFunction.CountInclusive += count;
+        topNFunction.CountInclusive += scaledCount;
       }
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
-        topNFunction.CountExclusive += count;
+        topNFunction.CountExclusive += scaledCount;
       }
     }
   }

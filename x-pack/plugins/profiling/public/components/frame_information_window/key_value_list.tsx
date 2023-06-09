@@ -13,7 +13,7 @@ interface Props {
   prependString?: string;
 }
 
-export function KeyValueList({ rows, prependString }: Props) {
+export function KeyValueList({ rows, prependString = '' }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {rows.map((row, index) => (
@@ -24,7 +24,7 @@ export function KeyValueList({ rows, prependString }: Props) {
                 {row.label}:
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end', overflowWrap: 'anywhere' }}>
-                {(prependString ?? '') + row.value}
+                {`${prependString}row.value`}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

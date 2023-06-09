@@ -65,7 +65,7 @@ export function createCalleeTree(
 
   // The inverse of the sampling rate is the number with which to multiply the number of
   // samples to get an estimate of the actual number of samples the backend received.
-  const scalingFactor = (1.0 / samplingRate);
+  const scalingFactor = 1.0 / samplingRate;
   tree.Edges[0] = new Map<FrameGroupID, NodeID>();
 
   tree.FileID[0] = '';

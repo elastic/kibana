@@ -45,6 +45,18 @@ interface Row {
   };
 }
 
+function getTotalSamplesLabel(samplingRate?: number) {
+  if (samplingRate === undefined) {
+    return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
+      defaultMessage: 'Total sample estimate:',
+    });
+  }
+  return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabelWithSamplingRate', {
+    defaultMessage: 'Total sample (estimate sample rate: {samplingRate}):',
+    values: { samplingRate },
+  });
+}
+
 function TotalSamplesStat({
   totalSamples,
   newSamples,
@@ -58,24 +70,17 @@ function TotalSamplesStat({
 }) {
   const value = totalSamples.toLocaleString();
 
-  let sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
-    defaultMessage: ' Total samples (estimate, sample rate: ',
-  });
-
-  const sampleHeaderA = sampleHeader + samplingRateA + '):';
-
   if (newSamples === undefined || newSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
-        description={sampleHeaderA}
+        description={getTotalSamplesLabel(samplingRateA)}
       />
     );
   }
 
   const diffSamples = totalSamples - newSamples;
   const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
-  const sampleHeaderB = sampleHeader + samplingRateB + '):';
 
   return (
     <EuiStat
@@ -85,7 +90,7 @@ function TotalSamplesStat({
           <GetLabel value={percentDelta} prepend=" (" append=")" />
         </EuiText>
       }
-      description={sampleHeaderB}
+      description={getTotalSamplesLabel(sampleRateB)}
     />
   );
 }
@@ -101,7 +106,7 @@ function SampleStat({
   totalSamples: number;
   isSampled: boolean;
 }) {
-  const samplesLabel = (isSampled ? '~ ' : '') + `${samples.toLocaleString()}`;
+  const samplesLabel = `${isSampled ? '~ ' : ''}${samples.toLocaleString()}`;
 
   if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;
@@ -163,7 +168,7 @@ export function TopNFunctionsTable({
   isDifferentialView,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
-  const isEstimatedA = (topNFunctions.SamplingRate ?? 1.0) != 1.0;
+  const isEstimatedA = (topNFunctions.SamplingRate ?? 1.0) !== 1.0;
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;

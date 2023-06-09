@@ -41,8 +41,11 @@ export interface BaseFlameGraph {
 }
 
 // createBaseFlameGraph encapsulates the tree representation into a serialized form.
-export function createBaseFlameGraph(tree: CalleeTree, samplingRate : number, 
-                                     totalSeconds: number): BaseFlameGraph {
+export function createBaseFlameGraph(
+  tree: CalleeTree,
+  samplingRate: number,
+  totalSeconds: number
+): BaseFlameGraph {
   const graph: BaseFlameGraph = {
     Size: tree.Size,
     SamplingRate: samplingRate,
@@ -150,7 +153,7 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
       FunctionOffset: graph.FunctionOffset[i],
       SourceFilename: graph.SourceFilename[i],
       SourceLine: graph.SourceLine[i],
-      SamplingRate: graph.SamplingRate
+      SamplingRate: graph.SamplingRate,
     });
     graph.Label[i] = getCalleeLabel(metadata);
   }

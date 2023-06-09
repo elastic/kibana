@@ -159,7 +159,7 @@ export interface StackFrameMetadata {
   // unused atm due to lack of symbolization metadata
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
-  
+
   SamplingRate: number;
 }
 
