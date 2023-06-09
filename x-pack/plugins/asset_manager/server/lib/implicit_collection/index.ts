@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AssetManagerConfig } from '../../types';
 
 import { collectContainers, collectHosts, collectPods, collectServices } from './collectors';
 import { CollectorRunner } from './collector_runner';
@@ -14,6 +15,7 @@ export interface ImplicitCollectionOptions {
   outputClient: ElasticsearchClient;
   intervalMs: number;
   logger: Logger;
+  sourceIndices: AssetManagerConfig['sourceIndices'];
 }
 
 export function startImplicitCollection(options: ImplicitCollectionOptions): () => void {

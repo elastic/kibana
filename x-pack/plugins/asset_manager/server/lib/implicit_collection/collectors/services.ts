@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { APM_INDICES } from '../../../constants';
 import { Asset } from '../../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { withSpan } from './helpers';
@@ -16,9 +15,11 @@ export async function collectServices({
   client,
   from,
   transaction,
+  sourceIndices,
 }: CollectorOptions): Promise<Asset[]> {
+  const { traces, serviceMetrics, serviceLogs } = sourceIndices;
   const dsl = {
-    index: APM_INDICES,
+    index: [traces, serviceMetrics, serviceLogs],
     size: 0,
     sort: [
       {
