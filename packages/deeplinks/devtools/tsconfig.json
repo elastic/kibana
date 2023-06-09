@@ -16,8 +16,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/shared-ux-chrome-navigation",
   ]
 }
