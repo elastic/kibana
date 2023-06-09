@@ -92,7 +92,7 @@ describe('annotation list view', () => {
   it('renders a table list view', () => {
     expect(wrapper.debug()).toMatchInlineSnapshot(`
       "<Fragment>
-        <Memo(TableListComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function (anonymous)]} onFetchSuccess={[Function: onFetchSuccess]} setPageDataTestSubject={[Function: setPageDataTestSubject]} />
+        <Memo(TableListViewTableComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function (anonymous)]} onFetchSuccess={[Function: onFetchSuccess]} setPageDataTestSubject={[Function: setPageDataTestSubject]} />
       </Fragment>"
     `);
   });
