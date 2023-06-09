@@ -29,10 +29,6 @@ export function registerActionRoutes(
   registerActionListRoutes(router, endpointContext);
   registerActionDetailsRoutes(router, endpointContext);
   registerResponseActionRoutes(router, endpointContext);
-
-  // APIs specific to `get-file` are behind FF
-  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
-    registerActionFileDownloadRoutes(router, endpointContext);
-    registerActionFileInfoRoute(router, endpointContext);
-  }
+  registerActionFileDownloadRoutes(router, endpointContext);
+  registerActionFileInfoRoute(router, endpointContext);
 }
