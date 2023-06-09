@@ -51,13 +51,12 @@ export function registerSetupRoute({
       try {
         const esClient = await getClient(context);
         const core = await context.core;
-        const clientWithDefaultAuth = createProfilingEsClient({
+        const client = createProfilingEsClient({
           esClient,
           request,
-          useDefaultAuth: true,
         });
         const setupOptions: ProfilingSetupOptions = {
-          client: clientWithDefaultAuth,
+          client,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
@@ -116,13 +115,12 @@ export function registerSetupRoute({
       try {
         const esClient = await getClient(context);
         const core = await context.core;
-        const clientWithDefaultAuth = createProfilingEsClient({
+        const client = createProfilingEsClient({
           esClient,
           request,
-          useDefaultAuth: true,
         });
         const setupOptions: ProfilingSetupOptions = {
-          client: clientWithDefaultAuth,
+          client,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
