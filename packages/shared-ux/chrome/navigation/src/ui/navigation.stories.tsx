@@ -252,7 +252,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
           ...child,
           children: child.children?.filter((item) => {
             // Hide discover and dashboard
-            return item.link !== 'discover' && item.link !== 'dashboard';
+            return item.link !== 'discover' && item.link !== 'dashboards';
           }),
         })) as NonEmptyArray<any>,
       },
