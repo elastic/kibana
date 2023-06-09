@@ -88,6 +88,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
     currentSelectedGroup
   );
 
+  const defaultOptions = { stickyHistogram: true };
+
   useEffect(
     // TODO: Consolidate this hook/function with with Data visualizer's
     function clearFiltersOnLeave() {
@@ -147,6 +149,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
             dataView={dataView}
             setGlobalState={setGlobalState}
             esSearchQuery={searchQuery}
+            options={defaultOptions}
           />
         </EuiFlexGroup>
       </EuiPageSection>

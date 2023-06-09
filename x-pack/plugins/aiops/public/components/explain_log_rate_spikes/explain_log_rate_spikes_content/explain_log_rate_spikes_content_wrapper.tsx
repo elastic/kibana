@@ -28,13 +28,18 @@ import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../../spike_analysis_table/spike_analysis_table_row_provider';
 
-import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content';
+import {
+  type ExplainLogRateSpikesContentOptions,
+  ExplainLogRateSpikesContent,
+} from './explain_log_rate_spikes_content';
 
 const localStorage = new Storage(window.localStorage);
 
 export interface ExplainLogRateSpikesContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** Options for style overrides */
+  options?: ExplainLogRateSpikesContentOptions;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
   /** On global timefilter update */
@@ -53,6 +58,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
+  options,
 }) => {
   if (!dataView) return null;
 
@@ -95,6 +101,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
+                  options={options}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

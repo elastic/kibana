@@ -72,24 +72,26 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem>
           <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
         </EuiFlexItem>
+        {documentCountStats.interval !== undefined && (
+          <EuiFlexItem>
+            <DocumentCountChart
+              brushSelectionUpdateHandler={brushSelectionUpdateHandler}
+              chartPoints={chartPoints}
+              chartPointsSplit={chartPointsSplit}
+              timeRangeEarliest={timeRangeEarliest}
+              timeRangeLatest={timeRangeLatest}
+              interval={documentCountStats.interval}
+              chartPointsSplitLabel={documentCountStatsSplitLabel}
+              isBrushCleared={isBrushCleared}
+              autoAnalysisStart={initialAnalysisStart}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      {documentCountStats.interval !== undefined && (
-        <DocumentCountChart
-          brushSelectionUpdateHandler={brushSelectionUpdateHandler}
-          chartPoints={chartPoints}
-          chartPointsSplit={chartPointsSplit}
-          timeRangeEarliest={timeRangeEarliest}
-          timeRangeLatest={timeRangeLatest}
-          interval={documentCountStats.interval}
-          chartPointsSplitLabel={documentCountStatsSplitLabel}
-          isBrushCleared={isBrushCleared}
-          autoAnalysisStart={initialAnalysisStart}
-        />
-      )}
     </>
   );
 };
