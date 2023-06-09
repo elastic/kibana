@@ -75,6 +75,7 @@ describe('event annotation group editor', () => {
           } as unknown as DataView)
         }
         queryInputServices={{} as QueryInputServices}
+        showValidation={false}
       />
     );
 

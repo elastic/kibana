@@ -30,6 +30,10 @@ import { AnnotationList } from './annotation_list';
 
 export const ENABLE_INDIVIDUAL_ANNOTATION_EDITING = false;
 
+const isTitleValid = (title: string) => Boolean(title.length);
+
+export const isGroupValid = (group: EventAnnotationGroupConfig) => isTitleValid(group.title);
+
 export const GroupEditorControls = ({
   group,
   update,
@@ -39,6 +43,7 @@ export const GroupEditorControls = ({
   dataViews: globalDataViews,
   createDataView,
   queryInputServices,
+  showValidation,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
@@ -48,6 +53,7 @@ export const GroupEditorControls = ({
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
+  showValidation: boolean;
 }) => {
   // save the spec for the life of the component since the user might change their mind after selecting another data view
   const [adHocDataView, setAdHocDataView] = useState<DataView>();
@@ -101,10 +107,15 @@ export const GroupEditorControls = ({
           label={i18n.translate('eventAnnotation.groupEditor.title', {
             defaultMessage: 'Title',
           })}
+          isInvalid={showValidation && !isTitleValid(group.title)}
+          error={i18n.translate('eventAnnotation.groupEditor.titleRequired', {
+            defaultMessage: 'A title is required.',
+          })}
         >
           <EuiFieldText
             data-test-subj="annotationGroupTitle"
             value={group.title}
+            isInvalid={showValidation && !isTitleValid(group.title)}
             onChange={({ target: { value } }) =>
               update({
                 ...group,

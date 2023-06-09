@@ -32,6 +32,7 @@ Object {
   "queryInputServices": Object {},
   "selectedAnnotation": undefined,
   "setSelectedAnnotation": [Function],
+  "showValidation": false,
   "update": [MockFunction],
 }
 `;

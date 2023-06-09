@@ -24,7 +24,7 @@ import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/pu
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
-import { GroupEditorControls } from './group_editor_controls';
+import { GroupEditorControls, isGroupValid } from './group_editor_controls';
 
 export const GroupEditorFlyout = ({
   group,
@@ -52,6 +52,8 @@ export const GroupEditorFlyout = ({
       flyoutBodyOverflowRef.current = document.querySelector('.euiFlyoutBody__overflow');
     }
   }, []);
+
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
 
   const resetContentScroll = useCallback(
     () => flyoutBodyOverflowRef.current && flyoutBodyOverflowRef.current.scroll(0, 0),
@@ -93,6 +95,7 @@ export const GroupEditorFlyout = ({
           dataViews={dataViews}
           createDataView={createDataView}
           queryInputServices={queryInputServices}
+          showValidation={hasAttemptedSave}
         />
       </EuiFlyoutBody>
 
@@ -120,7 +123,13 @@ export const GroupEditorFlyout = ({
                   iconType="save"
                   data-test-subj="saveAnnotationGroup"
                   fill
-                  onClick={onSave}
+                  onClick={() => {
+                    setHasAttemptedSave(true);
+
+                    if (isGroupValid(group)) {
+                      onSave();
+                    }
+                  }}
                 >
                   <FormattedMessage
                     id="eventAnnotation.edit.save"

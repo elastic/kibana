@@ -96,6 +96,15 @@ describe('group editor flyout', () => {
 
     expect(onSave).toHaveBeenCalledTimes(1);
   });
+  it("doesn't save invalid group config", () => {
+    component.setProps({
+      group: { ...group, title: '' },
+    });
+
+    simulateButtonClick(component, SELECTORS.SAVE_BUTTON);
+
+    expect(onSave).not.toHaveBeenCalled();
+  });
   it('reports group updates', () => {
     const newGroup = { ...group, description: 'new description' };
     component.find(GroupEditorControls).prop('update')(newGroup);
