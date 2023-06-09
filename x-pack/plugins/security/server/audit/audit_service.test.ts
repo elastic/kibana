@@ -26,7 +26,7 @@ import {
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const createConfig = (settings: Partial<ConfigType['audit']>) => {
   return ConfigSchema.validate({ audit: settings }).audit;

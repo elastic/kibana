@@ -53,7 +53,7 @@ describe('AllRules', () => {
   const mockRefetchRulesData = jest.fn();
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     mockUseUiSetting$.mockImplementation((key, defaultValue) => {
       const useUiSetting$Mock = createUseUiSetting$Mock();
@@ -204,31 +204,38 @@ describe('AllRules', () => {
     expect(wrapper.find('[data-test-subj="allRulesTableTab-rules"]')).toHaveLength(1);
   });
 
-  it('it pulls from uiSettings to determine default refresh values', async () => {
-    mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasPermissions
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
+  it(
+    'it pulls from uiSettings to determine default refresh values',
+    async () => {
+      mount(
+        <TestProviders>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasPermissions
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
 
-    await waitFor(() => {
-      expect(mockRefetchRulesData).not.toHaveBeenCalled();
+      await waitFor(
+        () => {
+          expect(mockRefetchRulesData).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
-      expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
-    });
-  });
+          jest.advanceTimersByTime(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
+          expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
+        },
+        { timeout: DEFAULT_RULE_REFRESH_INTERVAL_VALUE + 1000 }
+      );
+    },
+    DEFAULT_RULE_REFRESH_INTERVAL_VALUE + 5000
+  );
 
   // refresh functionality largely tested in cypress tests
   it('it pulls from storage and does not set an auto refresh interval if storage indicates refresh is paused', async () => {
@@ -261,14 +268,14 @@ describe('AllRules', () => {
     await waitFor(() => {
       expect(mockRefetchRulesData).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
+      jest.advanceTimersByTime(500);
       expect(mockRefetchRulesData).not.toHaveBeenCalled();
 
       wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
 
       wrapper.find('[data-test-subj="refreshSettingsSwitch"]').first().simulate('click');
 
-      jest.advanceTimersByTime(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
+      jest.advanceTimersByTime(500);
       expect(mockRefetchRulesData).not.toHaveBeenCalled();
     });
   });

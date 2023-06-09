@@ -52,7 +52,7 @@ const logger = loggingSystemMock.create().get();
 const savedObjects = savedObjectsServiceMock.createStartContract();
 
 describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
-  beforeEach(() => jest.useFakeTimers('legacy'));
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   it('should get status at each interval', async () => {
     const mockTaskManager = taskManagerMock.createStart();

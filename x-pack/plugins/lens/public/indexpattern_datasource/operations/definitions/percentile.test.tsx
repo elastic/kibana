@@ -273,7 +273,7 @@ describe('percentile', () => {
     });
 
     it('should update state on change', async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
