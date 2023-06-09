@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
 import * as runtimeTypes from 'io-ts';
 
 import { unionWithNullType } from '../../../utility_types';
@@ -28,18 +26,9 @@ const SavedNoteRuntimeType = runtimeTypes.intersection([
   }),
 ]);
 
-export interface SavedObjectNote extends runtimeTypes.TypeOf<typeof SavedNoteRuntimeType> {}
-
-/**
- * This type represents a note type stored in a saved object that does not include any fields that reference
- * other saved objects.
- */
-export type SavedObjectNoteWithoutExternalRefs = Omit<SavedObjectNote, 'timelineId'>;
-
 /**
  * Note Saved object type with metadata
  */
-
 export const SavedObjectNoteRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
     id: runtimeTypes.string,
@@ -55,17 +44,3 @@ export const SavedObjectNoteRuntimeType = runtimeTypes.intersection([
     ]),
   }),
 ]);
-
-export const SavedObjectNoteToReturnRuntimeType = runtimeTypes.intersection([
-  SavedNoteRuntimeType,
-  runtimeTypes.type({
-    noteId: runtimeTypes.string,
-    version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    timelineVersion: unionWithNullType(runtimeTypes.string),
-  }),
-]);
-
-export interface NoteSavedObject
-  extends runtimeTypes.TypeOf<typeof SavedObjectNoteToReturnRuntimeType> {}

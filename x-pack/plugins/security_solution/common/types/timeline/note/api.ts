@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import * as runtimeTypes from 'io-ts';
 import type { Maybe } from '../../../search_strategy/common';
 
@@ -24,27 +26,30 @@ export const NoteServerRepresentation = runtimeTypes.intersection([
   }),
 ]);
 
-export interface NoteResult {
-  eventId?: Maybe<string>;
+export interface NoteServerRepresentationType
+  extends runtimeTypes.TypeOf<typeof NoteServerRepresentation> {}
 
-  note?: Maybe<string>;
+/**
+ * This type represents a note type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type NoteServerRepresentationWithoutExternalRefs = Omit<
+  NoteServerRepresentationType,
+  'timelineId'
+>;
 
-  timelineId?: Maybe<string>;
+export const NoteToReturnRuntimeType = runtimeTypes.intersection([
+  NoteServerRepresentation,
+  runtimeTypes.type({
+    noteId: runtimeTypes.string,
+    version: runtimeTypes.string,
+  }),
+  runtimeTypes.partial({
+    timelineVersion: unionWithNullType(runtimeTypes.string),
+  }),
+]);
 
-  noteId: string;
-
-  created?: Maybe<number>;
-
-  createdBy?: Maybe<string>;
-
-  timelineVersion?: Maybe<string>;
-
-  updated?: Maybe<number>;
-
-  updatedBy?: Maybe<string>;
-
-  version?: Maybe<string>;
-}
+export interface NoteResult extends runtimeTypes.TypeOf<typeof NoteToReturnRuntimeType> {}
 
 export interface ResponseNote {
   code?: Maybe<number>;

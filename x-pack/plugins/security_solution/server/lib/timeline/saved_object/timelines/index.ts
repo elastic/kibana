@@ -15,7 +15,7 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note/saved_object';
+import type { NoteResult } from '../../../../../common/types/timeline/note/api';
 import type { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import type {
   AllTimelinesResponse,
@@ -684,7 +684,7 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
 export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
 
 export const timelineWithReduxProperties = (
-  notes: NoteSavedObject[],
+  notes: NoteResult[],
   pinnedEvents: PinnedEventSavedObject[],
   timeline: TimelineSavedObject,
   userName: string
