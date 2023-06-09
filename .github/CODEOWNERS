@@ -310,6 +310,7 @@ packages/deeplinks/analytics @elastic/kibana-data-discovery
 packages/deeplinks/devtools @elastic/platform-deployment-management
 packages/deeplinks/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
 packages/deeplinks/ml @elastic/ml-ui
+packages/deeplinks/search @elastic/enterprise-search-frontend
 packages/default-nav/analytics @elastic/kibana-data-discovery
 packages/default-nav/devtools @elastic/platform-deployment-management
 packages/default-nav/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
