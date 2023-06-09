@@ -7,7 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { Column, ColumnWithMeta, SchemaConfig } from '@kbn/visualizations-plugin/common';
+import { SchemaConfig } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getVisSchemas,
@@ -17,21 +17,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
 import { ConvertTableToLensVisualization } from './types';
-
-export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
-  if ((column as ColumnWithMeta).meta) {
-    return true;
-  }
-  return false;
-};
-
-export const excludeMetaFromColumn = (column: Column) => {
-  if (isColumnWithMeta(column)) {
-    const { meta, ...rest } = column;
-    return rest;
-  }
-  return column;
-};
 
 export const convertToLens: ConvertTableToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -45,7 +30,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await convertToLensModule;
+  const { getColumnsFromVis, getPercentageColumnFormulaColumn, excludeMetaFromColumn } = await convertToLensModule;
   const layers = getColumnsFromVis(
     vis,
     timefilter,

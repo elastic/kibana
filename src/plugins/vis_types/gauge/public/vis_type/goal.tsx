@@ -122,11 +122,11 @@ export const getGoalVisTypeDefinition = (
   },
   requiresSearch: true,
   navigateToLens: async (vis, timefilter) => {
-    const { convertGoalToLens } = await import('./convert_to_lens');
+    const { convertGoalToLens } = await import('../convert_to_lens');
     return vis ? convertGoalToLens(vis, timefilter) : null;
   },
   getExpressionVariables: async (vis, timeFilter) => {
-    const { convertGoalToLens } = await import('./convert_to_lens');
+    const { convertGoalToLens } = await import('../convert_to_lens');
     return {
       canNavigateToLens: Boolean(vis?.params ? await convertGoalToLens(vis, timeFilter) : null),
     };
