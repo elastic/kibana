@@ -38,6 +38,7 @@ import type {
   SavedObjectMigrationMap,
   SavedObjectMigrationParams,
 } from '@kbn/core-saved-objects-server';
+import { gte } from 'semver';
 
 describe('comments migrations', () => {
   const contextMock = savedObjectsServiceMock.createMigrationContext();
@@ -297,7 +298,7 @@ describe('comments migrations', () => {
       const lensVersions = Object.keys(lensMigrationObjectWithFakeMigration);
       const [lensVersionToBeDeferred, lensVersionToNotBeDeferred] = partition(
         lensVersions,
-        (version) => ['8.9.0', '8.10.0'].includes(version)
+        (version) => gte(version, '8.9.0')
       );
 
       const migrations = createCommentsMigrations({
