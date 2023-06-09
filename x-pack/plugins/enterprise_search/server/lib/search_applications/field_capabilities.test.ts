@@ -8,11 +8,17 @@
 import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { EnterpriseSearchEngine, SchemaField } from '../../../common/types/engines';
+import {
+  EnterpriseSearchApplication,
+  SchemaField,
+} from '../../../common/types/search_applications';
 
-import { fetchEngineFieldCapabilities, parseFieldsCapabilities } from './field_capabilities';
+import {
+  fetchSearchApplicationFieldCapabilities,
+  parseFieldsCapabilities,
+} from './field_capabilities';
 
-describe('engines field_capabilities', () => {
+describe('search applications field_capabilities', () => {
   const mockClient = {
     asCurrentUser: {
       fieldCaps: jest.fn(),
@@ -20,9 +26,9 @@ describe('engines field_capabilities', () => {
     },
     asInternalUser: {},
   };
-  const mockEngine: EnterpriseSearchEngine = {
+  const mockSearchApplication: EnterpriseSearchApplication = {
     indices: ['index-001'],
-    name: 'unit_test_engine',
+    name: 'unit_test_search_application',
     updated_at_millis: 2202018295,
   };
 
@@ -30,8 +36,8 @@ describe('engines field_capabilities', () => {
     jest.clearAllMocks();
   });
 
-  describe('fetchEngineFieldCapabilities', () => {
-    it('gets engine alias field capabilities', async () => {
+  describe('fetchSearchApplicationFieldCapabilities', () => {
+    it('gets search application alias field capabilities', async () => {
       const fieldCapsResponse: FieldCapsResponse = {
         fields: {
           body: {
@@ -47,14 +53,17 @@ describe('engines field_capabilities', () => {
       };
 
       const getAllAvailableIndexResponse = {
-        'index-001': { aliases: { unit_test_engine: {} } },
+        'index-001': { aliases: { unit_test_search_application: {} } },
       };
 
       mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
 
       await expect(
-        fetchEngineFieldCapabilities(mockClient as unknown as IScopedClusterClient, mockEngine)
+        fetchSearchApplicationFieldCapabilities(
+          mockClient as unknown as IScopedClusterClient,
+          mockSearchApplication
+        )
       ).resolves.toEqual({
         fields: [
           {
@@ -71,8 +80,8 @@ describe('engines field_capabilities', () => {
             type: 'text',
           },
         ],
-        name: mockEngine.name,
-        updated_at_millis: mockEngine.updated_at_millis,
+        name: mockSearchApplication.name,
+        updated_at_millis: mockSearchApplication.updated_at_millis,
       });
 
       expect(mockClient.asCurrentUser.fieldCaps).toHaveBeenCalledTimes(1);
