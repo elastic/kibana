@@ -68,14 +68,9 @@ export const useRouteResolver = (
     if (mlLicenseInfo.hasLicenseExpired) {
       showExpiredLicenseWarning();
     }
-  }, [mlLicenseInfo, navigateToApp, requiredLicence]);
 
-  useEffect(
-    function trackLicense() {
-      licenseResolver();
-    },
-    [licenseResolver, mlLicenseInfo]
-  );
+    return true;
+  }, [mlLicenseInfo, navigateToApp, requiredLicence]);
 
   useMount(function refreshCapabilitiesOnMount() {
     mlCapabilities.refreshCapabilities();
@@ -96,9 +91,20 @@ export const useRouteResolver = (
   // Check if the user has all required permissions
   const capabilitiesResults = usePermissionCheck(requiredCapabilities);
 
-  if (capabilitiesResults.some((v) => v === false)) {
-    redirectToMlAccessDeniedPage();
-  }
+  useEffect(
+    function trackLicenseAndCapabilities() {
+      // First check the license
+      licenseResolver().then((licenseCheckResult) => {
+        if (licenseCheckResult === true) {
+          // Check required capabilities after
+          if (capabilitiesResults.some((v) => !v)) {
+            redirectToMlAccessDeniedPage();
+          }
+        }
+      });
+    },
+    [licenseResolver, mlLicenseInfo, capabilitiesResults, redirectToMlAccessDeniedPage]
+  );
 
   const resolveCustomResolvers = useCallback(async () => {
     if (!customResolvers) return;
