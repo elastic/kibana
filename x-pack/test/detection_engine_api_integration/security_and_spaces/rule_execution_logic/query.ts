@@ -1137,7 +1137,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             from: 'now-1h',
-            interval: '1h',
+            interval: '2h',
           };
 
           const { previewId } = await previewRule({
@@ -1151,21 +1151,21 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['destination.ip', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(3);
-          expect(previewAlerts[2]._source).to.eql({
-            ...previewAlerts[2]._source,
+          expect(previewAlerts.length).to.eql(1);
+          expect(previewAlerts[0]._source).to.eql({
+            ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'destination.ip',
                 value: null,
               },
             ],
-            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
             [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
-            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
-            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 34,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 17,
           });
         });
 
