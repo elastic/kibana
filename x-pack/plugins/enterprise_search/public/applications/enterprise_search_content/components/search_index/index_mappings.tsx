@@ -49,7 +49,9 @@ export const SearchIndexIndexMappings: React.FC = () => {
   const [selectedIndexType, setSelectedIndexType] =
     useState<AccessControlSelectorOption['value']>('content-index');
   const indexToShow =
-    selectedIndexType === 'content-index' ? indexName : 'TODO-access-control-index';
+    selectedIndexType === 'content-index'
+      ? indexName
+      : indexName.replace('search-', 'access-control-');
 
   const shouldShowAccessControlSwitch =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
