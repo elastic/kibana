@@ -22,7 +22,12 @@ const store = {
 const value = 'the-value';
 const fieldName = 'user.name';
 const context = {
-  field: { name: fieldName, value, type: 'text', searchable: true, aggregatable: true },
+  data: [
+    {
+      field: { name: fieldName, type: 'text', searchable: true, aggregatable: true },
+      value,
+    },
+  ],
   metadata: {
     scopeId: TableId.test,
   },

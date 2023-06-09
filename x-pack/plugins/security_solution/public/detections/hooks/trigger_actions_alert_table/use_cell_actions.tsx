@@ -62,28 +62,30 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       tableDefaults.viewMode;
 
     const cellActionProps = useMemo<UseDataGridColumnsSecurityCellActionsProps>(() => {
-      const fields =
+      const cellActionsData =
         viewMode === VIEW_SELECTION.eventRenderedView
           ? []
           : columns.map((col) => {
               const fieldMeta: Partial<BrowserField> | undefined = browserFieldsByName[col.id];
               return {
-                name: col.id,
-                type: fieldMeta?.type ?? 'keyword',
-                aggregatable: fieldMeta?.aggregatable ?? false,
-                searchable: fieldMeta?.searchable ?? false,
+                // TODO use FieldSpec object instead of browserField
+                field: {
+                  name: col.id,
+                  type: fieldMeta?.type ?? 'keyword',
+                  esTypes: fieldMeta?.esTypes ?? [],
+                  aggregatable: fieldMeta?.aggregatable ?? false,
+                  searchable: fieldMeta?.searchable ?? false,
+                  subType: fieldMeta?.subType,
+                },
+                values: (finalData as TimelineNonEcsData[][]).map(
+                  (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
+                ),
               };
             });
 
-      // TODO BUG, wrap value and fields in an object
-      const values = (finalData as TimelineNonEcsData[][]).map((row) =>
-        row.map((rowData) => rowData.value ?? [])
-      );
-
       return {
         triggerId: SecurityCellActionsTrigger.DEFAULT,
-        fields,
-        values,
+        data: cellActionsData,
         metadata: {
           // cell actions scope
           scopeId: tableId,

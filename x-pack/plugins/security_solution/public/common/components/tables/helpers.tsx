@@ -8,7 +8,6 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
@@ -22,14 +21,10 @@ const Subtext = styled.div`
 interface GetRowItemsWithActionsParams {
   values: string[] | null | undefined;
   fieldName: string;
-  fieldType?: KBN_FIELD_TYPES;
-  esTypes?: ES_FIELD_TYPES[];
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
-  aggregatable?: boolean;
-  searchable?: boolean;
 }
 
 export const getRowItemsWithActions = ({
@@ -39,10 +34,6 @@ export const getRowItemsWithActions = ({
   render,
   displayCount = 5,
   maxOverflow = 5,
-  fieldType = KBN_FIELD_TYPES.STRING,
-  esTypes = [ES_FIELD_TYPES.KEYWORD],
-  aggregatable = true,
-  searchable = true,
 }: GetRowItemsWithActionsParams): JSX.Element => {
   if (values != null && values.length > 0) {
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
@@ -70,13 +61,9 @@ export const getRowItemsWithActions = ({
         <RowItemOverflow
           fieldName={fieldName}
           values={values}
-          fieldType={fieldType}
-          esTypes={esTypes}
           idPrefix={idPrefix}
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
-          isAggregatable={aggregatable}
-          isSearchable={searchable}
         />
       </>
     ) : (
@@ -89,10 +76,6 @@ export const getRowItemsWithActions = ({
 
 interface RowItemOverflowProps {
   fieldName: string;
-  fieldType: KBN_FIELD_TYPES;
-  esTypes: ES_FIELD_TYPES[];
-  isAggregatable: boolean;
-  isSearchable: boolean;
   values: string[];
   idPrefix: string;
   maxOverflowItems: number;
@@ -102,10 +85,6 @@ interface RowItemOverflowProps {
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   fieldName,
   values,
-  fieldType,
-  esTypes,
-  isAggregatable,
-  isSearchable,
   idPrefix,
   maxOverflowItems = 5,
   overflowIndexStart = 5,

@@ -8,7 +8,6 @@
 import React from 'react';
 import moment from 'moment';
 
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import type { NetworkTlsNode } from '../../../../../common/search_strategy';
 import type { Columns } from '../../../components/paginated_table';
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
@@ -88,9 +87,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: notAfter,
         fieldName: 'tls.server.not_after',
-        fieldType: KBN_FIELD_TYPES.DATE,
-        esTypes: [ES_FIELD_TYPES.DATE],
-        aggregatable: false,
         idPrefix: `${tableId}-${_id}-table-notAfter`,
         render: (validUntil) => (
           <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>

@@ -18,9 +18,10 @@ import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { getEmptyValue } from '../empty_value';
 import { render } from '@testing-library/react';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../lib/kibana');
+
+jest.mock('../../hooks/use_get_field_spec');
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
@@ -32,8 +33,6 @@ describe('Table Helpers', () => {
         values: undefined,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
-        searchable: true,
       });
 
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -46,8 +45,6 @@ describe('Table Helpers', () => {
         values: [''],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
-        searchable: true,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
 
@@ -59,8 +56,6 @@ describe('Table Helpers', () => {
         values: null,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
-        searchable: true,
         displayCount: 0,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -73,8 +68,6 @@ describe('Table Helpers', () => {
         values: ['item1'],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
-        searchable: true,
         render: renderer,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -87,8 +80,6 @@ describe('Table Helpers', () => {
         values: [],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
-        searchable: true,
       });
       const { container } = render(<TestProviders>{rowItems}</TestProviders>);
       expect(container.textContent).toBe(getEmptyValue());
@@ -99,12 +90,12 @@ describe('Table Helpers', () => {
         values: items,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
-        searchable: true,
         displayCount: 2,
       });
-      const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);
-
+      const { queryAllByTestId, queryByTestId, debug } = render(
+        <TestProviders>{rowItems}</TestProviders>
+      );
+      debug();
       expect(queryAllByTestId('cellActions-renderContent-attrName').length).toBe(2);
       expect(queryByTestId('overflow-button')).toBeInTheDocument();
     });
@@ -119,10 +110,6 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={1}
           overflowIndexStart={1}
-          esTypes={[ES_FIELD_TYPES.KEYWORD]}
-          fieldType={KBN_FIELD_TYPES.STRING}
-          isAggregatable={false}
-          isSearchable={false}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -136,10 +123,6 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={5}
           overflowIndexStart={1}
-          esTypes={[ES_FIELD_TYPES.KEYWORD]}
-          fieldType={KBN_FIELD_TYPES.STRING}
-          isAggregatable={false}
-          isSearchable={false}
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
@@ -154,10 +137,6 @@ describe('Table Helpers', () => {
             idPrefix="idPrefix"
             maxOverflowItems={5}
             overflowIndexStart={1}
-            esTypes={[ES_FIELD_TYPES.KEYWORD]}
-            fieldType={KBN_FIELD_TYPES.STRING}
-            isAggregatable={false}
-            isSearchable={false}
           />
         </TestProviders>
       );
@@ -177,10 +156,6 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={1}
           overflowIndexStart={1}
-          esTypes={[ES_FIELD_TYPES.KEYWORD]}
-          fieldType={KBN_FIELD_TYPES.STRING}
-          isAggregatable={false}
-          isSearchable={false}
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);

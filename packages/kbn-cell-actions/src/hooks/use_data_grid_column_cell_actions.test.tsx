@@ -51,8 +51,10 @@ const columns = [{ id: field1.name }, { id: field2.name }];
 
 const mockCloseCellPopover = jest.fn();
 const useDataGridColumnsCellActionsProps: UseDataGridColumnsCellActionsProps = {
-  fields: [field1, field2],
-  values: [values1, values2],
+  data: [
+    { field: field1, values: values1 },
+    { field: field2, values: values2 },
+  ],
   triggerId: 'testTriggerId',
   metadata: { some: 'value' },
   dataGridRef: {
@@ -152,13 +154,17 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          value: values1[1],
-          field: {
-            name: field1.name,
-            type: field1.type,
-            aggregatable: true,
-            searchable: true,
-          },
+          data: [
+            {
+              value: values1[1],
+              field: {
+                name: field1.name,
+                type: field1.type,
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          ],
           trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
         })
       );
@@ -171,13 +177,17 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action2.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          value: values2[2],
-          field: {
-            name: field2.name,
-            type: field2.type,
-            aggregatable: true,
-            searchable: true,
-          },
+          data: [
+            {
+              value: values2[2],
+              field: {
+                name: field2.name,
+                type: field2.type,
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          ],
           trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
         })
       );
@@ -197,13 +207,17 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          value: values1[1],
-          field: {
-            name: field1.name,
-            type: field1.type,
-            aggregatable: true,
-            searchable: true,
-          },
+          data: [
+            {
+              value: values1[1],
+              field: {
+                name: field1.name,
+                type: field1.type,
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          ],
         })
       );
     });
@@ -228,7 +242,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
       initialProps: {
         ...useDataGridColumnsCellActionsProps,
-        fields: [],
+        data: [],
       },
     });
 
@@ -242,7 +256,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
       initialProps: {
         ...useDataGridColumnsCellActionsProps,
-        fields: undefined,
+        data: undefined,
       },
     });
 

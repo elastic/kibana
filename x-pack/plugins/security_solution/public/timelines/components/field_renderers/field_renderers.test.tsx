@@ -44,6 +44,8 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
+jest.mock('../../../common/hooks/use_get_field_spec');
+
 describe('Field Renderers', () => {
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {

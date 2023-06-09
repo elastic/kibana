@@ -1,45 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`draggable_score renders correctly against snapshot 1`] = `
-<CellActions
-  field={
+<SecurityCellActions
+  data={
     Object {
-      "aggregatable": true,
-      "esTypes": Array [
-        "keyword",
-      ],
-      "name": "process.name",
-      "searchable": true,
-      "type": "string",
+      "field": "process.name",
+      "value": "du",
     }
   }
   mode="hover-down"
   triggerId="security-default-cellActions"
-  value="du"
   visibleCellActions={5}
 >
   17
-</CellActions>
+</SecurityCellActions>
 `;
 
 exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
-<CellActions
-  field={
+<SecurityCellActions
+  data={
     Object {
-      "aggregatable": true,
-      "esTypes": Array [
-        "keyword",
-      ],
-      "name": "process.name",
-      "searchable": true,
-      "type": "string",
+      "field": "process.name",
+      "value": "du",
     }
   }
   mode="hover-down"
   triggerId="security-default-cellActions"
-  value="du"
   visibleCellActions={5}
 >
   17
-</CellActions>
+</SecurityCellActions>
 `;

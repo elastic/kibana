@@ -99,7 +99,7 @@ describe('createAddToTimelineCellAction', () => {
 
     it('should execute with null value', async () => {
       await addToTimelineAction.execute({
-        data: [{ field: { name: 'user.name', value: null, type: 'text' } }],
+        data: [{ field: { name: 'user.name', type: 'text' }, value: null }],
       } as unknown as CellActionExecutionContext);
       expect(mockDispatch).toHaveBeenCalledWith(
         set(
@@ -124,7 +124,7 @@ describe('createAddToTimelineCellAction', () => {
       const value2 = 'value2';
       const value3 = 'value3';
       await addToTimelineAction.execute({
-        data: [{ field: { name: 'user.name', value: [value, value2, value3], type: 'text' } }],
+        data: [{ field: { name: 'user.name', type: 'text' }, value: [value, value2, value3] }],
       } as unknown as CellActionExecutionContext);
       expect(mockDispatch).toHaveBeenCalledWith(
         set(

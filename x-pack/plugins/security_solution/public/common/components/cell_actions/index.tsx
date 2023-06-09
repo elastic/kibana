@@ -15,9 +15,8 @@ import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
 import type { SecurityMetadata } from '../../../actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
-import { getSelectedDataviewSelector } from '../../store/sourcerer/selectors';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 
 // bridge exports for convenience
 export * from '@kbn/cell-actions';
@@ -49,8 +48,6 @@ export interface UseDataGridColumnsSecurityCellActionsProps
   metadata?: SecurityMetadata;
 }
 
-// same components with security cell actions types
-// export const SecurityCellActions: React.FC<SecurityCellActionsProps> = CellActions;
 export const useDataGridColumnsSecurityCellActions: UseDataGridColumnsCellActions<UseDataGridColumnsSecurityCellActionsProps> =
   useDataGridColumnsCellActions;
 
@@ -75,14 +72,4 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
   );
 
   return fieldData.length > 0 ? <CellActions data={fieldData} {...props} /> : <>{props.children}</>;
-};
-
-const selectedDataviewSelector = getSelectedDataviewSelector();
-
-const useGetFieldSpec = (scopeId: SourcererScopeName) => {
-  const dataView = useDeepEqualSelector((state) => selectedDataviewSelector(state, scopeId));
-  return (fieldName: string) => {
-    const fields = dataView?.fields;
-    return fields && fields[fieldName];
-  };
 };
