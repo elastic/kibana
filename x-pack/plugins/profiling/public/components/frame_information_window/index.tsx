@@ -85,7 +85,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
   });
 
   // Are the results sampled? If yes, prepend a '~'.
-  const prependString = ((samplingRate ?? 1.0) == 1.0) ? '' : '~';
+  const prependString = (samplingRate ?? 1.0) == 1.0 ? '' : '~';
 
   const impactRows = getImpactRows({
     countInclusive,

@@ -10,7 +10,7 @@ import React from 'react';
 
 interface Props {
   rows: Array<{ label: string | React.ReactNode; value: React.ReactNode }>;
-  prependString? : string;
+  prependString?: string;
 }
 
 export function KeyValueList({ rows, prependString }: Props) {

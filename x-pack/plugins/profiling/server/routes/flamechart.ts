@@ -49,12 +49,18 @@ export function registerFlameChartSearchRoute({
         const totalSeconds = timeTo - timeFrom;
 
         const t0 = Date.now();
-        const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
-          await searchStackTraces({
-            client: profilingElasticsearchClient,
-            filter,
-            sampleSize: targetSampleSize,
-          });
+        const {
+          stackTraceEvents,
+          stackTraces,
+          executables,
+          stackFrames,
+          totalFrames,
+          samplingRate,
+        } = await searchStackTraces({
+          client: profilingElasticsearchClient,
+          filter,
+          sampleSize: targetSampleSize,
+        });
         logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {

@@ -28,7 +28,8 @@ export function TooltipRow({
   formatValue?: (value: number) => string;
   prependValue?: string;
 }) {
-  const valueLabel = (prependValue ? prependValue : '') +
+  const valueLabel =
+    (prependValue ? prependValue : '') +
     (formatValue ? formatValue(Math.abs(value)) : value.toString());
   const comparisonLabel =
     formatValue && isNumber(comparison) ? formatValue(comparison) : comparison?.toString();

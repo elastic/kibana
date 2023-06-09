@@ -62,7 +62,7 @@ function TotalSamplesStat({
     defaultMessage: ' Total samples (estimate, sample rate: ',
   });
 
-  const sampleHeaderA = sampleHeader + samplingRateA + "):";
+  const sampleHeaderA = sampleHeader + samplingRateA + '):';
 
   if (newSamples === undefined || newSamples === 0) {
     return (
@@ -75,7 +75,7 @@ function TotalSamplesStat({
 
   const diffSamples = totalSamples - newSamples;
   const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
-  const sampleHeaderB = sampleHeader + samplingRateB + "):";
+  const sampleHeaderB = sampleHeader + samplingRateB + '):';
 
   return (
     <EuiStat
@@ -124,7 +124,6 @@ function SampleStat({
 }
 
 function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number; isSampled?: boolean }) {
-  
   const cpuLabel = `${cpu.toFixed(2)}%`;
 
   if (diffCPU === undefined || diffCPU === 0) {
@@ -164,7 +163,7 @@ export function TopNFunctionsTable({
   isDifferentialView,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
-  const isEstimatedA = ((topNFunctions.SamplingRate ?? 1.0) != 1.0);
+  const isEstimatedA = (topNFunctions.SamplingRate ?? 1.0) != 1.0;
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -253,8 +252,12 @@ export function TopNFunctionsTable({
       }),
       render: (_, { samples, diff }) => {
         return (
-          <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} 
-            isSampled={ isEstimatedA }/>
+          <SampleStat
+            samples={samples}
+            diffSamples={diff?.samples}
+            totalSamples={totalCount}
+            isSampled={isEstimatedA}
+          />
         );
       },
       align: 'right',
