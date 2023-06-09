@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 
-import { get } from 'lodash';
 import {
   ComboBoxField,
   FIELD_TYPES,
   UseField,
   Field,
-  useFormContext,
+  fieldValidators,
+  useFormData,
 } from '../../../../../../shared_imports';
 
 import { FieldsConfig, to, from } from './shared';
+
+const { maxLengthField } = fieldValidators;
+const MAX_DATASET_LENGTH = 100;
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field configs */
@@ -58,6 +61,19 @@ const fieldsConfig: FieldsConfig = {
         }}
       />
     ),
+    validations: [
+      {
+        validator: maxLengthField({
+          length: MAX_DATASET_LENGTH,
+          message: i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.rerouteForm.datasetLengthError',
+            {
+              defaultMessage: 'The value must not contain more than 100 characters.',
+            }
+          ),
+        }),
+      },
+    ],
   },
   namespace: {
     defaultValue: null,
@@ -74,25 +90,24 @@ const fieldsConfig: FieldsConfig = {
         values={{ defaultValue: <EuiCode>{'{{data_stream.namespace}}'}</EuiCode> }}
       />
     ),
+    validations: [
+      {
+        validator: maxLengthField({
+          length: MAX_DATASET_LENGTH,
+          message: i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.rerouteForm.namespaceLengthError',
+            {
+              defaultMessage: 'The value must not contain more than 100 characters.',
+            }
+          ),
+        }),
+      },
+    ],
   },
 };
 
 export const Reroute: FunctionComponent = () => {
-  const form = useFormContext();
-  const [isDestinationDisabled, setIsDestinationDisabled] = useState<boolean>(false);
-  useEffect(() => {
-    const subscription = form.subscribe(({ data: { internal } }) => {
-      const hasDatasetValues = get(internal, 'fields.dataset').length !== 0;
-      const hasNamespaceValues = get(internal, 'fields.namespace').length !== 0;
-      if ((hasDatasetValues || hasNamespaceValues) && !isDestinationDisabled) {
-        setIsDestinationDisabled(true);
-        form.getFields()['fields.destination'].setValue('');
-      } else if (!(hasDatasetValues || hasNamespaceValues) && isDestinationDisabled) {
-        setIsDestinationDisabled(false);
-      }
-    });
-    return subscription.unsubscribe;
-  }, [form, isDestinationDisabled]);
+  const [{ fields }] = useFormData();
 
   return (
     <>
@@ -102,9 +117,10 @@ export const Reroute: FunctionComponent = () => {
         component={Field}
         componentProps={{
           euiFieldProps: {
-            disabled: isDestinationDisabled,
+            disabled: fields?.dataset.length > 0 || fields?.dataset.length > 0,
           },
         }}
+        value={fields?.dataset.length > 0 || fields?.dataset.length > 0 ? '' : fields?.destination}
         path="fields.destination"
       />
 
