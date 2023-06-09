@@ -104,9 +104,14 @@ const Logo = (
   const homeHref = useObservable(props.homeHref$, '/app/home');
   const { logo } = headerCss;
 
+  let fullHref: string | undefined;
+  if (homeHref) {
+    fullHref = props.prependBasePath(homeHref);
+  }
+
   const navigateHome = (event: React.MouseEvent) => {
-    if (homeHref) {
-      props.application.navigateToUrl(props.prependBasePath(homeHref));
+    if (fullHref) {
+      props.application.navigateToUrl(fullHref);
     }
     event.preventDefault();
   };
@@ -117,12 +122,13 @@ const Logo = (
         <EuiHeaderLogo
           iconType="logoElastic"
           onClick={navigateHome}
+          href={fullHref}
           css={logo}
           data-test-subj="nav-header-logo"
           aria-label={headerStrings.logo.ariaLabel}
         />
       ) : (
-        <a href={homeHref} onClick={navigateHome} css={logo.spinner}>
+        <a onClick={navigateHome} href={fullHref} css={logo.spinner}>
           <EuiLoadingSpinner
             size="l"
             aria-hidden={false}
