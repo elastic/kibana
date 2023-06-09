@@ -24,7 +24,7 @@ import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
-import { suggestions } from './suggestions';
+import { getSuggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
@@ -79,7 +79,7 @@ export const getTagcloudVisualization = ({
     };
   },
 
-  getSuggestions: suggestions,
+  getSuggestions,
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     return !suggestions.length
