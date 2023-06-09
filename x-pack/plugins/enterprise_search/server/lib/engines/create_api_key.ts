@@ -23,6 +23,9 @@ export const createApiKey = async (
             privileges: ['read'],
           },
         ],
+        restriction: {
+          workflows: [`${engineName}_query`],
+        },
       },
     },
   });
