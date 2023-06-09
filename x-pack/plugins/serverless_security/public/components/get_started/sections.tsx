@@ -25,6 +25,38 @@ export const ActiveConditions = {
   endpointToggled: [ProductId.endpoint],
 };
 
+export const introductionSteps = [
+  {
+    id: IntroductionSteps.watchOverviewVideo,
+    title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
+    description: [
+      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
+      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION2,
+      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION3,
+    ],
+    splitPanel: (
+      <iframe
+        allowFullScreen
+        className="vidyard_iframe"
+        frameBorder="0"
+        height="100%"
+        referrerPolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin"
+        scrolling="no"
+        src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
+        title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
+        width="100%"
+      />
+    ),
+    timeInMinutes: 3,
+    badges: [
+      { id: 'analytics', name: i18n.PRODUCT_BADGE_ANALYTICS },
+      { id: 'cloud', name: i18n.PRODUCT_BADGE_CLOUD },
+      { id: 'edr', name: i18n.PRODUCT_BADGE_EDR },
+    ],
+  },
+];
+
 export const sections: Section[] = [
   {
     id: SectionId.getSetUp,
@@ -35,37 +67,12 @@ export const sections: Section[] = [
         icon: { type: 'securityApp', size: 'xl' },
         id: GetSetUpCardId.introduction,
         activeConditions: ActiveConditions.anyCondition,
-        steps: [
-          {
-            id: IntroductionSteps.watchOverviewVideo,
-            title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
-            description: [
-              i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
-              i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION2,
-              i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION3,
-            ],
-            splitPanel: (
-              <iframe
-                allowFullScreen
-                className="vidyard_iframe"
-                frameBorder="0"
-                height="100%"
-                referrerPolicy="no-referrer"
-                sandbox="allow-scripts allow-same-origin"
-                scrolling="no"
-                src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-                title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
-                width="100%"
-              />
-            ),
-            timeInMinutes: 3,
-            badges: [
-              { id: 'analytics', name: i18n.PRODUCT_BADGE_ANALYTICS },
-              { id: 'cloud', name: i18n.PRODUCT_BADGE_CLOUD },
-              { id: 'edr', name: i18n.PRODUCT_BADGE_EDR },
-            ],
-          },
-        ],
+        steps: introductionSteps,
+        timeInMins: introductionSteps.reduce(
+          (totalMin, { timeInMinutes }) => (totalMin += timeInMinutes),
+          0
+        ),
+        stepsLeft: introductionSteps.length,
       },
       {
         icon: { type: 'agentApp', size: 'xl' },

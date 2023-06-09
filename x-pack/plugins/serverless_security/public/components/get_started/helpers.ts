@@ -17,12 +17,11 @@ export const updateSections = (
         const cardsInCurrentSection = currentSection.cards?.reduce((accCards, currentCard) => {
           if (currentCard?.activeConditions?.some((condition) => activeSections.has(condition))) {
             const stepsDone = finishedSteps[currentCard.id] ?? new Set();
-            currentCard.timeInMins =
-              currentCard?.steps?.reduce(
-                (totalMin, { timeInMinutes, id: stepId }) =>
-                  (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
-                0
-              ) ?? 0;
+            currentCard.timeInMins = currentCard?.steps?.reduce(
+              (totalMin, { timeInMinutes, id: stepId }) =>
+                (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
+              0
+            );
             currentCard.stepsLeft = (currentCard?.steps?.length ?? 0) - (stepsDone?.size ?? 0);
 
             accCards.push(currentCard);

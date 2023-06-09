@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { GetStartedComponent } from './types';
 import { GetStarted } from './get_started';
@@ -17,11 +16,10 @@ import { ServerlessSecurityPluginStartDependencies } from '../../types';
 
 export const getSecurityGetStartedComponent = (
   core: CoreStart,
-  pluginsStart: ServerlessSecurityPluginStartDependencies,
-  storage: Storage
+  pluginsStart: ServerlessSecurityPluginStartDependencies
 ): GetStartedComponent => {
   return () => (
-    <KibanaServicesProvider core={core} pluginsStart={pluginsStart} storage={storage}>
+    <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
       <GetStarted />
     </KibanaServicesProvider>
   );

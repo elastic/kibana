@@ -73,7 +73,7 @@ const CardItemComponent: React.FC<{
                 <h4>{cardItem.title}</h4>
               </EuiTitle>
             </EuiFlexItem>
-            {(timeInMins > 0 || stepsLeft > 0) && (
+            {(timeInMins != null || stepsLeft != null) && (
               <EuiFlexItem
                 css={css`
                   align-items: end;
@@ -85,8 +85,12 @@ const CardItemComponent: React.FC<{
                     line-height: ${euiTheme.base * 2}px;
                   `}
                 >
-                  {stepsLeft > 0 && <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>}
-                  {timeInMins > 0 && <span> • {i18n.STEP_TIME_MIN(timeInMins)}</span>}
+                  {stepsLeft != null && stepsLeft > 0 && (
+                    <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>
+                  )}
+                  {timeInMins != null && timeInMins > 0 && (
+                    <span> • {i18n.STEP_TIME_MIN(timeInMins)}</span>
+                  )}
                 </EuiText>
               </EuiFlexItem>
             )}

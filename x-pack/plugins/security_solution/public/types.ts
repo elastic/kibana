@@ -149,7 +149,6 @@ export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
-  getStorage: () => Storage;
 }
 
 export interface AppObservableLibs {

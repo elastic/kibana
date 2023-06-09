@@ -100,6 +100,10 @@ export interface ToggleStepAction {
   payload: { cardId: CardId; stepId: StepId };
 }
 
+export interface InitSectionsAction {
+  type: GetStartedPageActions.InitSections;
+}
+
 export interface Switch {
   id: ProductId;
   label: string;
@@ -108,4 +112,5 @@ export interface Switch {
 export enum GetStartedPageActions {
   AddFinishedStep = 'addFinishedStep',
   ToggleSection = 'toggleSection',
+  InitSections = 'initSections',
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -15,26 +15,18 @@ import * as i18n from './translations';
 import { ProductSwitch } from './product_switch';
 import { useSetUpCardSections } from './use_setup_cards';
 import { useStorage } from './use_storage';
-import { useKibana } from '../../services';
-import {
-  getActiveSectionsInitialStates,
-  getFinishedStepsInitialStates,
-  getSectionsInitialStates,
-  reducer,
-} from './reducer';
+import { getActiveSectionsInitialStates, getFinishedStepsInitialStates, reducer } from './reducer';
 
 const TogglePanelComponent = () => {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { storage },
-  } = useKibana();
+
   const shadow = useEuiShadow('s');
   const {
     getAllFinishedStepsFromStorage,
     getActiveProductsFromStorage,
     toggleActiveProductsInStorage,
     addFinishedStepToStorage,
-  } = useStorage(storage);
+  } = useStorage();
   const finishedStepsInitialStates = useMemo(
     () => getFinishedStepsInitialStates({ finishedSteps: getAllFinishedStepsFromStorage() }),
     [getAllFinishedStepsFromStorage]
@@ -45,12 +37,10 @@ const TogglePanelComponent = () => {
     [getActiveProductsFromStorage]
   );
 
-  const sectionInitialStates = getSectionsInitialStates();
-
   const [state, dispatch] = useReducer(reducer, {
     activeSections: activeSectionsInitialStates,
     finishedSteps: finishedStepsInitialStates,
-    sections: sectionInitialStates,
+    sections: null,
   });
   const { setUpSections } = useSetUpCardSections({ euiTheme, shadow });
   const onStepClicked = useCallback(
@@ -72,6 +62,12 @@ const TogglePanelComponent = () => {
     },
     [toggleActiveProductsInStorage]
   );
+
+  useEffect(() => {
+    if (!state.sections && state.activeSections.size > 0) {
+      dispatch({ type: GetStartedPageActions.InitSections });
+    }
+  }, [state.activeSections.size, state.sections]);
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">

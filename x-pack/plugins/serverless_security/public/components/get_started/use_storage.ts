@@ -6,34 +6,27 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { storage } from '../../lib/storage';
 import { CardId, ProductId, StepId } from './types';
 
 export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
 export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
 
-export const useStorage = (storage: Storage) => {
-  const addFinishedStepToStorage = useCallback(
-    (cardId: CardId, stepId: StepId) => {
-      const finishedSteps: Record<CardId, Record<StepId, boolean> | undefined> =
-        storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
-      const card: Record<StepId, boolean> =
-        finishedSteps[cardId] ?? ({} as Record<StepId, boolean>);
-      if (!card[stepId]) {
-        card[stepId] = true;
-        storage.set(FINISHED_STEPS_STORAGE_KEY, { ...finishedSteps, [cardId]: card });
-      }
-    },
-    [storage]
-  );
-  const getFinishedStepsFromStorageByCardId = useCallback(
-    (cardId: CardId) => {
-      const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
-      const card = finishedSteps[cardId] ?? {};
-      return card;
-    },
-    [storage]
-  );
+export const useStorage = () => {
+  const addFinishedStepToStorage = useCallback((cardId: CardId, stepId: StepId) => {
+    const finishedSteps: Record<CardId, Record<StepId, boolean> | undefined> =
+      storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+    const card: Record<StepId, boolean> = finishedSteps[cardId] ?? ({} as Record<StepId, boolean>);
+    if (!card[stepId]) {
+      card[stepId] = true;
+      storage.set(FINISHED_STEPS_STORAGE_KEY, { ...finishedSteps, [cardId]: card });
+    }
+  }, []);
+  const getFinishedStepsFromStorageByCardId = useCallback((cardId: CardId) => {
+    const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+    const card = finishedSteps[cardId] ?? {};
+    return card;
+  }, []);
   return useMemo(
     () => ({
       getActiveProductsFromStorage: () => {
@@ -67,6 +60,6 @@ export const useStorage = (storage: Storage) => {
         storage.set(FINISHED_STEPS_STORAGE_KEY, finishedSteps);
       },
     }),
-    [addFinishedStepToStorage, getFinishedStepsFromStorageByCardId, storage]
+    [addFinishedStepToStorage, getFinishedStepsFromStorageByCardId]
   );
 };

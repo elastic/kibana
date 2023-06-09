@@ -11,18 +11,16 @@ import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { ServerlessSecurityPluginStartDependencies } from './types';
 
-export type Services = CoreStart & ServerlessSecurityPluginStartDependencies & { storage: Storage };
+export type Services = CoreStart & ServerlessSecurityPluginStartDependencies;
 
 export const KibanaServicesProvider: React.FC<{
   core: CoreStart;
   pluginsStart: ServerlessSecurityPluginStartDependencies;
-  storage: Storage;
-}> = ({ core, pluginsStart, children, storage }) => {
-  const services: Services = { ...core, ...pluginsStart, storage };
+}> = ({ core, pluginsStart, children }) => {
+  const services: Services = { ...core, ...pluginsStart };
   return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
 };
 

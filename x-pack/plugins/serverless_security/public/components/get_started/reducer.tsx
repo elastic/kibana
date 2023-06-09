@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { update } from 'lodash';
 import { updateSections } from './helpers';
 import { sections } from './sections';
 import {
   CardId,
   GetStartedPageActions,
+  InitSectionsAction,
   ProductId,
   StepId,
   TogglePanelAction,
@@ -19,7 +21,7 @@ import {
 
 export const reducer = (
   state: TogglePanelReducer,
-  action: TogglePanelAction | ToggleStepAction
+  action: TogglePanelAction | ToggleStepAction | InitSectionsAction
 ): TogglePanelReducer => {
   if (action.type === GetStartedPageActions.ToggleSection) {
     if (state.activeSections.has(action.payload?.section)) {
@@ -48,6 +50,13 @@ export const reducer = (
       ...state,
       finishedSteps: newFinishedSteps,
       sections: updateSections(newFinishedSteps, state.activeSections),
+    };
+  }
+
+  if (action.type === GetStartedPageActions.InitSections) {
+    return {
+      ...state,
+      sections: updateSections(state.finishedSteps, state.activeSections),
     };
   }
   return state;
