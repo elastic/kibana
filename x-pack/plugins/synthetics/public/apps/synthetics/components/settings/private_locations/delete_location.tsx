@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { useCanManagePrivateLocation } from '../../../hooks';
 
 export const DeleteLocation = ({
   loading,
@@ -28,7 +27,6 @@ export const DeleteLocation = ({
   const canDelete = monCount === 0;
 
   const { canSave } = useSyntheticsSettingsContext();
-  const canManagePrivateLocation = useCanManagePrivateLocation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -72,7 +70,7 @@ export const DeleteLocation = ({
           onClick={() => {
             setIsModalOpen(true);
           }}
-          isDisabled={!canDelete || !canManagePrivateLocation || !canSave}
+          isDisabled={!canDelete || !canSave}
         />
       </EuiToolTip>
     </>

@@ -61,10 +61,10 @@ export const getDecryptedMonitorAPI = async ({
   });
 };
 
-export const fetchServiceAPIKey = async (): Promise<{
+export const fetchProjectAPIKey = async (): Promise<{
   apiKey: { encoded: string };
 }> => {
-  return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
+  return await apiService.get(API_URLS.SYNTHETICS_PROJECT_API_KEY);
 };
 
 export const deletePackagePolicy = async (

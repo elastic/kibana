@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { useCanManagePrivateLocation } from '../../../hooks/use_fleet_permissions';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
-import { FleetPermissionsCallout } from '../../common/components/permissions';
 import { LocationForm } from './location_form';
 import { ManageEmptyState } from './manage_empty_state';
 
@@ -75,40 +74,37 @@ export const AddLocationFlyout = ({
             hasFleetPermissions={canManagePrivateLocation}
             showEmptyLocations={false}
           >
-            {!canManagePrivateLocation && <FleetPermissionsCallout />}
             <LocationForm
               privateLocations={privateLocations}
               hasPermissions={canManagePrivateLocation}
             />
           </ManageEmptyState>
         </EuiFlyoutBody>
-        {canManagePrivateLocation && (
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="syntheticsAddLocationFlyoutButton"
-                  iconType="cross"
-                  onClick={closeFlyout}
-                  flush="left"
-                  isLoading={isLoading}
-                >
-                  {CANCEL_LABEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="syntheticsAddLocationFlyoutButton"
-                  fill
-                  onClick={handleSubmit(onSubmit)}
-                  isLoading={isLoading}
-                >
-                  {SAVE_LABEL}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        )}
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="syntheticsAddLocationFlyoutButton"
+                iconType="cross"
+                onClick={closeFlyout}
+                flush="left"
+                isLoading={isLoading}
+              >
+                {CANCEL_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="syntheticsAddLocationFlyoutButton"
+                fill
+                onClick={handleSubmit(onSubmit)}
+                isLoading={isLoading}
+              >
+                {SAVE_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     </FormProvider>
   );

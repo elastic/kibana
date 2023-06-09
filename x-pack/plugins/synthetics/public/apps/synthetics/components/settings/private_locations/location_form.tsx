@@ -46,49 +46,81 @@ export const LocationForm = ({
   return (
     <>
       {data?.items.length === 0 && <AgentPolicyNeeded disabled={!hasPermissions} />}
-      {hasPermissions ? (
-        <EuiForm component="form" noValidate>
-          <EuiFormRow
+      <EuiForm component="form" noValidate>
+        <EuiFormRow
+          fullWidth
+          label={LOCATION_NAME_LABEL}
+          isInvalid={Boolean(errors?.label)}
+          error={errors?.label?.message}
+        >
+          <EuiFieldText
+            data-test-subj="syntheticsLocationFormFieldText"
             fullWidth
-            label={LOCATION_NAME_LABEL}
-            isInvalid={Boolean(errors?.label)}
-            error={errors?.label?.message}
+            aria-label={LOCATION_NAME_LABEL}
+            {...register('label', {
+              required: {
+                value: true,
+                message: NAME_REQUIRED,
+              },
+              validate: (val: string) => {
+                return privateLocations.some((loc) => loc.label === val)
+                  ? NAME_ALREADY_EXISTS
+                  : undefined;
+              },
+            })}
+          />
+        </EuiFormRow>
+        <EuiSpacer />
+        <PolicyHostsField errors={errors} control={control} privateLocations={privateLocations} />
+        <EuiSpacer />
+        <TagsField tagsList={tagsList} control={control} errors={errors} />
+        <EuiSpacer />
+        <EuiCallOut title={AGENT_CALLOUT_TITLE} size="s" style={{ textAlign: 'left' }}>
+          <p>
+            {
+              <FormattedMessage
+                id="xpack.synthetics.monitorManagement.agentCallout.content"
+                defaultMessage='To run "Browser" monitors on this private location, make sure that you&apos;re using the {code} Docker container, which contains the dependencies necessary to run these monitors. For more information, {link}.'
+                values={{
+                  code: <EuiCode>elastic-agent-complete</EuiCode>,
+                  link: (
+                    <EuiLink
+                      data-test-subj="syntheticsLocationFormReadTheDocsLink"
+                      target="_blank"
+                      href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.synthetics.monitorManagement.agentCallout.link"
+                        defaultMessage="read the docs"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          </p>
+        </EuiCallOut>
+
+        <EuiSpacer />
+        {selectedPolicy?.agents === 0 && (
+          <EuiCallOut
+            title={AGENT_MISSING_CALLOUT_TITLE}
+            size="s"
+            style={{ textAlign: 'left' }}
+            color="warning"
           >
-            <EuiFieldText
-              data-test-subj="syntheticsLocationFormFieldText"
-              fullWidth
-              aria-label={LOCATION_NAME_LABEL}
-              {...register('label', {
-                required: {
-                  value: true,
-                  message: NAME_REQUIRED,
-                },
-                validate: (val: string) => {
-                  return privateLocations.some((loc) => loc.label === val)
-                    ? NAME_ALREADY_EXISTS
-                    : undefined;
-                },
-              })}
-            />
-          </EuiFormRow>
-          <EuiSpacer />
-          <PolicyHostsField errors={errors} control={control} privateLocations={privateLocations} />
-          <EuiSpacer />
-          <TagsField tagsList={tagsList} control={control} errors={errors} />
-          <EuiSpacer />
-          <EuiCallOut title={AGENT_CALLOUT_TITLE} size="s" style={{ textAlign: 'left' }}>
             <p>
               {
                 <FormattedMessage
-                  id="xpack.synthetics.monitorManagement.agentCallout.content"
-                  defaultMessage='To run "Browser" monitors on this private location, make sure that you&apos;re using the {code} Docker container, which contains the dependencies necessary to run these monitors. For more information, {link}.'
+                  id="xpack.synthetics.monitorManagement.agentMissingCallout.content"
+                  defaultMessage="You have selected an agent policy that has no agent attached. Make sure that you have at least one agent enrolled in this policy. You can add agent before or after creating a location. For more information, {link}."
                   values={{
-                    code: <EuiCode>elastic-agent-complete</EuiCode>,
                     link: (
                       <EuiLink
                         data-test-subj="syntheticsLocationFormReadTheDocsLink"
                         target="_blank"
-                        href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+                        href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html#synthetics-private-location-fleet-agent"
                         external
                       >
                         <FormattedMessage
@@ -102,42 +134,8 @@ export const LocationForm = ({
               }
             </p>
           </EuiCallOut>
-
-          <EuiSpacer />
-          {selectedPolicy?.agents === 0 && (
-            <EuiCallOut
-              title={AGENT_MISSING_CALLOUT_TITLE}
-              size="s"
-              style={{ textAlign: 'left' }}
-              color="warning"
-            >
-              <p>
-                {
-                  <FormattedMessage
-                    id="xpack.synthetics.monitorManagement.agentMissingCallout.content"
-                    defaultMessage="You have selected an agent policy that has no agent attached. Make sure that you have at least one agent enrolled in this policy. You can add agent before or after creating a location. For more information, {link}."
-                    values={{
-                      link: (
-                        <EuiLink
-                          data-test-subj="syntheticsLocationFormReadTheDocsLink"
-                          target="_blank"
-                          href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html#synthetics-private-location-fleet-agent"
-                          external
-                        >
-                          <FormattedMessage
-                            id="xpack.synthetics.monitorManagement.agentCallout.link"
-                            defaultMessage="read the docs"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                }
-              </p>
-            </EuiCallOut>
-          )}
-        </EuiForm>
-      ) : null}
+        )}
+      </EuiForm>
     </>
   );
 };

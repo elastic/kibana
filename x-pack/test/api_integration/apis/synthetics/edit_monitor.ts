@@ -308,6 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
             label: 'Europe West',
             isServiceManaged: true,
           },
+          { id: testPolicyId, label: 'Private location', isServiceManaged: false },
         ],
       };
 
@@ -341,22 +342,19 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = id;
         const toUpdate = {
           ...savedMonitor,
-          locations: [
-            ...savedMonitor.locations,
-            { id: testPolicyId, label: 'Private location', isServiceManaged: false },
-          ],
+          name: '!@#$%^&*()_++[\\-\\]- wow',
           urls: 'https://google.com',
         };
         await supertestWithoutAuth
           .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
-          .send(toUpdate)
-          .expect(500);
+          .send(toUpdate);
 
         const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not updated
+        expect(response.body.attributes.urls).not.eql(toUpdate.urls);
         expect(response.body.attributes.urls).eql(newMonitor.urls);
         expect(response.body.attributes.locations).eql(newMonitor.locations);
       } finally {
@@ -408,7 +406,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send(toUpdate)
           .expect(200);
-
+        //
         const updatedResponse = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated

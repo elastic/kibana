@@ -51,7 +51,7 @@ import type {
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
-async function populateAssignedAgentsCount(
+export async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[]
@@ -77,10 +77,11 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
+  const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
+      esClient,
       ...restOfQuery,
     });
 
@@ -90,11 +91,6 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       page,
       perPage,
     };
-    if (!noAgentCount) {
-      await populateAssignedAgentsCount(esClient, soClient, items);
-    } else {
-      items.forEach((item) => (item.agents = 0));
-    }
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

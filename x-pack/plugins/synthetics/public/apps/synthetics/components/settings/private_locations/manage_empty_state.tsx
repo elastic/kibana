@@ -33,7 +33,7 @@ export const ManageEmptyState: FC<{
   }
 
   if (privateLocations.length === 0 && showEmptyLocations) {
-    return <EmptyLocations setIsAddingNew={setIsAddingNew} disabled={!hasFleetPermissions} />;
+    return <EmptyLocations setIsAddingNew={setIsAddingNew} />;
   }
 
   return <>{children}</>;

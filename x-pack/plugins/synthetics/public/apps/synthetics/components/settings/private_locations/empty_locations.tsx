@@ -10,22 +10,23 @@ import { useHistory } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
 import { setAddingNewPrivateLocation, setManageFlyoutOpen } from '../../../state/private_locations';
 
 export const EmptyLocations = ({
   inFlyout = true,
   setIsAddingNew,
-  disabled,
   redirectToSettings,
 }: {
   inFlyout?: boolean;
-  disabled?: boolean;
   setIsAddingNew?: (val: boolean) => void;
   redirectToSettings?: boolean;
 }) => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const { canSave } = useSyntheticsSettingsContext();
 
   return (
     <EuiEmptyPrompt
@@ -44,7 +45,7 @@ export const EmptyLocations = ({
             iconType="plusInCircle"
             color="primary"
             fill
-            isDisabled={disabled}
+            isDisabled={!canSave}
             href={history.createHref({
               pathname: PRIVATE_LOCATIOSN_ROUTE,
             })}
@@ -55,7 +56,7 @@ export const EmptyLocations = ({
           <EuiButton
             data-test-subj="syntheticsEmptyLocationsButton"
             iconType="plusInCircle"
-            disabled={disabled}
+            disabled={!canSave}
             color="primary"
             fill
             onClick={() => {

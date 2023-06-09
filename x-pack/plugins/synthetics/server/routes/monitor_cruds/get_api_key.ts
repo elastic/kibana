@@ -10,13 +10,13 @@ import { API_URLS } from '../../../common/constants';
 
 export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_APIKEY,
+  path: API_URLS.SYNTHETICS_PROJECT_API_KEY,
   validate: {},
   handler: async ({ request, server }): Promise<any> => {
     const apiKey = await generateAPIKey({
       request,
       server,
-      uptimePrivileges: true,
+      projectAPIKey: true,
     });
 
     return { apiKey };
