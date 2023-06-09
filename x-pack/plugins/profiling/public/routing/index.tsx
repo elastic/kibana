@@ -14,7 +14,9 @@ import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
 import { FlameGraphsView } from '../views/flame_graphs_view';
-import { FunctionsView } from '../views/functions_view';
+import { FunctionsView } from '../views/functions';
+import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
+import { TopNFunctionsView } from '../views/functions/topn';
 import { NoDataView } from '../views/no_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { RouteBreadcrumb } from './route_breadcrumb';
@@ -174,7 +176,7 @@ const routes = {
                     })}
                     href="/functions/topn"
                   >
-                    <Outlet />
+                    <TopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
               },
@@ -186,16 +188,36 @@ const routes = {
                     })}
                     href="/functions/differential"
                   >
-                    <Outlet />
+                    <DifferentialTopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.type({
-                    comparisonRangeFrom: t.string,
-                    comparisonRangeTo: t.string,
-                    comparisonKuery: t.string,
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      comparisonRangeFrom: t.string,
+                      comparisonRangeTo: t.string,
+                      comparisonKuery: t.string,
+                      comparisonMode: t.union([
+                        t.literal(ComparisonMode.Absolute),
+                        t.literal(ComparisonMode.Relative),
+                      ]),
+                      normalizationMode: t.union([
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
+                      ]),
+                    }),
+                    t.partial({
+                      baseline: toNumberRt,
+                      comparison: toNumberRt,
+                    }),
+                  ]),
                 }),
+                defaults: {
+                  query: {
+                    comparisonMode: ComparisonMode.Absolute,
+                    normalizationMode: NormalizationMode.Time,
+                  },
+                },
               },
             },
           },
