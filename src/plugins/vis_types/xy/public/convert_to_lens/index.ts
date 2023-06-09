@@ -13,6 +13,7 @@ import {
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
 import { ConvertXYToLensVisualization } from './types';
@@ -71,7 +72,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     (param) => param.show && visSchemas.metric.some((m) => m.aggId?.split('.')[0] === param.data.id)
   );
 
-  const { getColumnsFromVis, createStaticValueColumn, excludeMetaFromColumn } =
+  const { getColumnsFromVis, createStaticValueColumn } =
     await convertToLensModule;
   const dataLayers = getColumnsFromVis(
     vis,

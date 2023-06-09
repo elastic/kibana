@@ -11,6 +11,7 @@ import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { ConvertMetricVisToLensVisualization } from './types';
 import { getConfiguration } from './configurations';
@@ -27,7 +28,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const { getColumnsFromVis, getPalette, getPercentageModeConfig, excludeMetaFromColumn } =
+  const { getColumnsFromVis, getPalette, getPercentageModeConfig } =
     await convertToLensModule;
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.metric);

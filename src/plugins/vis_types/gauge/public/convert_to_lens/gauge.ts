@@ -12,6 +12,7 @@ import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { ConvertGaugeVisToLensVisualization } from './types';
 import { getConfiguration } from './configurations/gauge';
@@ -33,7 +34,6 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     createStaticValueColumn,
     getPalette,
     getPercentageModeConfig,
-    excludeMetaFromColumn,
   } = await convertToLensModule;
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);

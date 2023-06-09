@@ -11,6 +11,7 @@ import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import { NavigateToLensContext, TagcloudVisConfiguration } from '@kbn/visualizations-plugin/common';
@@ -32,7 +33,7 @@ export const convertToLens = async (
     return null;
   }
 
-  const { getColumnsFromVis, excludeMetaFromColumn } = await convertToLensModule;
+  const { getColumnsFromVis } = await convertToLensModule;
   const layers = getColumnsFromVis(vis, timefilter, dataView, {
     splits: ['segment'],
   });

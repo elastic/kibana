@@ -7,7 +7,6 @@
  */
 
 export { getColumnsFromVis } from './schemas';
-export { excludeMetaFromColumn } from './utils';
 export {
   convertToFiltersColumn,
   getPercentageColumnFormulaColumn,
