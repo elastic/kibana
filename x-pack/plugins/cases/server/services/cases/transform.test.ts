@@ -564,5 +564,23 @@ describe('case transforms', () => {
         transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
       ).toBe(null);
     });
+
+    it('returns the correct value for category when it is null', () => {
+      const CaseSOResponseWithoutCategory = createCaseSavedObjectResponse();
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe(null);
+    });
+
+    it('returns the correct value for category when it is defined', () => {
+      const CaseSOResponseWithoutCategory = createCaseSavedObjectResponse({
+        overrides: { category: 'foobar' },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe('foobar');
+    });
   });
 });
