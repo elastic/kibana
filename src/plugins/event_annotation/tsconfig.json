@@ -22,7 +22,7 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/i18n-react",
-    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",
