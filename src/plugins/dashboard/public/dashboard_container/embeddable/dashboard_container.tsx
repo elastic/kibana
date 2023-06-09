@@ -28,7 +28,10 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
-import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
+import {
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
+} from '@kbn/controls-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -324,12 +327,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
     } = this.getState();
 
-    if (
-      this.controlGroup &&
-      lastSavedControlGroupInput &&
-      !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
-    ) {
-      this.controlGroup.updateInput(lastSavedControlGroupInput);
+    if (this.controlGroup) {
+      if (!lastSavedControlGroupInput) {
+        this.controlGroup.updateInput(getDefaultControlGroupInput());
+      } else if (
+        !persistableControlGroupInputIsEqual(
+          this.controlGroup.getInput(),
+          lastSavedControlGroupInput
+        )
+      ) {
+        this.controlGroup.updateInput(lastSavedControlGroupInput);
+      }
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
