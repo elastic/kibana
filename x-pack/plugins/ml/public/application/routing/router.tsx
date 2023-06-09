@@ -64,7 +64,6 @@ export interface PageDependencies {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-  redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
 export const PageLoader: FC<{ context: MlContextValue | null }> = ({ context, children }) => {

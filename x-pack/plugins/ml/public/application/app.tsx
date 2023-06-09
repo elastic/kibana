@@ -9,28 +9,26 @@ import React, { type FC, useMemo } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
-
 import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
-
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+  wrapWithTheme,
+} from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-
-import { firstValueFrom } from 'rxjs';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
 import { MlLicense } from '../../common/license';
 import { cacheDataViewsContract } from './util/index_utils';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-
-import { setDependencyCache, clearCache } from './util/dependency_cache';
+import { clearCache, setDependencyCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { mlUsageCollectionProvider } from './services/usage_collection';
 import { MlRouter } from './routing';
@@ -81,29 +79,12 @@ export interface MlServicesContext {
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
-  const redirectToMlAccessDeniedPage = async () => {
-    // access maybe be denied due to an expired license, so check the license status first
-    // if the license has expired, redirect to the license management page
-    const license = await firstValueFrom(deps.licensing.license$);
-    const redirectPage =
-      license.status === 'expired'
-        ? deps.share.url.locators.get('LICENSE_MANAGEMENT_LOCATOR')!.getUrl({
-            page: 'dashboard',
-          })
-        : deps.share.url.locators.get(ML_APP_LOCATOR)!.getUrl({
-            page: ML_PAGES.ACCESS_DENIED,
-          });
-
-    await coreStart.application.navigateToUrl(await redirectPage);
-  };
-
   const pageDeps = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     dataViewsContract: deps.data.dataViews,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
-    redirectToMlAccessDeniedPage,
   };
 
   const services = useMemo(() => {

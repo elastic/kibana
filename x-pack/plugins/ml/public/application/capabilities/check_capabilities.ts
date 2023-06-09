@@ -130,32 +130,6 @@ export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiS
   });
 }
 
-export function checkGetJobsCapabilitiesResolver(
-  redirectToMlAccessDeniedPage: () => Promise<void>
-): Promise<MlCapabilities> {
-  return new Promise((resolve, reject) => {
-    getCapabilities()
-      .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
-        _capabilities = capabilities;
-        // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
-        // all other functionality is controlled by the return capabilities object.
-        // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
-        // allow the promise to resolve as the separate license check will redirect then user to
-        // a basic feature
-        if (_capabilities.canGetJobs || isPlatinumOrTrialLicense === false) {
-          return resolve(_capabilities);
-        } else {
-          await redirectToMlAccessDeniedPage();
-          return reject();
-        }
-      })
-      .catch(async (e) => {
-        await redirectToMlAccessDeniedPage();
-        return reject();
-      });
-  });
-}
-
 export function checkCreateJobsCapabilitiesResolver(
   redirectToJobsManagementPage: () => Promise<void>
 ): Promise<MlCapabilities> {
@@ -177,29 +151,6 @@ export function checkCreateJobsCapabilitiesResolver(
       })
       .catch(async (e) => {
         await redirectToJobsManagementPage();
-        return reject();
-      });
-  });
-}
-
-export function checkFindFileStructurePrivilegeResolver(
-  redirectToMlAccessDeniedPage: () => Promise<void>
-): Promise<MlCapabilities> {
-  return new Promise((resolve, reject) => {
-    getCapabilities()
-      .then(async ({ capabilities }) => {
-        _capabilities = capabilities;
-        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
-        // all other functionality is controlled by the return _capabilities object
-        if (_capabilities.canFindFileStructure) {
-          return resolve(_capabilities);
-        } else {
-          await redirectToMlAccessDeniedPage();
-          return reject();
-        }
-      })
-      .catch(async (e) => {
-        await redirectToMlAccessDeniedPage();
         return reject();
       });
   });

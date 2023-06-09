@@ -15,7 +15,7 @@ import { MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import type { ResolverResults, Resolvers } from './resolvers';
 import type { MlContextValue } from '../contexts/ml';
-import { ML_PAGES } from '../../../common/constants/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../common/constants/locator';
 
 /**
  * Resolves required dependencies for landing on the page
@@ -33,11 +33,14 @@ export const useRouteResolver = (
 
   const {
     services: {
-      application: { navigateToApp },
+      application: { navigateToApp, navigateToUrl },
       mlServices: { mlCapabilities },
       uiSettings,
       data: { dataViews },
       notifications,
+      share: {
+        url: { locators },
+      },
     },
   } = useMlKibana();
 
@@ -78,8 +81,24 @@ export const useRouteResolver = (
     mlCapabilities.refreshCapabilities();
   });
 
+  const redirectToMlAccessDeniedPage = useCallback(async () => {
+    const redirectPage = mlLicenseInfo.hasLicenseExpired
+      ? locators.get('LICENSE_MANAGEMENT_LOCATOR')!.getUrl({
+          page: 'dashboard',
+        })
+      : locators.get(ML_APP_LOCATOR)!.getUrl({
+          page: ML_PAGES.ACCESS_DENIED,
+        });
+
+    await navigateToUrl(await redirectPage);
+  }, [locators, navigateToUrl, mlLicenseInfo.hasLicenseExpired]);
+
   // Check if the user has all required permissions
   const capabilitiesResults = usePermissionCheck(requiredCapabilities);
+
+  if (capabilitiesResults.some((v) => v === false)) {
+    redirectToMlAccessDeniedPage();
+  }
 
   const resolveCustomResolvers = useCallback(async () => {
     if (!customResolvers) return;
@@ -96,16 +115,14 @@ export const useRouteResolver = (
     return tempResults;
   }, [customResolvers]);
 
-  if (capabilitiesResults.some((v) => v === false)) {
-    // Redirect to access denied
-    // return '';
-  }
-
   useEffect(
     function resolveOnMount() {
+      let mounted = true;
       resolveCustomResolvers()
         .then((customResults) => {
-          setResults(customResults);
+          if (mounted) {
+            setResults(customResults);
+          }
         })
         .catch((error) => {
           // an unexpected error has occurred. This could be caused by an incorrect index pattern or saved search ID
@@ -115,6 +132,10 @@ export const useRouteResolver = (
             }),
           });
         });
+
+      return () => {
+        mounted = false;
+      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
