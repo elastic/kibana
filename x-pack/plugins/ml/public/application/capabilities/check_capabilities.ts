@@ -100,16 +100,14 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
     },
   } = useMlKibana();
 
-  const licenseHasExpired = hasLicenseExpired();
-
   const capabilities = useObservable(
     mlCapabilitiesService.capabilities$,
     mlCapabilitiesService.getCapabilities()
   );
 
   return Array.isArray(capability)
-    ? capability.map((c) => capabilities[c] && !licenseHasExpired)
-    : capabilities[capability] && !licenseHasExpired;
+    ? capability.map((c) => capabilities[c])
+    : capabilities[capability];
 }
 
 export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {

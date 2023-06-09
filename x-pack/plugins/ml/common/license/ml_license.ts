@@ -7,7 +7,7 @@
 
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { PLUGIN_ID } from '../constants/app';
 
@@ -21,6 +21,16 @@ export interface LicenseStatus {
   message?: string;
 }
 
+export interface MlLicenseInfo {
+  license: ILicense | null;
+  isSecurityEnabled: boolean;
+  hasLicenseExpired: boolean;
+  isMlEnabled: boolean;
+  isMinimumLicense: boolean;
+  isFullLicense: boolean;
+  isTrialLicense: boolean;
+}
+
 export class MlLicense {
   private _licenseSubscription: Subscription | null = null;
   private _license: ILicense | null = null;
@@ -31,7 +41,7 @@ export class MlLicense {
   private _isFullLicense: boolean = false;
   private _isTrialLicense: boolean = false;
 
-  private _licenseInfo$ = new BehaviorSubject({
+  private _licenseInfo$ = new BehaviorSubject<MlLicenseInfo>({
     license: this._license,
     isSecurityEnabled: this._isSecurityEnabled,
     hasLicenseExpired: this._hasLicenseExpired,
@@ -41,7 +51,14 @@ export class MlLicense {
     isTrialLicense: this._isTrialLicense,
   });
 
-  public licenseInfo$ = this._licenseInfo$.pipe(distinctUntilChanged(isEqual));
+  public licenseInfo$: Observable<MlLicenseInfo> = this._licenseInfo$.pipe(
+    distinctUntilChanged(isEqual)
+  );
+
+  public isLicenseReady$: Observable<boolean> = this._licenseInfo$.pipe(
+    map((v) => !!v.license),
+    distinctUntilChanged()
+  );
 
   public setup(license$: Observable<ILicense>, callback?: (lic: MlLicense) => void) {
     this._licenseSubscription = license$.subscribe((license) => {

@@ -6,17 +6,10 @@
  */
 
 import React from 'react';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
-  combinedQuery: any;
-  currentDataView: DataView; // TODO this should be DataView or null
-  // @deprecated currentSavedSearch is of SavedSearchSavedObject type, change to selectedSavedSearch
-  deprecatedSavedSearchObj: SavedSearchSavedObject | null;
-  selectedSavedSearch: SavedSearch | null;
   /**
    * @deprecated Use the data view contract from the Kibana context.
    */

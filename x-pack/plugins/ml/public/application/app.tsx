@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC, useMemo } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
@@ -22,6 +22,7 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 
 import { firstValueFrom } from 'rxjs';
 import useLifecycles from 'react-use/lib/useLifecycles';
+import useObservable from 'react-use/lib/useObservable';
 import { MlLicense } from '../../common/license';
 import { cacheDataViewsContract } from './util/index_utils';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
@@ -105,30 +106,32 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     redirectToMlAccessDeniedPage,
   };
 
-  const services = {
-    kibanaVersion: deps.kibanaVersion,
-    share: deps.share,
-    data: deps.data,
-    security: deps.security,
-    licenseManagement: deps.licenseManagement,
-    storage: localStorage,
-    embeddable: deps.embeddable,
-    maps: deps.maps,
-    triggersActionsUi: deps.triggersActionsUi,
-    dataVisualizer: deps.dataVisualizer,
-    usageCollection: deps.usageCollection,
-    fieldFormats: deps.fieldFormats,
-    dashboard: deps.dashboard,
-    charts: deps.charts,
-    cases: deps.cases,
-    unifiedSearch: deps.unifiedSearch,
-    licensing: deps.licensing,
-    lens: deps.lens,
-    savedObjectsManagement: deps.savedObjectsManagement,
-    savedSearch: deps.savedSearch,
-    ...coreStart,
-    mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
-  };
+  const services = useMemo(() => {
+    return {
+      kibanaVersion: deps.kibanaVersion,
+      share: deps.share,
+      data: deps.data,
+      security: deps.security,
+      licenseManagement: deps.licenseManagement,
+      storage: localStorage,
+      embeddable: deps.embeddable,
+      maps: deps.maps,
+      triggersActionsUi: deps.triggersActionsUi,
+      dataVisualizer: deps.dataVisualizer,
+      usageCollection: deps.usageCollection,
+      fieldFormats: deps.fieldFormats,
+      dashboard: deps.dashboard,
+      charts: deps.charts,
+      cases: deps.cases,
+      unifiedSearch: deps.unifiedSearch,
+      licensing: deps.licensing,
+      lens: deps.lens,
+      savedObjectsManagement: deps.savedObjectsManagement,
+      savedSearch: deps.savedSearch,
+      ...coreStart,
+      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+    };
+  }, [deps, coreStart]);
 
   useLifecycles(
     function setupLicenseOnMount() {
@@ -139,6 +142,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       services.mlServices.mlLicense.unsubscribe();
     }
   );
+
+  // Wait for license to be retrieved before rendering the app.
+  const licenseReady = useObservable(services.mlServices.mlLicense.isLicenseReady$, false);
+  if (!licenseReady) return null;
 
   const datePickerDeps = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),

@@ -5,36 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
+import { useRouteResolver } from './use_resolver';
+import { MlLicenseInfo } from '../../../common/license/ml_license';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-
-import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
-import { useNotifications } from '../contexts/kibana';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-
-import { useResolver } from './use_resolver';
-
-jest.mock('../contexts/kibana/use_create_url', () => {
-  return {
-    useCreateAndNavigateToMlLink: jest.fn(),
-  };
-});
-
-jest.mock('../contexts/kibana', () => {
-  return {
-    useNavigateToPath: () => jest.fn(),
-    useNotifications: jest.fn(),
-  };
-});
-
-const addError = jest.fn();
-(useNotifications as jest.Mock).mockImplementation(() => ({
-  toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError },
-}));
-
-const redirectToJobsManagementPage = jest.fn(() => Promise.resolve());
-(useCreateAndNavigateToMlLink as jest.Mock).mockImplementation(() => redirectToJobsManagementPage);
+jest.mock('../contexts/kibana');
+jest.mock('../capabilities/check_capabilities');
 
 describe('useResolver', () => {
   afterEach(() => {
@@ -45,47 +22,13 @@ describe('useResolver', () => {
     jest.useRealTimers();
   });
 
-  it('should accept undefined as dataViewId and savedSearchId.', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
-    );
-
-    await act(async () => {
-      await waitForNextUpdate();
+  it('should redirect to home page if ML is disabled', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: false,
     });
 
-    expect(result.current).toStrictEqual({
-      context: {
-        combinedQuery: {
-          bool: {
-            must: [
-              {
-                match_all: {},
-              },
-            ],
-          },
-        },
-        currentDataView: null,
-        deprecatedSavedSearchObj: null,
-        dataViewsContract: {},
-        kibanaConfig: {},
-        selectedSavedSearch: null,
-      },
-      results: {},
-    });
-    expect(addError).toHaveBeenCalledTimes(0);
-    expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
-  });
+    renderHook(() => useRouteResolver('full', ['canCreateJob']));
 
-  it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
-    const { result } = renderHook(() =>
-      useResolver('', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
-    );
-
-    await act(async () => {});
-
-    expect(result.current).toStrictEqual({ context: null, results: {} });
-    expect(addError).toHaveBeenCalledTimes(1);
-    expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(1);
+    expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
   });
 });

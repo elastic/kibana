@@ -9,19 +9,13 @@ import { useContext } from 'react';
 
 import { MlContext, MlContextValue } from './ml_context';
 
+/**
+ * @deprecated use services from useMlKibana
+ */
 export const useMlContext = () => {
   const context = useContext(MlContext);
 
-  if (
-    context.combinedQuery === undefined ||
-    context.currentDataView === undefined ||
-    // @deprecated currentSavedSearch is of SavedSearchSavedObject type
-    // and should be migrated to selectedSavedSearch
-    context.deprecatedSavedSearchObj === undefined ||
-    context.selectedSavedSearch === undefined ||
-    context.dataViewsContract === undefined ||
-    context.kibanaConfig === undefined
-  ) {
+  if (context.dataViewsContract === undefined || context.kibanaConfig === undefined) {
     throw new Error('required attribute is undefined');
   }
 

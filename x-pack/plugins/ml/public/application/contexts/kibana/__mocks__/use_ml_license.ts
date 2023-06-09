@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export { useMlKibana } from './kibana_context';
-export { useTimefilter } from './use_timefilter';
-export { useMlApiContext } from './use_ml_api_context';
-export { useMlLicenseInfo } from './use_ml_license';
+export const useMlLicenseInfo = jest.fn(() => {
+  return {
+    isSecurityEnabled: true,
+    hasLicenseExpired: false,
+    isMlEnabled: true,
+    isMinimumLicense: true,
+    isFullLicense: true,
+    isTrialLicense: false,
+    license: {},
+  };
+});
