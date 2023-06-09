@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
@@ -787,10 +788,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         expect(await (await testSubjects.find(input)).getAttribute('value')).to.eql(value);
       });
     },
-    async useCurvedLines() {
-      await testSubjects.click('lnsCurveStyleToggle');
+    async setCurvedLines(option: XYCurveType) {
+      await testSubjects.click('lnsCurveStyleSelect');
+      const optionSelector = await find.byCssSelector(`#${option}`);
+      await optionSelector.click();
     },
-    async editMissingValues(option: string) {
+    async editMissingValues(option: FittingFunction) {
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
       await optionSelector.click();

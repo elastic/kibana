@@ -20,5 +20,6 @@
     { "path": "../test/tsconfig.json" },
     "@kbn/expect",
     "@kbn/test",
+    "@kbn/repo-info",
   ]
 }
