@@ -6,17 +6,12 @@
  */
 
 import {
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
-import {
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel';
-import { openGraphAnalyzerTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
+  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
+  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
+import { openInvestigationTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_investigation_tab';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { ANALYZER_NODE } from '../../../../screens/alerts';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -25,7 +20,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
-  'Alert details expandable flyout left panel analyzer graph',
+  'Alert details expandable flyout left panel investigation',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     beforeEach(() => {
@@ -36,22 +31,15 @@ describe(
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
-      openGraphAnalyzerTab();
+      openInvestigationTab();
     });
 
-    it('should display analyzer graph and node list under visualize', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
+    it('should display investigation guide', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
         .should('be.visible')
-        .and('have.text', 'Visualize');
+        .and('have.text', 'Investigation');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
-
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Analyzer Graph');
-
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
-      cy.get(ANALYZER_NODE).first().should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
     });
   }
 );

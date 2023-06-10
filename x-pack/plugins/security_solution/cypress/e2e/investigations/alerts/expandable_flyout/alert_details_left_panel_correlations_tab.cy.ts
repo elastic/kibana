@@ -7,23 +7,22 @@
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
-import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { INDICATOR_MATCH_ENRICHMENT_SECTION } from '../../../../screens/alerts_details';
-import { cleanKibana } from '../../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login, visit } from '../../../../tasks/login';
-import { ALERTS_URL } from '../../../../urls/navigation';
-import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
-import { openThreatIntelligenceTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel';
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
+import { openCorrelationsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
+import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
+import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { cleanKibana } from '../../../../tasks/common';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { login, visit } from '../../../../tasks/login';
+import { ALERTS_URL } from '../../../../urls/navigation';
 
 describe(
-  'Expandable flyout left panel threat intelligence',
+  'Expandable flyout left panel correlations',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     beforeEach(() => {
@@ -35,7 +34,7 @@ describe(
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openInsightsTab();
-      openThreatIntelligenceTab();
+      openCorrelationsTab();
     });
 
     it('should serialize its state to url', () => {
@@ -45,11 +44,11 @@ describe(
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Threat Intelligence');
+        .and('have.text', 'Correlations');
 
-      cy.get(INDICATOR_MATCH_ENRICHMENT_SECTION).should('be.visible');
+      // TODO actual test
     });
   }
 );
