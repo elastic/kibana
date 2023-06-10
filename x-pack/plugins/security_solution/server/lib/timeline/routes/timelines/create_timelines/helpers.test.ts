@@ -127,6 +127,7 @@ describe('createTimelines', () => {
           note: 'new note',
           noteId: 'abc',
           timelineId: '',
+          version: 'testVersion',
         },
       ]);
     });
