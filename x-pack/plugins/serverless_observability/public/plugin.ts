@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getObservabilitySideNavComponent } from './components/side_navigation';
-import {
+import type {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
   ServerlessObservabilityPluginSetupDependencies,

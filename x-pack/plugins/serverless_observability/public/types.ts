@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import {
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';

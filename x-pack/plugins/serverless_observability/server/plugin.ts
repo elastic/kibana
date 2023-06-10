@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
-import {
+import type {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
   SetupDependencies,

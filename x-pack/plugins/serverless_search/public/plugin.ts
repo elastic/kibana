@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
-import {
+import type {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
   ServerlessSearchPluginStart,

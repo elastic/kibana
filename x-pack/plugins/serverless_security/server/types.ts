@@ -7,7 +7,7 @@
 
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
-import {
+import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/server';

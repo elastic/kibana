@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { MlPluginSetup } from '@kbn/ml-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

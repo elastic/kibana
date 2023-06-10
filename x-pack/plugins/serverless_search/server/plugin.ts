@@ -16,7 +16,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 
 import type { ServerlessSearchConfig } from './config';
-import {
+import type {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginStart,
   SetupDependencies,

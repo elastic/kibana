@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
-import { ServerlessSecurityConfig } from './config';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import type { ServerlessSecurityConfig } from './config';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
-import {
+import type {
   ServerlessSecurityPluginSetup,
   ServerlessSecurityPluginStart,
   ServerlessSecurityPluginSetupDependencies,
