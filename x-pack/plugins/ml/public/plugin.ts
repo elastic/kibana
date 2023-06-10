@@ -99,6 +99,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
 
+  private navMenuEnabled = true;
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
@@ -142,7 +144,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
           },
-          params
+          params,
+          this.navMenuEnabled
         );
       },
     });
@@ -213,8 +216,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }
     });
 
+    const setNavMenuEnabled = (enabled: boolean) => {
+      this.navMenuEnabled = enabled;
+    };
+
     return {
       locator: this.locator,
+      setNavMenuEnabled,
     };
   }
 

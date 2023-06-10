@@ -21,6 +21,7 @@ export class ServerlessObservabilityPlugin
     _core: CoreSetup,
     _setupDeps: ServerlessObservabilityPluginSetupDependencies
   ): ServerlessObservabilityPluginSetup {
+    _setupDeps.ml.setNavMenuEnabled(false);
     return {};
   }
 

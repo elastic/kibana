@@ -43,6 +43,7 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { userProfile, ...services });
       },
     });
+    _setupDeps.ml.setNavMenuEnabled(false);
     return {};
   }
 

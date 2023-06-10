@@ -113,6 +113,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
     }
   }, [activeRoute]);
 
+  const sideNavItems = useSideNavItems(activeRoute);
+
   return (
     <MlPageControlsContext.Provider
       value={{
@@ -126,13 +128,17 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        solutionNav={{
-          name: i18n.translate('xpack.ml.plugin.title', {
-            defaultMessage: 'Machine Learning',
-          }),
-          icon: 'machineLearningApp',
-          items: useSideNavItems(activeRoute),
-        }}
+        solutionNav={
+          pageDeps.navMenuEnabled
+            ? {
+                name: i18n.translate('xpack.ml.plugin.title', {
+                  defaultMessage: 'Machine Learning',
+                }),
+                icon: 'machineLearningApp',
+                items: sideNavItems,
+              }
+            : undefined
+        }
         pageHeader={{
           pageTitle: <MlPageHeaderRenderer />,
           rightSideItems,

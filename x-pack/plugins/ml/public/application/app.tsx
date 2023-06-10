@@ -10,7 +10,7 @@ import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
-import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
@@ -32,6 +32,7 @@ import { mlUsageCollectionProvider } from './services/usage_collection';
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
+import type { PageDependencies } from './routing/router';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -43,6 +44,7 @@ interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
   appMountParams: AppMountParameters;
+  navMenuEnabled: boolean;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -73,7 +75,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams, navMenuEnabled }) => {
   const redirectToMlAccessDeniedPage = async () => {
     // access maybe be denied due to an expired license, so check the license status first
     // if the license has expired, redirect to the license management page
@@ -90,13 +92,14 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     await coreStart.application.navigateToUrl(await redirectPage);
   };
 
-  const pageDeps = {
+  const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     dataViewsContract: deps.data.dataViews,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
+    navMenuEnabled,
   };
 
   const services = {
@@ -159,7 +162,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 export const renderApp = (
   coreStart: CoreStart,
   deps: MlDependencies,
-  appMountParams: AppMountParameters
+  appMountParams: AppMountParameters,
+  navMenuEnabled: boolean
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -190,7 +194,12 @@ export const renderApp = (
 
   const mlLicense = setLicenseCache(deps.licensing, coreStart.application, () =>
     ReactDOM.render(
-      <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+      <App
+        coreStart={coreStart}
+        deps={deps}
+        appMountParams={appMountParams}
+        navMenuEnabled={navMenuEnabled}
+      />,
       appMountParams.element
     )
   );

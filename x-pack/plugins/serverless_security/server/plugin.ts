@@ -41,6 +41,8 @@ export class ServerlessSecurityPlugin
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
     }
 
+    pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
+
     return {};
   }
 

@@ -65,6 +65,7 @@ export interface PageDependencies {
   dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   redirectToMlAccessDeniedPage: () => Promise<void>;
+  navMenuEnabled: boolean;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {

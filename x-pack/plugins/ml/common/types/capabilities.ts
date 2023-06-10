@@ -18,6 +18,12 @@ export const apmUserMlCapabilities = {
   canGetJobs: false,
 };
 
+export const featureMlCapabilities = {
+  isADEnabled: true,
+  isDFAEnabled: true,
+  isNLPEnabled: true,
+};
+
 export const userMlCapabilities = {
   // Anomaly Detection
   canGetJobs: false,
@@ -78,9 +84,10 @@ export const adminMlCapabilities = {
   canStartStopTrainedModels: false,
 };
 
+export type FeatureMlCapabilities = typeof featureMlCapabilities;
 export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
-export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
+export type MlCapabilities = FeatureMlCapabilities & UserMlCapabilities & AdminMlCapabilities;
 export type MlCapabilitiesKey = keyof MlCapabilities;
 
 export const basicLicenseMlCapabilities = [
@@ -91,6 +98,7 @@ export const basicLicenseMlCapabilities = [
 
 export function getDefaultCapabilities(): MlCapabilities {
   return {
+    ...featureMlCapabilities,
     ...userMlCapabilities,
     ...adminMlCapabilities,
   };
@@ -99,8 +107,13 @@ export function getDefaultCapabilities(): MlCapabilities {
 export function getPluginPrivileges() {
   const apmUserMlCapabilitiesKeys = Object.keys(apmUserMlCapabilities);
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
+  const featureMlCapabilitiesKeys = Object.keys(featureMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
-  const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  const allMlCapabilitiesKeys = [
+    ...featureMlCapabilitiesKeys,
+    ...adminMlCapabilitiesKeys,
+    ...userMlCapabilitiesKeys,
+  ];
 
   const savedObjects = [
     'index-pattern',
@@ -141,10 +154,13 @@ export function getPluginPrivileges() {
     },
     user: {
       ...privilege,
-      api: ['fileUpload:analyzeFile', ...userMlCapabilitiesKeys.map((k) => `ml:${k}`)],
+      api: [
+        'fileUpload:analyzeFile',
+        ...[...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys].map((k) => `ml:${k}`),
+      ],
       catalogue: [PLUGIN_ID],
       management: { insightsAndAlerting: [] },
-      ui: userMlCapabilitiesKeys,
+      ui: [...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys],
       savedObject: {
         all: [],
         read: savedObjects,
@@ -166,7 +182,7 @@ export function getPluginPrivileges() {
         all: [],
         read: [ML_JOB_SAVED_OBJECT_TYPE],
       },
-      api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`), // should this include feature keys?!!!!!!!!!!!!!!!!!!!!!!!
       ui: apmUserMlCapabilitiesKeys,
     },
   };

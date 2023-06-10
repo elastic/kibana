@@ -37,6 +37,8 @@ export class ServerlessSecurityPlugin
     setupDeps: ServerlessSecurityPluginSetupDependencies
   ): ServerlessSecurityPluginSetup {
     registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
+
+    setupDeps.ml.setNavMenuEnabled(false);
     return {};
   }
 

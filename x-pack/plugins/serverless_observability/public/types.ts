@@ -10,6 +10,7 @@ import {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { MlPluginSetup } from '@kbn/ml-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPluginSetup {}
@@ -20,6 +21,7 @@ export interface ServerlessObservabilityPluginStart {}
 export interface ServerlessObservabilityPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   serverless: ServerlessPluginSetup;
+  ml: MlPluginSetup;
 }
 
 export interface ServerlessObservabilityPluginStartDependencies {

@@ -81,3 +81,5 @@ export interface RouteInitialization {
   mlLicense: MlLicense;
   routeGuard: RouteGuard;
 }
+
+export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;
