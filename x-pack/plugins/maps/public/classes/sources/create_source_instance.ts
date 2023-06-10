@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  AbstractSourceDescriptor,
-} from '../../../common/descriptor_types';
+import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { ISource } from './source';
 import { getSourceByType } from './source_registry';
 import { setupSources } from './setup_sources';

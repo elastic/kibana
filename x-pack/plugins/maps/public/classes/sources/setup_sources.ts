@@ -19,7 +19,7 @@ import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
 import { WMSSource } from './wms_source';
 import { XYZTMSSource } from './xyz_tms_source';
 
-let registered = false;
+const registered = false;
 
 export function setupSources() {
   if (registered) {

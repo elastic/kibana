@@ -27,19 +27,19 @@ const EXPECTED_UNREGISTERED_SOURCE_TYPES = [
   SOURCE_TYPES.ES_DISTANCE_SOURCE,
   SOURCE_TYPES.ES_TERM_SOURCE,
   SOURCE_TYPES.TABLE_SOURCE,
-]
+];
 
 test('should register all Elastic Maps sources', () => {
   setupSources();
 
   Object.values(SOURCE_TYPES)
-    .filter(sourceType => {
+    .filter((sourceType) => {
       return !EXPECTED_UNREGISTERED_SOURCE_TYPES.includes(sourceType);
     })
-    .forEach(sourceType => {
+    .forEach((sourceType) => {
       const entry = getSourceByType(sourceType);
       if (!entry) {
         throw new Error(`Required source type "${sourceType}" not registered.`);
       }
     });
-})
+});
