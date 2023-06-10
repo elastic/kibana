@@ -55,26 +55,31 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object[]} filters list of filters
    */
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/filters`,
-      validate: {},
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetFilters'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
-      try {
-        const resp = await getAllFilters(mlClient);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+        try {
+          const resp = await getAllFilters(mlClient);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup Filters

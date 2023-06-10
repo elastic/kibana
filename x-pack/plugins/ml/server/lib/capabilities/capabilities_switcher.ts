@@ -67,6 +67,5 @@ function applyEnabledFeatures(mlCaps: MlCapabilities, enabledFeatures: MlFeature
   mlCaps.isADEnabled = enabledFeatures.ad;
   mlCaps.isDFAEnabled = enabledFeatures.dfa;
   mlCaps.isNLPEnabled = enabledFeatures.nlp;
-  mlCaps.canCloseJob = false;
   return mlCaps;
 }

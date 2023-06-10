@@ -298,7 +298,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_summary`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canCloseJob'],
+        tags: ['access:ml:canGetJobs'],
       },
     })
     .addVersion(
