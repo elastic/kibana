@@ -23,7 +23,6 @@ const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const tableEntries = [
   {
     title: 'demo-stack-apache-01',
-    os: '-',
     cpuUsage: '1.2%',
     diskLatency: '1.6 ms',
     rx: '0 bit/s',
@@ -33,7 +32,6 @@ const tableEntries = [
   },
   {
     title: 'demo-stack-client-01',
-    os: '-',
     cpuUsage: '0.5%',
     diskLatency: '8.7 ms',
     rx: '0 bit/s',
@@ -43,7 +41,6 @@ const tableEntries = [
   },
   {
     title: 'demo-stack-haproxy-01',
-    os: '-',
     cpuUsage: '0.8%',
     diskLatency: '7 ms',
     rx: '0 bit/s',
@@ -53,7 +50,6 @@ const tableEntries = [
   },
   {
     title: 'demo-stack-mysql-01',
-    os: '-',
     cpuUsage: '0.9%',
     diskLatency: '6.6 ms',
     rx: '0 bit/s',
@@ -63,7 +59,6 @@ const tableEntries = [
   },
   {
     title: 'demo-stack-nginx-01',
-    os: '-',
     cpuUsage: '0.8%',
     diskLatency: '5.7 ms',
     rx: '0 bit/s',
@@ -73,7 +68,6 @@ const tableEntries = [
   },
   {
     title: 'demo-stack-redis-01',
-    os: '-',
     cpuUsage: '0.8%',
     diskLatency: '6.3 ms',
     rx: '0 bit/s',
