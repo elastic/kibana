@@ -31,7 +31,6 @@ import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import {
   tableDefaults,
@@ -44,13 +43,13 @@ import { AlertsTableComponent } from '../../../../detections/components/alerts_t
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -66,8 +65,8 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
-import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
+import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
+import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -88,12 +87,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import {
-  ALERTS_TABLE_REGISTRY_CONFIG_IDS,
-  APP_UI_ID,
-  DEFAULT_INDEX_KEY,
-  DEFAULT_THREAT_INDEX_KEY,
-} from '../../../../../common/constants';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 
@@ -141,6 +135,8 @@ import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
+import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
+import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -314,6 +310,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     fetchDataViewTitle();
   }, [data.dataViews, defineRuleData?.dataViewId]);
 
+  const { indexPattern: ruleIndexPattern } = useRuleIndexPattern({
+    dataSourceType: defineRuleData?.dataSourceType ?? DataSourceType.IndexPatterns,
+    index: defineRuleData?.index ?? [],
+    dataViewId: defineRuleData?.dataViewId,
+  });
+
   const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
     useDataTableFilters(TableId.alertsOnRuleDetailsPage);
 
@@ -321,33 +323,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
-  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
-
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery({
+    savedQueryId: rule?.saved_id,
     ruleType: rule?.type,
   });
-
-  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
-
-  useEffect(() => {
-    const fetchDV = async () => {
-      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-        (acc, item) => ({
-          ...acc,
-          [item.id]: item,
-        }),
-        {}
-      );
-      setDataViewOptions(dataViewIdIndexPatternMap);
-    };
-    fetchDV();
-    // if this array is not empty the data.dataViews dependency
-    // causes the jest tests for this file to re-render the
-    // step_define_rule component infinitely for some reason.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -787,18 +766,15 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         title={ruleI18n.DEFINITION}
                       >
                         {defineRuleData != null && !isSavedQueryLoading && !isStartingJobs && (
-                          <StepDefineRule
+                          <StepDefineRuleReadOnly
+                            addPadding={false}
                             descriptionColumns="singleSplit"
-                            isReadOnlyView={true}
-                            isLoading={false}
                             defaultValues={{
                               dataViewTitle,
                               ...defineRuleData,
                               queryBar: savedQueryBar ?? defineRuleData.queryBar,
                             }}
-                            kibanaDataViews={dataViewOptions}
-                            indicesConfig={indicesConfig}
-                            threatIndicesConfig={threatIndicesConfig}
+                            indexPattern={ruleIndexPattern}
                           />
                         )}
                       </StepPanel>
@@ -807,10 +783,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                       <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                         {scheduleRuleData != null && (
-                          <StepScheduleRule
+                          <StepScheduleRuleReadOnly
+                            addPadding={false}
                             descriptionColumns="singleSplit"
-                            isReadOnlyView={true}
-                            isLoading={false}
                             defaultValues={scheduleRuleData}
                           />
                         )}
@@ -820,7 +795,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              <TabNavigationWithBreadcrumbs navTabs={pageTabs} />
+              <TabNavigation navTabs={pageTabs} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>

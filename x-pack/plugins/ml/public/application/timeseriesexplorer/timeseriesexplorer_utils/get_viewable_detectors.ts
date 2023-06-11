@@ -21,7 +21,7 @@ export function getViewableDetectors(selectedJob: CombinedJob): ViewableDetector
       viewableDetectors.push({
         index,
         detector_description: dtr.detector_description,
-        function: dtr.function,
+        function: dtr.function!,
       });
     }
   });

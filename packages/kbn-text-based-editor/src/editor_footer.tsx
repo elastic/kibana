@@ -32,6 +32,7 @@ interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
   errors?: MonacoError[];
+  detectTimestamp: boolean;
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
 }
@@ -40,6 +41,7 @@ export const EditorFooter = memo(function EditorFooter({
   lines,
   containerCSS,
   errors,
+  detectTimestamp,
   onErrorClick,
   refreshErrors,
 }: EditorFooterProps) {
@@ -54,7 +56,7 @@ export const EditorFooter = memo(function EditorFooter({
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
+          <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
             <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-footer-lines">
               <p>
                 {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
@@ -63,6 +65,32 @@ export const EditorFooter = memo(function EditorFooter({
                 })}
               </p>
             </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
+            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="calendar" color="subdued" size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-date-info">
+                  <p>
+                    {detectTimestamp
+                      ? i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
+                          {
+                            defaultMessage: '@timestamp detected',
+                          }
+                        )
+                      : i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
+                          {
+                            defaultMessage: '@timestamp not detected',
+                          }
+                        )}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {errors && errors.length > 0 && (
             <EuiFlexItem grow={false}>

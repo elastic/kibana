@@ -173,6 +173,7 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasConnectors: true,
   hasDefaultIngestPipeline: true,
   hasDocumentLevelSecurityEnabled: true,
+  hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
 };

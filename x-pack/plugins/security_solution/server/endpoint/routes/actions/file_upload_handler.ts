@@ -67,7 +67,7 @@ export const getActionFileUploadHandler = (
   const logger = endpointContext.logFactory.get('uploadAction');
 
   return async (context, req, res) => {
-    const fleetFiles = await endpointContext.service.getFleetFilesClient('to-host');
+    const fleetFiles = await endpointContext.service.getFleetToHostFilesClient();
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const fileStream = req.body.file as HapiReadableStream;
     const { file: _, parameters: userParams, ...actionPayload } = req.body;

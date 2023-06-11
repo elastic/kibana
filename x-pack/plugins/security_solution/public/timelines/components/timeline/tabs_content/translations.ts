@@ -25,6 +25,13 @@ export const ANALYZER_TAB = i18n.translate(
   }
 );
 
+export const ASSISTANT_TAB = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.assistantTabTitle',
+  {
+    defaultMessage: 'Security assistant',
+  }
+);
+
 export const NOTES_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.notesTabTimelineTitle',
   {
@@ -36,6 +43,13 @@ export const PINNED_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.pinnedTabTimelineTitle',
   {
     defaultMessage: 'Pinned',
+  }
+);
+
+export const SECURITY_ASSISTANT = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.securityAssistantTimelineTitle',
+  {
+    defaultMessage: 'Security Assistant',
   }
 );
 

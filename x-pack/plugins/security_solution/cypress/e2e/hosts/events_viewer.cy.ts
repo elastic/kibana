@@ -7,7 +7,6 @@
 
 import {
   FIELDS_BROWSER_CHECKBOX,
-  FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
   FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../screens/fields_browser';
@@ -31,7 +30,7 @@ import {
   openEventsViewerFieldsBrowser,
   waitsForEventsToBeLoaded,
 } from '../../tasks/hosts/events';
-import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
+import { kqlSearch } from '../../tasks/security_header';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { resetFields } from '../../tasks/timeline';
@@ -50,7 +49,6 @@ const defaultHeadersInDefaultEcsCategory = [
 describe('Events Viewer', () => {
   before(() => {
     esArchiverLoad('auditbeat_big');
-    login();
   });
 
   after(() => {
@@ -59,14 +57,10 @@ describe('Events Viewer', () => {
 
   context('Fields rendering', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openEvents();
       openEventsViewerFieldsBrowser();
-    });
-
-    afterEach(() => {
-      closeFieldsBrowser();
-      cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
     });
 
     it('displays "view all" option by default', () => {
@@ -86,15 +80,9 @@ describe('Events Viewer', () => {
     });
   });
 
-  context('Events viewer query modal', () => {
-    beforeEach(() => {
-      visit(HOSTS_URL);
-      openEvents();
-    });
-  });
-
   context('Events viewer fields behaviour', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openEvents();
       openEventsViewerFieldsBrowser();
@@ -122,13 +110,10 @@ describe('Events Viewer', () => {
 
   context('Events behavior', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
-    });
-
-    afterEach(() => {
-      clearSearchBar();
     });
 
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {

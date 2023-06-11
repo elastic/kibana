@@ -48,10 +48,10 @@ describe('Cases connectors', () => {
 
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     deleteCases();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
       statusCode: 200,
@@ -59,7 +59,7 @@ describe('Cases connectors', () => {
     });
 
     cy.intercept('POST', '/api/actions/connector').as('createConnector');
-    cy.intercept('PATCH', '/api/cases/configure/*', (req) => {
+    cy.intercept({ method: '+(POST|PATCH)', url: '/api/cases/configure' }, (req) => {
       const connector = req.body.connector;
       req.reply((res) => {
         res.send(200, { ...configureResult, connector });

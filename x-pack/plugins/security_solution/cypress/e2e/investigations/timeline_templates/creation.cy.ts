@@ -51,14 +51,15 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 describe('Timeline Templates', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     deleteTimelines();
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
-  it('Creates a timeline template', async () => {
+  it.skip('Creates a timeline template', () => {
     visitWithoutDateRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();

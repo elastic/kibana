@@ -233,10 +233,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return false;
   }
 
-  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
-    return {};
-  }
-
   supportsJoins(): boolean {
     return false;
   }

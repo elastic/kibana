@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { SavedSearchSavedObject } from '../../../common/types/kibana';
-import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { Query, Filter } from '@kbn/es-query';
+import { getToastNotifications, getSavedSearch } from './dependency_cache';
 
-let savedSearchesCache: SavedSearchSavedObject[] = [];
 let dataViewsContract: DataViewsContract | null = null;
 
 export async function cacheDataViewsContract(dvc: DataViewsContract) {
@@ -19,22 +18,11 @@ export async function cacheDataViewsContract(dvc: DataViewsContract) {
 }
 
 export function loadSavedSearches() {
-  const savedObjectsClient = getSavedObjectsClient();
-  return savedObjectsClient
-    .find({
-      type: 'search',
-      perPage: 10000,
-    })
-    .then((response) => {
-      savedSearchesCache = response.savedObjects;
-      return savedSearchesCache;
-    });
+  return getSavedSearch().getAll();
 }
 
 export async function loadSavedSearchById(id: string) {
-  const savedObjectsClient = getSavedObjectsClient();
-  const ss = await savedObjectsClient.get('search', id);
-  return ss.error === undefined ? ss : null;
+  return getSavedSearch().get(id);
 }
 
 export async function getDataViewNames() {
@@ -69,7 +57,7 @@ export function getDataViewById(id: string): Promise<DataView> {
 }
 
 export interface DataViewAndSavedSearch {
-  savedSearch: SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   dataView: DataView | null;
 }
 
@@ -87,22 +75,21 @@ export async function getDataViewAndSavedSearch(savedSearchId: string) {
   if (ss === null) {
     return resp;
   }
-  const dataViewId = ss.references.find((r) => r.type === 'index-pattern')?.id;
+  const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
   resp.dataView = await getDataViewById(dataViewId!);
   resp.savedSearch = ss;
   return resp;
 }
 
-export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject) {
-  const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-  return JSON.parse(search.searchSourceJSON) as {
-    query: Query;
-    filter: any[];
+export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
+  return {
+    query: savedSearch.searchSource.getField('query')! as Query,
+    filter: savedSearch.searchSource.getField('filter') as Filter[],
   };
 }
 
-export function getSavedSearchById(id: string): SavedSearchSavedObject | undefined {
-  return savedSearchesCache.find((s) => s.id === id);
+export function getSavedSearchById(id: string): Promise<SavedSearch> {
+  return getSavedSearch().get(id);
 }
 
 /**

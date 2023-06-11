@@ -7,11 +7,10 @@
 
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
-import { getSeverityType, ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
+import { getSeverityType, ES_AGGREGATION, ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
 
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-import { ES_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { TimeBuckets } from '../../../../util/time_buckets';

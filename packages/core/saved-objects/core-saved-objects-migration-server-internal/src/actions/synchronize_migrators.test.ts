@@ -6,55 +6,69 @@
  * Side Public License, v 1.
  */
 import { synchronizeMigrators } from './synchronize_migrators';
-import { type Defer, defer } from '../kibana_migrator_utils';
+import { type WaitGroup, waitGroup as createWaitGroup } from '../kibana_migrator_utils';
 
 describe('synchronizeMigrators', () => {
-  let defers: Array<Defer<void>>;
-  let allDefersPromise: Promise<any>;
-  let migratorsDefers: Array<Defer<void>>;
+  let waitGroups: Array<WaitGroup<void>>;
+  let allWaitGroupsPromise: Promise<any>;
+  let migratorsWaitGroups: Array<WaitGroup<void>>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    defers = ['.kibana_cases', '.kibana_task_manager', '.kibana'].map(defer);
-    allDefersPromise = Promise.all(defers.map(({ promise }) => promise));
+    waitGroups = ['.kibana_cases', '.kibana_task_manager', '.kibana'].map(createWaitGroup);
+    allWaitGroupsPromise = Promise.all(waitGroups.map(({ promise }) => promise));
 
-    migratorsDefers = defers.map(({ resolve, reject }) => ({
+    migratorsWaitGroups = waitGroups.map(({ resolve, reject }) => ({
       resolve: jest.fn(resolve),
       reject: jest.fn(reject),
-      promise: allDefersPromise,
+      promise: allWaitGroupsPromise,
     }));
   });
 
   describe('when all migrators reach the synchronization point with a correct state', () => {
     it('unblocks all migrators and resolves Right', async () => {
-      const tasks = migratorsDefers.map((migratorDefer) => synchronizeMigrators(migratorDefer));
+      const tasks = migratorsWaitGroups.map((waitGroup) => synchronizeMigrators({ waitGroup }));
 
       const res = await Promise.all(tasks.map((task) => task()));
 
-      migratorsDefers.forEach((migratorDefer) =>
-        expect(migratorDefer.resolve).toHaveBeenCalledTimes(1)
+      migratorsWaitGroups.forEach((waitGroup) =>
+        expect(waitGroup.resolve).toHaveBeenCalledTimes(1)
       );
-      migratorsDefers.forEach((migratorDefer) =>
-        expect(migratorDefer.reject).not.toHaveBeenCalled()
-      );
+      migratorsWaitGroups.forEach((waitGroup) => expect(waitGroup.reject).not.toHaveBeenCalled());
 
       expect(res).toEqual([
-        { _tag: 'Right', right: 'synchronized_successfully' },
-        { _tag: 'Right', right: 'synchronized_successfully' },
-        { _tag: 'Right', right: 'synchronized_successfully' },
+        {
+          _tag: 'Right',
+          right: {
+            data: [undefined, undefined, undefined],
+            type: 'synchronization_successful',
+          },
+        },
+        {
+          _tag: 'Right',
+          right: {
+            data: [undefined, undefined, undefined],
+            type: 'synchronization_successful',
+          },
+        },
+        {
+          _tag: 'Right',
+          right: {
+            data: [undefined, undefined, undefined],
+            type: 'synchronization_successful',
+          },
+        },
       ]);
     });
 
     it('migrators are not unblocked until the last one reaches the synchronization point', async () => {
       let resolved: number = 0;
-      migratorsDefers.forEach((migratorDefer) => migratorDefer.promise.then(() => ++resolved));
-      const [casesDefer, ...otherMigratorsDefers] = migratorsDefers;
+      migratorsWaitGroups.forEach((waitGroup) => waitGroup.promise.then(() => ++resolved));
+      const [casesDefer, ...otherMigratorsDefers] = migratorsWaitGroups;
 
       // we simulate that only kibana_task_manager and kibana migrators get to the sync point
-      const tasks = otherMigratorsDefers.map((migratorDefer) =>
-        synchronizeMigrators(migratorDefer)
-      );
+      const tasks = otherMigratorsDefers.map((waitGroup) => synchronizeMigrators({ waitGroup }));
       // we don't await for them, or we would be locked forever
       Promise.all(tasks.map((task) => task()));
 
@@ -65,7 +79,7 @@ describe('synchronizeMigrators', () => {
       expect(resolved).toEqual(0);
 
       // finally, the last migrator gets to the synchronization point
-      await synchronizeMigrators(casesDefer)();
+      await synchronizeMigrators({ waitGroup: casesDefer })();
       expect(resolved).toEqual(3);
     });
   });
@@ -75,31 +89,29 @@ describe('synchronizeMigrators', () => {
       it('synchronizedMigrators resolves Left for the rest of migrators', async () => {
         let resolved: number = 0;
         let errors: number = 0;
-        migratorsDefers.forEach((migratorDefer) =>
-          migratorDefer.promise.then(() => ++resolved).catch(() => ++errors)
+        migratorsWaitGroups.forEach((waitGroup) =>
+          waitGroup.promise.then(() => ++resolved).catch(() => ++errors)
         );
-        const [casesDefer, ...otherMigratorsDefers] = migratorsDefers;
+        const [casesDefer, ...otherMigratorsDefers] = migratorsWaitGroups;
 
         // we first make one random migrator fail and not reach the sync point
         casesDefer.reject('Oops. The cases migrator failed unexpectedly.');
 
         // the other migrators then try to synchronize
-        const tasks = otherMigratorsDefers.map((migratorDefer) =>
-          synchronizeMigrators(migratorDefer)
-        );
+        const tasks = otherMigratorsDefers.map((waitGroup) => synchronizeMigrators({ waitGroup }));
 
         expect(Promise.all(tasks.map((task) => task()))).resolves.toEqual([
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },
@@ -116,15 +128,13 @@ describe('synchronizeMigrators', () => {
       it('synchronizedMigrators resolves Left for the rest of migrators', async () => {
         let resolved: number = 0;
         let errors: number = 0;
-        migratorsDefers.forEach((migratorDefer) =>
-          migratorDefer.promise.then(() => ++resolved).catch(() => ++errors)
+        migratorsWaitGroups.forEach((waitGroup) =>
+          waitGroup.promise.then(() => ++resolved).catch(() => ++errors)
         );
-        const [casesDefer, ...otherMigratorsDefers] = migratorsDefers;
+        const [casesDefer, ...otherMigratorsDefers] = migratorsWaitGroups;
 
         // some migrators try to synchronize
-        const tasks = otherMigratorsDefers.map((migratorDefer) =>
-          synchronizeMigrators(migratorDefer)
-        );
+        const tasks = otherMigratorsDefers.map((waitGroup) => synchronizeMigrators({ waitGroup }));
 
         // we then make one random migrator fail and not reach the sync point
         casesDefer.reject('Oops. The cases migrator failed unexpectedly.');
@@ -133,14 +143,14 @@ describe('synchronizeMigrators', () => {
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },

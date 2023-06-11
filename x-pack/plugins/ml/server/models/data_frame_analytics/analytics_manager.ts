@@ -9,17 +9,15 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import {
+  getAnalysisType,
   INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
-  JobMapNodeTypes,
-} from '../../../common/constants/data_frame_analytics';
-import {
-  AnalyticsMapEdgeElement,
-  AnalyticsMapReturnType,
-  AnalyticsMapNodeElement,
-  MapElements,
-} from '../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
+  type JobMapNodeTypes,
+  type AnalyticsMapEdgeElement,
+  type AnalyticsMapReturnType,
+  type AnalyticsMapNodeElement,
+  type MapElements,
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,

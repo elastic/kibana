@@ -386,14 +386,14 @@
           {
             "parentPluginId": "@kbn/shared-ux-avatar-user-profile-components",
             "id": "def-common.UserProfileAvatarData.imageUrl",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "imageUrl",
             "description": [
               "\nBase64 data URL for the user avatar image."
             ],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "packages/shared-ux/avatar/user_profile/impl/user_profile.ts",
             "deprecated": false,

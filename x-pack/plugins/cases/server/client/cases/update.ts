@@ -314,9 +314,9 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-
   try {
+    const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+
     const myCases = await caseService.getCases({
       caseIds: query.cases.map((q) => q.id),
     });
