@@ -15,7 +15,8 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -37,7 +38,6 @@ import {
   validGroupByForContext,
   flattenAdditionalContext,
   getGroupByObject,
-  getAlertUrl,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';

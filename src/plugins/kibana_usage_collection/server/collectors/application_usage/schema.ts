@@ -153,6 +153,7 @@ export const applicationUsageSchema = {
   ml: commonSchema,
   monitoring: commonSchema,
   'observability-overview': commonSchema,
+  observabilityOnboarding: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,
   profiling: commonSchema,

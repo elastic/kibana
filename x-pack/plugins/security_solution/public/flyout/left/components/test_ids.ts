@@ -26,7 +26,6 @@ export const HOST_DETAILS_INFO_TEST_ID = 'host-overview';
 export const HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID =
   `${PREFIX}HostsDetailsRelatedUsersTable` as const;
 
-export const THREAT_INTELLIGENCE_DETAILS_TEST_ID = `${PREFIX}ThreatIntelligenceDetails` as const;
 export const PREVALENCE_DETAILS_TEST_ID = `${PREFIX}PrevalenceDetails` as const;
 export const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as const;
 
@@ -34,4 +33,6 @@ export const THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID = `threat-match-det
 export const THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID =
   `${PREFIX}ThreatIntelligenceDetailsLoadingSpinner` as const;
 
-export const INVESTIGATION_TEST_ID = `${PREFIX}Investigation` as const;
+export const RESPONSE_BASE_TEST_ID = `${PREFIX}Responses` as const;
+export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_BASE_TEST_ID}Details` as const;
+export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;

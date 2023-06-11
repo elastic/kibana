@@ -27,12 +27,7 @@ import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient, ServiceData } from './service_api_client';
-import {
-  ConfigData,
-  formatHeartbeatRequest,
-  formatMonitorConfigFields,
-  mixParamsWithGlobalParams,
-} from './formatters/format_configs';
+
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -47,6 +42,12 @@ import {
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
+import {
+  ConfigData,
+  formatHeartbeatRequest,
+  formatMonitorConfigFields,
+  mixParamsWithGlobalParams,
+} from './formatters/public_formatters/format_configs';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -296,6 +297,24 @@ export class SyntheticsService {
       hosts: this.esHosts,
       api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
     };
+  }
+
+  async inspectConfig(config?: ConfigData) {
+    if (!config) {
+      return null;
+    }
+    const monitors = this.formatConfigs(config);
+    const license = await this.getLicense();
+
+    const output = await this.getOutput();
+    if (output) {
+      return await this.apiClient.inspect({
+        monitors,
+        output,
+        license,
+      });
+    }
+    return null;
   }
 
   async addConfigs(configs: ConfigData[]) {
@@ -567,7 +586,14 @@ export class SyntheticsService {
     >;
   }
 
-  async getSyntheticsParams({ spaceId }: { spaceId?: string } = {}) {
+  async getSyntheticsParams({
+    spaceId,
+    hideParams = false,
+    canSave = true,
+  }: { spaceId?: string; canSave?: boolean; hideParams?: boolean } = {}) {
+    if (!canSave) {
+      return Object.create(null);
+    }
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
     const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
@@ -585,7 +611,9 @@ export class SyntheticsService {
           if (!paramsBySpace[namespace]) {
             paramsBySpace[namespace] = Object.create(null);
           }
-          paramsBySpace[namespace][param.attributes.key] = param.attributes.value;
+          paramsBySpace[namespace][param.attributes.key] = hideParams
+            ? '"*******"'
+            : param.attributes.value;
         });
       });
     }

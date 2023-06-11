@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TestRunErrorInfo } from '../test_run_details/components/test_run_error_info';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
-import { useFormatTestRunAt } from '../../utils/monitor_test_result/test_time_formats';
 import { LastTestRunComponent } from '../monitor_details/monitor_summary/last_test_run';
 import { useStepDetails } from './hooks/use_step_details';
 import { StepDetails } from '../test_run_details/components/step_details';
@@ -22,6 +21,7 @@ import { ErrorTimeline } from './components/error_timeline';
 import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumbs';
 import { StepImage } from '../step_details_page/step_screenshot/step_image';
 import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
+import { useDateFormat } from '../../../../hooks/use_date_format';
 
 export function ErrorDetailsPage() {
   const { failedTests, loading } = useErrorFailedTests();
@@ -32,7 +32,8 @@ export function ErrorDetailsPage() {
 
   const lastTestRun = failedTests?.[0];
 
-  const startedAt = useFormatTestRunAt(lastTestRun?.state?.started_at);
+  const formatter = useDateFormat();
+  const startedAt = formatter(lastTestRun?.state?.started_at);
 
   useErrorDetailsBreadcrumbs([{ text: startedAt }]);
 
