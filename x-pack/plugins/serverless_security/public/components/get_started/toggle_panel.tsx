@@ -45,14 +45,14 @@ const TogglePanelComponent = () => {
   const activeCardsInitialStates = useMemo(
     () =>
       getActiveCardsInitialStates({
-        activeSections: activeSectionsInitialStates,
+        activeProducts: activeSectionsInitialStates,
         finishedSteps: finishedStepsInitialStates,
       }),
     [activeSectionsInitialStates, finishedStepsInitialStates]
   );
 
   const [state, dispatch] = useReducer(reducer, {
-    activeSections: activeSectionsInitialStates,
+    activeProducts: activeSectionsInitialStates,
     finishedSteps: finishedStepsInitialStates,
     activeCards: activeCardsInitialStates,
   });
@@ -74,7 +74,7 @@ const TogglePanelComponent = () => {
   });
   const onProductSwitchChanged = useCallback(
     (section: Switch) => {
-      dispatch({ type: GetStartedPageActions.ToggleSection, payload: { section: section.id } });
+      dispatch({ type: GetStartedPageActions.ToggleProduct, payload: { section: section.id } });
       toggleActiveProductsInStorage(section.id);
     },
     [toggleActiveProductsInStorage]
@@ -85,7 +85,7 @@ const TogglePanelComponent = () => {
       <EuiFlexItem grow={false}>
         <ProductSwitch
           onProductSwitchChanged={onProductSwitchChanged}
-          activeSections={state.activeSections}
+          activeProducts={state.activeProducts}
           euiTheme={euiTheme}
           shadow={shadow}
         />
@@ -96,7 +96,7 @@ const TogglePanelComponent = () => {
         `}
         grow={1}
       >
-        {state.activeSections.size > 0 ? (
+        {state.activeProducts.size > 0 ? (
           sectionNodes
         ) : (
           <EuiEmptyPrompt

@@ -46,7 +46,7 @@ export const getStartedStorage = {
       storage.set(FINISHED_STEPS_STORAGE_KEY, { ...finishedSteps, [cardId]: card });
     }
   },
-  removeFinishedStep: (cardId: CardId, stepId: StepId) => {
+  removeFinishedStepFromStorage: (cardId: CardId, stepId: StepId) => {
     const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
     const card: StepId[] = finishedSteps[cardId] ?? new Array<StepId>();
     const index = card.indexOf(stepId);

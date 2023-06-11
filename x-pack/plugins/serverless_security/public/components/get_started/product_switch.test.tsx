@@ -22,7 +22,7 @@ describe('ProductSwitch', () => {
     const { getByText } = render(
       <ProductSwitch
         onProductSwitchChanged={onProductSwitchChangedMock}
-        activeSections={new Set()}
+        activeProducts={new Set()}
         euiTheme={mockEuiTheme}
       />
     );
@@ -40,7 +40,7 @@ describe('ProductSwitch', () => {
     const { getByText } = render(
       <ProductSwitch
         onProductSwitchChanged={onProductSwitchChangedMock}
-        activeSections={new Set()}
+        activeProducts={new Set()}
         euiTheme={mockEuiTheme}
       />
     );
@@ -53,12 +53,12 @@ describe('ProductSwitch', () => {
     );
   });
 
-  it('should have checked switches for activeSections', () => {
-    const activeSections = new Set([ProductId.analytics, ProductId.endpoint]);
+  it('should have checked switches for activeProducts', () => {
+    const activeProducts = new Set([ProductId.analytics, ProductId.endpoint]);
     const { getByTestId } = render(
       <ProductSwitch
         onProductSwitchChanged={onProductSwitchChangedMock}
-        activeSections={activeSections}
+        activeProducts={activeProducts}
         euiTheme={mockEuiTheme}
       />
     );

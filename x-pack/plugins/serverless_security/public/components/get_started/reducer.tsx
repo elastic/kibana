@@ -11,28 +11,28 @@ import {
   GetStartedPageActions,
   ProductId,
   StepId,
-  TogglePanelAction,
+  ToggleProductAction,
   TogglePanelReducer,
   ToggleStepAction,
 } from './types';
 
 export const reducer = (
   state: TogglePanelReducer,
-  action: TogglePanelAction | ToggleStepAction
+  action: ToggleProductAction | ToggleStepAction
 ): TogglePanelReducer => {
-  if (action.type === GetStartedPageActions.ToggleSection) {
-    const activeSections = new Set([...state.activeSections]);
+  if (action.type === GetStartedPageActions.ToggleProduct) {
+    const activeProducts = new Set([...state.activeProducts]);
 
-    if (activeSections.has(action.payload?.section)) {
-      activeSections.delete(action.payload?.section);
+    if (activeProducts.has(action.payload?.section)) {
+      activeProducts.delete(action.payload?.section);
     } else {
-      activeSections.add(action.payload?.section);
+      activeProducts.add(action.payload?.section);
     }
 
     return {
       ...state,
-      activeSections,
-      activeCards: setupCards(state.finishedSteps, activeSections),
+      activeProducts,
+      activeCards: setupCards(state.finishedSteps, activeProducts),
     };
   }
 
@@ -51,7 +51,7 @@ export const reducer = (
       finishedSteps,
       activeCards: updateCard({
         finishedSteps,
-        activeSections: state.activeSections,
+        activeProducts: state.activeProducts,
         activeCards: state.activeCards,
         cardId: action.payload.cardId,
         sectionId: action.payload.sectionId,
@@ -84,9 +84,9 @@ export const getActiveSectionsInitialStates = ({
 }) => new Set(activeProducts);
 
 export const getActiveCardsInitialStates = ({
-  activeSections,
+  activeProducts,
   finishedSteps,
 }: {
-  activeSections: Set<ProductId>;
+  activeProducts: Set<ProductId>;
   finishedSteps: Record<CardId, Set<StepId>>;
-}) => setupCards(finishedSteps, activeSections);
+}) => setupCards(finishedSteps, activeProducts);

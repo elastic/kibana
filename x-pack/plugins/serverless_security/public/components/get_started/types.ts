@@ -90,13 +90,13 @@ export interface ActiveCard {
   stepsLeft: number;
 }
 export interface TogglePanelReducer {
-  activeSections: Set<ProductId>;
+  activeProducts: Set<ProductId>;
   finishedSteps: Record<CardId, Set<StepId>>;
-  activeCards: Record<CardId, ActiveCard> | null;
+  activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
 }
 
-export interface TogglePanelAction {
-  type: GetStartedPageActions.ToggleSection;
+export interface ToggleProductAction {
+  type: GetStartedPageActions.ToggleProduct;
   payload: { section: ProductId };
 }
 
@@ -112,5 +112,5 @@ export interface Switch {
 
 export enum GetStartedPageActions {
   AddFinishedStep = 'addFinishedStep',
-  ToggleSection = 'toggleSection',
+  ToggleProduct = 'toggleProduct',
 }

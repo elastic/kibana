@@ -28,10 +28,10 @@ const switches: Switch[] = [
 
 const ProductSwitchComponent: React.FC<{
   onProductSwitchChanged: (item: Switch) => void;
-  activeSections: Set<ProductId>;
+  activeProducts: Set<ProductId>;
   shadow?: string;
   euiTheme: EuiThemeComputed;
-}> = ({ onProductSwitchChanged, activeSections, euiTheme, shadow = '' }) => {
+}> = ({ onProductSwitchChanged, activeProducts, euiTheme, shadow = '' }) => {
   const switchNodes = useMemo(
     () =>
       switches.map((item) => (
@@ -43,10 +43,10 @@ const ProductSwitchComponent: React.FC<{
           css={css`
             padding-left: ${euiTheme.base * 0.625}px;
           `}
-          checked={activeSections.has(item.id)}
+          checked={activeProducts.has(item.id)}
         />
       )),
-    [activeSections, euiTheme.base, onProductSwitchChanged]
+    [activeProducts, euiTheme.base, onProductSwitchChanged]
   );
 
   return (

@@ -10,21 +10,22 @@ import { ActiveCard, CardId, ProductId, SectionId, StepId } from './types';
 
 export const setupCards = (
   finishedSteps: Record<CardId, Set<StepId>>,
-  activeSections: Set<ProductId>
-): Record<CardId, ActiveCard> | null =>
-  activeSections.size > 0
+  activeProducts: Set<ProductId>
+) =>
+  activeProducts.size > 0
     ? getSections().reduce((acc, section) => {
         const cardsInSections = section.cards?.reduce((accCards, card) => {
           if (
             !card.productTypeRequired ||
-            card?.productTypeRequired?.some((condition) => activeSections.has(condition))
+            card?.productTypeRequired?.some((condition) => activeProducts.has(condition))
           ) {
             const stepsDone = finishedSteps[card.id] ?? new Set();
-            const timeInMins = card?.steps?.reduce(
-              (totalMin, { timeInMinutes, id: stepId }) =>
-                (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
-              0
-            );
+            const timeInMins =
+              card?.steps?.reduce(
+                (totalMin, { timeInMinutes, id: stepId }) =>
+                  (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
+                0
+              ) ?? 0;
             const stepsLeft = (card?.steps?.length ?? 0) - (stepsDone?.size ?? 0);
 
             return {
@@ -38,23 +39,23 @@ export const setupCards = (
           }
           return accCards;
         }, {});
-        return { ...acc, ...cardsInSections };
-      }, {} as Record<CardId, ActiveCard>)
+        return { ...acc, [section.id]: cardsInSections };
+      }, {} as Record<SectionId, Record<CardId, ActiveCard>>)
     : null;
 
 export const updateCard = ({
   finishedSteps,
-  activeSections,
+  activeProducts,
   activeCards,
   sectionId,
   cardId,
 }: {
   finishedSteps: Record<CardId, Set<StepId>>;
-  activeSections: Set<ProductId>;
-  activeCards: Record<CardId, ActiveCard> | null;
+  activeProducts: Set<ProductId>;
+  activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
   sectionId: SectionId;
   cardId: CardId;
-}): Record<CardId, ActiveCard> | null => {
+}): Record<SectionId, Record<CardId, ActiveCard>> | null => {
   const sections = getSections();
   const section = sections.find(({ id }) => id === sectionId);
   const cards = section?.cards;
@@ -66,7 +67,7 @@ export const updateCard = ({
 
   if (
     !card.productTypeRequired ||
-    card?.productTypeRequired?.some((condition) => activeSections.has(condition))
+    card?.productTypeRequired?.some((condition) => activeProducts.has(condition))
   ) {
     const stepsDone = finishedSteps[cardId] ?? new Set();
     const timeInMins =
@@ -78,10 +79,13 @@ export const updateCard = ({
     const stepsLeft = (card?.steps?.length ?? 0) - (stepsDone?.size ?? 0);
     return {
       ...activeCards,
-      [cardId]: {
-        id: cardId,
-        timeInMins,
-        stepsLeft,
+      [sectionId]: {
+        ...activeCards[sectionId],
+        [cardId]: {
+          id: cardId,
+          timeInMins,
+          stepsLeft,
+        },
       },
     };
   }

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpCardSections } from './use_setup_cards';
-import { CardId, GetSetUpCardId, IntroductionSteps, ProductId, StepId } from './types';
+import { ActiveCard, CardId, GetSetUpCardId, IntroductionSteps, SectionId, StepId } from './types';
 
 const mockEuiTheme: EuiThemeComputed = {
   size: {
@@ -20,23 +20,39 @@ const finishedSteps = {
   [GetSetUpCardId.introduction]: new Set<StepId>([IntroductionSteps.watchOverviewVideo]),
 } as Record<CardId, Set<StepId>>;
 describe('useSetUpCardSections', () => {
-  it('should return the set up sections', () => {
+  it('should return the sections', () => {
     const { result } = renderHook(() => useSetUpCardSections({ euiTheme: mockEuiTheme }));
 
-    const activeSections = new Set<ProductId>([ProductId.analytics, ProductId.cloud]);
+    const activeCards = {
+      [SectionId.getSetUp]: {
+        [GetSetUpCardId.introduction]: {
+          id: GetSetUpCardId.introduction,
+          timeInMins: 3,
+          stepsLeft: 1,
+        },
+      },
+    } as Record<SectionId, Record<CardId, ActiveCard>>;
 
-    const sections = result.current.setUpSections(activeSections, jest.fn(), finishedSteps);
+    const sections = result.current.setUpSections({
+      activeCards,
+      onStepClicked: jest.fn(),
+      finishedSteps,
+    });
 
     expect(sections).toHaveLength(2);
   });
 
-  it('should return null if no active sections are provided', () => {
+  it('should return no section if no active cards', () => {
     const { result } = renderHook(() => useSetUpCardSections({ euiTheme: mockEuiTheme }));
 
-    const activeSections = new Set<ProductId>();
+    const activeCards = null;
 
-    const sections = result.current.setUpSections(activeSections, jest.fn(), finishedSteps);
+    const sections = result.current.setUpSections({
+      activeCards,
+      onStepClicked: jest.fn(),
+      finishedSteps,
+    });
 
-    expect(sections).toBeNull();
+    expect(sections.length).toEqual(0);
   });
 });

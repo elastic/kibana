@@ -7,18 +7,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CardItem } from './card_item';
-import { Card, CardId, GetSetUpCardId, IntroductionSteps, SectionId, Step, StepId } from './types';
+import { CardId, GetSetUpCardId, IntroductionSteps, SectionId, StepId } from './types';
 import { EuiThemeComputed } from '@elastic/eui';
 jest.mock('./card_step');
 
 describe('CardItemComponent', () => {
-  const cardItem: Card = {
-    id: GetSetUpCardId.introduction,
-    title: 'Test Card',
-    icon: { type: 'logoElastic' },
-    steps: [{ id: IntroductionSteps.watchOverviewVideo, title: 'Step 1' }] as Step[],
-  };
-
   const finishedSteps = {} as Record<CardId, Set<StepId>>;
 
   const onStepClicked = jest.fn();
@@ -37,7 +30,7 @@ describe('CardItemComponent', () => {
       />
     );
 
-    const cardTitle = getByText('Test Card');
+    const cardTitle = getByText('introduction');
     expect(cardTitle).toBeInTheDocument();
 
     const step = getByText('1 step left');
@@ -52,7 +45,7 @@ describe('CardItemComponent', () => {
 
   it('should not render steps left information when all steps done', () => {
     const mockFinishedSteps = {
-      [cardItem.id]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
     } as Record<CardId, Set<StepId>>;
 
     const { getByText, queryByText } = render(
@@ -68,7 +61,7 @@ describe('CardItemComponent', () => {
       />
     );
 
-    const cardTitle = getByText('Test Card');
+    const cardTitle = getByText('introduction');
     expect(cardTitle).toBeInTheDocument();
 
     const step = queryByText('1 step left');

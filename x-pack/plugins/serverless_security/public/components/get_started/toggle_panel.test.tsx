@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TogglePanel } from './toggle_panel';
-import { useStorage } from './use_storage';
+import { getStartedStorage as mockGetStartedStorage } from '../../lib/get_started/storage';
 import { useSetUpCardSections } from './use_setup_cards';
 
 jest.mock('@elastic/eui', () => ({
@@ -24,27 +24,18 @@ jest.mock('../../services', () => ({
   })),
 }));
 
-jest.mock('./use_storage', () => ({
-  useStorage: jest.fn(),
-}));
+jest.mock('../../lib/get_started/storage');
 
 jest.mock('./use_setup_cards', () => ({
   useSetUpCardSections: jest.fn(),
 }));
 
 describe('TogglePanel', () => {
-  const mockUseStorage = {
-    getAllFinishedStepsFromStorage: jest.fn(() => ({})),
-    getActiveProductsFromStorage: jest.fn(() => ({})),
-    toggleActiveProductsInStorage: jest.fn(),
-    addFinishedStepToStorage: jest.fn(),
-  };
   const mockUseSetUpCardSections = { setUpSections: jest.fn(() => null) };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useStorage as jest.Mock).mockReturnValue(mockUseStorage);
     (useSetUpCardSections as jest.Mock).mockReturnValue(mockUseSetUpCardSections);
   });
 
@@ -70,9 +61,9 @@ describe('TogglePanel', () => {
     const cloudSwitch = getByText('Cloud');
 
     fireEvent.click(analyticsSwitch);
-    expect(mockUseStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith('analytics');
+    expect(mockGetStartedStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith('analytics');
 
     fireEvent.click(cloudSwitch);
-    expect(mockUseStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith('cloud');
+    expect(mockGetStartedStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith('cloud');
   });
 });

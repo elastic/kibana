@@ -30,11 +30,12 @@ export const useSetUpCardSections = ({
     }: {
       onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: Record<CardId, ActiveCard> | null;
+      activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
       sectionId: SectionId;
-    }) =>
-      activeCards
-        ? Object.values(activeCards)?.map<React.ReactNode>((cardItem) => (
+    }) => {
+      const section = activeCards?.[sectionId];
+      return section
+        ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
             <EuiFlexItem key={cardItem.id}>
               <CardItem
                 data-test-subj={cardItem.id}
@@ -49,7 +50,8 @@ export const useSetUpCardSections = ({
               />
             </EuiFlexItem>
           ))
-        : null,
+        : null;
+    },
     [euiTheme, shadow]
   );
 
@@ -61,7 +63,7 @@ export const useSetUpCardSections = ({
     }: {
       onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: Record<CardId, ActiveCard> | null;
+      activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({
