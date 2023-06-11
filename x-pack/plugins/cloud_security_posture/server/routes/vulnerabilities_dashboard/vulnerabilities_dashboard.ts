@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CnvmDashboardData } from '../../../common/types';
 import {
-  VULNERABILITIES_STATS_ROUTE_PATH,
+  VULNERABILITIES_DASHBOARD_ROUTE_PATH,
   getSafeVulnerabilitiesQueryFilter,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
@@ -22,7 +22,7 @@ export interface KeyDocCount<TKey = string> {
 export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void =>
   router.get(
     {
-      path: VULNERABILITIES_STATS_ROUTE_PATH,
+      path: VULNERABILITIES_DASHBOARD_ROUTE_PATH,
       validate: false,
       options: {
         tags: ['access:cloud-security-posture-read'],

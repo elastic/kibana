@@ -8,7 +8,7 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { CnvmDashboardData } from '../../../common/types';
 import { useKibana } from '../hooks/use_kibana';
-import { VULNERABILITIES_STATS_ROUTE_PATH } from '../../../common/constants';
+import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants';
 
 const cnvmKey = 'use-cnvm-statistics-api-key';
 
@@ -18,7 +18,7 @@ export const useCnvmStatisticsApi = (
   const { http } = useKibana().services;
   return useQuery(
     [cnvmKey],
-    () => http.get<CnvmDashboardData>(VULNERABILITIES_STATS_ROUTE_PATH),
+    () => http.get<CnvmDashboardData>(VULNERABILITIES_DASHBOARD_ROUTE_PATH),
     options
   );
 };

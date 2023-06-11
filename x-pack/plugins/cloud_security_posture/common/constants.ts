@@ -10,8 +10,8 @@ import { PostureTypes } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
-export const VULNERABILITIES_STATS_ROUTE_PATH =
-  '/internal/cloud_security_posture/vulnerabilities_stats';
+export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =
+  '/internal/cloud_security_posture/vulnerabilities_dashboard';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
 
@@ -119,7 +119,7 @@ export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer
       { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
     ],
     must_not: [
-      ...(query?.bool?.must_not || []),
+      ...((query?.bool?.must_not as []) || []),
       { match_phrase: { 'vulnerability.severity': 'UNKNOWN' } },
     ],
   },
