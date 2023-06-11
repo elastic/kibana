@@ -10,7 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../typings/**/*"
-  ],
+, "../observability/public/components/header_menu"  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",

@@ -17,7 +17,7 @@ import {
 import axios from 'axios';
 import * as t from 'io-ts';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
-import { IOpenAIClient } from '../services/openai/types';
+import { CoPilotClient } from '../services/co_pilot/co_pilot_client';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
 
@@ -31,7 +31,7 @@ interface RegisterRoutes {
 export interface RegisterRoutesDependencies {
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
-  getOpenAIClient: () => IOpenAIClient | undefined;
+  getCoPilotClient: (options: { request: KibanaRequest }) => Promise<CoPilotClient | undefined>;
 }
 
 export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {

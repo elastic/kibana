@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -18,33 +17,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { catchError, Observable, of } from 'rxjs';
+import React, { useMemo, useState } from 'react';
 import { CoPilotPromptId } from '../../../common';
 import type { PromptParamsOf } from '../../../common/co_pilot';
-import type { CoPilotService, PromptObservableState } from '../../typings/co_pilot';
-
-const cursorCss = css`
-  @keyframes blink {
-    0% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-
-  animation: blink 1s infinite;
-  width: 10px;
-  height: 16px;
-  vertical-align: middle;
-  display: inline-block;
-  background: rgba(0, 0, 0, 0.25);
-`;
+import type { CoPilotService } from '../../typings/co_pilot';
+import { CoPilotChatBody } from '../co_pilot_chat_body';
 
 export interface CoPilotPromptProps<TPromptId extends CoPilotPromptId> {
   title: string;
@@ -64,69 +41,10 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
 
   const theme = useEuiTheme();
 
-  const conversation$ = useMemo(() => {
-    return hasOpened
-      ? coPilot
-          .prompt(promptId, params)
-          .pipe(
-            catchError((err) => of({ loading: false, error: err, message: String(err.message) }))
-          )
-      : new Observable<PromptObservableState>(() => {});
-  }, [params, promptId, coPilot, hasOpened]);
-
-  const conversation = useObservable(conversation$);
-
-  useEffect(() => {}, [conversation$]);
-
-  const content = conversation?.message ?? '';
-
-  let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
-
-  if (conversation?.loading) {
-    state = content ? 'streaming' : 'loading';
-  } else if (conversation && 'error' in conversation && conversation.error) {
-    state = 'error';
-  } else if (content) {
-    state = 'complete';
-  }
-
-  let inner: React.ReactElement;
-
-  if (state === 'complete' || state === 'streaming') {
-    inner = (
-      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-        {content}
-        {state === 'streaming' ? <span className={cursorCss} /> : <></>}
-      </p>
-    );
-  } else if (state === 'init' || state === 'loading') {
-    inner = (
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            {i18n.translate('xpack.observability.coPilotPrompt.chatLoading', {
-              defaultMessage: 'Waiting for a response...',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  } else {
-    /* if (state === 'error') {*/
-    inner = (
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon color="danger" type="warning" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{content}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const response$ = useMemo(() => {
+    return hasOpened ? coPilot.prompt(promptId, params) : undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, promptId, hasOpened]);
 
   const tooltipContent = i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
     defaultMessage: 'Ask Observability Co-Pilot for assistence',
@@ -165,7 +83,7 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
         }}
       >
         <EuiSpacer size="s" />
-        {inner}
+        {response$ ? <CoPilotChatBody response$={response$} /> : undefined}
       </EuiAccordion>
     </EuiPanel>
   );

@@ -24,6 +24,39 @@ export enum CoPilotPromptId {
   LogsFindSimilar = 'logsFindSimilar',
 }
 
+export interface CoPilotConversation {
+  '@timestamp': string;
+  user: {
+    id?: string;
+    name: string;
+  };
+  conversation: {
+    id: string;
+    title: string;
+    last_updated: string;
+  };
+  labels: Record<string, string | number | string[] | number[]>;
+  numeric_labels: Record<string, number | number[]>;
+}
+
+export interface CoPilotConversationMessage {
+  '@timestamp': string;
+  user: {
+    id?: string;
+    name: string;
+  };
+  conversation: {
+    id: string;
+  };
+  message: {
+    content: string;
+    role: 'system' | 'user' | 'assistant';
+    order: number;
+  };
+  labels: Record<string, string | number | string[] | number[]>;
+  numeric_labels: Record<string, number | number[]>;
+}
+
 const PERF_GPT_SYSTEM_MESSAGE = {
   content: `You are perf-gpt, a helpful assistant for performance analysis and optimisation
     of software. Answer as concisely as possible.`,
@@ -37,7 +70,7 @@ const APM_GPT_SYSTEM_MESSAGE = {
 };
 
 const LOGS_SYSTEM_MESSAGE = {
-  content: `You logsapm-gpt, a helpful assistant for logs-based observability. Answer as
+  content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
     concisely as possible.`,
   role: 'system' as const,
 };

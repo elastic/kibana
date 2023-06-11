@@ -9,6 +9,7 @@ import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CoPilotHeaderActionMenuLink } from '@kbn/observability-plugin/public';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -74,6 +75,7 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+      <CoPilotHeaderActionMenuLink />
     </EuiHeaderLinks>
   );
 }

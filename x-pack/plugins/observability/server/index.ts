@@ -18,7 +18,7 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
-import { observabilityCoPilotConfig } from './services/openai/config';
+import { observabilityCoPilotConfig } from './services/co_pilot/config';
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 

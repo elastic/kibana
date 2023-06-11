@@ -6,8 +6,6 @@
  */
 
 import axios from 'axios';
-import { ChatCompletionRequestMessage, CreateChatCompletionResponse } from 'openai';
-import { Readable } from 'stream';
 import { format } from 'url';
 import { AzureOpenAIConfig } from './config';
 import { pipeStreamingResponse } from './pipe_streaming_response';
@@ -16,12 +14,9 @@ import { IOpenAIClient } from './types';
 export class AzureOpenAIClient implements IOpenAIClient {
   constructor(private readonly config: AzureOpenAIConfig) {}
 
-  chatCompletion: {
-    create: (
-      messages: ChatCompletionRequestMessage[]
-    ) => Promise<CreateChatCompletionResponse | Readable>;
-  } = {
-    create: async (messages) => {
+  chatCompletion: IOpenAIClient['chatCompletion'] = {
+    create: async (messages, streamOverride) => {
+      const stream = streamOverride ?? true;
       const response = await axios.post(
         format({
           host: `${this.config.resourceName}.openai.azure.com`,
@@ -33,17 +28,17 @@ export class AzureOpenAIClient implements IOpenAIClient {
         }),
         {
           messages,
-          stream: true,
+          stream,
         },
         {
           headers: {
             'api-key': this.config.apiKey,
           },
-          responseType: 'stream',
+          ...(stream ? { responseType: 'stream' } : {}),
         }
       );
 
-      return pipeStreamingResponse(response);
+      return stream ? pipeStreamingResponse(response) : response.data;
     },
   };
 }

@@ -88,3 +88,5 @@ export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_valu
 export { CoPilotPrompt } from './components/co_pilot_prompt';
 export { useCoPilot } from './hooks/use_co_pilot';
 export { CoPilotContextProvider } from './context/co_pilot_context';
+export { CoPilotHeaderActionMenuLink } from './components/co_pilot_header_action_menu_link';
+export { CoPilotChat } from './components/co_pilot_chat';

@@ -11,6 +11,7 @@ import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { CoPilotChat } from '@kbn/observability-plugin/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -127,6 +128,7 @@ export function ApmMainTemplate({
       {...pageTemplateProps}
     >
       {children}
+      <CoPilotChat />
     </ObservabilityPageTemplate>
   );
 

@@ -12,6 +12,7 @@ import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
@@ -49,7 +50,7 @@ import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { sloRuleFieldMap } from './lib/rules/slo_burn_rate/field_map';
-import { OpenAIService } from './services/openai';
+import { CoPilotService } from './services/co_pilot/co_pilot_service';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -254,7 +255,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     );
     registerSloUsageCollector(plugins.usageCollection);
 
-    const openAIService = config.coPilot?.enabled ? new OpenAIService(config.coPilot) : undefined;
+    const coPilotService = config.coPilot?.enabled
+      ? new CoPilotService({ config: config.coPilot, core, logger: this.logger.get('coPilot') })
+      : undefined;
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
@@ -262,7 +265,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         dependencies: {
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
-          getOpenAIClient: () => openAIService?.client,
+          getCoPilotClient: async ({ request }: { request: KibanaRequest }) =>
+            coPilotService?.getCoPilotClient({ request }),
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(),
@@ -281,9 +285,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
-      },
-      getOpenAIClient() {
-        return openAIService?.client;
       },
       alertsLocator,
     };

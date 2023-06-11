@@ -5,95 +5,120 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core/public';
-import { concatMap, delay, Observable, of } from 'rxjs';
-import { type CreateChatCompletionResponseChunk } from '../../../common/co_pilot';
-import { type CoPilotService, type PromptObservableState } from '../../typings/co_pilot';
+import { HttpResponse, type HttpSetup } from '@kbn/core/public';
+import { BehaviorSubject, concatMap, delay, of } from 'rxjs';
+import { CoPilotConversation, CoPilotConversationMessage } from '../../../common/co_pilot';
+import { createStreamingChatResponseObservable } from '../../../common/co_pilot/streaming_chat_response_observable';
+import { type CoPilotService } from '../../typings/co_pilot';
 
-function getMessageFromChunks(chunks: CreateChatCompletionResponseChunk[]) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
+function httpResponseIntoObservable(responsePromise: Promise<HttpResponse>) {
+  const subject = new BehaviorSubject<string>('');
+  responsePromise
+    .then((response) => {
+      const status = response.response?.status;
+
+      if (!status || status >= 400) {
+        throw new Error(response.response?.statusText || 'Unexpected error');
+      }
+
+      const reader = response.response.body?.getReader();
+
+      if (!reader) {
+        throw new Error('Could not get reader from response');
+      }
+
+      const decoder = new TextDecoder();
+
+      function read() {
+        reader!.read().then(({ done, value }) => {
+          try {
+            if (done) {
+              subject.complete();
+              return;
+            }
+
+            subject.next(decoder.decode(value));
+          } catch (err) {
+            subject.error(err);
+            return;
+          }
+          read();
+        });
+      }
+
+      read();
+    })
+    .catch((err) => {
+      subject.error(err);
+    });
+  return createStreamingChatResponseObservable(subject).pipe(
+    concatMap((value) => of(value).pipe(delay(50)))
+  );
 }
 
 export function createCoPilotService({ enabled, http }: { enabled: boolean; http: HttpSetup }) {
   const service: CoPilotService = {
-    isEnabled: () => enabled,
-    prompt: (promptId, params) => {
-      return new Observable<PromptObservableState>((observer) => {
-        observer.next({ chunks: [], loading: true });
-
-        http
-          .post(`/internal/observability/copilot/prompts/${promptId}`, {
-            body: JSON.stringify(params),
-            asResponse: true,
-            rawResponse: true,
-          })
-          .then((response) => {
-            const status = response.response?.status;
-
-            if (!status || status >= 400) {
-              throw new Error(response.response?.statusText || 'Unexpected error');
-            }
-
-            const reader = response.response.body?.getReader();
-
-            if (!reader) {
-              throw new Error('Could not get reader from response');
-            }
-
-            const decoder = new TextDecoder();
-
-            const chunks: CreateChatCompletionResponseChunk[] = [];
-
-            function read() {
-              reader!.read().then(({ done, value }) => {
-                try {
-                  if (done) {
-                    observer.next({
-                      chunks,
-                      message: getMessageFromChunks(chunks),
-                      loading: false,
-                    });
-                    observer.complete();
-                    return;
-                  }
-
-                  const lines = decoder
-                    .decode(value)
-                    .trim()
-                    .split('\n')
-                    .map((str) => str.substr(6))
-                    .filter((str) => !!str && str !== '[DONE]');
-
-                  const nextChunks: CreateChatCompletionResponseChunk[] = lines.map((line) =>
-                    JSON.parse(line)
-                  );
-
-                  nextChunks.forEach((chunk) => {
-                    chunks.push(chunk);
-                    observer.next({ chunks, message: getMessageFromChunks(chunks), loading: true });
-                  });
-                } catch (err) {
-                  observer.error(err);
-                  return;
-                }
-                read();
-              });
-            }
-
-            read();
-
-            return () => {
-              reader.cancel();
-            };
-          })
-          .catch((err) => {
-            observer.error(err);
-          });
-      }).pipe(concatMap((value) => of(value).pipe(delay(50))));
+    isEnabled() {
+      return enabled;
+    },
+    prompt(promptId, params) {
+      return httpResponseIntoObservable(
+        http.post(`/internal/observability/copilot/prompts/${promptId}`, {
+          body: JSON.stringify(params),
+          asResponse: true,
+          rawResponse: true,
+        })
+      );
+    },
+    async createConversation() {
+      return (await http.post(`/internal/observability/copilot/conversation/create`, {})) as {
+        conversation: CoPilotConversation;
+      };
+    },
+    async listConversations(size: number) {
+      return (await http.get(`/internal/observability/copilot/conversation`, {
+        query: {
+          size,
+        },
+      })) as {
+        conversations: CoPilotConversation[];
+      };
+    },
+    async loadConversation(conversationId: string) {
+      return (await http.get(
+        `/internal/observability/copilot/conversation/${conversationId}`,
+        {}
+      )) as {
+        conversation: CoPilotConversation;
+        messages: CoPilotConversationMessage[];
+      };
+    },
+    async autoTitleConversation(conversationId: string) {
+      return (await http.post(
+        `/internal/observability/copilot/conversation/${conversationId}/auto_title`,
+        {}
+      )) as {
+        conversation: CoPilotConversation;
+      };
+    },
+    chat(messages) {
+      return httpResponseIntoObservable(
+        http.post(`/internal/observability/copilot/chat`, {
+          body: JSON.stringify({
+            messages,
+          }),
+          asResponse: true,
+          rawResponse: true,
+        })
+      );
+    },
+    async append(conversationId, messages) {
+      return (await http.post(
+        `/internal/observability/copilot/conversation/${conversationId}/append`,
+        { body: JSON.stringify({ messages }) }
+      )) as {
+        messages: CoPilotConversationMessage[];
+      };
     },
   };
 

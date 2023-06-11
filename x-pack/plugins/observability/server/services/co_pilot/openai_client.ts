@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import {
-  ChatCompletionRequestMessage,
-  Configuration,
-  CreateChatCompletionResponse,
-  OpenAIApi,
-} from 'openai';
+import { Configuration, OpenAIApi } from 'openai';
 import type { OpenAIConfig } from './config';
-import type { IOpenAIClient } from './types';
 import { pipeStreamingResponse } from './pipe_streaming_response';
+import type { IOpenAIClient } from './types';
 
 export class OpenAIClient implements IOpenAIClient {
   private readonly client: OpenAIApi;
@@ -26,20 +21,20 @@ export class OpenAIClient implements IOpenAIClient {
     this.client = new OpenAIApi(clientConfig);
   }
 
-  chatCompletion: {
-    create: (messages: ChatCompletionRequestMessage[]) => Promise<CreateChatCompletionResponse>;
-  } = {
-    create: async (messages) => {
+  chatCompletion: IOpenAIClient['chatCompletion'] = {
+    create: async (messages, streamOverride) => {
+      const stream = streamOverride ?? true;
+
       const response = await this.client.createChatCompletion(
         {
           messages,
           model: this.config.model,
-          stream: true,
+          stream,
         },
-        { responseType: 'stream' }
+        ...(stream ? [{ responseType: 'stream' as const }] : [])
       );
 
-      return pipeStreamingResponse(response);
+      return stream ? pipeStreamingResponse(response) : response.data;
     },
   };
 }
