@@ -8,7 +8,15 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpCardSections } from './use_setup_cards';
-import { ActiveCard, CardId, GetSetUpCardId, IntroductionSteps, SectionId, StepId } from './types';
+import {
+  ActiveCard,
+  CardId,
+  GetMoreFromElasticSecurityCardId,
+  GetSetUpCardId,
+  IntroductionSteps,
+  SectionId,
+  StepId,
+} from './types';
 
 const mockEuiTheme: EuiThemeComputed = {
   size: {
@@ -29,6 +37,11 @@ describe('useSetUpCardSections', () => {
           id: GetSetUpCardId.introduction,
           timeInMins: 3,
           stepsLeft: 1,
+        },
+      },
+      [SectionId.getMoreFromElasticSecurity]: {
+        [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
+          id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
         },
       },
     } as Record<SectionId, Record<CardId, ActiveCard>>;

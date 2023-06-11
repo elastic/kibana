@@ -85,6 +85,7 @@ export const useSetUpCardSections = ({
                 margin: ${euiTheme.size.l} 0;
               `}
               key={currentSection.id}
+              data-test-subj={`section-${currentSection.id}`}
             >
               <EuiTitle size="xxs">
                 <span>{currentSection.title}</span>
