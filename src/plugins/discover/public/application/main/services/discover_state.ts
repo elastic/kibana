@@ -22,7 +22,6 @@ import {
 import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -241,6 +240,7 @@ export function getDiscoverStateContainer({
     }
   };
   const setDataView = (dataView: DataView) => {
+    addLog('[discoverState] setDataView', dataView);
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
@@ -347,19 +347,6 @@ export function getDiscoverStateContainer({
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
-    // updates saved search when query or filters change, triggers data fetching
-    const filterUnsubscribe = merge(
-      services.data.query.queryString.getUpdates$(),
-      services.filterManager.getFetches$()
-    ).subscribe(async () => {
-      await savedSearchContainer.update({
-        nextDataView: internalStateContainer.getState().dataView,
-        nextState: appStateContainer.getState(),
-        useFilterAndQueryServices: true,
-      });
-      fetchData();
-    });
-
     services.data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
         appStateContainer,
@@ -381,7 +368,6 @@ export function getDiscoverStateContainer({
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
-      filterUnsubscribe.unsubscribe();
     };
   };
 

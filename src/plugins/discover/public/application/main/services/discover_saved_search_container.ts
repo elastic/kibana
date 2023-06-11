@@ -242,14 +242,29 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     // @ts-expect-error
     return !isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
   });
+  const filterChanged = !isEqual(
+    prevSearchSource.getField('filter'),
+    nextSearchSource.getField('filter')
+  );
+  const queryChanged = isEqual(
+    prevSearchSource.getField('query'),
+    nextSearchSource.getField('query')
+  );
+  const indexChanged = !isEqual(
+    prevSearchSource.getField('index'),
+    nextSearchSource.getField('index')
+  );
 
-  const searchSourceDiff =
-    !isEqual(prevSearchSource.getField('filter'), nextSearchSource.getField('filter')) ||
-    !isEqual(prevSearchSource.getField('query'), nextSearchSource.getField('query')) ||
-    !isEqual(prevSearchSource.getField('index'), nextSearchSource.getField('index'));
+  const searchSourceDiff = filterChanged || queryChanged || indexChanged;
+
   const hasChanged = Boolean(savedSearchDiff.length || searchSourceDiff);
   if (hasChanged) {
-    addLog('[savedSearch] difference between initial and changed version', searchSourceDiff);
+    addLog('[savedSearch] difference between initial and changed version', {
+      filterChanged,
+      queryChanged,
+      indexChanged,
+      savedSearchDiff,
+    });
   }
   return !hasChanged;
 }

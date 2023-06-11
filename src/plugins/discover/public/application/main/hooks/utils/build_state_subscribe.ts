@@ -44,6 +44,7 @@ export const buildStateSubscribe =
     setDataView: DiscoverStateContainer['actions']['setDataView'];
   }) =>
   async (nextState: DiscoverAppState) => {
+    let savedSearchDataView;
     const prevState = appState.getPrevious();
     const savedSearch = savedSearchState.getState();
     if (isEqualState(prevState, nextState)) {
@@ -51,17 +52,24 @@ export const buildStateSubscribe =
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sort, index } = appState.getPrevious();
-    const query = nextState.query;
+    const { hideChart, interval, breakdownField, sort } = appState.getPrevious();
+    const nextQuery = nextState.query;
+    const currentDataView = internalState.getState().dataView;
 
-    if (isTextBasedQuery(query)) {
-      const currentDataView = savedSearch.searchSource.getField('index');
-      const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
+    if (isTextBasedQuery(nextQuery)) {
+      const nextDataView = await getDataViewByTextBasedQueryLang(
+        nextQuery,
+        currentDataView,
+        services
+      );
       if (currentDataView !== nextDataView) {
-        addLog('[appstate] text based language data view change', nextState);
+        addLog('[appstate] text based language change of data view', {
+          current: currentDataView,
+          next: nextDataView,
+          query: nextQuery,
+        });
         setDataView(nextDataView);
-        await appState.update({ index: nextDataView.id }, true);
-        return;
+        savedSearchDataView = nextDataView;
       }
     }
 
@@ -71,8 +79,10 @@ export const buildStateSubscribe =
     const chartIntervalChanged = nextState.interval !== interval;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const docTableSortChanged = !isEqual(nextState.sort, sort);
-    const dataViewChanged = !isEqual(nextState.index, index);
-    let savedSearchDataView;
+    const dataViewChanged = !isEqual(nextState.index, currentDataView?.id);
+    const queryChanged = !isEqual(nextState.query, prevState.query);
+    const filterChanged = !isEqual(nextState.filters, prevState.filters);
+
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
@@ -92,7 +102,11 @@ export const buildStateSubscribe =
       savedSearchDataView = nextDataView;
     }
 
-    savedSearchState.update({ nextDataView: savedSearchDataView, nextState });
+    savedSearchState.update({
+      nextDataView: savedSearchDataView,
+      nextState,
+      useFilterAndQueryServices: true,
+    });
 
     if (dataViewChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
@@ -104,7 +118,9 @@ export const buildStateSubscribe =
       chartIntervalChanged ||
       breakdownFieldChanged ||
       docTableSortChanged ||
-      dataViewChanged
+      dataViewChanged ||
+      queryChanged ||
+      filterChanged
     ) {
       addLog('[appstate] subscribe triggers data fetching');
       dataState.fetch();

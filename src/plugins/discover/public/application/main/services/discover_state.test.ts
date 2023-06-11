@@ -550,6 +550,7 @@ describe('Test discover state actions', () => {
     expect(dataState.fetch).toHaveBeenCalledTimes(0);
     expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(dataViewMock.id);
     expect(getCurrentUrl()).toContain(dataViewMock.id);
+    expect(dataState.fetch).toHaveBeenCalledTimes(0);
 
     // change data view
     await actions.onChangeDataView(dataViewComplexMock.id!);
