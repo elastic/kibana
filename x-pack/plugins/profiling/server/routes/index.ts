@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IRouter, Logger } from '@kbn/core/server';
+import { ProfilingConfig } from '..';
 import {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
@@ -31,6 +32,7 @@ export interface RouteRegisterParameters {
   dependencies: {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
+    config: ProfilingConfig;
   };
   services: {
     createProfilingEsClient: (params: {

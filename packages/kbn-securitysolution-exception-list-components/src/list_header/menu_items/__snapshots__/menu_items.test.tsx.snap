@@ -233,7 +233,7 @@ Object {
         >
           <button
             class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-            data-test-subj="ManageRulesButton"
+            data-test-subj="LinkRulesButton"
             type="button"
           >
             <span
@@ -300,7 +300,7 @@ Object {
       >
         <button
           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-          data-test-subj="ManageRulesButton"
+          data-test-subj="LinkRulesButton"
           type="button"
         >
           <span
@@ -424,7 +424,7 @@ Object {
         >
           <button
             class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-            data-test-subj="ManageRulesButton"
+            data-test-subj="LinkRulesButton"
             type="button"
           >
             <span
@@ -591,7 +591,7 @@ Object {
       >
         <button
           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-          data-test-subj="ManageRulesButton"
+          data-test-subj="LinkRulesButton"
           type="button"
         >
           <span
@@ -1054,7 +1054,7 @@ Object {
         >
           <button
             class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-            data-test-subj="ManageRulesButton"
+            data-test-subj="LinkRulesButton"
             type="button"
           >
             <span
@@ -1149,7 +1149,7 @@ Object {
       >
         <button
           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-          data-test-subj="ManageRulesButton"
+          data-test-subj="LinkRulesButton"
           type="button"
         >
           <span
