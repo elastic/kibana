@@ -20,9 +20,7 @@ export const getIndexStatus = async ({
     const {
       indices,
       result: {
-        body: {
-          _shards: { total },
-        },
+        body: { count },
       },
     } = await uptimeEsClient.count({
       terminate_after: 1,
@@ -41,7 +39,7 @@ export const getIndexStatus = async ({
     });
     return {
       indices,
-      indexExists: total > 0,
+      indexExists: count > 0,
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
