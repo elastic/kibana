@@ -6,9 +6,11 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CnvmDashboardData } from '../../../common/types';
-import { VULNERABILITIES_STATS_ROUTE_PATH } from '../../../common/constants';
+import {
+  VULNERABILITIES_STATS_ROUTE_PATH,
+  getSafeVulnerabilitiesQueryFilter,
+} from '../../../common/constants';
 import { CspRouter } from '../../types';
 import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
 
@@ -32,18 +34,7 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
       try {
         const esClient = cspContext.esClient.asCurrentUser;
 
-        const query: QueryDslQueryContainer = {
-          bool: {
-            filter: [
-              { exists: { field: 'vulnerability.score.base' } },
-              { exists: { field: 'vulnerability.score.version' } },
-              { exists: { field: 'vulnerability.severity' } },
-              { exists: { field: 'resource.name' } },
-              { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
-            ],
-            must_not: [{ match_phrase: { 'vulnerability.severity': 'UNKNOWN' } }],
-          },
-        };
+        const query = getSafeVulnerabilitiesQueryFilter();
 
         const [cnvmStatistics] = await Promise.all([getVulnerabilitiesStatistics(esClient, query)]);
 

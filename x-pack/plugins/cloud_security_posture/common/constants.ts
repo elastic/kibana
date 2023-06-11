@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PostureTypes } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
@@ -104,3 +105,22 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
 
 export const VULNERABILITIES = 'vulnerabilities';
 export const CONFIGURATIONS = 'configurations';
+
+export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer) => ({
+  ...query,
+  bool: {
+    ...query?.bool,
+    filter: [
+      ...((query?.bool?.filter as []) || []),
+      { exists: { field: 'vulnerability.score.base' } },
+      { exists: { field: 'vulnerability.score.version' } },
+      { exists: { field: 'vulnerability.severity' } },
+      { exists: { field: 'resource.name' } },
+      { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
+    ],
+    must_not: [
+      ...(query?.bool?.must_not || []),
+      { match_phrase: { 'vulnerability.severity': 'UNKNOWN' } },
+    ],
+  },
+});
