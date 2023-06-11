@@ -40,8 +40,8 @@ const CardItemComponent: React.FC<{
   sectionId,
   cardId,
 }) => {
-  const section = getSections()[sectionId];
-  const cardItem = section?.cards?.[cardId];
+  const section = getSections().find((s) => s.id === sectionId);
+  const cardItem = section?.cards?.find((c) => c.id === cardId);
   const [expandCard, setExpandCard] = useState(false);
   const toggleCard = useCallback(
     (e) => {

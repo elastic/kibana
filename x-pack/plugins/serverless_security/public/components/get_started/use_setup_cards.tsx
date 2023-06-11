@@ -33,21 +33,23 @@ export const useSetUpCardSections = ({
       activeCards: Record<CardId, ActiveCard> | null;
       sectionId: SectionId;
     }) =>
-      Object.values(activeCards ?? {})?.map<React.ReactNode>((cardItem) => (
-        <EuiFlexItem key={cardItem.id}>
-          <CardItem
-            data-test-subj={cardItem.id}
-            stepsLeft={cardItem.stepsLeft}
-            timeInMins={cardItem.timeInMins}
-            sectionId={sectionId}
-            cardId={cardItem.id}
-            shadow={shadow}
-            euiTheme={euiTheme}
-            onStepClicked={onStepClicked}
-            finishedSteps={finishedSteps}
-          />
-        </EuiFlexItem>
-      )),
+      activeCards
+        ? Object.values(activeCards)?.map<React.ReactNode>((cardItem) => (
+            <EuiFlexItem key={cardItem.id}>
+              <CardItem
+                data-test-subj={cardItem.id}
+                stepsLeft={cardItem.stepsLeft}
+                timeInMins={cardItem.timeInMins}
+                sectionId={sectionId}
+                cardId={cardItem.id}
+                shadow={shadow}
+                euiTheme={euiTheme}
+                onStepClicked={onStepClicked}
+                finishedSteps={finishedSteps}
+              />
+            </EuiFlexItem>
+          ))
+        : null,
     [euiTheme, shadow]
   );
 
@@ -61,14 +63,14 @@ export const useSetUpCardSections = ({
       finishedSteps: Record<CardId, Set<StepId>>;
       activeCards: Record<CardId, ActiveCard> | null;
     }) =>
-      Object.values(getSections()).reduce<React.ReactNode[]>((acc, currentSection) => {
+      getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({
           sectionId: currentSection.id,
           onStepClicked,
           finishedSteps,
           activeCards,
         });
-        if (currentSection.cards) {
+        if (cardNodes && cardNodes.length > 0) {
           acc.push(
             <EuiPanel
               color="plain"

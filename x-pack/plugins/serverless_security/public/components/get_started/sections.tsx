@@ -13,7 +13,6 @@ import {
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
-  Card,
 } from './types';
 import * as i18n from './translations';
 import respond from './images/respond.svg';
@@ -57,42 +56,12 @@ export const introductionSteps = [
   },
 ];
 
-export const getSetUpCards: Record<GetSetUpCardId, Card> = {
-  [GetSetUpCardId.introduction]: {
-    title: i18n.INTRODUCTION_TITLE,
-    icon: { type: 'securityApp', size: 'xl' },
-    id: GetSetUpCardId.introduction,
-    steps: introductionSteps,
-    timeInMins: introductionSteps.reduce(
-      (totalMin, { timeInMinutes }) => (totalMin += timeInMinutes),
-      0
-    ),
-    stepsLeft: introductionSteps.length,
-  },
-  [GetSetUpCardId.bringInYourData]: {
-    icon: { type: 'agentApp', size: 'xl' },
-    title: i18n.BRING_IN_YOUR_DATA_TITLE,
-    id: GetSetUpCardId.bringInYourData,
-  },
-  [GetSetUpCardId.activateAndCreateRules]: {
-    icon: { type: 'advancedSettingsApp', size: 'xl' },
-    title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
-    id: GetSetUpCardId.activateAndCreateRules,
-  },
-  [GetSetUpCardId.protectYourEnvironmentInRuntime]: {
-    icon: { type: protect, size: 'xl' },
-    title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-    id: GetSetUpCardId.protectYourEnvironmentInRuntime,
-    productTypeRequired: [...ActiveConditions.cloudToggled, ...ActiveConditions.endpointToggled],
-  },
-};
-
-export const sections: Record<SectionId, Section> = {
-  [SectionId.getSetUp]: {
+export const sections: Section[] = [
+  {
     id: SectionId.getSetUp,
     title: i18n.GET_SET_UP_TITLE,
-    cards: {
-      [GetSetUpCardId.introduction]: {
+    cards: [
+      {
         title: i18n.INTRODUCTION_TITLE,
         icon: { type: 'securityApp', size: 'xl' },
         id: GetSetUpCardId.introduction,
@@ -103,17 +72,17 @@ export const sections: Record<SectionId, Section> = {
         ),
         stepsLeft: introductionSteps.length,
       },
-      [GetSetUpCardId.bringInYourData]: {
+      {
         icon: { type: 'agentApp', size: 'xl' },
         title: i18n.BRING_IN_YOUR_DATA_TITLE,
         id: GetSetUpCardId.bringInYourData,
       },
-      [GetSetUpCardId.activateAndCreateRules]: {
+      {
         icon: { type: 'advancedSettingsApp', size: 'xl' },
         title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
         id: GetSetUpCardId.activateAndCreateRules,
       },
-      [GetSetUpCardId.protectYourEnvironmentInRuntime]: {
+      {
         icon: { type: protect, size: 'xl' },
         title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
         id: GetSetUpCardId.protectYourEnvironmentInRuntime,
@@ -122,29 +91,29 @@ export const sections: Record<SectionId, Section> = {
           ...ActiveConditions.endpointToggled,
         ],
       },
-    },
+    ],
   },
-  [SectionId.getMoreFromElasticSecurity]: {
+  {
     id: SectionId.getMoreFromElasticSecurity,
     title: i18n.GET_MORE_TITLE,
-    cards: {
-      [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
+    cards: [
+      {
         icon: { type: 'advancedSettingsApp', size: 'xl' },
         title: i18n.MASTER_THE_INVESTIGATION_TITLE,
         id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
       },
-      [GetMoreFromElasticSecurityCardId.respondToThreats]: {
+      {
         icon: { type: respond, size: 'xl' },
         title: i18n.RESPOND_TO_THREATS_TITLE,
         id: GetMoreFromElasticSecurityCardId.respondToThreats,
       },
-      [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
+      {
         icon: { type: 'spacesApp', size: 'xl' },
         title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
         id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
       },
-    },
+    ],
   },
-};
+];
 
 export const getSections = () => sections;

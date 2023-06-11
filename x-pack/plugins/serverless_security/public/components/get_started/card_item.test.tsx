@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CardItem } from './card_item';
-import { Card, CardId, GetSetUpCardId, IntroductionSteps, Step, StepId } from './types';
+import { Card, CardId, GetSetUpCardId, IntroductionSteps, SectionId, Step, StepId } from './types';
 import { EuiThemeComputed } from '@elastic/eui';
 jest.mock('./card_step');
 
@@ -26,7 +26,8 @@ describe('CardItemComponent', () => {
   it('should render card', () => {
     const { getByText, queryByText } = render(
       <CardItem
-        cardItem={cardItem}
+        cardId={GetSetUpCardId.introduction}
+        sectionId={SectionId.getSetUp}
         euiTheme={mockEuiTheme}
         shadow=""
         stepsLeft={1}
@@ -56,7 +57,8 @@ describe('CardItemComponent', () => {
 
     const { getByText, queryByText } = render(
       <CardItem
-        cardItem={cardItem}
+        cardId={GetSetUpCardId.introduction}
+        sectionId={SectionId.getSetUp}
         euiTheme={mockEuiTheme}
         shadow=""
         stepsLeft={0}

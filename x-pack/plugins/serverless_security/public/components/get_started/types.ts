@@ -20,7 +20,7 @@ export interface HeaderSection {
   title: string;
 }
 export interface Section {
-  cards?: Record<string, Card>;
+  cards?: Card[];
   description?: string;
   icon?: EuiIconProps;
   id: SectionId;
