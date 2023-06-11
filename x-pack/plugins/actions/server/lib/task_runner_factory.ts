@@ -148,9 +148,6 @@ export class TaskRunnerFactory {
           executorResult.status === 'error' &&
           executorResult.message?.includes(validationErrorPrefix)
         ) {
-          logger.warn(
-            `Task Runner has skipped executing the Action (${actionId}) as it has invalid params.`
-          );
           return { state: taskInstance.state, skip: true };
         }
 

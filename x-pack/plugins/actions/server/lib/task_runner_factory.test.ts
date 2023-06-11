@@ -576,10 +576,6 @@ test('returns the existing state and delayed schedule to retry the task when ret
   const result = await taskRunner.run();
 
   expect(result).toEqual({ skip: true, state: mockTaskInstance.state });
-
-  expect(taskRunnerFactoryInitializerParams.logger.warn).toHaveBeenCalledWith(
-    'Task Runner has skipped executing the Action (2) as it has invalid params.'
-  );
 });
 
 test('uses API key when provided', async () => {

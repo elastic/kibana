@@ -1514,7 +1514,7 @@ describe('TaskManagerRunner', () => {
         runAt: new Date(),
       };
 
-      const { runner, store } = await readyToRunStageSetup({
+      const { runner, store, logger } = await readyToRunStageSetup({
         instance: mockTaskInstance,
         definitions: {
           bar: {
@@ -1539,6 +1539,9 @@ describe('TaskManagerRunner', () => {
       expect(instance.state).toEqual(mockTaskInstance.state);
       expect(instance.schedule).toEqual(mockTaskInstance.schedule);
       expect(instance.attempts).toBe(0);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Task Manager has skipped executing the Task (bar/foo) as it has invalid params.'
+      );
     });
   });
 

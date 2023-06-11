@@ -3122,10 +3122,6 @@ describe('Task Runner', () => {
     });
     expect(alertsService.createAlertsClient).not.toHaveBeenCalledWith({});
     expect(ruleType.executor).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Task Runner has skipped executing the Rule (1) as it has invalid params.'
-    );
 
     testAlertingEventLogCalls({
       status: 'skip',

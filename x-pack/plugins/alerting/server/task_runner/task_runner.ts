@@ -820,9 +820,6 @@ export class TaskRunner<
       schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       if (this.shouldSkipRun(err)) {
-        this.logger.warn(
-          `Task Runner has skipped executing the Rule (${ruleId}) as it has invalid params.`
-        );
         return { state: originalState, skip: true };
       }
       stateWithMetrics = asErr(err);

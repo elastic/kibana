@@ -552,12 +552,15 @@ export class TaskManagerRunner implements TaskRunner {
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(
         ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
-          const { startedAt, schedule, state: taskState } = this.instance.task;
+          const { startedAt, schedule, state: taskState, taskType, id } = this.instance.task;
           let processedRunAt =
             runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!;
           let processedState = state;
 
           if (unwrap(result).skip) {
+            this.logger.warn(
+              `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
+            );
             processedRunAt = moment().add(this.taskConfig.skip.delay, 'millisecond').toDate();
             processedState = taskState;
           }
