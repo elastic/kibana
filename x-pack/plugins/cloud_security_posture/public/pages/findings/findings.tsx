@@ -21,6 +21,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { Vulnerabilities } from '../vulnerabilities';
+import { QuickNav } from '../../components/quick_nav';
 
 export const Findings = () => {
   const history = useHistory();
@@ -35,9 +36,16 @@ export const Findings = () => {
   return (
     <>
       <EuiTitle size="l">
-        <h1>
-          <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
-        </h1>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <h1>
+              <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
+            </h1>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <QuickNav />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiTitle>
       <EuiSpacer />
       <EuiTabs size="l">
