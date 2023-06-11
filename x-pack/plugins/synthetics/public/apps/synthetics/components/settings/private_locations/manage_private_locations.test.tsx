@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/dom';
 import { render } from '../../../utils/testing/rtl_helpers';
 import * as permissionsHooks from '../../../hooks';
 import * as locationHooks from './hooks/use_locations_api';
@@ -13,6 +14,7 @@ import * as settingsHooks from '../../../contexts/synthetics_settings_context';
 import type { SyntheticsSettingsContextValues } from '../../../contexts';
 import { ManagePrivateLocations } from './manage_private_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
+import { fireEvent } from '@testing-library/react';
 
 jest.mock('../../../hooks');
 jest.mock('./hooks/use_locations_api');
@@ -33,18 +35,15 @@ describe('<ManagePrivateLocations />', () => {
       onDelete: jest.fn(),
       deleteLoading: false,
     });
-    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
-      canSave: true,
-    } as SyntheticsSettingsContextValues);
   });
 
   it.each([true, false])(
     'handles no agent found when the user does and does not have permissions',
-    (hasFleetPermissions) => {
-      jest
-        .spyOn(permissionsHooks, 'useCanManagePrivateLocation')
-        .mockReturnValue(hasFleetPermissions);
-      const { getByText, getByRole, queryByText } = render(<ManagePrivateLocations />, {
+    async (canSave) => {
+      jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+        canSave,
+      } as SyntheticsSettingsContextValues);
+      const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
         state: {
           agentPolicies: {
             data: {
@@ -62,27 +61,29 @@ describe('<ManagePrivateLocations />', () => {
       });
       expect(getByText('No agent policies found')).toBeInTheDocument();
 
-      if (hasFleetPermissions) {
+      if (canSave) {
         const button = getByRole('link', { name: 'Create agent policy' });
         expect(button).not.toBeDisabled();
-        expect(
-          queryByText(/You are not authorized to manage private locations./)
-        ).not.toBeInTheDocument();
       } else {
         const button = getByRole('button', { name: 'Create agent policy' });
+        screen.debug();
         expect(button).toBeDisabled();
-        expect(getByText(/You are not authorized to manage private locations./));
+        // hover over the button to see the tooltip
+        fireEvent.mouseOver(button);
+        expect(
+          await findByText(/You do not have sufficient permissions to perform this action./)
+        ).toBeInTheDocument();
       }
     }
   );
 
   it.each([true, false])(
     'handles create first location when the user does and does not have permissions',
-    (hasFleetPermissions) => {
-      jest
-        .spyOn(permissionsHooks, 'useCanManagePrivateLocation')
-        .mockReturnValue(hasFleetPermissions);
-      const { getByText, getByRole, queryByText } = render(<ManagePrivateLocations />, {
+    async (canSave) => {
+      jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+        canSave,
+      } as SyntheticsSettingsContextValues);
+      const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
         state: {
           agentPolicies: {
             data: {
@@ -101,29 +102,25 @@ describe('<ManagePrivateLocations />', () => {
       expect(getByText('Create your first private location')).toBeInTheDocument();
       const button = getByRole('button', { name: 'Create location' });
 
-      if (hasFleetPermissions) {
+      if (canSave) {
         expect(button).not.toBeDisabled();
-        expect(
-          queryByText(/You are not authorized to manage private locations./)
-        ).not.toBeInTheDocument();
       } else {
         expect(button).toBeDisabled();
-        expect(getByText(/You are not authorized to manage private locations./));
+        fireEvent.mouseOver(button);
+        expect(await findByText(/You do not have sufficient permissions to perform this action./))
+          .toBeInTheDocument;
       }
     }
   );
 
   it.each([true, false])(
     'handles location table when the user does and does not have permissions',
-    (hasFleetPermissions) => {
+    async (canSave) => {
       const privateLocationName = 'Test private location';
-      jest
-        .spyOn(permissionsHooks, 'useCanManagePrivateLocation')
-        .mockReturnValue(hasFleetPermissions);
-      jest.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
-        canSaveIntegrations: hasFleetPermissions,
-        canReadAgentPolicies: hasFleetPermissions,
-      });
+      jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+        canSave,
+      } as SyntheticsSettingsContextValues);
+
       jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
         formData: {} as PrivateLocation,
         loading: false,
@@ -140,7 +137,7 @@ describe('<ManagePrivateLocations />', () => {
         onDelete: jest.fn(),
         deleteLoading: false,
       });
-      const { getByText, getByRole, queryByText } = render(<ManagePrivateLocations />, {
+      const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
         state: {
           agentPolicies: {
             data: {
@@ -159,14 +156,13 @@ describe('<ManagePrivateLocations />', () => {
       expect(getByText(privateLocationName)).toBeInTheDocument();
       const button = getByRole('button', { name: 'Create location' });
 
-      if (hasFleetPermissions) {
+      if (canSave) {
         expect(button).not.toBeDisabled();
-        expect(
-          queryByText(/You are not authorized to manage private locations./)
-        ).not.toBeInTheDocument();
       } else {
         expect(button).toBeDisabled();
-        expect(getByText(/You are not authorized to manage private locations./));
+        fireEvent.mouseOver(button);
+        expect(await findByText(/You do not have sufficient permissions to perform this action./))
+          .toBeInTheDocument;
       }
     }
   );

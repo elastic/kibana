@@ -19,7 +19,8 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useCanManagePrivateLocation } from '../../../hooks/use_fleet_permissions';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LocationForm } from './location_form';
@@ -52,10 +53,9 @@ export const AddLocationFlyout = ({
     },
   });
 
+  const { canSave } = useSyntheticsSettingsContext();
+
   const { handleSubmit } = form;
-
-  const canManagePrivateLocation = useCanManagePrivateLocation();
-
   const closeFlyout = () => {
     setIsOpen(false);
   };
@@ -69,15 +69,8 @@ export const AddLocationFlyout = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <ManageEmptyState
-            privateLocations={privateLocations}
-            hasFleetPermissions={canManagePrivateLocation}
-            showEmptyLocations={false}
-          >
-            <LocationForm
-              privateLocations={privateLocations}
-              hasPermissions={canManagePrivateLocation}
-            />
+          <ManageEmptyState privateLocations={privateLocations} showEmptyLocations={false}>
+            <LocationForm privateLocations={privateLocations} />
           </ManageEmptyState>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
@@ -94,14 +87,17 @@ export const AddLocationFlyout = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="syntheticsAddLocationFlyoutButton"
-                fill
-                onClick={handleSubmit(onSubmit)}
-                isLoading={isLoading}
-              >
-                {SAVE_LABEL}
-              </EuiButton>
+              <NoPermissionsTooltip canEditSynthetics={canSave}>
+                <EuiButton
+                  data-test-subj="syntheticsAddLocationFlyoutButton"
+                  fill
+                  onClick={handleSubmit(onSubmit)}
+                  isLoading={isLoading}
+                  isDisabled={!canSave}
+                >
+                  {SAVE_LABEL}
+                </EuiButton>
+              </NoPermissionsTooltip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

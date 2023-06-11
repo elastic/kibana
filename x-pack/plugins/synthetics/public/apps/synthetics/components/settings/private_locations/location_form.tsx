@@ -24,14 +24,7 @@ import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
-export const LocationForm = ({
-  privateLocations,
-  hasPermissions,
-}: {
-  onDiscard?: () => void;
-  privateLocations: PrivateLocation[];
-  hasPermissions: boolean;
-}) => {
+export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
   const { control, register, watch } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
@@ -45,7 +38,7 @@ export const LocationForm = ({
 
   return (
     <>
-      {data?.items.length === 0 && <AgentPolicyNeeded disabled={!hasPermissions} />}
+      {data?.items.length === 0 && <AgentPolicyNeeded />}
       <EuiForm component="form" noValidate>
         <EuiFormRow
           fullWidth

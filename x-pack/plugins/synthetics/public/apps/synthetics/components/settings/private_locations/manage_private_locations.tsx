@@ -8,7 +8,6 @@ import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
-import { useCanManagePrivateLocation } from '../../../hooks';
 import { ManageEmptyState } from './manage_empty_state';
 import { AddLocationFlyout } from './add_location_flyout';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
@@ -31,8 +30,6 @@ export const ManagePrivateLocations = () => {
 
   const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = usePrivateLocationsAPI();
 
-  const canManagePrivateLocation = useCanManagePrivateLocation();
-
   // make sure flyout is closed when first visiting the page
   useEffect(() => {
     setIsAddingNew(false);
@@ -52,11 +49,7 @@ export const ManagePrivateLocations = () => {
       {loading ? (
         <LoadingState />
       ) : (
-        <ManageEmptyState
-          privateLocations={privateLocations}
-          setIsAddingNew={setIsAddingNew}
-          hasFleetPermissions={canManagePrivateLocation}
-        >
+        <ManageEmptyState privateLocations={privateLocations} setIsAddingNew={setIsAddingNew}>
           <PrivateLocationsTable
             privateLocations={privateLocations}
             onDelete={onDelete}

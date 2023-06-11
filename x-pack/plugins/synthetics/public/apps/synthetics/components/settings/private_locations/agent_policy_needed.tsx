@@ -8,11 +8,12 @@
 import React from 'react';
 import { EuiLink, EuiButton, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LEARN_MORE, READ_DOCS } from './empty_locations';
 
-export const AgentPolicyNeeded = ({ disabled }: { disabled: boolean }) => {
-  const { basePath } = useSyntheticsSettingsContext();
+export const AgentPolicyNeeded = () => {
+  const { basePath, canSave } = useSyntheticsSettingsContext();
 
   return (
     <EuiEmptyPrompt
@@ -20,15 +21,17 @@ export const AgentPolicyNeeded = ({ disabled }: { disabled: boolean }) => {
       title={<h2>{AGENT_POLICY_NEEDED}</h2>}
       body={<p>{ADD_AGENT_POLICY_DESCRIPTION}</p>}
       actions={
-        <EuiButton
-          data-test-subj="syntheticsAgentPolicyNeededButton"
-          fill
-          href={`${basePath}/app/fleet/policies?create`}
-          color="primary"
-          isDisabled={disabled}
-        >
-          {CREATE_AGENT_POLICY}
-        </EuiButton>
+        <NoPermissionsTooltip canEditSynthetics={canSave}>
+          <EuiButton
+            data-test-subj="syntheticsAgentPolicyNeededButton"
+            fill
+            href={`${basePath}/app/fleet/policies?create`}
+            color="primary"
+            isDisabled={!canSave}
+          >
+            {CREATE_AGENT_POLICY}
+          </EuiButton>
+        </NoPermissionsTooltip>
       }
       footer={
         <>
