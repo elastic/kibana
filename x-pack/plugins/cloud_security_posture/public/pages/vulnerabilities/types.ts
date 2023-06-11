@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+
 export interface VulnerabilityRecord {
   '@timestamp': string;
   resource?: {
@@ -86,7 +88,7 @@ export interface Vulnerability {
   id: string;
   title: string;
   reference: string;
-  severity: string;
+  severity: VulnSeverity;
   cvss: {
     nvd: VectorScoreBase;
     redhat?: VectorScoreBase;
