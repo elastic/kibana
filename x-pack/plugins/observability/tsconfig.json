@@ -69,7 +69,8 @@
     "@kbn/observability-shared-plugin",
     "@kbn/exploratory-view-plugin",
     "@kbn/rison",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/io-ts-utils"
   ],
   "exclude": ["target/**/*"]
 }
