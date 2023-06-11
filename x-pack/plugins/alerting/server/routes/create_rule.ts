@@ -16,7 +16,7 @@ import { BASE_ALERTING_API_PATH } from '../types';
 import { RouteOptions } from '.';
 import { createRuleSchemasV1 } from '../../common/api_schemas';
 import { ruleV1, createRuleV1 } from '../../common/types/api';
-import { SanitizedRule, RuleParams } from '../common/types';
+import { PublicRule, RuleParams } from '../common/types';
 import type { CreateRuleData } from '../rules_client/methods/create';
 import { transformPublicRuleToResponse } from '../common/transforms';
 
@@ -78,7 +78,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: SanitizedRule<RuleParams> = await rulesClient.create<RuleParams>({
+            const createdRule: PublicRule<RuleParams> = await rulesClient.create<RuleParams>({
               data: rewriteBodyReq(createRuleData),
               options: { id: params?.id },
             });

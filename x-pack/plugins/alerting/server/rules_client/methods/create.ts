@@ -23,7 +23,7 @@ import {
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { Rule, RuleParams, SanitizedRule } from '../../common/types';
+import { Rule, RuleParams, PublicRule } from '../../common/types';
 import {
   transformRuleToEs,
   transformEsToRule,
@@ -82,7 +82,7 @@ export interface CreateParams {
 export async function create<Params extends RuleParams = never>(
   context: RulesClientContext,
   createParams: CreateParams
-): Promise<SanitizedRule<Params>> {
+): Promise<PublicRule<Params>> {
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
 
   const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
