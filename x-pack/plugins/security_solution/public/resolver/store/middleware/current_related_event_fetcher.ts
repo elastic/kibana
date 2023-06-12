@@ -31,15 +31,18 @@ export function CurrentRelatedEventFetcher(
   dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch, State>
 ): (id: string) => void {
-  let last: PanelViewAndParameters | undefined;
+  const last: { [id: string]: PanelViewAndParameters | undefined } = {};
   return async (id: string) => {
     const state = api.getState();
 
+    if (!last[id]) {
+      last[id] = undefined;
+    }
     const newParams = selectors.panelViewAndParameters(state.analyzer.analyzerById[id]);
     const indices = selectors.eventIndices(state.analyzer.analyzerById[id]);
 
-    const oldParams = last;
-    last = newParams;
+    const oldParams = last[id];
+    last[id] = newParams;
 
     // If the panel view params have changed and the current panel view is the `eventDetail`, then fetch the event details for that eventID.
     if (!isEqual(newParams, oldParams) && newParams.panelView === 'eventDetail') {

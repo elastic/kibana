@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/analyzer');
 
-export const createResolver = actionCreator<{ id: string }>('ADD_RESOLVER');
+export const createResolver = actionCreator<{ id: string }>('CREATE_RESOLVER');
 
 export const clearResolver = actionCreator<{ id: string }>('CLEAR_RESOLVER');
 

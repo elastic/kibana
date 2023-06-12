@@ -145,6 +145,24 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     }
   }, [fullScreen]);
 
+  const resolver = useMemo(
+    () =>
+      graphEventId !== undefined ? (
+        <StyledResolver
+          databaseDocumentID={graphEventId}
+          resolverComponentInstanceID={scopeId}
+          indices={selectedPatterns}
+          shouldUpdate={shouldUpdate}
+          filters={filters}
+        />
+      ) : (
+        <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexGroup>
+      ),
+    [graphEventId, scopeId, selectedPatterns, shouldUpdate, filters]
+  );
+
   if (!isActiveTimeline(scopeId) && sessionViewConfig !== null) {
     return (
       <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
@@ -167,19 +185,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
-        {graphEventId !== undefined ? (
-          <StyledResolver
-            databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={scopeId}
-            indices={selectedPatterns}
-            shouldUpdate={shouldUpdate}
-            filters={filters}
-          />
-        ) : (
-          <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexGroup>
-        )}
+        {resolver}
       </FullScreenOverlayContainer>
     );
   } else {
@@ -190,19 +196,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
-        {graphEventId !== undefined ? (
-          <StyledResolver
-            databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={scopeId}
-            indices={selectedPatterns}
-            shouldUpdate={shouldUpdate}
-            filters={filters}
-          />
-        ) : (
-          <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexGroup>
-        )}
+        {resolver}
       </OverlayContainer>
     );
   }

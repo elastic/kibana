@@ -6,8 +6,7 @@
  */
 
 import type { Dispatch, MiddlewareAPI, AnyAction } from 'redux';
-import { isEmpty } from 'lodash';
-import type { DataAccessLayer, AnalyzerById } from '../../types';
+import type { DataAccessLayer } from '../../types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
 import type { State } from '../../../common/store/types';
 import { RelatedEventsFetcher } from './related_events_fetcher';
@@ -23,24 +22,22 @@ type MiddlewareFactory<S = State> = (
   api: MiddlewareAPI<Dispatch<AnyAction>, S>
 ) => (next: Dispatch<AnyAction>) => (action: AnyAction) => unknown;
 
-const resolverActions = { ...Actions, ...DataActions, ...CameraActions };
+const resolverActions = [
+  ...Object.values(Actions).map((action) => action.type),
+  ...Object.values(DataActions).map((action) => action.type),
+  ...Object.values(CameraActions).map((action) => action.type),
+];
 
 /**
  * Helper function to determine if analyzer is active (resolver middleware should be run)
- * analyzer is considered active if:
- * 1. action is initial set up (create resolver), or
- * 2. action is not clean up, or
- * 3. analyzer state for action id is not empty
+ * analyzer is considered active if: action is not clean up
  * @param state analyzerbyId state
  * @param action dispatched action
  * @returns boolean of whether the analyzer of id has an store in redux
  */
-function isAnalyzerActive(state: AnalyzerById, action: AnyAction): boolean {
+function isAnalyzerActive(action: AnyAction): boolean {
   // middleware shouldn't run after clear resolver
-  if (Actions.clearResolver.match(action)) {
-    return false;
-  }
-  return Actions.createResolver.match(action) || !isEmpty(state[action.payload?.id]);
+  return !Actions.clearResolver.match(action);
 }
 
 /**
@@ -49,7 +46,7 @@ function isAnalyzerActive(state: AnalyzerById, action: AnyAction): boolean {
  * @returns boolean of whether the action is a resolver action
  */
 function isResolverAction(action: AnyAction): boolean {
-  return Object.values(resolverActions).some((x) => x.match(action));
+  return resolverActions.includes(action.type);
 }
 /**
  * The `redux` middleware that the application uses to trigger side effects.
@@ -67,8 +64,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: Da
     return async (action: AnyAction) => {
       next(action);
 
-      const state = api.getState().analyzer.analyzerById;
-      if (action.payload?.id && isAnalyzerActive(state, action) && isResolverAction(action)) {
+      if (action.payload?.id && isAnalyzerActive(action) && isResolverAction(action)) {
         resolverTreeFetcher(action.payload.id);
         relatedEventsFetcher(action.payload.id);
         nodeDataFetcher(action.payload.id);

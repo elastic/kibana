@@ -133,4 +133,4 @@ export const userMovedPointer = actionCreator<{
    * Time (since epoch in milliseconds) when this action was dispatched.
    */
   readonly time: number;
-}>('USER_MOVED_CAMERA');
+}>('USER_MOVED_POINTER');

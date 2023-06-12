@@ -14,12 +14,14 @@ import type {
   CombinedState,
   AnyAction,
   Reducer,
+  compose,
 } from 'redux';
-import { applyMiddleware, compose, createStore as createReduxStore } from 'redux';
+import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, pluck } from 'rxjs';
-
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
@@ -186,7 +188,12 @@ export const createStore = (
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const enhancerOptions: EnhancerOptions = {
+    name: 'Kibana Security Solution',
+    actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
+  };
+
+  const composeEnhancers = composeWithDevTools(enhancerOptions);
 
   const middlewareDependencies: TimelineEpicDependencies<State> = {
     kibana$: kibana,
@@ -204,12 +211,16 @@ export const createStore = (
     }
   );
 
+  const middlewareEnhancer = applyMiddleware(
+    epicMiddleware,
+    telemetryMiddleware,
+    ...(additionalMiddleware ?? [])
+  );
+
   store = createReduxStore(
     createReducer(pluginsReducer),
     state as PreloadedState<State>,
-    composeEnhancers(
-      applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))
-    )
+    composeEnhancers(middlewareEnhancer)
   );
 
   epicMiddleware.run(createRootEpic<CombinedState<State>>());

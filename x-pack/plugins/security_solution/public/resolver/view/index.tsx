@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { ResolverProps } from '../types';
 import { ResolverWithoutProviders } from './resolver_without_providers';
-import { createResolver, clearResolver } from '../store/actions';
+import { createResolver } from '../store/actions';
 import type { State } from '../../common/store/types';
 /**
  * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutProviders` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
@@ -30,10 +30,6 @@ export const Resolver = React.memo((props: ResolverProps) => {
     if (props.shouldUpdate) {
       dispatch(createResolver({ id: props.resolverComponentInstanceID }));
     }
-    return () => {
-      dispatch(clearResolver({ id: props.resolverComponentInstanceID }));
-    };
   }, [dispatch, props.shouldUpdate, props.resolverComponentInstanceID]);
-
   return <ResolverWithoutProviders {...props} />;
 });

@@ -44,9 +44,14 @@ export function useCamera({ id }: { id: string }): {
    * The projection matrix changes over time if the camera is currently animating.
    */
 
-  const projectionMatrixAtTime = useSelector((state: State) => {
-    return selectors.projectionMatrix(state.analyzer.analyzerById[id]);
-  });
+  const projectionMatrixAtTime = useSelector(
+    useCallback(
+      (state: State) => {
+        return selectors.projectionMatrix(state.analyzer.analyzerById[id]);
+      },
+      [id]
+    )
+  );
 
   /**
    * Use a ref to refer to the `projectionMatrixAtTime` function. The rAF loop

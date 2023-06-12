@@ -21,27 +21,30 @@ export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch, State>
 ): (id: string) => void {
-  let last: PanelViewAndParameters | undefined;
+  const last: { [id: string]: PanelViewAndParameters | undefined } = {};
   // Call this after each state change.
   // This fetches the ResolverTree for the current entityID
   // if the entityID changes while
   return async (id: string) => {
     const state = api.getState();
 
+    if (!last[id]) {
+      last[id] = undefined;
+    }
     const newParams = selectors.panelViewAndParameters(state.analyzer.analyzerById[id]);
     const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(
       state.analyzer.analyzerById[id]
     );
     const indices = selectors.eventIndices(state.analyzer.analyzerById[id]);
 
-    const oldParams = last;
+    const oldParams = last[id];
     const detectedBounds = selectors.detectedBounds(state.analyzer.analyzerById[id]);
     const timeRangeFilters =
       detectedBounds !== undefined
         ? undefined
         : selectors.timeRangeFilters(state.analyzer.analyzerById[id]);
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
-    last = newParams;
+    last[id] = newParams;
 
     async function fetchEvents({
       nodeID,
