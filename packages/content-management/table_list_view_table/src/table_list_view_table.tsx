@@ -107,7 +107,6 @@ export interface TableListViewTableProps<
   withoutPageTemplateWrapper?: boolean;
   contentEditor?: ContentEditorConfig;
 
-  // TODO are these used?
   tableCaption: string;
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
