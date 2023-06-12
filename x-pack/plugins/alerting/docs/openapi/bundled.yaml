@@ -101,7 +101,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/create_rule_request'
+              title: Create rule request body properties
+              description: The properties vary depending on the rule type.
+              oneOf:
+                - $ref: '#/components/schemas/create_anomaly_detection_alert_rule_request'
+                - $ref: '#/components/schemas/create_anomaly_detection_jobs_health_rule_request'
+                - $ref: '#/components/schemas/create_apm_anomaly_rule_request'
+                - $ref: '#/components/schemas/create_apm_error_count_rule_request'
+                - $ref: '#/components/schemas/create_apm_transaction_duration_rule_request'
+                - $ref: '#/components/schemas/create_apm_transaction_error_rate_rule_request'
+                - $ref: '#/components/schemas/create_es_query_rule_request'
+                - $ref: '#/components/schemas/create_geo_containment_rule_request'
+                - $ref: '#/components/schemas/create_index_threshold_rule_request'
+                - $ref: '#/components/schemas/create_infra_inventory_rule_request'
+                - $ref: '#/components/schemas/create_infra_metric_threshold_rule_request'
+                - $ref: '#/components/schemas/create_log_threshold_rule_request'
+                - $ref: '#/components/schemas/create_slo_burn_rate_rule_request'
+                - $ref: '#/components/schemas/create_synthetics_monitor_status_rule_request'
+                - $ref: '#/components/schemas/create_synthetics_uptime_tls_rule_request'
+                - $ref: '#/components/schemas/create_transform_health_rule_request'
+              discriminator:
+                propertyName: rule_type_id
             examples:
               createCaseRequest:
                 $ref: '#/components/examples/create_rule_request'
@@ -1914,9 +1934,21 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    create_rule_request:
-      title: Create rule request
-      description: The create rule API request body varies depending on the type of rule and actions.
+    consumer:
+      type: string
+      description: |
+        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+    enabled_rule:
+      type: boolean
+      description: Indicates whether you want to run the rule on an interval basis after it is created.
+    name_rule:
+      type: string
+      description: |
+        The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
+    create_anomaly_detection_alert_rule_request:
+      title: Create anomaly detection rule request
+      description: |
+        An anomaly detection alert rule checks if the anomaly detection job results contain anomalies that match the rule conditions. 
       type: object
       required:
         - consumer
@@ -1928,26 +1960,1282 @@ components:
         actions:
           $ref: '#/components/schemas/actions'
         consumer:
-          type: string
-          description: |
-            The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+          $ref: '#/components/schemas/consumer'
         enabled:
-          type: boolean
-          description: Indicates whether you want to run the rule on an interval basis after it is created.
+          $ref: '#/components/schemas/enabled_rule'
         name:
-          type: string
-          description: The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
-          example: cluster_health_rule
+          $ref: '#/components/schemas/name_rule'
         notify_when:
           $ref: '#/components/schemas/notify_when'
         params:
           type: object
-          description: The parameters for the rule.
+          description: The parameters for an anomaly detection rule.
           additionalProperties: true
         rule_type_id:
           type: string
-          description: |
-            The ID of the rule type that you want to call when the rule is scheduled to run. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.ml.anomaly_detection_alert
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_anomaly_detection_jobs_health_rule_request:
+      title: Create anomaly detection jobs health rule request
+      description: |
+        An anomaly detection jobs health rule onitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for an anomaly detection jobs health rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.ml.anomaly_detection_jobs_health
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_apm_anomaly:
+      required:
+        - windowSize
+        - windowUnit
+        - environment
+        - anomalySeverityType
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        windowSize:
+          type: number
+          example: 6
+          description: The window size
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        anomalySeverityType:
+          type: string
+          description: The anomaly threshold value
+          enum:
+            - critical
+            - major
+            - minor
+            - warning
+    create_apm_anomaly_rule_request:
+      title: Create APM anomaly rule rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_apm_anomaly'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - apm.anomaly
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_apm_error_count:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        threshold:
+          type: number
+          description: The error count threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.name
+              - error.grouping_key
+        errorGroupingKey:
+          type: string
+    create_apm_error_count_rule_request:
+      title: Create APM error count rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_apm_error_count'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - apm.error_rate
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_apm_transaction_duration:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+        - aggregationType
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        transactionName:
+          type: string
+          description: The transaction name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: ç
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+        threshold:
+          type: number
+          description: The latency threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+            - transaction.type
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.type
+              - transaction.name
+        aggregationType:
+          type: string
+          enum:
+            - avg
+            - 95th
+            - 99th
+    create_apm_transaction_duration_rule_request:
+      title: Create transaction duration rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_apm_transaction_duration'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - apm.transaction_duration
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_apm_transaction_error_rate:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        transactionName:
+          type: string
+          description: The transaction name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        threshold:
+          type: number
+          description: The error rate threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+            - transaction.type
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.type
+              - transaction.name
+    create_apm_transaction_error_rate_rule_request:
+      title: Create APM transaction error rate rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_apm_transaction_error_rate'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - apm.transaction_error_rate
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_es_query_rule_request:
+      title: Create Elasticsearch query rule request
+      description: |
+        The Elasticsearch query rule type runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.  
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for an Elasticsearch query rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - .es-query
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_geo_containment_rule_request:
+      title: Create traacking containment rule request
+      description: |
+        The tracking containment rule type runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.  
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for an tracking containment rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - .geo-containment
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_index_threshold_rule_request:
+      title: Create index threshold rule request
+      description: The index threshold rule type runs an Elasticsearch query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for an index threshold rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - .index-threshold
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_infra_inventory:
+      properties:
+        criteria:
+          type: array
+          items:
+            type: object
+            properties:
+              metric:
+                type: string
+                enum:
+                  - count
+                  - cpu
+                  - diskLatency
+                  - load
+                  - memory
+                  - memoryTotal
+                  - tx
+                  - rx
+                  - logRate
+                  - diskIOReadBytes
+                  - diskIOWriteBytes
+                  - s3TotalRequests
+                  - s3NumberOfObjects
+                  - s3BucketSize
+                  - s3DownloadBytes
+                  - s3UploadBytes
+                  - rdsConnections
+                  - rdsQueriesExecuted
+                  - rdsActiveTransactions
+                  - rdsLatency
+                  - sqsMessagesVisible
+                  - sqsMessagesDelayed
+                  - sqsMessagesSent
+                  - sqsMessagesEmpty
+                  - sqsOldestMessage
+                  - custom
+              timeSize:
+                type: number
+              timeUnit:
+                type: string
+                enum:
+                  - s
+                  - m
+                  - h
+                  - d
+              sourceId:
+                type: string
+              threshold:
+                type: array
+                items:
+                  type: number
+              comparator:
+                type: string
+                enum:
+                  - <
+                  - <=
+                  - '>'
+                  - '>='
+                  - between
+                  - outside
+              customMetric:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      - custom
+                  field:
+                    type: string
+                  aggregation:
+                    type: string
+                    enum:
+                      - avg
+                      - max
+                      - min
+                      - rate
+                  id:
+                    type: string
+                  label:
+                    type: string
+              warningThreshold:
+                type: array
+                items:
+                  type: number
+              warningComparator:
+                type: string
+                enum:
+                  - <
+                  - <=
+                  - '>'
+                  - '>='
+                  - between
+                  - outside
+        filterQuery:
+          type: string
+        filterQueryText:
+          type: string
+        nodeType:
+          type: string
+          enum:
+            - host
+            - pod
+            - container
+            - awsEC2
+            - awsS3
+            - awsSQS
+            - awsRDS
+        sourceId:
+          type: string
+        alertOnNoData:
+          type: boolean
+    create_infra_inventory_rule_request:
+      title: Create infra inventory rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_infra_inventory'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - metrics.alert.inventory.threshold
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_infra_metric_threshold:
+      properties:
+        criteria:
+          type: array
+          items:
+            oneOf:
+              - title: non count criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  metric:
+                    type: string
+                  aggType:
+                    type: string
+                    enum:
+                      - avg
+                      - max
+                      - min
+                      - cardinality
+                      - rate
+                      - count
+                      - sum
+                      - p95
+                      - p99
+                      - custom
+              - title: count criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  aggType:
+                    type: string
+                    enum:
+                      - count
+              - title: custom criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  aggType:
+                    type: string
+                    enum:
+                      - custom
+                  customMetric:
+                    type: array
+                    items:
+                      oneOf:
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                            aggType:
+                              type: string
+                              enum:
+                                - avg
+                                - sum
+                                - max
+                                - min
+                                - cardinality
+                            field:
+                              type: string
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                            aggType:
+                              type: string
+                              enum:
+                                - count
+                            filter:
+                              type: string
+                  equation:
+                    type: string
+                  label:
+                    type: string
+        groupBy:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        filterQuery:
+          type: string
+        sourceId:
+          type: string
+        alertOnNoData:
+          type: boolean
+        alertOnGroupDisappear:
+          type: boolean
+    create_infra_metric_threshold_rule_request:
+      title: Create infra metric threshold rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_infra_metric_threshold'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - metrics.alert.threshold
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_log_threshold:
+      oneOf:
+        - title: Count
+          type: object
+          required:
+            - count
+            - timeSize
+            - timeUnit
+            - logView
+          properties:
+            criteria:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: my.field
+                  comparator:
+                    type: string
+                    enum:
+                      - more than
+                      - more than or equals
+                      - less than
+                      - less than or equals
+                      - equals
+                      - does not equal
+                      - matches
+                      - does not match
+                      - matches phrase
+                      - does not match phrase
+                  value:
+                    oneOf:
+                      - type: number
+                        example: 42
+                      - type: string
+                        example: value
+            count:
+              type: object
+              properties:
+                comparator:
+                  type: string
+                  enum:
+                    - more than
+                    - more than or equals
+                    - less than
+                    - less than or equals
+                    - equals
+                    - does not equal
+                    - matches
+                    - does not match
+                    - matches phrase
+                    - does not match phrase
+                value:
+                  type: number
+                  example: 100
+            timeSize:
+              type: number
+              example: 6
+            timeUnit:
+              type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+            logView:
+              type: object
+              properties:
+                logViewId:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - log-view-reference
+                  example: log-view-reference
+            groupBy:
+              type: array
+              items:
+                type: string
+        - title: Ratio
+          type: object
+          required:
+            - count
+            - timeSize
+            - timeUnit
+            - logView
+          properties:
+            criteria:
+              type: array
+              items:
+                minItems: 2
+                maxItems: 2
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: my.field
+                    comparator:
+                      type: string
+                      enum:
+                        - more than
+                        - more than or equals
+                        - less than
+                        - less than or equals
+                        - equals
+                        - does not equal
+                        - matches
+                        - does not match
+                        - matches phrase
+                        - does not match phrase
+                    value:
+                      oneOf:
+                        - type: number
+                          example: 42
+                        - type: string
+                          example: value
+            count:
+              type: object
+              properties:
+                comparator:
+                  type: string
+                  enum:
+                    - more than
+                    - more than or equals
+                    - less than
+                    - less than or equals
+                    - equals
+                    - does not equal
+                    - matches
+                    - does not match
+                    - matches phrase
+                    - does not match phrase
+                value:
+                  type: number
+                  example: 100
+            timeSize:
+              type: number
+              example: 6
+            timeUnit:
+              type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+            logView:
+              type: object
+              properties:
+                logViewId:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - log-view-reference
+                  example: log-view-reference
+            groupBy:
+              type: array
+              items:
+                type: string
+    create_log_threshold_rule_request:
+      title: Create log threshold rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_log_threshold'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - logs.alert.document.count
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_slo_burn_rate:
+      properties:
+        sloId:
+          description: The SLO identifier used by the rule
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+        burnRateThreshold:
+          description: The burn rate threshold used to trigger the alert
+          type: number
+          example: 14.4
+        maxBurnRateThreshold:
+          description: The maximum burn rate threshold value defined by the SLO error budget
+          type: number
+          example: 168
+        longWindow:
+          description: The duration of the long window used to compute the burn rate
+          type: object
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 6
+            unit:
+              description: The duration unit
+              type: string
+              example: h
+        shortWindow:
+          description: The duration of the short window used to compute the burn rate
+          type: object
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 30
+            unit:
+              description: The duration unit
+              type: string
+              example: m
+    create_slo_burn_rate_rule_request:
+      title: Create slo burn rate rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_slo_burn_rate'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - slo.rules.burnRate
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_synthetics_monitor_status:
+      required:
+        - numTimes
+        - shouldCheckStatus
+        - shouldCheckAvailability
+      properties:
+        availability:
+          type: object
+          properties:
+            range:
+              type: number
+            rangeUnit:
+              type: string
+            threshold:
+              type: string
+        filters:
+          oneOf:
+            - type: string
+            - type: object
+              deprecated: true
+              properties:
+                monitor.type:
+                  type: array
+                  items:
+                    type: string
+                observer.geo.name:
+                  type: array
+                  items:
+                    type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                url.port:
+                  type: array
+                  items:
+                    type: string
+        locations:
+          deprecated: true
+          type: array
+          items:
+            type: string
+        numTimes:
+          type: number
+        search:
+          type: string
+        shouldCheckStatus:
+          type: boolean
+        shouldCheckAvailability:
+          type: boolean
+        timerangeCount:
+          type: number
+        timerangeUnit:
+          type: string
+        timerange:
+          deprecated: true
+          type: object
+          properties:
+            from:
+              type: string
+            to:
+              type: string
+        version:
+          type: number
+        isAutoGenerated:
+          type: boolean
+    create_synthetics_monitor_status_rule_request:
+      title: Create synthetics monitor status rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_synthetics_monitor_status'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.uptime.alerts.monitorStatus
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_synthetics_uptime_tls:
+      properties:
+        search:
+          type: string
+        certExpirationThreshold:
+          type: number
+        certAgeThreshold:
+          type: number
+    create_synthetics_uptime_tls_rule_request:
+      title: Create synthetics uptime TLS rule request
+      description: TBD
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_synthetics_uptime_tls'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.uptime.alerts.tls
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_transform_health_rule_request:
+      title: Create transform health rule request
+      description: |
+        A transform health rule monitors transforms health and alerts if an operational issue occurred.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a transform health rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - transform_health
         schedule:
           $ref: '#/components/schemas/schedule'
         tags:

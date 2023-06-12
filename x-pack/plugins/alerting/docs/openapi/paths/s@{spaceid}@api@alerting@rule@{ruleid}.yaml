@@ -105,7 +105,27 @@ post:
     content:
       application/json:
         schema:
-          $ref: '../components/schemas/create_rule_request.yaml' 
+          title: Create rule request body properties
+          description: The properties vary depending on the rule type.
+          oneOf:
+            - $ref: '../components/schemas/create_anomaly_detection_alert_rule_request.yaml'
+            - $ref: '../components/schemas/create_anomaly_detection_jobs_health_rule_request.yaml'
+            - $ref: '../components/schemas/create_apm_anomaly_rule_request.yaml'
+            - $ref: '../components/schemas/create_apm_error_count_rule_request.yaml'
+            - $ref: '../components/schemas/create_apm_transaction_duration_rule_request.yaml'
+            - $ref: '../components/schemas/create_apm_transaction_error_rate_rule_request.yaml'
+            - $ref: '../components/schemas/create_es_query_rule_request.yaml'
+            - $ref: '../components/schemas/create_geo_containment_rule_request.yaml'
+            - $ref: '../components/schemas/create_index_threshold_rule_request.yaml'
+            - $ref: '../components/schemas/create_infra_inventory_rule_request.yaml'
+            - $ref: '../components/schemas/create_infra_metric_threshold_rule_request.yaml'
+            - $ref: '../components/schemas/create_log_threshold_rule_request.yaml'
+            - $ref: '../components/schemas/create_slo_burn_rate_rule_request.yaml'
+            - $ref: '../components/schemas/create_synthetics_monitor_status_rule_request.yaml'
+            - $ref: '../components/schemas/create_synthetics_uptime_tls_rule_request.yaml'
+            - $ref: '../components/schemas/create_transform_health_rule_request.yaml'
+          discriminator:
+            propertyName: rule_type_id
         examples:
           createCaseRequest:
             $ref: '../components/examples/create_rule_request.yaml'
