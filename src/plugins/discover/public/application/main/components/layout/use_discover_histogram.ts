@@ -222,8 +222,10 @@ export const useDiscoverHistogram = ({
     timefilter.getTime()
   );
 
-  // Update the columns only when documents are fetched so the Lens suggestions
-  // don't constantly change when the user modifies the table columns
+  // When in text based language mode, update the data view, query, and
+  // columns only when documents are done fetching so the Lens suggestions
+  // don't frequently change, such as when the user modifies the table
+  // columns, which would trigger unnecessary refetches.
   const textBasedFetchComplete$ = useMemo(
     () => createFetchCompleteObservable(stateContainer),
     [stateContainer]
@@ -244,46 +246,56 @@ export const useDiscoverHistogram = ({
    * Data fetching
    */
 
-  const savedSearchFetch$ = stateContainer.dataState.fetch$;
-  const skipDiscoverRefetch = useRef<boolean>();
+  const skipRefetch = useRef<boolean>();
 
   // Skip refetching when showing the chart since Lens will
   // automatically fetch when the chart is shown
   useEffect(() => {
-    if (skipDiscoverRefetch.current === undefined) {
-      skipDiscoverRefetch.current = false;
+    if (skipRefetch.current === undefined) {
+      skipRefetch.current = false;
     } else {
-      skipDiscoverRefetch.current = !hideChart;
+      skipRefetch.current = !hideChart;
     }
   }, [hideChart]);
 
-  // Trigger a unified histogram refetch when savedSearchFetch$ is triggered
+  // Handle unified histogram refetching
   useEffect(() => {
     if (!unifiedHistogram) {
       return;
     }
 
-    const fetch$: Observable<unknown> = isPlainRecord ? textBasedFetchComplete$ : savedSearchFetch$;
+    let fetch$: Observable<string>;
 
-    const subscription = merge(
-      fetch$.pipe(map(() => 'discover')),
-      createCurrentSuggestionObservable(unifiedHistogram.state$).pipe(map(() => 'lens'))
-    )
-      .pipe(debounceTime(50))
-      .subscribe((source) => {
-        if (!skipDiscoverRefetch.current) {
-          if (source === 'discover') addLog('Unified Histogram - Discover refetch');
-          if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-          unifiedHistogram.refetch();
-        }
+    // When in text based language mode, we refetch under two conditions:
+    // 1. When the current Lens suggestion changes. This syncs the visualization
+    //    with the user's selection.
+    // 2. When the documents are done fetching. This is necessary because we don't
+    //    have access to the latest columns until after the documents are fetched,
+    //    which are required to get the latest Lens suggestion, which would trigger
+    //    a refetch anyway and result in multiple unnecessary fetches.
+    if (isPlainRecord) {
+      fetch$ = merge(
+        createCurrentSuggestionObservable(unifiedHistogram.state$).pipe(map(() => 'lens')),
+        textBasedFetchComplete$.pipe(map(() => 'discover'))
+      ).pipe(debounceTime(50));
+    } else {
+      fetch$ = stateContainer.dataState.fetch$.pipe(map(() => 'discover'));
+    }
 
-        skipDiscoverRefetch.current = false;
-      });
+    const subscription = fetch$.subscribe((source) => {
+      if (!skipRefetch.current) {
+        if (source === 'discover') addLog('Unified Histogram - Discover refetch');
+        if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
+        unifiedHistogram.refetch();
+      }
+
+      skipRefetch.current = false;
+    });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [isPlainRecord, savedSearchFetch$, textBasedFetchComplete$, unifiedHistogram]);
+  }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$, unifiedHistogram]);
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
