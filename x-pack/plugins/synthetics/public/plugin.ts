@@ -168,6 +168,7 @@ export class UptimePlugin
     });
 
     registerUptimeRoutesWithNavigation(core, plugins);
+    registerSyntheticsRoutesWithNavigation(core, plugins);
 
     core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
 
@@ -301,13 +302,37 @@ function registerUptimeRoutesWithNavigation(
                   path: '/certificates',
                   matchFullPath: true,
                 },
+              ],
+            },
+          ];
+        }
+
+        return [];
+      })
+    )
+  );
+}
+
+function registerSyntheticsRoutesWithNavigation(
+  core: CoreSetup<ClientPluginsStart, unknown>,
+  plugins: ClientPluginsSetup
+) {
+  plugins.observabilityShared.navigation.registerSections(
+    from(core.getStartServices()).pipe(
+      map(([coreStart]) => {
+        if (coreStart.application.capabilities.uptime.show) {
+          return [
+            {
+              label: 'Synthetics',
+              sortKey: 499,
+              entries: [
                 {
-                  label: i18n.translate('xpack.synthetics.overview.headingBetaSection', {
-                    defaultMessage: 'Synthetics',
+                  label: i18n.translate('xpack.synthetics.overview.SyntheticsHeading', {
+                    defaultMessage: 'Monitors',
                   }),
                   app: 'synthetics',
                   path: OVERVIEW_ROUTE,
-                  matchFullPath: false,
+                  matchFullPath: true,
                   ignoreTrailingSlash: true,
                   isNewFeature: true,
                 },

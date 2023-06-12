@@ -6,16 +6,24 @@
  */
 
 import { UpsellingService } from '@kbn/security-solution-plugin/public';
-import { registerUpsellings } from './register_upsellings';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-plugin/common';
+import { registerUpsellings, upsellingPages, upsellingSections } from './register_upsellings';
+import type { SecurityProductTypes } from '../../../common/config';
 
 const mockGetProductAppFeatures = jest.fn();
 jest.mock('../../../common/pli/pli_features', () => ({
   getProductAppFeatures: () => mockGetProductAppFeatures(),
 }));
 
+const allProductTypes: SecurityProductTypes = [
+  { product_line: 'security', product_tier: 'complete' },
+  { product_line: 'endpoint', product_tier: 'complete' },
+  { product_line: 'cloud', product_tier: 'complete' },
+];
+
 describe('registerUpsellings', () => {
-  it('registers entity analytics upsellings page and section when PLIs features are disabled', () => {
-    mockGetProductAppFeatures.mockReturnValue({}); // return empty object to simulate no features enabled
+  it('should not register anything when all PLIs features are enabled', () => {
+    mockGetProductAppFeatures.mockReturnValue(ALL_APP_FEATURE_KEYS);
 
     const registerPages = jest.fn();
     const registerSections = jest.fn();
@@ -24,20 +32,37 @@ describe('registerUpsellings', () => {
       registerSections,
     } as unknown as UpsellingService;
 
-    registerUpsellings(upselling, ['securityEssentials', 'securityComplete']);
+    registerUpsellings(upselling, allProductTypes);
 
     expect(registerPages).toHaveBeenCalledTimes(1);
-    expect(registerPages).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ['entity-analytics']: expect.any(Function),
-      })
-    );
+    expect(registerPages).toHaveBeenCalledWith({});
 
     expect(registerSections).toHaveBeenCalledTimes(1);
-    expect(registerSections).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entity_analytics_panel: expect.any(Function),
-      })
+    expect(registerSections).toHaveBeenCalledWith({});
+  });
+
+  it('should register all upsellings pages and sections when PLIs features are disabled', () => {
+    mockGetProductAppFeatures.mockReturnValue([]);
+
+    const registerPages = jest.fn();
+    const registerSections = jest.fn();
+    const upselling = {
+      registerPages,
+      registerSections,
+    } as unknown as UpsellingService;
+
+    registerUpsellings(upselling, allProductTypes);
+
+    const expectedPagesObject = Object.fromEntries(
+      upsellingPages.map(({ pageName }) => [pageName, expect.any(Function)])
     );
+    expect(registerPages).toHaveBeenCalledTimes(1);
+    expect(registerPages).toHaveBeenCalledWith(expectedPagesObject);
+
+    const expectedSectionsObject = Object.fromEntries(
+      upsellingSections.map(({ id }) => [id, expect.any(Function)])
+    );
+    expect(registerSections).toHaveBeenCalledTimes(1);
+    expect(registerSections).toHaveBeenCalledWith(expectedSectionsObject);
   });
 });

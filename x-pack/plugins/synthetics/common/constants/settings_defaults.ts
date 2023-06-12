@@ -8,7 +8,7 @@
 import { DynamicSettings, DynamicSettingsAttributes } from '../runtime_types';
 
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
-  heartbeatIndices: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+  heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
   certAgeThreshold: 730,
   certExpirationThreshold: 30,
   defaultConnectors: [],
@@ -20,6 +20,6 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
 };
 
 // `DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES` helps isolate the Saved Object attributes from `DynamicSettings`
-// which represents API response type. It may initially be a duplcate of `DYNAMIC_SETTINGS_DEFAULTS`
+// which represents API response type. It may initially be a duplicate of `DYNAMIC_SETTINGS_DEFAULTS`
 export const DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES: DynamicSettingsAttributes =
   DYNAMIC_SETTINGS_DEFAULTS;

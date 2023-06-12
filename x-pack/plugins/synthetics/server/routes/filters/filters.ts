@@ -36,7 +36,7 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.FILTERS,
   validate: {},
-  handler: async ({ savedObjectsClient, request, response, server }): Promise<any> => {
+  handler: async ({ savedObjectsClient }): Promise<any> => {
     const data = await savedObjectsClient.find({
       type: syntheticsMonitorType,
       perPage: 0,
