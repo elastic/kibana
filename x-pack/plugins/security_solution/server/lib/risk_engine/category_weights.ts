@@ -6,17 +6,10 @@
  */
 
 import { keyBy, merge } from 'lodash';
+import { RiskCategories, RiskWeightTypes } from '../../../common/risk_engine';
 
 import type { IdentifierType, RiskScoreWeight } from './types';
 
-export enum RiskWeightTypes {
-  global = 'global_identifier',
-  riskCategory = 'risk_category',
-}
-
-export enum RiskCategories {
-  alerts = 'alerts',
-}
 const RISK_CATEGORIES = Object.values(RiskCategories);
 
 const DEFAULT_CATEGORY_WEIGHTS: RiskScoreWeight[] = RISK_CATEGORIES.map((category) => ({
