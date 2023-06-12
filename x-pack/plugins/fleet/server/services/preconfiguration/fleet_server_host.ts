@@ -31,7 +31,9 @@ export function getCloudFleetServersHosts() {
     // Fleet Server url are formed like this `https://<deploymentId>.fleet.<host>
     return [
       `https://${cloudSetup.deploymentId}.fleet.${cloudSetup.cloudHost}${
-        cloudSetup.cloudDefaultPort !== '443' ? `:${cloudSetup.cloudDefaultPort}` : ''
+        cloudSetup.cloudDefaultPort && cloudSetup.cloudDefaultPort !== '443'
+          ? `:${cloudSetup.cloudDefaultPort}`
+          : ''
       }`,
     ];
   }

@@ -23,7 +23,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       coreStart.savedObjects.createInternalRepository();
 
     const elasticsearchUrl =
-      plugins.cloud.setup.elasticsearchUrl ??
+      plugins.cloud?.setup?.elasticsearchUrl ??
       getFallbackUrls(coreStart).elasticsearchUrl;
 
     const savedState = await getObservabilityOnboardingState({

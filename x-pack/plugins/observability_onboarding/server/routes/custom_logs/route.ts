@@ -50,7 +50,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
 
     const kibanaUrl =
-      plugins.cloud.setup.kibanaUrl ?? getFallbackUrls(coreStart).kibanaUrl;
+      plugins.cloud?.setup?.kibanaUrl ?? getFallbackUrls(coreStart).kibanaUrl;
     const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
     const apiEndpoint = `${kibanaUrl}/api/observability_onboarding`;
 

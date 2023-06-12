@@ -11,6 +11,8 @@ const defaultPortCloud = {
   cloudId:
     'gcp-cluster:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDhhMDI4M2FmMDQxZjE5NWY3NzI5YmMwNGM2NmEwZmNlJDBjZDVjZDU2OGVlYmU1M2M4OWViN2NhZTViYWM4YjM3',
   isCloudEnabled: true,
+  cloudHost: 'us-central1.gcp.cloud.es.io',
+  cloudDefaultPort: '443',
   registerCloudService: jest.fn(),
 };
 // 9243
@@ -18,6 +20,8 @@ const customPortCloud = {
   cloudId:
     'custom-port:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvOjkyNDMkYWMzMWViYjkwMjQxNzczMTU3MDQzYzM0ZmQyNmZkNDYkYTRjMDYyMzBlNDhjOGZjZTdiZTg4YTA3NGEzYmIzZTA=',
   isCloudEnabled: true,
+  cloudHost: 'us-central1.gcp.cloud.es.io',
+  cloudDefaultPort: '9243',
   registerCloudService: jest.fn(),
 };
 const missingDeploymentIdCloud = {

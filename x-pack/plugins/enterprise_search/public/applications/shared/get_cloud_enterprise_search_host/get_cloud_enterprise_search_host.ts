@@ -16,7 +16,7 @@ export function getCloudEnterpriseSearchHost(cloud: CloudSetup | undefined): str
 
     // Enterprise Search Server url are formed like this `https://<deploymentId>.ent.<host>
     return `https://${deploymentId}.ent.${cloud.cloudHost}${
-      cloud.cloudDefaultPort !== '443' ? `:${cloud.cloudDefaultPort}` : ''
+      cloud.cloudDefaultPort && cloud.cloudDefaultPort !== '443' ? `:${cloud.cloudDefaultPort}` : ''
     }`;
   }
 }
