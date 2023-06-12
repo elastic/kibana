@@ -8,12 +8,13 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  const ensureFieldsAreSorted = (resp) => {
+  const ensureFieldsAreSorted = (resp: { body: { fields: { name: string } } }) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
   };
 

@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { Client } from '@elastic/elasticsearch';
 
-export async function getIndexNotFoundError(es) {
+export async function getIndexNotFoundError(es: Client) {
   try {
     await es.indices.get({
       index: 'SHOULD NOT EXIST',
@@ -21,7 +22,7 @@ export async function getIndexNotFoundError(es) {
   throw new Error('Expected es.indices.get() call to fail');
 }
 
-export async function getDocNotFoundError(es) {
+export async function getDocNotFoundError(es: Client) {
   try {
     await es.get({
       index: 'basic_index',
