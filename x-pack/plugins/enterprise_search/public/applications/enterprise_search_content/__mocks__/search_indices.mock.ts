@@ -129,8 +129,18 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_synced: null,
       name: 'connector',
       scheduling: {
-        enabled: false,
-        interval: '',
+        access_control: {
+          enabled: false,
+          interval: '',
+        },
+        full: {
+          enabled: false,
+          interval: '',
+        },
+        incremental: {
+          enabled: false,
+          interval: '',
+        },
       },
       service_type: null,
       status: ConnectorStatus.CONFIGURED,
@@ -245,8 +255,18 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_synced: null,
       name: 'crawler',
       scheduling: {
-        enabled: false,
-        interval: '',
+        access_control: {
+          enabled: false,
+          interval: '',
+        },
+        full: {
+          enabled: false,
+          interval: '',
+        },
+        incremental: {
+          enabled: false,
+          interval: '',
+        },
       },
       service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
       status: ConnectorStatus.CONFIGURED,

@@ -61,7 +61,7 @@ export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigPrope
 
 export interface ConnectorScheduling {
   enabled: boolean;
-  interval: string;
+  interval: string; // interval has crontab syntax
 }
 
 export interface CustomScheduling {
@@ -189,6 +189,12 @@ export type ConnectorFeatures = Partial<{
   };
 }> | null;
 
+export interface SchedulingConfiguraton {
+  access_control: ConnectorScheduling;
+  full: ConnectorScheduling;
+  incremental: ConnectorScheduling;
+}
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
@@ -212,10 +218,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
-  scheduling: {
-    enabled: boolean;
-    interval: string; // crontab syntax
-  };
+  scheduling: SchedulingConfiguraton;
   service_type: string | null;
   status: ConnectorStatus;
   sync_now: boolean;
