@@ -7,15 +7,13 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getMlNodeCount } from '../../ml_nodes_check';
-import { loadMlServerInfo } from '../../services/ml_server_info';
+import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath } from '../../contexts/kibana';
 import { createPath, MlRoute, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { MemoryUsagePage } from '../../memory_usage';
-import { loadSavedSearches } from '../../util/index_utils';
 
 export const nodesListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -41,11 +39,7 @@ const PageWrapper: FC = () => {
   const { context } = useRouteResolver(
     'full',
     ['canGetJobs', 'canGetDataFrameAnalytics', 'canGetTrainedModels'],
-    {
-      getMlNodeCount,
-      loadMlServerInfo,
-      loadSavedSearches,
-    }
+    basicResolvers()
   );
 
   return (

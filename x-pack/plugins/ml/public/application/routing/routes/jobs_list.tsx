@@ -18,7 +18,7 @@ import { loadMlServerInfo } from '../../services/ml_server_info';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import { createPath, MlRoute, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { JobsPage } from '../../jobs/jobs_list';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
@@ -32,7 +32,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
     defaultMessage: 'Anomaly Detection Jobs',
   }),
   path: createPath(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
@@ -46,7 +46,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   enableDatePicker: true,
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], {
     getMlNodeCount,
     loadMlServerInfo,

@@ -14,7 +14,7 @@ export interface Resolvers {
 }
 export type ResolverResults =
   | {
-      [name: string]: unknown;
+      [name: string]: any;
     }
   | undefined;
 

@@ -7,15 +7,13 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getMlNodeCount } from '../../../ml_nodes_check';
-import { loadMlServerInfo } from '../../../services/ml_server_info';
+import { basicResolvers } from '../../resolvers';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/job_type';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { loadSavedSearches } from '../../../util/index_utils';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
@@ -34,11 +32,7 @@ export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('full', ['canGetJobs'], {
-    getMlNodeCount,
-    loadMlServerInfo,
-    loadSavedSearches,
-  });
+  const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
 
   return (
     <PageLoader context={context}>

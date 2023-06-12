@@ -8,8 +8,7 @@
 import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getMlNodeCount } from '../../../ml_nodes_check';
-import { loadMlServerInfo } from '../../../services/ml_server_info';
+import { basicResolvers } from '../../resolvers';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -18,7 +17,6 @@ import { Page } from '../../../jobs/new_job/recognize';
 import { mlJobService } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
-import { loadSavedSearches } from '../../../util/index_utils';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const recognizeRouteFactory = (
@@ -51,9 +49,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { id } = parse(location.search, { sort: false });
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
-    getMlNodeCount,
-    loadMlServerInfo,
-    loadSavedSearches,
+    ...basicResolvers(),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 

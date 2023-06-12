@@ -15,8 +15,7 @@ import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-r
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
-import { getMlNodeCount } from '../../ml_nodes_check';
-import { loadMlServerInfo } from '../../services/ml_server_info';
+import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
@@ -46,7 +45,6 @@ import {
   AnomalyExplorerContextProvider,
   useAnomalyExplorerContext,
 } from '../../explorer/anomaly_explorer_context';
-import { loadSavedSearches } from '../../util/index_utils';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -79,9 +77,7 @@ const PageWrapper: FC<PageProps> = () => {
   } = useMlKibana();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
-    getMlNodeCount,
-    loadMlServerInfo,
-    loadSavedSearches,
+    ...basicResolvers(),
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => mlApiServices.jobs.jobsWithTimerange(getDateFormatTz()),
   });
