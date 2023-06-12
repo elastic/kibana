@@ -115,7 +115,7 @@ describe('isLayerLoading', () => {
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
-    test('Should be true when tiles are loaded but has data requests pending', () => {
+    test('Should be true when tiles are loaded but other data request are pending', () => {
       const layer = new AbstractLayer({
         layerDescriptor: {
           __areTilesLoaded: true,
@@ -134,7 +134,7 @@ describe('isLayerLoading', () => {
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
-    test('Should be false when tiles are loaded', () => {
+    test('Should be false when tiles are loaded and there are no other data requests pending', () => {
       const layer = new AbstractLayer({
         layerDescriptor: {
           __areTilesLoaded: true,
