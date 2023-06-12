@@ -15,7 +15,6 @@ import type {
   ExpandedEventFieldsObject,
   RawEventData,
 } from '../../../../common/types/response_actions';
-import { useUserPrivileges } from '../user_privileges';
 import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
@@ -37,9 +36,6 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData: SearchHit | undefined;
 }): EuiTabbedContentTab | undefined => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
-  const {
-    endpointPrivileges: { canAccessEndpointActionsLogManagement },
-  } = useUserPrivileges();
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
@@ -54,7 +50,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     {
       alertIds: [alertId],
     },
-    { enabled: !shouldEarlyReturn, canAccessEndpointActionsLogManagement }
+    { enabled: !shouldEarlyReturn }
   );
 
   if (shouldEarlyReturn) {

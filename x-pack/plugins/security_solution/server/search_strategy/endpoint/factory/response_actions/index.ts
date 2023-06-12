@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { FactoryQueryTypes } from '../../../../../common/search_strategy';
 import { ResponseActionsQueries } from '../../../../../common/search_strategy/security_solution/response_actions';
-import type { SecuritySolutionFactory } from '../types';
 import { allActions } from './actions';
 import { actionResults } from './results';
+import type { EndpointFactory } from '../types';
+import type { EndpointFactoryQueryTypes } from '../../../../../common/search_strategy/endpoint';
 
 export const responseActionsFactory: Record<
   ResponseActionsQueries,
-  SecuritySolutionFactory<FactoryQueryTypes>
+  EndpointFactory<EndpointFactoryQueryTypes>
 > = {
   [ResponseActionsQueries.actions]: allActions,
   [ResponseActionsQueries.results]: actionResults,

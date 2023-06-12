@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { ActionResponsesRequestStrategyParseResponse } from './response_actions/response';
+import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../typed_json';
 import type {
   HostDetailsStrategyResponse,
@@ -140,8 +139,7 @@ export type FactoryQueryTypes =
   | CtiQueries
   | typeof MatrixHistogramQuery
   | typeof FirstLastSeenQuery
-  | RelatedEntitiesQueries
-  | ResponseActionsQueries;
+  | RelatedEntitiesQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -156,11 +154,6 @@ export interface RequestOptionsPaginated<Field = string> extends RequestBasicOpt
   pagination: PaginationInputPaginated;
   sort: SortField<Field>;
 }
-
-export type StrategyParseResponseType<T extends FactoryQueryTypes> =
-  T extends ResponseActionsQueries.results
-    ? ActionResponsesRequestStrategyParseResponse
-    : IEsSearchResponse;
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse

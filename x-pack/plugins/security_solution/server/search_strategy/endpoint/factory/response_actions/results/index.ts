@@ -13,9 +13,9 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/response_actions';
 
 import { buildActionResultsQuery } from './query.action_results.dsl';
-import type { SecuritySolutionFactory } from '../../types';
+import type { EndpointFactory } from '../../types';
 
-export const actionResults: SecuritySolutionFactory<ResponseActionsQueries.results> = {
+export const actionResults: EndpointFactory<ResponseActionsQueries.results> = {
   buildDsl: (options: ActionResponsesRequestOptions) => {
     return buildActionResultsQuery(options);
   },

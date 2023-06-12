@@ -29,11 +29,10 @@ import type {
 
 interface GetAutomatedActionsListOptions {
   enabled: boolean;
-  canAccessEndpointActionsLogManagement: boolean;
 }
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
-  { enabled, canAccessEndpointActionsLogManagement }: GetAutomatedActionsListOptions
+  { enabled }: GetAutomatedActionsListOptions
 ): UseQueryResult<ActionRequestStrategyResponse & { items: LogsEndpointActionWithHosts[] }> => {
   const { data } = useKibana().services;
 
@@ -49,11 +48,10 @@ export const useGetAutomatedActionList = (
               order: SortOrder.desc,
               field: '@timestamp',
             },
-            canAccessEndpointActionsLogManagement,
             factoryQueryType: ResponseActionsQueries.actions,
           },
           {
-            strategy: 'securitySolutionSearchStrategy',
+            strategy: 'endpointSearchStrategy',
           }
         )
       );
@@ -70,6 +68,7 @@ export const useGetAutomatedActionList = (
         }
       );
 
+      console.log({ responseData, items });
       return {
         ...responseData,
         items: compact(items),
@@ -116,7 +115,7 @@ export const useGetAutomatedActionResponseList = (
             factoryQueryType: ResponseActionsQueries.results,
           },
           {
-            strategy: 'securitySolutionSearchStrategy',
+            strategy: 'endpointSearchStrategy',
           }
         )
       );
