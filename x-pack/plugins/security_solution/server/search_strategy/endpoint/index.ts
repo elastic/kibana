@@ -63,8 +63,6 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
             }),
             mergeMap((esSearchRes) =>
               queryFactory.parse(request, esSearchRes, {
-                endpointContext,
-                request: deps.request,
                 authz,
               })
             )

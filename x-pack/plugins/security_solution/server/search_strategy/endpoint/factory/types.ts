@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import type {
   EndpointFactoryQueryTypes,
@@ -14,7 +13,6 @@ import type {
   EndpointStrategyResponseType,
 } from '../../../../common/search_strategy/endpoint';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import type { EndpointAppContext } from '../../../endpoint/types';
 
 export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
   buildDsl: (
@@ -27,8 +25,6 @@ export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
     options: EndpointStrategyRequestType<T>,
     response: EndpointStrategyParseResponseType<T>,
     deps: {
-      endpointContext: EndpointAppContext;
-      request: KibanaRequest;
       authz: EndpointAuthz | void;
     }
   ) => Promise<EndpointStrategyResponseType<T>>;
