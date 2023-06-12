@@ -7,7 +7,6 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { Privilege } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 import { initGenAiDashboard } from './create_dashboard';
 import {
   GenAiRunActionParamsSchema,
@@ -102,7 +101,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
           },
         ],
       },
-    })) as Privilege;
+    })) as { has_all_requested: boolean };
 
     if (!privilege?.has_all_requested) {
       return { exists: false };
