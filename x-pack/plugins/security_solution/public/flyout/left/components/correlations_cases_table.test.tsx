@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { CaseDetailsLink } from '../../../common/components/links';
 
 import {
   CorrelationsCasesTable,
@@ -14,40 +15,51 @@ import {
 } from './correlations_cases_table';
 import { CaseStatuses, type RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
 
+jest.mock('../../../common/components/links', () => ({
+  CaseDetailsLink: jest
+    .fn()
+    .mockImplementation(({ title }) => <>{`<CaseDetailsLink title="${title}" />`}</>),
+}));
+
+const cases: RelatedCaseInfo[] = [
+  {
+    id: 'case-1',
+    title: 'Case 1',
+    description: '',
+    createdAt: '',
+    totals: {
+      alerts: 0,
+      userComments: 0,
+    },
+    status: CaseStatuses.open,
+  },
+  {
+    id: 'case-2',
+    title: 'Case 2',
+    description: '',
+    createdAt: '',
+    totals: {
+      alerts: 0,
+      userComments: 0,
+    },
+    status: CaseStatuses.open,
+  },
+];
+
+const props: CorrelationsCasesTableProps = {
+  cases,
+};
+
 describe('CorrelationsCasesTable', () => {
-  const cases: RelatedCaseInfo[] = [
-    {
-      id: 'case-1',
-      title: 'Case 1',
-      description: '',
-      createdAt: '',
-      totals: {
-        alerts: 0,
-        userComments: 0,
-      },
-      status: CaseStatuses.open,
-    },
-    {
-      id: 'case-2',
-      title: 'Case 2',
-      description: '',
-      createdAt: '',
-      totals: {
-        alerts: 0,
-        userComments: 0,
-      },
-      status: CaseStatuses.open,
-    },
-  ];
-
-  const props: CorrelationsCasesTableProps = {
-    cases,
-  };
-
   it('renders the table correctly', () => {
     render(<CorrelationsCasesTable {...props} />);
 
-    expect(screen.getByText('Case 1')).toBeInTheDocument();
-    expect(screen.getByText('Case 2')).toBeInTheDocument();
+    expect(CaseDetailsLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Case 1',
+        detailName: 'case-1',
+      }),
+      expect.anything()
+    );
   });
 });
