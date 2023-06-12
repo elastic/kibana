@@ -43,6 +43,7 @@ import {
   UpdatePackageRequestSchemaDeprecated,
   ReauthorizeTransformRequestSchema,
   GetDataStreamsRequestSchema,
+  CreateCustomIntegrationRequestSchema,
 } from '../../types';
 
 import {
@@ -62,6 +63,7 @@ import {
   getVerificationKeyIdHandler,
   reauthorizeTransformsHandler,
   getDataStreamsHandler,
+  createCustomIntegrationHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -194,6 +196,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     installPackageByUploadHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.CUSTOM_INTEGRATIONS_PATTERN,
+      validate: CreateCustomIntegrationRequestSchema,
+      fleetAuthz: {
+        integrations: { installPackages: true },
+      },
+    },
+    createCustomIntegrationHandler
   );
 
   router.delete(

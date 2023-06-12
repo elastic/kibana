@@ -52,6 +52,7 @@ import type {
   UpdatePackageRequestSchema,
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
+  CreateCustomIntegrationRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -402,6 +403,24 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   } else {
     return await defaultFleetErrorHandler({ error: res.error, response });
   }
+};
+export const createCustomIntegrationHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof CreateCustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const spaceId = fleetContext.spaceId;
+  return response.ok({
+    body: {
+      working: true,
+    },
+  });
 };
 
 const bulkInstallServiceResponseToHttpEntry = (
