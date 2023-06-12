@@ -14,7 +14,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchRule } from '../../hooks/use_fetch_rule_rq';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useGetRuleTypeDefinitionFromRuleType } from '../../hooks/use_get_rule_type_definition_from_rule_type';
 import { DeleteConfirmationModal } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';

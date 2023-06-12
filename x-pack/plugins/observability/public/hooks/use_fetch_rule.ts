@@ -5,61 +5,81 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { loadRule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Rule, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
+import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 
-export interface FetchRuleProps {
-  ruleId?: string;
-  http: HttpSetup;
+export interface UseFetchRuleResponse {
+  isInitialLoading: boolean;
+  isLoading: boolean;
+  isRefetching: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  rule: Rule | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<Rule | undefined, unknown>>;
 }
 
-export interface FetchRule {
-  isRuleLoading: boolean;
-  rule?: Rule;
-  ruleType?: RuleType;
-  errorRule?: string;
-}
+export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleResponse {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
-export function useFetchRule({ ruleId, http }: FetchRuleProps) {
-  const [ruleSummary, setRuleSummary] = useState<FetchRule>({
-    isRuleLoading: true,
-    rule: undefined,
-    errorRule: undefined,
-  });
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
+    {
+      queryKey: ['fetchRule', ruleId],
+      queryFn: async ({ signal }) => {
+        try {
+          if (!ruleId) return;
 
-  const fetchRuleSummary = useCallback(async () => {
-    try {
-      if (!ruleId) return;
-      const rule = await loadRule({
-        http,
-        ruleId,
-      });
+          const res = await http.get<AsApiContract<Rule>>(
+            `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}`,
+            {
+              signal,
+            }
+          );
 
-      setRuleSummary((oldState: FetchRule) => ({
-        ...oldState,
-        isRuleLoading: false,
-        rule,
-      }));
-    } catch (error) {
-      setRuleSummary((oldState: FetchRule) => ({
-        ...oldState,
-        isRuleLoading: false,
-        errorRule: i18n.translate('xpack.observability.ruleDetails.ruleLoadError', {
-          defaultMessage: 'Unable to load rule. Reason: {message}',
-          values: {
-            message:
-              error instanceof Error ? error.message : typeof error === 'string' ? error : '',
-          },
-        }),
-      }));
+          return transformRule(res);
+        } catch (error) {
+          throw error;
+          // ignore error for retrieving slos
+        }
+      },
+      keepPreviousData: true,
+      enabled: Boolean(ruleId),
+      refetchOnWindowFocus: false,
+      onError: (error: Error) => {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.observability.ruleDetails.ruleLoadError', {
+            defaultMessage: 'Unable to load rule. Reason: {message}',
+            values: {
+              message:
+                error instanceof Error ? error.message : typeof error === 'string' ? error : '',
+            },
+          }),
+        });
+      },
     }
-  }, [ruleId, http]);
-  useEffect(() => {
-    fetchRuleSummary();
-  }, [fetchRuleSummary]);
+  );
 
-  return { ...ruleSummary, reloadRule: fetchRuleSummary };
+  return {
+    rule: data,
+    isLoading,
+    isInitialLoading,
+    isRefetching,
+    isSuccess,
+    isError,
+    refetch,
+  };
 }
