@@ -28,7 +28,8 @@ export const setupCards = (
           }
           return accCards;
         }, {});
-        return { ...acc, [section.id]: cardsInSections };
+        acc[section.id] = cardsInSections;
+        return acc;
       }, {} as Record<SectionId, Record<CardId, ActiveCard>>)
     : null;
 
