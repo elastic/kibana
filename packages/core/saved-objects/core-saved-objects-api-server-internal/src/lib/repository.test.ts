@@ -5318,6 +5318,7 @@ describe('SavedObjectsRepository', () => {
         expect(result).toMatchObject({ originId });
       });
     });
+  });
   // BWC update uses esclient create/index upder the hood
   describe.skip('#update as BWCUpdate', () => {
     const id = 'logstash-*';
@@ -5341,11 +5342,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe.skip('client calls', () => {
-      it.skip(`should use the ES update action when type is not multi-namespace`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes);
-        expect(client.get).not.toHaveBeenCalled(); // will change, we fetch all documents, regardless of namespace type to do updates in the repo itself
-        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
-        expect(client.update).toHaveBeenCalledTimes(1);
+      it.skip(`should use the ES get action`, async () => {
+        await getSuccess(client, repository, registry, type, id);
+        expect(client.get).toHaveBeenCalledTimes(1);
       });
 
       it.skip(`should use the ES get action then update action when type is multi-namespace`, async () => {
@@ -5640,183 +5639,183 @@ describe('SavedObjectsRepository', () => {
         );
       });
     });
+  });
 
-    describe.skip('errors', () => {
-      const expectNotFoundError = async (type: string, id: string) => {
-        await expect(repository.update(type, id, {})).rejects.toThrowError(
-          createGenericNotFoundErrorPayload(type, id)
-        );
-      };
+  describe.skip('errors', () => {
+    const expectNotFoundError = async (type: string, id: string) => {
+      await expect(repository.update(type, id, {})).rejects.toThrowError(
+        createGenericNotFoundErrorPayload(type, id)
+      );
+    };
 
-      it(`throws when options.namespace is '*'`, async () => {
-        await expect(
-          repository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
-      });
+    it(`throws when options.namespace is '*'`, async () => {
+      await expect(
+        repository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
+      ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+    });
 
-      it(`throws when type is invalid`, async () => {
-        await expectNotFoundError('unknownType', id);
-        expect(client.update).not.toHaveBeenCalled();
-      });
+    it(`throws when type is invalid`, async () => {
+      await expectNotFoundError('unknownType', id);
+      expect(client.update).not.toHaveBeenCalled();
+    });
 
-      it(`throws when type is hidden`, async () => {
-        await expectNotFoundError(HIDDEN_TYPE, id);
-        expect(client.update).not.toHaveBeenCalled();
-      });
+    it(`throws when type is hidden`, async () => {
+      await expectNotFoundError(HIDDEN_TYPE, id);
+      expect(client.update).not.toHaveBeenCalled();
+    });
 
-      it(`throws when id is empty`, async () => {
-        await expect(repository.update(type, '', attributes)).rejects.toThrowError(
-          createBadRequestErrorPayload('id cannot be empty')
-        );
-        expect(client.update).not.toHaveBeenCalled();
-      });
+    it(`throws when id is empty`, async () => {
+      await expect(repository.update(type, '', attributes)).rejects.toThrowError(
+        createBadRequestErrorPayload('id cannot be empty')
+      );
+      expect(client.update).not.toHaveBeenCalled();
+    });
 
-      it(`throws when ES is unable to find the document during get`, async () => {
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { found: false } as estypes.GetResponse,
-            undefined
-          )
-        );
-        await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
-      });
+    it(`throws when ES is unable to find the document during get`, async () => {
+      client.get.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          { found: false } as estypes.GetResponse,
+          undefined
+        )
+      );
+      await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
+      expect(client.get).toHaveBeenCalledTimes(1);
+    });
 
-      it(`throws when ES is unable to find the index during get`, async () => {
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({} as estypes.GetResponse, {
-            statusCode: 404,
-          })
-        );
-        await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
-      });
+    it(`throws when ES is unable to find the index during get`, async () => {
+      client.get.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({} as estypes.GetResponse, {
+          statusCode: 404,
+        })
+      );
+      await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
+      expect(client.get).toHaveBeenCalledTimes(1);
+    });
 
-      it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
-        const response = getMockGetResponse(
-          registry,
-          { type: MULTI_NAMESPACE_ISOLATED_TYPE, id },
-          namespace
-        );
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-        await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
-      });
+    it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
+      const response = getMockGetResponse(
+        registry,
+        { type: MULTI_NAMESPACE_ISOLATED_TYPE, id },
+        namespace
+      );
+      client.get.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+      );
+      await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
+      expect(client.get).toHaveBeenCalledTimes(1);
+    });
 
-      it(`throws when there is an alias conflict from preflightCheckForCreate`, async () => {
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({
-            found: false,
-          } as estypes.GetResponse)
-        );
-        mockPreflightCheckForCreate.mockResolvedValue([
-          { type: 'type', id: 'id', error: { type: 'aliasConflict' } },
-        ]);
-        await expect(
-          repository.update(
-            MULTI_NAMESPACE_ISOLATED_TYPE,
-            id,
-            { attr: 'value' },
-            {
-              upsert: {
-                upsertAttr: 'val',
-                attr: 'value',
-              },
-            }
-          )
-        ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
-        expect(client.get).toHaveBeenCalledTimes(1);
-        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
-        expect(client.update).not.toHaveBeenCalled();
-      });
-
-      it(`does not throw when there is a different error from preflightCheckForCreate`, async () => {
-        mockPreflightCheckForCreate.mockResolvedValue([
-          { type: 'type', id: 'id', error: { type: 'conflict' } },
-        ]);
-        await updateSuccess(
-          client,
-          repository,
-          registry,
+    it(`throws when there is an alias conflict from preflightCheckForCreate`, async () => {
+      client.get.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          found: false,
+        } as estypes.GetResponse)
+      );
+      mockPreflightCheckForCreate.mockResolvedValue([
+        { type: 'type', id: 'id', error: { type: 'aliasConflict' } },
+      ]);
+      await expect(
+        repository.update(
           MULTI_NAMESPACE_ISOLATED_TYPE,
           id,
-          attributes,
-          { upsert: true },
-          { mockGetResponseValue: { found: false } as estypes.GetResponse }
-        );
-        expect(client.get).toHaveBeenCalledTimes(1);
-        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
-        expect(client.update).toHaveBeenCalledTimes(1);
-      });
+          { attr: 'value' },
+          {
+            upsert: {
+              upsertAttr: 'val',
+              attr: 'value',
+            },
+          }
+        )
+      ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+      expect(client.get).toHaveBeenCalledTimes(1);
+      expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+      expect(client.update).not.toHaveBeenCalled();
+    });
 
-      it(`throws when ES is unable to find the document during update`, async () => {
-        const notFoundError = new EsErrors.ResponseError(
-          elasticsearchClientMock.createApiResponse({
-            statusCode: 404,
-            body: { error: { type: 'es_type', reason: 'es_reason' } },
-          })
-        );
-        client.update.mockResolvedValueOnce(
-          elasticsearchClientMock.createErrorTransportRequestPromise(notFoundError)
-        );
-        await expectNotFoundError(type, id);
-        expect(client.update).toHaveBeenCalledTimes(1);
+    it(`does not throw when there is a different error from preflightCheckForCreate`, async () => {
+      mockPreflightCheckForCreate.mockResolvedValue([
+        { type: 'type', id: 'id', error: { type: 'conflict' } },
+      ]);
+      await updateSuccess(
+        client,
+        repository,
+        registry,
+        MULTI_NAMESPACE_ISOLATED_TYPE,
+        id,
+        attributes,
+        { upsert: true },
+        { mockGetResponseValue: { found: false } as estypes.GetResponse }
+      );
+      expect(client.get).toHaveBeenCalledTimes(1);
+      expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledTimes(1);
+    });
+
+    it(`throws when ES is unable to find the document during update`, async () => {
+      const notFoundError = new EsErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 404,
+          body: { error: { type: 'es_type', reason: 'es_reason' } },
+        })
+      );
+      client.update.mockResolvedValueOnce(
+        elasticsearchClientMock.createErrorTransportRequestPromise(notFoundError)
+      );
+      await expectNotFoundError(type, id);
+      expect(client.update).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe.skip('returns', () => {
+    it(`returns _seq_no and _primary_term encoded as version`, async () => {
+      const result = await updateSuccess(client, repository, registry, type, id, attributes, {
+        namespace,
+        references,
+      });
+      expect(result).toEqual({
+        id,
+        type,
+        ...mockTimestampFields,
+        version: mockVersion,
+        attributes,
+        references,
+        namespaces: [namespace],
       });
     });
 
-    describe.skip('returns', () => {
-      it(`returns _seq_no and _primary_term encoded as version`, async () => {
-        const result = await updateSuccess(client, repository, registry, type, id, attributes, {
-          namespace,
-          references,
-        });
-        expect(result).toEqual({
-          id,
-          type,
-          ...mockTimestampFields,
-          version: mockVersion,
-          attributes,
-          references,
-          namespaces: [namespace],
-        });
+    it(`includes namespaces if type is multi-namespace`, async () => {
+      const result = await updateSuccess(
+        client,
+        repository,
+        registry,
+        MULTI_NAMESPACE_ISOLATED_TYPE,
+        id,
+        attributes
+      );
+      expect(result).toMatchObject({
+        namespaces: expect.any(Array),
       });
+    });
 
-      it(`includes namespaces if type is multi-namespace`, async () => {
-        const result = await updateSuccess(
-          client,
-          repository,
-          registry,
-          MULTI_NAMESPACE_ISOLATED_TYPE,
-          id,
-          attributes
-        );
-        expect(result).toMatchObject({
-          namespaces: expect.any(Array),
-        });
+    it(`includes namespaces if type is not multi-namespace`, async () => {
+      const result = await updateSuccess(client, repository, registry, type, id, attributes);
+      expect(result).toMatchObject({
+        namespaces: ['default'],
       });
+    });
 
-      it(`includes namespaces if type is not multi-namespace`, async () => {
-        const result = await updateSuccess(client, repository, registry, type, id, attributes);
-        expect(result).toMatchObject({
-          namespaces: ['default'],
-        });
-      });
-
-      it(`includes originId property if present in cluster call response`, async () => {
-        const result = await updateSuccess(
-          client,
-          repository,
-          registry,
-          type,
-          id,
-          attributes,
-          {},
-          { originId }
-        );
-        expect(result).toMatchObject({ originId });
-      });
+    it(`includes originId property if present in cluster call response`, async () => {
+      const result = await updateSuccess(
+        client,
+        repository,
+        registry,
+        type,
+        id,
+        attributes,
+        {},
+        { originId }
+      );
+      expect(result).toMatchObject({ originId });
     });
   });
 

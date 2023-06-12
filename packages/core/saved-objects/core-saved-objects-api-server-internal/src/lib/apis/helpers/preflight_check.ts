@@ -27,7 +27,6 @@ import {
   rawDocExistsInNamespaces,
   isFoundGetResponse,
   type GetResponseFound,
-  rawDocExistsInNamespace,
 } from '../utils';
 import {
   preflightCheckForCreate,
@@ -109,43 +108,6 @@ export class PreflightCheckHelper {
     }
     return bulkGetMultiNamespaceDocsResponse;
   }
-
-  /**
-   * Internal implementation of preflightCheckNamespace
-   * @internal
-   */
-  // TODO: make sure we're handling the '*' namespace declaration in  getting the saved object from source.
-  public internalPreflightCheckNamespaces({
-    type,
-    id,
-    originalRawDocSource,
-    namespace,
-  }: {
-    type: string;
-    id: string;
-    originalRawDocSource: GetResponseFound<SavedObjectsRawDocSource> | undefined;
-    namespace?: string;
-  }): PreflightCheckNamespacesResult {
-    if (!originalRawDocSource) {
-      return {
-        checkResult: 'not_found',
-        savedObjectNamespaces: [SavedObjectsUtils.namespaceIdToString(namespace)],
-      };
-    }
-    if (
-      !rawDocExistsInNamespaces(this.registry, originalRawDocSource, [
-        SavedObjectsUtils.namespaceIdToString(namespace),
-      ])
-    ) {
-      return { checkResult: 'found_outside_namespace' };
-    } else {
-      return {
-        checkResult: 'found_in_namespace',
-        savedObjectNamespaces: getSavedObjectNamespaces(namespace, originalRawDocSource),
-        rawDocSource: originalRawDocSource,
-      };
-    }
-  }
   /**
    * Pre-flight check to ensure doc exists for partial update.
    * @internal
@@ -159,24 +121,18 @@ export class PreflightCheckHelper {
       },
       { ignore: [404], meta: true }
     );
-    const indexNotFound = statusCode === 404;
-    if (indexNotFound && !isSupportedEsServer(headers)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
+
+    const indexFound = statusCode !== 404;
+
+    if (indexFound && isFoundGetResponse(body)) {
+      return { checkDocFound: 'found', rawDocSource: body };
+    } else if (!indexFound && !isSupportedEsServer(headers)) {
+      // checking if the 404 is from Elasticsearch
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
-    const objectNotFound =
-      !isFoundGetResponse(body) ||
-      indexNotFound ||
-      !rawDocExistsInNamespace(this.registry, body, namespace);
-
-    if (objectNotFound) {
-      return { checkObjectFound: 'doc_not_found' } as PreflightGetDocResult;
-    }
-
     return {
-      checkObjectFound: 'doc_found',
-      rawDocSource: body,
-    } as PreflightGetDocResult;
+      checkDocFound: 'not_found', // === (!indexFound && !isFoundGetResponse)
+    };
   }
 
   /**
@@ -219,6 +175,7 @@ export class PreflightCheckHelper {
       // checking if the 404 is from Elasticsearch
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
+    // ative on (!indexFound && isFoundGetResponse(body)), (indexFound && !isFoundGetResponse(body)), (!indexFound && !isFoundGetResponse(body))
     return {
       checkResult: 'not_found',
       savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace),
@@ -292,46 +249,6 @@ export interface PreflightCheckNamespacesResult {
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
 }
 
-/**
- * @internal
- */
-export interface InternalPreflightSavedObjectsUpdateCallMeta {
-  upsert?: boolean;
-  api: 'create' | 'index';
-  updateParams: {
-    require_alias: boolean;
-    if_seq_no?: number | undefined;
-    if_primary_term?: number | undefined;
-    id: string;
-    index: string;
-    refresh: MutatingOperationRefreshSetting;
-    body: SavedObjectsRawDocSource;
-  };
-}
-
-/**
- * @internal
- */
-export interface PreFlightMeta {
-  preflightGetDocResult: PreflightGetDocResult;
-  originalRawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
-  preflightCheckNamespacesResult?: PreflightCheckNamespacesResult;
-}
-/**
- * @internal
- */
-export interface InternalPreflightCheckNamespacesParams {
-  /** The object type to fetch */
-  type: string;
-  /** The object ID to fetch */
-  id: string;
-  /** The current space */
-  namespace: string | undefined;
-  /** Optional; for an object that is being created, this specifies the initial namespace(s) it will exist in (overriding the current space) */
-  initialNamespaces?: string[];
-  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
-  originalRawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
-}
 export interface CheckResponseType {
   checkResult: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
   savedObjectNamespaces?: string[];

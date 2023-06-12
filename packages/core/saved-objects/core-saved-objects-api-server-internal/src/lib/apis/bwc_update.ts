@@ -19,7 +19,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import { cloneDeep } from 'lodash';
-import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
+import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { getCurrentTime, getSavedObjectFromSource } from './utils';
 import { ApiExecutionContext } from './types';
 import { PreflightCheckNamespacesResult } from './helpers';
@@ -31,18 +31,6 @@ export interface PerformUpdateParams<T = unknown> {
   options: SavedObjectsUpdateOptions<T>;
 }
 
-/**
- *   TODO: implement retrieving from preflightMeta here.
- Upsert case:
-  needs: preflightCheckNamespacesResult,
-  sets: rawUpsert: SavedObjectsRawDoc | undefined
- initialize these as: { preflightCheckNamespacesResult, rawUpsert}
- Partial case:
-  needs: preflightGetDocResult,
-  sets: raw: SavedObjectsRawDoc
- initialize these in: { preflightCheckNamespacesResult, rawUpsert} as { preflightGetDocResult, raw }
- Meta: {preflightCheckNamespacesResult, rawUpsert, preflightGetDocResult, raw}
- */
 export const performBWCUpdate = async <T>(
   { id, type, attributes, options }: PerformUpdateParams<T>,
   {
@@ -73,10 +61,11 @@ export const performBWCUpdate = async <T>(
     references,
     upsert, // translates to overwrite false if defined, otherwise the doc exists and we overwrite it
     refresh = DEFAULT_REFRESH_SETTING,
-    retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
+    // retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT, // not an option for `create/index`
     migrationVersionCompatibility,
   } = options;
 
+  let originalDocMigrated: SavedObject<T>;
   /* ================= GLOBAL VALIDATION ================== */
   if (!allowedTypes.includes(type)) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -94,6 +83,28 @@ export const performBWCUpdate = async <T>(
     id,
     namespace,
   });
+
+  if (preflightGetDocResult.rawDocSource && preflightGetDocResult.checkDocFound === 'found') {
+    const originalDoc = getSavedObjectFromSource<T>(
+      registry,
+      type,
+      id,
+      preflightGetDocResult.rawDocSource,
+      {
+        migrationVersionCompatibility,
+      }
+    );
+
+    try {
+      originalDocMigrated = migrationHelper.migrateStorageDocument(originalDoc) as SavedObject<T>;
+    } catch (error) {
+      throw SavedObjectsErrorHelpers.decorateGeneralError(
+        error,
+        'Failed to migrate document to the latest version.'
+      );
+    }
+  }
+
   /* ================= MULTINAMESPACE TYPES: CHECK NAMESPACES ================== */
   let preflightCheckNamespacesResult: PreflightCheckNamespacesResult | undefined;
 
@@ -101,11 +112,9 @@ export const performBWCUpdate = async <T>(
 
   if (registry.isMultiNamespace(type)) {
     logger.info('Verifying multi-namespace type');
-    const { rawDocSource: originalRawDocSource } = preflightGetDocResult;
-    preflightCheckNamespacesResult = preflightHelper.internalPreflightCheckNamespaces({
+    preflightCheckNamespacesResult = await preflightHelper.preflightCheckNamespaces({
       type,
       id,
-      originalRawDocSource,
       namespace,
     });
   }
@@ -116,6 +125,12 @@ export const performBWCUpdate = async <T>(
     object: { type, id, existingNamespaces },
   });
 
+  /**
+   * We're now in a situation where, for multi-namespace types, we've got multiple results
+   *  - preflightGetDoc: rawDoc in version the server's on in the current space
+   *    - saved object doc in the current version (migrated version from the preflight call)
+   *  - preflightCheckNamespaces: rawDoc in the version the server's on in the default space
+   */
   if (
     preflightCheckNamespacesResult?.checkResult === 'found_outside_namespace' ||
     (!upsert && preflightCheckNamespacesResult?.checkResult === 'not_found')
@@ -194,15 +209,17 @@ export const performBWCUpdate = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
   }
   // CREATE THE RESPONSE
-  const upsertUpdateResult = encryptionHelper.optionallyDecryptAndRedactSingleResult(
-    serializer.rawToSavedObject<T>(
-      { ...rawUpsert!, ...createBody },
-      { migrationVersionCompatibility }
-    ),
+  const upsertUpdateResult = serializer.rawToSavedObject<T>(
+    { ...rawUpsert!, ...createBody },
+    { migrationVersionCompatibility }
+  );
+  const upsertResult = { ...upsertUpdateResult, ...(Array.isArray(references) && { references }) };
+
+  return encryptionHelper.optionallyDecryptAndRedactSingleResult(
+    upsertResult,
     authorizationResult?.typeMap,
     attributes
   );
-  return upsertUpdateResult;
 
   // FINISHED UPSERT CASE
 
@@ -217,7 +234,7 @@ export const performBWCUpdate = async <T>(
 
   logger.info('update requested: original doc found');
 
-  const document = getSavedObjectFromSource<T>(registry, type, id, rawDoc!, {
+  const originalD = getSavedObjectFromSource<T>(registry, type, id, rawDoc!, {
     migrationVersionCompatibility,
   });
   try {
@@ -279,12 +296,17 @@ export const performBWCUpdate = async <T>(
   }
 
   // CREATE THE RESPONSE
-  const partialUpdateResult = encryptionHelper.optionallyDecryptAndRedactSingleResult(
-    serializer.rawToSavedObject<T>({ ...raw, ...indexBody }, { migrationVersionCompatibility }),
+  // `update` responds with <SavedObject<T>>, as does `create/index` and we don't have to modify anything
+  const partialUpdateResult = serializer.rawToSavedObject<T>(
+    { ...raw, ...indexBody },
+    { migrationVersionCompatibility }
+  );
+  const createResult = { ...partialUpdateResult, ...(Array.isArray(references) && { references }) };
+  return encryptionHelper.optionallyDecryptAndRedactSingleResult(
+    createResult,
     authorizationResult?.typeMap,
     attributes
   );
-  return partialUpdateResult;
 
   // FINISHED "PARTIAL UPDATE" CASE (indexing the full doc from client-side update)
 };

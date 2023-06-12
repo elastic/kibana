@@ -555,6 +555,34 @@ export const bulkGet = async (
     options
   );
 
+/** ==================== BWC update ==================== */
+export const bwcUpdateSuccess = async <T extends Partial<unknown>>(
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  registry: SavedObjectTypeRegistry,
+  type: string,
+  id: string,
+  attributes: T,
+  options?: SavedObjectsUpdateOptions,
+  internalOptions: {
+    originId?: string;
+    mockGetResponseValue?: estypes.GetResponse;
+  } = {},
+  objNamespaces?: string[]
+) => {
+  const { mockGetResponseValue, originId } = internalOptions;
+  const mockGetResponse =
+    mockGetResponse ??
+    getMockGetResponse(registry, { type, id }, objNamespaces ?? options?.namespace);
+  client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
+
+  mockBWCUpdateResponse(client, type, id, options, objNamespaces, originId);
+
+  const result = await repository.update(type, id, attributes, options);
+  expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+  return result;
+};
+
 export const bulkGetSuccess = async (
   client: ElasticsearchClientMock,
   repository: SavedObjectsRepository,
@@ -702,9 +730,6 @@ export const bulkUpdateSuccess = async (
   return result;
 };
 
-export const expectBWCUpdateResult = ({
-
-})
 export const expectUpdateResult = ({
   type,
   id,
