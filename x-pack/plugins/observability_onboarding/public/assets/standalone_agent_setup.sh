@@ -32,7 +32,7 @@ fi
 
 echo "Extracting Elastic Agent"
 updateStepProgress "ea-extract" "loading"
-tar -xzf elastic-agent-8.7.1-linux-x86_64.tar.gz --checkpoint=.1000
+tar -xzf elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64.tar.gz --checkpoint=.1000
 echo ""
 if [ "$?" -eq 0 ]; then
   echo "Elastic Agent extracted"
@@ -44,7 +44,7 @@ fi
 
 echo "Installing Elastic Agent"
 updateStepProgress "ea-install" "loading"
-cd elastic-agent-8.7.1-linux-x86_64
+cd elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64
 ./elastic-agent install -f
 if [ "$?" -eq 0 ]; then
   echo "Elastic Agent installed"
