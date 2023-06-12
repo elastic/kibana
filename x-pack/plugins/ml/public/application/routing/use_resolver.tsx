@@ -21,11 +21,11 @@ import { ML_PAGES } from '../../../common/constants/locator';
  * Resolves required dependencies for landing on the page
  * and performs redirects if needed.
  *
- * @param requiredLicence
+ * @param requiredLicense
  * @param requiredCapabilities
  */
 export const useRouteResolver = (
-  requiredLicence: 'full' | 'basic',
+  requiredLicense: 'full' | 'basic',
   requiredCapabilities: MlCapabilitiesKey[],
   customResolvers?: Resolvers
 ): { context: MlContextValue | null; results: ResolverResults; component?: React.Component } => {
@@ -60,7 +60,7 @@ export const useRouteResolver = (
       await navigateToApp('home');
       return Promise.reject();
     }
-    if (requiredLicence === 'full' && mlLicenseInfo.isFullLicense === false) {
+    if (requiredLicense === 'full' && mlLicenseInfo.isFullLicense === false) {
       // ML is enabled, but only with a basic or gold license
       await navigateToApp(PLUGIN_ID, { path: ML_PAGES.DATA_VISUALIZER });
       return Promise.reject();
@@ -83,7 +83,7 @@ export const useRouteResolver = (
     mlLicenseInfo.isMlEnabled,
     navigateToApp,
     navigateToUrl,
-    requiredLicence,
+    requiredLicense,
   ]);
 
   // Check if the user has all required permissions
