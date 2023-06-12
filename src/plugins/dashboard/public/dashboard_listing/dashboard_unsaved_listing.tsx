@@ -19,9 +19,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardAttributes } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { DashboardAttributes } from '../../common/content_management';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_storage/dashboard_session_storage_service';
 
@@ -117,7 +117,7 @@ export const DashboardUnsavedListing = ({
 }: DashboardUnsavedListingProps) => {
   const {
     dashboardSessionStorage,
-    dashboardSavedObject: { savedObjectsClient, findDashboards },
+    dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
@@ -173,13 +173,7 @@ export const DashboardUnsavedListing = ({
     return () => {
       canceled = true;
     };
-  }, [
-    refreshUnsavedDashboards,
-    dashboardSessionStorage,
-    unsavedDashboardIds,
-    savedObjectsClient,
-    findDashboards,
-  ]);
+  }, [refreshUnsavedDashboards, dashboardSessionStorage, unsavedDashboardIds, findDashboards]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>

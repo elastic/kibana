@@ -6,7 +6,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import LRU from 'lru-cache';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
@@ -111,7 +110,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private manifestTask: ManifestTask | undefined;
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
-  private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
 
@@ -124,8 +122,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.appClientFactory = new AppClientFactory();
     this.appFeatures = new AppFeatures(this.logger, this.config.experimentalFeatures);
 
-    // Cache up to three artifacts with a max retention of 5 mins each
-    this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
@@ -430,7 +426,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger,
-        cache: this.artifactsCache,
         experimentalFeatures: config.experimentalFeatures,
       });
 
