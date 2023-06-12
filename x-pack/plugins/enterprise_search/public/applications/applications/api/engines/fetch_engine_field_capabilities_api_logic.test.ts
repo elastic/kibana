@@ -23,7 +23,7 @@ describe('FetchEngineFieldCapabilitiesApiLogic', () => {
       const result = fetchEngineFieldCapabilities({ engineName: 'foobar' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        '/internal/enterprise_search/engines/foobar/field_capabilities'
+        '/internal/enterprise_search/search_applications/foobar/field_capabilities'
       );
       await expect(result).resolves.toEqual({ result: 'result' });
     });

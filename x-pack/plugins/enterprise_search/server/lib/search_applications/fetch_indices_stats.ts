@@ -7,14 +7,14 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server/src/client/scoped_cluster_client';
 
-import { EnterpriseSearchEngineIndex } from '../../../common/types/engines';
+import { EnterpriseSearchApplicationIndex } from '../../../common/types/search_applications';
 
 import { availableIndices } from './available_indices';
 
 export const fetchIndicesStats = async (
   client: IScopedClusterClient,
   indices: string[]
-): Promise<EnterpriseSearchEngineIndex[]> => {
+): Promise<EnterpriseSearchApplicationIndex[]> => {
   const indicesStats = await client.asCurrentUser.indices.stats({
     index: await availableIndices(client, indices),
     metric: ['docs'],
