@@ -7,37 +7,37 @@
 
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
-export interface EnterpriseSearchEnginesResponse {
+export interface EnterpriseSearchApplicationsResponse {
   count: number;
   params: { from: number; q?: string; size: number };
-  results: EnterpriseSearchEngine[];
+  results: EnterpriseSearchApplication[];
 }
 
-export interface EnterpriseSearchEngine {
+export interface EnterpriseSearchApplication {
   indices: string[];
   name: string;
   updated_at_millis: number;
 }
 
-export interface EnterpriseSearchEngineDetails {
-  indices: EnterpriseSearchEngineIndex[];
+export interface EnterpriseSearchApplicationDetails {
+  indices: EnterpriseSearchApplicationIndex[];
   name: string;
   updated_at_millis: number;
 }
 
-export interface EnterpriseSearchEngineIndex {
+export interface EnterpriseSearchApplicationIndex {
   count: number | null;
   health: HealthStatus | 'unknown';
   name: string;
 }
 
-export interface EnterpriseSearchEngineFieldCapabilities {
+export interface EnterpriseSearchApplicationFieldCapabilities {
   fields: SchemaField[];
   name: string;
   updated_at_millis: number;
 }
 
-export interface EnterpriseSearchEngineUpsertResponse {
+export interface EnterpriseSearchApplicationUpsertResponse {
   result: string;
 }
 export interface SchemaFieldIndex {
