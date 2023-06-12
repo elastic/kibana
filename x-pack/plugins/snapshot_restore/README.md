@@ -75,3 +75,65 @@ To run ES with plugins:
 2. `cd .es/8.0.0`
 3. `bin/elasticsearch-plugin install https://snapshots.elastic.co/downloads/elasticsearch-plugins/repository-hdfs/repository-hdfs-8.0.0-SNAPSHOT.zip`
 4. Run `bin/elasticsearch` from the `.es/8.0.0` directory. Otherwise, starting ES with `yarn es snapshot` would overwrite the plugins you just installed.
+
+### Cloud-managed repositories
+
+Cloud-managed repositories can be imitated when Kibana is running locally by following the steps below:
+
+1. Add the file system path you want to use to elasticsearch.yml or as part of starting up ES. Note that this path should point to a directory that exists.
+
+```
+path:
+  repo: /tmp/es-backups
+```
+
+or
+
+```
+yarn es snapshot --license=trial -E path.repo=/tmp/es-backups
+```
+
+2. Use Console to add the `cluster.metadata.managed_repository` and `cluster.metadata.managed_policies` settings:
+
+```
+PUT /_cluster/settings
+{
+  "persistent": {
+    "cluster.metadata.managed_repository": "found-snapshots",
+    "cluster.metadata.managed_policies": ["managed-policy"]
+  }
+}
+```
+
+3. Use Console or UI to create a repository with the same name as your setting value (`found-snapshots`). Use the file system path from the first step as the `location` setting:
+
+```
+PUT /_snapshot/found-snapshots
+{
+  "type": "fs",
+  "settings": {
+    "location": "/tmp/es-backups"
+  }
+}
+```
+
+4. Use Console or UI to create a policy with the same name as your setting value (`managed-policy`)
+
+```
+PUT _slm/policy/managed-policy
+{
+  "name": "managed-snap",
+  "schedule": "0 30 1 * * ?",
+  "repository": "found-snapshots",
+  "config": {
+    "include_global_state": true,
+    "feature_states": []
+  }
+}
+```
+
+7. Execute the created policy to create a managed snapshot:
+
+```
+POST _slm/policy/managed-policy/_execute
+```
