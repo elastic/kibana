@@ -11,15 +11,20 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { SLO_ID_FIELD } from '../../common/field_names/infra_metrics';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
-import { SLO_BURN_RATE_RULE_ID } from '../../common/constants';
+import {
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+} from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
+import { validateMetricThreshold } from '../pages/threshold/components/validation';
+import { formatReason } from '../pages/threshold/rule_data_formatters';
 
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
   observabilityRuleTypeRegistry.register({
-    id: SLO_BURN_RATE_RULE_ID,
+    id: SLO_BURN_RATE_RULE_TYPE_ID,
     description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
       defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
     }),
@@ -48,4 +53,36 @@ export const registerObservabilityRuleTypes = (
       }
     ),
   });
+  if (config.unsafe.thresholdRule.enabled) {
+    observabilityRuleTypeRegistry.register({
+      id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+      description: i18n.translate(
+        'xpack.observability.threshold.rule.alertFlyout.alertDescription',
+        {
+          defaultMessage: 'Alert when threshold breached.',
+        }
+      ),
+      iconClass: 'bell',
+      documentationUrl(docLinks) {
+        return `${docLinks.links.observability.metricsThreshold}`;
+      },
+      ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
+      validate: validateMetricThreshold,
+      defaultActionMessage: i18n.translate(
+        'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
+        {
+          defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+  
+  Reason:
+  \\{\\{context.reason\\}\\}
+  `,
+        }
+      ),
+      requiresAppContext: false,
+      format: formatReason,
+      alertDetailsAppSection: lazy(
+        () => import('../pages/threshold/components/alert_details_app_section')
+      ),
+    });
+  }
 };
