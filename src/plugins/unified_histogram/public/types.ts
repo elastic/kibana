@@ -7,7 +7,7 @@
  */
 
 import type { Theme } from '@kbn/charts-plugin/public/plugin';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -42,6 +42,7 @@ export interface UnifiedHistogramServices {
   lens: LensPublicStart;
   storage: Storage;
   expressions: ExpressionsStart;
+  capabilities: Capabilities;
 }
 
 /**
