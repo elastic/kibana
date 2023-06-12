@@ -4,8 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
+  useEuiTheme,
+  EuiAccordion,
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -15,17 +20,23 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiStepsHorizontal,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
-import React, { useState } from 'react';
+
 import {
-  BACK_LABEL,
   CANCEL_LABEL,
-  NEXT_LABEL,
+  DISABLED_LABEL,
+  ENABLED_LABEL,
   INVALID_JSON_ERROR,
+  REQUIRED_LABEL,
 } from '../../../../common/i18n_string';
 import { CreateAPIKeyArgs } from '../../../../common/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
@@ -36,38 +47,24 @@ import { MetadataForm } from './metadata_form';
 import { SecurityPrivilegesForm } from './security_privileges_form';
 import { CreateApiKeyResponse } from './types';
 
+const DEFAULT_ROLE_DESCRIPTORS = `{
+  "serverless_search": {
+    "indices": [{
+      "names": ["*"],
+      "privileges": [
+        "all"
+      ]
+    }]
+  }
+}`;
+const DEFAULT_METADATA = `{
+  "application": "myapp"
+}`;
+
 interface CreateApiKeyFlyoutProps {
   onClose: () => void;
   setApiKey: (apiKey: CreateApiKeyResponse) => void;
   username: string;
-}
-
-enum Steps {
-  BASIC_SETUP,
-  PRIVILEGES,
-  METADATA,
-}
-
-function getNextStep(currentStep: Steps): Steps {
-  switch (currentStep) {
-    case Steps.BASIC_SETUP:
-      return Steps.PRIVILEGES;
-    case Steps.PRIVILEGES:
-      return Steps.METADATA;
-    case Steps.METADATA:
-      return Steps.METADATA;
-  }
-}
-
-function getPreviousStep(currentStep: Steps): Steps {
-  switch (currentStep) {
-    case Steps.BASIC_SETUP:
-      return Steps.BASIC_SETUP;
-    case Steps.PRIVILEGES:
-      return Steps.BASIC_SETUP;
-    case Steps.METADATA:
-      return Steps.PRIVILEGES;
-  }
 }
 
 const parseCreateError = (error: unknown): string | undefined => {
@@ -86,32 +83,53 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   username,
   setApiKey,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { http } = useKibanaServices();
-  const [currentStep, setCurrentStep] = useState<Steps>(Steps.BASIC_SETUP);
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
-  const [roleDescriptors, setRoleDescriptors] = useState('');
+  const [roleDescriptors, setRoleDescriptors] = useState(DEFAULT_ROLE_DESCRIPTORS);
   const [roleDescriptorsError, setRoleDescriptorsError] = useState<string | undefined>(undefined);
-  const [metadata, setMetadata] = useState('');
+  const [metadata, setMetadata] = useState(DEFAULT_METADATA);
   const [metadataError, setMetadataError] = useState<string | undefined>(undefined);
+  const [privilegesEnabled, setPrivilegesEnabled] = useState<boolean>(false);
+  const [privilegesOpen, setPrivilegesOpen] = useState<'open' | 'closed'>('closed');
+  const [metadataEnabled, setMetadataEnabled] = useState<boolean>(false);
+  const [metadataOpen, setMetadataOpen] = useState<'open' | 'closed'>('closed');
 
+  const togglePrivileges = (e: EuiSwitchEvent) => {
+    const enabled = e.target.checked;
+    setPrivilegesEnabled(enabled);
+    setPrivilegesOpen(enabled ? 'open' : 'closed');
+    // Reset role descriptors to default
+    if (enabled) setRoleDescriptors(DEFAULT_ROLE_DESCRIPTORS);
+  };
+  const toggleMetadata = (e: EuiSwitchEvent) => {
+    const enabled = e.target.checked;
+    setMetadataEnabled(enabled);
+    setMetadataOpen(enabled ? 'open' : 'closed');
+    // Reset metadata to default
+    if (enabled) setMetadata(DEFAULT_METADATA);
+  };
   const onCreateClick = () => {
     let parsedRoleDescriptors: Record<string, any> | undefined;
-    try {
-      parsedRoleDescriptors = roleDescriptors.length > 0 ? JSON.parse(roleDescriptors) : undefined;
-    } catch (e) {
-      setCurrentStep(Steps.PRIVILEGES);
-      setRoleDescriptorsError(INVALID_JSON_ERROR);
-      return;
+    if (privilegesEnabled) {
+      try {
+        parsedRoleDescriptors =
+          roleDescriptors.length > 0 ? JSON.parse(roleDescriptors) : undefined;
+      } catch (e) {
+        setRoleDescriptorsError(INVALID_JSON_ERROR);
+        return;
+      }
     }
     if (roleDescriptorsError) setRoleDescriptorsError(undefined);
     let parsedMetadata: Record<string, any> | undefined;
-    try {
-      parsedMetadata = metadata.length > 0 ? JSON.parse(metadata) : undefined;
-    } catch (e) {
-      setCurrentStep(Steps.METADATA);
-      setMetadataError(INVALID_JSON_ERROR);
-      return;
+    if (metadataEnabled) {
+      try {
+        parsedMetadata = metadata.length > 0 ? JSON.parse(metadata) : undefined;
+      } catch (e) {
+        setMetadataError(INVALID_JSON_ERROR);
+        return;
+      }
     }
     if (metadataError) setMetadataError(undefined);
     const expiration = expires !== null ? `${expires}d` : undefined;
@@ -138,7 +156,12 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   });
   const createError = parseCreateError(error);
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout
+      onClose={onClose}
+      css={css`
+        max-width: calc(${euiTheme.size.xxxxl} * 10);
+      `}
+    >
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2>
@@ -160,56 +183,158 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
             {createError}
           </EuiCallOut>
         )}
-        <EuiStepsHorizontal
-          steps={[
-            {
-              title: i18n.translate('xpack.serverlessSearch.apiKey.basicSetupLabel', {
-                defaultMessage: 'Basic Setup',
-              }),
-              status: currentStep === Steps.BASIC_SETUP ? 'current' : 'complete',
-              onClick: () => setCurrentStep(Steps.BASIC_SETUP),
-            },
-            {
-              title: i18n.translate('xpack.serverlessSearch.apiKey.privilegesLabel', {
-                defaultMessage: 'Privileges',
-              }),
-              status:
-                currentStep === Steps.PRIVILEGES
-                  ? 'current'
-                  : currentStep === Steps.METADATA
-                  ? 'complete'
-                  : 'incomplete',
-              onClick: () => setCurrentStep(Steps.PRIVILEGES),
-            },
-            {
-              title: i18n.translate('xpack.serverlessSearch.apiKey.metadataLabel', {
-                defaultMessage: 'Metadata',
-              }),
-              status: currentStep === Steps.METADATA ? 'current' : 'incomplete',
-              onClick: () => setCurrentStep(Steps.METADATA),
-            },
-          ]}
-        />
-        {currentStep === Steps.BASIC_SETUP && (
-          <BasicSetupForm
-            isLoading={isLoading}
-            name={name}
-            user={username}
-            expires={expires}
-            onChangeName={(newName: string) => setName(newName)}
-            onChangeExpires={(newExpires: string | null) => setExpires(newExpires)}
-          />
-        )}
-        {currentStep === Steps.PRIVILEGES && (
-          <SecurityPrivilegesForm
-            roleDescriptors={roleDescriptors}
-            onChangeRoleDescriptors={setRoleDescriptors}
-            error={roleDescriptorsError}
-          />
-        )}
-        {currentStep === Steps.METADATA && (
-          <MetadataForm metadata={metadata} onChangeMetadata={setMetadata} error={metadataError} />
-        )}
+        <EuiPanel hasBorder>
+          <EuiAccordion
+            id="apiKey.setup"
+            paddingSize="l"
+            initialIsOpen
+            buttonContent={
+              <div>
+                <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="gear" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>
+                        {i18n.translate('xpack.serverlessSearch.apiKey.setup.title', {
+                          defaultMessage: 'Setup',
+                        })}
+                      </h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="xs" />
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    {i18n.translate('xpack.serverlessSearch.apiKey.setup.description', {
+                      defaultMessage: 'Basic configuration details to create your API key.',
+                    })}
+                  </p>
+                </EuiText>
+              </div>
+            }
+            extraAction={<EuiBadge color="hollow">{REQUIRED_LABEL}</EuiBadge>}
+          >
+            <EuiSpacer size="s" />
+            <BasicSetupForm
+              isLoading={isLoading}
+              name={name}
+              user={username}
+              expires={expires}
+              onChangeName={(newName: string) => setName(newName)}
+              onChangeExpires={(newExpires: string | null) => setExpires(newExpires)}
+            />
+          </EuiAccordion>
+        </EuiPanel>
+        <EuiSpacer size="l" />
+        <EuiPanel hasBorder>
+          <EuiAccordion
+            id="apiKey.privileges"
+            paddingSize="l"
+            buttonContent={
+              <div style={{ paddingRight: euiTheme.size.s }}>
+                <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="lock" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>
+                        {i18n.translate('xpack.serverlessSearch.apiKey.privileges.title', {
+                          defaultMessage: 'Security Privileges',
+                        })}
+                      </h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="xs" />
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    {i18n.translate('xpack.serverlessSearch.apiKey.privileges.description', {
+                      defaultMessage:
+                        'Control access to specific Elasticsearch APIs and resources using predefined roles or custom privileges per API key.',
+                    })}
+                  </p>
+                </EuiText>
+              </div>
+            }
+            extraAction={
+              <EuiSwitch
+                label={privilegesEnabled ? ENABLED_LABEL : DISABLED_LABEL}
+                checked={privilegesEnabled}
+                onChange={togglePrivileges}
+              />
+            }
+            forceState={privilegesOpen}
+            onToggle={(isOpen) => {
+              if (privilegesEnabled) {
+                setPrivilegesOpen(isOpen ? 'open' : 'closed');
+              }
+            }}
+          >
+            <EuiSpacer size="s" />
+            <SecurityPrivilegesForm
+              roleDescriptors={roleDescriptors}
+              onChangeRoleDescriptors={setRoleDescriptors}
+              error={roleDescriptorsError}
+            />
+          </EuiAccordion>
+        </EuiPanel>
+        <EuiSpacer size="l" />
+        <EuiPanel hasBorder>
+          <EuiAccordion
+            id="apiKey.metadata"
+            paddingSize="l"
+            buttonContent={
+              <div style={{ paddingRight: euiTheme.size.s }}>
+                <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="visVega" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>
+                        {i18n.translate('xpack.serverlessSearch.apiKey.metadata.title', {
+                          defaultMessage: 'Metadata',
+                        })}
+                      </h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="xs" />
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    {i18n.translate('xpack.serverlessSearch.apiKey.metadata.description', {
+                      defaultMessage:
+                        'Use configurable key-value pairs to add information about the API key or customize Elasticsearch resource access.',
+                    })}
+                  </p>
+                </EuiText>
+              </div>
+            }
+            extraAction={
+              <EuiSwitch
+                label={metadataEnabled ? ENABLED_LABEL : DISABLED_LABEL}
+                checked={metadataEnabled}
+                onChange={toggleMetadata}
+              />
+            }
+            forceState={metadataOpen}
+            onToggle={(isOpen) => {
+              if (metadataEnabled) {
+                setMetadataOpen(isOpen ? 'open' : 'closed');
+              }
+            }}
+          >
+            <EuiSpacer size="s" />
+            <MetadataForm
+              metadata={metadata}
+              onChangeMetadata={setMetadata}
+              error={metadataError}
+            />
+          </EuiAccordion>
+        </EuiPanel>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -220,33 +345,12 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd">
-              {currentStep !== Steps.BASIC_SETUP && (
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    iconType="sortLeft"
-                    isDisabled={isLoading}
-                    onClick={() => setCurrentStep(getPreviousStep(currentStep))}
-                  >
-                    {BACK_LABEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
               <EuiFlexItem>
-                {currentStep === Steps.METADATA ? (
-                  <EuiButton fill isLoading={isLoading} onClick={onCreateClick}>
-                    {i18n.translate('xpack.serverlessSearch.apiKey.flyOutCreateLabel', {
-                      defaultMessage: 'Create API Key',
-                    })}
-                  </EuiButton>
-                ) : (
-                  <EuiButton
-                    fill
-                    disabled={!name}
-                    onClick={() => setCurrentStep(getNextStep(currentStep))}
-                  >
-                    {NEXT_LABEL}
-                  </EuiButton>
-                )}
+                <EuiButton fill disabled={!name} isLoading={isLoading} onClick={onCreateClick}>
+                  {i18n.translate('xpack.serverlessSearch.apiKey.flyOutCreateLabel', {
+                    defaultMessage: 'Create API Key',
+                  })}
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

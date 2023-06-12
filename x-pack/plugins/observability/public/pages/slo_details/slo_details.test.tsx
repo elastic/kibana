@@ -237,7 +237,7 @@ describe('SLO Details Page', () => {
     const { id, createdAt, enabled, revision, summary, updatedAt, ...newSlo } = slo;
 
     expect(mockClone).toBeCalledWith({
-      idToCopyFrom: slo.id,
+      originalSloId: slo.id,
       slo: {
         ...newSlo,
         name: `[Copy] ${newSlo.name}`,

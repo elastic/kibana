@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { INPUT_FILE, TOASTER, TOASTER_BODY } from '../screens/alerts_detection_rules';
 import {
   EXCEPTIONS_TABLE,
   EXCEPTIONS_TABLE_SEARCH,
@@ -35,7 +36,15 @@ import {
   RULE_ACTION_LINK_RULE_SWITCH,
   LINKED_RULES_BADGE,
   MANAGE_RULES_SAVE,
+  IMPORT_SHARED_EXCEPTION_LISTS_BTN,
+  IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN,
+  EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU,
+  EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM,
+  MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
+  IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX,
+  IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX,
 } from '../screens/exceptions';
+import { closeErrorToast } from './alerts_detection_rules';
 import { assertExceptionItemsExists } from './exceptions';
 
 export const clearSearchSelection = () => {
@@ -44,6 +53,15 @@ export const clearSearchSelection = () => {
 
 export const expandExceptionActions = () => {
   cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+};
+
+export const importExceptionLists = (listsFile: string) => {
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_BTN).click();
+  cy.get(INPUT_FILE).should('exist');
+  cy.get(INPUT_FILE).trigger('click');
+  cy.get(INPUT_FILE).selectFile(listsFile);
+  cy.get(INPUT_FILE).trigger('change');
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
 };
 
 export const exportExceptionList = (listId: string) => {
@@ -67,7 +85,7 @@ export const linkRulesToExceptionList = (listId: string, ruleSwitch: number = 0)
     .click();
   cy.get(EXCEPTIONS_TABLE_LINK_RULES_BTN).first().click();
   cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
-  cy.get(MANAGE_RULES_SAVE).first().click();
+  saveLinkedRules();
 };
 
 export const deleteExceptionListWithoutRuleReferenceByListId = (listId: string) => {
@@ -197,4 +215,72 @@ export const editExceptionLisDetails = ({
   }
 
   cy.get(EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN).first().click();
+};
+
+export const clickOnLinkRulesByRuleRowOrderInListDetail = (ruleSwitch: number = 0) => {
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
+};
+export const linkSharedListToRulesFromListDetails = (numberOfRules: number) => {
+  for (let i = 0; i < numberOfRules; i++) {
+    clickOnLinkRulesByRuleRowOrderInListDetail(i);
+  }
+};
+
+export const saveLinkedRules = () => {
+  cy.get(MANAGE_RULES_SAVE).first().click();
+};
+
+export const validateSharedListLinkedRules = (
+  numberOfRules: number,
+  linkedRulesNames: string[]
+) => {
+  cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).should(
+    'have.text',
+    `Linked to ${numberOfRules} rules`
+  );
+  cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
+  linkedRulesNames.forEach((ruleName) => {
+    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', ruleName);
+  });
+};
+
+export const addExceptionListFromSharedExceptionListHeaderMenu = () => {
+  // Click on "Create shared exception list" button on the header
+  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
+  // Click on "Create exception item"
+  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
+};
+
+export const importExceptionListWithSelectingOverwriteExistingOption = () => {
+  // { force: true }: The EuiCheckbox component's label covers the checkbox
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX).check({ force: true });
+  // Close the Error toast to be able to import again
+  closeErrorToast();
+
+  // Import after selecting overwrite option
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
+};
+
+export const importExceptionListWithSelectingCreateNewOption = () => {
+  // { force: true }: The EuiCheckbox component's label covers the checkbox
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).check({ force: true });
+  // Close the Error toast to be able to import again
+  closeErrorToast();
+
+  // Import after selecting overwrite option
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
+};
+
+export const validateImportExceptionListWentSuccessfully = () => {
+  cy.wait('@import').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
+    cy.get(TOASTER).should('have.text', `Exception list imported`);
+  });
+};
+export const validateImportExceptionListFailedBecauseExistingListFound = () => {
+  cy.wait('@import').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
+    cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
+    cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
+  });
 };

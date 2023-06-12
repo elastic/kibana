@@ -59,6 +59,7 @@ export interface EditorFramePlugins {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   timefilter: TimefilterContract;
+  nowProvider: DataPublicPluginStart['nowProvider'];
   eventAnnotationService: EventAnnotationServiceType;
 }
 

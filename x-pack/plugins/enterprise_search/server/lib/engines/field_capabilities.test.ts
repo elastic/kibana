@@ -16,15 +16,16 @@ describe('engines field_capabilities', () => {
   const mockClient = {
     asCurrentUser: {
       fieldCaps: jest.fn(),
-      indices: { exists: jest.fn() },
+      indices: { get: jest.fn() },
     },
     asInternalUser: {},
   };
   const mockEngine: EnterpriseSearchEngine = {
     indices: ['index-001'],
-    name: 'unit-test-engine',
+    name: 'unit_test_engine',
     updated_at_millis: 2202018295,
   };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -45,8 +46,13 @@ describe('engines field_capabilities', () => {
         indices: ['index-001'],
       };
 
-      mockClient.asCurrentUser.indices.exists.mockResolvedValueOnce(true);
+      const getAllAvailableIndexResponse = {
+        'index-001': { aliases: { unit_test_engine: {} } },
+      };
+
+      mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
+
       await expect(
         fetchEngineFieldCapabilities(mockClient as unknown as IScopedClusterClient, mockEngine)
       ).resolves.toEqual({
