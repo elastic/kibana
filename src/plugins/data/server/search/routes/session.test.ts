@@ -43,7 +43,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, saveHandler] = mockRouter.post.mock.calls[PostHandlerIndex.SAVE];
+    const [, saveHandler] =
+      mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[PostHandlerIndex.SAVE];
 
     await saveHandler(mockContext, mockRequest, mockResponse);
 
@@ -58,7 +59,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, getHandler]] = mockRouter.get.mock.calls;
+    // console.log('###', mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls);
+    const [[, getHandler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
 
     await getHandler(mockContext, mockRequest, mockResponse);
 
@@ -72,11 +74,18 @@ describe('registerSessionRoutes', () => {
     const mockRequest = httpServerMock.createKibanaRequest({ params });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[], [, statusHandler]] = mockRouter.get.mock.calls;
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[1].value;
+    console.log(
+      'mockRouter',
+      typeof mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1]
+    );
+    const statusHandler =
+      mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1];
+    console.log('statusHandler', statusHandler);
 
     await statusHandler(mockContext, mockRequest, mockResponse);
-
+    // console.log();
+    expect(mockContext.search!.getSessionStatus).toHaveBeenCalled();
     expect(mockContext.search!.getSessionStatus).toHaveBeenCalledWith(id);
   });
 
@@ -92,7 +101,12 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, findHandler] = mockRouter.post.mock.calls[PostHandlerIndex.FIND];
+    console.log(
+      'HERE',
+      mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[PostHandlerIndex.FIND]
+    );
+    const [, findHandler] =
+      mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[PostHandlerIndex.FIND];
 
     await findHandler(mockContext, mockRequest, mockResponse);
 
@@ -157,7 +171,13 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, extendHandler] = mockRouter.post.mock.calls[PostHandlerIndex.EXTEND];
+
+    console.log(mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1]);
+    const [, extendHandler] =
+      mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0]; /* [
+        PostHandlerIndex.EXTEND
+      ];
+      */
 
     await extendHandler(mockContext, mockRequest, mockResponse);
 
