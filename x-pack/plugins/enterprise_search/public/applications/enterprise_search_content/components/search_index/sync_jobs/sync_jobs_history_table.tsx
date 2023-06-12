@@ -103,7 +103,7 @@ export const SyncJobsHistoryTable: React.FC<SyncJobHistoryTableProps> = ({ type 
     ...(type === 'access_control'
       ? [
           {
-            field: 'identity_sync_count',
+            field: 'indexed_document_count',
             name: i18n.translate(
               'xpack.enterpriseSearch.content.searchIndices.identitySync.columnTitle',
               {
