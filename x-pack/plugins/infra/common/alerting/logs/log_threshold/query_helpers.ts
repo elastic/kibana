@@ -139,9 +139,13 @@ export const positiveComparators = [
   Comparator.MATCH_PHRASE,
 ];
 
-const negativeComparators = [Comparator.NOT_EQ, Comparator.NOT_MATCH, Comparator.NOT_MATCH_PHRASE];
+export const negativeComparators = [
+  Comparator.NOT_EQ,
+  Comparator.NOT_MATCH,
+  Comparator.NOT_MATCH_PHRASE,
+];
 
-const queryMappings: {
+export const queryMappings: {
   [key: string]: string;
 } = {
   [Comparator.GT]: 'range',
