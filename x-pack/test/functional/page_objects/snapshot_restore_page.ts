@@ -98,9 +98,11 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
       return await Promise.all(
         rows.map(async (row) => {
           return {
+            snapshotName: await (await row.findByTestSubject('snapshotLink')).getVisibleText(),
             snapshotLink: await row.findByTestSubject('snapshotLink'),
             repoLink: await row.findByTestSubject('repositoryLink'),
-            snapshotRestore: row.findByTestSubject('srsnapshotListRestoreActionButton'),
+            snapshotRestore: await row.findByTestSubject('srsnapshotListRestoreActionButton'),
+            snapshotDelete: await row.findByTestSubject('srsnapshotListDeleteActionButton'),
           };
         })
       );

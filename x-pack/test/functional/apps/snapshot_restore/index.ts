@@ -12,5 +12,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     this.tags('skipCloud');
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./snapshot_restore'));
+    loadTestFile(require.resolve('./snapshot_list'));
   });
 };
