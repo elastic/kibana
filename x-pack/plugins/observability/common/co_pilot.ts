@@ -237,7 +237,7 @@ export const coPilotPrompts = {
         INFRA_SYSTEM_MESSAGE,
         {
           content: `I am a software engineer. I am trying to understand what a process running on my
-          Linux machine does.
+          machine does.
           
           Your task is to first desribe what the process is and what its general use cases are. If I also provide you
           with the arguments to the process you should then explain its arguments and how they influence the behaviour
