@@ -22,7 +22,9 @@ describe('FetchEngineApiLogic', () => {
       http.get.mockReturnValue(promise);
       const result = fetchEngine({ engineName: 'my-engine' });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/engines/my-engine');
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/enterprise_search/search_applications/my-engine'
+      );
       await expect(result).resolves.toEqual('result');
     });
   });
