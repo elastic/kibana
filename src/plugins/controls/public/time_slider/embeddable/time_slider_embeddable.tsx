@@ -21,7 +21,7 @@ import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/ty
 import { pluginServices } from '../../services';
 import { ControlsSettingsService } from '../../services/settings/types';
 import { ControlsDataService } from '../../services/data/types';
-import { ControlOutput } from '../../types';
+import { ClearableControlEmbeddable, ControlOutput } from '../../types';
 import { ControlGroupContainer } from '../../control_group/embeddable/control_group_container';
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
@@ -51,10 +51,7 @@ type TimeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof timeSliderReducers
 >;
 
-export class TimeSliderControlEmbeddable extends Embeddable<
-  TimeSliderControlEmbeddableInput,
-  ControlOutput
-> {
+export class TimeSliderControlEmbeddable extends ClearableControlEmbeddable<TimeSliderControlEmbeddableInput> {
   public readonly type = TIME_SLIDER_CONTROL;
   public deferEmbeddedLoad = true;
 
@@ -249,6 +246,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private onTimesliceChange = (value?: [number, number]) => {
     const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
       this.getTimeSliceAsPercentageOfTimeRange(value);
+
     this.dispatch.setValueAsPercentageOfTimeRange({
       timesliceStartAsPercentageOfTimeRange,
       timesliceEndAsPercentageOfTimeRange,
@@ -353,6 +351,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       .tz(epoch, getMomentTimezone(this.getTimezone()))
       .format(this.getState().componentState.format);
   };
+
+  public clearSelections() {
+    this.onTimesliceChange();
+  }
 
   public render = (node: HTMLElement) => {
     if (this.node) {

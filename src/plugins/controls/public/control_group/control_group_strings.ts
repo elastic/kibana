@@ -304,10 +304,16 @@ export const ControlGroupStrings = {
       [RANGE_SLIDER_CONTROL]: {
         getClearButtonTitle: () =>
           i18n.translate('controls.controlGroup.floatingActions.rangeSlider.clearTitle', {
-            defaultMessage: 'Clear range',
+            defaultMessage: 'Clear range selection',
           }),
       },
-
+      [TIME_SLIDER_CONTROL]: {
+        getClearButtonTitle: () =>
+          i18n.translate('controls.controlGroup.floatingActions.timeSlider.clearTitle', {
+            defaultMessage: 'Clear time selection',
+          }),
+      },
+    },
   },
   ariaActions: {
     getMoveControlButtonAction: (controlTitle?: string) =>
