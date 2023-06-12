@@ -5,28 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import {
   SOURCE_DATA_REQUEST_ID,
   SOURCE_META_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { AbstractLayer } from './layer';
 import { ISource } from '../sources/source';
-
-class MockSource {
-  private readonly _fitToBounds: boolean;
-  constructor({ fitToBounds = true } = {}) {
-    this._fitToBounds = fitToBounds;
-  }
-  cloneDescriptor() {
-    return [{}];
-  }
-
-  async supportsFitToBounds() {
-    return this._fitToBounds;
-  }
-}
 
 describe('isFittable', () => {
   [
@@ -65,7 +49,9 @@ describe('isFittable', () => {
           visible: test.isVisible,
           includeInFitToBounds: test.includeInFitToBounds,
         },
-        source: new MockSource({ fitToBounds: test.fitToBounds }) as unknown as ISource,
+        source: {
+          supportsFitToBounds: () => (test.fitToBounds),
+        } as unknown as ISource,
       });
       expect(await layer.isFittable()).toBe(test.canFit);
     });
