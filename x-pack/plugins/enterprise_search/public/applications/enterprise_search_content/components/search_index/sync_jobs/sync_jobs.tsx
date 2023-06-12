@@ -11,6 +11,8 @@ import { useValues } from 'kea';
 
 import { EuiButtonGroup } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -28,8 +30,14 @@ export const SyncJobs: React.FC = () => {
     <>
       {shouldShowAccessSyncs && (
         <EuiButtonGroup
-          legend={'Select sync job type to display.'}
-          name={'Sync job type'}
+          legend={i18n.translate(
+            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.legend',
+            { defaultMessage: 'Select sync job type to display.' }
+          )}
+          name={i18n.translate(
+            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.name',
+            { defaultMessage: 'Sync job type' }
+          )}
           idSelected={selectedSyncJobCategory}
           onChange={(optionId) => {
             setSelectedSyncJobCategory(optionId);
@@ -37,12 +45,18 @@ export const SyncJobs: React.FC = () => {
           options={[
             {
               id: 'content',
-              label: 'Content syncs',
+              label: i18n.translate(
+                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.content.label',
+                { defaultMessage: 'Content syncs' }
+              ),
             },
 
             {
               id: 'access_control',
-              label: 'Access control syncs',
+              label: i18n.translate(
+                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.accessControl.label',
+                { defaultMessage: 'Access control syncs' }
+              ),
             },
           ]}
         />
