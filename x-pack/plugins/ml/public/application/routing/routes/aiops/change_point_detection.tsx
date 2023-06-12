@@ -13,7 +13,7 @@ import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute } from '../..';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { createPath, PageLoader, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { ChangePointDetectionPage as Page } from '../../../aiops';
 
@@ -26,7 +26,7 @@ export const changePointDetectionRouteFactory = (
   title: i18n.translate('xpack.ml.aiops.changePointDetection.docTitle', {
     defaultMessage: 'Change point detection',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION', navigateToPath, basePath),
@@ -39,8 +39,8 @@ export const changePointDetectionRouteFactory = (
   disabled: !CHANGE_POINT_DETECTION_ENABLED,
 });
 
-const PageWrapper: FC<PageProps> = () => {
-  const { context } = useRouteResolver('basic', []);
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', ['canUseAiops']);
 
   return (
     <PageLoader context={context}>
