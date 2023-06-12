@@ -31,7 +31,7 @@ export const DataSourceContext = React.createContext<DataSourceContextValue>(
 );
 
 /**
- * Context provider that resolver current data view and the saved search from the URL state.
+ * Context provider that resolves current data view and the saved search from the URL state.
  *
  * @param children
  * @constructor
