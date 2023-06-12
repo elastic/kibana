@@ -58,7 +58,7 @@ export const SelectConnector: React.FC = () => {
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const hasNativeAccess = isCloud || hasPlatinumLicense;
+  const hasNativeAccess = isCloud;
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -150,6 +150,7 @@ export const SelectConnector: React.FC = () => {
             {CONNECTORS.map((connector) => (
               <EuiFlexItem key={connector.serviceType} grow>
                 <ConnectorCheckable
+                  disabled={connector.platinumOnly && !hasPlatinumLicense}
                   icon={connector.icon}
                   isBeta={connector.isBeta}
                   isTechPreview={Boolean(connector.isTechPreview)}
