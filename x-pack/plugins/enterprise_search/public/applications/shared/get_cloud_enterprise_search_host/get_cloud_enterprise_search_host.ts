@@ -8,23 +8,10 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export function getCloudEnterpriseSearchHost(cloud: CloudSetup | undefined): string | undefined {
-  if (cloud && cloud.isCloudEnabled && cloud.cloudId && cloud.cloudHost) {
-    const deploymentId = getDeploymentId(cloud.cloudId);
-    if (!deploymentId) {
-      return;
-    }
-
+  if (cloud && cloud.isCloudEnabled && cloud.cloudId && cloud.deploymentId && cloud.cloudHost) {
     // Enterprise Search Server url are formed like this `https://<deploymentId>.ent.<host>
-    return `https://${deploymentId}.ent.${cloud.cloudHost}${
+    return `https://${cloud.deploymentId}.ent.${cloud.cloudHost}${
       cloud.cloudDefaultPort && cloud.cloudDefaultPort !== '443' ? `:${cloud.cloudDefaultPort}` : ''
     }`;
-  }
-}
-
-function getDeploymentId(cloudId: string): string | undefined {
-  const [deploymentId, rest] = cloudId.split(':');
-
-  if (deploymentId && rest) {
-    return deploymentId;
   }
 }

@@ -48,6 +48,10 @@ export interface CloudSetup {
    */
   cloudId?: string;
   /**
+   * The deployment's ID. Only available when running on Elastic Cloud.
+   */
+  deploymentId?: string;
+  /**
    * This value is the same as `baseUrl` on ESS but can be customized on ECE.
    */
   cname?: string;

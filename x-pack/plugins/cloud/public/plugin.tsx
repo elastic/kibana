@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import type { CloudSetup, CloudStart } from './types';
@@ -60,6 +61,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       cloudId: id,
+      deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
       baseUrl,
       ...this.getCloudUrls(),
