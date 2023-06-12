@@ -58,7 +58,7 @@ export function registerEndpointRoutes(
     })
     .addVersion(
       {
-        version: '2023-09-12', // v8.10.0
+        version: '2023-10-31',
         validate: {
           request: GetMetadataListRequestSchema,
         },
@@ -78,7 +78,7 @@ export function registerEndpointRoutes(
     })
     .addVersion(
       {
-        version: '2023-09-12', // v8.10.0
+        version: '2023-10-31',
         validate: {
           request: GetMetadataRequestSchema,
         },
@@ -98,7 +98,7 @@ export function registerEndpointRoutes(
     })
     .addVersion(
       {
-        version: '2023-09-12', // v8.10.0
+        version: '2023-10-31',
         validate: false,
       },
       withEndpointAuthz(

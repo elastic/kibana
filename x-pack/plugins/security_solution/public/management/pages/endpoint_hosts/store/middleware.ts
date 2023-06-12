@@ -221,6 +221,7 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
       await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        version: '2023-10-31',
         query: {
           page: 0,
           pageSize: 1,
@@ -382,6 +383,7 @@ async function endpointDetailsListMiddleware({
     const decodedQuery: Query = searchBarQuery(getState());
 
     endpointResponse = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+      version: '2023-10-31',
       query: {
         page: pageIndex,
         pageSize,
@@ -484,7 +486,8 @@ async function loadEndpointDetails({
   // call the endpoint details api
   try {
     const response = await coreStart.http.get<HostInfo>(
-      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
+      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string }),
+      { version: '2023-10-31' }
     );
     dispatch({
       type: 'serverReturnedEndpointDetails',
@@ -561,6 +564,7 @@ async function endpointDetailsMiddleware({
     const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
     try {
       const response = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        version: '2023-10-31',
         query: {
           page: pageIndex,
           pageSize,
@@ -607,7 +611,8 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORMS_STATUS_ROUTE
+      METADATA_TRANSFORMS_STATUS_ROUTE,
+      { version: '2023-10-31' }
     );
 
     dispatch({

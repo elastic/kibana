@@ -283,6 +283,7 @@ export class EndpointTestResources extends FtrService {
     const metadata = this.supertest
       .get(HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
       .set('kbn-xsrf', 'true')
+      .set('Elastic-Api-Version', '2023-10-31')
       .send()
       .expect(200)
       .then((response) => response.body as HostInfo);
