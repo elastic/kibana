@@ -267,6 +267,51 @@ export function transformOutputToFullPolicyOutput(
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
   let generalShipperData;
+  let kafkaData = {};
+
+  if (type === outputType.Kafka) {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const {
+      client_id,
+      version,
+      key,
+      compression,
+      compression_level,
+      auth_type,
+      username,
+      password,
+      sasl,
+      partition,
+      random,
+      round_robin,
+      hash,
+      topics,
+      headers,
+      timeout,
+      broker_timeout,
+    } = output;
+    /* eslint-enable @typescript-eslint/naming-convention */
+
+    kafkaData = {
+      client_id,
+      version,
+      key,
+      compression,
+      compression_level,
+      auth_type,
+      username,
+      password,
+      sasl,
+      partition,
+      random,
+      round_robin,
+      hash,
+      topics,
+      headers,
+      timeout,
+      broker_timeout,
+    };
+  }
 
   if (shipper) {
     if (!isShipperDisabled) {
@@ -296,6 +341,7 @@ export function transformOutputToFullPolicyOutput(
     ...shipperDiskQueueData,
     type,
     hosts,
+    ...kafkaData,
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
