@@ -259,24 +259,10 @@
             "$ref": "#/components/parameters/owner"
           },
           {
-            "name": "page",
-            "in": "query",
-            "description": "The page number to return.",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            },
-            "example": 1
+            "$ref": "#/components/parameters/page_index"
           },
           {
-            "name": "perPage",
-            "in": "query",
-            "description": "The number of cases to return per page.",
-            "schema": {
-              "type": "integer",
-              "default": 20
-            },
-            "example": 20
+            "$ref": "#/components/parameters/page_size"
           },
           {
             "name": "reporters",
@@ -341,18 +327,7 @@
             "example": "updatedAt"
           },
           {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "Determines the sort order.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            },
-            "example": "asc"
+            "$ref": "#/components/parameters/sort_order"
           },
           {
             "name": "status",
@@ -1842,6 +1817,65 @@
         }
       ]
     },
+    "/s/{spaceId}/api/cases/{caseId}/comments/_find": {
+      "get": {
+        "summary": "Retrieves all the user comments from a case.",
+        "operationId": "findCaseComments",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/sort_order"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/case_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/cases/{caseId}/comments/{commentId}": {
       "delete": {
         "summary": "Deletes a comment or alert from a case.",
@@ -2095,38 +2129,14 @@
             "$ref": "#/components/parameters/space_id"
           },
           {
-            "name": "page",
-            "in": "query",
-            "description": "The page number to return.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
+            "$ref": "#/components/parameters/page_index",
             "example": "1"
           },
           {
-            "name": "perPage",
-            "in": "query",
-            "description": "The number of user actions to return per page.",
-            "schema": {
-              "type": "string",
-              "default": "20"
-            },
-            "example": "20"
+            "$ref": "#/components/parameters/page_size"
           },
           {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "Determines the sort order.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "asc"
-            },
-            "example": "asc"
+            "$ref": "#/components/parameters/sort_order"
           },
           {
             "name": "types",
@@ -2266,6 +2276,26 @@
         },
         "example": "cases"
       },
+      "page_index": {
+        "in": "query",
+        "name": "page",
+        "description": "The page number to return.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "page_size": {
+        "in": "query",
+        "name": "perPage",
+        "description": "The number of items to return.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 20
+        }
+      },
       "severity": {
         "in": "query",
         "name": "severity",
@@ -2278,6 +2308,20 @@
             "low",
             "medium"
           ]
+        }
+      },
+      "sort_order": {
+        "in": "query",
+        "name": "sortOrder",
+        "description": "Determines the sort order.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": "desc"
         }
       },
       "alert_id": {
@@ -3455,6 +3499,7 @@
       },
       "search_fields": {
         "type": "string",
+        "description": "The fields to perform the `simple_query_string` parsed query against.",
         "enum": [
           "closed_by.username",
           "closed_by.full_name",

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import type {
@@ -251,3 +257,17 @@ export const createSOFindResponse = <T>(savedObjects: Array<SavedObjectsFindResu
   per_page: savedObjects.length,
   page: 1,
 });
+
+export const mockPointInTimeFinder =
+  (unsecuredSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>) =>
+  (soFindRes: SavedObjectsFindResponse) => {
+    unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
+      close: jest.fn(),
+      // @ts-expect-error
+      find: function* asyncGenerator() {
+        yield {
+          ...soFindRes,
+        };
+      },
+    });
+  };

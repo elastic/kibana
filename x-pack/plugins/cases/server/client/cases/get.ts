@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type {
@@ -25,11 +21,12 @@ import {
   CaseRt,
   CaseResolveResponseRt,
   AllTagsFindRequestRt,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
   AllReportersFindRequestRt,
   CasesByAlertIDRequestRt,
   CasesByAlertIdRt,
+  GetTagsResponseRt,
+  GetReportersResponseRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
@@ -38,6 +35,7 @@ import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -70,10 +68,7 @@ export const getCasesByAlertID = async (
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(CasesByAlertIDRequestRt).decode(options),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
@@ -127,16 +122,16 @@ export const getCasesByAlertID = async (
       }))
     );
 
-    return CasesByAlertIdRt.encode(
-      validCasesInfo.map((caseInfo) => ({
-        id: caseInfo.id,
-        title: caseInfo.attributes.title,
-        description: caseInfo.attributes.description,
-        status: caseInfo.attributes.status,
-        createdAt: caseInfo.attributes.created_at,
-        totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
-      }))
-    );
+    const res = validCasesInfo.map((caseInfo) => ({
+      id: caseInfo.id,
+      title: caseInfo.attributes.title,
+      description: caseInfo.attributes.description,
+      status: caseInfo.attributes.status,
+      createdAt: caseInfo.attributes.created_at,
+      totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
+    }));
+
+    return decodeOrThrow(CasesByAlertIdRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
@@ -191,7 +186,7 @@ export const get = async (
     });
 
     if (!includeComments) {
-      return CaseRt.encode(
+      return decodeOrThrow(CaseRt)(
         flattenCaseSavedObject({
           savedObject: theCase,
         })
@@ -206,14 +201,14 @@ export const get = async (
       },
     });
 
-    return CaseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: theCase,
-        comments: theComments.saved_objects,
-        totalComment: theComments.total,
-        totalAlerts: countAlertsForID({ comments: theComments, id }),
-      })
-    );
+    const res = flattenCaseSavedObject({
+      savedObject: theCase,
+      comments: theComments.saved_objects,
+      totalComment: theComments.total,
+      totalAlerts: countAlertsForID({ comments: theComments, id }),
+    });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -253,7 +248,7 @@ export const resolve = async (
     });
 
     if (!includeComments) {
-      return CaseResolveResponseRt.encode({
+      return decodeOrThrow(CaseResolveResponseRt)({
         ...resolveData,
         case: flattenCaseSavedObject({
           savedObject: resolvedSavedObject,
@@ -269,7 +264,7 @@ export const resolve = async (
       },
     });
 
-    return CaseResolveResponseRt.encode({
+    const res = {
       ...resolveData,
       case: flattenCaseSavedObject({
         savedObject: resolvedSavedObject,
@@ -277,7 +272,9 @@ export const resolve = async (
         totalComment: theComments.total,
         totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
       }),
-    });
+    };
+
+    return decodeOrThrow(CaseResolveResponseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to resolve case id: ${id}: ${error}`, error, logger });
   }
@@ -299,10 +296,7 @@ export async function getTags(
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(AllTagsFindRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(AllTagsFindRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.findCases
@@ -315,7 +309,7 @@ export async function getTags(
       filter,
     });
 
-    return tags;
+    return decodeOrThrow(GetTagsResponseRt)(tags);
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -336,10 +330,7 @@ export async function getReporters(
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(AllReportersFindRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(AllReportersFindRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getReporters
@@ -352,7 +343,7 @@ export async function getReporters(
       filter,
     });
 
-    return reporters;
+    return decodeOrThrow(GetReportersResponseRt)(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }

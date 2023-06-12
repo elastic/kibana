@@ -40,7 +40,7 @@ export const IntegrationsPanel: React.FC = () => {
             </EuiTitle>
 
             <EuiSpacer size="xs" />
-            <EuiText size="s" color="default">
+            <EuiText size="s">
               <p>
                 {i18n.translate('xpack.serverlessSearch.ingestData.logstashDescription', {
                   defaultMessage:
@@ -82,7 +82,7 @@ export const IntegrationsPanel: React.FC = () => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiText size="s" color="default">
+            <EuiText size="s">
               {i18n.translate('xpack.serverlessSearch.ingestData.beatsDescription', {
                 defaultMessage:
                   'Lightweight, single-purpose data shippers for Elasticsearch. Use Beats to send operational data from your servers.',
@@ -122,7 +122,7 @@ export const IntegrationsPanel: React.FC = () => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiText size="s" color="default">
+            <EuiText size="s">
               {i18n.translate('xpack.serverlessSearch.ingestData.connectorsDescription', {
                 defaultMessage:
                   'Specialized integrations for syncing data from third-party sources to Elasticsearch. Use Elastic Connectors to sync content from a range of databases and object stores.',

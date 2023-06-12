@@ -13,14 +13,13 @@ import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-
 import { isDefined } from '@kbn/ml-is-defined';
 
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import { TransformListRow } from '../../../../common';
-import { useAppDependencies } from '../../../../app_dependencies';
 
 import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
@@ -47,9 +46,6 @@ interface Props {
 type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
-  const {
-    ml: { formatHumanReadableDateTimeSeconds },
-  } = useAppDependencies();
   const stateValues: StateValues = { ...item.stats };
   delete stateValues.stats;
   delete stateValues.checkpointing;
@@ -138,6 +134,15 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   };
 
   const checkpointingItems: Item[] = [];
+  if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
+    checkpointingItems.push({
+      title: 'changes_last_detected_at',
+      description: formatHumanReadableDateTimeSeconds(
+        item.stats.checkpointing.changes_last_detected_at
+      ),
+    });
+  }
+
   if (item.stats.checkpointing.last !== undefined) {
     checkpointingItems.push({
       title: 'last.checkpoint',
@@ -155,6 +160,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
         description: item.stats.checkpointing.last.timestamp_millis,
       });
     }
+  }
+
+  if (item.stats.checkpointing.last_search_time !== undefined) {
+    checkpointingItems.push({
+      title: 'last_search_time',
+      description: formatHumanReadableDateTimeSeconds(item.stats.checkpointing.last_search_time),
+    });
   }
 
   if (item.stats.checkpointing.next !== undefined) {
@@ -176,6 +188,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
         description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
       });
     }
+  }
+
+  if (item.stats.checkpointing.operations_behind !== undefined) {
+    checkpointingItems.push({
+      title: 'operations_behind',
+      description: item.stats.checkpointing.operations_behind,
+    });
   }
 
   const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {

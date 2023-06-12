@@ -36,6 +36,7 @@ import {
   listFiles,
   findAttachments,
   bulkCreateAttachments,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -65,7 +66,7 @@ import { User } from '../../../../common/lib/authentication/types';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
 } from '../../../../../detection_engine_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -249,7 +250,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
@@ -516,18 +517,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               auth: { user: superUser, space: 'space1' },
             }),
-            findAttachments({
+            getAllComments({
               supertest: supertestWithoutAuth,
               caseId: postedCase.id,
-              query: {
-                perPage: MAX_DOCS_PER_PAGE,
-              },
               auth: { user: secAllUser, space: 'space1' },
             }),
           ]);
 
           expect(filesAfterDelete.total).to.be(1);
-          expect(attachmentsAfterDelete.comments.length).to.be(1);
+          expect(attachmentsAfterDelete.length).to.be(1);
         });
       });
 

@@ -22,7 +22,7 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
 import {

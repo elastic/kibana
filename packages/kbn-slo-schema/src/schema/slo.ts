@@ -20,8 +20,10 @@ const budgetingMethodSchema = t.union([
   timeslicesBudgetingMethodSchema,
 ]);
 
+const targetSchema = t.type({ target: t.number });
+
 const objectiveSchema = t.intersection([
-  t.type({ target: t.number }),
+  targetSchema,
   t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
@@ -64,5 +66,6 @@ export {
   sloSchema,
   sloWithSummarySchema,
   tagsSchema,
+  targetSchema,
   timeslicesBudgetingMethodSchema,
 };

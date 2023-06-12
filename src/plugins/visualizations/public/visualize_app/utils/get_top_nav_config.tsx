@@ -544,6 +544,7 @@ export const getTopNavConfig = (
                     onTagsSelected={(newSelection) => {
                       selectedTags = newSelection;
                     }}
+                    markOptional
                   />
                 );
               }

@@ -31,7 +31,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => Promise<void>;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 };
 
 export const DiscoverTopNav = ({
@@ -44,16 +43,18 @@ export const DiscoverTopNav = ({
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
-  persistDataView,
 }: DiscoverTopNavProps) => {
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
-  const showDatePicker = useMemo(
-    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
-    [dataView]
-  );
+  const showDatePicker = useMemo(() => {
+    // always show the timepicker for text based languages
+    return (
+      isPlainRecord ||
+      (!isPlainRecord && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+    );
+  }, [dataView, isPlainRecord]);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
@@ -120,18 +121,8 @@ export const DiscoverTopNav = ({
         onOpenInspector,
         isPlainRecord,
         adHocDataViews,
-        persistDataView,
       }),
-    [
-      dataView,
-      navigateTo,
-      services,
-      stateContainer,
-      onOpenInspector,
-      isPlainRecord,
-      adHocDataViews,
-      persistDataView,
-    ]
+    [dataView, navigateTo, services, stateContainer, onOpenInspector, isPlainRecord, adHocDataViews]
   );
 
   const onEditDataView = async (editedDataView: DataView) => {

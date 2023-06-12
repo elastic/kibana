@@ -14,11 +14,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
 import {
   State,
   UNSET_CONFIG_ITEM,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { ANALYTICS_STEPS } from '../../page';
 

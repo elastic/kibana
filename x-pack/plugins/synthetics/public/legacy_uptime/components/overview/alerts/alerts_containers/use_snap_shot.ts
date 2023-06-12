@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useGenerateUpdatedKueryString } from '../../../../hooks';
 import { fetchSnapshotCount } from '../../../../state/api';
 

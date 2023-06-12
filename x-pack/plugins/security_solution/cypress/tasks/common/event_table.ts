@@ -13,15 +13,17 @@ import {
 import { EVENT_VIEWER_CHECKBOX } from '../../screens/hosts/events';
 
 export const selectFirstPageEvents = () => {
+  // eslint-disable-next-line cypress/unsafe-to-chain-command
   cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
 };
 
 export const selectAllEvents = () => {
+  // eslint-disable-next-line cypress/unsafe-to-chain-command
   cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
   cy.get(SELECT_ALL_EVENTS).click();
 };
 
 export const bulkInvestigateSelectedEventsInTimeline = () => {
-  cy.get(SELECTED_ALERTS).trigger('click');
+  cy.get(SELECTED_ALERTS).click();
   cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).click();
 };

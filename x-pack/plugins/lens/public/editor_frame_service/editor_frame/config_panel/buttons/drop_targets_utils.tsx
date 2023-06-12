@@ -35,9 +35,9 @@ export function shouldRemoveSource(source: DragDropIdentifier, dropType: DropTyp
   );
 }
 
-export function onDropForVisualization<T, P = unknown>(
+export function onDropForVisualization<T, P = unknown, E = unknown>(
   props: OnVisDropProps<T>,
-  activeVisualization: Visualization<T, P>
+  activeVisualization: Visualization<T, P, E>
 ) {
   const { prevState, target, frame, source, group } = props;
   const { layerId, columnId, groupId } = target;

@@ -1729,7 +1729,7 @@
             "section": "def-common.WrappedLifecycleRuleState",
             "text": "WrappedLifecycleRuleState"
           },
-          "<State>, InstanceState, InstanceContext, ActionGroupIds>) => Promise<{ state: ",
+          "<State>, InstanceState, InstanceContext, ActionGroupIds, never>) => Promise<{ state: ",
           {
             "pluginId": "@kbn/alerting-state-types",
             "scope": "common",
@@ -1973,7 +1973,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\">) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
+          "<TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -3787,7 +3787,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string>, \"executor\"> & { executor: ",
+          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string, never>, \"executor\"> & { executor: ",
           "AlertTypeExecutor",
           "<TState, TParams, TAlertInstanceContext, TServices>; }"
         ],
@@ -3852,7 +3852,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never>"
+          "<TParams, TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never, never>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -4009,7 +4009,7 @@
                 "section": "def-server.RuleExecutorOptions",
                 "text": "RuleExecutorOptions"
               },
-              "<Params, State, InstanceState, InstanceContext, ActionGroupIds>, \"services\"> & { services: ",
+              "<Params, State, InstanceState, InstanceContext, ActionGroupIds, never>, \"services\"> & { services: ",
               {
                 "pluginId": "alerting",
                 "scope": "server",
@@ -4017,7 +4017,15 @@
                 "section": "def-server.RuleExecutorServices",
                 "text": "RuleExecutorServices"
               },
-              "<InstanceState, InstanceContext, ActionGroupIds> & ",
+              "<InstanceState, InstanceContext, ActionGroupIds, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleAlertData",
+                "text": "RuleAlertData"
+              },
+              "> & ",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -4162,7 +4170,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never>, \"executor\"> & { executor: (options: ",
+          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never, never>, \"executor\"> & { executor: (options: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -4178,7 +4186,7 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>> & { services: ",
+          "<TActionGroupIds, never>, never> & { services: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",

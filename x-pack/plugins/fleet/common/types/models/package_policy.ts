@@ -92,6 +92,7 @@ export interface UpdatePackagePolicy extends NewPackagePolicy {
   version?: string;
 }
 
+// SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
   inputs: PackagePolicyInput[];
@@ -104,8 +105,6 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   created_at: string;
   created_by: string;
 }
-
-export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
 
 export type DryRunPackagePolicy = NewPackagePolicy & {
   errors?: Array<{ key: string | undefined; message: string }>;

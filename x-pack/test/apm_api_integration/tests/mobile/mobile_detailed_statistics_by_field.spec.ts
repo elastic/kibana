@@ -93,7 +93,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             environment: 'production',
             field: 'service.version',
           });
-          expect(isEmpty(response.currentPeriod)).to.be.equal(false);
+
+          expect(Object.keys(response.currentPeriod)).to.be.eql(['2.3', '1.1', '1.2']);
           expect(isEmpty(response.previousPeriod)).to.be.equal(true);
         });
       });
@@ -110,8 +111,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
         it('returns some data for both periods', async () => {
-          expect(isEmpty(mobiledetailedStatisticResponse.currentPeriod)).to.be.equal(false);
-          expect(isEmpty(mobiledetailedStatisticResponse.previousPeriod)).to.be.equal(false);
+          expect(Object.keys(mobiledetailedStatisticResponse.currentPeriod).sort()).to.be.eql(
+            SERVICE_VERSIONS.sort()
+          );
+          expect(Object.keys(mobiledetailedStatisticResponse.previousPeriod).sort()).to.be.eql(
+            SERVICE_VERSIONS.sort()
+          );
         });
 
         it('returns same number of buckets for both periods', () => {

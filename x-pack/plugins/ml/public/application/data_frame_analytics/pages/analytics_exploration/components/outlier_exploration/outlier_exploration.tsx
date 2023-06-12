@@ -10,6 +10,7 @@ import React, { useCallback, useState, FC } from 'react';
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
 
 import {
   useColorRange,
@@ -19,13 +20,7 @@ import {
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import {
-  defaultSearchQuery,
-  isOutlierAnalysis,
-  useResultsViewConfig,
-  getDestinationIndex,
-} from '../../../../common';
-import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { defaultSearchQuery, useResultsViewConfig, getDestinationIndex } from '../../../../common';
 
 import {
   ExpandableSectionSplom,

@@ -11,7 +11,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
-import { ConfigSchema } from '../config';
+import { TagcloudPublicConfig } from '../config';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
@@ -26,9 +26,9 @@ export interface TagCloudVisDependencies {
 
 /** @internal */
 export class TagCloudPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext<ConfigSchema>;
+  initializerContext: PluginInitializerContext<TagcloudPublicConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<TagcloudPublicConfig>) {
     this.initializerContext = initializerContext;
   }
 
@@ -37,7 +37,12 @@ export class TagCloudPlugin implements Plugin<void, void> {
       palettes: charts.palettes,
     };
 
-    visualizations.createBaseVisualization(getTagCloudVisTypeDefinition(visualizationDependencies));
+    const { readOnly } = this.initializerContext.config.get<TagcloudPublicConfig>();
+    visualizations.createBaseVisualization({
+      ...getTagCloudVisTypeDefinition(visualizationDependencies),
+      disableCreate: Boolean(readOnly),
+      disableEdit: Boolean(readOnly),
+    });
   }
 
   public start(core: CoreStart) {}

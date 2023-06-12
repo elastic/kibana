@@ -10,6 +10,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCheckbox,
   EuiFlexGroup,
   EuiIconTip,
@@ -35,7 +36,7 @@ import {
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config/paths';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { sloFeatureId } from '../../../../common';
 
@@ -49,6 +50,7 @@ const CREATE_RULE_SEARCH_PARAM = 'create-rule';
 
 export function SloEditForm({ slo }: Props) {
   const {
+    notifications,
     application: { navigateToUrl },
     http: { basePath },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
@@ -111,6 +113,35 @@ export function SloEditForm({ slo }: Props) {
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
 
+  const handleCopyToJson = async () => {
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+    const values = transformValuesToCreateSLOInput(getValues());
+    try {
+      await copyTextToClipboard(JSON.stringify(values, null, 2));
+      notifications.toasts.add({
+        title: i18n.translate('xpack.observability.slo.sloEdit.copyJsonNotification', {
+          defaultMessage: 'JSON copied to clipboard',
+        }),
+      });
+    } catch (e) {
+      notifications.toasts.add({
+        title: i18n.translate('xpack.observability.slo.sloEdit.copyJsonFailedNotification', {
+          defaultMessage: 'Could not copy JSON to clipboard',
+        }),
+      });
+    }
+  };
+
+  const copyTextToClipboard = async (text: string) => {
+    if (!window.navigator?.clipboard) {
+      throw new Error('Could not copy to clipboard!');
+    }
+    await window.navigator.clipboard.writeText(text);
+  };
+
   const handleSubmit = async () => {
     const isValid = await trigger();
     if (!isValid) {
@@ -171,7 +202,7 @@ export function SloEditForm({ slo }: Props) {
                 title: i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
                   defaultMessage: 'Define SLI',
                 }),
-                children: <SloEditFormIndicatorSection />,
+                children: <SloEditFormIndicatorSection isEditMode={isEditMode} />,
                 status: isIndicatorSectionValid ? 'complete' : 'incomplete',
               },
               {
@@ -252,6 +283,18 @@ export function SloEditForm({ slo }: Props) {
                 defaultMessage: 'Cancel',
               })}
             </EuiButton>
+
+            <EuiButtonEmpty
+              color="primary"
+              iconType="copyClipboard"
+              data-test-subj="sloFormCopyJsonButton"
+              disabled={isCreateSloLoading || isUpdateSloLoading}
+              onClick={handleCopyToJson}
+            >
+              {i18n.translate('xpack.observability.slo.sloEdit.copyJsonButton', {
+                defaultMessage: 'Copy JSON',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexGroup>
         </EuiFlexGroup>
       </FormProvider>
@@ -261,7 +304,7 @@ export function SloEditForm({ slo }: Props) {
           canChangeTrigger={false}
           consumer={sloFeatureId}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}
         />

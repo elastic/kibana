@@ -1,13 +1,43 @@
-.serverlessSearchHeaderTitle {
-  color: $euiColorEmptyShade;
-}
-
 .serverlessSearchHeaderSection {
   background-color: $euiColorPrimary;
-  color: $euiColorEmptyShade;
 }
 
 .serverlessSearchHeaderSection > div {
   padding-bottom: 0;
   padding-top: 0;
+}
+
+.serverlessSearchFooterCardsSection {
+  background-color: $euiColorPrimary;
+  padding-top: $euiSizeXL;
+  padding-bottom: $euiSizeXL;
+}
+
+.serverlessSearchFooterCard {
+  &--wrapper {
+    position: relative;
+  }
+
+  &--background {
+    z-index: 1;
+  }
+
+  &--iconWrapper {
+    align-items: center;
+    display: inlineFlex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    padding: 20px;
+    z-index: 2;
+  }
+}
+
+.serverlessSearchFooter {
+  background-color: $euiColorSuccess;
+  padding-top: $euiSizeXL;
+  padding-bottom: $euiSizeXL;
 }

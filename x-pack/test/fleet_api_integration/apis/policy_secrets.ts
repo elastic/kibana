@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// 👋 Hello, investigating a test failure in this file?
+// Each test relies on the previous test completing successfully.
+// So start investigating from earliest test failure in the file.
+
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
@@ -20,6 +25,21 @@ const arrayIdsEqual = (a: Array<{ id: string }>, b: Array<{ id: string }>) => {
   }
   return a.every(({ id }) => b.find(({ id: bid }) => bid === id));
 };
+
+function createdPolicyToUpdatePolicy(policy: any) {
+  const updatedPolicy = JSON.parse(JSON.stringify(policy));
+  delete updatedPolicy.id;
+  delete updatedPolicy.revision;
+  delete updatedPolicy.secret_references;
+  delete updatedPolicy.created_at;
+  delete updatedPolicy.created_by;
+  delete updatedPolicy.updated_at;
+  delete updatedPolicy.updated_by;
+  delete updatedPolicy.inputs[0].compiled_input;
+  delete updatedPolicy.inputs[0].streams[0].compiled_stream;
+  delete updatedPolicy.name;
+  return updatedPolicy;
+}
 
 export default function (providerContext: FtrProviderContext) {
   describe('fleet policy secrets', () => {
@@ -85,24 +105,29 @@ export default function (providerContext: FtrProviderContext) {
       });
       return res.hits.hits[0]._source as any as { data: FullAgentPolicy };
     };
+
+    let duplicatedAgentPolicyId: string;
+    let duplicatedPackagePolicyId: string;
+    let createdPackagePolicy: any;
     let createdPackagePolicyId: string;
     let packageVarId: string;
+    let updatedPackageVarId: string;
     let inputVarId: string;
     let streamVarId: string;
     let expectedCompiledStream: any;
     let expectedCompiledInput: any;
 
-    function expectCompiledPolicyVars(policy: any) {
+    function expectCompiledPolicyVars(policy: any, packageVarIdIn: string = packageVarId) {
       expect(
         arrayIdsEqual(policy.secret_references, [
-          { id: packageVarId },
+          { id: packageVarIdIn },
           { id: streamVarId },
           { id: inputVarId },
         ])
       ).to.eql(true);
-      expect(policy.inputs[0].package_var_secret).to.eql(secretVar(packageVarId));
+      expect(policy.inputs[0].package_var_secret).to.eql(secretVar(packageVarIdIn));
       expect(policy.inputs[0].input_var_secret).to.eql(secretVar(inputVarId));
-      expect(policy.inputs[0].streams[0].package_var_secret).to.eql(secretVar(packageVarId));
+      expect(policy.inputs[0].streams[0].package_var_secret).to.eql(secretVar(packageVarIdIn));
       expect(policy.inputs[0].streams[0].input_var_secret).to.eql(secretVar(inputVarId));
       expect(policy.inputs[0].streams[0].stream_var_secret).to.eql(secretVar(streamVarId));
     }
@@ -173,7 +198,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const createdPackagePolicy = createResBody.item;
+      createdPackagePolicy = createResBody.item;
       createdPackagePolicyId = createdPackagePolicy.id;
       packageVarId = createdPackagePolicy.vars.package_var_secret.value.id;
       expect(packageVarId).to.be.an('string');
@@ -266,6 +291,176 @@ export default function (providerContext: FtrProviderContext) {
       const agentPolicy = await getFullAgentPolicyById(agentPolicyId);
 
       expectCompiledPolicyVars(agentPolicy);
+    });
+
+    it('should allow secret values to be updated (single policy update API)', async () => {
+      const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
+      updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val';
+      const updateRes = await supertest
+        .put(`/api/fleet/package_policies/${createdPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(updatedPolicy)
+        .expect(200);
+
+      const updatedPackagePolicy = updateRes.body.item;
+
+      updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
+      expect(updatedPackageVarId).to.be.an('string');
+      expect(
+        arrayIdsEqual(updatedPackagePolicy.secret_references, [
+          { id: updatedPackageVarId },
+          { id: streamVarId },
+          { id: inputVarId },
+        ])
+      ).to.eql(true);
+      expect(updatedPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql({
+        'config.version': 2,
+        package_var_secret: secretVar(updatedPackageVarId),
+        input_var_secret: secretVar(inputVarId),
+        stream_var_secret: secretVar(streamVarId),
+      });
+      expect(updatedPackagePolicy.inputs[0].compiled_input).to.eql({
+        package_var_secret: secretVar(updatedPackageVarId),
+        input_var_secret: secretVar(inputVarId),
+      });
+      expect(updatedPackagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
+      expect(updatedPackagePolicy.vars.package_var_secret.value.id).eql(updatedPackageVarId);
+      expect(updatedPackagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
+      expect(updatedPackagePolicy.inputs[0].vars.input_var_secret.value.id).eql(inputVarId);
+      expect(
+        updatedPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
+      ).to.eql(true);
+      expect(updatedPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(
+        streamVarId
+      );
+    });
+
+    it('should have correctly deleted unused secrets after update', async () => {
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
+
+      const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        acc[secret._id] = secret._source.value;
+        return acc;
+      }, {});
+      expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
+      expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
+      expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
+    it('should not duplicate secrets after duplicating agent policy', async () => {
+      const { body: agentPolicy } = await supertest
+        .post(`/api/fleet/agent_policies/${agentPolicyId}/copy`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'copy',
+        })
+        .expect(200);
+
+      duplicatedAgentPolicyId = agentPolicy.item.id;
+
+      const { data: policyDoc } = await getLatestPolicyRevision(duplicatedAgentPolicyId);
+
+      duplicatedPackagePolicyId = policyDoc.inputs[0].package_policy_id;
+
+      expectCompiledPolicyVars(policyDoc, updatedPackageVarId);
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(3);
+
+      const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        acc[secret._id] = secret._source.value;
+        return acc;
+      }, {});
+
+      expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
+      expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
+      expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
+    it('should not delete used secrets on secret update', async () => {
+      const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
+      delete updatedPolicy.name;
+
+      updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val_2';
+
+      const updateRes = await supertest
+        .put(`/api/fleet/package_policies/${duplicatedPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(updatedPolicy)
+        .expect(200);
+
+      const updatedPackagePolicy = updateRes.body.item;
+
+      const packageVarSecretIds = [
+        updatedPackagePolicy.vars.package_var_secret.value.id,
+        updatedPackageVarId,
+      ];
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            terms: {
+              _id: packageVarSecretIds,
+            },
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(2);
+    });
+
+    it('should not delete used secrets on package policy delete', async () => {
+      return supertest
+        .delete(`/api/fleet/package_policies/${duplicatedPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(3);
+    });
+
+    it('should delete all secrets on package policy delete', async () => {
+      return supertest
+        .delete(`/api/fleet/package_policies/${createdPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(0);
     });
   });
 }

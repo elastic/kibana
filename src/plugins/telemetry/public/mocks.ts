@@ -12,10 +12,9 @@ import {
   notificationServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
-import { TelemetryService } from './services/telemetry_service';
-import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
-import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
-import { TelemetryConstants } from '.';
+import type { TelemetryConstants } from '.';
+import type { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
+import { TelemetryService, TelemetryNotifications } from './services';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */
@@ -102,12 +101,13 @@ function createSetupContract(): Setup {
 
 function createStartContract(): Start {
   const telemetryService = mockTelemetryService();
-  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
   const telemetryConstants = mockTelemetryConstants();
 
   const startContract: Start = {
     telemetryService,
-    telemetryNotifications,
+    telemetryNotifications: {
+      setOptedInNoticeSeen: jest.fn(),
+    },
     telemetryConstants,
   };
 

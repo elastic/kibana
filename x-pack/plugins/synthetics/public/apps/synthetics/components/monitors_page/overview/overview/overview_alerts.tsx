@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';

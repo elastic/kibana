@@ -162,6 +162,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
           properties: {},
         },
+        allow_edit: { enabled: false },
       },
     },
     migrations: {

@@ -28,7 +28,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { checkForDuplicateTitle } from '../utils/saved_objects_utils/check_for_duplicate_title';
-import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
@@ -40,7 +39,7 @@ import type {
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
-import { getCapabilities, getTypes, getUISettings } from '../services';
+import { getCapabilities, getTypes } from '../services';
 import { showNewVisModal } from '../wizard';
 import {
   convertToSerializedVis,
@@ -55,7 +54,6 @@ import {
   injectControlsReferences,
 } from '../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
@@ -76,7 +74,7 @@ export class VisualizeEmbeddableFactory
     EmbeddableFactoryDefinition<
       VisualizeInput,
       VisualizeOutput | EmbeddableOutput,
-      VisualizeEmbeddable | DisabledLabEmbeddable,
+      VisualizeEmbeddable,
       VisualizationAttributes
     >
 {
@@ -106,13 +104,7 @@ export class VisualizeEmbeddableFactory
       try {
         const typeName: string = JSON.parse(savedObject.attributes.visState).type;
         const visType = getTypes().get(typeName);
-        if (!visType) {
-          return false;
-        }
-        if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
-          return true;
-        }
-        return visType.stage !== 'experimental';
+        return Boolean(visType);
       } catch {
         return false;
       }
@@ -158,7 +150,7 @@ export class VisualizeEmbeddableFactory
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable> {
     const startDeps = await this.deps.start();
 
     try {

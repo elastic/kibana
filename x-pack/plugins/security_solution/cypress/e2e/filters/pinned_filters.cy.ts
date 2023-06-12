@@ -21,8 +21,11 @@ import { postDataView } from '../../tasks/common';
 
 describe('pinned filters', () => {
   before(() => {
-    login();
     postDataView('audit*');
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   it('show pinned filters on security', () => {

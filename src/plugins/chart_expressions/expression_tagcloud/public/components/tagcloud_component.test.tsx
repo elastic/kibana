@@ -61,6 +61,7 @@ const visParams: TagCloudRendererParams = {
   minFontSize: 12,
   maxFontSize: 70,
   showLabel: true,
+  isPreview: false,
 };
 
 const formattedData: WordcloudSpec['data'] = [

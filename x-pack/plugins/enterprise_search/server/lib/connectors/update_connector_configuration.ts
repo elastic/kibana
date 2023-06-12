@@ -53,7 +53,6 @@ export const updateConnectorConfiguration = async (
       if_primary_term: connectorResult?.primaryTerm,
       if_seq_no: connectorResult?.seqNo,
       index: CONNECTORS_INDEX,
-      refresh: 'wait_for',
     });
     return updatedConfig;
   } else {

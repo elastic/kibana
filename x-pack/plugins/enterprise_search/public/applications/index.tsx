@@ -100,7 +100,9 @@ export const renderApp = (
     productAccess,
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
-      params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),
+      params.setHeaderActionMenu(
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store) : undefined
+      ),
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,

@@ -19,7 +19,6 @@ import {
   PersistedLogViewReference,
 } from '../../../../common/log_views';
 import { LogViewContext, LogViewEvent } from './types';
-import { replaceStateKeyInQueryString } from '../../../utils/url_state';
 
 export const defaultLogViewKey = 'logView';
 const defaultLegacySourceIdKey = 'sourceId';
@@ -52,43 +51,52 @@ export const initializeFromUrl =
   }: LogViewUrlStateDependencies): InvokeCreator<LogViewContext, LogViewEvent> =>
   (_context, _event) =>
   (send) => {
-    const logViewQueryValueFromUrl = urlStateStorage.get(logViewKey);
-    const logViewQueryE = decodeLogViewQueryValueFromUrl(logViewQueryValueFromUrl);
+    const logViewReference = getLogViewReferenceFromUrl({
+      logViewKey,
+      sourceIdKey,
+      toastsService,
+      urlStateStorage,
+    });
 
-    const legacySourceIdQueryValueFromUrl = urlStateStorage.get(sourceIdKey);
-    const sourceIdQueryE = decodeSourceIdQueryValueFromUrl(legacySourceIdQueryValueFromUrl);
-
-    if (Either.isLeft(logViewQueryE) || Either.isLeft(sourceIdQueryE)) {
-      withNotifyOnErrors(toastsService).onGetError(
-        createPlainError(
-          formatErrors([
-            ...(Either.isLeft(logViewQueryE) ? logViewQueryE.left : []),
-            ...(Either.isLeft(sourceIdQueryE) ? sourceIdQueryE.left : []),
-          ])
-        )
-      );
-
-      send({
-        type: 'INITIALIZED_FROM_URL',
-        logViewReference: null,
-      });
-    } else {
-      send({
-        type: 'INITIALIZED_FROM_URL',
-        logViewReference: pipe(
-          // Via the legacy sourceId key
-          pipe(
-            sourceIdQueryE.right,
-            Either.fromNullable(null),
-            Either.map(convertSourceIdToReference)
-          ),
-          // Via the logView key
-          Either.alt(() => pipe(logViewQueryE.right, Either.fromNullable(null))),
-          Either.fold(identity, identity)
-        ),
-      });
-    }
+    send({
+      type: 'INITIALIZED_FROM_URL',
+      logViewReference,
+    });
   };
+
+export const getLogViewReferenceFromUrl = ({
+  logViewKey,
+  sourceIdKey,
+  toastsService,
+  urlStateStorage,
+}: LogViewUrlStateDependencies): LogViewReference | null => {
+  const logViewQueryValueFromUrl = urlStateStorage.get(logViewKey!);
+  const logViewQueryE = decodeLogViewQueryValueFromUrl(logViewQueryValueFromUrl);
+
+  const legacySourceIdQueryValueFromUrl = urlStateStorage.get(sourceIdKey!);
+  const sourceIdQueryE = decodeSourceIdQueryValueFromUrl(legacySourceIdQueryValueFromUrl);
+
+  if (Either.isLeft(logViewQueryE) || Either.isLeft(sourceIdQueryE)) {
+    withNotifyOnErrors(toastsService).onGetError(
+      createPlainError(
+        formatErrors([
+          ...(Either.isLeft(logViewQueryE) ? logViewQueryE.left : []),
+          ...(Either.isLeft(sourceIdQueryE) ? sourceIdQueryE.left : []),
+        ])
+      )
+    );
+
+    return null;
+  } else {
+    return pipe(
+      // Via the legacy sourceId key
+      pipe(sourceIdQueryE.right, Either.fromNullable(null), Either.map(convertSourceIdToReference)),
+      // Via the logView key
+      Either.alt(() => pipe(logViewQueryE.right, Either.fromNullable(null))),
+      Either.fold(identity, identity)
+    );
+  }
+};
 
 // NOTE: Certain navigations within the Logs solution will remove the logView URL key,
 // we want to ensure the logView key is present in the URL at all times by monitoring for it's removal.
@@ -129,10 +137,6 @@ const convertSourceIdToReference = (sourceId: string): PersistedLogViewReference
     logViewId: sourceId,
   };
 };
-
-// NOTE: Used by link-to components
-export const replaceLogViewInQueryString = (logViewReference: LogViewReference) =>
-  replaceStateKeyInQueryString(defaultLogViewKey, logViewReference);
 
 export type InitializeFromUrl = ReturnType<typeof initializeFromUrl>;
 export type UpdateContextInUrl = ReturnType<typeof updateContextInUrl>;

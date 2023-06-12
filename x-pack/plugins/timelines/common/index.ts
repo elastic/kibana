@@ -17,17 +17,16 @@
 export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 
 export type {
-  CellValueElementProps,
+  DeprecatedCellValueElementProps,
   DataProvidersAnd,
   DataProvider,
   QueryOperator,
   QueryMatch,
-  RowRenderer,
-  TimelineType,
+  DeprecatedRowRenderer,
   ColumnHeaderOptions,
 } from './types';
 
-export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';
+export { IS_OPERATOR, EXISTS_OPERATOR } from './types';
 
 export type {
   BeatFields,

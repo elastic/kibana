@@ -234,6 +234,23 @@ export const validatePackagePolicyConfig = (
     }
   }
 
+  if (varDef.secret === true && parsedValue && parsedValue.isSecretRef === true) {
+    if (
+      parsedValue.id === undefined ||
+      parsedValue.id === '' ||
+      typeof parsedValue.id !== 'string'
+    ) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id must be a string',
+        })
+      );
+
+      return errors;
+    }
+    return null;
+  }
+
   if (varDef.type === 'yaml') {
     try {
       parsedValue = safeLoadYaml(value);

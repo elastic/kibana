@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   const BULK_REQUESTS = [
     {
@@ -265,5 +267,31 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.saved_objects[2].managed).not.to.be.ok();
           expect(resp.body.saved_objects[3].managed).to.be.ok();
         }));
+
+    it('should migrate saved object before returning', async () => {
+      await es.update({
+        index: MAIN_SAVED_OBJECT_INDEX,
+        id: 'config:7.0.0-alpha1',
+        doc: {
+          coreMigrationVersion: '7.0.0',
+          typeMigrationVersion: '7.0.0',
+        },
+      });
+
+      const { body } = await supertest
+        .post(`/api/saved_objects/_bulk_get`)
+        .send([
+          {
+            type: 'config',
+            id: '7.0.0-alpha1',
+          },
+        ])
+        .expect(200);
+
+      expect(body.saved_objects[0].coreMigrationVersion).to.be.ok();
+      expect(body.saved_objects[0].coreMigrationVersion).not.to.be('7.0.0');
+      expect(body.saved_objects[0].typeMigrationVersion).to.be.ok();
+      expect(body.saved_objects[0].typeMigrationVersion).not.to.be('7.0.0');
+    });
   });
 }

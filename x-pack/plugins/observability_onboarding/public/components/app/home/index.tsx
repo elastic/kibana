@@ -17,7 +17,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import { breadcrumbsApp } from '../../../application/app';
@@ -55,7 +55,7 @@ export function Home() {
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="l" />
-        <EuiTitle size="l">
+        <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
           <h1>
             {i18n.translate('xpack.observability_onboarding.home.title', {
               defaultMessage: 'Get started with Observability',
@@ -287,7 +287,10 @@ export function Home() {
         <EuiHorizontalRule margin="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleClickSkip}>
+        <EuiButtonEmpty
+          onClick={handleClickSkip}
+          data-test-subj="obltOnboardingHomeSkipButton"
+        >
           {i18n.translate('xpack.observability_onboarding.skipLinkLabel', {
             defaultMessage: 'Skip for now',
           })}
