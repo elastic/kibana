@@ -8,16 +8,16 @@ import { SearchResponse, AcknowledgedResponseBase } from '@elastic/elasticsearch
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EnterpriseSearchEngine,
-  EnterpriseSearchEnginesResponse,
-  EnterpriseSearchEngineUpsertResponse,
-} from '../../../common/types/engines';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { createApiKey } from '../../lib/engines/create_api_key';
-import { fetchIndicesStats } from '../../lib/engines/fetch_indices_stats';
+import {
+  EnterpriseSearchApplication,
+  EnterpriseSearchApplicationsResponse,
+  EnterpriseSearchApplicationUpsertResponse,
+} from '../../../common/types/search_applications';
+import { createApiKey } from '../../lib/search_applications/create_api_key';
+import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 
-import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
+import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
 import { RouteDependencies } from '../../plugin';
 
 import { createError } from '../../utils/create_error';
@@ -27,10 +27,10 @@ import {
   isVersionConflictEngineException,
 } from '../../utils/identify_exceptions';
 
-export function registerEnginesRoutes({ log, router }: RouteDependencies) {
+export function registerSearchApplicationsRoutes({ log, router }: RouteDependencies) {
   router.get(
     {
-      path: '/internal/enterprise_search/engines',
+      path: '/internal/enterprise_search/search_applications',
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
@@ -43,7 +43,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const engines = (await client.asCurrentUser.searchApplication.list(
         request.query
-      )) as EnterpriseSearchEnginesResponse;
+      )) as EnterpriseSearchApplicationsResponse;
 
       return response.ok({ body: engines });
     })
@@ -51,7 +51,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
 
   router.get(
     {
-      path: '/internal/enterprise_search/engines/{engine_name}',
+      path: '/internal/enterprise_search/search_applications/{engine_name}',
       validate: {
         params: schema.object({
           engine_name: schema.string(),
@@ -62,7 +62,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const engine = (await client.asCurrentUser.searchApplication.get({
         name: request.params.engine_name,
-      })) as EnterpriseSearchEngine;
+      })) as EnterpriseSearchApplication;
       const indicesStats = await fetchIndicesStats(client, engine.indices);
 
       return response.ok({ body: { ...engine, indices: indicesStats } });
@@ -71,7 +71,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
 
   router.put(
     {
-      path: '/internal/enterprise_search/engines/{engine_name}',
+      path: '/internal/enterprise_search/search_applications/{engine_name}',
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),
@@ -96,7 +96,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
             name: request.params.engine_name,
             updated_at_millis: Date.now(),
           },
-        })) as EnterpriseSearchEngineUpsertResponse;
+        })) as EnterpriseSearchApplicationUpsertResponse;
 
         return response.ok({ body: engine });
       } catch (error) {
@@ -121,7 +121,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
 
   router.delete(
     {
-      path: '/internal/enterprise_search/engines/{engine_name}',
+      path: '/internal/enterprise_search/search_applications/{engine_name}',
       validate: {
         params: schema.object({
           engine_name: schema.string(),
@@ -140,7 +140,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
 
   router.post(
     {
-      path: '/internal/enterprise_search/engines/{engine_name}/search',
+      path: '/internal/enterprise_search/search_applications/{engine_name}/search',
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
         params: schema.object({
@@ -161,7 +161,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
   );
   router.post(
     {
-      path: '/internal/enterprise_search/engines/{engine_name}/api_key',
+      path: '/internal/enterprise_search/search_applications/{engine_name}/api_key',
       validate: {
         body: schema.object({
           keyName: schema.string(),
@@ -186,7 +186,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
   );
   router.get(
     {
-      path: '/internal/enterprise_search/engines/{engine_name}/field_capabilities',
+      path: '/internal/enterprise_search/search_applications/{engine_name}/field_capabilities',
       validate: { params: schema.object({ engine_name: schema.string() }) },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -195,9 +195,9 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
 
         const engine = (await client.asCurrentUser.searchApplication.get({
           name: request.params.engine_name,
-        })) as EnterpriseSearchEngine;
+        })) as EnterpriseSearchApplication;
 
-        const data = await fetchEngineFieldCapabilities(client, engine);
+        const data = await fetchSearchApplicationFieldCapabilities(client, engine);
         return response.ok({
           body: data,
           headers: { 'content-type': 'application/json' },
