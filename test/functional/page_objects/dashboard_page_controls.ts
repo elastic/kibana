@@ -668,7 +668,8 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
-    await this.testSubjects.click(`range-slider-control-${controlId}`);
+    const controlLabel = await this.find.byXPath(`//div[@data-control-id='${controlId}']//label`);
+    await controlLabel.click();
     await this.testSubjects.waitForDeleted(`rangeSlider-control-actions`);
   }
 
