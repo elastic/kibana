@@ -334,11 +334,28 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async verifyControlType(controlId: string, expectedType: string) {
-    const controlButton = await this.find.byXPath(
-      `//div[@id='controlFrame--${controlId}']//button`
-    );
-    const testSubj = await controlButton.getAttribute('data-test-subj');
-    expect(testSubj).to.equal(`${expectedType}-${controlId}`);
+    let controlButton;
+    switch (expectedType) {
+      case OPTIONS_LIST_CONTROL: {
+        controlButton = await this.find.byXPath(`//div[@id='controlFrame--${controlId}']//button`);
+        break;
+      }
+      case RANGE_SLIDER_CONTROL: {
+        controlButton = await this.find.byXPath(
+          `//div[@id='controlFrame--${controlId}']//div[contains(@class, 'rangeSliderAnchor__button')]`
+        );
+        break;
+      }
+      default: {
+        this.log.error('An invalid control type was provided.');
+        break;
+      }
+    }
+
+    if (controlButton) {
+      const testSubj = await controlButton.getAttribute('data-test-subj');
+      expect(testSubj).to.equal(`${expectedType}-${controlId}`);
+    }
   }
 
   // Options list functions
