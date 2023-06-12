@@ -11,6 +11,7 @@ import {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import { LogsSharedDomainLibs } from './lib/logs_shared_types';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
 
 export type LogsSharedPluginCoreSetup = CoreSetup<
@@ -19,7 +20,7 @@ export type LogsSharedPluginCoreSetup = CoreSetup<
 >;
 export type LogsSharedPluginStartServicesAccessor = LogsSharedPluginCoreSetup['getStartServices'];
 
-export interface LogsSharedPluginSetup {
+export interface LogsSharedPluginSetup extends LogsSharedDomainLibs {
   logViews: LogViewsServiceSetup;
 }
 

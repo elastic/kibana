@@ -35,12 +35,10 @@ export type LogViewFallbackHandler =
   | ((sourceId: string, options: LogViewFallbackHandlerOptions) => Promise<LogView>)
   | null;
 
-export type SetLogViewsStaticConfig = (config: LogViewsStaticConfig) => void;
-
 export interface LogViewsServiceSetup {
   defineInternalLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): void;
   registerLogViewFallbackHandler: (handler: LogViewFallbackHandler) => void;
-  setLogViewsStaticConfig: SetLogViewsStaticConfig;
+  setLogViewsStaticConfig: (config: LogViewsStaticConfig) => void;
 }
 
 export interface LogViewsServiceStart {

@@ -16,7 +16,7 @@ import {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -43,7 +43,7 @@ interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
-  infra: InfraPluginSetup;
+  logsShared: LogsSharedPluginSetup;
   security?: SecurityPluginSetup;
 }
 
@@ -83,7 +83,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, savedObjects }: CoreSetup,
-    { usageCollection, features, licensing, infra, security }: PluginsSetup
+    { usageCollection, features, licensing, logsShared, security }: PluginsSetup
   ) {
     this.licensing = licensing;
 
@@ -105,7 +105,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
+    logsShared?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {

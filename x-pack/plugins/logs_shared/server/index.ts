@@ -9,6 +9,7 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { LogsSharedPlugin } from './plugin';
 
 export type { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
+export type { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
 
 export function plugin(context: PluginInitializerContext) {
   return new LogsSharedPlugin(context);

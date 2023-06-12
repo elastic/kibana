@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import { CCS_REMOTE_PATTERN, INFRA_SOURCE_ID } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
 import { getIndexPatterns } from '../cluster/get_index_patterns';
 
-export const initInfraSource = (config: MonitoringConfig, infraPlugin: InfraPluginSetup) => {
-  if (infraPlugin) {
+export const initLogView = (config: MonitoringConfig, logsShared: LogsSharedPluginSetup) => {
+  if (logsShared) {
     const logsIndexPattern = getIndexPatterns({
       config,
       type: 'logs',
       ccs: CCS_REMOTE_PATTERN,
     });
 
-    infraPlugin.logViews.defineInternalLogView(INFRA_SOURCE_ID, {
+    logsShared.logViews.defineInternalLogView(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',
       logIndices: {
         type: 'index_name',

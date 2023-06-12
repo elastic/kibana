@@ -72,6 +72,7 @@ export class LogsSharedPlugin
     logEntriesService.setup(core, plugins);
 
     return {
+      ...domainLibs,
       logViews,
     };
   }
