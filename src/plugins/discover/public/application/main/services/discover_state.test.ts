@@ -584,11 +584,13 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
     await state.actions.onDataViewCreated(dataViewAdHoc);
-    await waitFor(() => {
+
+    await waitFor(async () => {
+      expect(state.appState.get().index).toBe(dataViewAdHoc.id);
       expect(state.internalState.getState().dataView?.id).toBe(dataViewAdHoc.id);
     });
-    expect(state.appState.get().index).toBe(dataViewAdHoc.id);
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewAdHoc.id
     );
@@ -647,6 +649,7 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
     await state.actions.onCreateDefaultAdHocDataView('ad-hoc-test');
     expect(state.appState.getState().index).toBe('ad-hoc-id');
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
