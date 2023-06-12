@@ -80,4 +80,6 @@ export function setupSources() {
     ConstructorFunction: XYZTMSSource,
     type: SOURCE_TYPES.EMS_XYZ,
   });
+
+  registered = true;
 }
