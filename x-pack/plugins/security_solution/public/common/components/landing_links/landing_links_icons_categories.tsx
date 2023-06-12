@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { SecurityPageName } from '../../../../common';
 import type { NavigationLink } from '../../links';
 import { useRootNavLink } from '../../links/nav_links';
@@ -21,11 +20,6 @@ export interface LandingLinksIconsCategoriesPageProps {
   pageName: SecurityPageName;
 }
 type CategoriesLinks = Array<{ label?: string; links: NavigationLink[] }>;
-
-const euiHorizontalRuleCSS = css`
-  margin-top: ${euiThemeVars.euiSizeM};
-  margin-bottom: ${euiThemeVars.euiSizeL};
-`;
 
 export const LandingLinksIconsCategoriesPage: React.FC<LandingLinksIconsCategoriesPageProps> =
   React.memo(function LandingLinksIconsCategoriesPage({ title, pageName }) {
@@ -61,6 +55,7 @@ export const LandingLinksIconsCategories = React.memo(function LandingLinksIcons
 }: {
   pageName: SecurityPageName;
 }) {
+  const { euiTheme } = useEuiTheme();
   const categories = useCategories({ pageName });
   return (
     <>
@@ -75,7 +70,12 @@ export const LandingLinksIconsCategories = React.memo(function LandingLinksIcons
           <EuiTitle size="xxxs">
             <h2>{label}</h2>
           </EuiTitle>
-          <EuiHorizontalRule css={euiHorizontalRuleCSS} />
+          <EuiHorizontalRule
+            css={css`
+              margin-top: ${euiTheme.size.m};
+              margin-bottom: ${euiTheme.size.l};
+            `}
+          />
           <LandingLinksIcons items={links} />
         </div>
       ))}
