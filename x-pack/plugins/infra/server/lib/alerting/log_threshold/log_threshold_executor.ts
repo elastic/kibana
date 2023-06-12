@@ -940,7 +940,7 @@ export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
   }),
 };
 
-export const getContextAggregation = (
+const getContextAggregation = (
   params: Pick<RuleParams, 'groupBy'> & { criteria: CountCriteria }
 ) => {
   const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
