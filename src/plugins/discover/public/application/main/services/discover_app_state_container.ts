@@ -69,6 +69,12 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
+  /**
+   * Updates the state in URL first, if replace is true, a history.replace is performed instead of history.push
+   * @param newPartial
+   * @param replace
+   */
+  updateUrlState: (newPartial: DiscoverAppState, replace?: boolean) => void;
 }
 
 export interface DiscoverAppState {
@@ -177,6 +183,12 @@ export const getDiscoverAppStateContainer = ({
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
+  const updateUrlState = async (newPartial: DiscoverAppState = {}, replace = true) => {
+    addLog('[appState] replaceUrlState', { newPartial });
+    const state = { ...appStateContainer.getState(), ...newPartial };
+    await stateStorage.set(APP_STATE_URL_KEY, state, { replace });
+  };
+
   const startAppStateUrlSync = () => {
     addLog('[appState] start syncing state with URL');
     return syncState({
@@ -249,6 +261,7 @@ export const getDiscoverAppStateContainer = ({
     replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
+    updateUrlState,
   };
 };
 
