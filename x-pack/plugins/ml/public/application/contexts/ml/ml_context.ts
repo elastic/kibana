@@ -14,10 +14,21 @@ export interface MlContextValue {
    * @deprecated Use the data view contract from the Kibana context.
    */
   dataViewsContract: DataViewsContract;
+  /**
+   * @deprecated
+   */
   kibanaConfig: any; // IUiSettingsClient;
+  /**
+   * @deprecated
+   */
   kibanaVersion: string;
 
   initialized: boolean;
+
+  /**
+   * Component provided by a route resolver to render instead of the page content.
+   */
+  resolvedComponent?: React.ReactElement;
 }
 
 export type SavedSearchQuery = object;

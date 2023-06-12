@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
+import { AccessDeniedCallout } from '../access_denied';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { type MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import type { ResolverResults, Resolvers } from './resolvers';
 import type { MlContextValue } from '../contexts/ml';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../common/constants/locator';
+import { ML_PAGES } from '../../../common/constants/locator';
 
 /**
  * Resolves required dependencies for landing on the page
@@ -28,6 +29,7 @@ export const useRouteResolver = (
   requiredCapabilities: MlCapabilitiesKey[],
   customResolvers?: Resolvers
 ): { context: MlContextValue | null; results: ResolverResults; component?: React.Component } => {
+  const requiredCapabilitiesRef = useRef(requiredCapabilities);
   const customResolversRef = useRef(customResolvers);
 
   const [results, setResults] = useState<ResolverResults>();
@@ -84,28 +86,21 @@ export const useRouteResolver = (
     requiredLicence,
   ]);
 
-  const redirectToMlAccessDeniedPage = useCallback(async () => {
-    const redirectPage = mlLicenseInfo.hasLicenseExpired
-      ? locators.get('LICENSE_MANAGEMENT_LOCATOR')!.getUrl({
-          page: 'dashboard',
-        })
-      : locators.get(ML_APP_LOCATOR)!.getUrl({
-          page: ML_PAGES.ACCESS_DENIED,
-        });
-
-    await navigateToUrl(await redirectPage);
-  }, [locators, navigateToUrl, mlLicenseInfo.hasLicenseExpired]);
-
   // Check if the user has all required permissions
   const capabilitiesResults = usePermissionCheck(requiredCapabilities);
 
   const capabilitiesResolver = useCallback(async () => {
-    if (capabilitiesResults.some((v) => !v)) {
-      await redirectToMlAccessDeniedPage();
+    const missingCapabilities = requiredCapabilitiesRef.current.filter(
+      (k, i) => !capabilitiesResults[i]
+    );
+    if (missingCapabilities.length > 0) {
+      setContext({
+        resolvedComponent: <AccessDeniedCallout missingCapabilities={missingCapabilities} />,
+      } as MlContextValue);
       return Promise.reject();
     }
     return true;
-  }, [capabilitiesResults, redirectToMlAccessDeniedPage]);
+  }, [capabilitiesResults]);
 
   const resolveCustomResolvers = useCallback(async () => {
     if (!customResolversRef.current) return;
