@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-default-export
-export default ResizeObserver;
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
+export const [getDataViewsStart, setDataViewsStart] =
+  createGetterSetter<DataViewsPublicPluginStart>('dataViews');

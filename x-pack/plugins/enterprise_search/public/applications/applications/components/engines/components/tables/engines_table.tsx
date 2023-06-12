@@ -19,8 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 import { Page } from '../../../../../../../common/types/pagination';
+import { EnterpriseSearchApplication } from '../../../../../../../common/types/search_applications';
 
 import { MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
@@ -34,12 +34,12 @@ import { TelemetryLogic } from '../../../../../shared/telemetry/telemetry_logic'
 import { ENGINE_PATH } from '../../../../routes';
 
 interface EnginesListTableProps {
-  enginesList: EnterpriseSearchEngine[];
+  enginesList: EnterpriseSearchApplication[];
   isLoading?: boolean;
   loading: boolean;
   meta: Page;
-  onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
-  onDelete: (engine: EnterpriseSearchEngine) => void;
+  onChange: (criteria: CriteriaWithPagination<EnterpriseSearchApplication>) => void;
+  onDelete: (engine: EnterpriseSearchApplication) => void;
   viewEngineIndices: (engineName: string) => void;
 }
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
@@ -52,7 +52,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
-  const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
+  const columns: Array<EuiBasicTableColumn<EnterpriseSearchApplication>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {

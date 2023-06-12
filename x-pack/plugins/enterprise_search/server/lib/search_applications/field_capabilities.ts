@@ -9,18 +9,18 @@ import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import {
-  EnterpriseSearchEngine,
-  EnterpriseSearchEngineFieldCapabilities,
+  EnterpriseSearchApplication,
+  EnterpriseSearchApplicationFieldCapabilities,
   SchemaField,
-} from '../../../common/types/engines';
+} from '../../../common/types/search_applications';
 
 import { availableIndices } from './available_indices';
 
-export const fetchEngineFieldCapabilities = async (
+export const fetchSearchApplicationFieldCapabilities = async (
   client: IScopedClusterClient,
-  engine: EnterpriseSearchEngine
-): Promise<EnterpriseSearchEngineFieldCapabilities> => {
-  const { name, updated_at_millis, indices } = engine;
+  searchApplication: EnterpriseSearchApplication
+): Promise<EnterpriseSearchApplicationFieldCapabilities> => {
+  const { name, updated_at_millis, indices } = searchApplication;
 
   const availableIndicesList = await availableIndices(client, indices);
 
