@@ -34,7 +34,7 @@ import {
 function throwNotFoundIfApmSchemaNotAvailable(
   featureFlags: ApmFeatureFlags
 ): void {
-  if (!featureFlags.schemaAvailable) {
+  if (!featureFlags.migrationToFleetAvailable) {
     throw Boom.notFound();
   }
 }
