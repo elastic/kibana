@@ -5,35 +5,36 @@
  * 2.0.
  */
 
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonRectangle,
+  EuiSpacer,
+  EuiStep,
+  EuiSteps,
+  EuiStepsProps,
+  EuiSubSteps,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Buffer } from 'buffer';
 import { flatten, zip } from 'lodash';
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  EuiText,
-  EuiButton,
-  EuiSpacer,
-  EuiButtonGroup,
-  EuiCodeBlock,
-  EuiSteps,
-  EuiStepsProps,
-  EuiSubSteps,
-  EuiStep,
-  EuiSkeletonRectangle,
-  EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { default as React, useCallback, useEffect, useState } from 'react';
+import { useWizard } from '.';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
-import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
-import { useWizard } from '.';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { ApiKeyBanner } from './api_key_banner';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
@@ -60,11 +61,37 @@ export function InstallElasticAgent() {
     setState({ ...state, autoDownloadConfig: !autoDownloadConfig });
   }
 
-  const { data: installShipperSetup, status: installShipperSetupStatus } =
-    useFetcher((callApi) => {
+  const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
+    (callApi) => {
       if (CurrentStep === InstallElasticAgent) {
         return callApi(
-          'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
+          'GET /internal/observability_onboarding/custom_logs/privileges'
+        );
+      }
+    },
+    []
+  );
+
+  const { data: setup } = useFetcher((callApi) => {
+    if (CurrentStep === InstallElasticAgent) {
+      return callApi(
+        'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+      );
+    }
+  }, []);
+
+  const {
+    data: installShipperSetup,
+    status: installShipperSetupStatus,
+    error,
+  } = useFetcher(
+    (callApi) => {
+      if (
+        CurrentStep === InstallElasticAgent &&
+        monitoringRole?.hasPrivileges
+      ) {
+        return callApi(
+          'POST /internal/observability_onboarding/custom_logs/save',
           {
             params: {
               body: {
@@ -80,22 +107,26 @@ export function InstallElasticAgent() {
           }
         );
       }
-    }, []);
+    },
+    [monitoringRole?.hasPrivileges]
+  );
 
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent && installShipperSetup) {
+      if (CurrentStep === InstallElasticAgent) {
+        const options = {
+          headers: {
+            authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
+          },
+        };
+
         return callApi(
           'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
-          {
-            headers: {
-              authorization: `ApiKey ${installShipperSetup.apiKeyEncoded}`,
-            },
-          }
+          installShipperSetup?.apiKeyEncoded ? options : {}
         );
       }
     },
-    [installShipperSetup?.apiKeyId, installShipperSetup?.apiKeyEncoded]
+    [installShipperSetup?.apiKeyEncoded]
   );
 
   useEffect(() => {
@@ -237,6 +268,16 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        {monitoringRoleStatus !== FETCH_STATUS.NOT_INITIATED &&
+          monitoringRoleStatus !== FETCH_STATUS.LOADING && (
+            <ApiKeyBanner
+              payload={installShipperSetup}
+              hasPrivileges={monitoringRole?.hasPrivileges}
+              status={installShipperSetupStatus}
+              error={error}
+            />
+          )}
+        <EuiSpacer size="m" />
         <EuiSteps
           steps={[
             {
@@ -302,31 +343,16 @@ export function InstallElasticAgent() {
                     }
                   />
                   <EuiSpacer size="m" />
-                  <EuiSkeletonRectangle
-                    isLoading={
-                      installShipperSetupStatus === FETCH_STATUS.LOADING
-                    }
-                    contentAriaLabel={i18n.translate(
-                      'xpack.observability_onboarding.installElasticAgent.installStep.installCommandDescription',
-                      { defaultMessage: 'Command to install elastic agent' }
-                    )}
-                    width="100%"
-                    height={80}
-                    borderRadius="s"
-                  >
-                    <EuiCodeBlock language="bash" isCopyable>
-                      {getInstallShipperCommand({
-                        elasticAgentPlatform,
-                        apiKeyEncoded,
-                        apiEndpoint: installShipperSetup?.apiEndpoint,
-                        scriptDownloadUrl:
-                          installShipperSetup?.scriptDownloadUrl,
-                        elasticAgentVersion:
-                          installShipperSetup?.elasticAgentVersion,
-                        autoDownloadConfig: wizardState.autoDownloadConfig,
-                      })}
-                    </EuiCodeBlock>
-                  </EuiSkeletonRectangle>
+                  <EuiCodeBlock language="bash" isCopyable>
+                    {getInstallShipperCommand({
+                      elasticAgentPlatform,
+                      apiKeyEncoded,
+                      apiEndpoint: setup?.apiEndpoint,
+                      scriptDownloadUrl: setup?.scriptDownloadUrl,
+                      elasticAgentVersion: setup?.elasticAgentVersion,
+                      autoDownloadConfig: wizardState.autoDownloadConfig,
+                    })}
+                  </EuiCodeBlock>
                   <EuiSpacer size="m" />
                   <EuiSwitch
                     label={i18n.translate(
@@ -335,7 +361,9 @@ export function InstallElasticAgent() {
                     )}
                     checked={wizardState.autoDownloadConfig}
                     onChange={onAutoDownloadConfig}
-                    disabled={isInstallStarted}
+                    disabled={
+                      isInstallStarted || !monitoringRole?.hasPrivileges
+                    }
                   />
                   {isInstallStarted && (
                     <>
@@ -474,7 +502,7 @@ export function InstallElasticAgent() {
                   </EuiText>
                   <EuiSpacer size="m" />
                   <EuiSkeletonRectangle
-                    isLoading={yamlConfigStatus === FETCH_STATUS.LOADING}
+                    isLoading={yamlConfigStatus === FETCH_STATUS.NOT_INITIATED}
                     contentAriaLabel={i18n.translate(
                       'xpack.observability_onboarding.installElasticAgent.configStep.yamlCodeBlockdescription',
                       { defaultMessage: 'Elastic agent yaml configuration' }

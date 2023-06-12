@@ -17059,7 +17059,7 @@
           "\nReturns the index name for File data (chunks) storage for a given integration"
         ],
         "signature": [
-          "(integrationName: string) => string"
+          "(integrationName: string, forHostDelivery?: boolean) => string"
         ],
         "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
         "deprecated": false,
@@ -17074,6 +17074,21 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getFileDataIndexName.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "forHostDelivery",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
             "deprecated": false,
@@ -17094,7 +17109,7 @@
           "\nReturns the index name for File Metadata storage for a given integration"
         ],
         "signature": [
-          "(integrationName: string) => string"
+          "(integrationName: string, forHostDelivery?: boolean) => string"
         ],
         "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
         "deprecated": false,
@@ -17109,6 +17124,21 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getFileMetadataIndexName.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "forHostDelivery",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
             "deprecated": false,
