@@ -7,9 +7,11 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { initGenAiDashboard } from './create_dashboard';
 import {
   GenAiRunActionParamsSchema,
   GenAiRunActionResponseSchema,
+  GenAiDashboardActionParamsSchema,
 } from '../../../common/gen_ai/schema';
 import type {
   GenAiConfig,
@@ -18,6 +20,10 @@ import type {
   GenAiRunActionResponse,
 } from '../../../common/gen_ai/types';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/gen_ai/constants';
+import {
+  GenAiDashboardActionParams,
+  GenAiDashboardActionResponse,
+} from '../../../common/gen_ai/types';
 
 export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets> {
   private url;
@@ -46,6 +52,12 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       method: 'runApi',
       schema: GenAiRunActionParamsSchema,
     });
+
+    this.registerSubAction({
+      name: SUB_ACTION.DASHBOARD,
+      method: 'getDashboard',
+      schema: GenAiDashboardActionParamsSchema,
+    });
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
@@ -72,5 +84,29 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       },
     });
     return response.data;
+  }
+
+  public async getDashboard({
+    dashboardId,
+  }: GenAiDashboardActionParams): Promise<GenAiDashboardActionResponse> {
+    const response = await initGenAiDashboard({
+      logger: this.logger,
+      savedObjectsClient: this.savedObjectsClient,
+      dashboardId,
+    });
+
+    //   this.request({
+    //   url: this.url,
+    //   method: 'post',
+    //   responseSchema: GenAiRunActionResponseSchema,
+    //   data: body,
+    //   headers: {
+    //     ...(this.provider === OpenAiProviderType.OpenAi
+    //       ? { Authorization: `Bearer ${this.key}` }
+    //       : { ['api-key']: this.key }),
+    //     ['content-type']: 'application/json',
+    //   },
+    // });
+    return { exists: response.success };
   }
 }

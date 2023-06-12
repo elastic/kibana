@@ -9,12 +9,11 @@ import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 
-export const getDashboardTitle = (spaceId: string): string =>
-  `Generative AI Token Usage - ${spaceId}`;
+export const dashboardTitle = `Generative AI Token Usage`;
 
-export const getGenAiDashboard = (spaceId: string): SavedObject<DashboardAttributes> => {
+export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAttributes> => {
   const ids: Record<string, string> = {
-    genAiSavedObjectId: uuidv4(),
+    genAiSavedObjectId: dashboardId,
     tokens: uuidv4(),
     totalTokens: uuidv4(),
     tag: uuidv4(),
@@ -352,7 +351,7 @@ export const getGenAiDashboard = (spaceId: string): SavedObject<DashboardAttribu
         },
       ]),
       timeRestore: false,
-      title: getDashboardTitle(spaceId),
+      title: dashboardTitle,
       version: 1,
     },
     coreMigrationVersion: '8.8.0',

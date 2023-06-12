@@ -296,7 +296,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core, plugins)
+      this.createRouteHandlerContext(core)
     );
     if (usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
@@ -448,7 +448,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
         },
-        spaces: plugins.spaces?.spacesService,
       });
     };
 
@@ -588,8 +587,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup<ActionsPluginsStart>,
-    plugins: ActionsPluginsSetup
+    core: CoreSetup<ActionsPluginsStart>
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,

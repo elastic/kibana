@@ -8,7 +8,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { Logger } from '@kbn/logging';
-import { getDashboardTitle, getGenAiDashboard } from './dashboard';
+import { getGenAiDashboard } from './dashboard';
 
 export interface OutputError {
   message: string;
@@ -18,27 +18,21 @@ export interface OutputError {
 export const initGenAiDashboard = async ({
   logger,
   savedObjectsClient,
-  spaceId,
+  dashboardId,
 }: {
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
-  spaceId: string;
+  dashboardId: string;
 }): Promise<{
   success: boolean;
   error?: OutputError;
 }> => {
-  const title = getDashboardTitle(spaceId);
   try {
-    const doesExist = await savedObjectsClient.find<DashboardAttributes>({
-      search: `"${title}"`,
-      searchFields: ['title'],
-      type: 'dashboard',
-    });
-    if (doesExist.total > 0) {
-      return {
-        success: true,
-      };
-    }
+    await savedObjectsClient.get<DashboardAttributes>('dashboard', dashboardId);
+
+    return {
+      success: true,
+    };
   } catch (error) {
     logger.error(`Failed to fetch Gen Ai Dashboard saved object: ${error.message}`);
 
@@ -51,7 +45,11 @@ export const initGenAiDashboard = async ({
   try {
     await savedObjectsClient.create<DashboardAttributes>(
       'dashboard',
-      getGenAiDashboard(spaceId).attributes
+      getGenAiDashboard(dashboardId).attributes,
+      {
+        overwrite: true,
+        id: dashboardId,
+      }
     );
 
     return { success: true };

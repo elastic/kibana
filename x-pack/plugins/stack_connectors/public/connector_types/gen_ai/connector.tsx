@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActionConnectorFieldsProps,
   SimpleConnectorForm,
@@ -19,12 +19,12 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { useGetDashboard } from './use_get_dashboard';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';
 import * as i18n from './translations';
 import {
   azureAiConfig,
   azureAiSecrets,
-  getDashboardTitle,
   openAiConfig,
   openAiSecrets,
   providerOptions,
@@ -42,57 +42,38 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   const {
     services: {
       application: { navigateToUrl },
-      dashboard,
-      spaces,
     },
   } = useKibana();
 
-  const [spaceId, setSpaceId] = useState<string>();
+  const [hasIndexPermissions, setHasIndexPermissions] = useState<boolean>(true);
 
-  useEffect(() => {
-    if (spaces) {
-      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
-    }
-  }, [spaces]);
+  // useEffect(() => {
+  //   let ignore = false;
+  //
+  //   const getDashboardIndex = async (pattern: string) => {
+  //     const indices = await getMatchingIndices({ http, pattern });
+  //     console.log('indices', indices);
+  //     if (!ignore && indices.length > 0) {
+  //       setHasIndexPermissions(true);
+  //     }
+  //   };
+  //
+  //   getDashboardIndex('.kibana-event-log-');
+  //   return () => {
+  //     ignore = true;
+  //   };
+  // }, [http]);
 
-  const [dashboardId, setDashboardId] = useState<string | null>(null);
-
-  useEffect(() => {
-    let ignore = false;
-    const getDashboardId = async (theSpaceId: string) => {
-      const findDashboardsService = await dashboard.findDashboardsService();
-      const foundDashboardId = (
-        await findDashboardsService.findByTitle(getDashboardTitle(theSpaceId))
-      )?.id;
-      if (!ignore && foundDashboardId != null) {
-        setDashboardId(foundDashboardId);
-      }
-    };
-    if (dashboardId == null && spaceId != null && spaceId.length) {
-      getDashboardId(spaceId);
-    }
-    return () => {
-      ignore = true;
-    };
-  }, [dashboard, dashboardId, spaceId]);
+  const { dashboardUrl } = useGetDashboard(id);
 
   const onClick = useCallback(
     (e) => {
       e.preventDefault();
-      if (dashboardId != null) {
-        const url = dashboard?.locator?.getRedirectUrl({
-          query: {
-            language: 'kuery',
-            query: `kibana.saved_objects: { id  : ${id} }`,
-          },
-          dashboardId,
-        });
-        if (url) {
-          navigateToUrl(url);
-        }
+      if (dashboardUrl) {
+        navigateToUrl(dashboardUrl);
       }
     },
-    [dashboardId, dashboard?.locator, id, navigateToUrl]
+    [dashboardUrl, navigateToUrl]
   );
 
   const selectedProviderDefaultValue = useMemo(
@@ -100,6 +81,15 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
       getFieldDefaultValue<OpenAiProviderType>('config.apiProvider') ?? OpenAiProviderType.OpenAi,
     [getFieldDefaultValue]
   );
+
+  const showDashboardLink = useMemo<boolean>(() => {
+    console.log({
+      isEdit,
+      hasIndexPermissions,
+      dashboardUrl,
+    });
+    return isEdit && dashboardUrl != null && hasIndexPermissions;
+  }, [dashboardUrl, hasIndexPermissions, isEdit]);
 
   return (
     <>
@@ -144,7 +134,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           secretsFormSchema={azureAiSecrets}
         />
       )}
-      {isEdit && dashboardId != null && (
+      {showDashboardLink && (
         <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
           {i18n.USAGE_DASHBOARD_LINK(selectedProviderDefaultValue, name)}
         </EuiLink>

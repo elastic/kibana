@@ -145,5 +145,7 @@ export const providerOptions = [
   },
 ];
 
+export const getDashboardId = (spaceId: string): string => `generative-ai-token-usage-${spaceId}`;
+
 export const getDashboardTitle = (spaceId: string): string =>
   `Generative AI Token Usage - ${spaceId}`;

@@ -26,8 +26,6 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { initGenAiDashboard } from './saved_objects/dashboard/create_saved_objects';
 import {
   ActionType,
   GetGlobalExecutionKPIParams,
@@ -128,7 +126,6 @@ interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
-  spaces?: SpacesServiceStart;
 }
 
 export interface UpdateOptions {
@@ -153,7 +150,6 @@ export class ActionsClient {
   private readonly usageCounter?: UsageCounter;
   private readonly connectorTokenClient: ConnectorTokenClientContract;
   private readonly getEventLogClient: () => Promise<IEventLogClient>;
-  private readonly spaces?: SpacesServiceStart;
 
   constructor({
     logger,
@@ -172,7 +168,6 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
     getEventLogClient,
-    spaces,
   }: ConstructorOptions) {
     this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -190,7 +185,6 @@ export class ActionsClient {
     this.usageCounter = usageCounter;
     this.connectorTokenClient = connectorTokenClient;
     this.getEventLogClient = getEventLogClient;
-    this.spaces = spaces;
   }
 
   /**
@@ -247,27 +241,13 @@ export class ActionsClient {
       })
     );
 
-    const additionalConfig: { [key: string]: string } = {};
-
-    // start gen_ai extension
-    // add usage dashboard id to gen-ai action
-    if (actionTypeId === '.gen-ai') {
-      const spaceId = (this.spaces && this.spaces.getSpaceId(this.request)) ?? '';
-      await initGenAiDashboard({
-        logger: this.logger,
-        savedObjectsClient: this.unsecuredSavedObjectsClient,
-        spaceId,
-      });
-    }
-    // end gen_ai extension
-
     const result = await this.unsecuredSavedObjectsClient.create(
       'action',
       {
         actionTypeId,
         name,
         isMissingSecrets: false,
-        config: { ...validatedActionTypeConfig, ...additionalConfig } as SavedObjectAttributes,
+        config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
       { id }

@@ -6,6 +6,7 @@
  */
 
 export { getTimeFieldOptions, getTimeOptions } from './get_time_options';
+export { getMatchingIndices } from './data_apis';
 export {
   getOutcomeHealthColor,
   getExecutionStatusHealthColor,
