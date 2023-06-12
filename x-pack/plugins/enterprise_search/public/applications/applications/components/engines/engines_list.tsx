@@ -90,7 +90,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
           <EuiFlexItem grow={false}>
             <FormattedMessage
               id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.title"
-              defaultMessage="Technical Preview"
+              defaultMessage="Beta"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
