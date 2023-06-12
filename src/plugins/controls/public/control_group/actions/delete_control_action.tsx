@@ -60,7 +60,7 @@ export class DeleteControlAction implements Action<DeleteControlActionContext> {
     if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return 'cross';
+    return 'trash';
   }
 
   public async isCompatible({ embeddable }: DeleteControlActionContext) {

@@ -7,6 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TIME_SLIDER_CONTROL } from '../time_slider';
+import { OPTIONS_LIST_CONTROL } from '../options_list';
+import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
   emptyState: {
@@ -289,12 +292,22 @@ export const ControlGroupStrings = {
       }),
     getRemoveButtonTitle: () =>
       i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
-        defaultMessage: 'Remove control',
+        defaultMessage: 'Delete control',
       }),
-    getClearButtonTitle: () =>
-      i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
-        defaultMessage: 'Clear selections',
-      }),
+    clearAction: {
+      [OPTIONS_LIST_CONTROL]: {
+        getClearButtonTitle: () =>
+          i18n.translate('controls.controlGroup.floatingActions.optionsList.clearTitle', {
+            defaultMessage: 'Clear selections',
+          }),
+      },
+      [RANGE_SLIDER_CONTROL]: {
+        getClearButtonTitle: () =>
+          i18n.translate('controls.controlGroup.floatingActions.rangeSlider.clearTitle', {
+            defaultMessage: 'Clear range',
+          }),
+      },
+
   },
   ariaActions: {
     getMoveControlButtonAction: (controlTitle?: string) =>

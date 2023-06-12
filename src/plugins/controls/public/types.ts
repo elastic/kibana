@@ -48,7 +48,7 @@ export type ControlEmbeddable<
 };
 
 export abstract class ClearableControlEmbeddable<
-  I extends DataControlInput = DataControlInput
+  I extends ControlInput = ControlInput
 > extends Embeddable<I, ControlOutput> {
   public abstract clearSelections(): void;
 }

@@ -129,56 +129,34 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
   return (
     <>
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
-      <EuiFlexGroup
-        className="rangeSlider__actions"
-        gutterSize="none"
-        data-test-subj="rangeSlider-control-actions"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiDualRange
-            id={id}
-            min={hasAvailableRange ? rangeSliderMin : 0}
-            max={hasAvailableRange ? rangeSliderMax : 100}
-            onChange={([newLowerBound, newUpperBound]) => {
-              const updatedLowerBound =
-                typeof newLowerBound === 'number' ? String(newLowerBound) : value[0];
-              const updatedUpperBound =
-                typeof newUpperBound === 'number' ? String(newUpperBound) : value[1];
+      <EuiDualRange
+        id={id}
+        min={hasAvailableRange ? rangeSliderMin : 0}
+        max={hasAvailableRange ? rangeSliderMax : 100}
+        onChange={([newLowerBound, newUpperBound]) => {
+          const updatedLowerBound =
+            typeof newLowerBound === 'number' ? String(newLowerBound) : value[0];
+          const updatedUpperBound =
+            typeof newUpperBound === 'number' ? String(newUpperBound) : value[1];
 
-              rangeSlider.dispatch.setSelectedRange([updatedLowerBound, updatedUpperBound]);
-            }}
-            value={displayedValue}
-            ticks={hasAvailableRange ? ticks : undefined}
-            levels={hasAvailableRange ? levels : undefined}
-            showTicks={hasAvailableRange}
-            disabled={!hasAvailableRange}
-            fullWidth
-            ref={rangeRef}
-            data-test-subj="rangeSlider__slider"
-          />
-          <EuiText
-            size="s"
-            color={errorMessage ? 'danger' : 'default'}
-            data-test-subj="rangeSlider__helpText"
-          >
-            {errorMessage || helpText}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
-            <EuiButtonIcon
-              iconType="eraser"
-              color="danger"
-              onClick={() => {
-                rangeSlider.dispatch.setSelectedRange(['', '']);
-              }}
-              aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
-              data-test-subj="rangeSlider__clearRangeButton"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          rangeSlider.dispatch.setSelectedRange([updatedLowerBound, updatedUpperBound]);
+        }}
+        value={displayedValue}
+        ticks={hasAvailableRange ? ticks : undefined}
+        levels={hasAvailableRange ? levels : undefined}
+        showTicks={hasAvailableRange}
+        disabled={!hasAvailableRange}
+        fullWidth
+        ref={rangeRef}
+        data-test-subj="rangeSlider__slider"
+      />
+      <EuiText
+        size="s"
+        color={errorMessage ? 'danger' : 'default'}
+        data-test-subj="rangeSlider__helpText"
+      >
+        {errorMessage || helpText}
+      </EuiText>
     </>
   );
 };

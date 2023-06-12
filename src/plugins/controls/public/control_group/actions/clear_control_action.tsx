@@ -24,7 +24,7 @@ export interface ClearControlActionContext {
 export class ClearControlAction implements Action<ClearControlActionContext> {
   public readonly type = ACTION_CLEAR_CONTROL;
   public readonly id = ACTION_CLEAR_CONTROL;
-  public order = 2;
+  public order = 1;
 
   constructor() {}
 
@@ -43,10 +43,15 @@ export class ClearControlAction implements Action<ClearControlActionContext> {
   };
 
   public getDisplayName({ embeddable }: ClearControlActionContext) {
-    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+    const clearStrings = ControlGroupStrings.floatingActions.clearAction;
+    if (
+      !embeddable.parent ||
+      !isControlGroup(embeddable.parent) ||
+      !Object.keys(clearStrings).includes(embeddable.type)
+    ) {
       throw new IncompatibleActionError();
     }
-    return ControlGroupStrings.floatingActions.getClearButtonTitle();
+    return clearStrings[embeddable.type as keyof typeof clearStrings].getClearButtonTitle();
   }
 
   public getIconType({ embeddable }: ClearControlActionContext) {
