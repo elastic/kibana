@@ -6,17 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { v4 as uuidv4 } from 'uuid';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import { NavigateToLensContext, TagcloudVisConfiguration } from '@kbn/visualizations-plugin/common';
+import type { TagCloudVisParams } from '../types';
 import { getDataViewsStart } from '../services';
-import { getConfiguration } from './configurations';
-import { ConvertHeatmapToLensVisualization } from './types';
 
-export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, timefilter) => {
+export const convertToLens = async (
+  vis: Vis<TagCloudVisParams>,
+  timefilter?: TimefilterContract
+) => {
   if (!timefilter) {
     return null;
   }
@@ -28,11 +33,9 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
     return null;
   }
 
-  const { getColumnsFromVis, convertToFiltersColumn } = await convertToLensModule;
+  const { getColumnsFromVis } = await convertToLensModule;
   const layers = getColumnsFromVis(vis, timefilter, dataView, {
-    buckets: ['segment'],
-    splits: ['group'],
-    unsupported: ['split_row', 'split_column'],
+    splits: ['segment'],
   });
 
   if (layers === null) {
@@ -41,33 +44,15 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
 
   const [layerConfig] = layers;
 
-  const xColumn = layerConfig.columns.find(({ isBucketed, isSplit }) => isBucketed && !isSplit);
-  const xAxisColumn =
-    xColumn ??
-    convertToFiltersColumn(uuidv4(), { filters: [{ input: { language: 'lucene', query: '*' } }] })!;
-
-  if (xColumn?.columnId !== xAxisColumn?.columnId) {
-    layerConfig.buckets.all.push(xAxisColumn.columnId);
-    layerConfig.columns.push(xAxisColumn);
-  }
-  const yColumn = layerConfig.columns.find(({ isBucketed, isSplit }) => isBucketed && isSplit);
-
-  if (!layerConfig.buckets.all.length || layerConfig.metrics.length > 1) {
+  if (!layerConfig.buckets.all.length || !layerConfig.metrics.length) {
     return null;
   }
 
   const layerId = uuidv4();
 
   const indexPatternId = dataView.id!;
-  const configuration = await getConfiguration(layerId, vis, {
-    metrics: layerConfig.metrics,
-    buckets: [xAxisColumn.columnId, yColumn?.columnId].filter<string>((c): c is string =>
-      Boolean(c)
-    ),
-  });
-
   return {
-    type: 'lnsHeatmap',
+    type: 'lnsTagcloud',
     layers: [
       {
         indexPatternId,
@@ -77,7 +62,17 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
         ignoreGlobalFilters: false,
       },
     ],
-    configuration,
+    configuration: {
+      layerId,
+      layerType: 'data',
+      valueAccessor: layerConfig.metrics[0],
+      tagAccessor: layerConfig.buckets.all[0],
+      maxFontSize: vis.params.maxFontSize,
+      minFontSize: vis.params.minFontSize,
+      orientation: vis.params.orientation,
+      palette: vis.params.palette,
+      showLabel: vis.params.showLabel,
+    },
     indexPatternIds: [indexPatternId],
-  };
+  } as NavigateToLensContext<TagcloudVisConfiguration>;
 };
