@@ -29,7 +29,7 @@ const configMock = {
   featureFlags: {
     agentConfigurationAvailable: true,
     schemaAvailable: true,
-    indicesAvailable: true,
+    configurableIndicesAvailable: true,
   },
 };
 
