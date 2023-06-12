@@ -149,7 +149,7 @@ interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
   type: OutputType['Logstash'];
 }
 
-interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   type: OutputType['Kafka'];
   client_id?: string;
   version?: string;

@@ -17,7 +17,13 @@ import type {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
-import type { NewOutput, Output, OutputSOAttributes, AgentPolicy } from '../types';
+import type {
+  NewOutput,
+  Output,
+  OutputSOAttributes,
+  AgentPolicy,
+  OutputSoKafkaAttributes,
+} from '../types';
 import {
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
@@ -637,15 +643,88 @@ class OutputService {
       fromPreconfiguration
     );
 
+    const removeKafkaFields = (target: Nullable<Partial<OutputSoKafkaAttributes>>) => {
+      target.version = null;
+      target.key = null;
+      target.compression = null;
+      target.compression_level = null;
+      target.client_id = null;
+      target.auth_type = null;
+      target.username = null;
+      target.password = null;
+      target.sasl = null;
+      target.partition = null;
+      target.random = null;
+      target.round_robin = null;
+      target.hash = null;
+      target.topics = null;
+      target.timeout = null;
+      target.broker_timeout = null;
+    };
+
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
+      if (
+        (data.type === outputType.Elasticsearch || data.type === outputType.Logstash) &&
+        originalOutput.type === outputType.Kafka
+      ) {
+        removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
+      }
+
       if (data.type === outputType.Logstash) {
         // remove ES specific field
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
-      } else {
+      }
+
+      if (data.type === outputType.Elasticsearch) {
         // remove logstash specific field
         updateData.ssl = null;
+      }
+
+      if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+        updateData.ca_trusted_fingerprint = null;
+        updateData.ca_sha256 = null;
+
+        if (!data.version) {
+          updateData.version = '1.0.0';
+        }
+        if (!data.compression) {
+          updateData.compression = kafkaCompressionType.Gzip;
+        }
+        if (
+          !data.compression ||
+          (data.compression === kafkaCompressionType.Gzip && !data.compression_level)
+        ) {
+          updateData.compression_level = 4;
+        }
+        if (!data.client_id) {
+          updateData.client_id = 'Elastic Agent';
+        }
+        if (data.username && data.password && !data.sasl?.mechanism) {
+          updateData.sasl = {
+            mechanism: kafkaSaslMechanism.Plain,
+          };
+        }
+        if (!data.partition) {
+          updateData.partition = kafkaPartitionType.Hash;
+        }
+        if (data.partition === kafkaPartitionType.Random && !data.random?.group_events) {
+          updateData.random = {
+            group_events: 1,
+          };
+        }
+        if (data.partition === kafkaPartitionType.RoundRobin && !data.round_robin?.group_events) {
+          updateData.round_robin = {
+            group_events: 1,
+          };
+        }
+        if (!data.timeout) {
+          updateData.timeout = 30;
+        }
+        if (!data.broker_timeout) {
+          updateData.broker_timeout = 10;
+        }
       }
     }
 
