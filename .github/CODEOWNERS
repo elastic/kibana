@@ -1220,10 +1220,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
 
-# Kibana design
-# scss overrides should be below this line for specificity
-**/*.scss @elastic/kibana-design
-
 # Observability design
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
