@@ -12,8 +12,8 @@ import { isEmpty } from 'lodash';
 import { batch } from 'react-redux';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Subscription, lastValueFrom, BehaviorSubject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
+import { Subscription, lastValueFrom } from 'rxjs';
+import { distinctUntilChanged, skip, map } from 'rxjs/operators';
 
 import {
   compareFilters,
@@ -187,7 +187,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.subscriptions.add(
       this.getInput$()
         .pipe(
-          // debounceTime(400),
           distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
           skip(1) // skip the first input update because initial filters will be built by initialize.
         )
