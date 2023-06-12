@@ -18,13 +18,11 @@ export function waitUntilTimeLayersLoad$(store: MapStore) {
     switchMap(async (state) => {
       const zoom = getMapZoom(state);
       const promises = getLayerList(state)
-        .filter((layer) => {
-          return layer.isVisible() && layer.showAtZoomLevel(zoom);
-        })
         .map(async (layer) => {
           return {
             isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
             layer,
+            zoom, 
           };
         });
       const layersWithMeta = await Promise.all(promises);
@@ -33,7 +31,7 @@ export function waitUntilTimeLayersLoad$(store: MapStore) {
     first((layersWithMeta) => {
       const areTimeLayersStillLoading = layersWithMeta
         .filter(({ isFilteredByGlobalTime }) => isFilteredByGlobalTime)
-        .some(({ layer }) => layer.isLayerLoading());
+        .some(({ layer, zoom }) => layer.isLayerLoading(zoom));
       return !areTimeLayersStillLoading;
     }),
     map(() => {
