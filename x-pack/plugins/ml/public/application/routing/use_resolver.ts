@@ -92,6 +92,7 @@ export const useRouteResolver = (
       await redirectToMlAccessDeniedPage();
       return Promise.reject();
     }
+    return true;
   }, [capabilitiesResults, redirectToMlAccessDeniedPage]);
 
   const resolveCustomResolvers = useCallback(async () => {
