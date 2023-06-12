@@ -19,7 +19,7 @@ export const createInitialTagsState = (existingTags: string[][], defaultTags: st
         checked: existingTagsIntersection.includes(tag)
           ? 'on'
           : existingTagsUnion.includes(tag)
-          ? 'off'
+          ? 'mixed'
           : undefined,
       };
     })

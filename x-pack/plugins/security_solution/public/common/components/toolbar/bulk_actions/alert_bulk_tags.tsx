@@ -121,15 +121,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     event: EuiSelectableOnChangeEvent,
     changedOption: EuiSelectableOption
   ) => {
-    if (changedOption.checked === 'off') {
-      // Don't allow intermediate state when selecting, only from initial state
-      newOptions[newOptions.findIndex((option) => option.label === changedOption.label)] = {
-        ...changedOption,
-        checked: undefined,
-      };
-      tagsToRemove[changedOption.label] = true;
-      delete tagsToAdd[changedOption.label];
-    } else if (changedOption.checked === 'on') {
+    if (changedOption.checked === 'on') {
       tagsToAdd[changedOption.label] = true;
       delete tagsToRemove[changedOption.label];
     } else if (!changedOption.checked) {
@@ -142,7 +134,6 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
   return (
     <>
       <EuiSelectable
-        allowExclusions
         searchable
         searchProps={{
           placeholder: i18n.ALERT_TAGS_MENU_SEARCH_PLACEHOLDER,
