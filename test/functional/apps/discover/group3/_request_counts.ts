@@ -21,14 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'settings',
   ]);
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const browser = getService('browser');
-  const es = getService('es');
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
-  const fieldEditor = getService('fieldEditor');
-  const retry = getService('retry');
-  const dataGrid = getService('dataGrid');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
 
