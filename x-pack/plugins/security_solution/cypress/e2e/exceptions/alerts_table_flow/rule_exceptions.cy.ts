@@ -6,7 +6,7 @@
  */
 
 import { LOADING_INDICATOR } from '../../../screens/security_header';
-import { getNewRule } from '../../../objects/rule';
+import { getNewRule, getEndpointRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -24,6 +24,8 @@ import {
   submitNewExceptionItem,
   validateExceptionItemFirstAffectedRuleNameInRulePage,
   validateExceptionItemAffectsTheCorrectRulesInRulePage,
+  validateExceptionCondition,
+  validateExceptionCommentText,
 } from '../../../tasks/exceptions';
 import {
   esArchiverLoad,
@@ -49,9 +51,6 @@ describe('Rule Exceptions workflows from Alert', () => {
   const newRule = getNewRule();
   before(() => {
     esArchiverResetKibana();
-    esArchiverLoad('exceptions');
-    login();
-    postDataView('exceptions-*');
   });
 
   after(() => {
@@ -60,6 +59,16 @@ describe('Rule Exceptions workflows from Alert', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
+  });
+
+  afterEach(() => {
+    esArchiverUnload('exceptions_2');
+  });
+
+  it('Creates an exception item from alert actions overflow menu and close all matching alerts', () => {
+    esArchiverLoad('exceptions');
+    login();
+    postDataView('exceptions-*');
     createRule({
       ...newRule,
       query: 'agent.name:*',
@@ -70,13 +79,7 @@ describe('Rule Exceptions workflows from Alert', () => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();
-  });
 
-  afterEach(() => {
-    esArchiverUnload('exceptions_2');
-  });
-
-  it('Creates an exception item from alert actions overflow menu  and close all matching alerts', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 
@@ -119,5 +122,26 @@ describe('Rule Exceptions workflows from Alert', () => {
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
+  });
+  it('Creates an exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields ', () => {
+    esArchiverLoad('endpoint');
+    login();
+    createRule(getEndpointRule());
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    goToRuleDetails();
+    waitForAlertsToPopulate();
+
+    cy.get(LOADING_INDICATOR).should('not.exist');
+    addExceptionFromFirstAlert();
+
+    // Validate the highlighted fields are auto populated
+    validateExceptionCondition(0, 'have.text', 'host.name');
+
+    // Comment text area should be opened by default with one comment added
+    // clarifying that the conditions are pre-filled from alert's data
+    validateExceptionCommentText(1, 'Exception conditions are pre-filled with relevant data from');
+
+    addExceptionFlyoutItemName(ITEM_NAME);
+    submitNewExceptionItem();
   });
 });

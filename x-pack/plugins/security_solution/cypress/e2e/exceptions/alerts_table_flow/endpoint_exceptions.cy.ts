@@ -28,13 +28,10 @@ import {
   addExceptionFlyoutItemName,
   selectCloseSingleAlerts,
   submitNewExceptionItem,
+  validateExceptionCondition,
 } from '../../../tasks/exceptions';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import {
-  EXCEPTION_ITEM_CONTAINER,
-  FIELD_INPUT_PARENT,
-  NO_EXCEPTIONS_EXIST_PROMPT,
-} from '../../../screens/exceptions';
+import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
 import {
   removeException,
   goToAlertsTab,
@@ -43,9 +40,11 @@ import {
 
 describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
-  beforeEach(() => {
+  before(() => {
     esArchiverResetKibana();
     esArchiverLoad('endpoint');
+  });
+  beforeEach(() => {
     login();
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
@@ -65,11 +64,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
 
     // As the endpoint.alerts-* is used to trigger the alert the
     // file.Ext.code_signature will be populated as the first item
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(0)
-      .find(FIELD_INPUT_PARENT)
-      .eq(0)
-      .should('have.text', 'file.Ext.code_signature');
+    validateExceptionCondition(0, 'have.text', 'file.Ext.code_signature');
 
     selectCloseSingleAlerts();
     addExceptionFlyoutItemName('Sample Exception');

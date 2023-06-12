@@ -338,10 +338,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   useEffect((): void => {
     if (alertData) {
       switch (listType) {
-        case ExceptionListTypeEnum.ENDPOINT:
-          setInitialExceptionItems(
+        case ExceptionListTypeEnum.ENDPOINT: {
+          return setInitialExceptionItems(
             defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
           );
+        }
         case ExceptionListTypeEnum.RULE_DEFAULT: {
           const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
             alertData,
@@ -349,7 +350,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           });
           if (populatedException) {
             setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
-            setInitialExceptionItems([populatedException]);
+            return setInitialExceptionItems([populatedException]);
           }
         }
       }

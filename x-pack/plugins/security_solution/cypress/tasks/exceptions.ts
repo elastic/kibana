@@ -44,6 +44,7 @@ import {
   EXCEPTION_ITEM_HEADER_ACTION_MENU,
   EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT,
   EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE,
+  FIELD_INPUT_PARENT,
 } from '../screens/exceptions';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
@@ -164,6 +165,13 @@ export const addExceptionConditions = (exception: Exception) => {
   });
 };
 
+export const validateExceptionCondition = (index: number, shouldClause: string, value: string) => {
+  cy.get(EXCEPTION_ITEM_CONTAINER)
+    .eq(index)
+    .find(FIELD_INPUT_PARENT)
+    .eq(index)
+    .should(shouldClause, value);
+};
 export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
@@ -193,13 +201,12 @@ export const selectOs = (os: string) => {
 export const addExceptionComment = (comment: string) => {
   cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`${comment}`);
-  // cy.root()
-  //   .pipe(($el) => {
-  //     return $el.find(EXCEPTION_COMMENT_TEXT_AREA);
-  //   })
-  //   .clear()
-  //   .type(`${comment}`)
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
+};
+
+export const validateExceptionCommentText = (numberOfComment: number, comment: string) => {
+  cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).contains('have.text', numberOfComment);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).contains('have.value', comment);
 };
 export const clickOnShowComments = () => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN).click();
