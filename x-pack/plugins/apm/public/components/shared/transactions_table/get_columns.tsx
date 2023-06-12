@@ -18,8 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { ValuesType } from 'utility-types';
-import { ALERT_STATUS_ACTIVE } from '../../../../../rule_registry/common/technical_rule_data_field_names';
-import { TRANSACTION_NAME } from '../../../../common/es_fields/apm';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   asMillisecondDuration,
   asPercent,
@@ -37,6 +36,7 @@ import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 import { ApmRoutes } from '../../routing/apm_route_config';
 import { unit } from '../../../utils/style';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -83,7 +83,7 @@ export function getColumns({
               { defaultMessage: 'Active alerts' }
             ),
             width: `${unit * 8}px`,
-            render: (_, { alertsCount, name, transactionType }) => {
+            render: (_, { alertsCount }) => {
               if (!alertsCount) {
                 return null;
               }

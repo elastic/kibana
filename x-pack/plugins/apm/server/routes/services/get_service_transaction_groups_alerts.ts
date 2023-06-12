@@ -65,6 +65,7 @@ export async function getServiceTranactionGroupsAlerts({
   environment?: string;
 }): Promise<ServiceTransactionGroupAlertsResponse> {
   const ALERT_RULE_PARAMETERS_AGGREGATION_TYPE = `${ALERT_RULE_PARAMETERS}.aggregationType`;
+
   const params = {
     size: 0,
     query: {
@@ -103,8 +104,9 @@ export async function getServiceTranactionGroupsAlerts({
   };
 
   const response = await apmAlertsClient.search(params);
-
-  const buckets = response.aggregations?.transaction_groups.buckets ?? [];
+  const { buckets } = (response.aggregations?.transaction_groups ?? {
+    buckets: {},
+  }) as ServiceTransactionGroupAlertsAggResponse;
 
   const servicesTransactionGroupsAlertsCount = buckets.map((bucket) => ({
     name: bucket.key as string,
