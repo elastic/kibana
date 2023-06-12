@@ -63,11 +63,13 @@ export class ObservabilityOnboardingPlugin
       };
     }) as ObservabilityOnboardingRouteHandlerResources['plugins'];
 
+    const config = this.initContext.config.get<ObservabilityOnboardingConfig>();
     registerRoutes({
       core,
       logger: this.logger,
       repository: getObservabilityOnboardingServerRouteRepository(),
       plugins: resourcePlugins,
+      config,
     });
 
     return {};

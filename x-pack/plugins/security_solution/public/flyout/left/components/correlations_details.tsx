@@ -25,12 +25,22 @@ import { EntityPanel } from '../../right/components/entity_panel';
 import { AlertsTable } from './correlations_details_alerts_table';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
 import {
-  CORRELATIONS_DETAILS_BY_ANCESTRY_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SESSION_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SOURCE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_BY_ANCESTRY_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SESSION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SOURCE_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_ERROR_TEST_ID,
 } from './test_ids';
 import { CorrelationsCasesTable } from './correlations_cases_table';
+import {
+  ANCESTRY_ALERTS_HEADING,
+  RELATED_CASES_HEADING,
+  SESSION_ALERTS_HEADING,
+  SOURCE_ALERTS_HEADING,
+} from './translations';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -98,45 +108,53 @@ export const CorrelationsDetails: React.FC = () => {
   return (
     <>
       <EntityPanel
-        title={`${ancestryAlertsIds.length} alerts related by ancestry`}
+        title={ANCESTRY_ALERTS_HEADING(ancestryAlertsIds.length)}
         iconType={'warning'}
         expandable={true}
+        data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
       >
         <AlertsTable
           alertIds={ancestryAlertsIds}
-          data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_TEST_ID}
+          data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_TABLE_TEST_ID}
         />
       </EntityPanel>
 
       <EuiSpacer />
 
       <EntityPanel
-        title={`${sameSourceAlertsIds.length} alerts related by source event`}
+        title={SOURCE_ALERTS_HEADING(sameSourceAlertsIds.length)}
         iconType={'warning'}
         expandable={true}
+        data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
       >
         <AlertsTable
           alertIds={sameSourceAlertsIds}
-          data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_TEST_ID}
+          data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_TABLE_TEST_ID}
         />
       </EntityPanel>
 
       <EuiSpacer />
 
       <EntityPanel
-        title={`${alertsBySessionIds.length} alerts related by session`}
+        title={SESSION_ALERTS_HEADING(alertsBySessionIds.length)}
         iconType={'warning'}
         expandable={true}
+        data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
       >
         <AlertsTable
-          data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_TEST_ID}
           alertIds={alertsBySessionIds}
+          data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_TABLE_TEST_ID}
         />
       </EntityPanel>
 
       <EuiSpacer />
 
-      <EntityPanel title={`${cases.length} related cases`} iconType={'warning'} expandable={true}>
+      <EntityPanel
+        title={RELATED_CASES_HEADING(cases.length)}
+        iconType={'warning'}
+        expandable={true}
+        data-test-subj={CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID}
+      >
         <CorrelationsCasesTable cases={cases} />
       </EntityPanel>
     </>

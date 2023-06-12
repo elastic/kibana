@@ -103,7 +103,7 @@ describe('CorrelationsDetails', () => {
 
     renderCorrelationDetails();
 
-    expect(screen.getByText('1 alerts related by ancestry')).toBeInTheDocument();
+    expect(screen.getByText('1 alert related by ancestry')).toBeInTheDocument();
     expect(screen.getByText('2 alerts related by source event')).toBeInTheDocument();
     expect(screen.getByText('3 alerts related by session')).toBeInTheDocument();
   });

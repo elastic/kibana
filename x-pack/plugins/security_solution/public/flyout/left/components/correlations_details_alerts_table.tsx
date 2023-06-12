@@ -103,6 +103,7 @@ export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': 
 
   return (
     <EuiBasicTable<Record<string, unknown>>
+      data-test-subj={dataTestSubj}
       loading={loading}
       items={mappedData}
       columns={columns}
