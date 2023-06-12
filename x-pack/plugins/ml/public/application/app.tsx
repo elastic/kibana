@@ -24,7 +24,6 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
 import { MlLicense } from '../../common/license';
-import { cacheDataViewsContract } from './util/index_utils';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -190,9 +189,6 @@ export const renderApp = (
     share: deps.share,
     lens: deps.lens,
   });
-
-  // Temp
-  cacheDataViewsContract(deps.data.dataViews);
 
   appMountParams.onAppLeave((actions) => actions.default());
 
