@@ -50,13 +50,6 @@ export const RangeSliderButton = ({
     <EuiFormControlLayoutDelimited
       fullWidth
       onClick={onClick}
-      onFocus={onClick}
-      onBlur={(event) => {
-        // the popover should be closed if the next element to recieve focus **after** blur is not a number input
-        if (isPopoverOpen && !(event.relatedTarget instanceof HTMLInputElement)) {
-          setIsPopoverOpen(false);
-        }
-      }}
       isLoading={isLoading}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${id}`}
