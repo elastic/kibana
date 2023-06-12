@@ -23,13 +23,16 @@ import { i18n } from '@kbn/i18n';
 import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
+  Comparator,
   CountRuleParams,
+  hasGroupBy,
+  isRatioRuleParams,
   PartialRuleParams,
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
-import { getESQuery } from '../query';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { DEFAULT_LOG_VIEW } from '../../../../../../common/log_views';
+import { getESQuery } from '../../../../../../common/alerting/logs/log_threshold/query';
 
 export interface AlertDetailsExplainLogRateSpikesSectionProps {
   rule: Rule<PartialRuleParams>;
@@ -49,6 +52,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     async function getDataView() {
       const { indices, timestampField, runtimeMappings, dataViewReference } =
         await logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
+
       const dataViewId = dataViewReference.id;
 
       if (dataViewId) {
@@ -56,7 +60,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
         setDataView(logDataView);
 
         const esSearchRequest = getESQuery(
-          decodeOrThrow(ruleParamsRT)(rule.params) as CountRuleParams,
+          validatedParams as CountRuleParams,
           timestampField,
           indices,
           runtimeMappings,
@@ -71,13 +75,23 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       }
     }
 
-    getDataView();
+    const validatedParams = decodeOrThrow(ruleParamsRT)(rule.params);
+
+    if (
+      !isRatioRuleParams(validatedParams) &&
+      !hasGroupBy(validatedParams) &&
+      (validatedParams.count.comparator === Comparator.GT ||
+        validatedParams.count.comparator === Comparator.GT_OR_EQ)
+    ) {
+      getDataView();
+    }
   }, [rule, alert, dataViews, logViews]);
 
   const timeRange = { min: moment(alert.start).subtract(20, 'minutes'), max: moment(new Date()) };
 
   const coPilotService = useCoPilot();
 
+  // TODO: Get top 2 field values from the actual analysis results
   const significantFieldValues = {
     fields: [
       {
@@ -91,18 +105,14 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     ? { significantFieldValues: { fields: significantFieldValues.fields } }
     : undefined;
 
-  // const explainLogSpikeParams = useMemo(() => {
-  //   return significantFieldValues
-  //     ? { significantFieldValues: { fields: significantFieldValues.fields } }
-  //     : undefined;
-  // }, [significantFieldValues]);
-
   const explainLogSpikeTitle = i18n.translate(
     'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
     {
-      defaultMessage: 'Why is there a spike?',
+      defaultMessage: 'Possible causes and remediations',
     }
   );
+
+  if (!dataView) return null;
 
   return (
     <EuiPanel hasBorder={true} data-test-subj="explainLogRateSpikesAlertDetails">
