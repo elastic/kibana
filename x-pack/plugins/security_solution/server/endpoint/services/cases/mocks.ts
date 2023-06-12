@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { EndpointCasesServiceInterface } from './types';
+
 export const getEndpointCasesServiceMock = (): jest.Mocked<EndpointCasesServiceInterface> => {
   return {
-    update: jest.fn().mockResolvedValue(),
+    update: jest.fn(async (_) => undefined),
   };
 };
