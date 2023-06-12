@@ -20,13 +20,10 @@ export const setupCards = (
             const timeInMins = getCardTimeInMinutes(card, stepsDone);
             const stepsLeft = getCardStepsLeft(card, stepsDone);
 
-            return {
-              ...accCards,
-              [card.id]: {
-                id: card.id,
-                timeInMins,
-                stepsLeft,
-              },
+            accCards[card.id] = {
+              id: card.id,
+              timeInMins,
+              stepsLeft,
             };
           }
           return accCards;
