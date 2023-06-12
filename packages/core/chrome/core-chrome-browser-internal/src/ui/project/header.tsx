@@ -96,11 +96,15 @@ interface Props {
 }
 
 const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
+const LOADING_DEBOUNCE_TIME = 80;
 
 const Logo = (
   props: Pick<Props, 'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath'>
 ) => {
-  const loadingCount = useObservable(props.loadingCount$.pipe(debounceTime(50)), 0);
+  const loadingCount = useObservable(
+    props.loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)),
+    0
+  );
 
   const homeHref = useObservable(props.homeHref$, '/app/home');
   const { logo } = headerCss;
