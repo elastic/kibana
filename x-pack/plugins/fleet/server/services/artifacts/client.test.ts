@@ -6,8 +6,12 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
+
+import { appContextService } from '../app_context';
+import { createAppContextStartContractMock } from '../../mocks';
 
 import { FleetArtifactsClient } from './client';
 import {
@@ -20,7 +24,7 @@ import {
 describe('When using the Fleet Artifacts Client', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
   let artifactClient: FleetArtifactsClient;
-
+  let logger: Logger;
   const setEsClientGetMock = (withInvalidArtifact?: boolean) => {
     const singleHit = generateArtifactEsGetSingleHitMock();
 
@@ -33,12 +37,22 @@ describe('When using the Fleet Artifacts Client', () => {
   };
 
   beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+
     esClientMock = elasticsearchServiceMock.createInternalClient();
-    artifactClient = new FleetArtifactsClient(esClientMock, 'endpoint');
+    logger = appContextService.getLogger().get('artifactsTest');
+    artifactClient = new FleetArtifactsClient(
+      esClientMock,
+      'endpoint',
+      appContextService.getConfig()!,
+      logger
+    );
   });
 
   it('should error if input argument is not set', () => {
-    expect(() => new FleetArtifactsClient(esClientMock, '')).toThrow(ArtifactsClientError);
+    expect(
+      () => new FleetArtifactsClient(esClientMock, '', appContextService.getConfig()!, logger)
+    ).toThrow(ArtifactsClientError);
   });
 
   describe('and calling `getArtifact()`', () => {
