@@ -75,6 +75,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
+  searchAfter?: estypes.SortResults;
 }
 
 export type BulkUpdateResult = Result<
@@ -431,7 +432,7 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
@@ -447,6 +448,7 @@ export class TaskStore {
       });
 
       return {
+        searchAfter: tasks.length === 0 ? undefined : tasks[tasks.length - 1].sort,
         docs: tasks
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))

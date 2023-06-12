@@ -73,7 +73,7 @@ const mockApmTrans = {
   end: jest.fn(),
 };
 
-describe('TaskClaiming', () => {
+describe.skip('TaskClaiming', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest

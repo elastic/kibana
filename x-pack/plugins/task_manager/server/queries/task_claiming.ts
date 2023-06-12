@@ -12,23 +12,21 @@ import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
-import { groupBy, pick, isPlainObject } from 'lodash';
+import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 
-import { asOk, asErr, Result } from '../lib/result_type';
-import { ConcreteTaskInstance } from '../task';
+import { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { asOk, asErr, Result, isOk } from '../lib/result_type';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer, TaskTiming } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from './query_clauses';
 
 import {
-  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
-  tasksClaimedByOwner,
-  tasksOfType,
   EnabledTask,
 } from './mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -37,6 +35,7 @@ import {
   TaskStore,
   UpdateByQueryResult,
   SearchOpts,
+  BulkUpdateResult,
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -95,6 +94,11 @@ type LimitedBatch = TaskClaimingBatch<BatchConcurrency.Limited, string>;
 
 export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
 
+interface ClaimAvailableTasksResult {
+  docs: ConcreteTaskInstance[];
+  tasksConflicted: number;
+}
+
 export class TaskClaiming {
   public readonly errors$ = new Subject<Error>();
   public readonly maxAttempts: number;
@@ -120,7 +124,7 @@ export class TaskClaiming {
     this.maxAttempts = opts.maxAttempts;
     this.taskStore = opts.taskStore;
     this.getCapacity = opts.getCapacity;
-    this.logger = opts.logger;
+    this.logger = opts.logger.get('taskClaiming');
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
@@ -240,19 +244,16 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
-    const { updated: tasksUpdated, version_conflicts: tasksConflicted } =
-      await this.markAvailableTasksAsClaimed({
-        claimOwnershipUntil,
-        size,
-        taskTypes,
-      });
-
-    const docs = tasksUpdated > 0 ? await this.sweepForClaimedTasks(taskTypes, size) : [];
+    const { docs, tasksConflicted } = await this.claimAvailableTasksImpl({
+      claimOwnershipUntil,
+      size,
+      taskTypes,
+    });
 
     this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
 
     const stats = {
-      tasksUpdated,
+      tasksUpdated: docs.length,
       tasksConflicted,
       tasksClaimed: docs.length,
     };
@@ -273,82 +274,153 @@ export class TaskClaiming {
     return false;
   }
 
-  private async markAvailableTasksAsClaimed({
+  private async claimAvailableTasksImpl({
     claimOwnershipUntil,
-    size,
+    size: claimSize,
     taskTypes,
-  }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
-    const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
-      this.definitions.getAllTypes(),
-      (type) =>
-        taskTypes.has(type) && !this.isTaskTypeExcluded(type)
-          ? 'taskTypesToClaim'
-          : 'taskTypesToSkip'
+  }: OwnershipClaimingOpts): Promise<ClaimAvailableTasksResult> {
+    this.logger.debug(`Claiming tasks`);
+    const { taskTypesToClaim = [] } = groupBy(this.definitions.getAllTypes(), (type) =>
+      taskTypes.has(type) && !this.isTaskTypeExcluded(type) ? 'taskTypesToClaim' : 'taskTypesToSkip'
     );
+
     const queryForScheduledTasks = mustBeAllOf(
       // Task must be enabled
       EnabledTask,
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      {
+        bool: { must: { terms: { 'task.taskType': [...taskTypesToClaim, ...this.unusedTypes] } } },
+      }
     );
 
     const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
     const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
-    const script = updateFieldsAndMarkAsFailed({
-      fieldUpdates: {
-        ownerId: this.taskStore.taskManagerId,
-        retryAt: claimOwnershipUntil,
-      },
-      claimableTaskTypes: taskTypesToClaim,
-      skippedTaskTypes: taskTypesToSkip,
-      unusedTaskTypes: this.unusedTypes,
-      taskMaxAttempts: pick(this.taskMaxAttempts, taskTypesToClaim),
-    });
-
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_MARK_AS_CLAIMED,
       TASK_MANAGER_TRANSACTION_TYPE
     );
 
+    // ugly constant... this should probably be dynamically adjusted internally based on
+    // how many stale doc's we're seeing from both the prune and the version conflicts.
+    // Or config.
+    const searchSize = claimSize * 4;
+
+    // counters just used for logging
+    let searchesCount = 0;
+    let bulkUpdatesCount = 0;
+
     try {
-      const result = await this.taskStore.updateByQuery(
-        {
+      let hasMore = true;
+      let searchAfter: SortResults | undefined;
+      const updatedDocs: ConcreteTaskInstance[] = [];
+      let tasksConflicted = 0;
+      let staleTasks = 0;
+
+      do {
+        // we're going to search for more docs than we need
+        // so if we hit a version conflict claiming one, we can proceed with
+        // claiming more docs without having to do another search
+        ++searchesCount;
+        const searchResult = await this.taskStore.search({
           query,
-          script,
           sort,
-        },
-        {
-          max_docs: size,
+          size: searchSize,
+          seq_no_primary_term: true,
+          search_after: searchAfter,
+        });
+
+        const updateableDocs = searchResult.docs;
+        if (updateableDocs.length < searchSize) {
+          hasMore = false;
+        } else {
+          searchAfter = searchResult.searchAfter;
         }
-      );
-      apmTrans.end('success');
-      return result;
+
+        do {
+          const docsToUpdate: ConcreteTaskInstance[] = [];
+
+          // Searches can return stale documents. As a result, we are
+          // going to do a mget to use realtime search to get the most recent
+          // doc, and if it has been updated we will skip updating it below
+          const bulkGetResult = await this.taskStore.bulkGet(updateableDocs.map((docs) => docs.id));
+          const bulkGetResultVersions = new Map<string, string>();
+          for (const bulkGetResultItem of bulkGetResult) {
+            if (isOk(bulkGetResultItem)) {
+              bulkGetResultVersions.set(
+                bulkGetResultItem.value.id,
+                bulkGetResultItem.value.version!
+              );
+            }
+          }
+
+          while (
+            docsToUpdate.length < claimSize - updatedDocs.length &&
+            updateableDocs.length > 0
+          ) {
+            const doc = updateableDocs.shift()!;
+            if (bulkGetResultVersions.get(doc.id) !== doc.version) {
+              ++staleTasks;
+            } else if (taskTypesToClaim.includes(doc.taskType)) {
+              docsToUpdate.push(doc);
+              if (doc.schedule != null || doc.attempts < this.taskMaxAttempts[doc.taskType]) {
+                if (doc.retryAt != null && doc.retryAt < new Date()) {
+                  doc.scheduledAt = doc.retryAt;
+                } else {
+                  doc.scheduledAt = doc.runAt;
+                }
+
+                doc.status = TaskStatus.Claiming;
+                doc.ownerId = this.taskStore.taskManagerId;
+                doc.retryAt = claimOwnershipUntil;
+              } else {
+                docsToUpdate.push(doc);
+                doc.status = TaskStatus.Failed;
+              }
+            } else if (this.unusedTypes.includes(doc.taskType)) {
+              docsToUpdate.push(doc);
+              doc.status = TaskStatus.Unrecognized;
+            }
+          }
+
+          let bulkUpdateResults: BulkUpdateResult[] = [];
+          if (docsToUpdate.length > 0) {
+            ++bulkUpdatesCount;
+            bulkUpdateResults = await this.taskStore.bulkUpdate(docsToUpdate, { validate: false });
+          }
+
+          for (const bulkUpdateResult of bulkUpdateResults) {
+            if (isOk(bulkUpdateResult)) {
+              updatedDocs.push(bulkUpdateResult.value);
+            } else {
+              tasksConflicted++;
+            }
+          }
+        } while (updatedDocs.length < claimSize && updateableDocs.length > 0);
+      } while (updatedDocs.length < claimSize && hasMore && searchAfter);
+
+      apmTrans?.end('success');
+
+      if (tasksConflicted || staleTasks) {
+        this.logger
+          .get('claim')
+          .debug(
+            `claim size: ${claimSize}; claimed: ${updatedDocs.length}; searches: ${searchesCount}; bulk updates: ${bulkUpdatesCount}; conflicts: ${tasksConflicted}; stale pruned: ${staleTasks}; has more: ${hasMore}`
+          );
+      }
+
+      // Not all of the updated docs are "claimed" and ready to be ran
+      // we also update some tasks to be failed and unrecognized
+      const claimedDocs = updatedDocs.filter((doc) => doc.status === TaskStatus.Claiming);
+      return {
+        docs: claimedDocs,
+        tasksConflicted,
+      };
     } catch (err) {
-      apmTrans.end('failure');
+      apmTrans?.end('failure');
       throw err;
     }
-  }
-
-  /**
-   * Fetches tasks from the index, which are owned by the current Kibana instance
-   */
-  private async sweepForClaimedTasks(
-    taskTypes: Set<string>,
-    size: number
-  ): Promise<ConcreteTaskInstance[]> {
-    const claimedTasksQuery = tasksClaimedByOwner(
-      this.taskStore.taskManagerId,
-      tasksOfType([...taskTypes])
-    );
-    const { docs } = await this.taskStore.fetch({
-      query: claimedTasksQuery,
-      size,
-      sort: SortByRunAtAndRetryAt,
-      seq_no_primary_term: true,
-    });
-
-    return docs;
   }
 }
 
