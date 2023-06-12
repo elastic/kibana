@@ -7,6 +7,7 @@
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import type { CasesClient } from '@kbn/cases-plugin/server';
+import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import { APP_ID } from '../../../../common';
 import type {
   HostMetadata,
@@ -52,21 +53,21 @@ export const updateCases = async ({
       endpointId: endpoint.agent.id,
     }));
 
+    const attachments = caseIDs.map(() => ({
+      type: CommentType.actions,
+      comment: createActionPayload.comment || '',
+      actions: {
+        targets,
+        type: createActionPayload.command,
+      },
+      owner: APP_ID,
+    })) as BulkCreateArgs['attachments'];
+
     await Promise.all(
       caseIDs.map((caseId) =>
         casesClient.attachments.bulkCreate({
           caseId,
-          attachments: [
-            {
-              type: CommentType.actions,
-              comment: createActionPayload.comment || '',
-              actions: {
-                targets,
-                type: createActionPayload.command,
-              },
-              owner: APP_ID,
-            },
-          ],
+          attachments,
         })
       )
     );
