@@ -98,7 +98,7 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE)
           .should('be.visible')
-          .and('have.text', 'Rule description');
+          .and('have.text', 'Rule descriptionView rule');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS)
           .should('be.visible')
           .and('have.text', rule.description);

@@ -91,7 +91,9 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   );
   const id = `event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`;
   const link = useMemo(() => {
-    const content = truncate ? (
+    const content = children ? (
+      children
+    ) : truncate ? (
       <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
     ) : (
       value
