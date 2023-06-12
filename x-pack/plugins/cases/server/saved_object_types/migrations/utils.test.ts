@@ -7,13 +7,14 @@
 
 import type { SavedObjectsMigrationLogger } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { mockCaseComments } from '../../mocks';
+import { mockCaseComments, mockUsersActions } from '../../mocks';
 import { MIN_COMMENTS_DEFERRED_KIBANA_VERSION } from './constants';
 import {
   isDeferredMigration,
   isUserCommentSO,
   logError,
   isPersistableStateAttachmentSO,
+  isPersistableStateAttachmentUserActionSO,
 } from './utils';
 
 describe('migration utils', () => {
@@ -82,13 +83,23 @@ describe('migration utils', () => {
     });
   });
 
-  describe('isPersistableStateAttachmentAttributes', () => {
+  describe('isPersistableStateAttachmentSO', () => {
     it('should return true if it is a persistable attachment SO', () => {
       expect(isPersistableStateAttachmentSO(mockCaseComments[6])).toBe(true);
     });
 
     it('should return false if it is not a persistable attachment SO', () => {
       expect(isPersistableStateAttachmentSO(mockCaseComments[0])).toBe(false);
+    });
+  });
+
+  describe('isPersistableStateAttachmentUserActionSO', () => {
+    it('should return true if it is a persistable attachment SO', () => {
+      expect(isPersistableStateAttachmentUserActionSO(mockUsersActions[1])).toBe(true);
+    });
+
+    it('should return false if it is not a persistable attachment SO', () => {
+      expect(isPersistableStateAttachmentUserActionSO(mockUsersActions[0])).toBe(false);
     });
   });
 });

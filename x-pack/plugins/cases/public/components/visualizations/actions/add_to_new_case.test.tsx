@@ -8,6 +8,7 @@
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { waitFor } from '@testing-library/dom';
 
 import { createAddToNewCaseLensAction } from './add_to_new_case';
 import type { ActionContext, DashboardVisualizationEmbeddable } from './types';
@@ -24,8 +25,6 @@ import {
 } from './mocks';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { useKibana } from '../../../common/lib/kibana';
-import { CommentType } from '../../../../common';
-import { waitFor } from '@testing-library/dom';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 
@@ -88,6 +87,7 @@ describe('createAddToNewCaseLensAction', () => {
   const mockCasePermissions = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockUseCasesAddToNewCaseFlyout.mockReturnValue({
       open: mockOpenFlyout,
     });
@@ -181,11 +181,12 @@ describe('createAddToNewCaseLensAction', () => {
           expect.objectContaining({
             attachments: [
               {
-                comment: `!{lens${JSON.stringify({
-                  timeRange: mockTimeRange,
+                persistableStateAttachmentState: {
                   attributes: mockAttributes,
-                })}}`,
-                type: CommentType.user as const,
+                  timeRange: mockTimeRange,
+                },
+                persistableStateAttachmentTypeId: '.lens',
+                type: 'persistableState',
               },
             ],
           })

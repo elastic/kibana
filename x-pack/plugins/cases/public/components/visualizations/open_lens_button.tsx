@@ -31,16 +31,18 @@ const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, ti
     );
   }, [attachmentId, attributes, navigateToPrefilledEditor, timeRange]);
 
-  if (!canUseEditor) {
+  const hasLensPermissions = canUseEditor();
+
+  if (!hasLensPermissions) {
     return null;
   }
 
   return (
     <EuiButtonEmpty
       aria-label={OPEN_IN_VISUALIZATION}
-      data-test-subj={'cases-open-in-visualization-btn'}
-      iconType={'lensApp'}
-      isDisabled={!canUseEditor}
+      data-test-subj="cases-open-in-visualization-btn"
+      iconType="lensApp"
+      isDisabled={!hasLensPermissions}
       onClick={onClick}
     >
       {OPEN_IN_VISUALIZATION}

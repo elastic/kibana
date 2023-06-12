@@ -124,7 +124,7 @@ export const lensMigratorFactory = (
           return Object.assign(doc, { references: doc.references ?? [] });
         }
 
-        const { persistableStateAttachmentState } = doc.attributes.payload;
+        const { persistableStateAttachmentState } = doc.attributes.payload.comment;
 
         const migratedLensState = migrate(persistableStateAttachmentState);
 
@@ -134,7 +134,10 @@ export const lensMigratorFactory = (
             ...doc.attributes,
             payload: {
               ...doc.attributes.payload,
-              persistableStateAttachmentState: migratedLensState,
+              comment: {
+                ...doc.attributes.payload.comment,
+                persistableStateAttachmentState: migratedLensState,
+              },
             },
           },
           references: doc.references ?? [],

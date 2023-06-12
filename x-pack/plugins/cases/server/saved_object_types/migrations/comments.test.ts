@@ -342,7 +342,7 @@ describe('comments migrations', () => {
 
         const migratedPersistableAttachmentState = {
           ...persistableAttachmentState,
-          // @ts-expect-error: attributes can be spread
+          // @ts-expect-error: lens attributes can be spread
           attributes: { ...persistableAttachmentState.attributes, foo: 'bar' },
         };
 

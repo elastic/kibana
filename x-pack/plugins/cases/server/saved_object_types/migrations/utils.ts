@@ -90,7 +90,7 @@ export const isPersistableStateAttachmentSO = (
 };
 
 type PersistableStateUserAction = Omit<CommentUserAction, 'payload'> & {
-  payload: CommentRequestPersistableStateType;
+  payload: { comment: CommentRequestPersistableStateType };
 };
 
 export const isPersistableStateAttachmentUserActionSO = (
@@ -98,7 +98,8 @@ export const isPersistableStateAttachmentUserActionSO = (
 ): doc is SavedObjectUnsanitizedDoc<PersistableStateUserAction> => {
   return (
     doc.attributes.type === ActionTypes.comment &&
-    doc.attributes.payload.type === CommentType.persistableState
+    (doc as SavedObjectUnsanitizedDoc<PersistableStateUserAction>).attributes.payload.comment
+      .type === CommentType.persistableState
   );
 };
 

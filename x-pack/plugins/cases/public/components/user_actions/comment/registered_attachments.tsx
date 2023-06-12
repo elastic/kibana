@@ -151,6 +151,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
                   <EuiFlexItem
                     grow={false}
                     data-test-subj={`attachment-${attachmentTypeId}-${comment.id}`}
+                    key={`attachment-${attachmentTypeId}-${comment.id}`}
                   >
                     <EuiButtonIcon
                       aria-label={action.label}
@@ -158,6 +159,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
                       color={action.color ?? 'text'}
                       onClick={action.onClick}
                       data-test-subj={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
+                      key={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
                     />
                   </EuiFlexItem>
                 )) ||
