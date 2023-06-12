@@ -12,6 +12,8 @@
  * @param payload - optional object to log
  */
 
+window.ELASTIC_DISCOVER_LOGGER = true;
+
 export const addLog = (message: string, payload?: unknown) => {
   // @ts-expect-error
   const logger = window?.ELASTIC_DISCOVER_LOGGER;
