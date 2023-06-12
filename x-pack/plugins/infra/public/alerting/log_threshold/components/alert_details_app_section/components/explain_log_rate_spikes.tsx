@@ -91,19 +91,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   const coPilotService = useCoPilot();
 
-  // TODO: Get top 2 field values from the actual analysis results
-  const significantFieldValues = {
-    fields: [
-      {
-        field: 'log.level',
-        value: 'ERROR',
-      },
-    ],
-  };
-
-  const explainLogSpikeParams = significantFieldValues
-    ? { significantFieldValues: { fields: significantFieldValues.fields } }
-    : undefined;
+  const explainLogSpikeParams = undefined;
 
   const explainLogSpikeTitle = i18n.translate(
     'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
