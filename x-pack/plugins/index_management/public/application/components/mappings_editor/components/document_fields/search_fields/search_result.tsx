@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
-import memoize from 'memoize-one';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -50,12 +49,6 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
   );
 }, areEqual);
 
-const createItemData = memoize((result, status, fieldToEdit) => ({
-  result,
-  status,
-  fieldToEdit,
-}));
-
 export const SearchResult = React.memo(
   ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
     const dispatch = useDispatch();
@@ -65,7 +58,10 @@ export const SearchResult = React.memo(
       dispatch({ type: 'search:update', value: '' });
     };
 
-    const itemData = createItemData(result, status, fieldToEdit);
+    const itemData = useMemo(
+      () => ({ result, status, fieldToEdit }),
+      [fieldToEdit, result, status]
+    );
 
     return result.length === 0 ? (
       <EuiEmptyPrompt
