@@ -49,7 +49,9 @@ export const kibanaContextMock = {
         locators: {
           get: jest.fn(() => {
             return {
-              getUrl: jest.fn(),
+              getUrl: jest.fn(() => {
+                return Promise.resolve('mock-url');
+              }),
             };
           }),
         },
