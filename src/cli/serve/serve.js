@@ -214,7 +214,11 @@ export default function (program) {
     });
 
     const configsEvaluted = getConfigFromFiles(configs);
-    const isServerlessMode = !!(configsEvaluted.serverless || opts.serverless || unknownOptions.serverless);
+    const isServerlessMode = !!(
+      configsEvaluted.serverless ||
+      opts.serverless ||
+      unknownOptions.serverless
+    );
 
     const cliArgs = {
       dev: !!opts.dev,
