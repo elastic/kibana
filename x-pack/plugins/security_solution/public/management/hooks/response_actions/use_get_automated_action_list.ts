@@ -68,7 +68,6 @@ export const useGetAutomatedActionList = (
         }
       );
 
-      console.log({ responseData, items });
       return {
         ...responseData,
         items: compact(items),
