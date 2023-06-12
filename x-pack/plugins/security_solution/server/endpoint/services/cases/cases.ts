@@ -54,17 +54,19 @@ export const updateCases = async ({
 
     await Promise.all(
       caseIDs.map((caseId) =>
-        casesClient.attachments.add({
+        casesClient.attachments.bulkCreate({
           caseId,
-          comment: {
-            type: CommentType.actions,
-            comment: createActionPayload.comment || '',
-            actions: {
-              targets,
-              type: createActionPayload.command,
+          attachments: [
+            {
+              type: CommentType.actions,
+              comment: createActionPayload.comment || '',
+              actions: {
+                targets,
+                type: createActionPayload.command,
+              },
+              owner: APP_ID,
             },
-            owner: APP_ID,
-          },
+          ],
         })
       )
     );
