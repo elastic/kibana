@@ -194,6 +194,21 @@ export const InstallPackageByUploadRequestSchema = {
   body: schema.buffer(),
 };
 
+export const CreateCustomIntegrationRequestSchema = {
+  body: schema.object({
+    integrationName: schema.string(),
+    datasetType: schema.oneOf([
+      schema.literal('logs'),
+      schema.literal('metrics'),
+      schema.literal('traces'),
+      schema.literal('synthetics'),
+      schema.literal('profiling'),
+    ]),
+    datasetNames: schema.arrayOf(schema.string()),
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const DeletePackageRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
