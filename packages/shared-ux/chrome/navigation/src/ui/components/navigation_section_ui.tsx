@@ -8,8 +8,6 @@
 
 import React, { FC } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCollapsibleNavGroup,
   EuiIcon,
   EuiLink,
