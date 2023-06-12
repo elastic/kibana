@@ -68,6 +68,7 @@ export interface ActionAccordionFormProps {
     index: number
   ) => void;
   featureId: string;
+  producerId: string;
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
@@ -82,7 +83,8 @@ export interface ActionAccordionFormProps {
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultRuleFrequency?: RuleActionFrequency;
-  showActionAlertsFilter?: boolean;
+  ruleTypeId?: string;
+  hasFieldsForAAD?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -116,7 +118,9 @@ export const ActionForm = ({
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultRuleFrequency = DEFAULT_FREQUENCY,
-  showActionAlertsFilter,
+  ruleTypeId,
+  producerId,
+  hasFieldsForAAD,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -488,7 +492,10 @@ export const ActionForm = ({
               minimumThrottleInterval={minimumThrottleInterval}
               notifyWhenSelectOptions={notifyWhenSelectOptions}
               defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
-              showActionAlertsFilter={showActionAlertsFilter}
+              featureId={featureId}
+              producerId={producerId}
+              ruleTypeId={ruleTypeId}
+              hasFieldsForAAD={hasFieldsForAAD}
             />
           );
         })}
