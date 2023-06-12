@@ -31,8 +31,6 @@ export async function getMatchingIndices({
 }): Promise<Record<string, any>> {
   try {
     const formattedPattern = formatPattern(pattern);
-    console.log('formattedPattern??', formattedPattern);
-    console.log('_indices??', `${DATA_API_ROOT}/_indices`);
 
     const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
       `${DATA_API_ROOT}/_indices`,
