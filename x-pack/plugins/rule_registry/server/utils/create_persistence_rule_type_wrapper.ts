@@ -355,7 +355,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
-                  refresh: false,
+                  refresh: 'wait_for',
                 });
 
                 if (bulkResponse == null) {
