@@ -14,8 +14,12 @@ import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_PAGES } from '../../../locator';
 import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
-import { NavigateToPath, useMlApiContext, useNotifications } from '../../contexts/kibana';
-import { useMlContext } from '../../contexts/ml';
+import {
+  NavigateToPath,
+  useMlApiContext,
+  useMlKibana,
+  useNotifications,
+} from '../../contexts/kibana';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
@@ -103,7 +107,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
-  const dataViewsService = useMlContext().dataViewsContract;
+  const {
+    services: {
+      data: { dataViews: dataViewsService },
+    },
+  } = useMlKibana();
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =

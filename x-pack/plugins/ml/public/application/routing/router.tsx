@@ -20,10 +20,10 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
-import { MlContext, MlContextValue } from '../contexts/ml';
 
 import { MlPage } from '../components/ml_page';
 import { MlPages } from '../../locator';
+import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -66,8 +66,8 @@ export interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
-export const PageLoader: FC<{ context: MlContextValue | null }> = ({ context, children }) => {
-  const isLoading = context === null;
+export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {
+  const isLoading = !context.initialized;
 
   if (context?.resolvedComponent) {
     return context.resolvedComponent;
@@ -75,7 +75,7 @@ export const PageLoader: FC<{ context: MlContextValue | null }> = ({ context, ch
 
   return (
     <EuiSkeletonText lines={10} isLoading={isLoading}>
-      {!isLoading ? <MlContext.Provider value={context!}>{children}</MlContext.Provider> : null}
+      {!isLoading ? children : null}
     </EuiSkeletonText>
   );
 };

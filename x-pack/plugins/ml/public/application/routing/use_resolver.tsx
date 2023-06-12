@@ -14,8 +14,12 @@ import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { type MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import type { ResolverResults, Resolvers } from './resolvers';
-import type { MlContextValue } from '../contexts/ml';
 import { ML_PAGES } from '../../../common/constants/locator';
+
+export interface RouteResolverContext {
+  initialized: boolean;
+  resolvedComponent?: React.ReactElement;
+}
 
 /**
  * Resolves required dependencies for landing on the page
@@ -28,12 +32,16 @@ export const useRouteResolver = (
   requiredLicense: 'full' | 'basic',
   requiredCapabilities: MlCapabilitiesKey[],
   customResolvers?: Resolvers
-): { context: MlContextValue | null; results: ResolverResults; component?: React.Component } => {
+): {
+  context: RouteResolverContext;
+  results: ResolverResults;
+  component?: React.Component;
+} => {
   const requiredCapabilitiesRef = useRef(requiredCapabilities);
   const customResolversRef = useRef(customResolvers);
 
   const [results, setResults] = useState<ResolverResults>();
-  const [context, setContext] = useState<MlContextValue | null>(null);
+  const [context, setContext] = useState<RouteResolverContext>({ initialized: false });
 
   const {
     services: {
@@ -95,8 +103,9 @@ export const useRouteResolver = (
     );
     if (missingCapabilities.length > 0) {
       setContext({
+        initialized: true,
         resolvedComponent: <AccessDeniedCallout missingCapabilities={missingCapabilities} />,
-      } as MlContextValue);
+      });
       return Promise.reject();
     }
     return true;
@@ -128,10 +137,8 @@ export const useRouteResolver = (
         .then((customResults) => {
           if (mounted) {
             setContext({
-              dataViewsContract: dataViews,
-              kibanaConfig: uiSettings,
               initialized: true,
-            } as MlContextValue);
+            });
             setResults(customResults);
           }
         })
