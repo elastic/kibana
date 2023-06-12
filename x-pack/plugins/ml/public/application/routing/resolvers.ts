@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loadSavedSearches } from '../util/index_utils';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
 
@@ -21,5 +20,4 @@ export type ResolverResults =
 export const basicResolvers = (): Resolvers => ({
   getMlNodeCount,
   loadMlServerInfo,
-  loadSavedSearches,
 });

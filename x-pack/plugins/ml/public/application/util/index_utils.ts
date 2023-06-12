@@ -11,10 +11,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { Query, Filter } from '@kbn/es-query';
 import { getToastNotifications, getSavedSearch, getDataViews } from './dependency_cache';
 
-export function loadSavedSearches() {
-  return getSavedSearch().getAll();
-}
-
 export async function loadSavedSearchById(id: string) {
   return getSavedSearch().get(id);
 }
