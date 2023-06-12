@@ -7,6 +7,7 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import { SUB_ACTION } from '../../../../common/gen_ai/constants';
 import {
   ConnectorExecutorResult,
   rewriteResponseToCamelCase,
@@ -27,7 +28,7 @@ export async function getDashboard({
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
     {
       body: JSON.stringify({
-        params: { subAction: 'getDashboard', subActionParams: { dashboardId } },
+        params: { subAction: SUB_ACTION.DASHBOARD, subActionParams: { dashboardId } },
       }),
       signal,
     }
