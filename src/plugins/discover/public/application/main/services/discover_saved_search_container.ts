@@ -246,7 +246,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     prevSearchSource.getField('filter'),
     nextSearchSource.getField('filter')
   );
-  const queryChanged = isEqual(
+  const queryChanged = !isEqual(
     prevSearchSource.getField('query'),
     nextSearchSource.getField('query')
   );
