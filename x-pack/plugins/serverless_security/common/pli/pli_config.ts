@@ -18,8 +18,8 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     complete: [AppFeatureKey.advancedInsights, AppFeatureKey.casesConnectors],
   },
   endpoint: {
-    essentials: [],
-    complete: [],
+    essentials: [AppFeatureKey.endpointExceptions],
+    complete: [AppFeatureKey.endpointResponseActions],
   },
   cloud: {
     essentials: [],
