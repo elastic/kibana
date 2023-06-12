@@ -16,7 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const config = defendWorkflowsCypressConfig.getAll();
   const hostIp = getLocalhostRealIp();
 
-  const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = ['responseActionExecuteEnabled'];
+  const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = [];
 
   return {
     ...config,

@@ -39,9 +39,9 @@ import {
   OperationDefinition,
 } from './definitions';
 import { TinymathAST } from '@kbn/tinymath';
-import { CoreStart } from '@kbn/core/public';
 import { IndexPattern } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 
 const dataMock = dataPluginMock.createStartContract();
 dataMock.query.timefilter.timefilter.getAbsoluteTime = jest
@@ -53,6 +53,10 @@ jest.mock('../../../id_generator');
 jest.mock('../dimension_panel/reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
+const TARGET_BAR_COUNT = 100;
+
+const CoreStartMock = createCoreStartMock();
+CoreStartMock.uiSettings.get.mockReturnValue(TARGET_BAR_COUNT);
 
 const indexPatternFields = [
   {
@@ -3128,7 +3132,7 @@ describe('state_helpers', () => {
         indexPattern,
         {},
         '1',
-        {},
+        CoreStartMock,
         dataMock
       );
       expect(mock).toHaveBeenCalled();
@@ -3155,7 +3159,7 @@ describe('state_helpers', () => {
         indexPattern,
         {} as FormBasedPrivateState,
         '1',
-        {} as CoreStart,
+        CoreStartMock,
         dataMock
       );
       expect(mock).toHaveBeenCalled();
@@ -3191,7 +3195,7 @@ describe('state_helpers', () => {
         indexPattern,
         {} as FormBasedPrivateState,
         '1',
-        {} as CoreStart,
+        CoreStartMock,
         dataMock
       );
       expect(notCalledMock).not.toHaveBeenCalled();
@@ -3228,7 +3232,7 @@ describe('state_helpers', () => {
         indexPattern,
         {} as FormBasedPrivateState,
         '1',
-        {} as CoreStart,
+        CoreStartMock,
         dataMock
       );
       expect(savedRef).toHaveBeenCalled();
@@ -3258,7 +3262,7 @@ describe('state_helpers', () => {
         indexPattern,
         {} as FormBasedPrivateState,
         '1',
-        {} as CoreStart,
+        CoreStartMock,
         dataMock
       );
       expect(mock).toHaveBeenCalledWith(
@@ -3281,7 +3285,8 @@ describe('state_helpers', () => {
           fromDate: '2022-11-01T00:00:00.000Z',
           toDate: '2022-11-03T00:00:00.000Z',
         },
-        operationDefinitionMap
+        operationDefinitionMap,
+        TARGET_BAR_COUNT
       );
     });
   });

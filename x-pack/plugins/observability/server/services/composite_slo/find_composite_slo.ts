@@ -9,7 +9,6 @@ import {
   FindCompositeSLOParams,
   FindCompositeSLOResponse,
   findCompositeSLOResponseSchema,
-  FindSLOParams,
 } from '@kbn/slo-schema';
 import { CompositeSLO } from '../../domain/models';
 import {
@@ -19,6 +18,7 @@ import {
   Sort,
   SortDirection,
   SortField,
+  Criteria,
 } from './composite_slo_repository';
 import { SummaryClient } from './summary_client';
 
@@ -30,10 +30,11 @@ export class FindCompositeSLO {
 
   public async execute(params: FindCompositeSLOParams): Promise<FindCompositeSLOResponse> {
     const pagination: Pagination = toPagination(params);
+    const criteria: Criteria = toCriteria(params);
     const sort: Sort = toSort(params);
 
     const { results: compositeSloList, ...resultMeta }: Paginated<CompositeSLO> =
-      await this.repository.find(sort, pagination);
+      await this.repository.find(criteria, sort, pagination);
     const summaryByCompositeSlo = await this.summaryClient.fetchSummary(compositeSloList);
 
     return findCompositeSLOResponseSchema.encode({
@@ -48,7 +49,11 @@ export class FindCompositeSLO {
   }
 }
 
-function toPagination(params: FindSLOParams): Pagination {
+function toCriteria(params: FindCompositeSLOParams): Criteria {
+  return { name: params.name };
+}
+
+function toPagination(params: FindCompositeSLOParams): Pagination {
   const page = Number(params.page);
   const perPage = Number(params.perPage);
 
