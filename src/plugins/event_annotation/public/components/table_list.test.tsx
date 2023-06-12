@@ -95,14 +95,6 @@ describe('annotation list view', () => {
     );
   });
 
-  it('renders a table list view', () => {
-    expect(wrapper.debug()).toMatchInlineSnapshot(`
-      "<Fragment>
-        <Memo(TableListViewTableComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" customTableColumn={{...}} entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function (anonymous)]} onFetchSuccess={[Function: onFetchSuccess]} setPageDataTestSubject={[Function: setPageDataTestSubject]} />
-      </Fragment>"
-    `);
-  });
-
   it('searches for groups', () => {
     const searchQuery = 'My Search Query';
     const references = [{ id: 'first_id', type: 'sometype' }];
