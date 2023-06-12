@@ -68,10 +68,20 @@ export const getQuery = ({
     resources: {
       terms: {
         field: 'resource.id',
-        order: {
-          _count: 'desc',
-        },
-        size: MAX_FINDINGS_TO_LOAD,
+        size: MAX_FINDINGS_TO_LOAD * 2,
+        // in case there are more resources then size, ensuring resources with more vulnerabilities
+        // will be included first, and then vulnerabilities with critical and high severity
+        order: [
+          {
+            _count: 'desc',
+          },
+          {
+            vulnerability_severity_critical: 'desc',
+          },
+          {
+            vulnerability_severity_high: 'desc',
+          },
+        ],
       },
       aggs: {
         vulnerabilitiesCountBucketSort: {
