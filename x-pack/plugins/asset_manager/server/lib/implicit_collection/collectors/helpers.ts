@@ -11,7 +11,7 @@ type CollectorSpan = 'processing_response';
 
 interface SpanOptions {
   name: CollectorSpan;
-  transaction: Transaction | null;
+  transaction?: Transaction | null;
 }
 
 export function withSpan<T>(options: SpanOptions, fn: () => T) {

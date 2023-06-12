@@ -17,6 +17,8 @@
     "@kbn/core-http-server",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/io-ts-utils",
-    "@kbn/expect"
+    "@kbn/expect",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-request-handler-context-server"
   ]
 }

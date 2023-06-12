@@ -21,14 +21,18 @@ import { startImplicitCollection } from './lib/implicit_collection';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetManagerConfig, configSchema } from './types';
+import { AssetAccessor } from './lib/asset_accessor';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
+export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
 
 export const config: PluginConfigDescriptor<AssetManagerConfig> = {
   schema: configSchema,
 };
 
-export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPluginSetup> {
+export class AssetManagerServerPlugin
+  implements Plugin<AssetManagerServerPluginSetup, AssetManagerServerPluginStart>
+{
   private context: PluginInitializerContext<AssetManagerConfig>;
   private stopImplicitCollection?: () => void;
   public config: AssetManagerConfig;
@@ -49,10 +53,17 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
 
     this.logger.info('Asset manager plugin [tech preview] is enabled');
 
-    const router = core.http.createRouter();
-    setupRoutes<RequestHandlerContext>({ router });
+    const assetAccessor = new AssetAccessor({
+      source: this.config.lockedSource,
+      sourceIndices: this.config.sourceIndices,
+    });
 
-    return {};
+    const router = core.http.createRouter();
+    setupRoutes<RequestHandlerContext>({ router, assetAccessor });
+
+    return {
+      assetAccessor,
+    };
   }
 
   public start(core: CoreStart) {
@@ -83,6 +94,8 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
         sourceIndices: this.config.sourceIndices,
       });
     }
+
+    return {};
   }
 
   public stop() {

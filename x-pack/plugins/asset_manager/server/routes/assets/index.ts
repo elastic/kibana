@@ -15,15 +15,15 @@ import {
   createRouteValidationFunction,
   createLiteralValueFromUndefinedRT,
 } from '@kbn/io-ts-utils';
-import { debug } from '../../common/debug_log';
-import { assetTypeRT, assetKindRT, relationRT } from '../../common/types_api';
-import { ASSET_MANAGER_API_BASE } from '../constants';
-import { getAssets } from '../lib/get_assets';
-import { getAllRelatedAssets } from '../lib/get_all_related_assets';
-import { SetupRouteOptions } from './types';
-import { getEsClientFromContext } from './utils';
-import { AssetNotFoundError } from '../lib/errors';
-import { isValidRange } from '../lib/utils';
+import { debug } from '../../../common/debug_log';
+import { assetTypeRT, assetKindRT, relationRT } from '../../../common/types_api';
+import { ASSET_MANAGER_API_BASE } from '../../constants';
+import { getAssets } from '../../lib/get_assets';
+import { getAllRelatedAssets } from '../../lib/get_all_related_assets';
+import { SetupRouteOptions } from '../types';
+import { getEsClientFromContext } from '../utils';
+import { AssetNotFoundError } from '../../lib/errors';
+import { isValidRange } from '../../lib/utils';
 
 function maybeArrayRT(t: rt.Mixed) {
   return rt.union([rt.array(t), t]);

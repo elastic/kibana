@@ -14,8 +14,8 @@ export const QUERY_MAX_SIZE = 1000;
 
 export interface CollectorOptions {
   client: ElasticsearchClient;
-  from: number;
-  transaction: Transaction | null;
+  from: string | number;
+  transaction?: Transaction | null;
   sourceIndices: AssetManagerConfig['sourceIndices'];
 }
 
