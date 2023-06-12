@@ -24,7 +24,7 @@ export const createApiKey = async (
           },
         ],
         restriction: {
-          workflows: [`${engineName}_query`],
+          workflows: ['search_application_query'],
         },
       },
     },
