@@ -190,8 +190,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
 
   const { context } = useRouteResolver(
     mode === MODE.NEW_JOB ? 'full' : 'basic',
-    // TODO check if this capability is actually needed for the data fiz
-    ['canGetJobs'],
+    mode === MODE.NEW_JOB ? ['canCreateJob'] : [],
     mode === MODE.NEW_JOB ? newJobResolvers : {}
   );
   return (
