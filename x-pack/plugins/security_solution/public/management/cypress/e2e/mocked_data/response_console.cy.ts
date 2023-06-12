@@ -24,7 +24,8 @@ import {
 } from '../../tasks/isolate';
 import { login } from '../../tasks/login';
 
-describe('Response console', () => {
+// unskip after https://github.com/elastic/endpoint-package/pull/373 is deployed
+describe.skip('Response console', () => {
   beforeEach(() => {
     login();
   });

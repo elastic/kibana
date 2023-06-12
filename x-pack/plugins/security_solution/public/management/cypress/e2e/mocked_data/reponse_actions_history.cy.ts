@@ -9,7 +9,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 
-describe('Response actions history page', () => {
+describe.skip('Response actions history page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
   // let actionData: ReturnTypeFromChainable<typeof indexActionResponses>;
 

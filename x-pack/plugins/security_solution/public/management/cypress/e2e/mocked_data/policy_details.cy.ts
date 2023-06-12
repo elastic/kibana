@@ -16,7 +16,8 @@ import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 
-describe('Policy Details', () => {
+// unskip after https://github.com/elastic/endpoint-package/pull/373 is deployed
+describe.skip('Policy Details', () => {
   const packagePolicyBackupHelper = new PackagePolicyBackupHelper();
   let indexedHostsData: CyIndexEndpointHosts;
 

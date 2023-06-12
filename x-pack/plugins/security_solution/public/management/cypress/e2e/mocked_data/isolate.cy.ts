@@ -28,7 +28,8 @@ import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('Isolate command', () => {
+// unskip after https://github.com/elastic/endpoint-package/pull/373 is deployed
+describe.skip('Isolate command', () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;

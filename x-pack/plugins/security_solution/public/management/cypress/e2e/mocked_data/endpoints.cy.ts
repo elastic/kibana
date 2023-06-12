@@ -9,7 +9,8 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 
-describe('Endpoints page', () => {
+// unskip after https://github.com/elastic/endpoint-package/pull/373 is deployed
+describe.skip('Endpoints page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
 
   before(() => {

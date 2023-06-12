@@ -34,7 +34,8 @@ const loginWithoutAccess = (url: string) => {
   cy.visit(url);
 };
 
-describe('Artifacts pages', () => {
+// unskip after https://github.com/elastic/endpoint-package/pull/373 is deployed
+describe.skip('Artifacts pages', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();

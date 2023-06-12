@@ -63,7 +63,8 @@ const visitArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-describe('Artifact tabs in Policy Details page', () => {
+// unskip after https://github.com/elastic/endpoint-package/pull/373 is deployed
+describe.skip('Artifact tabs in Policy Details page', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
