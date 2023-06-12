@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiFieldNumber, EuiFormControlLayoutDelimited } from '@elastic/eui';
 
@@ -16,12 +16,14 @@ import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 
 export const RangeSliderButton = ({
   value,
-  onClick,
   onChange,
+  isPopoverOpen,
+  setIsPopoverOpen,
 }: {
   value: RangeValue;
+  isPopoverOpen: boolean;
+  setIsPopoverOpen: (open: boolean) => void;
   onChange: (newRange: RangeValue) => void;
-  onClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }) => {
   const rangeSlider = useRangeSlider();
 
@@ -33,10 +35,28 @@ export const RangeSliderButton = ({
 
   const isLoading = rangeSlider.select((state) => state.output.loading);
 
+  const onClick = useCallback(
+    (event) => {
+      // the popover should remain open if the click/focus target is one of the number inputs
+      if (isPopoverOpen && event.target instanceof HTMLInputElement) {
+        return;
+      }
+      setIsPopoverOpen(true);
+    },
+    [isPopoverOpen, setIsPopoverOpen]
+  );
+
   return (
     <EuiFormControlLayoutDelimited
       fullWidth
       onClick={onClick}
+      onFocus={onClick}
+      onBlur={(event) => {
+        // the popover should be closed if the next element to recieve focus **after** blur is not a number input
+        if (isPopoverOpen && !(event.relatedTarget instanceof HTMLInputElement)) {
+          setIsPopoverOpen(false);
+        }
+      }}
       isLoading={isLoading}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${id}`}

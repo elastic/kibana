@@ -49,13 +49,8 @@ export const RangeSliderControl: FC = () => {
     <RangeSliderButton
       value={displayedValue}
       onChange={setDisplayedValue}
-      onClick={(event) => {
-        // the popover should remain open if the click target is one of the number inputs
-        if (isPopoverOpen && event.target instanceof HTMLInputElement) {
-          return;
-        }
-        setIsPopoverOpen(!isPopoverOpen);
-      }}
+      isPopoverOpen={isPopoverOpen}
+      setIsPopoverOpen={setIsPopoverOpen}
     />
   );
 
