@@ -66,6 +66,12 @@ export class VisualBuilderPageObject extends FtrService {
     }
   }
 
+  private async toggleYesNoSwitch(testSubj: string, value: boolean) {
+    const option = await this.testSubjects.find(`${testSubj}-${value ? 'yes' : 'no'}`);
+    (await option.findByCssSelector('label')).click();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async checkTabIsSelected(chartType: string) {
     const chartTypeBtn = await this.testSubjects.find(`${chartType}TsvbTypeBtn`);
     const isSelected = await chartTypeBtn.getAttribute('aria-selected');
@@ -588,17 +594,11 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setDropLastBucket(value: boolean) {
-    const option = await this.testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
-    (await option.findByCssSelector('label')).click();
-    await this.header.waitUntilLoadingHasFinished();
+    await this.toggleYesNoSwitch('metricsDropLastBucket', value);
   }
 
   public async setOverrideIndexPattern(value: boolean) {
-    const option = await this.testSubjects.find(
-      `seriesOverrideIndexPattern-${value ? 'yes' : 'no'}`
-    );
-    (await option.findByCssSelector('label')).click();
-    await this.header.waitUntilLoadingHasFinished();
+    await this.toggleYesNoSwitch('seriesOverrideIndexPattern', value);
   }
 
   public async waitForIndexPatternTimeFieldOptionsLoaded() {
@@ -910,6 +910,10 @@ export class VisualBuilderPageObject extends FtrService {
     const panelFilterQueryInput = await this.testSubjects.find('panelFilterQueryBar');
     await panelFilterQueryInput.type(query);
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setIgnoreFilters(value: boolean) {
+    await this.toggleYesNoSwitch('ignore_global_filter', value);
   }
 
   public async setMetricsDataTimerangeMode(value: string) {

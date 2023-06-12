@@ -142,7 +142,7 @@ const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
             'lists-all',
             'lists-read',
             'lists-summary',
-            `${APP_ID}-writeHostIsolationExceptions`,
+            `${APP_ID}-deleteHostIsolationExceptions`,
             `${APP_ID}-readHostIsolationExceptions`,
           ],
           id: 'host_isolation_exceptions_all',
@@ -152,7 +152,7 @@ const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
           },
-          ui: ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
+          ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
           api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
@@ -396,7 +396,7 @@ const hostIsolationSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [`${APP_ID}-writeHostIsolation`],
+          api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
           name: 'All',
@@ -404,7 +404,7 @@ const hostIsolationSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ui: ['writeHostIsolation'],
+          ui: ['writeHostIsolationRelease'],
         },
       ],
     },
