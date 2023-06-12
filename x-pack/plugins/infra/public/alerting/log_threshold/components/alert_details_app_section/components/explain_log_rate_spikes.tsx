@@ -101,9 +101,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     baselineMax: alertStart.clone().subtract(1, 'minutes').valueOf(),
     deviationMin: alertStart.valueOf(),
     deviationMax:
-      alertStart.clone().add(5, 'minutes') > moment(new Date())
+      alertStart.clone().add(10, 'minutes') > moment(new Date())
         ? moment(new Date()).valueOf()
-        : alertStart.clone().add(5, 'minutes').valueOf(),
+        : alertStart.clone().add(10, 'minutes').valueOf(),
   };
 
   const coPilotService = useCoPilot();
