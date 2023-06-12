@@ -5,26 +5,60 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  SearchResponse,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { HostMetadata } from '../../../../../common/endpoint/types';
 import type { HostListQueryResult, HostQueryResult } from '../../../types';
 
-// remove the top-level 'HostDetails' property if found, from previous schemas
-function stripHostDetails(host: HostMetadata | { HostDetails: HostMetadata }): HostMetadata {
-  return 'HostDetails' in host ? host.HostDetails : host;
+/**
+ * Maps the data from the index to `HostMetadata`, ensuring that only known properties are
+ * returned.
+ * @param data
+ */
+export function mapToHostMetadata(
+  data:
+    | HostMetadata
+    // support for top-level 'HostDetails' property if found - from previous index schemas
+    | { HostDetails: HostMetadata }
+): HostMetadata {
+  const {
+    host,
+    agent,
+    '@timestamp': timestamp,
+    elastic,
+    Endpoint,
+    event,
+    data_stream: dataStream,
+  } = 'HostDetails' in data ? data.HostDetails : data;
+
+  return {
+    '@timestamp': timestamp,
+    event,
+    elastic,
+    Endpoint,
+    agent,
+    host,
+    data_stream: dataStream,
+  };
 }
 
 export const queryResponseToHostResult = (
   searchResponse: SearchResponse<HostMetadata | { HostDetails: HostMetadata }>
 ): HostQueryResult => {
   const response = searchResponse as SearchResponse<HostMetadata | { HostDetails: HostMetadata }>;
-  return {
+  const metadata =
+    response.hits.hits && response.hits.hits[0] && response.hits.hits[0]._source
+      ? mapToHostMetadata(response.hits.hits[0]._source)
+      : undefined;
+
+  const hostResult: HostQueryResult = {
     resultLength: response.hits.hits.length,
-    result:
-      response.hits.hits.length > 0
-        ? stripHostDetails(response.hits.hits[0]._source as HostMetadata)
-        : undefined,
+    result: metadata,
   };
+
+  return hostResult;
 };
 
 export const queryResponseToHostListResult = (
@@ -33,12 +67,11 @@ export const queryResponseToHostListResult = (
   const response = searchResponse as SearchResponse<HostMetadata | { HostDetails: HostMetadata }>;
   const list =
     response.hits.hits.length > 0
-      ? response.hits.hits.map((entry) => stripHostDetails(entry?._source as HostMetadata))
+      ? response.hits.hits.map((entry) => mapToHostMetadata(entry?._source as HostMetadata))
       : [];
 
   return {
-    resultLength:
-      (response.hits?.total as unknown as { value: number; relation: string }).value || 0,
+    resultLength: (response.hits?.total as SearchTotalHits).value || 0,
     resultList: list,
   };
 };

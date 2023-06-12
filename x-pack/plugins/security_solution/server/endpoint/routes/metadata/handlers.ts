@@ -12,6 +12,7 @@ import type {
   RequestHandler,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { MetadataListResponse } from '../../../../common/endpoint/types';
 import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
@@ -60,14 +61,14 @@ export function getMetadataListRequestHandler(
         request.query
       );
 
-      return response.ok({
-        body: {
-          data,
-          total,
-          page: request.query.page || ENDPOINT_DEFAULT_PAGE,
-          pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
-        },
-      });
+      const body: MetadataListResponse = {
+        data,
+        total,
+        page: request.query.page || ENDPOINT_DEFAULT_PAGE,
+        pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
+      };
+
+      return response.ok({ body });
     } catch (error) {
       return errorHandler(logger, response, error);
     }

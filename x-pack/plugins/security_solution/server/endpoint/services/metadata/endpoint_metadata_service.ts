@@ -22,7 +22,7 @@ import type {
   MaybeImmutable,
   MetadataListResponse,
   PolicyData,
-  UnitedAgentMetadata,
+  UnitedAgentMetadataPersistedData,
 } from '../../../../common/endpoint/types';
 import {
   EndpointHostNotFoundError,
@@ -38,6 +38,7 @@ import {
   getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
 import {
+  mapToHostMetadata,
   queryResponseToHostListResult,
   queryResponseToHostResult,
 } from '../../routes/metadata/support/query_strategies';
@@ -375,10 +376,12 @@ export class EndpointMetadataService {
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
     const unitedIndexQuery = await buildUnitedIndexQuery(soClient, queryOptions, endpointPolicyIds);
 
-    let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadata>;
+    let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
     try {
-      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
+      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadataPersistedData>(
+        unitedIndexQuery
+      );
     } catch (error) {
       const errorType = error?.meta?.body?.error?.type ?? '';
       if (errorType === 'index_not_found_exception') {
@@ -422,8 +425,11 @@ export class EndpointMetadataService {
     const hosts: HostInfo[] = [];
 
     for (const doc of docs) {
-      const { endpoint: metadata, agent: _agent } = doc?._source?.united ?? {};
-      if (metadata && _agent) {
+      const { endpoint, agent: _agent } = doc?._source?.united ?? {};
+
+      if (endpoint && _agent) {
+        const metadata = mapToHostMetadata(endpoint);
+
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
