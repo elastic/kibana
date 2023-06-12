@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
-import type { ActionRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
+import type { ActionRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 
 const EndpointFieldsLimited = [

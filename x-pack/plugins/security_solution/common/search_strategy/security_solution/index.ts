@@ -100,13 +100,6 @@ import type {
   FirstLastSeenStrategyResponse,
 } from './first_last_seen';
 import type {
-  ActionRequestOptions,
-  ActionRequestStrategyResponse,
-  ActionResponsesRequestOptions,
-  ActionResponsesRequestStrategyResponse,
-  ResponseActionsQueries,
-} from './response_actions';
-import type {
   ManagedUserDetailsRequestOptions,
   ManagedUserDetailsStrategyResponse,
 } from './users/managed_details';
@@ -223,10 +216,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsRelatedUsersStrategyResponse
   : T extends RelatedEntitiesQueries.relatedHosts
   ? UsersRelatedHostsStrategyResponse
-  : T extends ResponseActionsQueries.actions
-  ? ActionRequestStrategyResponse
-  : T extends ResponseActionsQueries.results
-  ? ActionResponsesRequestStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -297,10 +286,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? UsersRelatedHostsRequestOptions
   : T extends RelatedEntitiesQueries.relatedUsers
   ? HostsRelatedUsersRequestOptions
-  : T extends ResponseActionsQueries.actions
-  ? ActionRequestOptions
-  : T extends ResponseActionsQueries.results
-  ? ActionResponsesRequestOptions
   : never;
 
 export interface CommonFields {

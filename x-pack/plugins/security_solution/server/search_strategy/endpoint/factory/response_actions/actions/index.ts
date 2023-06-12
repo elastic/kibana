@@ -14,7 +14,7 @@ import type {
   ActionRequestOptions,
   ActionRequestStrategyResponse,
   ResponseActionsQueries,
-} from '../../../../../../common/search_strategy/security_solution/response_actions';
+} from '../../../../../../common/search_strategy/endpoint/response_actions';
 
 export const allActions: EndpointFactory<ResponseActionsQueries.actions> = {
   buildDsl: (options: ActionRequestOptions, { authz }) => {

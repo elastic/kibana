@@ -10,7 +10,7 @@ import type {
   ActionResponsesRequestOptions,
   ActionResponsesRequestStrategyResponse,
   ResponseActionsQueries,
-} from '../../../../../../common/search_strategy/security_solution/response_actions';
+} from '../../../../../../common/search_strategy/endpoint/response_actions';
 
 import { buildActionResultsQuery } from './query.action_results.dsl';
 import type { EndpointFactory } from '../../types';

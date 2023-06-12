@@ -12,15 +12,15 @@ import { compact, filter, map } from 'lodash';
 
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
-import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/security_solution/response_actions/types';
-import { SortOrder } from '../../../../common/search_strategy/security_solution/response_actions/types';
+import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { SortOrder } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { ResponseActionsQueries } from '../../../../common/search_strategy/endpoint/response_actions';
 import type {
   ActionResponsesRequestOptions,
   ActionRequestOptions,
   ActionRequestStrategyResponse,
   ActionResponsesRequestStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/response_actions';
-import { ResponseActionsQueries } from '../../../../common/search_strategy/security_solution/response_actions';
+} from '../../../../common/search_strategy/endpoint/response_actions';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   EndpointAutomatedActionListRequestQuery,
@@ -30,6 +30,7 @@ import type {
 interface GetAutomatedActionsListOptions {
   enabled: boolean;
 }
+
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
   { enabled }: GetAutomatedActionsListOptions

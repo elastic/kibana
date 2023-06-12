@@ -6,14 +6,14 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { ActionResponsesRequestStrategyParseResponse } from '../security_solution/response_actions/response';
+import type { ActionResponsesRequestStrategyParseResponse } from './response_actions/response';
 import type {
   ResponseActionsQueries,
   ActionRequestOptions,
   ActionRequestStrategyResponse,
   ActionResponsesRequestOptions,
   ActionResponsesRequestStrategyResponse,
-} from '../security_solution/response_actions';
+} from './response_actions';
 
 export type EndpointFactoryQueryTypes = ResponseActionsQueries;
 
