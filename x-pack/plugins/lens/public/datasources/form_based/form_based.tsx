@@ -997,6 +997,7 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     columns: {},
     columnOrder: [],
     sampling: 1,
+    ignoreGlobalFilters: false,
   };
 }
 

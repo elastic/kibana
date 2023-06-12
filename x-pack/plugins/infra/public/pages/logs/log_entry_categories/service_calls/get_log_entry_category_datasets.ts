@@ -12,7 +12,7 @@ import {
   getLogEntryCategoryDatasetsRequestPayloadRT,
   getLogEntryCategoryDatasetsSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH,
-} from '../../../../../common/http_api/log_analysis';
+} from '../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
@@ -40,6 +40,7 @@ export const callGetLogEntryCategoryDatasetsAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryCategoryDatasetsSuccessReponsePayloadRT)(response);

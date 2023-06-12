@@ -59,6 +59,12 @@ export interface EndpointAuthz {
   /** if user has read permissions for host isolation exceptions */
   canReadHostIsolationExceptions: boolean;
   /**
+   * if user has permissions to access host isolation exceptions. This could be set to false, while
+   * `canReadHostIsolationExceptions` is true in cases where the license might have been downgraded.
+   * It is used to show the UI elements that allow users to navigate to the host isolation exceptions.
+   */
+  canAccessHostIsolationExceptions: boolean;
+  /**
    * if user has permissions to delete host isolation exceptions. This could be set to true, while
    * `canWriteHostIsolationExceptions` is false in cases where the license might have been downgraded.
    * In that use case, users should still be allowed to ONLY delete entries.
