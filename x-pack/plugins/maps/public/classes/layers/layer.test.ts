@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SOURCE_DATA_REQUEST_ID,
-  SOURCE_META_DATA_REQUEST_ID,
-} from '../../../common/constants';
+import { SOURCE_DATA_REQUEST_ID, SOURCE_META_DATA_REQUEST_ID } from '../../../common/constants';
 import { AbstractLayer } from './layer';
 import { ISource } from '../sources/source';
 
@@ -50,7 +47,7 @@ describe('isFittable', () => {
           includeInFitToBounds: test.includeInFitToBounds,
         },
         source: {
-          supportsFitToBounds: () => (test.fitToBounds),
+          supportsFitToBounds: () => test.fitToBounds,
         } as unknown as ISource,
       });
       expect(await layer.isFittable()).toBe(test.canFit);
@@ -86,18 +83,18 @@ describe('isLayerLoading', () => {
         layerDescriptor: {},
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (true);
+      layer._isTiled = () => true;
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
     test('Should be true when tiles are loading', () => {
       const layer = new AbstractLayer({
         layerDescriptor: {
-          __areTilesLoaded: false
+          __areTilesLoaded: false,
         },
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (true);
+      layer._isTiled = () => true;
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
@@ -111,12 +108,12 @@ describe('isLayerLoading', () => {
               dataId: SOURCE_META_DATA_REQUEST_ID,
               dataRequestMetaAtStart: {},
               dataRequestToken: Symbol(),
-            }
-          ]
+            },
+          ],
         },
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (true);
+      layer._isTiled = () => true;
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
@@ -127,7 +124,7 @@ describe('isLayerLoading', () => {
         },
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (true);
+      layer._isTiled = () => true;
       expect(layer.isLayerLoading(1)).toBe(false);
     });
   });
@@ -138,7 +135,7 @@ describe('isLayerLoading', () => {
         layerDescriptor: {},
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (false);
+      layer._isTiled = () => false;
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
@@ -151,12 +148,12 @@ describe('isLayerLoading', () => {
               dataId: SOURCE_DATA_REQUEST_ID,
               dataRequestMetaAtStart: {},
               dataRequestToken: Symbol(),
-            }
-          ]
+            },
+          ],
         },
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (false);
+      layer._isTiled = () => false;
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
@@ -176,12 +173,12 @@ describe('isLayerLoading', () => {
               dataId: SOURCE_META_DATA_REQUEST_ID,
               dataRequestMetaAtStart: {},
               dataRequestToken: Symbol(),
-            }
-          ]
+            },
+          ],
         },
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (false);
+      layer._isTiled = () => false;
       expect(layer.isLayerLoading(1)).toBe(true);
     });
 
@@ -195,12 +192,12 @@ describe('isLayerLoading', () => {
               dataRequestMeta: {},
               dataRequestMetaAtStart: undefined,
               dataRequestToken: undefined,
-            }
-          ]
+            },
+          ],
         },
         source: {} as unknown as ISource,
       });
-      layer._isTiled = () => (false);
+      layer._isTiled = () => false;
       expect(layer.isLayerLoading(1)).toBe(false);
     });
   });
