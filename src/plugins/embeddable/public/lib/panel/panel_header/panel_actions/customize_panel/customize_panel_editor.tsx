@@ -125,13 +125,9 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             <EuiButtonEmpty
               size="xs"
               data-test-subj="resetCustomEmbeddablePanelTitleButton"
-              onClick={() => {
-                setPanelTitle(embeddable.getInput().title ?? embeddable.getOutput().defaultTitle);
-              }}
+              onClick={() => setPanelTitle(embeddable.getOutput().defaultTitle)}
               disabled={
-                hideTitle || !editMode || embeddable.getInput().title != undefined
-                  ? embeddable.getInput().title === panelTitle
-                  : embeddable.getOutput().defaultTitle === panelTitle || panelTitle === ''
+                hideTitle || !editMode || embeddable.getOutput().defaultTitle === panelTitle
               }
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
@@ -176,15 +172,12 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               size="xs"
               data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
               onClick={() => {
-                setPanelDescription(
-                  embeddable.getInput().description ?? embeddable.getOutput().defaultDescription
-                );
+                setPanelDescription(embeddable.getOutput().defaultDescription);
               }}
               disabled={
-                hideTitle || !editMode || embeddable.getInput().description != undefined
-                  ? embeddable.getInput().description === panelDescription
-                  : embeddable.getOutput().defaultDescription === panelDescription ||
-                    panelDescription === ''
+                hideTitle ||
+                !editMode ||
+                embeddable.getOutput().defaultDescription === panelDescription
               }
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
