@@ -21,7 +21,7 @@ import {
   SectionId,
   StepId,
   ToggleProductAction,
-  ToggleStepAction,
+  AddFinishedStepAction,
 } from './types';
 
 describe('reducer', () => {
@@ -58,7 +58,7 @@ describe('reducer', () => {
       } as unknown as Record<SectionId, Record<CardId, ActiveCard>> | null,
     };
 
-    const action: ToggleStepAction = {
+    const action: AddFinishedStepAction = {
       type: GetStartedPageActions.AddFinishedStep,
       payload: {
         cardId: GetSetUpCardId.introduction,

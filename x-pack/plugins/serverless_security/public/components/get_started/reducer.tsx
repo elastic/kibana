@@ -13,20 +13,20 @@ import {
   StepId,
   ToggleProductAction,
   TogglePanelReducer,
-  ToggleStepAction,
+  AddFinishedStepAction,
 } from './types';
 
 export const reducer = (
   state: TogglePanelReducer,
-  action: ToggleProductAction | ToggleStepAction
+  action: ToggleProductAction | AddFinishedStepAction
 ): TogglePanelReducer => {
   if (action.type === GetStartedPageActions.ToggleProduct) {
     const activeProducts = new Set([...state.activeProducts]);
 
-    if (activeProducts.has(action.payload?.section)) {
-      activeProducts.delete(action.payload?.section);
+    if (activeProducts.has(action.payload.section)) {
+      activeProducts.delete(action.payload.section);
     } else {
-      activeProducts.add(action.payload?.section);
+      activeProducts.add(action.payload.section);
     }
 
     return {

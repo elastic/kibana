@@ -100,7 +100,7 @@ export interface ToggleProductAction {
   payload: { section: ProductId };
 }
 
-export interface ToggleStepAction {
+export interface AddFinishedStepAction {
   type: GetStartedPageActions.AddFinishedStep;
   payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
 }
