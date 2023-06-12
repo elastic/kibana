@@ -18,6 +18,7 @@ import {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
+  const log = getService('log');
   const endpointTestResources = getService('endpointTestResources');
 
   const expectedData = [

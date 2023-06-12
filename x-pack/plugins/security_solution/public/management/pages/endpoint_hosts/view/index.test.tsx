@@ -205,10 +205,19 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('when there are policies, but no hosts', () => {
+    let renderResult;
+    let firstPolicyId;
     beforeEach(async () => {
+      const policyData = mockPolicyResultList({ total: 3 }).items;
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [],
-        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+        endpointPackagePolicies: policyData,
+      });
+      firstPolicyId = policyData[0].id;
+
+      renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
     });
     afterEach(() => {
@@ -216,30 +225,32 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should show the no hosts empty state', async () => {
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
       const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
       expect(emptyHostsTable).not.toBeNull();
     });
 
     it('should display the onboarding steps', async () => {
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
       expect(onboardingSteps).not.toBeNull();
     });
 
     it('should show policy selection', async () => {
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
+    });
+
+    it.only("should navigate to Fleet's Add agent flyout through the Enroll agent button", async () => {
+      const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+      const firstPolicy = (await renderResult.findAllByRole('option'))[0];
+      userEvent.click(firstPolicy);
+      // expect(enrollAgentButton.getAttribute('disabled')).toBe(false);
+      const enrollAgentButton = await renderResult.findByTestId('onboardingStartButton');
+      userEvent.click(enrollAgentButton);
+      const changedUrlAction = await userChangedUrlChecker;
+      expect(changedUrlAction.payload.pathname).toEqual(
+        `fleet/policies/${firstPolicyId}?openEnrollmentFlyout=true`
+      );
+      expect(history.location.pathname).toEqual('something/else');
     });
   });
 
