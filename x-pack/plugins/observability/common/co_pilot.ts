@@ -130,7 +130,7 @@ export const coPilotPrompts = {
             The library is: ${library}
             The function is: ${functionName}
             
-            Your task is to desribe what the library is and what its use cases are, and to describe what the function
+            Your task is to describe what the library is and what its use cases are, and to describe what the function
             does. The output format should look as follows:
             
             Library description: Provide a concise description of the library
@@ -239,7 +239,7 @@ export const coPilotPrompts = {
           content: `I am a software engineer. I am trying to understand what a process running on my
           machine does.
           
-          Your task is to first desribe what the process is and what its general use cases are. If I also provide you
+          Your task is to first describe what the process is and what its general use cases are. If I also provide you
           with the arguments to the process you should then explain its arguments and how they influence the behaviour
           of the process. If I do not provide any arguments then explain the behaviour of the process when no arguments are
           provided.
