@@ -53,6 +53,7 @@ export const getTableList = (
           dataViews={services.dataViews}
           createDataView={services.createDataView}
           queryInputServices={services.queryInputServices}
+          navigateToLens={() => services.core.application.navigateToApp('lens')}
         />
       </TableListViewKibanaProvider>
     </RootDragDropProvider>

@@ -16,6 +16,8 @@ import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/pu
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { EuiButton, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EventAnnotationGroupConfig } from '../../common';
 import type { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { EventAnnotationGroupContent } from '../../common/types';
@@ -56,6 +58,7 @@ export const EventAnnotationGroupTableList = ({
   createDataView,
   queryInputServices,
   toasts,
+  navigateToLens,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
@@ -66,6 +69,7 @@ export const EventAnnotationGroupTableList = ({
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
   toasts: IToasts;
+  navigateToLens: () => void;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -154,7 +158,38 @@ export const EventAnnotationGroupTableList = ({
         initialPageSize={initialPageSize}
         initialFilter={''}
         customTableColumn={getCustomColumn(dataViews)}
-        // emptyPrompt={noItemsFragment} TODO
+        emptyPrompt={
+          <EuiEmptyPrompt
+            title={
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    id="eventAnnotation.tableList.emptyPrompt.title"
+                    defaultMessage="Create your first annotation in Lens"
+                  />
+                </h2>
+              </EuiTitle>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="eventAnnotation.tableList.emptyPrompt.body"
+                  defaultMessage="You can create and save annotations for use across multiple visualization in the
+                    Lens visualization editor."
+                />
+              </p>
+            }
+            actions={
+              <EuiButton onClick={navigateToLens}>
+                <FormattedMessage
+                  id="eventAnnotation.tableList.emptyPrompt.cta"
+                  defaultMessage="Create new annotation in Lens"
+                />
+              </EuiButton>
+            }
+            iconType="flag"
+          />
+        }
         entityName={i18n.translate('eventAnnotation.tableList.entityName', {
           defaultMessage: 'annotation group',
         })}
