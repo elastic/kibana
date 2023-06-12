@@ -14,7 +14,11 @@ import type { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
+export type OptionsListSearchTechnique = 'prefix' | 'wildcard';
+export const OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
+
 export interface OptionsListEmbeddableInput extends DataControlInput {
+  searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: string[];
   existsSelected?: boolean;
@@ -23,9 +27,9 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   hideActionBar?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  placeholder?: string;
   hideSort?: boolean;
   exclude?: boolean;
-  placeholder?: string;
 }
 
 export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
@@ -61,6 +65,7 @@ export type OptionsListRequest = Omit<
   OptionsListRequestBody,
   'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
 > & {
+  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
   runPastTimeout?: boolean;
@@ -75,6 +80,7 @@ export type OptionsListRequest = Omit<
  */
 export interface OptionsListRequestBody {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
   sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;

@@ -13,6 +13,7 @@ import type {
   GeoJSONSource,
   VectorTileSource,
   RasterTileSource,
+  SourceSpecification,
   StyleSpecification,
   MapEvent,
   MapOptions,
@@ -45,6 +46,7 @@ export { maplibregl };
 export type {
   Map,
   LayerSpecification,
+  SourceSpecification,
   StyleSpecification,
   Source,
   GeoJSONSource,

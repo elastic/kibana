@@ -63,6 +63,7 @@ export function registerSetupRoute({
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+          config: dependencies.config,
         };
 
         logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
@@ -127,6 +128,7 @@ export function registerSetupRoute({
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+          config: dependencies.config,
         };
 
         logger.info('Setting up Elasticsearch and Fleet for Universal Profiling');

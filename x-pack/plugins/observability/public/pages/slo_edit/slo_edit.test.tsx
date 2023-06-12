@@ -338,7 +338,7 @@ describe('SLO Edit Page', () => {
                   },
                   "timeWindow": Object {
                     "duration": "7d",
-                    "isRolling": true,
+                    "type": "rolling",
                   },
                 },
               ],
