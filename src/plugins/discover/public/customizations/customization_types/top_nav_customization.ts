@@ -14,7 +14,6 @@ export interface TopNavDefaultMenuItem {
 }
 
 export interface TopNavDefaultMenu {
-  optionsItem?: TopNavDefaultMenuItem;
   newItem?: TopNavDefaultMenuItem;
   openItem?: TopNavDefaultMenuItem;
   shareItem?: TopNavDefaultMenuItem;

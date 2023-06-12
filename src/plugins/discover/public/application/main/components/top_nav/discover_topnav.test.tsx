@@ -128,13 +128,12 @@ describe('Discover topnav component', () => {
       expect(mockTopNavCustomization.getMenuItems).toHaveBeenCalledTimes(1);
       const topNavMenu = component.find(TopNavMenu);
       const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-      expect(topMenuConfig).toEqual(['options', 'new', 'open', 'test', 'share', 'inspect', 'save']);
+      expect(topMenuConfig).toEqual(['new', 'open', 'share', 'test', 'inspect', 'save']);
     });
 
     it('should allow disabling default menu items', () => {
       mockUseCustomizations = true;
       mockTopNavCustomization.defaultMenu = {
-        optionsItem: { disabled: true },
         newItem: { disabled: true },
         openItem: { disabled: true },
         shareItem: { disabled: true },
@@ -156,7 +155,6 @@ describe('Discover topnav component', () => {
     it('should allow reordering default menu items', () => {
       mockUseCustomizations = true;
       mockTopNavCustomization.defaultMenu = {
-        optionsItem: { order: 7 },
         newItem: { order: 6 },
         openItem: { order: 5 },
         shareItem: { order: 4 },
@@ -172,7 +170,7 @@ describe('Discover topnav component', () => {
       );
       const topNavMenu = component.find(TopNavMenu);
       const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-      expect(topMenuConfig).toEqual(['save', 'inspect', 'share', 'open', 'new', 'options']);
+      expect(topMenuConfig).toEqual(['save', 'inspect', 'share', 'open', 'new']);
     });
   });
 
@@ -185,7 +183,7 @@ describe('Discover topnav component', () => {
           <DiscoverTopNav {...props} />
         </DiscoverMainProvider>
       );
-      const topNav = component.find(discoverServiceMock.navigation.ui.AggregateQueryTopNavMenu);
+      const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
       const customDataViewPicker = mountWithIntl(
         topNav.prop('customDataViewPicker') as ReactElement

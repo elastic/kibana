@@ -222,15 +222,15 @@ export const getTopNavLinks = ({
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
 
   if (!defaultMenu?.newItem?.disabled) {
-    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 200 });
+    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });
   }
 
   if (!defaultMenu?.openItem?.disabled) {
-    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 300 });
+    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 200 });
   }
 
   if (!defaultMenu?.shareItem?.disabled) {
-    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 400 });
+    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 300 });
   }
 
   if (
@@ -239,15 +239,15 @@ export const getTopNavLinks = ({
     !isPlainRecord &&
     !defaultMenu?.alertsItem?.disabled
   ) {
-    entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 500 });
+    entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 400 });
   }
 
   if (!defaultMenu?.inspectItem?.disabled) {
-    entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 600 });
+    entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 500 });
   }
 
   if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
-    entries.push({ data: saveSearch, order: defaultMenu?.saveItem?.order ?? 700 });
+    entries.push({ data: saveSearch, order: defaultMenu?.saveItem?.order ?? 600 });
   }
 
   return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);

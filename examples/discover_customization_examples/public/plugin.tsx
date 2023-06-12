@@ -72,7 +72,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
       customizations.set({
         id: 'top_nav',
         defaultMenu: {
-          optionsItem: { disabled: true },
           newItem: { disabled: true },
           openItem: { disabled: true },
           shareItem: { order: 200 },
