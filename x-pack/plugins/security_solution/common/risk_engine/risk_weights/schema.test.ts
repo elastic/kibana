@@ -15,6 +15,44 @@ import { RiskCategories, RiskWeightTypes } from './types';
 describe('risk weight schema', () => {
   let type: string;
 
+  describe('allowed types', () => {
+    it('allows the global weight type', () => {
+      const payload = {
+        type: RiskWeightTypes.global,
+        host: 0.1,
+      };
+      const decoded = riskWeightSchema.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    it('allows the risk category weight type', () => {
+      const payload = {
+        type: RiskWeightTypes.global,
+        host: 0.1,
+      };
+      const decoded = riskWeightSchema.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    it('rejects an unknown weight type', () => {
+      const payload = {
+        type: 'unknown',
+        host: 0.1,
+      };
+      const decoded = riskWeightSchema.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors)).length).toBeGreaterThan(0);
+      expect(message.schema).toEqual({});
+    });
+  });
+
   describe('conditional fields', () => {
     describe('global weights', () => {
       beforeEach(() => {
@@ -160,6 +198,36 @@ describe('risk weight schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([]);
         expect(message.schema).toEqual({ type, value: RiskCategories.alerts, host: 0.1 });
+      });
+
+      describe('allowed category values', () => {
+        it('allows the alerts type for a category', () => {
+          const payload = {
+            type,
+            value: RiskCategories.alerts,
+            host: 0.1,
+          };
+          const decoded = riskWeightSchema.decode(payload);
+          const message = pipe(decoded, foldLeftRight);
+
+          expect(getPaths(left(message.errors))).toEqual([]);
+          expect(message.schema).toEqual(payload);
+        });
+
+        it('rejects an unknown category value', () => {
+          const payload = {
+            type,
+            value: 'unknown',
+            host: 0.1,
+          };
+          const decoded = riskWeightSchema.decode(payload);
+          const message = pipe(decoded, foldLeftRight);
+
+          expect(getPaths(left(message.errors))).toContain(
+            'Invalid value "unknown" supplied to "value"'
+          );
+          expect(message.schema).toEqual({});
+        });
       });
     });
   });
