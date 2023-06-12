@@ -238,20 +238,6 @@ describe('when on the endpoint list page', () => {
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
     });
-
-    it.only("should navigate to Fleet's Add agent flyout through the Enroll agent button", async () => {
-      const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
-      const firstPolicy = (await renderResult.findAllByRole('option'))[0];
-      userEvent.click(firstPolicy);
-      // expect(enrollAgentButton.getAttribute('disabled')).toBe(false);
-      const enrollAgentButton = await renderResult.findByTestId('onboardingStartButton');
-      userEvent.click(enrollAgentButton);
-      const changedUrlAction = await userChangedUrlChecker;
-      expect(changedUrlAction.payload.pathname).toEqual(
-        `fleet/policies/${firstPolicyId}?openEnrollmentFlyout=true`
-      );
-      expect(history.location.pathname).toEqual('something/else');
-    });
   });
 
   describe('when there is no selected host in the url', () => {

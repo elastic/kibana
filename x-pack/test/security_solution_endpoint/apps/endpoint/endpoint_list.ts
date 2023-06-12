@@ -19,7 +19,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
+  const policyTestResources = getService('policyTestResources');
 
   const expectedData = [
     [
@@ -96,23 +98,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.exists('emptyPolicyTable');
       });
       it('navigates to fleet through the Enroll agent button when there are policies but no endpoints', async () => {
-        const noHostsData = await endpointTestResources.loadEndpointData({
-          numHosts: 0,
-          generatorSeed: 'onlypolicies',
-          waitUntilTransformed: false,
-        });
+        const policyData = await policyTestResources.createPolicy();
+        // refresh page
+        await browser.refresh();
         await testSubjects.exists('emptyHostsTable');
-        const firstPolicyOption = await testSubjects.findByClassName('euiSelectableListItem');
+        const firstPolicyOption = (
+          await testSubjects.findService.allByCssSelector('.euiSelectableListItem')
+        )[0];
         firstPolicyOption.click();
-        const enrollAgentButton = await testSubjects.find('onboardingStartButton');
-        expect(await enrollAgentButton.isEnabled()).to.eql(true);
-        enrollAgentButton.click();
+        await testSubjects.waitForEnabled('onboardingStartButton');
+        await testSubjects.click('onboardingStartButton');
         await testSubjects.exists('agentEnrollmentFlyout');
 
         // cleanup
-        if (noHostsData) {
-          await endpointTestResources.unloadEndpointData(noHostsData);
-        }
+        await policyData.cleanup();
         await pageObjects.endpoint.navigateToEndpointList();
       });
 
