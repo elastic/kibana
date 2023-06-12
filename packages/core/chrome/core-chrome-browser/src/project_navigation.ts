@@ -121,9 +121,7 @@ export interface NodeDefinition<
   /** Optional children of the navigation node */
   children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
   /**
-   * Temporarilly we allow href to be passed.
-   * Once all the deeplinks will be exposed in packages we will not allow href anymore
-   * and force deeplink id to be passed
+   * Use href for absolute links only. Internal links should use "link".
    */
   href?: string;
 }
