@@ -219,7 +219,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         request.params.connectorId,
         request.query.from,
         request.query.size,
-        request.query.type as 'content'| 'access_control' | 'all'
+        request.query.type as 'content' | 'access_control' | 'all'
       );
       return response.ok({ body: result });
     })
