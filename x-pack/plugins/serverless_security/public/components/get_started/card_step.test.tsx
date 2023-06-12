@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { CardStep } from './card_step';
-import { GetSetUpCardId, IntroductionSteps } from './types';
+import { GetSetUpCardId, IntroductionSteps, SectionId, StepId } from './types';
 
 describe('CardStepComponent', () => {
   const step = {
@@ -21,38 +21,32 @@ describe('CardStepComponent', () => {
     splitPanel: <div>Split Panel</div>,
   };
 
-  const cardId = GetSetUpCardId.introduction;
   const onStepClicked = jest.fn();
 
+  const props = {
+    sectionId: SectionId.getSetUp,
+    cardId: GetSetUpCardId.introduction,
+    step,
+    onStepClicked,
+    finishedStepsByCard: new Set() as Set<StepId>,
+  };
+
   it('should toggle step expansion on click', () => {
-    const { getByText } = render(
-      <CardStep
-        cardId={cardId}
-        step={step}
-        onStepClicked={onStepClicked}
-        finishedStepsByCard={new Set()}
-      />
-    );
+    const { getByText } = render(<CardStep {...props} />);
 
     const stepTitle = getByText('Test Step');
     fireEvent.click(stepTitle);
 
     expect(onStepClicked).toHaveBeenCalledTimes(1);
     expect(onStepClicked).toHaveBeenCalledWith({
+      sectionId: SectionId.getSetUp,
       stepId: IntroductionSteps.watchOverviewVideo,
       cardId: GetSetUpCardId.introduction,
     });
   });
 
   it('should render step title, badges, and description when expanded', () => {
-    const { getByText } = render(
-      <CardStep
-        cardId={cardId}
-        step={step}
-        onStepClicked={onStepClicked}
-        finishedStepsByCard={new Set()}
-      />
-    );
+    const { getByText } = render(<CardStep {...props} />);
 
     const stepTitle = getByText('Test Step');
     fireEvent.click(stepTitle);
@@ -69,14 +63,7 @@ describe('CardStepComponent', () => {
   });
 
   it('should render split panel when expanded', () => {
-    const { getByText, queryByText } = render(
-      <CardStep
-        cardId={cardId}
-        step={step}
-        onStepClicked={onStepClicked}
-        finishedStepsByCard={new Set()}
-      />
-    );
+    const { getByText, queryByText } = render(<CardStep {...props} />);
 
     const stepTitle = getByText('Test Step');
     fireEvent.click(stepTitle);
@@ -93,12 +80,7 @@ describe('CardStepComponent', () => {
     const finishedStepsByCard = new Set([IntroductionSteps.watchOverviewVideo]);
 
     const { getByTestId } = render(
-      <CardStep
-        cardId={cardId}
-        step={step}
-        onStepClicked={onStepClicked}
-        finishedStepsByCard={finishedStepsByCard}
-      />
+      <CardStep {...props} finishedStepsByCard={finishedStepsByCard} />
     );
 
     const checkIcon = getByTestId(`${step.id}-icon`);
