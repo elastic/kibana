@@ -33,7 +33,12 @@ describe('UploadState', () => {
     filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
     filesClient.upload.mockReturnValue(of(undefined) as any);
     uploadState = new UploadState(
-      { id: 'test', http: {}, maxSizeBytes: 1000, allowedMimeTypes: ['text/plain', 'image/png'] } as FileKindBrowser,
+      {
+        id: 'test',
+        http: {},
+        maxSizeBytes: 1000,
+        allowedMimeTypes: ['text/plain', 'image/png'],
+      } as FileKindBrowser,
       filesClient,
       {},
       imageMetadataFactory
@@ -205,7 +210,9 @@ describe('UploadState', () => {
           {
             file,
             status: 'idle',
-            error: new Error('File mime type "text/x-sh" is not supported. Supported mime types are: text/plain, image/png.'),
+            error: new Error(
+              'File mime type "text/x-sh" is not supported. Supported mime types are: text/plain, image/png.'
+            ),
           },
         ],
       });

@@ -100,16 +100,16 @@ export class UploadState {
   private readonly validateFile = (file: File): void => {
     const fileKind = this.fileKind;
 
-    if (
-      fileKind.maxSizeBytes != null &&
-      file.size > this.fileKind.maxSizeBytes!
-    ) {
+    if (fileKind.maxSizeBytes != null && file.size > this.fileKind.maxSizeBytes!) {
       const message = i18nTexts.fileTooLarge(String(this.fileKind.maxSizeBytes));
       throw new Error(message);
     }
 
     if (fileKind.allowedMimeTypes != null && !fileKind.allowedMimeTypes.includes(file.type)) {
-      const message = i18nTexts.mimeTypeNotSupported(file.type, fileKind.allowedMimeTypes.join(', '));
+      const message = i18nTexts.mimeTypeNotSupported(
+        file.type,
+        fileKind.allowedMimeTypes.join(', ')
+      );
       throw new Error(message);
     }
   };
