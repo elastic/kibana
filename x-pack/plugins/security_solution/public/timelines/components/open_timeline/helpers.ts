@@ -13,21 +13,20 @@ import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
-  ColumnHeaderOptions,
   TimelineResult,
   SingleTimelineResolveResponse,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   DataProviderType,
-  TimelineId,
   TimelineStatus,
   TimelineType,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 
 import {
   addNotes as dispatchAddNotes,

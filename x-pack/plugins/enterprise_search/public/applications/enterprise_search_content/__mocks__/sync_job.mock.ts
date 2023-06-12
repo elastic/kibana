@@ -7,7 +7,12 @@
 
 import moment from 'moment';
 
-import { ConnectorSyncJob, TriggerMethod, SyncStatus } from '../../../../common/types/connectors';
+import {
+  ConnectorSyncJob,
+  TriggerMethod,
+  SyncStatus,
+  SyncJobType,
+} from '../../../../common/types/connectors';
 import { SyncJobView } from '../components/search_index/sync_jobs/sync_jobs_view_logic';
 
 export const syncJob: ConnectorSyncJob = {
@@ -29,6 +34,7 @@ export const syncJob: ConnectorSyncJob = {
   id: 'id',
   indexed_document_count: 50,
   indexed_document_volume: 40,
+  job_type: SyncJobType.FULL,
   last_seen: '2022-09-05T15:59:39.816+00:00',
   metadata: {},
   started_at: '2022-09-05T14:59:39.816+00:00',
