@@ -5740,6 +5740,192 @@
           "items"
         ]
       },
+      "kibana_saved_object_type": {
+        "title": "Kibana saved object asset type",
+        "type": "string",
+        "enum": [
+          "dashboard",
+          "visualization",
+          "search",
+          "index-pattern",
+          "map",
+          "lens",
+          "ml-module",
+          "security-rule",
+          "csp_rule_template"
+        ]
+      },
+      "elasticsearch_asset_type": {
+        "title": "Elasticsearch asset type",
+        "type": "string",
+        "enum": [
+          "component_template",
+          "ingest_pipeline",
+          "index_template",
+          "ilm_policy",
+          "transform",
+          "data_stream_ilm_policy"
+        ]
+      },
+      "installation_info": {
+        "title": "Installation info object",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "installed_kibana": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "$ref": "#/components/schemas/kibana_saved_object_type"
+              }
+            }
+          },
+          "installed_es": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "deferred": {
+                "type": "boolean"
+              },
+              "type": {
+                "$ref": "#/components/schemas/elasticsearch_asset_type"
+              }
+            }
+          },
+          "package_assets": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "epm-packages-assets"
+                ]
+              }
+            }
+          },
+          "es_index_patterns": {
+            "additionalProperties": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "install_status": {
+            "type": "string",
+            "enum": [
+              "installed",
+              "installing",
+              "install_failed"
+            ]
+          },
+          "install_version": {
+            "type": "string"
+          },
+          "install_started_at": {
+            "type": "string"
+          },
+          "install_source": {
+            "type": "string",
+            "enum": [
+              "registry",
+              "upload",
+              "bundled"
+            ]
+          },
+          "install_kibana_space_id": {
+            "type": "string"
+          },
+          "install_format_schema_version": {
+            "type": "string"
+          },
+          "keep_policies_up_to_date": {
+            "type": "boolean"
+          },
+          "verification_status": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "unverified",
+              "unknown"
+            ]
+          },
+          "verification_key_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "experimental_data_stream_features": {
+            "type": "array",
+            "properties": {
+              "data_stream": {
+                "type": "string"
+              },
+              "features": {
+                "type": "object",
+                "properties": {
+                  "synthetic_source": {
+                    "type": "boolean",
+                    "nullable": true
+                  },
+                  "tsdb": {
+                    "type": "boolean",
+                    "nullable": true
+                  },
+                  "doc_value_only_numeric": {
+                    "type": "boolean",
+                    "nullable": true
+                  },
+                  "doc_value_only_other": {
+                    "type": "boolean",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          },
+          "internal": {
+            "type": "boolean"
+          },
+          "removal": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "installed_kibana",
+          "installed_es",
+          "es_index_patterns",
+          "name",
+          "version",
+          "install_status",
+          "install_version",
+          "install_started_at",
+          "install_source",
+          "verification_status"
+        ]
+      },
       "search_result": {
         "title": "Search result",
         "type": "object",
@@ -5770,6 +5956,9 @@
           },
           "status": {
             "type": "string"
+          },
+          "installationInfo": {
+            "$ref": "#/components/schemas/installation_info"
           },
           "savedObject": {
             "type": "object",
@@ -5808,33 +5997,6 @@
         },
         "required": [
           "items"
-        ]
-      },
-      "kibana_saved_object_type": {
-        "title": "Kibana saved object asset type",
-        "type": "string",
-        "enum": [
-          "dashboard",
-          "visualization",
-          "search",
-          "index-pattern",
-          "map",
-          "lens",
-          "ml-module",
-          "security-rule",
-          "csp_rule_template"
-        ]
-      },
-      "elasticsearch_asset_type": {
-        "title": "Elasticsearch asset type",
-        "type": "string",
-        "enum": [
-          "component_template",
-          "ingest_pipeline",
-          "index_template",
-          "ilm_policy",
-          "transform",
-          "data_stream_ilm_policy"
         ]
       },
       "bulk_install_packages_response": {
