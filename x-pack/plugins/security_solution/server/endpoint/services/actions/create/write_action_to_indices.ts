@@ -195,7 +195,7 @@ const addRuleInfoToAction = (
   payload: CreateActionPayload
 ):
   | {
-      rule?: { id: string; name: string };
+      rule: { id: string; name: string };
     }
   | undefined => {
   if (payload.rule_id && payload.rule_name) {

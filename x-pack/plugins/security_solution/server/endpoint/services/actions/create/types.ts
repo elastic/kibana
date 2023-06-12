@@ -28,7 +28,6 @@ export type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
 export interface CreateActionMetadata {
   casesClient?: CasesClient;
   minimumLicenseRequired?: LicenseType;
-  enableActionsWithErrors?: boolean;
 }
 
 export interface ActionCreateService {
