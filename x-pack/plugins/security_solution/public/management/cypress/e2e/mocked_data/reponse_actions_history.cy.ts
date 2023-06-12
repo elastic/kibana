@@ -9,7 +9,8 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 
-describe('Response actions history page', () => {
+// Flaky, example build failure: https://buildkite.com/elastic/kibana-pull-request/builds/134463
+describe.skip('Response actions history page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
   // let actionData: ReturnTypeFromChainable<typeof indexActionResponses>;
 
