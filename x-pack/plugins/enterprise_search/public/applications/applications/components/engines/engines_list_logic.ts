@@ -9,12 +9,12 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 
-import {
-  EnterpriseSearchEngine,
-  EnterpriseSearchEngineDetails,
-  EnterpriseSearchEnginesResponse,
-} from '../../../../../common/types/engines';
 import { Page } from '../../../../../common/types/pagination';
+import {
+  EnterpriseSearchApplication,
+  EnterpriseSearchApplicationDetails,
+  EnterpriseSearchApplicationsResponse,
+} from '../../../../../common/types/search_applications';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
@@ -35,7 +35,7 @@ interface EuiBasicTableOnChange {
 }
 
 export type EnginesListActions = Pick<
-  Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
+  Actions<EnginesListAPIArguments, EnterpriseSearchApplicationsResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   closeDeleteEngineModal(): void;
@@ -47,8 +47,10 @@ export type EnginesListActions = Pick<
   fetchEngines(): void;
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
-  openDeleteEngineModal: (engine: EnterpriseSearchEngine | EnterpriseSearchEngineDetails) => {
-    engine: EnterpriseSearchEngine;
+  openDeleteEngineModal: (
+    engine: EnterpriseSearchApplication | EnterpriseSearchApplicationDetails
+  ) => {
+    engine: EnterpriseSearchApplication;
   };
   setIsFirstRequest(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
@@ -56,7 +58,7 @@ export type EnginesListActions = Pick<
 
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
-  deleteModalEngine: EnterpriseSearchEngine | null;
+  deleteModalEngine: EnterpriseSearchApplication | null;
   deleteModalEngineName: string;
   deleteStatus: typeof DeleteEngineAPILogic.values.status;
   hasNoEngines: boolean;
@@ -66,7 +68,7 @@ interface EngineListValues {
   isLoading: boolean;
   meta: Page;
   parameters: { count: number; meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
-  results: EnterpriseSearchEngine[]; // stores engine list value from data
+  results: EnterpriseSearchApplication[]; // stores engine list value from data
   searchQuery: string;
   status: typeof FetchEnginesAPILogic.values.status;
 }

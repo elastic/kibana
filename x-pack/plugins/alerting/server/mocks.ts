@@ -22,6 +22,7 @@ import {
   PublicRuleResultService,
   PublicRuleMonitoringService,
 } from './types';
+import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 
 export { rulesClientMock };
 
@@ -162,6 +163,7 @@ const createRuleExecutorServicesMock = <
       },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
+    alertsClient: publicAlertsClientMock.create(),
     savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
