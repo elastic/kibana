@@ -8884,7 +8884,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly coPilot?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+          "{ readonly coPilot?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -10213,6 +10213,86 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.metricsExplorerViewSavedObjectAttributesRT",
+        "type": "Object",
+        "tags": [],
+        "label": "metricsExplorerViewSavedObjectAttributesRT",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "ExactC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">; }>>, ",
+          "UnknownRecordC",
+          "]>"
+        ],
+        "path": "x-pack/plugins/observability/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.metricsExplorerViewSavedObjectRT",
+        "type": "Object",
+        "tags": [],
+        "label": "metricsExplorerViewSavedObjectRT",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; attributes: ",
+          "IntersectionC",
+          "<[",
+          "ExactC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">; }>>, ",
+          "UnknownRecordC",
+          "]>; }>, ",
+          "PartialC",
+          "<{ version: ",
+          "StringC",
+          "; updated_at: ",
+          "Type",
+          "<number, string, unknown>; }>]>"
+        ],
+        "path": "x-pack/plugins/observability/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-server.uiSettings",

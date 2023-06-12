@@ -2162,6 +2162,20 @@
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedLayer.ignoreGlobalFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10239,7 +10253,7 @@
             "section": "def-public.GenericIndexPatternColumn",
             "text": "GenericIndexPatternColumn"
           },
-          ">; columnOrder: string[]; linkToLayers?: string[] | undefined; incompleteColumns?: Record<string, ",
+          ">; ignoreGlobalFilters?: boolean | undefined; columnOrder: string[]; linkToLayers?: string[] | undefined; incompleteColumns?: Record<string, ",
           {
             "pluginId": "lens",
             "scope": "public",
