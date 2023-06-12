@@ -13,7 +13,7 @@ import { DataViewsService } from '../../../../common/data_views';
 import { RuntimeField } from '../../../../common/types';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSchema } from '../../../../common/schemas';
+import { runtimeFieldSchemaUpdate } from '../../../../common/schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -93,7 +93,7 @@ const updateRuntimeFieldRouteFactory =
             }),
             body: schema.object({
               name: schema.never(),
-              runtimeField: runtimeFieldSchema,
+              runtimeField: runtimeFieldSchemaUpdate,
             }),
           },
           response: {

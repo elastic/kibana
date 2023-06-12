@@ -30,8 +30,7 @@ export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
   ]
 );
 
-export const primitiveRuntimeFieldSchema = schema.object({
-  type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
+const primitiveRuntimeFieldSchemaShared = {
   script: schema.maybe(
     schema.object({
       source: schema.string(),
@@ -44,10 +43,19 @@ export const primitiveRuntimeFieldSchema = schema.object({
       min: 0,
     })
   ),
+};
+
+export const primitiveRuntimeFieldSchema = schema.object({
+  type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
+  ...primitiveRuntimeFieldSchemaShared,
 });
 
-export const compositeRuntimeFieldSchema = schema.object({
-  type: schema.literal('composite') as Type<RuntimeType>,
+const primitiveRuntimeFieldSchemaUpdate = schema.object({
+  type: schema.maybe(runtimeFieldNonCompositeFieldsSpecTypeSchema),
+  ...primitiveRuntimeFieldSchemaShared,
+});
+
+const compositeRuntimeFieldSchemaShared = {
   script: schema.maybe(
     schema.object({
       source: schema.string(),
@@ -68,11 +76,26 @@ export const compositeRuntimeFieldSchema = schema.object({
       })
     )
   ),
+};
+
+export const compositeRuntimeFieldSchema = schema.object({
+  type: schema.literal('composite') as Type<RuntimeType>,
+  ...compositeRuntimeFieldSchemaShared,
+});
+
+const compositeRuntimeFieldSchemaUpdate = schema.object({
+  type: schema.maybe(schema.literal('composite') as Type<RuntimeType>),
+  ...compositeRuntimeFieldSchemaShared,
 });
 
 export const runtimeFieldSchema = schema.oneOf([
   primitiveRuntimeFieldSchema,
   compositeRuntimeFieldSchema,
+]);
+
+export const runtimeFieldSchemaUpdate = schema.oneOf([
+  primitiveRuntimeFieldSchemaUpdate,
+  compositeRuntimeFieldSchemaUpdate,
 ]);
 
 export const fieldSpecSchemaFields = {
