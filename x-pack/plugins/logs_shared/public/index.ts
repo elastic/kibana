@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './index.scss';
-
 import { LogsSharedPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
@@ -14,4 +12,7 @@ import { LogsSharedPlugin } from './plugin';
 export function plugin() {
   return new LogsSharedPlugin();
 }
-export type { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
+
+// Shared components
+export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';
+export type { LogStreamProps } from './components/log_stream';
