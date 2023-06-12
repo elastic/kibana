@@ -6,11 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// Follow pattern from https://github.com/elastic/kibana/pull/52447
-// TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
-
-import type { CustomIntegrationIcon } from '@kbn/custom-integrations-plugin/common';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -21,12 +16,7 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '..';
 
-import type {
-  PackageSpecManifest,
-  PackageSpecIcon,
-  PackageSpecScreenshot,
-  PackageSpecCategory,
-} from './package_spec';
+import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -48,13 +38,6 @@ export type InstallSource = 'registry' | 'upload' | 'bundled';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
-export type DetailViewPanelName =
-  | 'overview'
-  | 'policies'
-  | 'assets'
-  | 'settings'
-  | 'custom'
-  | 'api-reference';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice' | 'license';
@@ -114,6 +97,29 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
   ElasticsearchAssetType.index
 >;
+
+export type AllowedAssetTypes = [
+  KibanaAssetType.dashboard,
+  KibanaAssetType.search,
+  KibanaAssetType.visualization,
+  ElasticsearchAssetType.transform
+];
+
+// Defined as part of the removing public references to saved object schemas
+export interface SimpleSOAssetType {
+  id: string;
+  type: ElasticsearchAssetType | KibanaSavedObjectType;
+  updatedAt?: string;
+  attributes: {
+    title?: string;
+    description?: string;
+  };
+}
+
+export interface AssetSOObject {
+  id: string;
+  type: ElasticsearchAssetType | KibanaSavedObjectType;
+}
 
 export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;
@@ -251,12 +257,6 @@ export interface RegistryStream {
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
 
-export type RequirementVersion = string;
-export type RequirementVersionRange = string;
-export interface ServiceRequirements {
-  versions: RequirementVersionRange;
-}
-
 // Registry's response types
 // from /search
 // https://github.com/elastic/package-registry/blob/master/docs/api/search.json
@@ -278,8 +278,6 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates'
   | 'categories'
 >;
-
-export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
 
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json
@@ -420,6 +418,34 @@ export interface RegistryVarsEntry {
   };
 }
 
+// Deprecated as part of the removing public references to saved object schemas
+// See https://github.com/elastic/kibana/issues/149098
+/**
+ * @deprecated
+ */
+export interface InstallableSavedObject {
+  type: string;
+  id: string;
+  attributes: Installation;
+  references?: SOReference[];
+  created_at?: string;
+  updated_at?: string;
+  version?: string;
+  coreMigrationVersion?: string;
+  namespaces?: string[];
+}
+
+// Deprecated as part of the removing public references to saved object schemas
+// See https://github.com/elastic/kibana/issues/149098
+/**
+ * @deprecated
+ */
+interface SOReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
 // some properties are optional in Registry responses but required in EPM
 // internal until we need them
 export interface EpmPackageAdditions {
@@ -437,35 +463,18 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
+  id: string;
   integration?: string;
-  id: string;
+  savedObject?: InstallableSavedObject;
 };
-
-export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
-
-export interface IntegrationCardItem {
-  url: string;
-  release?: IntegrationCardReleaseLabel;
-  description: string;
-  name: string;
-  title: string;
-  version: string;
-  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
-  integration: string;
-  id: string;
-  categories: string[];
-  fromIntegrations?: string;
-  isReauthorizationRequired?: boolean;
-  isUnverified?: boolean;
-  isUpdateAvailable?: boolean;
-  showLabels?: boolean;
-}
-
-export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+
+export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
+
+export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 
 // TODO - Expand this with other experimental indexing types
 export type ExperimentalIndexingFeature =
@@ -479,7 +488,7 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
-export interface Installation extends SavedObjectAttributes {
+export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
@@ -500,8 +509,9 @@ export interface Installation extends SavedObjectAttributes {
     data_stream: string;
     features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>;
+  internal?: boolean;
+  removable?: boolean;
 }
-
 export interface PackageUsageStats {
   agent_policy_count: number;
 }
@@ -519,12 +529,12 @@ export type InstallStatusExcluded<T = {}> = T & {
 
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
-  savedObject: SavedObject<Installation>;
+  savedObject?: InstallableSavedObject;
 };
 
 export type Installing<T = {}> = T & {
   status: InstallationStatus['Installing'];
-  savedObject: SavedObject<Installation>;
+  savedObject?: InstallableSavedObject;
 };
 
 export type NotInstalled<T = {}> = T & {
@@ -537,17 +547,20 @@ export type InstallFailed<T = {}> = T & {
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;
 
-export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+export interface KibanaAssetReference {
+  id: string;
   type: KibanaSavedObjectType;
-};
-export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
+}
+export interface EsAssetReference {
+  id: string;
   type: ElasticsearchAssetType;
   deferred?: boolean;
-};
+}
 
-export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
+export interface PackageAssetReference {
+  id: string;
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
-};
+}
 
 export interface IndexTemplateMappings {
   properties: any;

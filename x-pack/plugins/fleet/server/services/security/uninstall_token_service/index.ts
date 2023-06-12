@@ -24,6 +24,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { asyncForEach } from '@kbn/std';
 
+import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { GetUninstallTokensResponse } from '../../../../common/types/rest_spec/uninstall_token';
+
+import type { UninstallToken } from '../../../../common/types/models/uninstall_token';
+
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import { appContextService } from '../../app_context';
 import { agentPolicyService } from '../../agent_policy';
@@ -44,11 +50,17 @@ interface UninstallTokenSOAggregation {
 }
 
 export interface UninstallTokenServiceInterface {
-  getTokenForPolicyId(policyId: string): Promise<string>;
+  getTokenForPolicyId(policyId: string): Promise<UninstallToken | null>;
 
-  getTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>>;
+  getTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]>;
 
-  getAllTokens(): Promise<Record<string, string>>;
+  findTokensForPartialPolicyId(
+    searchString: string,
+    page?: number,
+    perPage?: number
+  ): Promise<GetUninstallTokensResponse>;
+
+  getAllTokens(page?: number, perPage?: number): Promise<GetUninstallTokensResponse>;
 
   getHashedTokenForPolicyId(policyId: string): Promise<string>;
 
@@ -74,32 +86,67 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * gets uninstall token for given policy id
    *
    * @param policyId agent policy id
-   * @returns token
+   * @returns uninstall token if found
    */
-  public async getTokenForPolicyId(policyId: string): Promise<string> {
-    return (await this.getTokensForPolicyIds([policyId]))[policyId];
+  public async getTokenForPolicyId(policyId: string): Promise<UninstallToken | null> {
+    return (await this.getTokensByIncludeFilter({ include: policyId })).items[0] ?? null;
   }
 
   /**
    * gets uninstall tokens for given policy ids
    *
    * @param policyIds agent policy ids
-   * @returns Record<policyId, token>
+   * @returns array of UninstallToken objects
    */
-  public async getTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
-    let filter = policyIds
-      .map((policyId) => `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: ${policyId}`)
-      .join(' or ');
+  public async getTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
+    return (await this.getTokensByIncludeFilter({ include: policyIds })).items;
+  }
+  /**
+   * gets uninstall token for given policy id, paginated
+   *
+   * @param searchString a string for partial matching the policyId
+   * @param page
+   * @param perPage
+   * @param policyId agent policy id
+   * @returns GetUninstallTokensResponse
+   */
+  public async findTokensForPartialPolicyId(
+    searchString: string,
+    page: number = 1,
+    perPage: number = 20
+  ): Promise<GetUninstallTokensResponse> {
+    return await this.getTokensByIncludeFilter({ include: `.*${searchString}.*`, page, perPage });
+  }
+
+  /**
+   * gets uninstall tokens for all policies, optionally paginated or returns all tokens
+   * @param page
+   * @param perPage
+   * @returns GetUninstallTokensResponse
+   */
+  public async getAllTokens(page?: number, perPage?: number): Promise<GetUninstallTokensResponse> {
+    return this.getTokensByIncludeFilter({ perPage, page });
+  }
+
+  private async getTokensByIncludeFilter({
+    page = 1,
+    perPage = SO_SEARCH_LIMIT,
+    include,
+  }: {
+    include?: AggregationsTermsInclude;
+    perPage?: number;
+    page?: number;
+  }): Promise<GetUninstallTokensResponse> {
     const bucketSize = 10000;
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       perPage: 0,
-      filter,
       aggs: {
         by_policy_id: {
           terms: {
             field: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id`,
             size: bucketSize,
+            include,
           },
           aggs: {
             latest: {
@@ -131,14 +178,27 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       break;
     }
 
-    filter = aggResults
-      .reduce((acc, { latest }) => {
-        const id = latest?.hits?.hits?.at(0)?._id;
-        if (!id) return acc;
-        const filterStr = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${id}"`;
-        acc.push(filterStr);
-        return acc;
-      }, [] as string[])
+    const firstItemsIndexInPage = (page - 1) * perPage;
+    const isCurrentPageEmpty = firstItemsIndexInPage >= aggResults.length;
+    if (isCurrentPageEmpty) {
+      return { items: [], total: aggResults.length, page, perPage };
+    }
+
+    const getCreatedAt = (soBucket: UninstallTokenSOAggregationBucket) =>
+      new Date(soBucket.latest.hits.hits[0]._source?.created_at ?? Date.now()).getTime();
+
+    // sort buckets by  { created_at: 'desc' }
+    // this is done with `slice()` instead of ES, because
+    // 1) the query below doesn't support pagination, so we need to slice the IDs here,
+    // 2) the query above doesn't support bucket sorting based on sub aggregation, see this:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#_ordering_by_a_sub_aggregation
+    aggResults.sort((a, b) => getCreatedAt(b) - getCreatedAt(a));
+
+    const filter: string = aggResults
+      .slice((page - 1) * perPage, page * perPage)
+      .map(({ latest }) => {
+        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${latest.hits.hits[0]._id}"`;
+      })
       .join(' or ');
 
     const tokensFinder =
@@ -150,33 +210,24 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         }
       );
     let tokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+
     for await (const result of tokensFinder.find()) {
-      tokenObjects = [...tokenObjects, ...result.saved_objects];
+      tokenObjects = result.saved_objects;
+      break;
     }
     tokensFinder.close();
 
-    const tokensMap = tokenObjects.reduce((acc, { attributes }) => {
-      const policyId = attributes.policy_id;
-      const token = attributes.token || attributes.token_plain;
-      if (!policyId || !token) {
-        return acc;
-      }
+    const items: UninstallToken[] = tokenObjects
+      .filter(
+        ({ attributes }) => attributes.policy_id && (attributes.token || attributes.token_plain)
+      )
+      .map(({ attributes, created_at: createdAt }) => ({
+        policy_id: attributes.policy_id,
+        token: attributes.token || attributes.token_plain,
+        ...(createdAt ? { created_at: createdAt } : {}),
+      }));
 
-      acc[policyId] = token;
-      return acc;
-    }, {} as Record<string, string>);
-
-    return tokensMap;
-  }
-
-  /**
-   * gets uninstall tokens for all policies
-   *
-   * @returns Record<policyId, token>
-   */
-  public async getAllTokens(): Promise<Record<string, string>> {
-    const policyIds = await this.getAllPolicyIds();
-    return this.getTokensForPolicyIds(policyIds);
+    return { items, total: aggResults.length, page, perPage };
   }
 
   /**
@@ -196,8 +247,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * @returns Record<policyId, hashedToken>
    */
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
-    const tokensMap = await this.getTokensForPolicyIds(policyIds);
-    return Object.entries(tokensMap).reduce((acc, [policyId, token]) => {
+    const tokens = await this.getTokensForPolicyIds(policyIds);
+    return tokens.reduce((acc, { policy_id: policyId, token }) => {
       if (policyId && token) {
         acc[policyId] = this.hashToken(token);
       }
@@ -243,7 +294,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       return {};
     }
 
-    const existingTokens = force ? {} : await this.getTokensForPolicyIds(policyIds);
+    const existingTokens = force
+      ? {}
+      : (await this.getTokensForPolicyIds(policyIds)).reduce(
+          (acc, { policy_id: policyId, token }) => {
+            acc[policyId] = token;
+            return acc;
+          },
+          {} as Record<string, string>
+        );
     const missingTokenPolicyIds = force
       ? policyIds
       : policyIds.filter((policyId) => !existingTokens[policyId]);
@@ -360,7 +419,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const config = appContextService.getConfig();
     const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
 
-    asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
+    await asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
       await this.soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
         policyIdsBatch.map((policyId) => ({
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
