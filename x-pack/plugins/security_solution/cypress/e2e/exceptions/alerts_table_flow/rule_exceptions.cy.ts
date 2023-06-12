@@ -24,8 +24,8 @@ import {
   submitNewExceptionItem,
   validateExceptionItemFirstAffectedRuleNameInRulePage,
   validateExceptionItemAffectsTheCorrectRulesInRulePage,
-  validateExceptionCondition,
-  validateExceptionCommentText,
+  validateExceptionConditionField,
+  validateExceptionCommentCountAndText,
 } from '../../../tasks/exceptions';
 import {
   esArchiverLoad,
@@ -49,18 +49,14 @@ describe('Rule Exceptions workflows from Alert', () => {
   const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception List Item';
   const newRule = getNewRule();
-  before(() => {
-    esArchiverResetKibana();
-  });
 
+  beforeEach(() => {
+    esArchiverResetKibana();
+    deleteAlertsAndRules();
+  });
   after(() => {
     esArchiverUnload('exceptions');
   });
-
-  beforeEach(() => {
-    deleteAlertsAndRules();
-  });
-
   afterEach(() => {
     esArchiverUnload('exceptions_2');
   });
@@ -123,6 +119,7 @@ describe('Rule Exceptions workflows from Alert', () => {
 
     cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
   });
+
   it('Creates an exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields ', () => {
     esArchiverLoad('endpoint');
     login();
@@ -134,12 +131,31 @@ describe('Rule Exceptions workflows from Alert', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 
-    // Validate the highlighted fields are auto populated
-    validateExceptionCondition(0, 'have.text', 'host.name');
+    const highlightedFieldsBasedOnAlertDoc = [
+      'host.name',
+      'agent.id',
+      'user.name',
+      'process.executable',
+      'file.path',
+    ];
 
-    // Comment text area should be opened by default with one comment added
-    // clarifying that the conditions are pre-filled from alert's data
-    validateExceptionCommentText(1, 'Exception conditions are pre-filled with relevant data from');
+    /**
+     * Validate the highlighted fields are auto populated, these
+     * fields are based on the alert document that should be generated
+     * when the endpoint rule runs
+     */
+    highlightedFieldsBasedOnAlertDoc.forEach((field, index) => {
+      validateExceptionConditionField(field);
+    });
+
+    /**
+     * Validate that the comments are opened by default with one comment added
+     * showing a text contains information about the pre-filled conditions
+     */
+    validateExceptionCommentCountAndText(
+      1,
+      'Exception conditions are pre-filled with relevant data from'
+    );
 
     addExceptionFlyoutItemName(ITEM_NAME);
     submitNewExceptionItem();

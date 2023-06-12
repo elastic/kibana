@@ -28,7 +28,7 @@ import {
   addExceptionFlyoutItemName,
   selectCloseSingleAlerts,
   submitNewExceptionItem,
-  validateExceptionCondition,
+  validateExceptionConditionField,
 } from '../../../tasks/exceptions';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
@@ -63,8 +63,8 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     openAddEndpointExceptionFromFirstAlert();
 
     // As the endpoint.alerts-* is used to trigger the alert the
-    // file.Ext.code_signature will be populated as the first item
-    validateExceptionCondition(0, 'have.text', 'file.Ext.code_signature');
+    // file.Ext.code_signature will be auto-populated
+    validateExceptionConditionField('file.Ext.code_signature');
 
     selectCloseSingleAlerts();
     addExceptionFlyoutItemName('Sample Exception');
