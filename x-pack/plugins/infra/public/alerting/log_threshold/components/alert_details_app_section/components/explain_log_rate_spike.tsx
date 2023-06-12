@@ -31,7 +31,7 @@ import {
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
-import { getESQueryForLogSpike } from '../../../../../../common/alerting/logs/log_threshold/query';
+import { getESQueryForLogSpike } from '../log_rate_spike_query';
 
 export interface AlertDetailsExplainLogRateSpikesSectionProps {
   rule: Rule<PartialRuleParams>;
@@ -61,14 +61,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     };
 
     const getQuery = (timestampField: string) => {
-      const executionTimeRange = {
-        lte: alert.start,
-      };
-
       const esSearchRequest = getESQueryForLogSpike(
         validatedParams as CountRuleParams,
-        timestampField,
-        executionTimeRange
+        timestampField
       ) as QueryDslQueryContainer;
 
       if (esSearchRequest) {

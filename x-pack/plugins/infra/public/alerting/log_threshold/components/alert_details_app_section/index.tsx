@@ -39,7 +39,7 @@ import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import LogsRatioChart from './components/logs_ratio_chart';
-import { ExplainLogRateSpikes } from './components/explain_log_rate_spikes';
+import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);

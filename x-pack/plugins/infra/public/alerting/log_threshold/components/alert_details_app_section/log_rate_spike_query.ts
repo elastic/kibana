@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { RuleParams, CountCriteria, ExecutionTimeRange } from '.';
-import { buildFiltersFromCriteria } from './query_helpers';
+import { RuleParams, CountCriteria } from '../../../../../common/alerting/logs/log_threshold';
+import { buildFiltersFromCriteria } from '../../../../../common/alerting/logs/log_threshold/query_helpers';
 
 export const getESQueryForLogSpike = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
-  timestampField: string,
-  executionTimeRange?: ExecutionTimeRange
+  timestampField: string
 ): object => {
-  const { mustFilters, mustNotFilters } = buildFiltersFromCriteria(
-    params,
-    timestampField,
-    executionTimeRange
-  );
+  const { mustFilters, mustNotFilters } = buildFiltersFromCriteria(params, timestampField);
 
   const query = {
     bool: {
