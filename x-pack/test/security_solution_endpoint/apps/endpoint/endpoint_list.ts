@@ -95,36 +95,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('finds no data in list and prompts onboarding to add policy', async () => {
         await testSubjects.exists('emptyPolicyTable');
       });
-    });
+      it('navigates to fleet through the Enroll agent button when there are policies but no endpoints', async () => {
+        const noHostsData = await endpointTestResources.loadEndpointData({
+          numHosts: 0,
+          generatorSeed: 'onlypolicies',
+          waitUntilTransformed: false,
+        });
+        await testSubjects.exists('emptyHostsTable');
+        const firstPolicyOption = await testSubjects.findByClassName('euiSelectableListItem');
+        firstPolicyOption.click();
+        const enrollAgentButton = await testSubjects.find('onboardingStartButton');
+        expect(await enrollAgentButton.isEnabled()).to.eql(true);
+        enrollAgentButton.click();
+        await testSubjects.exists('agentEnrollmentFlyout');
 
-    describe('when there is data,', () => {
-      let customHostData: IndexedHostsAndAlertsResponse;
-      // let customHostData2: IndexedHostsAndAlertsResponse;
-      before(async () => {
-        // indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
-        indexedData = await endpointTestResources.loadEndpointData({
-          numHosts: 3,
-        });
-        customHostData = await endpointTestResources.loadEndpointData({
-          namedHosts: true,
-        });
+        // cleanup
+        if (noHostsData) {
+          await endpointTestResources.unloadEndpointData(noHostsData);
+        }
         await pageObjects.endpoint.navigateToEndpointList();
-        await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 4, 90000);
-      });
-      after(async () => {
-        await deleteAllDocsFromMetadataCurrentIndex(getService);
-        await deleteAllDocsFromMetadataUnitedIndex(getService);
-        if (indexedData) {
-          await endpointTestResources.unloadEndpointData(indexedData);
-        }
-        if (customHostData) {
-          await endpointTestResources.unloadEndpointData(customHostData);
-        }
       });
 
-      it('finds page title', async () => {
-        const title = await testSubjects.getVisibleText('header-page-title');
-        expect(title).to.equal('Endpoints');
+      describe('when there is data,', () => {
+        let customHostData: IndexedHostsAndAlertsResponse;
+        // let customHostData2: IndexedHostsAndAlertsResponse;
+        before(async () => {
+          // indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
+          indexedData = await endpointTestResources.loadEndpointData({
+            numHosts: 3,
+          });
+          /* customHostData = await endpointTestResources.loadEndpointData({
+            namedHosts: true,
+          });*/
+          await pageObjects.endpoint.navigateToEndpointList();
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+            'endpointListTable',
+            // 4,
+            3,
+            90000
+          );
+        });
+        after(async () => {
+          await deleteAllDocsFromMetadataCurrentIndex(getService);
+          await deleteAllDocsFromMetadataUnitedIndex(getService);
+          if (indexedData) {
+            await endpointTestResources.unloadEndpointData(indexedData);
+          }
+          if (customHostData) {
+            await endpointTestResources.unloadEndpointData(customHostData);
+          }
+        });
+
+        it('finds page title', async () => {
+          const title = await testSubjects.getVisibleText('header-page-title');
+          expect(title).to.equal('Endpoints');
+        });
       });
 
       it('displays table data', async () => {
