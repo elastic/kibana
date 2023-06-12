@@ -27,7 +27,6 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
     }
   );
 
-  // TODO check license and capabilities
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
   });

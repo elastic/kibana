@@ -35,7 +35,6 @@ export const settingsRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  // TODO check capabilities
   const { context } = useRouteResolver('full', ['canGetJobs'], {
     getMlNodeCount,
   });

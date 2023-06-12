@@ -37,7 +37,6 @@ export const indexBasedRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  // TODO check if required capabilities is correct
   const { context } = useRouteResolver('basic', []);
 
   return (
