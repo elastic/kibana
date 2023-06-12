@@ -73,13 +73,18 @@ export function getEventAnnotationService(
   const mapSavedObjectToGroupContent = (
     savedObject: SimpleSavedObject<EventAnnotationGroupAttributes>
   ): EventAnnotationGroupContent => {
+    const groupConfig = mapSavedObjectToGroupConfig(savedObject);
+
     return {
       id: savedObject.id,
       references: savedObject.references,
       type: savedObject.type,
       updatedAt: savedObject.updatedAt ? savedObject.updatedAt : '',
       attributes: {
-        ...mapSavedObjectToGroupConfig(savedObject),
+        title: groupConfig.title,
+        description: groupConfig.description,
+        indexPatternId: groupConfig.indexPatternId,
+        dataViewSpec: groupConfig.dataViewSpec,
       },
     };
   };

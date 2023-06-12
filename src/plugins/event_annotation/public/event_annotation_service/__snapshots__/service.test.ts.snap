@@ -5,7 +5,9 @@ Object {
   "hits": Array [
     Object {
       "attributes": Object {
+        "dataViewSpec": undefined,
         "description": undefined,
+        "indexPatternId": undefined,
         "title": undefined,
       },
       "id": "nonExistingGroup",
@@ -15,7 +17,9 @@ Object {
     },
     Object {
       "attributes": Object {
+        "dataViewSpec": undefined,
         "description": "",
+        "indexPatternId": "ipid",
         "title": "groupTitle",
       },
       "id": undefined,
@@ -36,7 +40,9 @@ Object {
     },
     Object {
       "attributes": Object {
+        "dataViewSpec": undefined,
         "description": undefined,
+        "indexPatternId": "ipid",
         "title": "groupTitle",
       },
       "id": "multiAnnotations",
@@ -52,7 +58,11 @@ Object {
     },
     Object {
       "attributes": Object {
+        "dataViewSpec": Object {
+          "id": "my-id",
+        },
         "description": undefined,
+        "indexPatternId": "my-id",
         "title": "groupTitle",
       },
       "id": "multiAnnotations",
