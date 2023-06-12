@@ -73,6 +73,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
         layerId,
         columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration: getConfiguration(layerId, vis, layerConfig),

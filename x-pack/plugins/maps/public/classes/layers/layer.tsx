@@ -33,7 +33,7 @@ import {
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
@@ -66,7 +66,6 @@ export interface ILayer {
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
-  getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
@@ -336,11 +335,6 @@ export class AbstractLayer implements ILayer {
 
   getQuery(): Query | null {
     return this._descriptor.query ? this._descriptor.query : null;
-  }
-
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    const source = this.getSource();
-    return await source.getImmutableProperties();
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {

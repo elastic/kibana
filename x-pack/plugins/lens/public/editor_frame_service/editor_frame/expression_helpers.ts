@@ -14,6 +14,7 @@ export function getDatasourceExpressionsByLayers(
   datasourceStates: DatasourceStates,
   indexPatterns: IndexPatternMap,
   dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
@@ -32,6 +33,7 @@ export function getDatasourceExpressionsByLayers(
         layerId,
         indexPatterns,
         dateRange,
+        nowInstant,
         searchSessionId
       );
       if (result) {
@@ -63,6 +65,7 @@ export function buildExpression({
   description,
   indexPatterns,
   dateRange,
+  nowInstant,
   searchSessionId,
 }: {
   title?: string;
@@ -75,6 +78,7 @@ export function buildExpression({
   indexPatterns: IndexPatternMap;
   searchSessionId?: string;
   dateRange: DateRange;
+  nowInstant: Date;
 }): Ast | null {
   if (visualization === null) {
     return null;
@@ -85,6 +89,7 @@ export function buildExpression({
     datasourceStates,
     indexPatterns,
     dateRange,
+    nowInstant,
     searchSessionId
   );
 

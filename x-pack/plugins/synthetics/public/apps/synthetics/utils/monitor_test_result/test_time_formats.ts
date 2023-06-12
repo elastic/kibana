@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { useKibanaDateFormat } from '../../../../hooks/use_kibana_date_format';
 
 /**
  * Formats the microseconds (µ) into either milliseconds (ms) or seconds (s) based on the duration value
@@ -52,26 +50,3 @@ export const formatTestDuration = (duration = 0, isMilli = false) => {
     values: { value: (duration / 1000).toFixed(0) },
   });
 };
-
-export function formatTestRunAt(timestamp: string, format: string) {
-  const stampedMoment = moment(timestamp);
-  return stampedMoment.format(format);
-}
-
-export function useDateFormatForTest() {
-  let format = useKibanaDateFormat();
-
-  if (format.endsWith('.SSS')) {
-    format = format.replace('.SSS', '');
-  }
-  return format;
-}
-
-export function useFormatTestRunAt(timestamp?: string) {
-  const format = useDateFormatForTest();
-
-  if (!timestamp) {
-    return '';
-  }
-  return formatTestRunAt(timestamp, format);
-}
