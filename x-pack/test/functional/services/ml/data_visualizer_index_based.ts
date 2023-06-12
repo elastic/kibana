@@ -14,7 +14,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover']);
+  const PageObjects = getPageObjects(['discover', 'header']);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const browser = getService('browser');
@@ -46,6 +46,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.setRandomSamplingOption(randomSamplerOption);
         await await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });

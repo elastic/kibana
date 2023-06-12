@@ -17,17 +17,12 @@ import {
   Position,
   ScaleType,
   Settings,
-  TooltipValue,
-  TooltipValueFormatter,
+  TooltipHeaderFormatter,
 } from '@elastic/charts';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { kibanaFieldFormat } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
-
-interface ChartTooltipValue extends TooltipValue {
-  skipHeader?: boolean;
-}
 
 export interface MetricDistributionChartData {
   x: number;
@@ -66,7 +61,7 @@ export const MetricDistributionChart: FC<Props> = ({
 
   const theme = useDataVizChartTheme();
 
-  const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
+  const headerFormatter: TooltipHeaderFormatter = (tooltipData) => {
     const xValue = tooltipData.value;
     const chartPoint: MetricDistributionChartData | undefined = chartData.find(
       (data) => data.x === xValue

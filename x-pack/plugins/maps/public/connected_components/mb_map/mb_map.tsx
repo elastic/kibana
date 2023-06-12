@@ -43,7 +43,7 @@ import {
 import { getCanAccessEmsFonts, getGlyphs, getKibanaFontsGlyphUrl } from './glyphs';
 import { syncLayerOrder } from './sort_layers';
 
-import { removeOrphanedSourcesAndLayers } from './utils';
+import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';

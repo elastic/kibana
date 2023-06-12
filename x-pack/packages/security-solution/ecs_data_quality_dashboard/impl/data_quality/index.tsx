@@ -42,6 +42,7 @@ interface Props {
   };
   httpFetch: HttpHandler;
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -64,6 +65,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   httpFetch,
   ilmPhases,
+  isAssistantEnabled,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
@@ -91,6 +93,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhases={ilmPhases}
+        isAssistantEnabled={isAssistantEnabled}
         lastChecked={lastChecked}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
