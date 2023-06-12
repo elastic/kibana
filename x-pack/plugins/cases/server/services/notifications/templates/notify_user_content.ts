@@ -49,8 +49,8 @@ const getSeverityColor = (severity: string): string => {
 
 export const getEmailBodyContent = (
   caseData: CaseSavedObjectTransformed,
-  caseUrl: string|null,
-):Promise<string> => {
+  caseUrl: string | null
+): Promise<string> => {
   const filePath = '../templates';
   const fileName = 'notify_user_template.html';
 
@@ -69,7 +69,7 @@ export const getEmailBodyContent = (
           severity: caseData.attributes.severity,
           severityColor: getSeverityColor(caseData.attributes.severity),
           hasMoreTags: hasMoreTags ? caseData.attributes.tags.length - 3 : null,
-          tags: caseData.attributes.tags.length ? caseData.attributes.tags.slice(0,3) : ['-'],
+          tags: caseData.attributes.tags.length ? caseData.attributes.tags.slice(0, 3) : ['-'],
           description:
             caseData.attributes.description.length > 300
               ? `${caseData.attributes.description.slice(0, 300)}...`
