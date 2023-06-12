@@ -4963,14 +4963,14 @@
           {
             "parentPluginId": "security",
             "id": "def-common.UserProfileAvatarData.imageUrl",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "imageUrl",
             "description": [
               "\nBase64 data URL for the user avatar image."
             ],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
             "deprecated": false,

@@ -40,7 +40,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
         .transaction({ transactionName: 'GET /api/product' })
         .timestamp(timestamp)
         .duration(1000)
-        .success()
+        .failure()
         .errors(
           opbeansJava
             .error({ message: '[MockError] Foo', type: `Exception` })
@@ -55,7 +55,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
             })
             .timestamp(timestamp)
             .duration(50)
-            .success()
+            .failure()
             .destination('postgresql')
         ),
       opbeansNode

@@ -11,8 +11,6 @@
 
 /**
  * Enum ML_DETECTOR_RULE_ACTION
- * @export
- * @enum {number}
  */
 export enum ML_DETECTOR_RULE_ACTION {
   SKIP_MODEL_UPDATE = 'skip_model_update',
@@ -21,8 +19,6 @@ export enum ML_DETECTOR_RULE_ACTION {
 
 /**
  * Enum ML_DETECTOR_RULE_FILTER_TYPE
- * @export
- * @enum {number}
  */
 export enum ML_DETECTOR_RULE_FILTER_TYPE {
   EXCLUDE = 'exclude',
@@ -31,8 +27,6 @@ export enum ML_DETECTOR_RULE_FILTER_TYPE {
 
 /**
  * Enum ML_DETECTOR_RULE_APPLIES_TO
- * @export
- * @enum {number}
  */
 export enum ML_DETECTOR_RULE_APPLIES_TO {
   ACTUAL = 'actual',
@@ -42,8 +36,6 @@ export enum ML_DETECTOR_RULE_APPLIES_TO {
 
 /**
  * Enum ML_DETECTOR_RULE_OPERATOR
- * @export
- * @enum {number}
  */
 export enum ML_DETECTOR_RULE_OPERATOR {
   LESS_THAN = 'lt',
