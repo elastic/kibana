@@ -32,11 +32,8 @@ export const buildResponseActionsQuery = (
     allow_no_indices: true,
     index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
     ignore_unavailable: true,
-    _source: false,
-
     body: {
       fields,
-      _source: false,
       query: {
         bool: {
           minimum_should_match: 2,

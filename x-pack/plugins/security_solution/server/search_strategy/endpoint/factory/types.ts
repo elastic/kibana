@@ -19,7 +19,9 @@ import type { EndpointAppContext } from '../../../endpoint/types';
 export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
   buildDsl: (
     options: EndpointStrategyRequestType<T>,
-    authz: EndpointAuthz | void
+    deps: {
+      authz: EndpointAuthz | void;
+    }
   ) => ISearchRequestParams;
   parse: (
     options: EndpointStrategyRequestType<T>,

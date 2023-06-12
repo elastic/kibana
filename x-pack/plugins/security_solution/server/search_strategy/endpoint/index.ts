@@ -51,7 +51,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       return from(endpointContext.service.getEndpointAuthz(deps.request)).pipe(
         mergeMap((authz) => {
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
-          const dsl = queryFactory.buildDsl(request, authz);
+          const dsl = queryFactory.buildDsl(request, { authz });
           return es.search({ ...request, params: dsl }, options, deps).pipe(
             map((response) => {
               return {
