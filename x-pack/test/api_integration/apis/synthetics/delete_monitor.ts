@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
     let testPolicyId = '';
 
     const saveMonitor = async (monitor: MonitorFields) => {
-      kibanaServer.log.debug(`Creating monitor ${monitor.name}`);
       const res = await supertest
         .post(API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
