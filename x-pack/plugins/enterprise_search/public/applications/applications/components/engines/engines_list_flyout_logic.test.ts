@@ -9,7 +9,7 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
-import { EnterpriseSearchEngineDetails } from '../../../../../common/types/engines';
+import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
 
 import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 
@@ -23,7 +23,7 @@ const DEFAULT_VALUES: EngineListFlyoutValues = {
   isFetchEngineFlyoutVisible: false,
   isFetchEngineLoading: false,
 };
-const mockEngineData: EnterpriseSearchEngineDetails = {
+const mockEngineData: EnterpriseSearchApplicationDetails = {
   indices: [
     {
       count: 10,

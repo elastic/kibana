@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-default-export
-export default ResizeObserver;
+/**
+ * Token used for the `type` option when exporting by type
+ * to specify that all (importable and exportable) types should be exported.
+ */
+export const EXPORT_ALL_TYPES_TOKEN = '*';

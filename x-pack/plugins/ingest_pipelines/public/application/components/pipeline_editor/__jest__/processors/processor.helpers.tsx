@@ -55,16 +55,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
-  return {
-    ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
-    ),
-  };
-});
+jest.mock('react-virtualized/dist/commonjs/AutoSizer', () => ({ children }: { children: any }) => (
+  <div>{children({ height: 500, width: 500 })}</div>
+));
 
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => <ProcessorsEditorWithDeps {...props} />,

@@ -82,7 +82,7 @@ class InternalEngineTransporter implements Transporter {
   ) {}
 
   async performRequest(request: SearchRequest) {
-    const url = `/internal/enterprise_search/engines/${this.engineName}/search`;
+    const url = `/internal/enterprise_search/search_applications/${this.engineName}/search`;
 
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),
