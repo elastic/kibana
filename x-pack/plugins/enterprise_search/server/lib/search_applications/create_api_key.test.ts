@@ -10,7 +10,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { createApiKey } from './create_api_key';
 
 describe('createApiKey lib function', () => {
-  const engineName = 'my-index';
+  const searchApplicationName = 'my-index';
   const keyName = 'Search alias read only key';
 
   const createResponse = {
@@ -34,7 +34,7 @@ describe('createApiKey lib function', () => {
 
   it('should create an api key via the security plugin', async () => {
     await expect(
-      createApiKey(mockClient as unknown as IScopedClusterClient, engineName, keyName)
+      createApiKey(mockClient as unknown as IScopedClusterClient, searchApplicationName, keyName)
     ).resolves.toEqual(createResponse);
 
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
@@ -44,7 +44,7 @@ describe('createApiKey lib function', () => {
           cluster: [],
           indices: [
             {
-              names: [`${engineName}`],
+              names: [`${searchApplicationName}`],
               privileges: ['read'],
             },
           ],

@@ -7,7 +7,7 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { EnterpriseSearchEngineDetails } from '../../../../../common/types/engines';
+import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
 import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 
 import { EngineIndicesLogic, EngineIndicesLogicValues } from './engine_indices_logic';
@@ -19,7 +19,7 @@ const DEFAULT_VALUES: EngineIndicesLogicValues = {
   isLoadingEngine: true,
 };
 
-const mockEngineData: EnterpriseSearchEngineDetails = {
+const mockEngineData: EnterpriseSearchApplicationDetails = {
   indices: [
     {
       count: 10,
