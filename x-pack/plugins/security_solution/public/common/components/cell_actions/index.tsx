@@ -57,18 +57,20 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
   ...props
 }) => {
   const getFieldSpec = useGetFieldSpec(scopeId);
-  // not a great dependency may cause rerenders whe it is an object
-  const dataArray = useMemo(() => (Array.isArray(data) ? data : [data]), [data]);
+  // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
+  // It is necessary because the data object is an array or object and useMemo would always re-render
+  const dependencyKey = Array.isArray(data) ? data : `${data.field} - ${data.value}`;
 
   const fieldData: CellActionsData[] = useMemo(
     () =>
-      dataArray
+      (Array.isArray(data) ? data : [data])
         .map(({ field, value }) => ({
           field: getFieldSpec(field),
           value,
         }))
         .filter((item): item is CellActionsData => !!item.field),
-    [dataArray, getFieldSpec]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Use the dependencyKey to prevent unnecessary re-renders
+    [dependencyKey, getFieldSpec]
   );
 
   return fieldData.length > 0 ? <CellActions data={fieldData} {...props} /> : <>{props.children}</>;
