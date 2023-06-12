@@ -184,6 +184,7 @@ export const getLensAttributes = ({
   const attributes = {
     title:
       title ??
+      suggestion?.title ??
       i18n.translate('unifiedHistogram.lensTitle', {
         defaultMessage: 'Edit visualization',
       }),
