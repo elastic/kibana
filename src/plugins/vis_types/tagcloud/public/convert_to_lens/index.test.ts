@@ -74,6 +74,7 @@ test('should convert legacy tag cloud vis into navigate to lens context', async 
           },
         ],
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration: {

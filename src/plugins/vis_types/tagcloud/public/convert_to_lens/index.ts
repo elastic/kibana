@@ -59,6 +59,7 @@ export const convertToLens = async (
         layerId,
         columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration: {
