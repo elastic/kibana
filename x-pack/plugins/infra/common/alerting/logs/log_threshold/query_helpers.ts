@@ -11,6 +11,8 @@ import { RuleParams, Comparator, CountCriteria, Criterion, ExecutionTimeRange } 
 
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 
+export const COMPOSITE_GROUP_SIZE = 2000;
+
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
@@ -156,4 +158,48 @@ const queryMappings: {
 
 const getQueryMappingForComparator = (comparator: Comparator) => {
   return queryMappings[comparator];
+};
+
+export const getContextAggregation = (
+  params: Pick<RuleParams, 'groupBy'> & { criteria: CountCriteria }
+) => {
+  const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
+  const positiveCriteria = params.criteria.filter((criterion: Criterion) =>
+    positiveComparators.includes(criterion.comparator)
+  );
+
+  const fieldsFromGroupBy = params.groupBy
+    ? getFieldsSet(params.groupBy, validPrefixForContext)
+    : new Set<string>();
+  const fieldsFromCriteria = getFieldsSet(
+    positiveCriteria.map((criterion: Criterion) => criterion.field),
+    validPrefixForContext
+  );
+  const fieldsPrefixList = Array.from(
+    new Set<string>([...fieldsFromGroupBy, ...fieldsFromCriteria])
+  );
+  const fieldsList = fieldsPrefixList.map((prefix) => (prefix === 'tags' ? prefix : `${prefix}.*`));
+
+  const additionalContextAgg =
+    fieldsList.length > 0
+      ? {
+          additionalContext: {
+            top_hits: {
+              size: 1,
+              fields: fieldsList,
+              _source: false,
+            },
+          },
+        }
+      : null;
+
+  return additionalContextAgg;
+};
+
+const getFieldsSet = (groupBy: string[] | undefined, validPrefix: string[]): Set<string> => {
+  return new Set<string>(
+    groupBy
+      ?.map((currentGroupBy) => currentGroupBy.split('.')[0])
+      .filter((groupByPrefix) => validPrefix.includes(groupByPrefix))
+  );
 };

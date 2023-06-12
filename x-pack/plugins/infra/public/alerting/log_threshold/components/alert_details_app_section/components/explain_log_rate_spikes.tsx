@@ -32,7 +32,7 @@ import {
 } from '../../../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { DEFAULT_LOG_VIEW } from '../../../../../../common/log_views';
-import { getESQuery } from '../../../../../../common/alerting/logs/log_threshold/query';
+import { getUngroupedESQuery } from '../../../../../../common/alerting/logs/log_threshold/query';
 
 export interface AlertDetailsExplainLogRateSpikesSectionProps {
   rule: Rule<PartialRuleParams>;
@@ -59,19 +59,21 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
         const logDataView = await dataViews.get(dataViewId);
         setDataView(logDataView);
 
-        const esSearchRequest = getESQuery(
+        const executionTimeRange = {
+          lte: alert.start,
+        };
+
+        const esSearchRequest = getUngroupedESQuery(
           validatedParams as CountRuleParams,
           timestampField,
           indices,
           runtimeMappings,
-          alert.start
+          executionTimeRange
         ) as estypes.SearchRequest;
 
-        if (!esSearchRequest) {
-          throw new Error('ES query could not be built from the provided alert params');
+        if (esSearchRequest) {
+          setEsSearchQuery(esSearchRequest.query);
         }
-
-        setEsSearchQuery(esSearchRequest.query);
       }
     }
 
@@ -100,7 +102,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     }
   );
 
-  if (!dataView) return null;
+  if (!dataView || !esSearchQuery) return null;
 
   return (
     <EuiPanel hasBorder={true} data-test-subj="explainLogRateSpikesAlertDetails">
