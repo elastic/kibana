@@ -27,7 +27,8 @@ const options = {
   tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
 };
 const pathPrefix = '/internal/session';
-const version = '1';
+export const INITIAL_SEARCH_SESSION_REST_VERSION = '1';
+const version = INITIAL_SEARCH_SESSION_REST_VERSION;
 
 const idAndAttrsOnly = (so?: SearchSessionRestResponse) =>
   so && { id: so.id, attributes: so.attributes };

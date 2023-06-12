@@ -10,7 +10,6 @@ import { PublicContract } from '@kbn/utility-types';
 import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
-  // SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
