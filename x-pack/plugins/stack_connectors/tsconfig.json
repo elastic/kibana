@@ -29,6 +29,10 @@
     "@kbn/safer-lodash-set",
     "@kbn/spaces-plugin",
     "@kbn/dashboard-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/security-solution-plugin",
   ],
   "exclude": [
     "target/**/*",
