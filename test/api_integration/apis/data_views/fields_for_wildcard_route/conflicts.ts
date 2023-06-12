@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -23,6 +26,7 @@ export default function ({ getService }) {
     it('flags fields with mismatched types as conflicting', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({ pattern: 'logs-*' })
         .expect(200)
         .then((resp) => {

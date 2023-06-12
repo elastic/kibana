@@ -23,7 +23,11 @@ export default function ({ getService }) {
     );
 
     it('requires a pattern query param', () =>
-      supertest.get('/api/index_patterns/_fields_for_wildcard').query({}).expect(400));
+      supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .query({})
+        .expect(400));
 
     it('accepts include_unmapped param', () =>
       supertest
