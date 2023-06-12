@@ -14,14 +14,14 @@ import { links as casesLinks } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
 import { exploreLinks } from '../../explore/links';
 import { gettingStartedLinks } from '../../overview/links';
-import { rootLinks as cloudSecurityPostureRootLinks } from '../../cloud_security_posture/links';
+import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
-import { dashboardsLandingLinks } from '../../dashboards/links';
+import { dashboardsLinks } from '../../dashboards/links';
 
 export const links: AppLinkItems = Object.freeze([
-  dashboardsLandingLinks,
+  dashboardsLinks,
   alertsLinks,
-  cloudSecurityPostureRootLinks,
+  findingsLinks,
   casesLinks,
   timelinesLinks,
   indicatorsLinks,
@@ -38,9 +38,9 @@ export const getFilteredLinks = async (
   const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
 
   return Object.freeze([
-    dashboardsLandingLinks,
+    dashboardsLinks,
     alertsLinks,
-    cloudSecurityPostureRootLinks,
+    findingsLinks,
     casesLinks,
     timelinesLinks,
     indicatorsLinks,

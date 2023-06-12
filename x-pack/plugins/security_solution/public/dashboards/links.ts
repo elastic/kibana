@@ -10,7 +10,7 @@ import { DASHBOARDS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { links as kubernetesLinks } from '../kubernetes/links';
 import {
-  dashboardLinks as cloudSecurityPostureLinks,
+  dashboardLinks as cspDashboardLinks,
   vulnerabilityDashboardLink,
 } from '../cloud_security_posture/links';
 import {
@@ -20,7 +20,7 @@ import {
   overviewLinks,
 } from '../overview/links';
 
-export const dashboardsLandingLinks: LinkItem = {
+export const dashboardsLinks: LinkItem = {
   id: SecurityPageName.dashboards,
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
@@ -31,11 +31,12 @@ export const dashboardsLandingLinks: LinkItem = {
       defaultMessage: 'Dashboards',
     }),
   ],
+  // showSideNavIcons: true,
   links: [
     overviewLinks,
     detectionResponseLinks,
     kubernetesLinks,
-    cloudSecurityPostureLinks,
+    cspDashboardLinks,
     vulnerabilityDashboardLink,
     entityAnalyticsLinks,
     ecsDataQualityDashboardLinks,

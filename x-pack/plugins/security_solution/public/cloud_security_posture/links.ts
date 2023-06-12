@@ -11,14 +11,14 @@ import { SERVER_APP_ID } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
 import cloudNativeVulnerabilityManagementDashboardImage from '../common/images/cloud_native_vulnerability_management_dashboard_page.png';
 import type { LinkItem } from '../common/links/types';
-import { IconExceptionLists } from '../management/icons/exception_lists';
+import { IconEndpoints } from '../management/icons/endpoints';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
   capabilities: [`${SERVER_APP_ID}.show`],
 };
 
-export const rootLinks: LinkItem = {
+export const findingsLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('findings'),
   globalNavPosition: 3,
   ...commonLinkProperties,
@@ -47,7 +47,7 @@ export const vulnerabilityDashboardLink: LinkItem = {
   ...commonLinkProperties,
 };
 
-export const benchmarksLink: LinkItem = {
+export const benchmarksLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
@@ -55,6 +55,6 @@ export const benchmarksLink: LinkItem = {
       defaultMessage: 'View benchmark rules.',
     }
   ),
-  landingIcon: IconExceptionLists,
+  landingIcon: IconEndpoints,
   ...commonLinkProperties,
 };

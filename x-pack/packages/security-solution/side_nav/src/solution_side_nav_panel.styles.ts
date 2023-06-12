@@ -8,7 +8,7 @@
 import { transparentize, type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-const EUI_HEADER_HEIGHT = '93px';
+const EUI_HEADER_HEIGHT = '96px';
 const PANEL_LEFT_OFFSET = '248px';
 const PANEL_WIDTH = '340px';
 
@@ -24,6 +24,7 @@ export const SolutionSideNavPanelStyles = (
   bottom: 0;
   width: ${PANEL_WIDTH};
   height: inherit;
+  z-index: 999;
 
   // If the bottom bar is visible add padding to the navigation
   ${$bottomOffset != null &&
@@ -40,16 +41,16 @@ export const SolutionSideNavPanelStyles = (
       `}
 
   .solutionSideNavPanelLink {
-    .solutionSideNavPanelLinkItem {
-      background-color: transparent; /* originally white, it prevents panel to remove the bottom inset box shadow */
-      &:hover {
-        background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+    &:focus-within {
+      background-color: transparent;
+      a {
+        text-decoration: auto;
       }
-      dt {
-        color: ${euiTheme.colors.primaryText};
-      }
-      dd {
-        color: ${euiTheme.colors.darkestShade};
+    }
+    &:hover {
+      background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+      a {
+        text-decoration: underline;
       }
     }
   }

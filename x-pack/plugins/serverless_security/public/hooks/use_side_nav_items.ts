@@ -25,6 +25,7 @@ const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
 const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): SolutionSideNavItem => ({
   id: navLink.id,
   label: navLink.title,
+  iconType: navLink.icon,
   position: isBottomNavItem(navLink.id)
     ? SolutionSideNavItemPosition.bottom
     : SolutionSideNavItemPosition.top,
@@ -36,7 +37,7 @@ const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): Soluti
         acc.push({
           id: current.id,
           label: current.title,
-          description: current.description,
+          iconType: current.icon,
           isBeta: current.isBeta,
           betaOptions: current.betaOptions,
           ...getLinkProps({ deepLinkId: current.id }),
@@ -55,10 +56,9 @@ const formatGetStartedLink = (
   getLinkProps: GetLinkProps
 ): SolutionSideNavItem => ({
   id: navLink.id,
-  label: navLink.title.toUpperCase(),
+  label: navLink.title,
   position: SolutionSideNavItemPosition.bottom,
   ...getLinkProps({ deepLinkId: navLink.id }),
-  labelSize: 'xs',
   iconType: 'launch',
   appendSeparator: true,
 });

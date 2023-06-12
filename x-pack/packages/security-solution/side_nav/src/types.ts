@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import type { EuiListGroupItemProps, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 
 export enum SolutionSideNavItemPosition {
   top = 'top',
@@ -23,7 +23,6 @@ export interface SolutionSideNavItem<T extends string = string> {
   items?: Array<SolutionSideNavItem<T>>;
   categories?: LinkCategories<T>;
   iconType?: IconType;
-  labelSize?: EuiListGroupItemProps['size'];
   appendSeparator?: boolean;
   position?: SolutionSideNavItemPosition;
   isBeta?: boolean;

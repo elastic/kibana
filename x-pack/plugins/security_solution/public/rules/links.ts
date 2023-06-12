@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LinkCategoryType } from '@kbn/security-solution-side-nav';
 import {
   RULES_PATH,
   RULES_CREATE_PATH,
@@ -15,7 +14,7 @@ import {
 } from '../../common/constants';
 import { CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../app/translations';
 import { SecurityPageName } from '../app/types';
-import { benchmarksLink } from '../cloud_security_posture/links';
+import { benchmarksLinks } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
 import { IconExceptionLists } from './icons/exception_lists';
 import { IconSiemRules } from './icons/siem_rules';
@@ -67,7 +66,7 @@ export const links: LinkItem = {
         }),
       ],
     },
-    benchmarksLink,
+    benchmarksLinks,
   ],
   categories: [
     {
@@ -77,8 +76,10 @@ export const links: LinkItem = {
       linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
     },
     {
-      type: LinkCategoryType.separator,
-      linkIds: [benchmarksLink.id],
+      label: i18n.translate('xpack.securitySolution.appLinks.category.cspRules', {
+        defaultMessage: 'Cloud Security Rules',
+      }),
+      linkIds: [SecurityPageName.cloudSecurityPostureBenchmarks],
     },
   ],
 };

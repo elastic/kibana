@@ -8,13 +8,12 @@
 import React, { useCallback } from 'react';
 import {
   EuiAccordion,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
   EuiHorizontalRule,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiOutsideClickDetector,
   EuiPanel,
   EuiPortal,
@@ -106,25 +105,22 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
                 paddingSize="m"
                 data-test-subj="solutionSideNavPanel"
               >
-                <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
+                <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
                   <EuiFlexItem>
                     <EuiTitle size="xs" className={titleClasses}>
                       <strong>{title}</strong>
                     </EuiTitle>
                   </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiDescriptionList>
-                      {categories ? (
-                        <SolutionSideNavPanelCategories
-                          categories={categories}
-                          items={items}
-                          onClose={onClose}
-                        />
-                      ) : (
-                        <SolutionSideNavPanelItems items={items} onClose={onClose} />
-                      )}
-                    </EuiDescriptionList>
+                  <EuiFlexItem style={{ width: '100%' }}>
+                    {categories ? (
+                      <SolutionSideNavPanelCategories
+                        categories={categories}
+                        items={items}
+                        onClose={onClose}
+                      />
+                    ) : (
+                      <SolutionSideNavPanelItems items={items} onClose={onClose} />
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
@@ -213,12 +209,13 @@ const SolutionSideNavPanelTitleCategory: React.FC<SolutionSideNavPanelTitleCateg
     const titleClasses = classNames(sideNavTitleStyles);
     return (
       <>
+        <EuiSpacer size="s" />
         <EuiTitle size="xxxs" className={titleClasses}>
           <h2>{label}</h2>
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
         <SolutionSideNavPanelItems items={items} onClose={onClose} />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
       </>
     );
   });
@@ -254,9 +251,9 @@ const SolutionSideNavPanelSeparatorCategory: React.FC<SolutionSideNavPanelSepara
   React.memo(function SolutionSideNavPanelSeparatorCategory({ onClose, items }) {
     return (
       <>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
         <SolutionSideNavPanelItems items={items} onClose={onClose} />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
       </>
     );
   });
@@ -271,32 +268,37 @@ interface SolutionSideNavPanelItemsProps {
 const SolutionSideNavPanelItems: React.FC<SolutionSideNavPanelItemsProps> = React.memo(
   function SolutionSideNavPanelItems({ items, onClose }) {
     const panelLinkClassNames = classNames('solutionSideNavPanelLink');
-    const panelLinkItemClassNames = classNames('solutionSideNavPanelLinkItem');
     const { tracker } = useTelemetryContext();
     return (
-      <>
-        {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (
-          <a
-            key={id}
-            className={panelLinkClassNames}
-            data-test-subj={`solutionSideNavPanelLink-${id}`}
-            href={href}
-            onClick={(ev) => {
-              tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION}${id}`);
-              onClose();
-              onClick?.(ev);
-            }}
-          >
-            <EuiPanel hasShadow={false} className={panelLinkItemClassNames} paddingSize="s">
-              <EuiDescriptionListTitle>
-                {label}
-                {isBeta && <BetaBadge text={betaOptions?.text} />}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
-            </EuiPanel>
-          </a>
-        ))}
-      </>
+      <EuiListGroup>
+        {items.map(({ id, href, onClick, label, iconType, isBeta, betaOptions }) => {
+          const itemLabel = !isBeta ? (
+            label
+          ) : (
+            <>
+              {label} <BetaBadge text={betaOptions?.text} />
+            </>
+          );
+
+          return (
+            <EuiListGroupItem
+              key={id}
+              label={itemLabel}
+              wrapText
+              className={panelLinkClassNames}
+              size="s"
+              data-test-subj={`solutionSideNavPanelLink-${id}`}
+              href={href}
+              iconType={iconType}
+              onClick={(ev) => {
+                tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION}${id}`);
+                onClose();
+                onClick?.(ev);
+              }}
+            />
+          );
+        })}
+      </EuiListGroup>
     );
   }
 );

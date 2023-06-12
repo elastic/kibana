@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */
-
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiListGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   useIsWithinBreakpoints,
   useEuiTheme,
   EuiListGroupItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiButtonIcon,
+  EuiIcon,
 } from '@elastic/eui';
 import partition from 'lodash/fp/partition';
 import classNames from 'classnames';
@@ -181,7 +180,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
 
     return (
       <>
-        {categories?.map((category) => {
+        {categories?.map((category, categoryIndex) => {
           const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
             const link = items.find((item) => item.id === linkId);
             if (link) {
@@ -196,7 +195,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
 
           return (
             <>
-              <EuiSpacer size="s" />
+              {categoryIndex !== 0 && <EuiSpacer size="s" />}
               {categoryItems.map((item) => (
                 <SolutionSideNavItem
                   key={item.id}
@@ -233,15 +232,12 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 
-    const { id, href, label, items, onClick, labelSize, iconType, appendSeparator } = item;
+    const { id, href, label, items, onClick, iconType, appendSeparator } = item;
 
     const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
     const itemClassNames = classNames(
       'solutionSideNavItem',
-      {
-        'solutionSideNavItem--isActive': isActive,
-        'solutionSideNavItem--isPrimary': isSelected,
-      },
+      { 'solutionSideNavItem--isSelected': isSelected },
       solutionSideNavItemStyles
     );
     const buttonClassNames = classNames('solutionSideNavItemButton');
@@ -259,50 +255,55 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
       [id, onClick, tracker]
     );
 
-    const onButtonClick: React.MouseEventHandler = useCallback(
-      (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION_TOGGLE}${id}`);
-        onOpenPanelNav(id);
-      },
-      [id, onOpenPanelNav, tracker]
-    );
+    const onButtonClick: React.MouseEventHandler = useCallback(() => {
+      tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION_TOGGLE}${id}`);
+      onOpenPanelNav(id);
+    }, [id, onOpenPanelNav, tracker]);
+
+    const itemLabel = useMemo(() => {
+      if (iconType == null) {
+        return label;
+      }
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem>{label}</EuiFlexItem>
+          <EuiFlexItem grow={0}>
+            <EuiIcon type={iconType} color="text" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }, [label, iconType]);
 
     return (
       <>
-        <EuiLink
-          key={id}
-          href={href}
-          onClick={onLinkClicked}
-          color={isSelected ? 'primary' : 'text'}
-          data-test-subj={`solutionSideNavItemLink-${id}`}
-        >
-          <EuiListGroupItem
-            className={itemClassNames}
-            color={isSelected ? 'primary' : 'text'}
-            label={label}
-            size={labelSize ?? 's'}
-            {...(iconType && {
-              iconType,
-              iconProps: {
-                color: isSelected ? 'primary' : 'text',
-              },
-            })}
-            {...(hasPanelNav && {
-              extraAction: {
-                className: buttonClassNames,
-                color: isActive ? 'primary' : 'text',
-                onClick: onButtonClick,
-                iconType: 'spaces',
-                iconSize: 'm',
-                'aria-label': 'Toggle panel nav',
-                'data-test-subj': `solutionSideNavItemButton-${id}`,
-                alwaysShow: true,
-              },
-            })}
-          />
-        </EuiLink>
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiListGroupItem
+              label={itemLabel}
+              href={href}
+              onClick={onLinkClicked}
+              className={itemClassNames}
+              color="text"
+              size="s"
+              data-test-subj={`solutionSideNavItemLink-${id}`}
+            />
+          </EuiFlexItem>
+          {hasPanelNav && (
+            <EuiFlexItem grow={0}>
+              <EuiButtonIcon
+                className={buttonClassNames}
+                display={isActive ? 'base' : 'empty'}
+                size="s"
+                color="text"
+                onClick={onButtonClick}
+                iconType="spaces"
+                iconSize="m"
+                aria-label="Toggle panel nav"
+                data-test-subj={`solutionSideNavItemButton-${id}`}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         {appendSeparator && <EuiHorizontalRule margin="xs" />}
       </>
     );

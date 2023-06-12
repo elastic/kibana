@@ -31,7 +31,7 @@ import {
   ENDPOINTS,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
-  MANAGE,
+  SETTINGS,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
@@ -69,15 +69,15 @@ const categories = [
 
 export const links: LinkItem = {
   id: SecurityPageName.administration,
-  title: MANAGE,
+  title: SETTINGS,
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
   globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.manage', {
-      defaultMessage: 'Manage',
+    i18n.translate('xpack.securitySolution.appLinks.settings', {
+      defaultMessage: 'Settings',
     }),
   ],
   categories,
