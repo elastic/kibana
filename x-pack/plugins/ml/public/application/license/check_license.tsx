@@ -10,7 +10,7 @@ import { MlLicense } from '../../../common/license';
 let mlLicense: MlLicense | null = null;
 
 /**
- * Cache ml license it for later checks
+ * Cache ml license to support legacy usage.
  */
 export function setLicenseCache(mlLicenseInstance: MlLicense) {
   mlLicense = mlLicenseInstance;
