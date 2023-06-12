@@ -65,6 +65,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       ...this.getCloudUrls(),
       elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
+      cloudHost: decodedId?.host,
+      cloudDefaultPort: decodedId?.defaultPort,
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,

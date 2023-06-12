@@ -80,6 +80,14 @@ export interface CloudSetup {
    */
   kibanaUrl?: string;
   /**
+   * {host} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   */
+  cloudHost?: string;
+  /**
+   * {port} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   */
+  cloudDefaultPort?: string;
+  /**
    * `true` when Kibana is running on Elastic Cloud.
    */
   isCloudEnabled: boolean;
