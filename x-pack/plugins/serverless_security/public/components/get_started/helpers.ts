@@ -6,7 +6,11 @@
  */
 
 import { getSections } from './sections';
-import { ActiveCard, CardId, ProductId, SectionId, StepId } from './types';
+import { ActiveCard, Card, CardId, ProductId, SectionId, StepId } from './types';
+
+export const isCardActive = (card: Card, activeProducts: Set<ProductId>) =>
+  !card.productTypeRequired ||
+  card?.productTypeRequired?.some((condition) => activeProducts.has(condition));
 
 export const setupCards = (
   finishedSteps: Record<CardId, Set<StepId>>,
