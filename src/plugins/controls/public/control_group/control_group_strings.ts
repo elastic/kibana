@@ -291,6 +291,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
         defaultMessage: 'Remove control',
       }),
+    getClearButtonTitle: () =>
+      i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
+        defaultMessage: 'Clear selections',
+      }),
   },
   ariaActions: {
     getMoveControlButtonAction: (controlTitle?: string) =>

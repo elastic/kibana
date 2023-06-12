@@ -10,6 +10,7 @@ import { ReactNode } from 'react';
 
 import { Filter } from '@kbn/es-query';
 import {
+  Embeddable,
   EmbeddableFactory,
   EmbeddableOutput,
   EmbeddableSetup,
@@ -45,6 +46,12 @@ export type ControlEmbeddable<
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
 };
+
+export abstract class ClearableControlEmbeddable<
+  I extends DataControlInput = DataControlInput
+> extends Embeddable<I, ControlOutput> {
+  public abstract clearSelections(): void;
+}
 
 /**
  * Control embeddable editor types
