@@ -74,7 +74,7 @@ describe('LayerControl', () => {
               isLayerLoading: () => {
                 return true;
               },
-            } as unknown as ILayer
+            } as unknown as ILayer,
           ]}
         />
       );

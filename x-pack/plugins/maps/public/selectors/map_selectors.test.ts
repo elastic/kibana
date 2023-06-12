@@ -160,7 +160,7 @@ describe('isMapLoading', () => {
         isLayerLoading: () => {
           return true;
         },
-      } as unknown as ILayer
+      } as unknown as ILayer,
     ];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
@@ -176,7 +176,7 @@ describe('isMapLoading', () => {
         isLayerLoading: () => {
           return true;
         },
-      } as unknown as ILayer
+      } as unknown as ILayer,
     ];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
@@ -192,7 +192,7 @@ describe('isMapLoading', () => {
         isLayerLoading: () => {
           return false;
         },
-      } as unknown as ILayer
+      } as unknown as ILayer,
     ];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
