@@ -437,10 +437,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     });
   };
 
-  public reload = () => {
-    this.runRangeSliderQuery().catch((e) => {
+  public reload = async () => {
+    try {
+      await this.runRangeSliderQuery();
+      await this.buildFilter();
+    } catch (e) {
       this.dispatch.setErrorMessage(e.message);
-    });
+    }
   };
 
   public destroy = () => {
