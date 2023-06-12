@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
@@ -90,18 +91,18 @@ export const getActionFileUploadHandler = (
       return errorHandler(logger, res, err);
     }
 
+    const createActionPayload = {
+      ...actionPayload,
+      parameters: uploadParameters,
+      command: 'upload' as ResponseActionsApiCommandNames,
+      user,
+    };
     try {
       const casesClient = await endpointContext.service.getCasesClient(req);
       const { action: actionId, ...data } = await endpointContext.service
         .getActionCreateService()
         .createAction<ResponseActionUploadOutputContent, ResponseActionUploadParameters>(
-          {
-            ...actionPayload,
-            parameters: uploadParameters,
-            command: 'upload',
-            user,
-          },
-          { casesClient }
+          createActionPayload
         );
 
       // Update the file meta to include the action id, and if any errors (unlikely),
@@ -113,6 +114,11 @@ export const getActionFileUploadHandler = (
       } catch (e) {
         logger.warn(`Attempt to update File meta with Action ID failed: ${e.message}`, e);
       }
+
+      // update cases
+      await endpointContext.service
+        .getEndpointCasesService()
+        .update({ casesClient, createActionPayload });
 
       return res.ok({
         body: {

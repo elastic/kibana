@@ -4,36 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { CommentType } from '@kbn/cases-plugin/common';
-import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import type { CasesClient } from '@kbn/cases-plugin/server';
+import { APP_ID } from '../../../../common';
 import type {
   HostMetadata,
   HostMetadataInterface,
   ImmutableObject,
-} from '../../../../../common/endpoint/types';
-import { APP_ID } from '../../../../../common/constants';
-import type { CreateActionPayload } from './types';
+} from '../../../../common/endpoint/types';
+import type { CreateActionPayload } from '../actions/create/types';
 
 export const updateCases = async ({
-  payload,
-  endpointData,
   casesClient,
+  createActionPayload,
+  endpointData,
 }: {
-  payload: CreateActionPayload;
-  endpointData: Array<ImmutableObject<HostMetadataInterface>>;
   casesClient?: CasesClient;
+  createActionPayload: CreateActionPayload;
+  endpointData: Array<ImmutableObject<HostMetadataInterface>>;
 }): Promise<void> => {
   if (!casesClient) {
     return;
   }
-
   // convert any alert IDs into cases
-  let caseIDs: string[] = payload.case_ids?.slice() || [];
-  if (payload.alert_ids && payload.alert_ids.length > 0) {
+  let caseIDs: string[] = createActionPayload.case_ids?.slice() || [];
+  if (createActionPayload.alert_ids && createActionPayload.alert_ids.length > 0) {
     const newIDs: string[][] = await Promise.all(
-      payload.alert_ids.map(async (alertID: string) => {
+      createActionPayload.alert_ids.map(async (alertID: string) => {
         const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
           alertID,
           options: { owner: APP_ID },
@@ -60,10 +58,10 @@ export const updateCases = async ({
           caseId,
           comment: {
             type: CommentType.actions,
-            comment: payload.comment || '',
+            comment: createActionPayload.comment || '',
             actions: {
               targets,
-              type: payload.command,
+              type: createActionPayload.command,
             },
             owner: APP_ID,
           },

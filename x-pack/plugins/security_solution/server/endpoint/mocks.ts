@@ -44,6 +44,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createActionCreateServiceMock } from './services/actions/mocks';
+import { getEndpointCasesServiceMock } from './services/cases/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -110,6 +111,7 @@ export const createMockEndpointAppContextService = (
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getActionCreateService: jest.fn().mockReturnValue(createActionCreateServiceMock()),
+    getEndpointCasesService: jest.fn().mockReturnValue(getEndpointCasesServiceMock()),
     getFleetFromHostFilesClient: jest.fn(async () => fleetFromHostFilesClientMock),
     getFleetToHostFilesClient: jest.fn(async () => fleetToHostFilesClientMock),
     setup: jest.fn(),

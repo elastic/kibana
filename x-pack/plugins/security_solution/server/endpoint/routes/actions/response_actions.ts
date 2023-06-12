@@ -188,11 +188,16 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
     const casesClient = await endpointContext.service.getCasesClient(req);
     let action: ActionDetails;
-
+    const createActionPayload = { ...req.body, command, user };
     try {
       action = await endpointContext.service
         .getActionCreateService()
-        .createAction({ ...req.body, command, user }, { casesClient });
+        .createAction(createActionPayload);
+
+      // update cases
+      await endpointContext.service
+        .getEndpointCasesService()
+        .update({ casesClient, createActionPayload });
     } catch (err) {
       return res.customError({
         statusCode: 500,

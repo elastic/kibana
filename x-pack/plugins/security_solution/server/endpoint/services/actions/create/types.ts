@@ -8,7 +8,6 @@
 import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
 import type {
   ActionDetails,
@@ -26,7 +25,6 @@ export type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
 };
 
 export interface CreateActionMetadata {
-  casesClient?: CasesClient;
   minimumLicenseRequired?: LicenseType;
 }
 
@@ -37,6 +35,6 @@ export interface ActionCreateService {
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,
-    metadata: CreateActionMetadata
+    metadata?: CreateActionMetadata
   ) => Promise<ActionDetails<TOutputContent, TParameters>>;
 }

@@ -41,6 +41,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ActionCreateService } from './services/actions/create/types';
+import type { EndpointCasesService } from './services/cases';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -65,6 +66,7 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
+  endpointCasesService: EndpointCasesService | undefined;
   cloud: CloudSetup;
 }
 
@@ -232,6 +234,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.actionCreateService;
+  }
+
+  public getEndpointCasesService(): EndpointCasesService {
+    if (!this.startDependencies?.endpointCasesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.endpointCasesService;
   }
 
   public async getFleetToHostFilesClient() {

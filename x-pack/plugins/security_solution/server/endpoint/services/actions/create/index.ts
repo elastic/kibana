@@ -19,7 +19,6 @@ import type { EndpointAppContext } from '../../../types';
 import type { FeatureKeys } from '../../feature_usage';
 import { getActionDetailsById } from '..';
 import type { ActionCreateService, CreateActionMetadata, CreateActionPayload } from './types';
-import { updateCases } from './update_cases';
 import { writeActionToIndices } from './write_action_to_indices';
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
@@ -43,7 +42,7 @@ export const actionCreateService = (
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,
-    { casesClient, minimumLicenseRequired = 'basic' }: CreateActionMetadata
+    { minimumLicenseRequired = 'basic' }: CreateActionMetadata = {}
   ): Promise<ActionDetails<TOutputContent, TParameters>> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
@@ -69,8 +68,6 @@ export const actionCreateService = (
       minimumLicenseRequired,
       payload,
     });
-
-    await updateCases({ casesClient, payload, endpointData });
 
     const actionId = returnActionIdCommands.includes(payload.command) ? { action: actionID } : {};
     const data = await getActionDetailsById(
