@@ -21,8 +21,15 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
+import {
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/es_fields/apm';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { MAX_NUMBER_OF_TX_GROUPS } from './get_service_transaction_groups';
 
 interface ServiceTransactionGroupAlertsAggResponse {
   buckets: Array<
@@ -34,14 +41,14 @@ interface ServiceTransactionGroupAlertsAggResponse {
 }
 
 export type ServiceTransactionGroupAlertsResponse = Array<{
-  serviceName: string;
+  name: string;
   alertsCount: number;
 }>;
 
 export async function getServiceTranactionGroupsAlerts({
   apmAlertsClient,
   kuery,
-  transactionNames,
+  transactionType,
   serviceName,
   latencyAggregationType,
   start,
@@ -51,13 +58,13 @@ export async function getServiceTranactionGroupsAlerts({
   apmAlertsClient: ApmAlertsClient;
   kuery?: string;
   serviceName?: string;
-  transactionNames: string[];
-  latencyAggregationType: LatencyAggregationType,
+  transactionType?: string;
+  latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
   environment?: string;
-}): Promise<ServiceTransactionGroupAlertsAggResponse> {
-  const ALERT_RULE_PARAMETERS_AGGREGATION_TYPE =  `${ALERT_RULE_PARAMETERS}.aggregationType`
+}): Promise<ServiceTransactionGroupAlertsResponse> {
+  const ALERT_RULE_PARAMETERS_AGGREGATION_TYPE = `${ALERT_RULE_PARAMETERS}.aggregationType`;
   const params = {
     size: 0,
     query: {
@@ -65,11 +72,14 @@ export async function getServiceTranactionGroupsAlerts({
         filter: [
           ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...termQuery(ALERT_RULE_PARAMETERS_AGGREGATION_TYPE, ALERT_STATUS_ACTIVE),
+          ...termQuery(
+            ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
+            latencyAggregationType
+          ),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),
           ...termQuery(SERVICE_NAME, serviceName),
-          ...termQuery(TRANSACTION_TYPE, serviceName),
+          ...termQuery(TRANSACTION_TYPE, transactionType),
           ...environmentQuery(environment),
         ],
       },
@@ -78,8 +88,8 @@ export async function getServiceTranactionGroupsAlerts({
       transaction_groups: {
         terms: {
           field: TRANSACTION_NAME,
-          include: transactionNames,
-          size: transactionNames.length,
+          size: MAX_NUMBER_OF_TX_GROUPS,
+          order: { _count: 'desc' },
         },
         aggs: {
           alerts_count: {
@@ -96,11 +106,10 @@ export async function getServiceTranactionGroupsAlerts({
 
   const buckets = response.aggregations?.transaction_groups.buckets ?? [];
 
-  const servicesTransactionGroupsAlertsCount =
-    buckets.map((bucket) => ({
-      transactionName: bucket.key as string;
-      alertsCount: bucket.alerts_count.value,
-    }));
+  const servicesTransactionGroupsAlertsCount = buckets.map((bucket) => ({
+    name: bucket.key as string,
+    alertsCount: bucket.alerts_count.value,
+  }));
 
   return servicesTransactionGroupsAlertsCount;
 }

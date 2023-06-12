@@ -12,6 +12,8 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../common/latency_aggregation_types';
+import { joinByKey } from '../../../common/utils/join_by_key';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import {
@@ -72,9 +74,17 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources): Promise<ServiceTransactionGroupsResponse> => {
+  handler: async (
+    resources
+  ): Promise<
+    ServiceTransactionGroupsResponse & {
+      hasActiveAlerts: boolean;
+    }
+  > => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
+    const apmAlertsClient = await getApmAlertsClient(resources);
+
     const {
       path: { serviceName },
       query: {
@@ -90,19 +100,51 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       },
     } = params;
 
-    return getServiceTransactionGroups({
-      environment,
-      kuery,
-      apmEventClient,
-      serviceName,
-      transactionType,
-      latencyAggregationType,
-      start,
-      end,
-      documentType,
-      rollupInterval,
-      useDurationSummary,
-    });
+    const [serviceTransactionGroups, serviceTransactionGroupsAlerts] =
+      await Promise.all([
+        getServiceTransactionGroups({
+          environment,
+          kuery,
+          apmEventClient,
+          serviceName,
+          transactionType,
+          latencyAggregationType,
+          start,
+          end,
+          documentType,
+          rollupInterval,
+          useDurationSummary,
+        }),
+
+        getServiceTranactionGroupsAlerts({
+          apmAlertsClient,
+          kuery,
+          environment,
+          serviceName,
+          transactionType,
+          latencyAggregationType,
+          start,
+          end,
+        }),
+      ]);
+
+    const {
+      transactionGroups,
+      maxTransactionGroupsExceeded,
+      transactionOverflowCount,
+    } = serviceTransactionGroups;
+
+    const transactionGroupsWithAlerts = joinByKey(
+      [...transactionGroups, ...serviceTransactionGroupsAlerts],
+      'name'
+    );
+
+    return {
+      transactionGroups: transactionGroupsWithAlerts,
+      maxTransactionGroupsExceeded,
+      transactionOverflowCount,
+      hasActiveAlerts: !!serviceTransactionGroupsAlerts.length,
+    };
   },
 });
 
@@ -172,54 +214,6 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       start,
       end,
       offset,
-    });
-  },
-});
-
-const transactionGroupsAlertsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/transactions/groups/alerts',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        useDurationSummary: toBooleanRt,
-        transactionType: t.string,
-        latencyAggregationType: latencyAggregationTypeRt,
-      }),
-      transactionDataSourceRt,
-    ]),
-  }),
-  options: {
-    tags: ['access:apm'],
-  },
-  handler: async (resources): Promise<ServiceTransactionGroupsResponse> => {
-    const { params } = resources;
-    const apmEventClient = await getApmEventClient(resources);
-    const {
-      path: { serviceName },
-      query: {
-        environment,
-        kuery,
-        latencyAggregationType,
-        transactionType,
-        start,
-        end,
-      },
-    } = params;
-
-    return getServiceTranactionGroupsAlerts({
-      environment,
-      kuery,
-      apmEventClient,
-      serviceName,
-      transactionType,
-      latencyAggregationType,
-      start,
-      end,
     });
   },
 });
@@ -537,7 +531,6 @@ const transactionChartsColdstartRateByTransactionNameRoute =
 export const transactionRouteRepository = {
   ...transactionGroupsMainStatisticsRoute,
   ...transactionGroupsDetailedStatisticsRoute,
-  ...transactionGroupsAlertsRoute,
   ...transactionLatencyChartsRoute,
   ...transactionTraceSamplesRoute,
   ...transactionChartsBreakdownRoute,
