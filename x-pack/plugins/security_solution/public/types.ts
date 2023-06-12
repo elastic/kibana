@@ -70,6 +70,7 @@ import type { NavigationLink } from './common/links';
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { UpsellingService } from './common/lib/upsellings';
+import type { BreadcrumbsNavigation } from './common/links/breadcrumbs_navigation';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -152,6 +153,7 @@ export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Elem
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
+  getBreadcrumbsNavigation$: () => Observable<BreadcrumbsNavigation>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: GetStartedComponent) => void;
 }

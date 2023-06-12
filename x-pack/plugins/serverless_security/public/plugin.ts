@@ -53,12 +53,33 @@ export class ServerlessSecurityPlugin
     securitySolution.setIsSidebarEnabled(false);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
     serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
-    securitySolution.getNavLinks$().subscribe((navLinks) => {
-      serverless.setNavigation({
-        homeRef: '/security',
-        // TODO wait for `projectNavigationTree` to be available in the API
-        projectNavigationTree: getProjectNavigationTree(navLinks),
-      });
+
+    // Wait for new APIs to be functional
+    // securitySolution.getNavLinks$().subscribe((navLinks) => {
+    //   serverless.setNavigation({
+    //     homeRef: '/security',
+    //     // TODO wait for `projectNavigationTree` to be available in the API
+    //     projectNavigationTree: getProjectNavigationTree(navLinks),
+    //   });
+    // });
+
+    // securitySolution.getNavLinks$().subscribe((navLinks) => {
+    //   (core.chrome as InternalChromeStart).project.setNavigation({
+    //     homeRef: '/security',
+    //     // TODO wait for `projectNavigationTree` to be available in the API
+    //     projectNavigationTree: getProjectNavigationTree(navLinks),
+    //   });
+    // });
+
+    // securitySolution.getTrailingBreadCrumbs$().subscribe((breadcrumbs) => {
+    //   (core.chrome as InternalChromeStart).project.setBreadcrumbs(breadcrumbs);
+    // });
+
+    // Temporary code while new breadcrumbs are not implemented
+    securitySolution.getBreadcrumbsNavigation$().subscribe((breadcrumbsNav) => {
+      if (breadcrumbsNav.trailing.length > 0) {
+        core.chrome.setBreadcrumbs(breadcrumbsNav.trailing);
+      }
     });
 
     return {};

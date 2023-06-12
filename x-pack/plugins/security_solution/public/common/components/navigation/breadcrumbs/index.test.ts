@@ -7,7 +7,7 @@
 
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { getBreadcrumbsForRoute, useBreadcrumbs } from '.';
+import { getBreadcrumbsForRoute, useUpdateBreadcrumbsNavigation } from '.';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { NetworkRouteType } from '../../../../explore/network/pages/navigation/types';
@@ -499,7 +499,7 @@ describe('Navigation Breadcrumbs', () => {
   describe('setBreadcrumbs()', () => {
     it('should call chrome breadcrumb service with correct breadcrumbs', () => {
       mockUseRouteSpy.mockReturnValueOnce([getMockObject(SecurityPageName.hosts, '/', hostName)]);
-      renderHook(useBreadcrumbs, {
+      renderHook(useUpdateBreadcrumbsNavigation, {
         initialProps: { isEnabled: true },
         wrapper: TestProviders,
       });
@@ -534,7 +534,7 @@ describe('Navigation Breadcrumbs', () => {
 
     it('should not call chrome breadcrumb service when not enabled', () => {
       mockUseRouteSpy.mockReturnValueOnce([getMockObject(SecurityPageName.hosts, '/', hostName)]);
-      renderHook(useBreadcrumbs, {
+      renderHook(useUpdateBreadcrumbsNavigation, {
         initialProps: { isEnabled: false },
         wrapper: TestProviders,
       });

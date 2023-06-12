@@ -14,9 +14,17 @@ import type { GetSecuritySolutionUrl } from '../../link_to';
 import { getAncestorLinksInfo } from '../../../links';
 
 export const getLeadingBreadcrumbsForSecurityPage = (
-  pageName: SecurityPageName,
+  pageName: SecurityPageName | null,
   getSecuritySolutionUrl: GetSecuritySolutionUrl
-): [ChromeBreadcrumb, ...ChromeBreadcrumb[]] => {
+): ChromeBreadcrumb[] => {
+  if (
+    !pageName ||
+    // cases manages its own breadcrumbs, return null
+    pageName === SecurityPageName.case
+  ) {
+    return [];
+  }
+
   const landingPath = getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing });
 
   const siemRootBreadcrumb: ChromeBreadcrumb = {

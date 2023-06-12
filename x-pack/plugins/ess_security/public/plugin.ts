@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { emptyLastBreadcrumbUrl } from '@kbn/security-solution-plugin/public';
 import {
   EssSecurityPluginSetup,
   EssSecurityPluginStart,
@@ -32,9 +33,18 @@ export class EssSecurityPlugin
   }
 
   public start(
-    _core: CoreStart,
-    _startDeps: EssSecurityPluginStartDependencies
+    core: CoreStart,
+    startDeps: EssSecurityPluginStartDependencies
   ): EssSecurityPluginStart {
+    const { securitySolution } = startDeps;
+
+    securitySolution.getBreadcrumbsNavigation$().subscribe((breadcrumbsNav) => {
+      const breadcrumbs = [...breadcrumbsNav.leading, ...breadcrumbsNav.trailing];
+      if (breadcrumbs.length > 0) {
+        core.chrome.setBreadcrumbs(emptyLastBreadcrumbUrl(breadcrumbs));
+      }
+    });
+
     return {};
   }
 

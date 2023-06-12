@@ -9,6 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
 import type { PluginSetup, PluginStart } from './types';
 export type { TimelineModel } from './timelines/store/timeline/model';
+export { emptyLastBreadcrumbUrl } from './common/components/navigation/helpers';
 export type {
   UpsellingService,
   PageUpsellings,

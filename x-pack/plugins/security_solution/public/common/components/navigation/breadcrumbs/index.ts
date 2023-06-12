@@ -6,10 +6,10 @@
  */
 
 import { useEffect } from 'react';
-import { last } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { Dispatch } from 'redux';
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../explore/hosts/pages/details/utils';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details/utils';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
@@ -29,69 +29,53 @@ import { useGetSecuritySolutionUrl } from '../../link_to';
 import { TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { updateBreadcrumbsNavigation } from '../../../links/breadcrumbs_navigation';
 
-export const useBreadcrumbs = ({ isEnabled }: { isEnabled: boolean }) => {
+export const useUpdateBreadcrumbsNavigation = () => {
   const dispatch = useDispatch();
   const [routeProps] = useRouteSpy();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const {
-    chrome: { setBreadcrumbs },
     application: { navigateToUrl },
   } = useKibana().services;
 
   useEffect(() => {
-    if (!isEnabled) {
-      return;
-    }
-    const breadcrumbs = getBreadcrumbsForRoute(routeProps, getSecuritySolutionUrl);
-    if (!breadcrumbs) {
-      return;
-    }
-    setBreadcrumbs(
-      breadcrumbs.map((breadcrumb) => ({
-        ...breadcrumb,
-        ...(breadcrumb.href && !breadcrumb.onClick
-          ? {
-              onClick: (ev) => {
-                ev.preventDefault();
-                const trackedPath = breadcrumb.href?.split('?')[0] ?? 'unknown';
-                track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trackedPath}`);
-                dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
-
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                navigateToUrl(breadcrumb.href!);
-              },
-            }
-          : {}),
-      }))
+    const trailingBreadcrumbs = getTrailingBreadcrumbsForRoutes(routeProps, getSecuritySolutionUrl);
+    const leadingBreadcrumbs = getLeadingBreadcrumbsForSecurityPage(
+      routeProps.pageName,
+      getSecuritySolutionUrl
     );
-  }, [routeProps, isEnabled, dispatch, getSecuritySolutionUrl, setBreadcrumbs, navigateToUrl]);
+
+    updateBreadcrumbsNavigation({
+      trailing: enhanceOnClick(trailingBreadcrumbs, dispatch, navigateToUrl),
+      leading: enhanceOnClick(leadingBreadcrumbs, dispatch, navigateToUrl),
+    });
+  }, [routeProps, dispatch, getSecuritySolutionUrl, navigateToUrl]);
 };
 
-export const getBreadcrumbsForRoute = (
-  spyState: RouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-): ChromeBreadcrumb[] | null => {
-  if (
-    !spyState?.pageName ||
-    // cases manages its own breadcrumbs, return null
-    spyState.pageName === SecurityPageName.case
-  ) {
-    return null;
-  }
+const enhanceOnClick = (
+  breadcrumbs: ChromeBreadcrumb[],
+  dispatch: Dispatch,
+  navigateToUrl: (href: string) => void
+): ChromeBreadcrumb[] =>
+  breadcrumbs.map((breadcrumb) => ({
+    ...breadcrumb,
+    ...(breadcrumb.href && !breadcrumb.onClick
+      ? {
+          onClick: (ev) => {
+            ev.preventDefault();
+            const trackedPath = breadcrumb.href?.split('?')[0] ?? 'unknown';
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trackedPath}`);
+            dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
 
-  const leadingBreadcrumbs = getLeadingBreadcrumbsForSecurityPage(
-    spyState.pageName,
-    getSecuritySolutionUrl
-  );
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            navigateToUrl(breadcrumb.href!);
+          },
+        }
+      : {}),
+  }));
 
-  return emptyLastBreadcrumbUrl([
-    ...leadingBreadcrumbs,
-    ...getTrailingBreadcrumbsForRoutes(spyState, getSecuritySolutionUrl),
-  ]);
-};
-
-const getTrailingBreadcrumbsForRoutes = (
+export const getTrailingBreadcrumbsForRoutes = (
   spyState: RouteSpyState,
   getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
@@ -118,21 +102,4 @@ const getTrailingBreadcrumbsForRoutes = (
   }
 
   return [];
-};
-
-const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
-  const leadingBreadCrumbs = breadcrumbs.slice(0, -1);
-  const lastBreadcrumb = last(breadcrumbs);
-
-  if (lastBreadcrumb) {
-    return [
-      ...leadingBreadCrumbs,
-      {
-        ...lastBreadcrumb,
-        href: '',
-      },
-    ];
-  }
-
-  return breadcrumbs;
 };

@@ -11,7 +11,7 @@ import { useSecuritySolutionNavigation } from './use_security_solution_navigatio
 
 const mockSetBreadcrumbs = jest.fn();
 jest.mock('../breadcrumbs', () => ({
-  useBreadcrumbs: () => mockSetBreadcrumbs,
+  useUpdateBreadcrumbsNavigation: () => mockSetBreadcrumbs,
 }));
 
 const mockIsSidebarEnabled$ = new BehaviorSubject(true);
