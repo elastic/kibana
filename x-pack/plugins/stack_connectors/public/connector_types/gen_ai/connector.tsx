@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   ActionConnectorFieldsProps,
   SimpleConnectorForm,
@@ -45,26 +45,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     },
   } = useKibana();
 
-  const [hasIndexPermissions, setHasIndexPermissions] = useState<boolean>(true);
-
-  // useEffect(() => {
-  //   let ignore = false;
-  //
-  //   const getDashboardIndex = async (pattern: string) => {
-  //     const indices = await getMatchingIndices({ http, pattern });
-  //     console.log('indices', indices);
-  //     if (!ignore && indices.length > 0) {
-  //       setHasIndexPermissions(true);
-  //     }
-  //   };
-  //
-  //   getDashboardIndex('.kibana-event-log-');
-  //   return () => {
-  //     ignore = true;
-  //   };
-  // }, [http]);
-
-  const { dashboardUrl } = useGetDashboard(id);
+  const { dashboardUrl } = useGetDashboard({ connectorId: id });
 
   const onClick = useCallback(
     (e) => {
@@ -81,15 +62,6 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
       getFieldDefaultValue<OpenAiProviderType>('config.apiProvider') ?? OpenAiProviderType.OpenAi,
     [getFieldDefaultValue]
   );
-
-  const showDashboardLink = useMemo<boolean>(() => {
-    console.log({
-      isEdit,
-      hasIndexPermissions,
-      dashboardUrl,
-    });
-    return isEdit && dashboardUrl != null && hasIndexPermissions;
-  }, [dashboardUrl, hasIndexPermissions, isEdit]);
 
   return (
     <>
@@ -134,7 +106,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           secretsFormSchema={azureAiSecrets}
         />
       )}
-      {showDashboardLink && (
+      {isEdit && dashboardUrl != null && (
         <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
           {i18n.USAGE_DASHBOARD_LINK(selectedProviderDefaultValue, name)}
         </EuiLink>

@@ -48,7 +48,6 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
         },
         dashboardId,
       });
-      console.log('set url!');
       setDashboardUrl(url ?? null);
     },
     [connectorId, dashboard?.locator]

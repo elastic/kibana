@@ -10,6 +10,7 @@ import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestHeaders } from 'axios';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -29,6 +30,7 @@ export abstract class SubActionConnector<Config, Secrets> {
   private subActions: Map<string, SubAction> = new Map();
   private configurationUtilities: ActionsConfigurationUtilities;
   protected logger: Logger;
+  protected esClient: ElasticsearchClient;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected connector: ServiceParams<Config, Secrets>['connector'];
   protected config: Config;
@@ -40,6 +42,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     this.config = params.config;
     this.secrets = params.secrets;
     this.savedObjectsClient = params.services.savedObjectsClient;
+    this.esClient = params.services.scopedClusterClient;
     this.configurationUtilities = params.configurationUtilities;
     this.axiosInstance = axios.create();
   }

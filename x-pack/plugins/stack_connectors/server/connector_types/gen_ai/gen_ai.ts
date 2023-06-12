@@ -7,6 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { Privilege } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 import { initGenAiDashboard } from './create_dashboard';
 import {
   GenAiRunActionParamsSchema,
@@ -89,24 +90,30 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
   public async getDashboard({
     dashboardId,
   }: GenAiDashboardActionParams): Promise<GenAiDashboardActionResponse> {
+    const privilege = (await this.esClient.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: ['*.kibana-event-log-*'],
+            allow_restricted_indices: true,
+            privileges: ['read'],
+          },
+        ],
+      },
+    })) as Privilege;
+
+    if (!privilege?.has_all_requested) {
+      return { exists: false };
+    }
+
     const response = await initGenAiDashboard({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       dashboardId,
     });
 
-    //   this.request({
-    //   url: this.url,
-    //   method: 'post',
-    //   responseSchema: GenAiRunActionResponseSchema,
-    //   data: body,
-    //   headers: {
-    //     ...(this.provider === OpenAiProviderType.OpenAi
-    //       ? { Authorization: `Bearer ${this.key}` }
-    //       : { ['api-key']: this.key }),
-    //     ['content-type']: 'application/json',
-    //   },
-    // });
     return { exists: response.success };
   }
 }

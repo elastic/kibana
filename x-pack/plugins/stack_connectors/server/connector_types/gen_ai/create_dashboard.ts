@@ -29,13 +29,11 @@ export const initGenAiDashboard = async ({
 }> => {
   try {
     await savedObjectsClient.get<DashboardAttributes>('dashboard', dashboardId);
-
     return {
       success: true,
     };
   } catch (error) {
     logger.error(`Failed to fetch Gen Ai Dashboard saved object: ${error.message}`);
-
     // if 404, does not yet exist. do not error, continue to create
     if (error.output.statusCode !== 404) {
       return { success: false, error: { message: error.message, statusCode: error.statusCode } };
@@ -51,7 +49,6 @@ export const initGenAiDashboard = async ({
         id: dashboardId,
       }
     );
-
     return { success: true };
   } catch (error) {
     logger.error(`Failed to create Gen Ai Dashboard saved object: ${error.message}`);
