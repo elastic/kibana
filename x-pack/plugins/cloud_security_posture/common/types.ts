@@ -139,3 +139,5 @@ export interface CnvmStatistics {
 export interface CnvmDashboardData {
   cnvmStatistics: CnvmStatistics;
 }
+
+export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';

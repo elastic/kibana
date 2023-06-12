@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+import { VulnSeverity } from '../../../common/types';
 
 export interface VulnerabilityRecord {
   '@timestamp': string;
