@@ -51,5 +51,5 @@ export const GenAiDashboardActionParamsSchema = schema.object({
 });
 
 export const GenAiDashboardActionResponseSchema = schema.object({
-  exists: schema.boolean(),
+  available: schema.boolean(),
 });

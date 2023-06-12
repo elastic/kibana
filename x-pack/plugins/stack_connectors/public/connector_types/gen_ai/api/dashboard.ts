@@ -23,8 +23,8 @@ export async function getDashboard({
   signal: AbortSignal;
   connectorId: string;
   dashboardId: string;
-}): Promise<ActionTypeExecutorResult<{ exists: boolean }>> {
-  const res = await http.post<ConnectorExecutorResult<{ exists: boolean }>>(
+}): Promise<ActionTypeExecutorResult<{ available: boolean }>> {
+  const res = await http.post<ConnectorExecutorResult<{ available: boolean }>>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
     {
       body: JSON.stringify({

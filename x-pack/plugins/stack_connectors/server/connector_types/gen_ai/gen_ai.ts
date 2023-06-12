@@ -104,7 +104,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     })) as { has_all_requested: boolean };
 
     if (!privilege?.has_all_requested) {
-      return { exists: false };
+      return { available: false };
     }
 
     const response = await initGenAiDashboard({
@@ -113,6 +113,6 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       dashboardId,
     });
 
-    return { exists: response.success };
+    return { available: response.success };
   }
 }

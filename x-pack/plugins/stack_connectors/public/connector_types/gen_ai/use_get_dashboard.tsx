@@ -68,7 +68,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
 
         if (!didCancel) {
           setIsLoading(false);
-          if (res.data?.exists) {
+          if (res.data?.available) {
             setUrl(dashboardId);
           }
 
