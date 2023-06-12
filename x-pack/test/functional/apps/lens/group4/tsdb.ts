@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { partition } from 'lodash';
+import moment from 'moment';
 import { createTSDBHelper } from './_tsdb_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -16,16 +17,72 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const log = getService('log');
   const TSDBHelper = createTSDBHelper({ getService });
 
+  const createDocs = async (esIndex: string) => {
+    type TestDoc = Record<string, string | string[] | number | null | Record<string, unknown>>;
+    const testDocTemplate: TestDoc = {
+      agent: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+      bytes: 6219,
+      clientip: '223.87.60.27',
+      extension: 'deb',
+      geo: {
+        srcdest: 'US:US',
+        src: 'US',
+        dest: 'US',
+        coordinates: { lat: 39.41042861, lon: -88.8454325 },
+      },
+      host: 'artifacts.elastic.co',
+      index: 'kibana_sample_data_logs',
+      ip: '223.87.60.27',
+      machine: { ram: 8589934592, os: 'win 8' },
+      memory: null,
+      message:
+        '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
+      phpmemory: null,
+      referer: 'http://twitter.com/success/wendy-lawrence',
+      request: '/elasticsearch/elasticsearch-6.3.2.deb',
+      response: 200,
+      tags: ['success', 'info'],
+      '@timestamp': '2018-07-22T00:39:02.912Z',
+      url: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb_1',
+      utc_time: '2018-07-22T00:39:02.912Z',
+      event: { dataset: 'sample_web_logs' },
+      bytes_gauge: 0,
+      bytes_counter: 0,
+    };
+    const TEST_DOC_COUNT = 100;
+
+    const docs = Array<TestDoc>(TEST_DOC_COUNT).fill(testDocTemplate);
+    for (const [index, doc] of Object.entries(docs)) {
+      const i = Number(index);
+      const timestamp = moment
+        .utc()
+        .subtract(TEST_DOC_COUNT + i, 'seconds')
+        .format();
+      doc['@timestamp'] = timestamp;
+      doc.utc_time = timestamp;
+      doc.bytes_gauge = Math.floor(Math.random() * 10000 * i);
+      doc.bytes_counter = i * 1000;
+    }
+
+    const res = await es.bulk({
+      index: esIndex,
+      body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
+    });
+
+    log.info(`Indexed ${res.items.length} test data docs.`);
+  };
+
   describe('lens tsdb', function () {
-    const testIndex = 'kibana_sample_data_logstsdb';
-    const testDataView = testIndex;
-    const testEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
+    const tsdbIndex = 'kibana_sample_data_logstsdb';
+    const tsdbDataView = tsdbIndex;
+    const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
 
     before(async () => {
-      await TSDBHelper.loadIndex(testIndex, testEsArchive);
-      await TSDBHelper.configureDataView(testIndex, '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51');
+      await TSDBHelper.loadIndex(tsdbIndex, tsdbEsArchive);
+      await TSDBHelper.configureDataView(tsdbDataView, '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51');
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
@@ -33,13 +90,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await TSDBHelper.deleteIndexAndResetSettings(testIndex);
+      await TSDBHelper.deleteIndexAndResetSettings(tsdbIndex);
     });
 
     describe('downsampling', () => {
       let downsampleDataView: { index: string; dataView: string };
       before(async () => {
-        downsampleDataView = await TSDBHelper.downsampleTSDBIndex(testIndex);
+        downsampleDataView = await TSDBHelper.downsampleTSDBIndex(tsdbIndex);
         await TSDBHelper.configureDataView(downsampleDataView.dataView);
       });
 
@@ -100,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('field types support', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('lens');
-        await PageObjects.lens.switchDataPanelIndexPattern(testDataView);
+        await PageObjects.lens.switchDataPanelIndexPattern(tsdbDataView);
         await PageObjects.lens.goToTimeRange();
       });
 
@@ -227,6 +284,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         }
       }
+    });
+
+    describe('Data-stream upgraded to TSDB', () => {
+      const streamIndex = 'data_stream';
+      const streamDataView = streamIndex;
+      const streamEsArchive = 'test/functional/fixtures/es_archiver/data_stream';
+
+      before(async () => {
+        await TSDBHelper.loadIndex(streamIndex, streamEsArchive);
+        await kibanaServer.uiSettings.update({
+          'dateFormat:tz': 'UTC',
+          'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
+        });
+        await TSDBHelper.upgradeStreamToTSDB(
+          streamIndex,
+          `${streamIndex}-tsdb`,
+          { bytes_gauge: 'gauge', bytes_counter: 'counter' },
+          ['request', 'url']
+        );
+        // add some more data when upgraded
+        await createDocs(streamIndex);
+      });
+
+      after(async () => {
+        await TSDBHelper.deleteIndexAndResetSettings(streamIndex);
+      });
+
+      describe('dataview contains only upgraded stream', () => {
+        before(async () => {
+          await TSDBHelper.configureDataView(`${streamDataView}-tsdb`);
+        });
+        after(async () => {
+          await TSDBHelper.unloadDataView('');
+        });
+      });
+      describe('dataView contains upgraded stream + another tsdb index', () => {
+        before(async () => {
+          await TSDBHelper.configureDataView(`${streamDataView},${streamDataView}-tsdb`);
+        });
+        after(async () => {
+          await TSDBHelper.unloadDataView('');
+        });
+      });
+      describe('dataView contains upgraded stream + simple stream', () => {});
+      describe('dataView contains upgraded stream + downsampled tsdb index', () => {});
     });
   });
 }
