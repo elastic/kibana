@@ -68,18 +68,21 @@ export const getQuery = ({
     resources: {
       terms: {
         field: 'resource.id',
-        size: MAX_FINDINGS_TO_LOAD * 2,
+        size: MAX_FINDINGS_TO_LOAD * 3,
         // in case there are more resources then size, ensuring resources with more vulnerabilities
         // will be included first, and then vulnerabilities with critical and high severity
         order: [
           {
-            _count: 'desc',
+            _count: sortOrder,
           },
           {
             vulnerability_severity_critical: 'desc',
           },
           {
             vulnerability_severity_high: 'desc',
+          },
+          {
+            vulnerability_severity_medium: 'desc',
           },
         ],
       },
