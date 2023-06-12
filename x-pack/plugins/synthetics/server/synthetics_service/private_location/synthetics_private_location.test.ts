@@ -152,7 +152,6 @@ describe('SyntheticsPrivateLocation', () => {
         ...serverMock.fleet,
         packagePolicyService: {
           ...serverMock.fleet.packagePolicyService,
-
           delete(
             soClient: SavedObjectsClientContract,
             esClient: any,
