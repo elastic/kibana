@@ -438,6 +438,19 @@ describe('UninstallTokenService', () => {
           ]);
         });
       });
+
+      describe('agentTamperProtectionEnabled false', () => {
+        beforeAll(() => {
+          // @ts-ignore
+          mockContext.experimentalFeatures.agentTamperProtectionEnabled = false;
+        });
+
+        it('should not generate token if agentTamperProtectionEnabled: false', async () => {
+          const so = getDefaultSO();
+          await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
+          expect(soClientMock.bulkCreate).not.toBeCalled();
+        });
+      });
     });
   });
 });
