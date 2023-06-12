@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
+import { isAbsoluteLink } from '../../utils';
 import {
   ChromeProjectNavigationNodeEnhanced,
   NodeProps,
@@ -56,12 +57,16 @@ function createInternalNavNode<
   deepLinks: Readonly<ChromeNavLink[]>,
   path: string[] | null
 ): ChromeProjectNavigationNodeEnhanced | null {
-  const { children, link, ...navNode } = _navNode;
+  const { children, link, href, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const isVisible = isNodeVisible({ link, deepLink });
 
   const titleFromDeepLinkOrChildren = typeof children === 'string' ? children : deepLink?.title;
   const title = navNode.title ?? titleFromDeepLinkOrChildren;
+
+  if (href && !isAbsoluteLink(href)) {
+    throw new Error(`href must be an absolute URL. Node id [${id}].`);
+  }
 
   if (!isVisible) {
     return null;
@@ -73,6 +78,7 @@ function createInternalNavNode<
     path: path ?? [id],
     title: title ?? '',
     deepLink,
+    href,
   };
 }
 

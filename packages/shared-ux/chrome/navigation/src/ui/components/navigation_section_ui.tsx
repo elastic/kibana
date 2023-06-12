@@ -8,8 +8,11 @@
 
 import React, { FC } from 'react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCollapsibleNavGroup,
   EuiIcon,
+  EuiLink,
   EuiSideNav,
   EuiSideNavItemType,
   EuiText,
@@ -18,6 +21,9 @@ import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
 import { navigationStyles as styles } from '../../styles';
 import { useNavigation as useServices } from '../../services';
 import { ChromeProjectNavigationNodeEnhanced } from '../types';
+import { isAbsoluteLink } from '../../utils';
+
+type RenderItem = EuiSideNavItemType<unknown>['renderItem'];
 
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNodeEnhanced,
@@ -25,6 +31,21 @@ const navigationNodeToEuiItem = (
 ): EuiSideNavItemType<unknown> => {
   const href = item.deepLink?.href ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
+  const isExternal = Boolean(href) && isAbsoluteLink(href!);
+
+  const getRenderItem = (): RenderItem | undefined => {
+    if (!isExternal || item.renderItem) {
+      return item.renderItem;
+    }
+
+    return () => (
+      <div className="euiSideNavItemButton">
+        <EuiLink href={href} external>
+          {item.title}
+        </EuiLink>
+      </div>
+    );
+  };
 
   return {
     id,
@@ -37,7 +58,7 @@ const navigationNodeToEuiItem = (
           }
         : undefined,
     href,
-    renderItem: item.renderItem,
+    renderItem: getRenderItem(),
     items: item.children?.map((_item) =>
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
     ),

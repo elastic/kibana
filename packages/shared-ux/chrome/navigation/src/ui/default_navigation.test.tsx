@@ -253,6 +253,119 @@ describe('<DefaultNavigation />', () => {
       });
     });
 
+    test('should allow href for absolute links', async () => {
+      const onProjectNavigationChange = jest.fn();
+
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          children: [
+            {
+              id: 'group1',
+              children: [
+                {
+                  id: 'item1',
+                  title: 'Absolute link',
+                  href: 'https://example.com',
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      render(
+        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+          <DefaultNavigation
+            {...defaultProps}
+            navigationTree={{
+              body: navigationBody,
+            }}
+          />
+        </NavigationProvider>
+      );
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTreeGenerated] = lastCall;
+
+      expect(navTreeGenerated).toEqual({
+        homeRef: 'https://elastic.co',
+        navigationTree: [
+          {
+            id: 'root',
+            path: ['root'],
+            title: '',
+            children: [
+              {
+                id: 'group1',
+                path: ['root', 'group1'],
+                title: '',
+                children: [
+                  {
+                    id: 'item1',
+                    path: ['root', 'group1', 'item1'],
+                    title: 'Absolute link',
+                    href: 'https://example.com',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    test('should throw if href is not an absolute links', async () => {
+      // We'll mock the console.error to avoid dumping the (expected) error in the console
+      // source: https://github.com/jestjs/jest/pull/5267#issuecomment-356605468
+      jest.spyOn(console, 'error');
+      // @ts-expect-error we're mocking the console so "mockImplementation" exists
+      // eslint-disable-next-line no-console
+      console.error.mockImplementation(() => {});
+
+      const onProjectNavigationChange = jest.fn();
+
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          children: [
+            {
+              id: 'group1',
+              children: [
+                {
+                  id: 'item1',
+                  title: 'Absolute link',
+                  href: '../dashboards',
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const expectToThrow = () => {
+        render(
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <DefaultNavigation
+              {...defaultProps}
+              navigationTree={{
+                body: navigationBody,
+              }}
+            />
+          </NavigationProvider>
+        );
+      };
+
+      expect(expectToThrow).toThrowError('href must be an absolute URL. Node id [item1].');
+      // @ts-expect-error we're mocking the console so "mockImplementation" exists
+      // eslint-disable-next-line no-console
+      console.error.mockRestore();
+    });
+
     test('should render cloud link', async () => {
       const navigationBody: RootNavigationItemDefinition[] = [
         {

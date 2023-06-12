@@ -138,6 +138,15 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
               id: 'item3',
               title: 'Dashboards',
             },
+            {
+              id: 'item4',
+              title: 'External link',
+              href: 'https://elastic.co',
+            },
+            {
+              id: 'item5',
+              title: 'Another link',
+            },
           ],
         },
         {
@@ -337,15 +346,18 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
               <Navigation.Item id="item2" title="Alerts">
                 {(navNode) => {
                   return (
-                    <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    <div className="euiSideNavItemButton">
+                      <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    </div>
                   );
                 }}
               </Navigation.Item>
               <Navigation.Item id="item3" title="Title in ReactNode">
-                <EuiText size="s">
+                <div className="euiSideNavItemButton">
                   <EuiLink>Title in ReactNode</EuiLink>
-                </EuiText>
+                </div>
               </Navigation.Item>
+              <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
             </Navigation.Group>
 
             <Navigation.Group id="group:settings" title="Settings">
