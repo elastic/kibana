@@ -85,6 +85,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
         layerId,
         columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration: getConfiguration(
