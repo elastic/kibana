@@ -7,13 +7,7 @@
 
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
-import {
-  ALERT_SUPPRESSION_TERMS,
-  ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_START,
-  ALERT_INSTANCE_ID,
-} from '@kbn/rule-data-utils';
+import { ALERT_SUPPRESSION_DOCS_COUNT, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
