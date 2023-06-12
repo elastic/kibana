@@ -22,7 +22,7 @@ import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';
 export interface RuleTagFilterProps {
   selectedTags: string[];
   isGrouped?: boolean; // Whether or not this should appear as the child of a EuiFilterGroup
-  canLoadRules: boolean;
+  canLoadRules?: boolean;
   refresh?: Date;
   loadingMessage?: EuiSelectableProps['loadingMessage'];
   noMatchesMessage?: EuiSelectableProps['noMatchesMessage'];
@@ -153,7 +153,7 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
   const {
     selectedTags = EMPTY_TAGS,
     isGrouped = false,
-    canLoadRules,
+    canLoadRules = true,
     refresh,
     loadingMessage = loadingText,
     noMatchesMessage,
@@ -193,7 +193,7 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
   }, []);
 
   const allTags = useMemo(() => {
-    return [...new Set([...selectedTags.sort(), ...tags.sort()])];
+    return [...new Set([...selectedTags.sort(), ...tags])];
   }, [selectedTags, tags]);
 
   // Attaches an intersection observer to the last element
@@ -266,7 +266,7 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
   }, [isGrouped]);
 
   return (
-    <Container>
+    <Container {...(isGrouped ? {} : { 'data-test-subj': 'ruleTagFilterUngrouped' })}>
       <EuiPopover
         data-test-subj={dataTestSubj}
         isOpen={isPopoverOpen}

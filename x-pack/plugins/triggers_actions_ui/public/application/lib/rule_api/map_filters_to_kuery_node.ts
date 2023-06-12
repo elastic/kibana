@@ -105,11 +105,7 @@ export const mapFiltersToKueryNode = ({
 
   if (tagsFilter && tagsFilter.length) {
     filterKueryNode.push(
-      nodeBuilder.or(
-        tagsFilter.map((tag) =>
-          nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(tag))
-        )
-      )
+      nodeBuilder.or(tagsFilter.map((tag) => nodeBuilder.is('alert.attributes.tags', tag)))
     );
   }
 

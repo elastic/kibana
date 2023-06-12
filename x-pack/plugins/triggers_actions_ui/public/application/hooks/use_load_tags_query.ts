@@ -36,8 +36,10 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
   const queryFn = ({ pageParam }: { pageParam?: LoadRuleTagsProps }) => {
     if (pageParam) {
       return loadRuleTags({
-        ...pageParam,
         http,
+        perPage: pageParam.perPage,
+        page: pageParam.page,
+        search,
       });
     }
     return loadRuleTags({
@@ -57,7 +59,7 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
   };
 
   const getNextPageParam = (lastPage: GetRuleTagsResponse) => {
-    const totalPages = Math.min(1, Math.ceil(lastPage.total / lastPage.perPage));
+    const totalPages = Math.max(1, Math.ceil(lastPage.total / lastPage.perPage));
     if (totalPages === lastPage.page) {
       return;
     }

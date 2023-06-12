@@ -20,10 +20,16 @@ jest.mock('../lib/license_api_access', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  rulesClient.getTags.mockResolvedValueOnce({
+    data: ['a', 'b', 'c'],
+    page: 1,
+    perPage: 10,
+    total: 3,
+  });
 });
 
 describe('getRuleTagsRoute', () => {
-  it('aggregates rule tags with proper parameters', async () => {
+  it('gets rule tags with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -37,11 +43,9 @@ describe('getRuleTagsRoute', () => {
       { rulesClient },
       {
         query: {
-          filter: 'test',
-          search: 'search text',
-          after: {
-            tags: 'c',
-          },
+          search: 'test',
+          per_page: 10,
+          page: 1,
         },
       },
       ['ok']
@@ -50,60 +54,28 @@ describe('getRuleTagsRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "rule_tags": Array [
+          "data": Array [
             "a",
             "b",
             "c",
           ],
+          "page": 1,
+          "per_page": 10,
+          "total": 3,
         },
       }
     `);
-    expect(rulesClient.aggregate).toHaveBeenCalledTimes(1);
-    expect(rulesClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "aggs": Object {
-            "tags": Object {
-              "composite": Object {
-                "after": Object {
-                  "tags": "c",
-                },
-                "size": 50,
-                "sources": Array [
-                  Object {
-                    "tags": Object {
-                      "terms": Object {
-                        "field": "alert.attributes.tags",
-                        "order": "asc",
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          "options": Object {
-            "after": Object {
-              "tags": "c",
-            },
-            "defaultSearchOperator": "AND",
-            "filter": "test",
-            "search": "search text",
-            "searchFields": Array [
-              "tags",
-            ],
-          },
-        },
-      ]
-    `);
     expect(res.ok).toHaveBeenCalledWith({
       body: {
-        rule_tags: ['a', 'b', 'c'],
+        data: ['a', 'b', 'c'],
+        page: 1,
+        per_page: 10,
+        total: 3,
       },
     });
   });
 
-  it('ensures the license allows aggregating rule tags', async () => {
+  it('ensures the license allows getting rule tags', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -115,11 +87,9 @@ describe('getRuleTagsRoute', () => {
       { rulesClient },
       {
         query: {
-          filter: 'test',
-          search: 'search text',
-          after: {
-            tags: 'c',
-          },
+          search: 'test',
+          per_page: 10,
+          page: 1,
         },
       }
     );
@@ -129,7 +99,7 @@ describe('getRuleTagsRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  it('ensures the license check prevents aggregating rule tags', async () => {
+  it('ensures the license check prevents getting rule tags', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
