@@ -12,7 +12,6 @@ import type { ResponseActionsApiCommandNames } from '../../../../../common/endpo
 
 import type {
   ActionDetails,
-  HostMetadata,
   EndpointActionDataParameterTypes,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
@@ -42,20 +41,13 @@ export const actionCreateService = (
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,
+    agents: string[],
     { minimumLicenseRequired = 'basic' }: CreateActionMetadata = {}
   ): Promise<ActionDetails<TOutputContent, TParameters>> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
     }
-
-    // fetch the Agent IDs to send the commands to
-    const endpointIDs = [...new Set(payload.endpoint_ids)]; // dedupe
-    const endpointData = await endpointContext.service
-      .getEndpointMetadataService()
-      .getMetadataForEndpoints(esClient, endpointIDs);
-
-    const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
 
     // create an Action ID and use that to dispatch action to ES & Fleet Server
     const actionID = uuidv4();
@@ -84,7 +76,7 @@ export const actionCreateService = (
 
   return {
     createAction,
-    createActionFromAlert: (payload) =>
-      createAction(payload, { minimumLicenseRequired: 'enterprise' }),
+    createActionFromAlert: (payload, agents) =>
+      createAction(payload, agents, { minimumLicenseRequired: 'enterprise' }),
   };
 };

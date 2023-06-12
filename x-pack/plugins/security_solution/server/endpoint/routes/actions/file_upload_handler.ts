@@ -10,6 +10,7 @@ import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint
 import type {
   ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
+  HostMetadata,
 } from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import {
@@ -24,6 +25,7 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
+import { updateCases } from '../../services/actions/create/update_cases';
 
 export const registerActionFileUploadRoute = (
   router: SecuritySolutionPluginRouter,
@@ -97,12 +99,19 @@ export const getActionFileUploadHandler = (
       command: 'upload' as ResponseActionsApiCommandNames,
       user,
     };
+
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const endpointData = await endpointContext.service
+      .getEndpointMetadataService()
+      .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
+
     try {
       const casesClient = await endpointContext.service.getCasesClient(req);
       const { action: actionId, ...data } = await endpointContext.service
         .getActionCreateService()
         .createAction<ResponseActionUploadOutputContent, ResponseActionUploadParameters>(
-          createActionPayload
+          createActionPayload,
+          endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id)
         );
 
       // Update the file meta to include the action id, and if any errors (unlikely),
@@ -116,9 +125,7 @@ export const getActionFileUploadHandler = (
       }
 
       // update cases
-      await endpointContext.service
-        .getEndpointCasesService()
-        .update({ casesClient, createActionPayload });
+      updateCases({ casesClient, createActionPayload, endpointData });
 
       return res.ok({
         body: {

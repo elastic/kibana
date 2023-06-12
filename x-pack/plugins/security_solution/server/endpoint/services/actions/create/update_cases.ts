@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CommentType } from '@kbn/cases-plugin/common';
+
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import { CommentType } from '@kbn/cases-plugin/common/api';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
-import { APP_ID } from '../../../../common';
+import { APP_ID } from '../../../../../common';
 import type {
-  HostMetadata,
-  HostMetadataInterface,
   ImmutableObject,
-} from '../../../../common/endpoint/types';
-import type { CreateActionPayload } from '../actions/create/types';
+  HostMetadataInterface,
+  HostMetadata,
+} from '../../../../../common/endpoint/types';
+import type { CreateActionPayload } from './types';
 
 export const updateCases = async ({
   casesClient,

@@ -30,6 +30,7 @@ import type {
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
   ActionDetails,
+  HostMetadata,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -39,6 +40,7 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { registerActionFileUploadRoute } from './file_upload_handler';
+import { updateCases } from '../../services/actions/create/update_cases';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -185,19 +187,23 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 > {
   return async (context, req, res) => {
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
-    const casesClient = await endpointContext.service.getCasesClient(req);
     let action: ActionDetails;
-    const createActionPayload = { ...req.body, command, user };
+
     try {
-      action = await endpointContext.service
-        .getActionCreateService()
-        .createAction(createActionPayload);
+      const createActionPayload = { ...req.body, command, user };
+      const endpointData = await endpointContext.service
+        .getEndpointMetadataService()
+        .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
+      action = await endpointContext.service.getActionCreateService().createAction(
+        createActionPayload,
+        endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id)
+      );
 
       // update cases
-      await endpointContext.service
-        .getEndpointCasesService()
-        .update({ casesClient, createActionPayload });
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      updateCases({ casesClient, createActionPayload, endpointData });
     } catch (err) {
       return res.customError({
         statusCode: 500,

@@ -136,18 +136,21 @@ describe('Upload response action create API handler', () => {
       const createActionMock = testSetup.endpointAppContextMock.service.getActionCreateService()
         .createAction as jest.Mock;
 
-      expect(createActionMock).toHaveBeenCalledWith({
-        command: 'upload',
-        endpoint_ids: ['123-456'],
-        parameters: {
-          file_id: '123-456-789',
-          file_name: 'foo.txt',
-          file_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-          file_size: 45632,
-          overwrite: true,
+      expect(createActionMock).toHaveBeenCalledWith(
+        {
+          command: 'upload',
+          endpoint_ids: ['123-456'],
+          parameters: {
+            file_id: '123-456-789',
+            file_name: 'foo.txt',
+            file_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            file_size: 45632,
+            overwrite: true,
+          },
+          user: undefined,
         },
-        user: undefined,
-      });
+        ['123-456']
+      );
     });
 
     it('should delete file if creation of Action fails', async () => {

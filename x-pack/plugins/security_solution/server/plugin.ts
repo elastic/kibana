@@ -90,7 +90,6 @@ import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
 import { AppFeatures } from './lib/app_features';
-import { EndpointCasesService } from './endpoint/services/cases';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -488,10 +487,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
       actionCreateService: actionCreateService(
-        core.elasticsearch.client.asInternalUser,
-        this.endpointContext
-      ),
-      endpointCasesService: new EndpointCasesService(
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
       ),
