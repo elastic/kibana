@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { PostureTypes } from './types';
+import { PostureTypes, VulnSeverity } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
@@ -124,3 +124,11 @@ export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer
     ],
   },
 });
+
+export const SEVERITY: Record<VulnSeverity, VulnSeverity> = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+  UNKNOWN: 'UNKNOWN',
+};
