@@ -53,7 +53,7 @@ export const usePrevalence = ({
   dataFormattedForFieldBrowser,
   scopeId,
 }: UsePrevalenceParams): UsePrevalenceResult => {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0); // TODO this needs to be changed at it causes a re-render when the count is updated
 
   // retrieves the highlighted fields
   const summaryRows = useMemo(
@@ -77,6 +77,7 @@ export const usePrevalence = ({
           scopeId={scopeId}
           callbackIfNull={() => setCount((prevCount) => prevCount + 1)}
           data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
+          key={row.description.data.field}
         />
       )),
     [summaryRows, scopeId]
