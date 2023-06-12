@@ -36,12 +36,9 @@ const createPackage = ({
     type: 'epm-package',
     installed_kibana: [],
     installed_es: installedEs ?? [],
-    es_index_patterns: {},
     name: 'test-package',
     version: '0.0.1',
     install_status: 'installed',
-    install_version: '0.0.1',
-    install_started_at: new Date().toString(),
     install_source: 'registry',
     verification_status: 'verified',
     verification_key_id: '',
@@ -71,6 +68,7 @@ describe('isPackageUnverified', () => {
           { id: '', type: ElasticsearchAssetType.transform, deferred: true },
         ],
       });
+
       expect(hasDeferredInstallations(pkgWithDeferredInstallations)).toEqual(true);
     });
 

@@ -5811,23 +5811,6 @@
               }
             }
           },
-          "package_assets": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "epm-packages-assets"
-                ]
-              }
-            }
-          },
-          "es_index_patterns": {
-            "additionalProperties": true
-          },
           "name": {
             "type": "string"
           },
@@ -5842,12 +5825,6 @@
               "install_failed"
             ]
           },
-          "install_version": {
-            "type": "string"
-          },
-          "install_started_at": {
-            "type": "string"
-          },
           "install_source": {
             "type": "string",
             "enum": [
@@ -5861,9 +5838,6 @@
           },
           "install_format_schema_version": {
             "type": "string"
-          },
-          "keep_policies_up_to_date": {
-            "type": "boolean"
           },
           "verification_status": {
             "type": "string",
@@ -5905,18 +5879,11 @@
                 }
               }
             }
-          },
-          "internal": {
-            "type": "boolean"
-          },
-          "removal": {
-            "type": "boolean"
           }
         },
         "required": [
           "installed_kibana",
           "installed_es",
-          "es_index_patterns",
           "name",
           "version",
           "install_status",

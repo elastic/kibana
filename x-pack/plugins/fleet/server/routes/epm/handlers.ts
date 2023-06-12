@@ -80,6 +80,7 @@ import type {
   PackageListItem,
   PackageList,
   PackageInfo,
+  InstallationInfo,
 } from '../../types';
 import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
 import { getDataStreams } from '../../services/epm/data_streams';
@@ -606,10 +607,18 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
 
 // Don't expose the whole SO in the API response, only selected fields
 const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
-  if ('savedObject' in pkg) {
-    const installationInfo = {
+  if ('savedObject' in pkg && pkg.savedObject?.attributes) {
+    const { attributes } = pkg.savedObject;
+    const installationInfo: InstallationInfo = {
       ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
-      ...pkg.savedObject?.attributes,
+      installed_kibana: attributes.installed_kibana,
+      installed_es: attributes.installed_es,
+      install_status: attributes.install_status,
+      install_source: attributes.install_source,
+      name: attributes.name,
+      version: attributes.version,
+      verification_status: attributes.verification_status,
+      verification_key_id: attributes.verification_key_id,
     };
     return {
       // When savedObject gets deprecated, replace `pkg` with `...omit(pkg, 'savedObject')`

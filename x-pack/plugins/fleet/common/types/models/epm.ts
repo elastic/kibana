@@ -439,7 +439,16 @@ export type InstallationInfo = {
   created_at?: string;
   updated_at?: string;
   namespaces?: string[];
-} & Installation;
+} & Omit<
+  Installation,
+  | 'package_assets'
+  | 'es_index_patterns'
+  | 'install_version'
+  | 'install_started_at'
+  | 'keep_policies_up_to_date'
+  | 'internal'
+  | 'removable'
+>;
 
 // Deprecated as part of the removing public references to saved object schemas
 // See https://github.com/elastic/kibana/issues/149098
@@ -513,14 +522,11 @@ export interface Installation {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
-  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
-  experimental_data_stream_features?: Array<{
-    data_stream: string;
-    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
-  }>;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   internal?: boolean;
   removable?: boolean;
 }
+
 export interface PackageUsageStats {
   agent_policy_count: number;
 }
