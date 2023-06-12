@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 
 export interface SetupState {
@@ -97,7 +98,7 @@ export function areResourcesSetup(state: SetupState): boolean {
 }
 
 function mergeRecursivePartial<T>(base: T, partial: RecursivePartial<T>): T {
-  return { ...base, ...partial };
+  return merge(base, partial);
 }
 
 export function mergePartialSetupStates(
