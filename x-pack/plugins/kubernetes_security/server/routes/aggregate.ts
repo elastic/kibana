@@ -13,6 +13,12 @@ import {
   AGGREGATE_ROUTE,
   AGGREGATE_PAGE_SIZE,
   AGGREGATE_MAX_BUCKETS,
+  ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_RESOURCE_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_CLUSTER_NAME,
+  CONTAINER_IMAGE_NAME,
+  CLOUD_INSTANCE_NAME,
 } from '../../common/constants';
 import { AggregateBucketPaginationResult } from '../../common/types';
 
@@ -34,11 +40,25 @@ export const registerAggregateRoute = (router: IRouter, logger: Logger) => {
             query: schema.object({
               index: schema.string(),
               query: schema.string(),
-              countBy: schema.maybe(schema.string()),
-              groupBy: schema.string(),
-              page: schema.number(),
-              perPage: schema.maybe(schema.number()),
-              sortByCount: schema.maybe(schema.string()),
+              countBy: schema.oneOf([
+                schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                schema.literal(ORCHESTRATOR_NAMESPACE),
+                schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                schema.literal(CLOUD_INSTANCE_NAME),
+                schema.literal(CONTAINER_IMAGE_NAME),
+              ]),
+              groupBy: schema.oneOf([
+                schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                schema.literal(ORCHESTRATOR_NAMESPACE),
+                schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                schema.literal(CLOUD_INSTANCE_NAME),
+                schema.literal(CONTAINER_IMAGE_NAME),
+              ]),
+              page: schema.number({ max: 10000, min: 0 }),
+              perPage: schema.maybe(schema.number({ max: 100, min: 1 })),
+              sortByCount: schema.maybe(schema.oneOf([schema.literal(ASC), schema.literal(DESC)])),
             }),
           },
         },

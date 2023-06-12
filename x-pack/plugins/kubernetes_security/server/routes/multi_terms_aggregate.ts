@@ -8,7 +8,16 @@ import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter, Logger } from '@kbn/core/server';
-import { MULTI_TERMS_AGGREGATE_ROUTE, AGGREGATE_PAGE_SIZE } from '../../common/constants';
+import {
+  MULTI_TERMS_AGGREGATE_ROUTE,
+  AGGREGATE_PAGE_SIZE,
+  ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_RESOURCE_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_CLUSTER_NAME,
+  CONTAINER_IMAGE_NAME,
+  CLOUD_INSTANCE_NAME,
+} from '../../common/constants';
 import {
   MultiTermsAggregateGroupBy,
   MultiTermsAggregateBucketPaginationResult,
@@ -29,15 +38,30 @@ export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger
               index: schema.string(),
               query: schema.string(),
               countBy: schema.maybe(schema.string()),
+              countBy: schema.oneOf([
+                schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                schema.literal(ORCHESTRATOR_NAMESPACE),
+                schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                schema.literal(CLOUD_INSTANCE_NAME),
+                schema.literal(CONTAINER_IMAGE_NAME),
+              ]),
               groupBys: schema.arrayOf(
                 schema.object({
-                  field: schema.string(),
+                  field: schema.oneOf([
+                    schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                    schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                    schema.literal(ORCHESTRATOR_NAMESPACE),
+                    schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                    schema.literal(CLOUD_INSTANCE_NAME),
+                    schema.literal(CONTAINER_IMAGE_NAME),
+                  ]),
                   missing: schema.maybe(schema.string()),
                 }),
                 { defaultValue: [] }
               ),
-              page: schema.number(),
-              perPage: schema.maybe(schema.number()),
+              page: schema.number({ max: 10000, min: 0 }),
+              perPage: schema.maybe(schema.number({ max: 100, min: 1 })),
             }),
           },
         },

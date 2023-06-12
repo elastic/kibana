@@ -8,7 +8,15 @@ import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter, Logger } from '@kbn/core/server';
-import { COUNT_ROUTE } from '../../common/constants';
+import {
+  COUNT_ROUTE,
+  ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_RESOURCE_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_CLUSTER_NAME,
+  CONTAINER_IMAGE_NAME,
+  CLOUD_INSTANCE_NAME,
+} from '../../common/constants';
 
 export const registerCountRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -24,7 +32,14 @@ export const registerCountRoute = (router: IRouter, logger: Logger) => {
             query: schema.object({
               index: schema.string(),
               query: schema.string(),
-              field: schema.string(),
+              field: schema.oneOf([
+                schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                schema.literal(ORCHESTRATOR_NAMESPACE),
+                schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                schema.literal(CLOUD_INSTANCE_NAME),
+                schema.literal(CONTAINER_IMAGE_NAME),
+              ]),
             }),
           },
         },
