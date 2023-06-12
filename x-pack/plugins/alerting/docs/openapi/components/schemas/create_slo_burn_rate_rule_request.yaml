@@ -1,0 +1,34 @@
+title: Create slo burn rate rule request
+description: TBD
+type: object
+required:
+  - consumer
+  - name
+  - params
+  - rule_type_id
+  - schedule
+properties:
+  actions:
+    $ref: 'actions.yaml'
+  consumer:
+    $ref: 'consumer.yaml'
+  enabled:
+    $ref: 'enabled_rule.yaml'
+  name:
+    $ref: 'name_rule.yaml'
+  notify_when:
+    $ref: 'notify_when.yaml'
+  params:
+    $ref:  '../../../../../observability/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
+  rule_type_id:
+    type: string
+    description: The ID of the rule type that you want to call when the rule is scheduled to run.
+    enum:
+      - slo.rules.burnRate
+  schedule:
+    $ref: 'schedule.yaml'
+  tags:
+    $ref: 'tags.yaml'
+  throttle:
+    $ref: 'throttle.yaml'
+ 
