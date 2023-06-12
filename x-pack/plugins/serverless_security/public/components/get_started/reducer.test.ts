@@ -22,6 +22,7 @@ import {
   StepId,
   ToggleProductAction,
   AddFinishedStepAction,
+  GetMoreFromElasticSecurityCardId,
 } from './types';
 
 describe('reducer', () => {
@@ -119,43 +120,41 @@ describe('getActiveCardsInitialStates', () => {
 
     const initialStates = getActiveCardsInitialStates({ activeProducts, finishedSteps });
 
-    expect(initialStates).toMatchInlineSnapshot(`
-      Object {
-        "getMoreFromElasticSecurity": Object {
-          "masterTheInvestigationsWorkflow": Object {
-            "id": "masterTheInvestigationsWorkflow",
-            "stepsLeft": 0,
-            "timeInMins": 0,
-          },
-          "optimizeYourWorkSpace": Object {
-            "id": "optimizeYourWorkSpace",
-            "stepsLeft": 0,
-            "timeInMins": 0,
-          },
-          "respondToThreats": Object {
-            "id": "respondToThreats",
-            "stepsLeft": 0,
-            "timeInMins": 0,
-          },
+    expect(initialStates).toEqual({
+      [SectionId.getSetUp]: {
+        [GetSetUpCardId.introduction]: {
+          id: GetSetUpCardId.introduction,
+          timeInMins: 0,
+          stepsLeft: 0,
         },
-        "getSetUp": Object {
-          "activateAndCreateRules": Object {
-            "id": "activateAndCreateRules",
-            "stepsLeft": 0,
-            "timeInMins": 0,
-          },
-          "bringInYourData": Object {
-            "id": "bringInYourData",
-            "stepsLeft": 0,
-            "timeInMins": 0,
-          },
-          "introduction": Object {
-            "id": "introduction",
-            "stepsLeft": 0,
-            "timeInMins": 0,
-          },
+        [GetSetUpCardId.bringInYourData]: {
+          id: GetSetUpCardId.bringInYourData,
+          timeInMins: 0,
+          stepsLeft: 0,
         },
-      }
-    `);
+        [GetSetUpCardId.activateAndCreateRules]: {
+          id: GetSetUpCardId.activateAndCreateRules,
+          timeInMins: 0,
+          stepsLeft: 0,
+        },
+      },
+      [SectionId.getMoreFromElasticSecurity]: {
+        [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
+          id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
+          stepsLeft: 0,
+          timeInMins: 0,
+        },
+        [GetMoreFromElasticSecurityCardId.respondToThreats]: {
+          id: GetMoreFromElasticSecurityCardId.respondToThreats,
+          stepsLeft: 0,
+          timeInMins: 0,
+        },
+        [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
+          id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
+          stepsLeft: 0,
+          timeInMins: 0,
+        },
+      },
+    });
   });
 });
