@@ -13,7 +13,7 @@ import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RawRule } from '../../types';
 
-export const DEFAULT_TAGS_PER_PAGE = 10;
+export const DEFAULT_TAGS_PER_PAGE = 50;
 const MAX_TAGS = 10000;
 
 const getTagsParamsSchema = schema.object({
