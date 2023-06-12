@@ -10,14 +10,12 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
+import { IconChartTagcloud } from '@kbn/chart-icons';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import {
-  getColumnByAccessor,
-  getAccessor,
-  getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -153,6 +151,11 @@ export const TagCloudChart = ({
       const termsBucketId = getColumnByAccessor(bucket, visData.columns)!.id;
       const clickedValue = elements[0][0].text;
 
+      const columnIndex = visData.columns.findIndex((col) => col.id === termsBucketId);
+      if (columnIndex < 0) {
+        return;
+      }
+
       const rowIndex = visData.rows.findIndex((row) => {
         const formattedValue = bucketFormatter
           ? bucketFormatter.convert(row[termsBucketId], 'text')
@@ -170,7 +173,7 @@ export const TagCloudChart = ({
           data: [
             {
               table: visData,
-              column: getAccessor(bucket),
+              column: columnIndex,
               row: rowIndex,
             },
           ],
@@ -179,6 +182,10 @@ export const TagCloudChart = ({
     },
     [bucket, bucketFormatter, fireEvent, visData]
   );
+
+  if (visData.rows.length === 0) {
+    return <EmptyPlaceholder icon={IconChartTagcloud} renderComplete={renderComplete} />;
+  }
 
   return (
     <EuiResizeObserver onResize={updateChart}>
@@ -215,7 +222,7 @@ export const TagCloudChart = ({
               {label}
             </div>
           )}
-          {warning && (
+          {!visParams.isPreview && warning && (
             <div className="tgcChart__warning">
               <EuiIconTip
                 type="warning"
@@ -229,7 +236,7 @@ export const TagCloudChart = ({
               />
             </div>
           )}
-          {tagCloudData.length > MAX_TAG_COUNT && (
+          {!visParams.isPreview && tagCloudData.length > MAX_TAG_COUNT && (
             <div className="tgcChart__warning">
               <EuiIconTip
                 type="warning"
