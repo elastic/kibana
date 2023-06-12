@@ -99,6 +99,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
         layerId,
         columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration: getConfiguration(layerId, vis.params, layerConfig),

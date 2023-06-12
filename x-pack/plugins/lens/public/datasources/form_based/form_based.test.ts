@@ -542,6 +542,9 @@ describe('IndexPattern Data Source', () => {
                     "type": "expression",
                   },
                 ],
+                "ignoreGlobalFilters": Array [
+                  false,
+                ],
                 "index": Array [
                   Object {
                     "chain": Array [
@@ -1831,6 +1834,7 @@ describe('IndexPattern Data Source', () => {
             columns: {},
             sampling: 1,
             linkToLayers: ['link-to-id'],
+            ignoreGlobalFilters: false,
           },
         },
       });
@@ -1921,6 +1925,7 @@ describe('IndexPattern Data Source', () => {
               indexPatternId: '1',
               columnOrder: [],
               columns: {},
+              ignoreGlobalFilters: false,
               linkToLayers: ['some-layer'],
               sampling: 1,
             },
@@ -1951,7 +1956,12 @@ describe('IndexPattern Data Source', () => {
         newState: {
           ...state,
           layers: {
-            first: { ...state.layers.first, linkToLayers: undefined, sampling: 1 },
+            first: {
+              ...state.layers.first,
+              linkToLayers: undefined,
+              sampling: 1,
+              ignoreGlobalFilters: false,
+            },
           },
         },
       });
