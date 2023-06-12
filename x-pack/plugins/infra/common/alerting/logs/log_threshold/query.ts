@@ -13,7 +13,7 @@ export const getESQueryForLogSpike = (
   timestampField: string,
   executionTimeRange?: ExecutionTimeRange
 ): object => {
-  const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
+  const { mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
     executionTimeRange
@@ -21,7 +21,7 @@ export const getESQueryForLogSpike = (
 
   const query = {
     bool: {
-      filter: [rangeFilter, ...mustFilters],
+      filter: mustFilters,
       ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
     },
   };

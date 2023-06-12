@@ -48,7 +48,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
 
   useEffect(() => {
-    async function getDataView() {
+    const getDataView = async () => {
       const { timestampField, dataViewReference } = await logViews.client.getResolvedLogView(
         rule.params.logView
       );
@@ -58,14 +58,12 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
         setDataView(logDataView);
         getQuery(timestampField);
       }
-    }
+    };
 
-    function getQuery(timestampField: string) {
+    const getQuery = (timestampField: string) => {
       const executionTimeRange = {
         lte: alert.start,
       };
-
-      const validatedParams = decodeOrThrow(ruleParamsRT)(rule.params);
 
       const esSearchRequest = getESQueryForLogSpike(
         validatedParams as CountRuleParams,
@@ -76,7 +74,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       if (esSearchRequest) {
         setEsSearchQuery(esSearchRequest);
       }
-    }
+    };
 
     const validatedParams = decodeOrThrow(ruleParamsRT)(rule.params);
 
@@ -94,18 +92,18 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
 
   const timeRange = {
-    min: alertStart.subtract(20, 'minutes'),
-    max: alertEnd ? alertEnd.add(5, 'minutes') : moment(new Date()),
+    min: alertStart.clone().subtract(20, 'minutes'),
+    max: alertEnd ? alertEnd.clone().add(5, 'minutes') : moment(new Date()),
   };
 
   const initialAnalysisStart = {
-    baselineMin: alertStart.subtract(10, 'minutes').valueOf(),
-    baselineMax: alertStart.subtract(1, 'minutes').valueOf(),
+    baselineMin: alertStart.clone().subtract(10, 'minutes').valueOf(),
+    baselineMax: alertStart.clone().subtract(1, 'minutes').valueOf(),
     deviationMin: alertStart.valueOf(),
     deviationMax:
-      alertStart.add(5, 'minutes') > moment(new Date())
+      alertStart.clone().add(5, 'minutes') > moment(new Date())
         ? moment(new Date()).valueOf()
-        : alertStart.add(5, 'minutes').valueOf(),
+        : alertStart.clone().add(5, 'minutes').valueOf(),
   };
 
   const coPilotService = useCoPilot();
