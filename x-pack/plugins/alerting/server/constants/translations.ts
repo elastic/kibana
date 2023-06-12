@@ -21,6 +21,9 @@ export const translations = {
         defaultMessage:
           'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
       }),
+      esql: i18n.translate('xpack.alerting.taskRunner.warning.esql', {
+        defaultMessage: 'Rule reported duplicate alerts.',
+      }),
     },
   },
 };

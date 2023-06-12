@@ -18,6 +18,7 @@ import { ActionsCompletion, RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { RuleRunMetrics } from './rule_run_metrics_store';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 export interface IExecutionStatusAndMetrics {
   status: RuleExecutionStatus;
@@ -26,6 +27,7 @@ export interface IExecutionStatusAndMetrics {
 
 export function executionStatusFromState(
   stateWithMetrics: RuleTaskStateAndMetrics,
+  ruleResultService: RuleResultService,
   lastExecutionDate?: Date
 ): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
@@ -48,6 +50,16 @@ export function executionStatusFromState(
       reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
       message: translations.taskRunner.warning.maxExecutableActions,
     };
+  } else {
+    const { warnings } = ruleResultService.getLastRunResults();
+
+    if (warnings.length > 0) {
+      status = RuleExecutionStatusValues[5];
+      warning = {
+        reason: RuleExecutionStatusWarningReasons.WARNING,
+        message: translations.taskRunner.warning.esql,
+      };
+    }
   }
 
   return {
