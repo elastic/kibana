@@ -10629,7 +10629,6 @@
     "xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel": "新建",
     "xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel": "未找到匹配的 lens。",
     "xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.savedObjectType.lens": "Lens",
-    "xpack.cases.markdownEditor.plugins.lens.openVisualizationButtonLabel": "打开可视化",
     "xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchInputHelpText": "插入现有 Lens 可视化或新建一个。任何更改或新建可视化将仅应用于此注释。",
     "xpack.cases.markdownEditor.plugins.lens.visualizationButtonLabel": "可视化",
     "xpack.cases.markdownEditor.plugins.timeline.noParenthesesErrorMsg": "应为左括号",
