@@ -265,6 +265,7 @@ describe('split .kibana index into multiple system indices', () => {
             "synthetics-privates-locations",
             "tag",
             "telemetry",
+            "threshold-explorer-view",
             "ui-metric",
             "upgrade-assistant-ml-upgrade-operation",
             "upgrade-assistant-reindex-operation",
