@@ -8,6 +8,16 @@
 import { getSections } from './sections';
 import { ActiveCard, Card, CardId, ProductId, SectionId, StepId } from './types';
 
+export const getCardTimeInMinutes = (card: Card, stepsDone: Set<StepId>) =>
+  card?.steps?.reduce(
+    (totalMin, { timeInMinutes, id: stepId }) =>
+      (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
+    0
+  ) ?? 0;
+
+export const getCardStepsLeft = (card: Card, stepsDone: Set<StepId>) =>
+  (card.steps?.length ?? 0) - (stepsDone.size ?? 0);
+
 export const isCardActive = (card: Card, activeProducts: Set<ProductId>) =>
   !card.productTypeRequired ||
   card?.productTypeRequired?.some((condition) => activeProducts.has(condition));
@@ -31,8 +41,10 @@ export const setupCards = (
             };
           }
           return accCards;
-        }, {});
-        acc[section.id] = cardsInSections;
+        }, {} as Record<CardId, ActiveCard>);
+        if (cardsInSections) {
+          acc[section.id] = cardsInSections;
+        }
         return acc;
       }, {} as Record<SectionId, Record<CardId, ActiveCard>>)
     : null;
@@ -56,21 +68,13 @@ export const updateCard = ({
   const card = cards?.find(({ id }) => id === cardId);
 
   if (!card || !activeCards) {
-    return activeCards ?? null;
+    return activeCards;
   }
 
-  if (
-    !card.productTypeRequired ||
-    card?.productTypeRequired?.some((condition) => activeProducts.has(condition))
-  ) {
+  if (isCardActive(card, activeProducts)) {
     const stepsDone = finishedSteps[cardId] ?? new Set();
-    const timeInMins =
-      card?.steps?.reduce(
-        (totalMin, { timeInMinutes, id: stepId }) =>
-          (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
-        0
-      ) ?? 0;
-    const stepsLeft = (card?.steps?.length ?? 0) - (stepsDone?.size ?? 0);
+    const timeInMins = getCardTimeInMinutes(card, stepsDone);
+    const stepsLeft = getCardStepsLeft(card, stepsDone);
     return {
       ...activeCards,
       [sectionId]: {
@@ -83,5 +87,5 @@ export const updateCard = ({
       },
     };
   }
-  return null;
+  return activeCards;
 };
