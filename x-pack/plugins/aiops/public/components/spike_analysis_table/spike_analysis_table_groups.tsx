@@ -118,6 +118,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       );
     }
