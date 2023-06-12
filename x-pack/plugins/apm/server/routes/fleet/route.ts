@@ -31,7 +31,7 @@ import {
   RunMigrationCheckResponse,
 } from './run_migration_check';
 
-function throwNotFoundIfApmSchemaNotAvailable(
+function throwNotFoundIfFleetMigrationNotAvailable(
   featureFlags: ApmFeatureFlags
 ): void {
   if (!featureFlags.migrationToFleetAvailable) {
@@ -77,7 +77,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<void> => {
-    throwNotFoundIfApmSchemaNotAvailable(resources.featureFlags);
+    throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { params, logger, core } = resources;
     const coreStart = await core.start();
     const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
@@ -97,7 +97,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
-    throwNotFoundIfApmSchemaNotAvailable(resources.featureFlags);
+    throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { context } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
     return {
@@ -111,6 +111,8 @@ const getMigrationCheckRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<RunMigrationCheckResponse> => {
     const { core, plugins, context, config, request } = resources;
+
+    throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
 
     const { fleet, security } = plugins;
 
