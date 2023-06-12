@@ -13,5 +13,14 @@
     "@kbn/data-views-plugin",
     "@kbn/io-ts-utils",
     "@kbn/data-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/rison",
+    "@kbn/es-query",
+    "@kbn/utility-types",
+    "@kbn/core-http-server",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/logging-mocks",
   ]
 }
