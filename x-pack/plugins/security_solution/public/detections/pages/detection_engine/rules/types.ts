@@ -161,6 +161,7 @@ export interface DefineStepRule {
   esqlOptions: {
     suppressionDuration?: EsqlSuppressionDuration;
     groupByFields?: string[];
+    suppressionMode?: GroupByOptions;
   };
 }
 

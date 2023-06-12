@@ -145,6 +145,9 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   esqlOptions: {
     suppressionDuration: rule.esql_params?.suppression_duration,
     groupByFields: rule.esql_params?.group_by_fields ?? [],
+    suppressionMode: rule.esql_params?.suppression_duration
+      ? GroupByOptions.PerTimePeriod
+      : GroupByOptions.PerRuleExecution,
   },
 });
 

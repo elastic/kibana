@@ -92,8 +92,9 @@ export const esqlExecutor = async ({
 
     const isGrouping = computeIfGrouping(completeRule.ruleParams.query);
     const suppressionDuration = completeRule.ruleParams.esqlParams?.suppressionDuration;
+    const suppressionFields = completeRule.ruleParams.esqlParams?.groupByFields ?? [];
 
-    if (isGrouping && suppressionDuration) {
+    if (isGrouping) {
       const wrappedAlerts = wrapGroupedEsqlAlerts({
         results: response,
         spaceId,
@@ -103,9 +104,13 @@ export const esqlExecutor = async ({
         ruleExecutionLogger,
         publicBaseUrl,
         tuple,
+        suppressionFields,
       });
 
-      const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
+      const suppressionWindow = suppressionDuration
+        ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
+        : completeRule.ruleParams.from;
+
       const bulkCreateResult = await bulkCreateWithSuppression({
         alertWithSuppression,
         ruleExecutionLogger,

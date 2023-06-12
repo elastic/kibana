@@ -86,6 +86,7 @@ import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
 import { EsqlFieldsSelect } from '../esql_fields_select/esql_fields_select';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { useEsqlFieldOptions } from '../../../hooks/use_esql_field_options';
 import {
   minimumLicenseForSuppression,
   AlertSuppressionMissingFieldsStrategy,
@@ -476,26 +477,49 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [license, groupByFields]
   );
 
-  const EsqlOptions = useCallback(
-    ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlGroupByFields }) => {
-      // if (queryBar.query.language !== 'esql' && typeof queryBar.query.query !== 'string') {
-      //   return null;
-      // }
-      return (
-        <>
-          <EsqlFieldsSelect field={esqlGroupByFields} query={queryBar.query.query as string} />
-          <DurationInput
-            data-test-subj="esqlSuppressionDurationSelect"
-            durationValueField={esqlSuppressionDurationValue}
-            durationUnitField={esqlSuppressionDurationUnit}
-            isDisabled={false}
-            minimumValue={1}
-            label={'Configure suppression window for grouping ESQL alerts'}
-          />
-        </>
-      );
-    },
-    [queryBar]
+  const { options: esqlFieldOptions, isLoading: isEsqlFieldOptionsLoading } = useEsqlFieldOptions(
+    isEsqlRule(ruleType) && typeof queryBar.query.query === 'string'
+      ? queryBar.query.query
+      : undefined
+  );
+
+  const isEsqlGrouping =
+    isEsqlRule(ruleType) && typeof queryBar.query.query === 'string'
+      ? /\sstats\s.*\sby\s/.test(queryBar.query.query)
+      : false;
+
+  const EsqlDurationOptions = useCallback(
+    ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlSuppressionMode }) => (
+      <EuiRadioGroup
+        idSelected={esqlSuppressionMode.value ?? GroupByOptions.PerRuleExecution}
+        options={[
+          {
+            id: GroupByOptions.PerRuleExecution,
+            label: 'Rule interval plus look back time',
+          },
+          {
+            id: GroupByOptions.PerTimePeriod,
+            label: (
+              <>
+                {'Configure time window for grouping ESQL alerts'}
+                <DurationInput
+                  data-test-subj="esqlSuppressionDurationSelect"
+                  durationValueField={esqlSuppressionDurationValue}
+                  durationUnitField={esqlSuppressionDurationUnit}
+                  minimumValue={1}
+                  isDisabled={esqlSuppressionMode.value === GroupByOptions.PerRuleExecution}
+                />
+              </>
+            ),
+          },
+        ]}
+        onChange={(id: string) => {
+          esqlSuppressionMode.setValue(id);
+        }}
+        data-test-subj="esqlSuppressionOptions"
+      />
+    ),
+    []
   );
 
   const AlertsSuppressionMissingFields = useCallback(
@@ -824,25 +848,41 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           )}
 
           <RuleTypeEuiFormRow
-            $isVisible={isEsqlRule(ruleType)}
+            $isVisible={isEsqlRule(ruleType) && isEsqlGrouping}
             data-test-subj="esqlSuppressionDuration"
+          >
+            <UseField
+              path="esqlOptions.groupByFields"
+              component={EsqlFieldsSelect}
+              componentProps={{
+                options: esqlFieldOptions,
+                isLoading: isEsqlFieldOptionsLoading,
+              }}
+              validationData={{ options: esqlFieldOptions }}
+            />
+          </RuleTypeEuiFormRow>
+
+          <IntendedRuleTypeEuiFormRow
+            $isVisible={isEsqlRule(ruleType) && isEsqlGrouping}
+            data-test-subj="esqlSuppressionDuration"
+            label="Select time interval for deduplication"
           >
             <UseMultiFields
               fields={{
+                esqlSuppressionMode: {
+                  path: 'esqlOptions.suppressionMode',
+                },
                 esqlSuppressionDurationValue: {
                   path: 'esqlOptions.suppressionDuration.value',
                 },
                 esqlSuppressionDurationUnit: {
                   path: 'esqlOptions.suppressionDuration.unit',
                 },
-                esqlGroupByFields: {
-                  path: 'esqlOptions.groupByFields',
-                },
               }}
             >
-              {EsqlOptions}
+              {EsqlDurationOptions}
             </UseMultiFields>
-          </RuleTypeEuiFormRow>
+          </IntendedRuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
             $isVisible={isQueryRule(ruleType)}

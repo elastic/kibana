@@ -7,7 +7,13 @@
 
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_SUPPRESSION_TERMS,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
+  ALERT_INSTANCE_ID,
+} from '@kbn/rule-data-utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -19,7 +25,7 @@ import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import type { EsqlTable, EsqlResultColumn } from './esql_request';
 
-import { rowToDocument } from './utils';
+import { rowToDocument, pickCells } from './utils';
 
 const retrieveGroupByFields = (esqlQuery: string, columns: EsqlResultColumn[]) => {
   // fields after the last ...by, will be the ones piped
@@ -35,6 +41,7 @@ export const wrapGroupedEsqlAlerts = ({
   ruleExecutionLogger,
   publicBaseUrl,
   tuple,
+  suppressionFields,
 }: {
   results: EsqlTable;
   spaceId: string | null | undefined;
@@ -43,6 +50,7 @@ export const wrapGroupedEsqlAlerts = ({
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
+  suppressionFields: string[];
   tuple: {
     to: Moment;
     from: Moment;
@@ -58,11 +66,12 @@ export const wrapGroupedEsqlAlerts = ({
       `${spaceId}:${completeRule.alertId}`,
       i,
     ]);
-
+    console.log('>>>> pickCells', pickCells(results.columns, row, suppressionFields));
     const instanceId = objectHash([
       completeRule.ruleParams.query,
       `${spaceId}:${completeRule.alertId}`,
-      row.slice(1),
+      suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : ruleRunId,
+      // row.slice(1),
       //   pickCells(results.columns, row, ['destination.domain']).join(),
     ]);
 
@@ -88,6 +97,8 @@ export const wrapGroupedEsqlAlerts = ({
       _index: '',
       _source: {
         ...baseAlert,
+        //    [ALERT_SUPPRESSION_TERMS]: suppressionFields ?? [],
+        [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         [ALERT_INSTANCE_ID]: instanceId,
       },
     };

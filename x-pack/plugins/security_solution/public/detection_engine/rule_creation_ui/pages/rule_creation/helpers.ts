@@ -461,7 +461,10 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         esql_params: ruleFields.esqlOptions
           ? {
-              suppression_duration: ruleFields.esqlOptions?.suppressionDuration,
+              suppression_duration:
+                ruleFields.esqlOptions?.suppressionMode === GroupByOptions.PerTimePeriod
+                  ? ruleFields.esqlOptions?.suppressionDuration
+                  : undefined,
               group_by_fields: ruleFields.esqlOptions?.groupByFields,
             }
           : undefined,

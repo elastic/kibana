@@ -22,9 +22,10 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
-import { isMlRule, isEsqlRule } from '../../../../../common/machine_learning/helpers';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
@@ -133,6 +134,7 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   eqlOptions: {},
   queryBar: {
+    fieldsToValidateOnChange: ['esqlOptions.groupByFields', 'queryBar'],
     validations: [
       {
         validator: (
@@ -654,7 +656,39 @@ export const schema: FormSchema<DefineStepRule> = {
           defaultMessage: 'Select available field(s) to suppress ESQL alerts',
         }
       ),
-      validations: [],
+      validations: [
+        {
+          validator: (
+            ...args: Parameters<ValidationFunc>
+          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+            const [{ formData, value, path, customData }] = args;
+            if (!isEsqlRule(formData.ruleType)) {
+              return;
+            }
+
+            const validationData = customData.value as { options: Array<{ label: string }> };
+
+            const optionsSet = new Set(validationData?.options?.map((option) => option.label));
+
+            const errorFields: string[] = [];
+
+            (value as string[])?.forEach((field) => {
+              if (!optionsSet.has(field)) {
+                errorFields.push(field);
+              }
+            });
+
+            console.log('>>>>>>>>>> ', value, errorFields, optionsSet);
+            if (errorFields.length) {
+              return {
+                code: 'ERR_FIELD_FORMAT',
+                path,
+                message: `Fields are not available in ESQL response: ${errorFields.join(', ')}`,
+              };
+            }
+          },
+        },
+      ],
     },
     suppressionDuration: {
       label: i18n.translate(
@@ -666,6 +700,7 @@ export const schema: FormSchema<DefineStepRule> = {
       value: {},
       unit: {},
     },
+    suppressionMode: {},
   },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,

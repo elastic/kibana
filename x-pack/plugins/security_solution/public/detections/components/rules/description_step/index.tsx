@@ -234,14 +234,22 @@ export const getDescriptionItem = (
     const esqlSuppressionDuration = get('esqlOptions.suppressionDuration', data);
     const esqlGroupByFields = get('esqlOptions.groupByFields', data);
     return [
-      {
-        title: 'ESQL suppression window',
-        description: `${esqlSuppressionDuration?.value}${esqlSuppressionDuration?.unit}`,
-      },
-      {
-        title: 'ESQL group by fields',
-        description: esqlGroupByFields?.join(', '),
-      },
+      ...(esqlSuppressionDuration
+        ? [
+            {
+              title: 'ESQL suppression window',
+              description: `${esqlSuppressionDuration?.value}${esqlSuppressionDuration?.unit}`,
+            },
+          ]
+        : []),
+      ...(esqlGroupByFields.length
+        ? [
+            {
+              title: 'ESQL group by fields',
+              description: esqlGroupByFields?.join(', '),
+            },
+          ]
+        : []),
     ];
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);
