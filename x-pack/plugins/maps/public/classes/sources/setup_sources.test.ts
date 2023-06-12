@@ -24,7 +24,6 @@ import { getSourceByType } from './source_registry';
 const EXPECTED_UNREGISTERED_SOURCE_TYPES = [
   SOURCE_TYPES.ES_ML_ANOMALIES, // registered in ML plugin
   // join sources are not contained in source registry
-  SOURCE_TYPES.ES_DISTANCE_SOURCE,
   SOURCE_TYPES.ES_TERM_SOURCE,
   SOURCE_TYPES.TABLE_SOURCE,
 ];
