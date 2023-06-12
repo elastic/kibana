@@ -98,6 +98,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
         layerId,
         columns: columns.map(excludeMetaFromColumn),
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration: getConfiguration(

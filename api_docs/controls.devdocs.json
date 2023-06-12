@@ -6092,15 +6092,15 @@
             "section": "def-common.RawControlGroupAttributes",
             "text": "RawControlGroupAttributes"
           },
-          ") => Omit<",
+          ") => ",
           {
             "pluginId": "controls",
             "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupInput",
-            "text": "ControlGroupInput"
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
           },
-          ", \"id\"> | undefined"
+          " | undefined"
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
