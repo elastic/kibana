@@ -364,7 +364,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         if (!vulnerabilityRow.vulnerability.severity) {
           return null;
         }
-        return <SeverityStatusBadge status={vulnerabilityRow.vulnerability.severity} />;
+        return <SeverityStatusBadge severity={vulnerabilityRow.vulnerability.severity} />;
       }
 
       if (columnId === vulnerabilitiesColumns.package) {
