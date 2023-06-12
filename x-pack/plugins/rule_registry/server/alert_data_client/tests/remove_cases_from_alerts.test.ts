@@ -164,7 +164,6 @@ describe('remove cases from alerts', () => {
           "conflicts": "proceed",
           "ignore_unavailable": true,
           "index": "undefined-*",
-          "refresh": true,
         }
       `);
     });
