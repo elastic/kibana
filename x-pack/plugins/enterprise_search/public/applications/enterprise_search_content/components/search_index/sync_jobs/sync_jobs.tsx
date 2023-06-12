@@ -22,7 +22,7 @@ export const SyncJobs: React.FC = () => {
   const { productFeatures } = useValues(KibanaLogic);
   const [selectedSyncJobCategory, setSelectedSyncJobCategory] = useState<string>('content');
   const shouldShowAccessSyncs =
-    true || (productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature);
+    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
 
   return (
     <>
