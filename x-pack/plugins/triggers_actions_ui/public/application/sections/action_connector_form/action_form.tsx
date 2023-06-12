@@ -84,6 +84,7 @@ export interface ActionAccordionFormProps {
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultRuleFrequency?: RuleActionFrequency;
   showActionAlertsFilter?: boolean;
+  disableErrorMessages?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -118,6 +119,7 @@ export const ActionForm = ({
   notifyWhenSelectOptions,
   defaultRuleFrequency = DEFAULT_FREQUENCY,
   showActionAlertsFilter,
+  disableErrorMessages,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -492,6 +494,7 @@ export const ActionForm = ({
               notifyWhenSelectOptions={notifyWhenSelectOptions}
               defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
               showActionAlertsFilter={showActionAlertsFilter}
+              disableErrorMessages={disableErrorMessages}
             />
           );
         })}
