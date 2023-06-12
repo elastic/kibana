@@ -217,5 +217,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
     });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('table');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('lnsDataTable');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
   });
 }

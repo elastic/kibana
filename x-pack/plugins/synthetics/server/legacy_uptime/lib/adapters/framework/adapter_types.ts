@@ -31,6 +31,7 @@ import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UptimeEsClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';
@@ -60,6 +61,7 @@ export interface UptimeServerSetup {
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  share: SharePluginSetup;
   stackVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
@@ -81,6 +83,7 @@ export interface UptimeCorePluginsSetup {
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
   bfetch: BfetchServerSetup;
+  share: SharePluginSetup;
 }
 
 export interface UptimeCorePluginsStart {

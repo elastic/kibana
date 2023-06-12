@@ -66,7 +66,7 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { appContextService, checkAllowedPackages, licenseService } from '../../services';
+import { appContextService, checkAllowedPackages } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
@@ -461,13 +461,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
-  if (!licenseService.isEnterprise()) {
-    return response.customError({
-      statusCode: 403,
-      body: { message: 'Requires Enterprise license' },
-    });
-  }
-
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
