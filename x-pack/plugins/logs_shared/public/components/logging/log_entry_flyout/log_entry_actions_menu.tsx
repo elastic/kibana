@@ -8,7 +8,6 @@
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { getApmTraceUrl } from '@kbn/observability-plugin/public';
 import { useLinkProps, LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
@@ -142,3 +141,15 @@ const getAPMLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
     pathname: getApmTraceUrl({ traceId, rangeFrom, rangeTo }),
   };
 };
+
+function getApmTraceUrl({
+  traceId,
+  rangeFrom,
+  rangeTo,
+}: {
+  traceId: string;
+  rangeFrom: string;
+  rangeTo: string;
+}) {
+  return `/link-to/trace/${traceId}?` + new URLSearchParams({ rangeFrom, rangeTo }).toString();
+}
