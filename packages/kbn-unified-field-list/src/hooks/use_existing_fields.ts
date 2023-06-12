@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewsContract } from '@kbn/data-plugin/common';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
