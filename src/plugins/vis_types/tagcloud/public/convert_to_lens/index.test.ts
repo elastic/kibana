@@ -17,19 +17,17 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
         {
           metrics: ['0cdf0372-a78f-438f-9fc0-df9ad83796df'],
           buckets: {
-            all: [
-              '8a2556cf-dfb2-49f1-83cb-8892e1eace1c'
-            ]
+            all: ['8a2556cf-dfb2-49f1-83cb-8892e1eace1c'],
           },
           columns: [
             {
               columnId: '8a2556cf-dfb2-49f1-83cb-8892e1eace1c',
               meta: {
-                aggId: '2'
-              }
-            }
-          ]
-        }
+                aggId: '2',
+              },
+            },
+          ],
+        },
       ];
     }),
   }),
@@ -43,9 +41,9 @@ jest.mock('../services', () => ({
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { TagCloudVisParams } from '../types';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { convertToLens } from './index';
+import { convertToLens } from '.';
 
-test('should convert legacy tag cloud vis into navigate to lens context', async() => {
+test('should convert legacy tag cloud vis into navigate to lens context', async () => {
   const mockVis = {
     data: {
       indexPattern: {
@@ -58,11 +56,11 @@ test('should convert legacy tag cloud vis into navigate to lens context', async(
       orientation: 'right angled',
       palette: {
         name: 'status',
-        type: 'palette'
+        type: 'palette',
       },
       scale: 'linear',
-      showLabel: true
-    }
+      showLabel: true,
+    },
   } as unknown as Vis<TagCloudVisParams>;
   expect(await convertToLens(mockVis, {} as unknown as TimefilterContract)).toEqual({
     type: 'lnsTagcloud',
@@ -73,7 +71,7 @@ test('should convert legacy tag cloud vis into navigate to lens context', async(
         columns: [
           {
             columnId: '8a2556cf-dfb2-49f1-83cb-8892e1eace1c',
-          }
+          },
         ],
         columnOrder: [],
       },
@@ -88,11 +86,10 @@ test('should convert legacy tag cloud vis into navigate to lens context', async(
       orientation: 'right angled',
       palette: {
         name: 'status',
-        type: 'palette'
+        type: 'palette',
       },
       showLabel: true,
     },
     indexPatternIds: ['myDataViewId'],
   });
 });
-
