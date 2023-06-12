@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import {
@@ -150,8 +150,16 @@ describe('SyntheticsPrivateLocation', () => {
       ...serverMock,
       fleet: {
         ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          delete(
+            soClient: SavedObjectsClientContract,
+            esClient: any,
+            ids: string[],
+            options?: any
+          ): any {
+            throw new Error(error);
+          },
         },
       },
     });
