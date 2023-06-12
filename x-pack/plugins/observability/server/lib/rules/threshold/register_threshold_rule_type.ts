@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { IRuleTypeAlerts, RuleType } from '@kbn/alerting-plugin/server';
@@ -17,6 +18,7 @@ import {
   IRuleDataClient,
 } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
+import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { observabilityFeatureId } from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
@@ -216,6 +218,20 @@ export function thresholdRuleType(
           description: originalAlertStateWasActionVariableDescription,
         },
       ],
+    },
+    useSavedObjectReferences: {
+      extractReferences: (params: any) => {
+        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
+        const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
+
+        return { params: newParams, references };
+      },
+      injectReferences: (params: any, references: any) => {
+        return {
+          ...params,
+          searchConfiguration: injectReferences(params.searchConfiguration, references),
+        };
+      },
     },
     producer: observabilityFeatureId,
     getSummarizedAlerts: getSummarizedAlerts(),

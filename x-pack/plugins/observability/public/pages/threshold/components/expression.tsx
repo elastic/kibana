@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
@@ -18,6 +19,10 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewBase } from '@kbn/es-query';
+import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
@@ -42,7 +47,7 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 export const defaultExpression = {
@@ -54,16 +59,53 @@ export const defaultExpression = {
 } as MetricExpression;
 
 export function Expressions(props: Props) {
-  const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { docLinks } = useKibana().services;
-  const { source, createDerivedIndexPattern } = useSourceContext();
+  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+  const { data, docLinks } = useKibana().services;
+  const { source } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
+  const [dataView, setDataView] = useState<DataView>();
+  const [searchSource, setSearchSource] = useState<ISearchSource>();
+  const derivedIndexPattern = useMemo<DataViewBase>(
+    () => ({
+      fields: dataView?.fields || [],
+      title: dataView?.getIndexPattern() || 'unknown-index',
+    }),
+    [dataView]
   );
+
+  useEffect(() => {
+    const initSearchSource = async () => {
+      let initialSearchConfiguration = ruleParams.searchConfiguration;
+
+      if (!ruleParams.searchConfiguration) {
+        const newSearchSource = data.search.searchSource.createEmpty();
+        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+        if (defaultDataView) {
+          newSearchSource.setField('index', defaultDataView);
+          setDataView(defaultDataView);
+        }
+        initialSearchConfiguration = newSearchSource.getSerializedFields();
+      }
+
+      try {
+        const createdSearchSource = await data.search.searchSource.create(
+          initialSearchConfiguration
+        );
+        setRuleParams('searchConfiguration', initialSearchConfiguration);
+        setSearchSource(createdSearchSource);
+        setDataView(createdSearchSource.getField('index'));
+      } catch (error) {
+        // TODO Handle error
+        console.log('error:', error);
+      }
+    };
+
+    initSearchSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search.searchSource, data.dataViews]);
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -75,6 +117,15 @@ export function Expressions(props: Props) {
       };
     }
   }, [metadata]);
+
+  const onSelectDataView = useCallback(
+    (newDataView: DataView) => {
+      setDataView(newDataView);
+      searchSource?.setParent(undefined).setField('index', newDataView);
+      setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+    },
+    [setRuleParams, searchSource]
+  );
 
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
@@ -283,7 +334,14 @@ export function Expressions(props: Props) {
 
   return (
     <>
-      <EuiSpacer size={'m'} />
+      <DataViewSelectPopover
+        dataView={dataView}
+        onSelectDataView={onSelectDataView}
+        onChangeMetaData={({ adHocDataViewList }) => {
+          onChangeMetaData({ ...metadata, adHocDataViewList });
+        }}
+      />
+      <EuiSpacer size={'s'} />
       <EuiText size="xs">
         <h4>
           <FormattedMessage
@@ -298,7 +356,7 @@ export function Expressions(props: Props) {
           return (
             <ExpressionRow
               canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields}
+              fields={derivedIndexPattern.fields as any}
               remove={removeExpression}
               addExpression={addExpression}
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
@@ -318,7 +376,6 @@ export function Expressions(props: Props) {
             </ExpressionRow>
           );
         })}
-
       <div style={{ marginLeft: 28 }}>
         <ForLastExpression
           timeWindowSize={timeSize}
@@ -328,7 +385,6 @@ export function Expressions(props: Props) {
           onChangeWindowUnit={updateTimeUnit}
         />
       </div>
-
       <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
@@ -345,7 +401,6 @@ export function Expressions(props: Props) {
           />
         </EuiButtonEmpty>
       </div>
-
       <EuiSpacer size={'m'} />
       <EuiAccordion
         id="advanced-options-accordion"
@@ -387,7 +442,6 @@ export function Expressions(props: Props) {
         </EuiPanel>
       </EuiAccordion>
       <EuiSpacer size={'m'} />
-
       <EuiFormRow
         label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterLabel', {
           defaultMessage: 'Filter (optional)',
@@ -398,7 +452,7 @@ export function Expressions(props: Props) {
         fullWidth
         display="rowCompressed"
       >
-        {(metadata && (
+        {(metadata && derivedIndexPattern && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onChange={debouncedOnFilterChange}
@@ -414,7 +468,6 @@ export function Expressions(props: Props) {
           />
         )}
       </EuiFormRow>
-
       <EuiSpacer size={'m'} />
       <EuiFormRow
         label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.createAlertPerText', {
@@ -432,7 +485,7 @@ export function Expressions(props: Props) {
       >
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields}
+          fields={derivedIndexPattern.fields as any}
           options={{
             ...options,
             groupBy: ruleParams.groupBy || undefined,
