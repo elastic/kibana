@@ -132,7 +132,7 @@ PUT _slm/policy/managed-policy
 }
 ```
 
-7. Execute the created policy to create a managed snapshot:
+5. Execute the created policy to create a managed snapshot:
 
 ```
 POST _slm/policy/managed-policy/_execute
