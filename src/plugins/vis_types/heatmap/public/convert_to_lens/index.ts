@@ -74,6 +74,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
         layerId,
         columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
+        ignoreGlobalFilters: false,
       },
     ],
     configuration,

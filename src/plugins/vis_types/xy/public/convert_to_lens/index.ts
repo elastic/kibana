@@ -28,6 +28,7 @@ export interface Layer {
   seriesIdsMap: Record<string, string>;
   isReferenceLineLayer: boolean;
   collapseFn?: CollapseFunction;
+  ignoreGlobalFilters: boolean;
 }
 
 const SIBBLING_PIPELINE_AGGS: string[] = [
@@ -174,6 +175,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       seriesIdsMap,
       collapseFn,
       isReferenceLineLayer: false,
+      ignoreGlobalFilters: false,
     };
   });
 
@@ -186,6 +188,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       columnOrder: [],
       metrics: [staticValueColumn.columnId],
       isReferenceLineLayer: true,
+      ignoreGlobalFilters: false,
       collapseFn: undefined,
       seriesIdsMap: {},
     });
