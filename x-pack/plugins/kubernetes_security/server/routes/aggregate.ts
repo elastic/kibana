@@ -19,6 +19,9 @@ import {
   ORCHESTRATOR_CLUSTER_NAME,
   CONTAINER_IMAGE_NAME,
   CLOUD_INSTANCE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
+  ENTRY_LEADER_USER_ID,
+  ENTRY_LEADER_INTERACTIVE,
 } from '../../common/constants';
 import { AggregateBucketPaginationResult } from '../../common/types';
 
@@ -40,14 +43,17 @@ export const registerAggregateRoute = (router: IRouter, logger: Logger) => {
             query: schema.object({
               index: schema.string(),
               query: schema.string(),
-              countBy: schema.oneOf([
-                schema.literal(ORCHESTRATOR_CLUSTER_ID),
-                schema.literal(ORCHESTRATOR_RESOURCE_ID),
-                schema.literal(ORCHESTRATOR_NAMESPACE),
-                schema.literal(ORCHESTRATOR_CLUSTER_NAME),
-                schema.literal(CLOUD_INSTANCE_NAME),
-                schema.literal(CONTAINER_IMAGE_NAME),
-              ]),
+              countBy: schema.maybe(
+                schema.oneOf([
+                  schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                  schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                  schema.literal(ORCHESTRATOR_NAMESPACE),
+                  schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                  schema.literal(CLOUD_INSTANCE_NAME),
+                  schema.literal(CONTAINER_IMAGE_NAME),
+                  schema.literal(ENTRY_LEADER_ENTITY_ID),
+                ])
+              ),
               groupBy: schema.oneOf([
                 schema.literal(ORCHESTRATOR_CLUSTER_ID),
                 schema.literal(ORCHESTRATOR_RESOURCE_ID),
@@ -55,9 +61,11 @@ export const registerAggregateRoute = (router: IRouter, logger: Logger) => {
                 schema.literal(ORCHESTRATOR_CLUSTER_NAME),
                 schema.literal(CLOUD_INSTANCE_NAME),
                 schema.literal(CONTAINER_IMAGE_NAME),
+                schema.literal(ENTRY_LEADER_USER_ID),
+                schema.literal(ENTRY_LEADER_INTERACTIVE),
               ]),
-              page: schema.number({ max: 10000, min: 0 }),
-              perPage: schema.maybe(schema.number({ max: 100, min: 1 })),
+              page: schema.number({ defaultValue: 0, max: 10000, min: 0 }),
+              perPage: schema.maybe(schema.number({ defaultValue: 10, max: 100, min: 1 })),
               sortByCount: schema.maybe(schema.oneOf([schema.literal(ASC), schema.literal(DESC)])),
             }),
           },

@@ -16,6 +16,7 @@ import {
   ORCHESTRATOR_CLUSTER_NAME,
   CONTAINER_IMAGE_NAME,
   CLOUD_INSTANCE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
 } from '../../common/constants';
 
 export const registerCountRoute = (router: IRouter, logger: Logger) => {
@@ -39,6 +40,8 @@ export const registerCountRoute = (router: IRouter, logger: Logger) => {
                 schema.literal(ORCHESTRATOR_CLUSTER_NAME),
                 schema.literal(CLOUD_INSTANCE_NAME),
                 schema.literal(CONTAINER_IMAGE_NAME),
+                schema.literal(CONTAINER_IMAGE_NAME),
+                schema.literal(ENTRY_LEADER_ENTITY_ID),
               ]),
             }),
           },

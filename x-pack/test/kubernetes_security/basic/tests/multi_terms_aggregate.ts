@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import {
   MULTI_TERMS_AGGREGATE_ROUTE,
   CURRENT_API_VERSION,
+  ORCHESTRATOR_NAMESPACE,
+  CONTAINER_IMAGE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
 } from '@kbn/kubernetes-security-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 const MOCK_INDEX = 'kubernetes-test-index';
-const ORCHESTRATOR_NAMESPACE_PROPERTY = 'orchestrator.namespace';
-const CONTAINER_IMAGE_NAME_PROPERTY = 'container.image.name';
-const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
 const TIMESTAMP_PROPERTY = '@timestamp';
 
 // eslint-disable-next-line import/no-default-export
@@ -59,10 +59,10 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         query: JSON.stringify({ match: { [ENTRY_LEADER_ENTITY_ID]: '1' } }),
         groupBys: JSON.stringify([
           {
-            field: ORCHESTRATOR_NAMESPACE_PROPERTY,
+            field: ORCHESTRATOR_NAMESPACE,
           },
           {
-            field: CONTAINER_IMAGE_NAME_PROPERTY,
+            field: CONTAINER_IMAGE_NAME,
           },
         ]),
         page: 0,
@@ -83,10 +83,10 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         query: JSON.stringify({ match: { [ENTRY_LEADER_ENTITY_ID]: '1' } }),
         groupBys: JSON.stringify([
           {
-            field: ORCHESTRATOR_NAMESPACE_PROPERTY,
+            field: ORCHESTRATOR_NAMESPACE,
           },
           {
-            field: CONTAINER_IMAGE_NAME_PROPERTY,
+            field: CONTAINER_IMAGE_NAME,
             missing: 'default',
           },
         ]),
@@ -106,10 +106,10 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         query: JSON.stringify({ match: { [ENTRY_LEADER_ENTITY_ID]: '1' } }),
         groupBys: JSON.stringify([
           {
-            field: ORCHESTRATOR_NAMESPACE_PROPERTY,
+            field: ORCHESTRATOR_NAMESPACE,
           },
           {
-            field: CONTAINER_IMAGE_NAME_PROPERTY,
+            field: CONTAINER_IMAGE_NAME,
             missing: 'default',
           },
         ]),
@@ -128,13 +128,13 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         query: JSON.stringify({ match: { [ENTRY_LEADER_ENTITY_ID]: '1' } }),
         groupBys: JSON.stringify([
           {
-            field: ORCHESTRATOR_NAMESPACE_PROPERTY,
+            field: ORCHESTRATOR_NAMESPACE,
           },
           {
-            field: CONTAINER_IMAGE_NAME_PROPERTY,
+            field: CONTAINER_IMAGE_NAME,
           },
         ]),
-        countBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+        countBy: ORCHESTRATOR_NAMESPACE,
         page: 0,
         index: MOCK_INDEX,
       });
@@ -159,10 +159,10 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         }),
         groupBys: JSON.stringify([
           {
-            field: ORCHESTRATOR_NAMESPACE_PROPERTY,
+            field: ORCHESTRATOR_NAMESPACE,
           },
           {
-            field: CONTAINER_IMAGE_NAME_PROPERTY,
+            field: CONTAINER_IMAGE_NAME,
           },
         ]),
         page: 0,
@@ -177,10 +177,10 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         query: 'asdf',
         groupBys: JSON.stringify([
           {
-            field: ORCHESTRATOR_NAMESPACE_PROPERTY,
+            field: ORCHESTRATOR_NAMESPACE,
           },
           {
-            field: CONTAINER_IMAGE_NAME_PROPERTY,
+            field: CONTAINER_IMAGE_NAME,
           },
         ]),
         page: 0,

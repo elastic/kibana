@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import {
   AGGREGATE_ROUTE,
   CURRENT_API_VERSION,
+  ORCHESTRATOR_NAMESPACE,
+  CONTAINER_IMAGE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
 } from '@kbn/kubernetes-security-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 const MOCK_INDEX = 'kubernetes-test-index';
-const ORCHESTRATOR_NAMESPACE_PROPERTY = 'orchestrator.namespace';
-const CONTAINER_IMAGE_NAME_PROPERTY = 'container.image.name';
-const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
 const TIMESTAMP_PROPERTY = '@timestamp';
 
 // eslint-disable-next-line import/no-default-export
@@ -45,8 +45,8 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
 
     it(`${AGGREGATE_ROUTE} returns aggregates on process events`, async () => {
       const response = await getRoute().query({
-        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME_PROPERTY]: 'debian11' } }),
-        groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME]: 'debian11' } }),
+        groupBy: ORCHESTRATOR_NAMESPACE,
         page: 0,
         index: MOCK_INDEX,
         perPage: 10,
@@ -61,8 +61,8 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
 
     it(`${AGGREGATE_ROUTE} allows pagination`, async () => {
       const response = await getRoute().query({
-        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME_PROPERTY]: 'debian11' } }),
-        groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME]: 'debian11' } }),
+        groupBy: ORCHESTRATOR_NAMESPACE,
         page: 1,
         index: MOCK_INDEX,
       });
@@ -73,9 +73,9 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
 
     it(`${AGGREGATE_ROUTE} return countBy value for each aggregation`, async () => {
       const response = await getRoute().query({
-        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME_PROPERTY]: 'debian11' } }),
-        groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
-        countBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME]: 'debian11' } }),
+        groupBy: ORCHESTRATOR_NAMESPACE,
+        countBy: ORCHESTRATOR_NAMESPACE,
         page: 0,
         index: MOCK_INDEX,
       });
@@ -90,8 +90,8 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
 
     it(`${AGGREGATE_ROUTE} return sorted aggregation by countBy field if sortByCount is true`, async () => {
       const response = await getRoute().query({
-        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME_PROPERTY]: 'debian11' } }),
-        groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+        query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME]: 'debian11' } }),
+        groupBy: ORCHESTRATOR_NAMESPACE,
         countBy: ENTRY_LEADER_ENTITY_ID,
         page: 0,
         index: MOCK_INDEX,
@@ -113,7 +113,7 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
             },
           },
         }),
-        groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+        groupBy: ORCHESTRATOR_NAMESPACE,
         page: 0,
         index: MOCK_INDEX,
       });
@@ -124,7 +124,7 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
     it(`${AGGREGATE_ROUTE} handles a bad request`, async () => {
       const response = await supertest.get(AGGREGATE_ROUTE).set('kbn-xsrf', 'foo').query({
         query: 'asdf',
-        groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+        groupBy: ORCHESTRATOR_NAMESPACE,
         page: 0,
         index: MOCK_INDEX,
       });

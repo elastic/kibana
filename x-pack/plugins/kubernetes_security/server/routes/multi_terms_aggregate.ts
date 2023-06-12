@@ -17,6 +17,9 @@ import {
   ORCHESTRATOR_CLUSTER_NAME,
   CONTAINER_IMAGE_NAME,
   CLOUD_INSTANCE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
+  ENTRY_LEADER_USER_ID,
+  ENTRY_LEADER_INTERACTIVE,
 } from '../../common/constants';
 import {
   MultiTermsAggregateGroupBy,
@@ -37,15 +40,17 @@ export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger
             query: schema.object({
               index: schema.string(),
               query: schema.string(),
-              countBy: schema.maybe(schema.string()),
-              countBy: schema.oneOf([
-                schema.literal(ORCHESTRATOR_CLUSTER_ID),
-                schema.literal(ORCHESTRATOR_RESOURCE_ID),
-                schema.literal(ORCHESTRATOR_NAMESPACE),
-                schema.literal(ORCHESTRATOR_CLUSTER_NAME),
-                schema.literal(CLOUD_INSTANCE_NAME),
-                schema.literal(CONTAINER_IMAGE_NAME),
-              ]),
+              countBy: schema.maybe(
+                schema.oneOf([
+                  schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                  schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                  schema.literal(ORCHESTRATOR_NAMESPACE),
+                  schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                  schema.literal(CLOUD_INSTANCE_NAME),
+                  schema.literal(CONTAINER_IMAGE_NAME),
+                  schema.literal(ENTRY_LEADER_ENTITY_ID),
+                ])
+              ),
               groupBys: schema.arrayOf(
                 schema.object({
                   field: schema.oneOf([
@@ -55,6 +60,8 @@ export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger
                     schema.literal(ORCHESTRATOR_CLUSTER_NAME),
                     schema.literal(CLOUD_INSTANCE_NAME),
                     schema.literal(CONTAINER_IMAGE_NAME),
+                    schema.literal(ENTRY_LEADER_USER_ID),
+                    schema.literal(ENTRY_LEADER_INTERACTIVE),
                   ]),
                   missing: schema.maybe(schema.string()),
                 }),
