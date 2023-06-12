@@ -90,6 +90,7 @@ const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
 const sortBySchema = t.literal('creationTime');
 const findCompositeSLOParamsSchema = t.partial({
   query: t.partial({
+    name: t.string,
     page: t.string,
     perPage: t.string,
     sortBy: sortBySchema,

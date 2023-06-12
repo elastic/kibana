@@ -35,7 +35,7 @@ async function initializeEsResources(esContext: EsContext) {
   await retry(steps.setExistingAssetsToHidden);
   await retry(steps.createIlmPolicyIfNotExists);
   await retry(steps.createIndexTemplateIfNotExists);
-  await retry(steps.createInitialIndexIfNotExists);
+  await retry(steps.createDataStreamIfNotExists);
 
   async function retry(stepMethod: () => Promise<void>): Promise<void> {
     // call the step method with retry options via p-retry
@@ -227,12 +227,14 @@ class EsInitializationSteps {
     }
   }
 
-  async createInitialIndexIfNotExists(): Promise<void> {
-    const exists = await this.esContext.esAdapter.doesAliasExist(this.esContext.esNames.alias);
+  async createDataStreamIfNotExists(): Promise<void> {
+    const exists = await this.esContext.esAdapter.doesDataStreamExist(
+      this.esContext.esNames.dataStream
+    );
     if (!exists) {
-      await this.esContext.esAdapter.createIndex(this.esContext.esNames.initialIndex, {
+      await this.esContext.esAdapter.createDataStream(this.esContext.esNames.dataStream, {
         aliases: {
-          [this.esContext.esNames.alias]: {
+          [this.esContext.esNames.dataStream]: {
             is_write_index: true,
             is_hidden: true,
           },

@@ -9,6 +9,10 @@ import { defaultSourceConfiguration } from '../source_configuration/defaults';
 import { LogViewAttributes, LogViewsStaticConfig } from './types';
 
 export const defaultLogViewId = 'default';
+export const defaultFilterStateKey = 'logFilter';
+export const defaultPositionStateKey = 'logPosition'; // NOTE: Provides backwards compatibility for start / end / streamLive previously stored under the logPosition key.
+
+export const DEFAULT_REFRESH_INTERVAL = { pause: true, value: 5000 };
 
 export const defaultLogViewAttributes: LogViewAttributes = {
   name: 'Log View',
@@ -39,4 +43,9 @@ export const defaultLogViewAttributes: LogViewAttributes = {
 
 export const defaultLogViewsStaticConfig: LogViewsStaticConfig = {
   messageFields: defaultSourceConfiguration.fields.message,
+};
+
+export const DEFAULT_LOG_VIEW = {
+  type: 'log-view-reference' as const,
+  logViewId: defaultLogViewId,
 };
