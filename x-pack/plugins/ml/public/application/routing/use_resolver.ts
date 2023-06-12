@@ -9,7 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import { showExpiredLicenseWarning } from '../license/expired_warning';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { type MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
@@ -28,7 +27,7 @@ export const useRouteResolver = (
   requiredLicence: 'full' | 'basic',
   requiredCapabilities: MlCapabilitiesKey[],
   customResolvers?: Resolvers
-): { context: MlContextValue | null; results: ResolverResults } => {
+): { context: MlContextValue | null; results: ResolverResults; component?: React.Component } => {
   const customResolversRef = useRef(customResolvers);
 
   const [results, setResults] = useState<ResolverResults>();
@@ -64,13 +63,26 @@ export const useRouteResolver = (
       await navigateToApp(PLUGIN_ID, { path: ML_PAGES.DATA_VISUALIZER });
       return Promise.reject();
     }
-    // ML is enabled
     if (mlLicenseInfo.hasLicenseExpired) {
-      showExpiredLicenseWarning();
+      await navigateToUrl(
+        await locators.get('LICENSE_MANAGEMENT_LOCATOR')!.getUrl({
+          page: 'dashboard',
+        })
+      );
+      return Promise.reject();
     }
 
     return true;
-  }, [mlLicenseInfo, navigateToApp, requiredLicence]);
+  }, [
+    locators,
+    mlLicenseInfo.hasLicenseExpired,
+    mlLicenseInfo.isFullLicense,
+    mlLicenseInfo.isMinimumLicense,
+    mlLicenseInfo.isMlEnabled,
+    navigateToApp,
+    navigateToUrl,
+    requiredLicence,
+  ]);
 
   const redirectToMlAccessDeniedPage = useCallback(async () => {
     const redirectPage = mlLicenseInfo.hasLicenseExpired
