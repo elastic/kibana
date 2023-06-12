@@ -403,10 +403,7 @@ export const isLoadingPreviewLayers = createSelector(
   getMapZoom,
   (layerList, zoom) => {
     return layerList.some((layer) => {
-      return (
-        layer.isPreviewLayer() &&
-        layer.isLayerLoading(zoom)
-      );
+      return layer.isPreviewLayer() && layer.isLayerLoading(zoom);
     });
   }
 );
@@ -506,10 +503,7 @@ export const isMapLoading = createSelector(
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (
-        !layer.hasErrors() &&
-        layer.isLayerLoading(zoom)
-      ) {
+      if (!layer.hasErrors() && layer.isLayerLoading(zoom)) {
         return true;
       }
     }

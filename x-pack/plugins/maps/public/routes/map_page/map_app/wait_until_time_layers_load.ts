@@ -17,14 +17,13 @@ export function waitUntilTimeLayersLoad$(store: MapStore) {
     // using switchMap since switchMap will discard promise from previous state iterations in progress
     switchMap(async (state) => {
       const zoom = getMapZoom(state);
-      const promises = getLayerList(state)
-        .map(async (layer) => {
-          return {
-            isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
-            layer,
-            zoom, 
-          };
-        });
+      const promises = getLayerList(state).map(async (layer) => {
+        return {
+          isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
+          layer,
+          zoom,
+        };
+      });
       const layersWithMeta = await Promise.all(promises);
       return layersWithMeta;
     }),

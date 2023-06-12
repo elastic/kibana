@@ -65,7 +65,7 @@ describe('isLayerLoading', () => {
       layerDescriptor,
       source: {} as unknown as ISource,
     });
-    layer._isTiled = () => (true);
+    layer._isTiled = () => true;
     return layer;
   }
 
