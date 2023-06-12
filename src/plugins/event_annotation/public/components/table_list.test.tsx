@@ -91,6 +91,7 @@ describe('annotation list view', () => {
         createDataView={() => Promise.resolve({} as DataView)}
         queryInputServices={{} as QueryInputServices}
         toasts={mockToasts}
+        navigateToLens={() => {}}
       />
     );
   });
