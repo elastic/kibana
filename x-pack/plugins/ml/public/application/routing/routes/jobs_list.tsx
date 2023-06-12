@@ -13,8 +13,6 @@ import {
   useRefreshIntervalUpdates,
   useTimefilter,
 } from '@kbn/ml-date-picker';
-import { getMlNodeCount } from '../../ml_nodes_check';
-import { loadMlServerInfo } from '../../services/ml_server_info';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
@@ -24,7 +22,7 @@ import { JobsPage } from '../../jobs/jobs_list';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { loadSavedSearches } from '../../util/index_utils';
+import { basicResolvers } from '../resolvers';
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   id: 'anomaly_detection',
@@ -47,11 +45,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('full', ['canGetJobs'], {
-    getMlNodeCount,
-    loadMlServerInfo,
-    loadSavedSearches,
-  });
+  const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
 
   const timefilter = useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
