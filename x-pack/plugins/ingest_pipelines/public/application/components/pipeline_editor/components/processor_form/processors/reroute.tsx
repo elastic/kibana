@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
@@ -17,6 +17,7 @@ import {
   Field,
   fieldValidators,
   useFormData,
+  useFormContext,
 } from '../../../../../../shared_imports';
 
 import { FieldsConfig, to, from } from './shared';
@@ -109,7 +110,14 @@ const fieldsConfig: FieldsConfig = {
 };
 
 export const Reroute: FunctionComponent = () => {
-  const [{ fields }] = useFormData();
+  const form = useFormContext();
+  const [{ fields }] = useFormData({ watch: ['fields.dataset', 'fields.namespace'] });
+
+  useEffect(() => {
+    if (fields?.dataset.length > 0 || fields?.namespace.length > 0) {
+      form.setFieldValue('fields.destination', '');
+    }
+  }, [form, fields]);
 
   return (
     <>
@@ -119,10 +127,9 @@ export const Reroute: FunctionComponent = () => {
         component={Field}
         componentProps={{
           euiFieldProps: {
-            disabled: fields?.dataset.length > 0 || fields?.dataset.length > 0,
+            disabled: fields?.dataset.length > 0 || fields?.namespace.length > 0,
           },
         }}
-        value={fields?.dataset.length > 0 || fields?.dataset.length > 0 ? '' : fields?.destination}
         path="fields.destination"
       />
 
