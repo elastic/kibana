@@ -9,20 +9,23 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 export const createApiKey = async (
   client: IScopedClusterClient,
-  engineName: string,
+  searchApplicationName: string,
   keyName: string
 ) => {
   return await client.asCurrentUser.security.createApiKey({
     name: keyName,
     role_descriptors: {
-      [`${engineName}-key-role`]: {
+      [`${searchApplicationName}-key-role`]: {
         cluster: [],
         indices: [
           {
-            names: [`${engineName}`],
+            names: [`${searchApplicationName}`],
             privileges: ['read'],
           },
         ],
+        restriction: {
+          workflows: ['search_application_query'],
+        },
       },
     },
   });

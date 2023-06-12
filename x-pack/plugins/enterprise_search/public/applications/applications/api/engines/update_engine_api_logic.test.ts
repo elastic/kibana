@@ -24,9 +24,12 @@ describe('UpdateEngineApiLogic', () => {
       http.put.mockReturnValue(promise);
       const result = updateEngine(engine);
       await nextTick();
-      expect(http.put).toHaveBeenCalledWith('/internal/enterprise_search/engines/my-engine', {
-        body: '{"indices":["an-index"],"name":"my-engine"}',
-      });
+      expect(http.put).toHaveBeenCalledWith(
+        '/internal/enterprise_search/search_applications/my-engine',
+        {
+          body: '{"indices":["an-index"],"name":"my-engine"}',
+        }
+      );
       await expect(result).resolves.toEqual(response);
     });
   });
