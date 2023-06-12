@@ -4,29 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { eachSeries } from 'async';
-import { Logger } from '@kbn/logging';
-import { RouteRegisterParameters } from '.';
-import { getRoutePaths } from '../../common';
-import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
-import { getProfilingSetupSteps } from '../lib/setup/steps';
-import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { hasProfilingData } from '../lib/setup/has_profiling_data';
-import { getClient } from './compat';
-import { ProfilingSetupStep } from '../lib/setup/types';
 
-function checkSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Logger }) {
-  return Promise.all(
-    steps.map(async (step) => {
-      try {
-        return { name: step.name, completed: await step.hasCompleted() };
-      } catch (error) {
-        logger.error(error);
-        return { name: step.name, completed: false, error: error.toString() };
-      }
-    })
-  );
-}
+import { RouteRegisterParameters } from '.';
+import { getClient } from './compat';
+import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
+import {
+  enableResourceManagement,
+  setMaximumBuckets,
+  validateMaximumBuckets,
+  validateResourceManagement,
+} from '../lib/setup/cluster_settings';
+import {
+  createCollectorPackagePolicy,
+  createSymbolizerPackagePolicy,
+  updateApmPolicy,
+  validateApmPolicy,
+  validateCollectorPackagePolicy,
+  validateSymbolizerPackagePolicy,
+} from '../lib/setup/fleet_policies';
+import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
+import { hasProfilingData } from '../lib/setup/has_profiling_data';
+import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
+import { ProfilingSetupOptions } from '../lib/setup/types';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
+import { getRoutePaths } from '../../common';
+import {
+  areResourcesSetup,
+  createDefaultSetupState,
+  mergePartialSetupStates,
+} from '../../common/setup';
 
 export function registerSetupRoute({
   router,
@@ -35,7 +41,7 @@ export function registerSetupRoute({
   dependencies,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  // Check if ES resources needed for Universal Profiling to work exist
+  // Check if Elasticsearch and Fleet are setup for Universal Profiling
   router.get(
     {
       path: paths.HasSetupESResources,
@@ -44,53 +50,55 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
-        logger.debug('checking if profiling ES configurations are installed');
         const core = await context.core;
-
-        const steps = getProfilingSetupSteps({
-          client: createProfilingEsClient({
-            esClient,
-            request,
-            useDefaultAuth: true,
-          }),
+        const clientWithDefaultAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: true,
+        });
+        const setupOptions: ProfilingSetupOptions = {
+          client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-        });
+          config: dependencies.config,
+        };
 
-        const hasDataPromise = hasProfilingData({
-          client: createProfilingEsClient({
-            esClient,
-            request,
-          }),
-        });
+        logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
 
-        const stepCompletionResultsPromises = checkSteps({ steps, logger });
+        const state = createDefaultSetupState();
+        state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
-        const hasData = await hasDataPromise;
-
-        if (hasData) {
-          return response.ok({
+        if (!state.cloud.available) {
+          const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
+          logger.error(msg);
+          return response.custom({
+            statusCode: 500,
             body: {
-              has_data: true,
-              has_setup: true,
-              steps: [],
+              message: msg,
             },
           });
         }
 
-        const stepCompletionResults = await stepCompletionResultsPromises;
+        const verifyFunctions = [
+          hasProfilingData,
+          isApmPackageInstalled,
+          validateApmPolicy,
+          validateCollectorPackagePolicy,
+          validateMaximumBuckets,
+          validateResourceManagement,
+          validateSecurityRole,
+          validateSymbolizerPackagePolicy,
+        ];
+        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+        const mergedState = mergePartialSetupStates(state, partialStates);
 
-        // Reply to clients if we have already created all 12 events template indices.
-        // This is kind of simplistic but can be a good first step to ensure
-        // Profiling resources will be created.
         return response.ok({
           body: {
-            has_setup: stepCompletionResults.every((step) => step.completed),
-            has_data: false,
-            steps: stepCompletionResults,
+            has_setup: areResourcesSetup(mergedState),
+            has_data: mergedState.data.available,
           },
         });
       } catch (error) {
@@ -98,7 +106,7 @@ export function registerSetupRoute({
       }
     }
   );
-  // Configure ES resources needed by Universal Profiling using the mappings
+  // Set up Elasticsearch and Fleet for Universal Profiling
   router.post(
     {
       path: paths.HasSetupESResources,
@@ -107,37 +115,69 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
-        logger.info('Applying initial setup of Elasticsearch resources');
-        const steps = getProfilingSetupSteps({
-          client: createProfilingEsClient({ esClient, request, useDefaultAuth: true }),
+        const core = await context.core;
+        const clientWithDefaultAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: true,
+        });
+        const setupOptions: ProfilingSetupOptions = {
+          client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
-          soClient: (await context.core).savedObjects.client,
+          soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-        });
+          config: dependencies.config,
+        };
 
-        await eachSeries(steps, (step, cb) => {
-          logger.debug(`Executing step ${step.name}`);
-          step
-            .init()
-            .then(() => cb())
-            .catch(cb);
-        });
+        logger.info('Setting up Elasticsearch and Fleet for Universal Profiling');
 
-        const checkedSteps = await checkSteps({ steps, logger });
+        const state = createDefaultSetupState();
+        state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
-        if (checkedSteps.every((step) => step.completed)) {
+        if (!state.cloud.available) {
+          const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
+          logger.error(msg);
+          return response.custom({
+            statusCode: 500,
+            body: {
+              message: msg,
+            },
+          });
+        }
+
+        const verifyFunctions = [
+          isApmPackageInstalled,
+          validateApmPolicy,
+          validateCollectorPackagePolicy,
+          validateMaximumBuckets,
+          validateResourceManagement,
+          validateSecurityRole,
+          validateSymbolizerPackagePolicy,
+        ];
+        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+        const mergedState = mergePartialSetupStates(state, partialStates);
+
+        if (areResourcesSetup(mergedState)) {
           return response.ok();
         }
 
-        return response.custom({
-          statusCode: 500,
-          body: {
-            message: `Failed to complete all steps`,
-            steps: checkedSteps,
-          },
-        });
+        const executeFunctions = [
+          installLatestApmPackage,
+          updateApmPolicy,
+          createCollectorPackagePolicy,
+          createSymbolizerPackagePolicy,
+          enableResourceManagement,
+          setSecurityRole,
+          setMaximumBuckets,
+        ];
+        await Promise.all(executeFunctions.map((fn) => fn(setupOptions)));
+
+        // We return a status code of 202 instead of 200 because enabling
+        // resource management in Elasticsearch is an asynchronous action
+        // and is not guaranteed to complete before Kibana sends a response.
+        return response.accepted();
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }

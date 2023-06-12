@@ -8,7 +8,7 @@
 import { QUERY_INPUT } from '../screens/indicators';
 
 /**
- * Nvigate to specific page in indicators table
+ * Navigate to specific page in indicators table
  */
 export const navigateToIndicatorsTablePage = (index: number) => {
   cy.get(`[data-test-subj="pagination-button-${index}"]`).click();
@@ -18,12 +18,14 @@ export const navigateToIndicatorsTablePage = (index: number) => {
  * Clears text in KQL bar
  */
 export const enterQuery = (text: string) => {
-  cy.get(QUERY_INPUT).should('exist').focus().type(text);
+  cy.get(QUERY_INPUT).should('exist').focus();
+  cy.get(QUERY_INPUT).should('exist').type(text);
 };
 
 /**
  * Clears text in KQL bar
  */
 export const clearQuery = () => {
-  cy.get(QUERY_INPUT).should('exist').focus().clear();
+  cy.get(QUERY_INPUT).should('exist').focus();
+  cy.get(QUERY_INPUT).should('exist').clear();
 };

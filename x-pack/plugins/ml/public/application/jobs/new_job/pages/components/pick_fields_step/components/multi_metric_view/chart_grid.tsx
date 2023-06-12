@@ -7,8 +7,7 @@
 
 import React, { Fragment, FC } from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-
-import { AggFieldPair, SplitField } from '../../../../../../../../../common/types/fields';
+import type { AggFieldPair, SplitField } from '@kbn/ml-anomaly-utils';
 import { ChartSettings } from '../../../charts/common/settings';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { ModelItem, Anomaly } from '../../../../../common/results_loader';

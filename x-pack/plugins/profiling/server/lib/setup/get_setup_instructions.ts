@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { getApmPolicy } from './steps/get_apm_policy';
+import { getApmPolicy } from './get_apm_policy';
 
 export interface SetupDataCollectionInstructions {
   variables: {

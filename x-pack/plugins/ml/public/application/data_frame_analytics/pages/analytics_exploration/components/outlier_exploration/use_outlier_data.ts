@@ -18,6 +18,13 @@ import {
   FEATURE_INFLUENCE,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import {
+  getFieldType,
+  getDataGridSchemasFromFieldTypes,
+  showDataGridColumnChartErrorMessageToast,
+  useRenderCellValue,
+  type UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
@@ -25,13 +32,6 @@ import {
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import {
-  getFieldType,
-  getDataGridSchemasFromFieldTypes,
-  showDataGridColumnChartErrorMessageToast,
-  useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
