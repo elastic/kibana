@@ -7,21 +7,21 @@
 
 import { mockDependencies, MockRouter } from '../../__mocks__';
 
-jest.mock('../../lib/engines/field_capabilities', () => ({
-  fetchEngineFieldCapabilities: jest.fn(),
+jest.mock('../../lib/search_applications/field_capabilities', () => ({
+  fetchSearchApplicationFieldCapabilities: jest.fn(),
 }));
-jest.mock('../../lib/engines/fetch_indices_stats', () => ({
+jest.mock('../../lib/search_applications/fetch_indices_stats', () => ({
   fetchIndicesStats: jest.fn(),
 }));
 import { RequestHandlerContext } from '@kbn/core/server';
 
-import { fetchIndicesStats } from '../../lib/engines/fetch_indices_stats';
-import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
+import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
+import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
 
-import { registerEnginesRoutes } from './engines';
+import { registerSearchApplicationsRoutes } from './search_applications';
 
 describe('engines routes', () => {
-  describe('GET /internal/enterprise_search/engines', () => {
+  describe('GET /internal/enterprise_search/search_applications', () => {
     let mockRouter: MockRouter;
 
     const mockClient = {
@@ -40,9 +40,9 @@ describe('engines routes', () => {
       mockRouter = new MockRouter({
         context,
         method: 'get',
-        path: '/internal/enterprise_search/engines',
+        path: '/internal/enterprise_search/search_applications',
       });
-      registerEnginesRoutes({
+      registerSearchApplicationsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -77,7 +77,7 @@ describe('engines routes', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/engines/{engine_name}', () => {
+  describe('GET /internal/enterprise_search/search_applications/{engine_name}', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: {
@@ -95,10 +95,10 @@ describe('engines routes', () => {
       mockRouter = new MockRouter({
         context,
         method: 'get',
-        path: '/internal/enterprise_search/engines/{engine_name}',
+        path: '/internal/enterprise_search/search_applications/{engine_name}',
       });
 
-      registerEnginesRoutes({
+      registerSearchApplicationsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -147,7 +147,7 @@ describe('engines routes', () => {
     });
   });
 
-  describe('PUT /internal/enterprise_search/engines/{engine_name}', () => {
+  describe('PUT /internal/enterprise_search/search_applications/{engine_name}', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: {
@@ -165,10 +165,10 @@ describe('engines routes', () => {
       mockRouter = new MockRouter({
         context,
         method: 'put',
-        path: '/internal/enterprise_search/engines/{engine_name}',
+        path: '/internal/enterprise_search/search_applications/{engine_name}',
       });
 
-      registerEnginesRoutes({
+      registerSearchApplicationsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -290,7 +290,7 @@ describe('engines routes', () => {
     });
   });
 
-  describe('DELETE /internal/enterprise_search/engines/{engine_name}', () => {
+  describe('DELETE /internal/enterprise_search/search_applications/{engine_name}', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: {
@@ -308,10 +308,10 @@ describe('engines routes', () => {
       mockRouter = new MockRouter({
         context,
         method: 'delete',
-        path: '/internal/enterprise_search/engines/{engine_name}',
+        path: '/internal/enterprise_search/search_applications/{engine_name}',
       });
 
-      registerEnginesRoutes({
+      registerSearchApplicationsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -350,7 +350,7 @@ describe('engines routes', () => {
     });
   });
 
-  describe('POST /internal/enterprise_search/engines/{engine_name}/search', () => {
+  describe('POST /internal/enterprise_search/search_applications/{engine_name}/search', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: {
@@ -366,10 +366,10 @@ describe('engines routes', () => {
       mockRouter = new MockRouter({
         context,
         method: 'post',
-        path: '/internal/enterprise_search/engines/{engine_name}/search',
+        path: '/internal/enterprise_search/search_applications/{engine_name}/search',
       });
 
-      registerEnginesRoutes({
+      registerSearchApplicationsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -440,7 +440,7 @@ describe('engines routes', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/engines/{engine_name}/field_capabilities', () => {
+  describe('GET /internal/enterprise_search/search_applications/{engine_name}/field_capabilities', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: { searchApplication: { get: jest.fn() } },
@@ -460,10 +460,10 @@ describe('engines routes', () => {
       mockRouter = new MockRouter({
         context,
         method: 'get',
-        path: '/internal/enterprise_search/engines/{engine_name}/field_capabilities',
+        path: '/internal/enterprise_search/search_applications/{engine_name}/field_capabilities',
       });
 
-      registerEnginesRoutes({
+      registerSearchApplicationsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -483,7 +483,9 @@ describe('engines routes', () => {
       (mockClient.asCurrentUser.searchApplication.get as jest.Mock).mockResolvedValueOnce(
         engineResult
       );
-      (fetchEngineFieldCapabilities as jest.Mock).mockResolvedValueOnce(fieldCapabilitiesResult);
+      (fetchSearchApplicationFieldCapabilities as jest.Mock).mockResolvedValueOnce(
+        fieldCapabilitiesResult
+      );
 
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
@@ -492,7 +494,10 @@ describe('engines routes', () => {
       expect(mockClient.asCurrentUser.searchApplication.get).toHaveBeenCalledWith({
         name: 'unit-test',
       });
-      expect(fetchEngineFieldCapabilities).toHaveBeenCalledWith(mockClient, engineResult);
+      expect(fetchSearchApplicationFieldCapabilities).toHaveBeenCalledWith(
+        mockClient,
+        engineResult
+      );
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: fieldCapabilitiesResult,
         headers: { 'content-type': 'application/json' },
