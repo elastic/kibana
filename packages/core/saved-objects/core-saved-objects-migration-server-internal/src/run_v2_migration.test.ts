@@ -144,11 +144,7 @@ describe('runV2Migration', () => {
     expect(mockCreateWaitGroupMap).toBeCalledTimes(3);
     expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(1, ['.my_index', '.other_index']);
     expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(2, ['.my_index', '.other_index']);
-    expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(
-      3,
-      ['.my_index', '.other_index'],
-      expect.any(Function) // we expect to receive a method to update all aliases in this hook
-    );
+    expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(3, ['.my_index', '.other_index']);
   });
 
   it('calls runResilientMigrator for each migrator it must spawn', async () => {

@@ -43,7 +43,7 @@ export interface ExplainLogRateSpikesContentProps {
   dataView: DataView;
   setGlobalState?: (params: Dictionary<unknown>) => void;
   /** Timestamp for the start of the range for initial analysis */
-  initialAnalysisStart?: number;
+  initialAnalysisStart?: number | WindowParameters;
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;

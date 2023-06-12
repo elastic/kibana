@@ -19,7 +19,7 @@ export function SvlObltNavigationServiceProvider({
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
-        await testSubjects.existOrFail('obltOverviewPageHeader', { timeout: 2000 });
+        await testSubjects.existOrFail('obltOnboardingHomeTitle', { timeout: 2000 });
       });
     },
   };

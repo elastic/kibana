@@ -138,13 +138,6 @@ jest.mock(
 // Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
 
-jest.mock(
-  'react-visibility-sensor',
-  () =>
-    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-      children({ isVisible: true })
-);
-
 jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));

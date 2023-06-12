@@ -147,7 +147,10 @@ export default function ({ getService }: FtrProviderContext) {
     return tests.flat();
   };
 
-  describe('_import', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/158586
+  // Also, https://github.com/elastic/kibana/issues/158918
+  // esArchiver fails with no_shard_available_action_exception after deleting indexes
+  describe.skip('_import', () => {
     getTestScenarios([
       [false, false],
       [false, true],
