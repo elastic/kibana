@@ -1202,13 +1202,11 @@ describe('TableList', () => {
 
     const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
 
-    act(() => {
+    await act(async () => {
       testBed = setup({ findItems });
     });
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     const { component, table } = testBed!;
-    component.update();
 
     findItems.mockClear();
     expect(findItems).not.toHaveBeenCalled();
@@ -1226,13 +1224,11 @@ describe('TableList', () => {
     ];
     findItems.mockResolvedValue({ total: hits.length, hits });
 
-    act(() => {
+    await act(async () => {
       component.setProps({
         refreshListBouncer: true,
       });
     });
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     component.update();
 
@@ -1246,10 +1242,9 @@ describe('TableList', () => {
   it('reports successful fetches', async () => {
     const onFetchSuccess = jest.fn();
 
-    act(() => {
+    await act(async () => {
       setup({ onFetchSuccess });
     });
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(onFetchSuccess).toHaveBeenCalled();
   });

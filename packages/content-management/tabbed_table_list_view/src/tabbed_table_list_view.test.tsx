@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { ReactWrapper, mount, shallow } from 'enzyme';
 import {
   TabbedTableListView,
   TableListTabParentProps,
@@ -96,29 +96,32 @@ describe('TabbedTableListView', () => {
   it('should switch tabs when props change', async () => {
     const changeActiveTab = jest.fn();
 
-    const wrapper = mount(
-      <TabbedTableListView
-        title={title}
-        description={description}
-        headingId={headingId}
-        children={children}
-        tabs={tabs}
-        activeTabId={'tab-1'}
-        changeActiveTab={changeActiveTab}
-      />
-    );
+    let wrapper: ReactWrapper | undefined;
+    await act(async () => {
+      wrapper = mount(
+        <TabbedTableListView
+          title={title}
+          description={description}
+          headingId={headingId}
+          children={children}
+          tabs={tabs}
+          activeTabId={'tab-1'}
+          changeActiveTab={changeActiveTab}
+        />
+      );
+    });
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    if (!wrapper) {
+      throw new Error("enzyme wrapper didn't initialize");
+    }
 
     expect(wrapper.find(EuiPageTemplate.Section).text()).toContain(tableList1);
 
-    act(() => {
-      wrapper.setProps({
+    await act(async () => {
+      wrapper?.setProps({
         activeTabId: 'tab-2',
       });
     });
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(wrapper.find(EuiPageTemplate.Section).text()).toContain(tableList2);
   });
