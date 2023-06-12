@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-export let mockStorageData: Record<string, unknown> = {};
-export const clearMockStorageData = () => {
-  mockStorageData = {};
-};
-const mockStorage = {
-  get: jest.fn((key: string) => mockStorageData[key]),
+export interface MockStorage {
+  data: Record<string, unknown>;
+  clearMockStorageData: () => void;
+  get: (key: string) => unknown;
+  set: (key: string, value: unknown) => void;
+}
+
+const mockStorage: MockStorage = {
+  data: {},
+  clearMockStorageData: () => {
+    mockStorage.data = {};
+  },
+  get: jest.fn((key: string) => mockStorage.data[key]),
   set: jest.fn((key, value) => {
-    mockStorageData[key] = value;
+    mockStorage.data[key] = value;
   }),
 };
 

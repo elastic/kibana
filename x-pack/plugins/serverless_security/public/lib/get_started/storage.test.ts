@@ -12,74 +12,61 @@ import {
   ProductId,
   StepId,
 } from '../../components/get_started/types';
-import { storage as mockStorage } from '../storage';
-import { clearMockStorageData } from '../__mocks__/storage';
+import { storage } from '../storage';
+import { MockStorage } from '../__mocks__/storage';
 
 jest.mock('../storage');
 
 describe('useStorage', () => {
+  const mockStorage = storage as unknown as MockStorage;
   beforeEach(() => {
     // Clear the mocked storage object before each test
-    clearMockStorageData();
+    mockStorage.clearMockStorageData();
     jest.clearAllMocks();
   });
 
   it('should return the active products from storage', () => {
-    expect(getStartedStorage.getActiveProductsFromStorage()).toEqual({});
+    expect(getStartedStorage.getActiveProductsFromStorage()).toEqual([]);
 
-    mockStorage.set('ACTIVE_PRODUCTS', { product1: true, product2: true });
-    expect(getStartedStorage.getActiveProductsFromStorage()).toEqual({
-      product1: true,
-      product2: true,
-    });
+    mockStorage.set('ACTIVE_PRODUCTS', ['product1', 'product2']);
+    expect(getStartedStorage.getActiveProductsFromStorage()).toEqual(['product1', 'product2']);
   });
 
   it('should toggle active products in storage', () => {
-    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual({
-      [ProductId.analytics]: true,
-    });
-    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', {
-      [ProductId.analytics]: true,
-    });
+    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual([
+      ProductId.analytics,
+    ]);
+    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', [ProductId.analytics]);
 
-    mockStorage.set('ACTIVE_PRODUCTS', { [ProductId.analytics]: true });
-    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual({});
-    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', {});
+    mockStorage.set('ACTIVE_PRODUCTS', [ProductId.analytics]);
+    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual([]);
+    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', []);
   });
 
   it('should return the finished steps from storage by card ID', () => {
     expect(
       getStartedStorage.getFinishedStepsFromStorageByCardId(GetSetUpCardId.introduction)
-    ).toEqual({});
+    ).toEqual([]);
 
     mockStorage.set('FINISHED_STEPS', {
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
     });
 
     expect(
       getStartedStorage.getFinishedStepsFromStorageByCardId(GetSetUpCardId.introduction)
-    ).toEqual({ [IntroductionSteps.watchOverviewVideo]: true, step2: true });
+    ).toEqual([IntroductionSteps.watchOverviewVideo, 'step2']);
   });
 
   it('should return all finished steps from storage', () => {
     expect(getStartedStorage.getAllFinishedStepsFromStorage()).toEqual({});
 
     mockStorage.set('FINISHED_STEPS', {
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
-      card2: { step3: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
+      [GetSetUpCardId.bringInYourData]: ['step3'],
     });
     expect(getStartedStorage.getAllFinishedStepsFromStorage()).toEqual({
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
-      card2: { step3: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
+      [GetSetUpCardId.bringInYourData]: ['step3'],
     });
   });
 
@@ -89,62 +76,47 @@ describe('useStorage', () => {
       IntroductionSteps.watchOverviewVideo
     );
     expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
-      [GetSetUpCardId.introduction]: { [IntroductionSteps.watchOverviewVideo]: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo],
     });
 
     mockStorage.set('FINISHED_STEPS', {
-      [GetSetUpCardId.introduction]: { [IntroductionSteps.watchOverviewVideo]: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo],
     });
     getStartedStorage.addFinishedStepToStorage(GetSetUpCardId.introduction, 'step2' as StepId);
     expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
     });
   });
 
   it('should get finished steps from storage by card ID', () => {
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
-      card2: { step3: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
+      [GetSetUpCardId.bringInYourData]: ['step3'],
     });
 
     expect(
       getStartedStorage.getFinishedStepsFromStorageByCardId(GetSetUpCardId.introduction)
-    ).toEqual({ [IntroductionSteps.watchOverviewVideo]: true, step2: true });
+    ).toEqual([IntroductionSteps.watchOverviewVideo, 'step2']);
 
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
-      card2: { step3: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
+      [GetSetUpCardId.bringInYourData]: ['step3'],
     });
     expect(
-      getStartedStorage.getFinishedStepsFromStorageByCardId(GetSetUpCardId.introduction)
-    ).toEqual({ step3: true });
+      getStartedStorage.getFinishedStepsFromStorageByCardId(GetSetUpCardId.bringInYourData)
+    ).toEqual(['step3']);
   });
 
   it('should get all finished steps from storage', () => {
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
-      card2: { step3: true },
-      card3: { step4: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
+      [GetSetUpCardId.bringInYourData]: ['step3'],
+      card3: ['step4'],
     });
     expect(getStartedStorage.getAllFinishedStepsFromStorage()).toEqual({
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
-      card2: { step3: true },
-      card3: { step4: true },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
+      [GetSetUpCardId.bringInYourData]: ['step3'],
+      card3: ['step4'],
     });
 
     (mockStorage.get as jest.Mock).mockReturnValueOnce({});
@@ -153,25 +125,22 @@ describe('useStorage', () => {
 
   it('should remove a finished step from storage', () => {
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [GetSetUpCardId.introduction]: {
-        [IntroductionSteps.watchOverviewVideo]: true,
-        step2: true,
-      },
+      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo, 'step2'],
     });
-    getStartedStorage.removeFinishedStep(
+    getStartedStorage.removeFinishedStepFromStorage(
       GetSetUpCardId.introduction,
       IntroductionSteps.watchOverviewVideo
     );
     expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
-      [GetSetUpCardId.introduction]: { step2: true },
+      [GetSetUpCardId.introduction]: ['step2'],
     });
 
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [GetSetUpCardId.introduction]: { step2: true },
+      [GetSetUpCardId.introduction]: ['step2'],
     });
-    getStartedStorage.removeFinishedStep(GetSetUpCardId.introduction, 'step2' as StepId);
+    getStartedStorage.removeFinishedStepFromStorage(GetSetUpCardId.introduction, 'step2' as StepId);
     expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
-      [GetSetUpCardId.introduction]: {},
+      [GetSetUpCardId.introduction]: [],
     });
   });
 });

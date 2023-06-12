@@ -16,12 +16,12 @@ export const getStartedStorage = {
     const activeProducts: ProductId[] = storage.get(ACTIVE_PRODUCTS_STORAGE_KEY);
     return activeProducts ?? new Array();
   },
-  toggleActiveProductsInStorage: (sectionId: ProductId) => {
+  toggleActiveProductsInStorage: (productId: ProductId) => {
     const activeProducts: ProductId[] =
       storage.get(ACTIVE_PRODUCTS_STORAGE_KEY) ?? new Array<ProductId>();
-    const index = activeProducts.indexOf(sectionId);
+    const index = activeProducts.indexOf(productId);
     if (index < 0) {
-      activeProducts.push(sectionId);
+      activeProducts.push(productId);
     } else {
       activeProducts.splice(index, 1);
     }
@@ -48,11 +48,11 @@ export const getStartedStorage = {
   },
   removeFinishedStepFromStorage: (cardId: CardId, stepId: StepId) => {
     const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
-    const card: StepId[] = finishedSteps[cardId] ?? new Array<StepId>();
-    const index = card.indexOf(stepId);
-    if (index < 0) {
-      card.splice(index, 1);
+    const steps: StepId[] = finishedSteps[cardId] ?? new Array<StepId>();
+    const index = steps.indexOf(stepId);
+    if (index >= 0) {
+      steps.splice(index, 1);
     }
-    storage.set(FINISHED_STEPS_STORAGE_KEY, finishedSteps);
+    storage.set(FINISHED_STEPS_STORAGE_KEY, { ...finishedSteps, [cardId]: steps });
   },
 };
