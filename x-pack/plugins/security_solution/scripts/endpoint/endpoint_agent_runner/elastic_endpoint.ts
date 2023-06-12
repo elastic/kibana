@@ -35,7 +35,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
   try {
     const uniqueId = Math.random().toString().substring(2, 6);
-    const username = userInfo().username.toLowerCase().replace('.', '-'); // Multipass doesn't like periods in username
+    const username = userInfo().username.toLowerCase().replaceAll('.', '-'); // Multipass doesn't like periods in username
     const policyId: string = policy || (await getOrCreateAgentPolicyId());
 
     if (!policyId) {

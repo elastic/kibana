@@ -8,6 +8,7 @@
 
 import Boom from '@hapi/boom';
 import type { RequestHandler, RouteMethod, RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { ErrorIndexPatternNotFound } from '../../error';
 
 interface ErrorResponseBody {
@@ -49,7 +50,8 @@ export const handleErrors =
 
         const is404 =
           (error as ErrorIndexPatternNotFound).is404 ||
-          (error as Boom.Boom)?.output?.statusCode === 404;
+          (error as Boom.Boom)?.output?.statusCode === 404 ||
+          error instanceof SavedObjectNotFound;
 
         if (is404) {
           return response.notFound({

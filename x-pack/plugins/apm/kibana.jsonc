@@ -10,6 +10,8 @@
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
       "data",
+      "dashboard",
+      "controls",
       "embeddable",
       "features",
       "infra",
@@ -42,7 +44,9 @@
       "security",
       "spaces",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
+      "licenseManagement"
     ],
     "requiredBundles": [
       "fleet",

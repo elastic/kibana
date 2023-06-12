@@ -17,7 +17,7 @@ import {
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 type Config =
-  APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
+  APIReturnType<'GET /api/apm/settings/agent-configuration 2023-05-22'>['configurations'][0];
 
 interface Props {
   config: Config;
@@ -71,17 +71,20 @@ async function deleteConfig(
   toasts: NotificationsStart['toasts']
 ) {
   try {
-    await callApmApi('DELETE /api/apm/settings/agent-configuration', {
-      signal: null,
-      params: {
-        body: {
-          service: {
-            name: config.service.name,
-            environment: config.service.environment,
+    await callApmApi(
+      'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+      {
+        signal: null,
+        params: {
+          body: {
+            service: {
+              name: config.service.name,
+              environment: config.service.environment,
+            },
           },
         },
-      },
-    });
+      }
+    );
 
     toasts.addSuccess({
       title: i18n.translate(

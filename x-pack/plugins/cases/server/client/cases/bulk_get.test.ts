@@ -23,5 +23,15 @@ describe('bulkGet', () => {
         'Maximum request limit of 1000 cases reached'
       );
     });
+
+    it('throws with excess fields', async () => {
+      await expect(
+        bulkGet(
+          // @ts-expect-error: excess attribute
+          { ids: ['1'], foo: 'bar' },
+          clientArgs
+        )
+      ).rejects.toThrow('invalid keys "foo"');
+    });
   });
 });

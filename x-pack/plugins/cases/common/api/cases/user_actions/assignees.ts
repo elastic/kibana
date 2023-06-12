@@ -10,9 +10,9 @@ import { CaseAssigneesRt } from '../assignee';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const AssigneesUserActionPayloadRt = rt.type({ assignees: CaseAssigneesRt });
+export const AssigneesUserActionPayloadRt = rt.strict({ assignees: CaseAssigneesRt });
 
-export const AssigneesUserActionRt = rt.type({
+export const AssigneesUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.assignees),
   payload: AssigneesUserActionPayloadRt,
 });

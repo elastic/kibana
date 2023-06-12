@@ -8,9 +8,6 @@
 import { badRequest } from '@hapi/boom';
 import { get, isPlainObject, differenceWith, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { validate as uuidValidate } from 'uuid';
 
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
@@ -34,12 +31,11 @@ import {
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
   ContextTypeUserRt,
-  excess,
-  throwErrors,
   ExternalReferenceStorageType,
   ExternalReferenceSORt,
   ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
+  decodeWithExcessOrThrow,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import {
@@ -57,16 +53,18 @@ import {
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
+// TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
   comment: CommentRequest,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (isCommentRequestTypeUser(comment)) {
-    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(ContextTypeUserRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
-    pipe(excess(ActionsCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(ActionsCommentRequestRt)(comment);
   } else if (isCommentRequestTypeAlert(comment)) {
-    pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(AlertCommentRequestRt)(comment);
+
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
     /**
@@ -112,10 +110,7 @@ export const decodeCommentRequest = (
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
-    pipe(
-      excess(PersistableStateAttachmentRt).decode(comment),
-      fold(throwErrors(badRequest), identity)
-    );
+    decodeWithExcessOrThrow(PersistableStateAttachmentRt)(comment);
   } else {
     /**
      * This assertion ensures that TS will show an error
@@ -131,12 +126,9 @@ const decodeExternalReferenceAttachment = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
-    pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(ExternalReferenceSORt)(attachment);
   } else {
-    pipe(
-      excess(ExternalReferenceNoSORt).decode(attachment),
-      fold(throwErrors(badRequest), identity)
-    );
+    decodeWithExcessOrThrow(ExternalReferenceNoSORt)(attachment);
   }
 
   const metadata = attachment.externalReferenceMetadata;
@@ -489,6 +481,7 @@ export const arraysDifference = <T>(
 interface CaseWithIDVersion {
   id: string;
   version: string;
+
   [key: string]: unknown;
 }
 
@@ -496,31 +489,19 @@ export const getCaseToUpdate = (
   currentCase: unknown,
   queryCase: CaseWithIDVersion
 ): CaseWithIDVersion =>
-  Object.entries(queryCase).reduce(
+  Object.entries(queryCase).reduce<CaseWithIDVersion>(
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
       if (Array.isArray(currentValue) && Array.isArray(value)) {
         if (arraysDifference(value, currentValue)) {
-          return {
-            ...acc,
-            [key]: value,
-          };
+          acc[key] = value;
         }
-        return acc;
       } else if (isPlainObject(currentValue) && isPlainObject(value)) {
         if (!deepEqual(currentValue, value)) {
-          return {
-            ...acc,
-            [key]: value,
-          };
+          acc[key] = value;
         }
-
-        return acc;
       } else if (currentValue != null && value !== currentValue) {
-        return {
-          ...acc,
-          [key]: value,
-        };
+        acc[key] = value;
       }
       return acc;
     },

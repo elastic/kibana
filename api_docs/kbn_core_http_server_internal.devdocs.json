@@ -535,6 +535,26 @@
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.eluMonitor",
+            "type": "Object",
+            "tags": [],
+            "label": "eluMonitor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IHttpEluMonitorConfig",
+                "text": "IHttpEluMonitorConfig"
+              }
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -881,7 +901,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
+          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
         ],
         "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
         "deprecated": false,

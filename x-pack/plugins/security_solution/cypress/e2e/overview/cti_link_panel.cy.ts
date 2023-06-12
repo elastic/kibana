@@ -17,7 +17,7 @@ import { OVERVIEW_URL } from '../../urls/navigation';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('CTI Link Panel', () => {
-  before(() => {
+  beforeEach(() => {
     login();
   });
 
@@ -34,6 +34,10 @@ describe('CTI Link Panel', () => {
   describe('enabled threat intel module', () => {
     before(() => {
       esArchiverLoad('threat_indicator');
+    });
+
+    beforeEach(() => {
+      login();
     });
 
     after(() => {

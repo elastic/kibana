@@ -6,6 +6,7 @@ value:
   name: new name
   enabled: true
   throttle: null
+  revision: 1
   running: false
   schedule:
     interval: 10m

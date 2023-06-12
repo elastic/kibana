@@ -45,7 +45,7 @@ import {
 import { checkIndexStatus } from '../../lib/check_index_status';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
-export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 60;
+export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 240;
 
 interface CspStatusDependencies {
   logger: Logger;

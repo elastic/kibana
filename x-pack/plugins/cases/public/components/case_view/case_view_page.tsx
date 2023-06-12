@@ -15,7 +15,6 @@ import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
-import { WhitePageWrapperNoBorder } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewFiles } from './components/case_view_files';
@@ -27,7 +26,6 @@ import { useOnUpdateField } from './use_on_update_field';
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
-    caseId,
     onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
@@ -116,34 +114,29 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           />
         </HeaderPage>
 
-        <WhitePageWrapperNoBorder>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <EuiSpacer size="l" />
+        <EuiSpacer size="l" />
 
-          <EuiFlexGroup
-            data-test-subj={`case-view-tab-content-${activeTabId}`}
-            alignItems="baseline"
-          >
-            {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
-              <CaseViewActivity
-                ruleDetailsNavigation={ruleDetailsNavigation}
-                caseData={caseData}
-                actionsNavigation={actionsNavigation}
-                showAlertDetails={showAlertDetails}
-                useFetchAlertData={useFetchAlertData}
-              />
-            )}
-            {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
-              <CaseViewAlerts caseData={caseData} />
-            )}
-            {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
-          </EuiFlexGroup>
-        </WhitePageWrapperNoBorder>
+        <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
+          {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
+            <CaseViewActivity
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              caseData={caseData}
+              actionsNavigation={actionsNavigation}
+              showAlertDetails={showAlertDetails}
+              useFetchAlertData={useFetchAlertData}
+            />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
+            <CaseViewAlerts caseData={caseData} />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
+        </EuiFlexGroup>
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
     );

@@ -18,12 +18,18 @@ import { i18n } from '@kbn/i18n';
 
 interface HeaderActionsProps {
   loading: boolean;
+  isRuleEditable: boolean;
 
   onDeleteRule: () => void;
   onEditRule: () => void;
 }
 
-export function HeaderActions({ loading, onDeleteRule, onEditRule }: HeaderActionsProps) {
+export function HeaderActions({
+  loading,
+  isRuleEditable,
+  onDeleteRule,
+  onEditRule,
+}: HeaderActionsProps) {
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
 
   const togglePopover = () => setIsRuleEditPopoverOpen(!isRuleEditPopoverOpen);
@@ -42,7 +48,7 @@ export function HeaderActions({ loading, onDeleteRule, onEditRule }: HeaderActio
     onDeleteRule();
   };
 
-  return (
+  return isRuleEditable ? (
     <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
       <EuiFlexItem>
         <EuiPopover
@@ -94,5 +100,5 @@ export function HeaderActions({ loading, onDeleteRule, onEditRule }: HeaderActio
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
+  ) : null;
 }

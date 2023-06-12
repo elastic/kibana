@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { Type } from 'io-ts';
-import { exact, partial } from 'io-ts';
+import { exact, partial, strict, string } from 'io-ts';
 import type { CaseAttributes } from '../../../common/api';
 import { CaseAttributesRt } from '../../../common/api';
 import type { ConnectorPersisted } from './connectors';
@@ -55,7 +55,7 @@ export const CaseTransformedAttributesRt = CaseAttributesRt;
 
 export const getPartialCaseTransformedAttributesRt = (): Type<Partial<CaseAttributes>> => {
   const caseTransformedAttributesProps = CaseAttributesRt.types.reduce(
-    (acc, type) => Object.assign(acc, type.props),
+    (acc, type) => Object.assign(acc, type.type.props),
     {}
   );
 
@@ -64,3 +64,5 @@ export const getPartialCaseTransformedAttributesRt = (): Type<Partial<CaseAttrib
 
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;
+
+export const OwnerRt = strict({ owner: string });

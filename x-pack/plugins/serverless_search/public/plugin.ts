@@ -16,10 +16,16 @@ import {
 } from './types';
 
 export class ServerlessSearchPlugin
-  implements Plugin<ServerlessSearchPluginSetup, ServerlessSearchPluginStart>
+  implements
+    Plugin<
+      ServerlessSearchPluginSetup,
+      ServerlessSearchPluginStart,
+      ServerlessSearchPluginSetupDependencies,
+      ServerlessSearchPluginStartDependencies
+    >
 {
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     _setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
     core.application.register({
@@ -28,10 +34,13 @@ export class ServerlessSearchPlugin
       appRoute: '/app/elasticsearch',
       async mount({ element }: AppMountParameters) {
         const { renderApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, services] = await core.getStartServices();
+        const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
 
-        return await renderApp(element, coreStart);
+        const userProfile = await security.userProfiles.getCurrent();
+
+        return await renderApp(element, coreStart, { userProfile, ...services });
       },
     });
     return {};
@@ -41,7 +50,7 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     { serverless }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    serverless.setSideNavComponent(createComponent(core));
+    serverless.setSideNavComponent(createComponent(core, { serverless }));
     return {};
   }
 

@@ -24,5 +24,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/serverless",
+    "@kbn/security-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/share-plugin",
   ]
 }

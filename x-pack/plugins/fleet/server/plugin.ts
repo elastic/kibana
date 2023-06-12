@@ -65,6 +65,8 @@ import {
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
+import { getFilesClientFactory } from './services/files/get_files_client_factory';
+
 import type { MessageSigningServiceInterface } from './services/security';
 import {
   getRouteRequiredAuthz,
@@ -124,6 +126,7 @@ import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
+import type { FilesClientFactory } from './services/files/types';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -216,6 +219,14 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  /**
+   * Create a Fleet Files client instance
+   * @param packageName
+   * @param type
+   * @param maxSizeBytes
+   */
+  createFilesClient: Readonly<FilesClientFactory>;
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
@@ -567,6 +578,12 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      createFilesClient: Object.freeze(
+        getFilesClientFactory({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.initializerContext.logger,
+        })
+      ),
       messageSigningService,
       uninstallTokenService,
     };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFocusTrap, EuiOutsideClickDetector, EuiWindowEvent, keys } from '@elastic/eui';
-import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
+import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 
@@ -24,8 +24,6 @@ interface OwnProps {
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-type VoidFunc = () => void;
-
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
@@ -35,31 +33,6 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);
-
-  const [focusOwnership, setFocusOwnership] = useState(true);
-  const [triggerOnBlur, setTriggerOnBlur] = useState(true);
-  const callbackRef = useRef<VoidFunc | null>(null);
-  const searchRef = useRef<HTMLElement | null>(null);
-
-  const handleSearch = useCallback(() => {
-    if (show && focusOwnership === false) {
-      setFocusOwnership(true);
-    }
-  }, [show, focusOwnership]);
-
-  const onOutsideClick = useCallback((event) => {
-    setFocusOwnership(false);
-    const classes = event.target.classList;
-    if (classes.contains('kbnSearchBar')) {
-      searchRef.current = event.target;
-      setTriggerOnBlur((prev) => !prev);
-      window.setTimeout(() => {
-        if (searchRef.current !== null) {
-          searchRef.current.focus();
-        }
-      }, 0);
-    }
-  }, []);
 
   // ESC key closes Pane
   const onKeyDown = useCallback(
@@ -73,31 +46,14 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
 
   useTimelineSavePrompt(timelineId, onAppLeave);
 
-  useEffect(() => {
-    if (searchRef.current != null) {
-      if (callbackRef.current !== null) {
-        searchRef.current.removeEventListener('blur', callbackRef.current);
-      }
-      searchRef.current.addEventListener('blur', handleSearch);
-      callbackRef.current = handleSearch;
-    }
-    return () => {
-      if (searchRef.current != null && callbackRef.current !== null) {
-        searchRef.current.removeEventListener('blur', callbackRef.current);
-      }
-    };
-  }, [handleSearch, triggerOnBlur]);
-
   return (
-    <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-      <>
-        <EuiFocusTrap disabled={!focusOwnership}>
-          <Pane timelineId={timelineId} visible={show} />
-        </EuiFocusTrap>
-        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
-        <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      </>
-    </EuiOutsideClickDetector>
+    <>
+      <EuiFocusTrap disabled={!show}>
+        <Pane timelineId={timelineId} visible={show} />
+      </EuiFocusTrap>
+      <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
+      <EuiWindowEvent event="keydown" handler={onKeyDown} />
+    </>
   );
 };
 

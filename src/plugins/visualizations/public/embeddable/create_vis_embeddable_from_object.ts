@@ -16,11 +16,9 @@ import type {
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-import { getUISettings, getHttp, getTimeFilter, getCapabilities } from '../services';
+import { getHttp, getTimeFilter, getCapabilities } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
 export const createVisEmbeddableFromObject =
@@ -34,18 +32,13 @@ export const createVisEmbeddableFromObject =
       VisualizeByReferenceInput
     >,
     parent?: IContainer
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable> => {
     try {
       const visId = vis.id as string;
 
       const editPath = visId ? urlFor(visId) : '#/edit_by_value';
 
       const editUrl = visId ? getHttp().basePath.prepend(`/app/visualize${urlFor(visId)}`) : '';
-      const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
-
-      if (!isLabsEnabled && vis.type.stage === 'experimental') {
-        return new DisabledLabEmbeddable(vis.title, input);
-      }
 
       let indexPatterns: DataView[] = [];
 

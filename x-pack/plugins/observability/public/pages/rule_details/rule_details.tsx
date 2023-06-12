@@ -9,13 +9,12 @@ import React, { useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { estypes } from '@elastic/elasticsearch';
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useFetchRule } from '../../hooks/use_fetch_rule_rq';
 import { useGetRuleTypeDefinitionFromRuleType } from '../../hooks/use_get_rule_type_definition_from_rule_type';
 import { DeleteConfirmationModal } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -53,7 +52,6 @@ export function RuleDetailsPage() {
     application: { capabilities, navigateToUrl },
     charts,
     http,
-    notifications: { toasts },
     share: {
       url: { locators },
     },
@@ -70,7 +68,9 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
 
-  const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
+
+  const ruleTypeDefinition = useGetRuleTypeDefinitionFromRuleType({ ruleTypeId: rule?.ruleTypeId });
 
   useBreadcrumbs([
     {
@@ -90,16 +90,10 @@ export function RuleDetailsPage() {
     },
   ]);
 
-  const ruleTypeDefinition = useGetRuleTypeDefinitionFromRuleType({ ruleTypeId: rule?.ruleTypeId });
-
-  const chartProps = {
-    theme: charts.theme.useChartsTheme(),
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
-
-  const [activeTab, setActiveTab] = useState<TabId>(() => {
-    const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
-    return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
+  const alertSummaryWidgetFilter = useRef({
+    term: {
+      'kibana.alert.rule.uuid': ruleId,
+    },
   });
 
   const [editRuleFlyoutVisible, setEditRuleFlyoutVisible] = useState<boolean>(false);
@@ -111,34 +105,12 @@ export function RuleDetailsPage() {
     getDefaultAlertSummaryTimeRange
   );
 
-  const alertSummaryWidgetFilter = useRef<estypes.QueryDslQueryContainer>({
-    term: {
-      'kibana.alert.rule.uuid': ruleId,
-    },
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
+    return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
   });
 
   const tabsRef = useRef<HTMLDivElement>(null);
-
-  const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
-    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
-
-    await locators.get(ruleDetailsLocatorID)?.navigate(
-      {
-        rangeFrom: defaultTimeRange.from,
-        rangeTo: defaultTimeRange.to,
-        ruleId,
-        status,
-        tabId: ALERTS_TAB,
-      },
-      {
-        replace: true,
-      }
-    );
-
-    setActiveTab(ALERTS_TAB);
-
-    tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   const handleChangeTab = (newTab: TabId) => {
     setActiveTab(newTab);
@@ -171,6 +143,27 @@ export function RuleDetailsPage() {
     setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
   };
 
+  const handleAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+
+    await locators.get(ruleDetailsLocatorID)?.navigate(
+      {
+        rangeFrom: defaultTimeRange.from,
+        rangeTo: defaultTimeRange.to,
+        ruleId,
+        status,
+        tabId: ALERTS_TAB,
+      },
+      {
+        replace: true,
+      }
+    );
+
+    setActiveTab(ALERTS_TAB);
+
+    tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const featureIds = (
     !rule || !ruleTypeDefinition
       ? undefined
@@ -181,13 +174,9 @@ export function RuleDetailsPage() {
 
   const isRuleEditable = canEditRule({ rule, ruleTypeDefinition, capabilities, ruleTypeRegistry });
 
-  if (errorRule) {
-    toasts.addDanger({ title: errorRule });
-  }
+  if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
 
-  if (isRuleLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
-
-  if (!rule || errorRule) return <NoRuleFoundPanel />;
+  if (!rule || isError) return <NoRuleFoundPanel />;
 
   return (
     <ObservabilityPageTemplate
@@ -195,15 +184,14 @@ export function RuleDetailsPage() {
       pageHeader={{
         pageTitle: <PageTitle rule={rule} />,
         bottomBorder: false,
-        rightSideItems: isRuleEditable
-          ? [
-              <HeaderActions
-                loading={isRuleLoading || isRuleDeleting}
-                onEditRule={handleEditRule}
-                onDeleteRule={handleDeleteRule}
-              />,
-            ]
-          : undefined,
+        rightSideItems: [
+          <HeaderActions
+            loading={isLoading || isRuleDeleting}
+            isRuleEditable={isRuleEditable}
+            onEditRule={handleEditRule}
+            onDeleteRule={handleDeleteRule}
+          />,
+        ],
       }}
     >
       <EuiFlexGroup wrap gutterSize="m">
@@ -211,13 +199,11 @@ export function RuleDetailsPage() {
           <RuleStatusPanel
             isEditable={isRuleEditable}
             healthColor={getHealthColor(rule.executionStatus.status)}
-            requestRefresh={reloadRule}
+            requestRefresh={refetch}
             rule={rule}
             statusMessage={
               rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
-                ? i18n.translate('xpack.observability.ruleDetails.ruleStatusLicenseError', {
-                    defaultMessage: 'License Error',
-                  })
+                ? rulesStatusesTranslationsMapping.licenseError
                 : rule
                 ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
                 : ''
@@ -227,11 +213,14 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={chartProps}
+            chartProps={{
+              theme: charts.theme.useChartsTheme(),
+              baseTheme: charts.theme.useChartsBaseTheme(),
+            }}
             featureIds={featureIds}
-            onClick={onAlertSummaryWidgetClick}
-            timeRange={alertSummaryWidgetTimeRange}
             filter={alertSummaryWidgetFilter.current}
+            timeRange={alertSummaryWidgetTimeRange}
+            onClick={handleAlertSummaryWidgetClick}
           />
         </EuiFlexItem>
 
@@ -239,7 +228,9 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
-          onEditRule={reloadRule}
+          onEditRule={async () => {
+            refetch();
+          }}
         />
       </EuiFlexGroup>
 
@@ -247,7 +238,7 @@ export function RuleDetailsPage() {
 
       <div ref={tabsRef} />
 
-      {rule && ruleTypeDefinition ? (
+      {ruleTypeDefinition ? (
         <RuleDetailTabs
           featureIds={featureIds}
           rule={rule}
@@ -260,7 +251,13 @@ export function RuleDetailsPage() {
       ) : null}
 
       {editRuleFlyoutVisible ? (
-        <EditRuleFlyout initialRule={rule} onClose={handleCloseRuleFlyout} onSave={reloadRule} />
+        <EditRuleFlyout
+          initialRule={rule}
+          onClose={handleCloseRuleFlyout}
+          onSave={async () => {
+            refetch();
+          }}
+        />
       ) : null}
 
       {ruleToDelete ? (
@@ -277,6 +274,9 @@ export function RuleDetailsPage() {
 }
 
 const rulesStatusesTranslationsMapping: Record<string, string> = {
+  licenceError: i18n.translate('xpack.observability.ruleDetails.ruleStatusLicenseError', {
+    defaultMessage: 'License Error',
+  }),
   ok: i18n.translate('xpack.observability.ruleDetails.ruleStatusOk', {
     defaultMessage: 'Ok',
   }),

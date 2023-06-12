@@ -15,7 +15,7 @@ import type { LeftPanelPaths } from '.';
 import {
   HISTORY_TAB_TEST_ID,
   INSIGHTS_TAB_TEST_ID,
-  INVESTIGATIONS_TAB_TEST_ID,
+  INVESTIGATION_TAB_TEST_ID,
   VISUALIZE_TAB_TEST_ID,
 } from './test_ids';
 
@@ -41,7 +41,7 @@ export const tabs: LeftPanelTabsType = [
   },
   {
     id: 'investigation',
-    'data-test-subj': INVESTIGATIONS_TAB_TEST_ID,
+    'data-test-subj': INVESTIGATION_TAB_TEST_ID,
     name: INVESTIGATIONS_TAB,
     content: <InvestigationTab />,
   },

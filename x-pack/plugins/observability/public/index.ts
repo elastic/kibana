@@ -40,7 +40,13 @@ export {
   enableInfrastructureHostsView,
   enableAgentExplorerView,
 } from '../common/ui_settings_keys';
-export { uptimeOverviewLocatorID } from '../common';
+export {
+  alertsLocatorID,
+  ruleDetailsLocatorID,
+  rulesLocatorID,
+  sloDetailsLocatorID,
+  uptimeOverviewLocatorID,
+} from '../common';
 
 export type { UXMetrics } from './components/core_web_vitals/core_vitals';
 export { getCoreVitalsComponent } from './components/core_web_vitals/get_core_web_vitals_lazy';
@@ -78,3 +84,7 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
+
+export { CoPilotPrompt } from './components/co_pilot_prompt';
+export { useCoPilot } from './hooks/use_co_pilot';
+export { CoPilotContextProvider } from './context/co_pilot_context';

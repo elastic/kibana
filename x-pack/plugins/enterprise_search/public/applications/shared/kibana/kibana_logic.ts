@@ -45,7 +45,7 @@ interface KibanaLogicProps {
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
-  renderHeaderActions(HeaderActions: FC): void;
+  renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;

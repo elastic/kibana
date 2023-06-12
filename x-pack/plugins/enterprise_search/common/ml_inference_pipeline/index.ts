@@ -57,7 +57,7 @@ export const generateMlInferencePipelineBody = ({
   model,
   pipelineName,
 }: MlInferencePipelineParams): MlInferencePipeline => {
-  const inferenceType = Object.keys(model.inference_config)[0];
+  const inferenceType = Object.keys(model.inference_config || {})[0];
   const pipelineDefinition: MlInferencePipeline = {
     description: description ?? '',
     processors: [],

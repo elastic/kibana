@@ -13,10 +13,10 @@
  * connector.id.
  */
 
-import { omit } from 'lodash';
+import { omit, unset } from 'lodash';
 import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, CaseStatuses } from '../../../common/api';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
@@ -1863,9 +1863,9 @@ describe('CasesService', () => {
     });
   });
 
-  describe('Encoding responses', () => {
+  describe('Decoding responses', () => {
     const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-      (acc, type) => ({ ...acc, ...type.props }),
+      (acc, type) => ({ ...acc, ...type.type.props }),
       {}
     );
 
@@ -1882,8 +1882,50 @@ describe('CasesService', () => {
       'external_service'
     );
 
+    describe('getCaseIdsByAlertId', () => {
+      it('strips excess fields', async () => {
+        const findMockReturn = createSOFindResponse([createFindSO({ caseId: '2' })]);
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        const res = await service.getCaseIdsByAlertId({ alertId: '1' });
+        expect(res).toStrictEqual({
+          saved_objects: [
+            {
+              id: '2',
+              score: 0,
+              references: [],
+              type: CASE_SAVED_OBJECT,
+              attributes: { owner: SECURITY_SOLUTION_OWNER },
+            },
+          ],
+          total: 1,
+          per_page: 1,
+          page: 1,
+        });
+      });
+
+      it('throws an error when the owner field is not present', async () => {
+        const findMockReturn = createSOFindResponse([createFindSO({ caseId: '2' })]);
+        unset(findMockReturn, 'saved_objects[0].attributes.owner');
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(
+          service.getCaseIdsByAlertId({ alertId: '1' })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Invalid value \\"undefined\\" supplied to \\"owner\\""`
+        );
+      });
+
+      it('does not throw an error when the owner field exists', async () => {
+        const findMockReturn = createSOFindResponse([createFindSO({ caseId: '2' })]);
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(service.getCaseIdsByAlertId({ alertId: '1' })).resolves.not.toThrow();
+      });
+    });
+
     describe('getCase', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createCaseSavedObjectResponse());
 
         await expect(service.getCase({ id: 'a' })).resolves.not.toThrow();
@@ -1902,18 +1944,72 @@ describe('CasesService', () => {
         }
       );
 
-      // TODO: Unskip when all types are converted to strict
-      it.skip('strips out excess attributes', async () => {
-        const theCase = createCaseSavedObjectResponse();
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse({
+          connector: createESJiraConnector(),
+          externalService: null,
+        });
         const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
         unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
 
-        await expect(service.getCase({ id: 'a' })).resolves.toEqual({ attributes });
+        await expect(service.getCase({ id: 'a' })).resolves.toMatchInlineSnapshot(`
+          Object {
+            "attributes": Object {
+              "assignees": Array [],
+              "closed_at": null,
+              "closed_by": null,
+              "connector": Object {
+                "fields": Object {
+                  "issueType": "bug",
+                  "parent": "2",
+                  "priority": "high",
+                },
+                "id": "1",
+                "name": ".jira",
+                "type": ".jira",
+              },
+              "created_at": "2019-11-25T21:54:48.952Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
+              "external_service": null,
+              "owner": "securitySolution",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "severity": "low",
+              "status": "open",
+              "tags": Array [
+                "defacement",
+              ],
+              "title": "Super Bad Security Issue",
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+            },
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "connectorId",
+                "type": "action",
+              },
+            ],
+            "type": "cases",
+          }
+        `);
       });
     });
 
     describe('getResolveCase', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.resolve.mockResolvedValue({
           saved_object: createCaseSavedObjectResponse(),
           outcome: 'exactMatch',
@@ -1938,8 +2034,7 @@ describe('CasesService', () => {
         }
       );
 
-      // TODO: Unskip when all types are converted to strict
-      it.skip('strips out excess attributes', async () => {
+      it('strips out excess attributes', async () => {
         const theCase = createCaseSavedObjectResponse();
         const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
         unsecuredSavedObjectsClient.resolve.mockResolvedValue({
@@ -1947,12 +2042,69 @@ describe('CasesService', () => {
           outcome: 'exactMatch',
         });
 
-        await expect(service.getResolveCase({ id: 'a' })).resolves.toEqual({ attributes });
+        await expect(service.getResolveCase({ id: 'a' })).resolves.toMatchInlineSnapshot(`
+          Object {
+            "outcome": "exactMatch",
+            "saved_object": Object {
+              "attributes": Object {
+                "assignees": Array [],
+                "closed_at": null,
+                "closed_by": null,
+                "connector": Object {
+                  "fields": null,
+                  "id": "none",
+                  "name": "none",
+                  "type": ".none",
+                },
+                "created_at": "2019-11-25T21:54:48.952Z",
+                "created_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
+                },
+                "description": "This is a brand new case of a bad meanie defacing data",
+                "duration": null,
+                "external_service": Object {
+                  "connector_id": "none",
+                  "connector_name": ".jira",
+                  "external_id": "100",
+                  "external_title": "awesome",
+                  "external_url": "http://www.google.com",
+                  "pushed_at": "2019-11-25T21:54:48.952Z",
+                  "pushed_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "owner": "securitySolution",
+                "settings": Object {
+                  "syncAlerts": true,
+                },
+                "severity": "low",
+                "status": "open",
+                "tags": Array [
+                  "defacement",
+                ],
+                "title": "Super Bad Security Issue",
+                "updated_at": "2019-11-25T21:54:48.952Z",
+                "updated_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
+                },
+              },
+              "id": "1",
+              "references": Array [],
+              "type": "cases",
+            },
+          }
+        `);
       });
     });
 
     describe('getCases', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({ caseId: '1' }),
@@ -1963,7 +2115,7 @@ describe('CasesService', () => {
         await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.not.toThrow();
       });
 
-      it('do not encodes errors', async () => {
+      it('do not decodes errors', async () => {
         const errorSO = {
           ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
           error: {
@@ -2065,20 +2217,77 @@ describe('CasesService', () => {
         }
       );
 
-      // TODO: Unskip when all types are converted to strict
-      it.skip('strips out excess attributes', async () => {
+      it('strips out excess attributes', async () => {
         const theCase = createCaseSavedObjectResponse();
         const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [{ ...theCase, attributes }],
         });
 
-        await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.toEqual({ attributes });
+        await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
       });
     });
 
     describe('findCases', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         const findMockReturn = createSOFindResponse([
           createFindSO({ caseId: '1' }),
           createFindSO({ caseId: '2' }),
@@ -2107,8 +2316,7 @@ describe('CasesService', () => {
         }
       );
 
-      // TODO: Unskip when all types are converted to strict
-      it.skip('strips out excess attributes', async () => {
+      it('strips out excess attributes', async () => {
         const theCase = createCaseSavedObjectResponse();
         const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
         const findMockReturn = createSOFindResponse([
@@ -2118,12 +2326,128 @@ describe('CasesService', () => {
 
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
-        await expect(service.findCases()).resolves.toEqual({ attributes });
+        await expect(service.findCases()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "page": 1,
+            "per_page": 2,
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "score": 0,
+                "type": "cases",
+              },
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "score": 0,
+                "type": "cases",
+              },
+            ],
+            "total": 2,
+          }
+        `);
       });
     });
 
     describe('post', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await expect(
@@ -2150,8 +2474,7 @@ describe('CasesService', () => {
         }
       );
 
-      // TODO: Unskip when all types are converted to strict
-      it.skip('strips out excess attributes', async () => {
+      it('strips out excess attributes', async () => {
         const theCase = createCaseSavedObjectResponse();
         const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
         unsecuredSavedObjectsClient.create.mockResolvedValue({ ...theCase, attributes });
@@ -2161,12 +2484,66 @@ describe('CasesService', () => {
             attributes: createCasePostParams({ connector: createJiraConnector() }),
             id: '1',
           })
-        ).resolves.toEqual({ attributes });
+        ).resolves.toMatchInlineSnapshot(`
+          Object {
+            "attributes": Object {
+              "assignees": Array [],
+              "closed_at": null,
+              "closed_by": null,
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+              "created_at": "2019-11-25T21:54:48.952Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
+              "external_service": Object {
+                "connector_id": "none",
+                "connector_name": ".jira",
+                "external_id": "100",
+                "external_title": "awesome",
+                "external_url": "http://www.google.com",
+                "pushed_at": "2019-11-25T21:54:48.952Z",
+                "pushed_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
+                },
+              },
+              "owner": "securitySolution",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "severity": "low",
+              "status": "open",
+              "tags": Array [
+                "defacement",
+              ],
+              "title": "Super Bad Security Issue",
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+            },
+            "id": "1",
+            "references": Array [],
+            "type": "cases",
+          }
+        `);
       });
     });
 
     describe('patchCase', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(createUpdateSOResponse());
 
         await expect(
@@ -2199,7 +2576,7 @@ describe('CasesService', () => {
     });
 
     describe('patchCases', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({ caseId: '1' }),
@@ -2222,7 +2599,7 @@ describe('CasesService', () => {
         ).resolves.not.toThrow();
       });
 
-      it('do not encodes errors', async () => {
+      it('do not decodes errors', async () => {
         const errorSO = {
           ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
           error: {
@@ -2325,6 +2702,136 @@ describe('CasesService', () => {
             },
           ],
         });
+      });
+    });
+  });
+
+  describe('Decoding requests', () => {
+    describe('create case', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+
+        await expect(service.postNewCase({ id: 'a', attributes })).resolves.not.toThrow();
+      });
+
+      it('throws if title is omitted', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+        unset(attributes, 'title');
+
+        await expect(
+          service.postNewCase({
+            attributes,
+            id: '1',
+          })
+        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+      });
+
+      it('remove excess fields', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(service.postNewCase({ id: 'a', attributes })).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('patch case', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const updatedAttributes = createCasePostParams({
+          connector: createJiraConnector(),
+          status: CaseStatuses['in-progress'],
+        });
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('remove excess fields', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('patch cases', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse({ caseId: '1' })],
+        });
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const updatedAttributes = createCasePostParams({
+          connector: createJiraConnector(),
+          status: CaseStatuses['in-progress'],
+        });
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('remove excess fields', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        expect(persistedAttributes).not.toHaveProperty('foo');
       });
     });
   });

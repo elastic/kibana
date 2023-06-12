@@ -7,12 +7,31 @@
  */
 
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 
 export interface EventAnnotationServiceType {
+  loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;
+  createAnnotationGroup: (group: EventAnnotationGroupConfig) => Promise<{ id: string }>;
+  updateAnnotationGroup: (
+    group: EventAnnotationGroupConfig,
+    savedObjectId: string
+  ) => Promise<void>;
   toExpression: (props: EventAnnotationConfig[]) => ExpressionAstExpression[];
   toFetchExpression: (props: {
     interval: string;
-    groups: EventAnnotationGroupConfig[];
+    groups: Array<
+      Pick<EventAnnotationGroupConfig, 'annotations' | 'ignoreGlobalFilters' | 'indexPatternId'>
+    >;
   }) => ExpressionAstExpression[];
+  renderEventAnnotationGroupSavedObjectFinder: (props: {
+    fixedPageSize?: number;
+    onChoose: (value: {
+      id: string;
+      type: string;
+      fullName: string;
+      savedObject: SavedObjectCommon<unknown>;
+    }) => void;
+    onCreateNew: () => void;
+  }) => JSX.Element;
 }

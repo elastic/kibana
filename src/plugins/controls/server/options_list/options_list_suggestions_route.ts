@@ -26,50 +26,57 @@ export const setupOptionsListSuggestionsRoute = (
 ) => {
   const router = http.createRouter();
 
-  router.post(
-    {
-      path: '/api/kibana/controls/optionsList/{index}',
-      validate: {
-        params: schema.object(
-          {
-            index: schema.string(),
+  router.versioned
+    .post({
+      access: 'internal',
+      path: '/internal/controls/optionsList/{index}',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object(
+              {
+                index: schema.string(),
+              },
+              { unknowns: 'allow' }
+            ),
+            body: schema.object(
+              {
+                size: schema.number(),
+                fieldName: schema.string(),
+                sort: schema.maybe(schema.any()),
+                filters: schema.maybe(schema.any()),
+                fieldSpec: schema.maybe(schema.any()),
+                allowExpensiveQueries: schema.boolean(),
+                searchString: schema.maybe(schema.string()),
+                selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
+              },
+              { unknowns: 'allow' }
+            ),
           },
-          { unknowns: 'allow' }
-        ),
-        body: schema.object(
-          {
-            size: schema.number(),
-            fieldName: schema.string(),
-            sort: schema.maybe(schema.any()),
-            filters: schema.maybe(schema.any()),
-            fieldSpec: schema.maybe(schema.any()),
-            allowExpensiveQueries: schema.boolean(),
-            searchString: schema.maybe(schema.string()),
-            selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
-          },
-          { unknowns: 'allow' }
-        ),
+        },
       },
-    },
-    async (context, request, response) => {
-      try {
-        const suggestionRequest: OptionsListRequestBody = request.body;
-        const { index } = request.params;
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      async (context, request, response) => {
+        try {
+          const suggestionRequest: OptionsListRequestBody = request.body;
+          const { index } = request.params;
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        const suggestionsResponse = await getOptionsListSuggestions({
-          abortedEvent$: request.events.aborted$,
-          request: suggestionRequest,
-          esClient,
-          index,
-        });
-        return response.ok({ body: suggestionsResponse });
-      } catch (e) {
-        const kbnErr = getKbnServerError(e);
-        return reportServerError(response, kbnErr);
+          const suggestionsResponse = await getOptionsListSuggestions({
+            abortedEvent$: request.events.aborted$,
+            request: suggestionRequest,
+            esClient,
+            index,
+          });
+          return response.ok({ body: suggestionsResponse });
+        } catch (e) {
+          const kbnErr = getKbnServerError(e);
+          return reportServerError(response, kbnErr);
+        }
       }
-    }
-  );
+    );
 
   const getOptionsListSuggestions = async ({
     abortedEvent$,

@@ -74,7 +74,7 @@
                 "id": "def-common.SOContentStorage.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjectType,\n    cmServicesDefinition,\n    createArgsToSoCreateOptions,\n    updateArgsToSoUpdateOptions,\n    searchArgsToSOFindOptions,\n    enableMSearch,\n  }",
+                "label": "{\n    savedObjectType,\n    cmServicesDefinition,\n    createArgsToSoCreateOptions,\n    updateArgsToSoUpdateOptions,\n    searchArgsToSOFindOptions,\n    enableMSearch,\n    allowedSavedObjectAttributes,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -384,7 +384,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string) => Promise<Types[\"DeleteOut\"]>"
+              ", id: string, options?: { force: boolean; } | undefined) => Promise<Types[\"DeleteOut\"]>"
             ],
             "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
@@ -425,6 +425,30 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.delete.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-management-utils",
+                    "id": "def-common.SOContentStorage.delete.$3.force",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -2586,6 +2610,20 @@
                 "section": "def-common.ServicesDefinitionSet",
                 "text": "ServicesDefinitionSet"
               }
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.allowedSavedObjectAttributes",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedSavedObjectAttributes",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,

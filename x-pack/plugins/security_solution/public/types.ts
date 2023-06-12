@@ -10,6 +10,7 @@ import type { BehaviorSubject, Observable } from 'rxjs';
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
@@ -68,6 +69,7 @@ import type { NavigationLink } from './common/links';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
+import type { UpsellingService } from './common/lib/upsellings';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -108,6 +110,7 @@ export interface StartPlugins {
   threatIntelligence: ThreatIntelligencePluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -132,16 +135,25 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    getStartedComponent: GetStartedComponent | undefined;
+    upselling: UpsellingService;
     telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  upselling: UpsellingService;
 }
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type GetStartedComponentProps = {};
+
+export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
+  setGetStartedPage: (getStartedComponent: GetStartedComponent) => void;
 }
 
 export interface AppObservableLibs {

@@ -83,11 +83,6 @@ export function DashboardApp({
     customBranding,
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
-
-  const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
-    DASHBOARD_APP_ID,
-    true
-  );
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useExecutionContext(executionContext, {
@@ -125,13 +120,28 @@ export function DashboardApp({
   /**
    * Create options to pass into the dashboard renderer
    */
-  const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+    const getInitialInput = () => {
+      const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
+      const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
 
-    return Promise.resolve({
-      incomingEmbeddable,
+      // Override all state with URL + Locator input
+      return {
+        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
+        ...initialUrlState,
+        ...stateFromLocator,
+
+        // if print mode is active, force viewMode.PRINT
+        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
+          ? { viewMode: ViewMode.PRINT }
+          : {}),
+      };
+    };
+
+    return Promise.resolve<DashboardCreationOptions>({
+      getIncomingEmbeddable: () =>
+        getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
       // integrations
       useControlGroupIntegration: true,
@@ -148,28 +158,16 @@ export function DashboardApp({
         getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
-
-      // Override all state with URL + Locator input
-      initialInput: {
-        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
-        ...initialUrlState,
-        ...stateFromLocator,
-
-        // if print mode is active, force viewMode.PRINT
-        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
-          ? { viewMode: ViewMode.PRINT }
-          : {}),
-      },
-
+      getInitialInput,
       validateLoadedSavedObject: validateOutcome,
     });
   }, [
     history,
     validateOutcome,
-    stateFromLocator,
+    getScopedHistory,
     isScreenshotMode,
+    getStateTransfer,
     kbnUrlStateStorage,
-    incomingEmbeddable,
     getScreenshotContext,
   ]);
 
@@ -183,7 +181,7 @@ export function DashboardApp({
       dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
   return (
     <div className="dshAppWrapper">

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';
 
@@ -26,9 +26,9 @@ export default ({ getService }: FtrProviderContext) => {
     expectedResponsecode: number
   ): Promise<any> {
     const { body, status } = await supertest
-      .post('/api/ml/jobs/reset_jobs')
+      .post('/internal/ml/jobs/reset_jobs')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 

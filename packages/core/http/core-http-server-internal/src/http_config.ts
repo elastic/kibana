@@ -262,12 +262,12 @@ export class HttpConfig implements IHttpConfig {
     this.securityResponseHeaders = securityResponseHeaders;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
       (headers, [key, value]) => {
-        return {
-          ...headers,
-          [key]: Array.isArray(value) ? value.map((e) => convertHeader(e)) : convertHeader(value),
-        };
+        headers[key] = Array.isArray(value)
+          ? value.map((e) => convertHeader(e))
+          : convertHeader(value);
+        return headers;
       },
-      {}
+      {} as Record<string, string | string[]>
     );
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;

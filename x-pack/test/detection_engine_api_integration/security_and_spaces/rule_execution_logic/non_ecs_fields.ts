@@ -8,7 +8,7 @@
 import expect from 'expect';
 import {
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getPreviewAlerts,
   getRuleForSignalTesting,
   previewRule,
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
       );
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

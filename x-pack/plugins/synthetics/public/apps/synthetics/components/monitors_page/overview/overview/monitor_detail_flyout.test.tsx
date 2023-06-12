@@ -115,17 +115,13 @@ describe('Monitor Detail Flyout', () => {
     jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       data: {
-        attributes: {
-          enabled: true,
-          name: 'test-monitor',
-          schedule: {
-            number: '1',
-            unit: 'm',
-          },
-          tags: ['prod'],
+        enabled: true,
+        name: 'test-monitor',
+        schedule: {
+          number: '1',
+          unit: 'm',
         },
-        type: 'browser',
-        updated_at: '1996-02-27',
+        tags: ['prod'],
       },
       refetch: jest.fn(),
     });

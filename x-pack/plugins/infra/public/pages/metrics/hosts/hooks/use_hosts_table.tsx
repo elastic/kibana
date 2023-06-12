@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
@@ -20,7 +20,7 @@ import {
   InfraAssetMetricsItem,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
-import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
+import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
@@ -116,10 +116,6 @@ const titleLabel = i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHea
   defaultMessage: 'Name',
 });
 
-const osLabel = i18n.translate('xpack.infra.hostsViewPage.table.operatingSystemColumnHeader', {
-  defaultMessage: 'Operating System',
-});
-
 const averageCpuUsageLabel = i18n.translate(
   'xpack.infra.hostsViewPage.table.averageCpuUsageColumnHeader',
   {
@@ -171,9 +167,9 @@ export const useHostsTable = () => {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  const [hostFlyoutOpen, setHostFlyoutOpen, setFlyoutClosed] = useHostFlyoutOpen();
+  const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
-  const closeFlyout = () => setFlyoutClosed();
+  const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -204,8 +200,8 @@ export const useHostsTable = () => {
 
   const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
-    () => items.find(({ id }) => id === hostFlyoutOpen.clickedItemId),
-    [hostFlyoutOpen.clickedItemId, items]
+    () => items.find(({ id }) => id === hostFlyoutState?.clickedItemId),
+    [hostFlyoutState?.clickedItemId, items]
   );
 
   const currentPage = useMemo(() => {
@@ -228,19 +224,19 @@ export const useHostsTable = () => {
             name: toggleDialogActionLabel,
             description: toggleDialogActionLabel,
             icon: ({ id }) =>
-              hostFlyoutOpen.clickedItemId && id === hostFlyoutOpen.clickedItemId
+              hostFlyoutState?.clickedItemId && id === hostFlyoutState?.clickedItemId
                 ? 'minimize'
                 : 'expand',
             type: 'icon',
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {
-              setHostFlyoutOpen({
+              setHostFlyoutState({
                 clickedItemId: id,
               });
-              if (id === hostFlyoutOpen.clickedItemId) {
-                setFlyoutClosed();
+              if (id === hostFlyoutState?.clickedItemId) {
+                setHostFlyoutState(null);
               } else {
-                setHostFlyoutOpen({ clickedItemId: id });
+                setHostFlyoutState({ clickedItemId: id });
               }
             },
           },
@@ -259,13 +255,6 @@ export const useHostsTable = () => {
             onClick={() => reportHostEntryClick(title)}
           />
         ),
-      },
-      {
-        name: osLabel,
-        field: 'os',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-os',
-        render: (os: string) => <EuiText size="s">{os}</EuiText>,
       },
       {
         name: averageCpuUsageLabel,
@@ -317,11 +306,10 @@ export const useHostsTable = () => {
       },
     ],
     [
-      hostFlyoutOpen.clickedItemId,
+      hostFlyoutState?.clickedItemId,
       reportHostEntryClick,
       searchCriteria.dateRange,
-      setFlyoutClosed,
-      setHostFlyoutOpen,
+      setHostFlyoutState,
     ]
   );
 
@@ -331,7 +319,7 @@ export const useHostsTable = () => {
     currentPage,
     closeFlyout,
     items,
-    isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
+    isFlyoutOpen: !!hostFlyoutState?.clickedItemId,
     onTableChange,
     pagination,
     sorting,
