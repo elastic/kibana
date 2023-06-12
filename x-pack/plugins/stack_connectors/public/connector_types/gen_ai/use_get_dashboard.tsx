@@ -8,7 +8,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { getDashboardId } from './constants';
-import { getDashboard } from './api/dashboard';
+import { getDashboard } from './api';
 import * as i18n from './translations';
 
 interface Props {
@@ -28,7 +28,8 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
     spaces,
   } = useKibana().services;
 
-  const [spaceId, setSpaceId] = useState<string>();
+  const [spaceId, setSpaceId] = useState<string | null>(null);
+
   useEffect(() => {
     if (spaces) {
       spaces.getActiveSpace().then((space) => setSpaceId(space.id));
@@ -90,7 +91,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
       }
     };
 
-    if (dashboardUrl == null && spaceId != null && spaceId.length) {
+    if (dashboardUrl == null && spaceId != null) {
       abortCtrl.current.abort();
       fetchData(getDashboardId(spaceId));
     }

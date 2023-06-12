@@ -7,11 +7,8 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
-import { SUB_ACTION } from '../../../../common/gen_ai/constants';
-import {
-  ConnectorExecutorResult,
-  rewriteResponseToCamelCase,
-} from '../../lib/rewrite_response_body';
+import { SUB_ACTION } from '../../../common/gen_ai/constants';
+import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../lib/rewrite_response_body';
 
 export async function getDashboard({
   http,
