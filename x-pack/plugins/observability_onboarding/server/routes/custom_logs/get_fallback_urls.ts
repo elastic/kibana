@@ -32,5 +32,8 @@ function getElasticsearchUrl(esClient: Client): string[] {
 function getKibanaUrl({ http }: CoreStart) {
   const basePath = http.basePath;
   const { protocol, hostname, port } = http.getServerInfo();
-  return `${protocol}://${hostname}:${port}${basePath.prepend('')}`;
+  return `${protocol}://${hostname}:${port}${basePath
+    // Prepending on '' removes the serverBasePath
+    .prepend('/')
+    .slice(0, -1)}`;
 }
