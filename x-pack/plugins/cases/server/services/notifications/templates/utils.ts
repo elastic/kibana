@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export type { EmailService, EmailServiceStart, PlainTextEmail, HTMLEmail } from './types';
-export type {
-  EmailServiceSetupDeps,
-  EmailServiceStartDeps,
-} from './connectors_email_service_provider';
+import path, { join, resolve } from 'path';
+
+export const getDataPath = (filePath: string, fileName: string): string => {
+    const dir = resolve(join(__dirname, filePath));
+  
+    const dataPath = path.join(dir, fileName);
+
+    return dataPath ?? '';
+}

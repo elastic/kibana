@@ -14,6 +14,7 @@ import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/cons
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { getCaseViewPath } from '../../common/utils';
 import type { NotificationService, NotifyArgs } from './types';
+import { getEmailBodyContent } from './templates/notify_user_content';
 
 type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
@@ -50,10 +51,9 @@ export class EmailNotificationService implements NotificationService {
     return `[Elastic][Cases] ${theCase.attributes.title}`;
   }
 
-  private static getMessage(
+  private static getPlainTextMessage(
     theCase: CaseSavedObjectTransformed,
-    spaceId: string,
-    publicBaseUrl?: IBasePath['publicBaseUrl']
+    caseUrl: string|null,
   ) {
     const lineBreak = '\r\n\r\n';
     let message = `You are assigned to an Elastic Case.${lineBreak}`;
@@ -65,16 +65,9 @@ export class EmailNotificationService implements NotificationService {
       message = `${message}Tags: ${theCase.attributes.tags.join(', ')}${lineBreak}`;
     }
 
-    if (publicBaseUrl) {
-      const caseUrl = getCaseViewPath({
-        publicBaseUrl,
-        caseId: theCase.id,
-        owner: theCase.attributes.owner,
-        spaceId,
-      });
+  
 
-      message = `${message}${lineBreak}[View the case details](${caseUrl})`;
-    }
+    message = `${message}View the case details: ${caseUrl}`;
 
     return message;
   }
@@ -86,6 +79,13 @@ export class EmailNotificationService implements NotificationService {
         return;
       }
 
+      const caseUrl = this.publicBaseUrl ? getCaseViewPath({
+        publicBaseUrl: this.publicBaseUrl,
+        caseId: theCase.id,
+        owner: theCase.attributes.owner,
+        spaceId: this.spaceId,
+      }) : null;
+
       const uids = new Set(assignees.map((assignee) => assignee.uid));
       const userProfiles = await this.security.userProfiles.bulkGet({ uids });
       const users = userProfiles.map((profile) => profile.user);
@@ -95,16 +95,18 @@ export class EmailNotificationService implements NotificationService {
         .map((user) => user.email);
 
       const subject = EmailNotificationService.getTitle(theCase);
-      const message = EmailNotificationService.getMessage(
+      const message = EmailNotificationService.getPlainTextMessage(
         theCase,
-        this.spaceId,
-        this.publicBaseUrl
+        caseUrl
       );
 
-      await this.notifications.getEmailService().sendPlainTextEmail({
+      const messageHTML = await getEmailBodyContent(theCase, caseUrl);
+
+      await this.notifications.getEmailService().sendHTMLEmail({
         to,
         subject,
         message,
+        messageHTML,
         context: {
           relatedObjects: [
             {

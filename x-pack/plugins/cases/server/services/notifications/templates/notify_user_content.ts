@@ -6,10 +6,10 @@
  */
 
 import fs from 'fs';
-import path, { join, resolve } from 'path';
 import mustache from 'mustache';
 import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import { CaseStatuses, CaseSeverity } from '../../../../common/api';
+import { getDataPath } from './utils';
 
 const getStatusColor = (status: string): string => {
   if (!status) {
@@ -49,31 +49,31 @@ const getSeverityColor = (severity: string): string => {
 
 export const getEmailBodyContent = (
   caseData: CaseSavedObjectTransformed,
-  caseUrl: string,
-  numberOfAlerts: number
-) => {
+  caseUrl: string|null,
+):Promise<string> => {
   const filePath = '../templates';
-  const dir = resolve(join(__dirname, filePath));
+  const fileName = 'notify_user_template.html';
 
-  const dataPath = path.join(dir, 'notify_user_template.html');
+  const dataPath = getDataPath(filePath, fileName);
 
   return new Promise((resolve, reject) =>
     fs.readFile(dataPath, 'utf8', (error, data) => {
       if (error) {
         reject(error);
       } else {
+        const hasMoreTags = caseData.attributes.tags.length > 3;
         const template = mustache.render(data, {
           title: caseData.attributes.title,
           status: caseData.attributes.status,
           statusColor: getStatusColor(caseData.attributes.status),
           severity: caseData.attributes.severity,
           severityColor: getSeverityColor(caseData.attributes.severity),
-          tags: caseData.attributes.tags.length ? caseData.attributes.tags : ['-'],
+          hasMoreTags: hasMoreTags ? caseData.attributes.tags.length - 3 : null,
+          tags: caseData.attributes.tags.length ? caseData.attributes.tags.slice(0,3) : ['-'],
           description:
             caseData.attributes.description.length > 300
               ? `${caseData.attributes.description.slice(0, 300)}...`
               : caseData.attributes.description,
-          alerts: numberOfAlerts,
           url: caseUrl,
         });
 

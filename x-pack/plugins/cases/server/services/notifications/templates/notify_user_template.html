@@ -48,8 +48,8 @@
         <tr>
             <td align="center" border="0" bgcolor="#FAFAFA"
                 style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-                <table cellpadding="0" cellspacing="0"
-                    style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;" align="center"
+                <table cellpadding="0" cellspacing="0" width="100%"
+                    style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;" align="center"
                     border="0">
                     <tr>
                         <td
@@ -68,24 +68,21 @@
                     style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0px 40px;"
                     bgcolor="#ffffff">
                     <tr>
-                        <td style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;"
-                            width="100%">
+                        <td style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;">
                             <h1 style="font-weight: bold; color: #1A1C21; font-size: 34px; margin: 0;">Cases:
                                 {{title}}</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;"
-                            width="100%">
+                        <td style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;">
                             <h3 style="color: #1A1C21; font-weight: bold; font-size: 22px; margin: 0;">You are assigned
                                 to an Elastic Case</h3>
                         </td>
                     </tr>
                     <tr>
-                        <td style="line-height: 30px; mso-line-height-rule: exactly; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0; padding: 60px 30px 30px;"
-                            width="100%">
+                        <td style="line-height: 30px; mso-line-height-rule: exactly; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0; padding: 60px 30px 30px;">
                             <table cellpadding="0" cellspacing="0" border="0"
-                                style="width: 100%; border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
                                 align="center">
                                 <tr>
                                     <td
@@ -127,18 +124,10 @@
                                         <span class="tags"
                                             style="background-color: #E0E5EE; margin-right: 15px; align-items: center; justify-content: center; width: 70px; height: 18px; font-size: 12px; padding: 1px 8px; border-radius: 3px;">{{.}}</span>
                                         {{/tags}}
+                                        {{#hasMoreTags}}
+                                        <span style="color: #1A1C21; font-weight: normal; font-size: 12px;">+{{hasMoreTags}} more</span>
+                                        {{/hasMoreTags}}
 
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td
-                                        style="width: 120px; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;">
-                                        <h5 style="color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;">
-                                            Alerts</h5>
-                                    </td>
-                                    <td
-                                        style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;">
-                                        <span>{{alerts}}</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -158,7 +147,7 @@
                                 style="width: 100%; margin-top: 60px; border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
                                 align="center">
                                 <tr>
-                                    <td align="center" width="100%"
+                                    <td align="center"
                                         style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
                                         {{#url}}
                                         <a href="{{& url}}"
@@ -183,7 +172,7 @@
                         <td
                             style="font-size: 9px; color: #6d6d6d; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px;">
                             <table cellpadding="0" cellspacing="0" width="100%"
-                                style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                                style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                                 <tr>
                                     <td
                                         style="padding-bottom: 10px; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
