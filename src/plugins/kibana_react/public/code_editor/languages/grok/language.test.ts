@@ -33,91 +33,85 @@ beforeAll(() => {
 });
 
 test('lang', () => {
-  expect(
-    monaco.editor.tokenize(
-      '%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{MSG:syslog_message}\n',
-      'grok'
-    )
-  ).toMatchInlineSnapshot(`
+  expect(monaco.editor.tokenize('\\[(?:-|%{NUMBER:bytes:int})\\]', 'grok')).toMatchInlineSnapshot(`
     Array [
       Array [
         Token {
           "language": "grok",
           "offset": 0,
-          "type": "string.openGrok.grok",
+          "type": "string.escape.grokEscape.grok",
+        },
+        Token {
+          "language": "grok",
+          "offset": 1,
+          "type": "source.grokEscaped.grok",
         },
         Token {
           "language": "grok",
           "offset": 2,
-          "type": "variable.syntax.grok",
+          "type": "regexp.grokRegex.grok",
         },
         Token {
           "language": "grok",
-          "offset": 12,
-          "type": "string.closeGrok.grok",
-        },
-        Token {
-          "language": "grok",
-          "offset": 13,
+          "offset": 5,
           "type": "source.grok",
         },
         Token {
           "language": "grok",
-          "offset": 14,
+          "offset": 6,
+          "type": "regexp.grokRegex.grok",
+        },
+        Token {
+          "language": "grok",
+          "offset": 7,
           "type": "string.openGrok.grok",
+        },
+        Token {
+          "language": "grok",
+          "offset": 9,
+          "type": "variable.syntax.grok",
+        },
+        Token {
+          "language": "grok",
+          "offset": 15,
+          "type": "string.separator.grok",
         },
         Token {
           "language": "grok",
           "offset": 16,
-          "type": "variable.syntax.grok",
-        },
-        Token {
-          "language": "grok",
-          "offset": 31,
-          "type": "string.separator.grok",
-        },
-        Token {
-          "language": "grok",
-          "offset": 32,
           "type": "variable.id.grok",
         },
         Token {
           "language": "grok",
-          "offset": 40,
-          "type": "string.closeGrok.grok",
-        },
-        Token {
-          "language": "grok",
-          "offset": 41,
-          "type": "source.grok",
-        },
-        Token {
-          "language": "grok",
-          "offset": 43,
-          "type": "string.openGrok.grok",
-        },
-        Token {
-          "language": "grok",
-          "offset": 45,
-          "type": "variable.syntax.grok",
-        },
-        Token {
-          "language": "grok",
-          "offset": 48,
+          "offset": 21,
           "type": "string.separator.grok",
         },
         Token {
           "language": "grok",
-          "offset": 49,
-          "type": "variable.id.grok",
+          "offset": 22,
+          "type": "variable.type.grok",
         },
         Token {
           "language": "grok",
-          "offset": 63,
+          "offset": 25,
           "type": "string.closeGrok.grok",
+        },
+        Token {
+          "language": "grok",
+          "offset": 26,
+          "type": "regexp.grokRegex.grok",
+        },
+        Token {
+          "language": "grok",
+          "offset": 27,
+          "type": "string.escape.grokEscape.grok",
+        },
+        Token {
+          "language": "grok",
+          "offset": 28,
+          "type": "source.grokEscaped.grok",
         },
       ],
-      Array [],
     ]
   `);
 });

@@ -33,6 +33,9 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
 };
 
 export const lexerRules: monaco.languages.IMonarchLanguage = {
+  // special grok symbols []()?:|
+  grokRegexSymbols: /[\[\]()?:|]/,
+
   tokenizer: {
     root: [
       // %{SYNTAX}
@@ -63,6 +66,9 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
           'string.closeGrok',
         ],
       ],
+
+      [/(\\)(@grokRegexSymbols)/, ['string.escape.grokEscape', 'source.grokEscaped']], // highlight escape symbol and don't highlight escaped symbol
+      [/@grokRegexSymbols/, 'regexp.grokRegex'], // highlight special grok symbols
     ],
   },
 };
