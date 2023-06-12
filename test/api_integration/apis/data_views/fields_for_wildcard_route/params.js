@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -25,6 +28,7 @@ export default function ({ getService }) {
     it('accepts include_unmapped param', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: '*',
           include_unmapped: true,
@@ -34,6 +38,7 @@ export default function ({ getService }) {
     it('rejects unexpected query params', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: randomness.word(),
           [randomness.word()]: randomness.word(),
@@ -44,6 +49,7 @@ export default function ({ getService }) {
       it('accepts a JSON formatted fields query param', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: JSON.stringify(['baz']),
@@ -53,6 +59,7 @@ export default function ({ getService }) {
       it('accepts meta_fields query param in string array', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: ['baz', 'foo'],
@@ -62,6 +69,7 @@ export default function ({ getService }) {
       it('accepts single array fields query param', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: ['baz'],
@@ -71,6 +79,7 @@ export default function ({ getService }) {
       it('accepts single fields query param', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: 'baz',
@@ -80,6 +89,7 @@ export default function ({ getService }) {
       it('rejects a comma-separated list of fields', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: 'foo,bar',
@@ -91,6 +101,7 @@ export default function ({ getService }) {
       it('accepts a JSON formatted meta_fields query param', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: JSON.stringify(['meta']),
@@ -100,6 +111,7 @@ export default function ({ getService }) {
       it('accepts meta_fields query param in string array', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: ['_id', 'meta'],
@@ -109,6 +121,7 @@ export default function ({ getService }) {
       it('accepts single meta_fields query param', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: ['_id'],
@@ -118,6 +131,7 @@ export default function ({ getService }) {
       it('rejects a comma-separated list of meta_fields', () =>
         supertest
           .get('/api/index_patterns/_fields_for_wildcard')
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: 'foo,bar',

@@ -82,3 +82,9 @@ export type SERVICE_KEY_TYPE = typeof SERVICE_KEY | typeof SERVICE_KEY_LEGACY;
  */
 
 export const INITIAL_REST_VERSION = '2023-10-31';
+
+/**
+ * Initial REST version internal
+ */
+
+export const INITIAL_REST_VERSION_INTERNAL = '1';

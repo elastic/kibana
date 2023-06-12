@@ -8,10 +8,9 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { configArray } from '../../constants';
-
-const version = '2023-10-31';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -23,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest
             .post(config.path)
-            .set(ELASTIC_HTTP_VERSION_HEADER, version)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             .send({
               [config.serviceKey]: {
                 title,
@@ -32,19 +31,19 @@ export default function ({ getService }: FtrProviderContext) {
 
           const response2 = await supertest
             .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, version);
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
 
           expect(response2.status).to.be(200);
 
           const response3 = await supertest
             .delete(`${config.path}/${response1.body[config.serviceKey].id}`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, version);
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
 
           expect(response3.status).to.be(200);
 
           const response4 = await supertest
             .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, version);
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
 
           expect(response4.status).to.be(404);
         });
@@ -55,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response1 = await supertest
 
           .post(config.path)
-          .set(ELASTIC_HTTP_VERSION_HEADER, version)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             [config.serviceKey]: {
               title,
@@ -65,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest.get(`${config.path}/${response1.body[config.serviceKey].id}`);
         const response2 = await supertest
           .delete(`${config.path}/${response1.body[config.serviceKey].id}`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, version);
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
 
         // verify empty response
         expect(Object.keys(response2.body).length).to.be(0);

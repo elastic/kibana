@@ -10,6 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
 import { FullValidationConfig } from '@kbn/core-http-server';
+import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
@@ -38,7 +39,6 @@ export const parseFields = (fields: string | string[]): string[] => {
 };
 
 const path = '/api/index_patterns/_fields_for_wildcard';
-const version = '1';
 const access = 'internal';
 
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
