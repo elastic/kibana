@@ -44,7 +44,7 @@ export class LegacyAlertsClient<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> implements IAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>
+> implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private maxAlerts: number = DEFAULT_MAX_ALERTS;
   private flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS;
@@ -197,9 +197,13 @@ export class LegacyAlertsClient<
     return {};
   }
 
-  public async getAlertsToSerialize(shouldSetFlapping: boolean = true) {
+  public getAlertsToSerialize(shouldSetFlapping: boolean = true) {
     if (shouldSetFlapping) {
-      this.setFlapping();
+      setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        this.flappingSettings,
+        this.processedAlerts.active,
+        this.processedAlerts.recovered
+      );
     }
     return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
@@ -215,15 +219,13 @@ export class LegacyAlertsClient<
     return this.alertFactory!.alertLimit.checkLimitUsage();
   }
 
-  public getExecutorServices() {
+  public factory() {
     return getPublicAlertFactory(this.alertFactory!);
   }
 
-  public setFlapping() {
-    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      this.flappingSettings,
-      this.processedAlerts.active,
-      this.processedAlerts.recovered
-    );
+  public client() {
+    return null;
   }
+
+  public async persistAlerts() {}
 }

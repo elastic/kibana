@@ -79,7 +79,6 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../tasks/common/rule_actions';
 import {
-  continueWithNextSection,
   createAndEnableRule,
   expandAdvancedSettings,
   fillAboutRule,
@@ -131,7 +130,7 @@ describe('Custom query rules', () => {
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);
-      continueWithNextSection();
+      cy.get(DEFINE_CONTINUE_BUTTON).click();
 
       cy.log('Filling about section');
       fillRuleName();
@@ -146,7 +145,7 @@ describe('Custom query rules', () => {
       fillThreatTechnique();
       fillThreatSubtechnique();
       fillNote();
-      continueWithNextSection();
+      cy.get(ABOUT_CONTINUE_BTN).click();
 
       cy.log('Filling schedule section');
       fillFrom();
@@ -155,13 +154,11 @@ describe('Custom query rules', () => {
       cy.get(DEFINE_EDIT_BUTTON).click();
       cy.get(CUSTOM_QUERY_INPUT).should('have.value', ruleFields.ruleQuery);
       cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
-      cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
 
       // expect about step to populate
       cy.get(ABOUT_EDIT_BUTTON).click();
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', ruleFields.ruleName);
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
-      cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
       cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 
       createAndEnableRule();

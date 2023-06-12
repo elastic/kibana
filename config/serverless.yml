@@ -1,3 +1,4 @@
+interactiveSetup.enabled: false
 newsfeed.enabled: false
 xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
@@ -35,3 +36,6 @@ telemetry.allowChangingOptInStatus: false
 server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includeSubDomains
 # Disable embedding for serverless MVP
 server.securityResponseHeaders.disableEmbedding: true
+
+# Enforce single "default" space
+xpack.spaces.maxSpaces: 1

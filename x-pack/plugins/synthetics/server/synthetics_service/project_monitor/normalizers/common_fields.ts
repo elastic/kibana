@@ -9,7 +9,6 @@ import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { formatLocation } from '../../../../common/utils/location_formatter';
-import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
   ConfigKey,
@@ -23,6 +22,7 @@ import {
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {
   locations: Locations;

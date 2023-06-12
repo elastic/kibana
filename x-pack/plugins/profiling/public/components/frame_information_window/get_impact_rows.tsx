@@ -13,7 +13,7 @@ import { asDuration } from '../../utils/formatters/as_duration';
 import { asNumber } from '../../utils/formatters/as_number';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
-import { CPULabelWithHint } from '../shared/cpu_label_with_hint';
+import { CPULabelWithHint } from '../cpu_label_with_hint';
 
 export function getImpactRows({
   countInclusive,
