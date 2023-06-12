@@ -11,6 +11,7 @@ import {
   processGroupByResults,
   LogThresholdAlertFactory,
   LogThresholdAlertLimit,
+  getUngroupedESQuery,
 } from './log_threshold_executor';
 import {
   Comparator,
@@ -26,7 +27,6 @@ import {
   buildFiltersFromCriteria,
   queryMappings,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
-import { getUngroupedESQuery } from '../../../../common/alerting/logs/log_threshold/query';
 
 // Mocks //
 const numericField = {

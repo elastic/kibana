@@ -51,6 +51,7 @@ import {
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
   ExecutionTimeRange,
+  Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
@@ -70,13 +71,9 @@ import {
   getReasonMessageForUngroupedRatioAlert,
 } from './reason_formatters';
 import {
-  getUngroupedESQuery,
-  LogThresholdRuleTypeParams,
-} from '../../../../common/alerting/logs/log_threshold/query';
-import {
   buildFiltersFromCriteria,
-  COMPOSITE_GROUP_SIZE,
-  getContextAggregation,
+  LogThresholdRuleTypeParams,
+  positiveComparators,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
@@ -102,6 +99,8 @@ export type LogThresholdAlertLimit = RuleExecutorServices<
   LogThresholdAlertContext,
   LogThresholdActionGroups
 >['alertFactory']['alertLimit'];
+
+const COMPOSITE_GROUP_SIZE = 2000;
 
 const checkValueAgainstComparatorMap: {
   [key: string]: (a: number, b: number) => boolean;
@@ -782,6 +781,43 @@ export const getGroupedESQuery = (
   }
 };
 
+export const getUngroupedESQuery = (
+  params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
+  timestampField: string,
+  index: string,
+  runtimeMappings: estypes.MappingRuntimeFields,
+  executionTimeRange?: ExecutionTimeRange
+): object => {
+  const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
+    params,
+    timestampField,
+    executionTimeRange
+  );
+
+  const body: estypes.SearchRequest['body'] = {
+    // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
+    track_total_hits: true,
+    query: {
+      bool: {
+        filter: [rangeFilter, ...mustFilters],
+        ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
+      },
+    },
+    aggregations: {
+      ...getContextAggregation(params),
+    },
+    runtime_mappings: runtimeMappings,
+    size: 0,
+  };
+
+  return {
+    index,
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    body,
+  };
+};
+
 const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
   return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
 };
@@ -902,6 +938,50 @@ export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
   name: i18n.translate('xpack.infra.logs.alerting.threshold.fired', {
     defaultMessage: 'Fired',
   }),
+};
+
+export const getContextAggregation = (
+  params: Pick<RuleParams, 'groupBy'> & { criteria: CountCriteria }
+) => {
+  const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
+  const positiveCriteria = params.criteria.filter((criterion: Criterion) =>
+    positiveComparators.includes(criterion.comparator)
+  );
+
+  const fieldsFromGroupBy = params.groupBy
+    ? getFieldsSet(params.groupBy, validPrefixForContext)
+    : new Set<string>();
+  const fieldsFromCriteria = getFieldsSet(
+    positiveCriteria.map((criterion: Criterion) => criterion.field),
+    validPrefixForContext
+  );
+  const fieldsPrefixList = Array.from(
+    new Set<string>([...fieldsFromGroupBy, ...fieldsFromCriteria])
+  );
+  const fieldsList = fieldsPrefixList.map((prefix) => (prefix === 'tags' ? prefix : `${prefix}.*`));
+
+  const additionalContextAgg =
+    fieldsList.length > 0
+      ? {
+          additionalContext: {
+            top_hits: {
+              size: 1,
+              fields: fieldsList,
+              _source: false,
+            },
+          },
+        }
+      : null;
+
+  return additionalContextAgg;
+};
+
+const getFieldsSet = (groupBy: string[] | undefined, validPrefix: string[]): Set<string> => {
+  return new Set<string>(
+    groupBy
+      ?.map((currentGroupBy) => currentGroupBy.split('.')[0])
+      .filter((groupByPrefix) => validPrefix.includes(groupByPrefix))
+  );
 };
 
 const fieldsToExclude = ['disk', 'network', 'cpu', 'memory'];

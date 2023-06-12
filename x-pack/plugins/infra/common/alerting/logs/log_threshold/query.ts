@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { RuleParams, CountCriteria, ExecutionTimeRange } from '.';
-import { buildFiltersFromCriteria, getContextAggregation } from './query_helpers';
+import { buildFiltersFromCriteria } from './query_helpers';
 
-export type LogThresholdRuleTypeParams = RuleParams;
-
-export const getUngroupedESQuery = (
+export const getESQueryForLogSpike = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
-  index: string,
-  runtimeMappings: estypes.MappingRuntimeFields,
   executionTimeRange?: ExecutionTimeRange
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
@@ -25,26 +19,12 @@ export const getUngroupedESQuery = (
     executionTimeRange
   );
 
-  const body: estypes.SearchRequest['body'] = {
-    // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
-    track_total_hits: true,
-    query: {
-      bool: {
-        filter: [rangeFilter, ...mustFilters],
-        ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
-      },
+  const query = {
+    bool: {
+      filter: [rangeFilter, ...mustFilters],
+      ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
     },
-    aggregations: {
-      ...getContextAggregation(params),
-    },
-    runtime_mappings: runtimeMappings,
-    size: 0,
   };
 
-  return {
-    index,
-    allow_no_indices: true,
-    ignore_unavailable: true,
-    body,
-  };
+  return query;
 };

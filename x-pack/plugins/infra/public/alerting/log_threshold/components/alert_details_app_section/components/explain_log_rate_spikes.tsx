@@ -17,10 +17,10 @@ import { ExplainLogRateSpikesContent } from '@kbn/aiops-plugin/public';
 
 import { Rule } from '@kbn/alerting-plugin/common';
 import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
-import { estypes } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { CoPilotPromptId } from '@kbn/observability-plugin/common';
+import { ALERT_END } from '@kbn/rule-data-utils';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -31,8 +31,7 @@ import {
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
-import { DEFAULT_LOG_VIEW } from '../../../../../../common/log_views';
-import { getUngroupedESQuery } from '../../../../../../common/alerting/logs/log_threshold/query';
+import { getESQueryForLogSpike } from '../../../../../../common/alerting/logs/log_threshold/query';
 
 export interface AlertDetailsExplainLogRateSpikesSectionProps {
   rule: Rule<PartialRuleParams>;
@@ -50,30 +49,32 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   useEffect(() => {
     async function getDataView() {
-      const { indices, timestampField, runtimeMappings, dataViewReference } =
-        await logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
+      const { timestampField, dataViewReference } = await logViews.client.getResolvedLogView(
+        rule.params.logView
+      );
 
-      const dataViewId = dataViewReference.id;
-
-      if (dataViewId) {
-        const logDataView = await dataViews.get(dataViewId);
+      if (dataViewReference.id) {
+        const logDataView = await dataViews.get(dataViewReference.id);
         setDataView(logDataView);
+        getQuery(timestampField);
+      }
+    }
 
-        const executionTimeRange = {
-          lte: alert.start,
-        };
+    function getQuery(timestampField: string) {
+      const executionTimeRange = {
+        lte: alert.start,
+      };
 
-        const esSearchRequest = getUngroupedESQuery(
-          validatedParams as CountRuleParams,
-          timestampField,
-          indices,
-          runtimeMappings,
-          executionTimeRange
-        ) as estypes.SearchRequest;
+      const validatedParams = decodeOrThrow(ruleParamsRT)(rule.params);
 
-        if (esSearchRequest) {
-          setEsSearchQuery(esSearchRequest.query);
-        }
+      const esSearchRequest = getESQueryForLogSpike(
+        validatedParams as CountRuleParams,
+        timestampField,
+        executionTimeRange
+      ) as QueryDslQueryContainer;
+
+      if (esSearchRequest) {
+        setEsSearchQuery(esSearchRequest);
       }
     }
 
@@ -89,7 +90,23 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     }
   }, [rule, alert, dataViews, logViews]);
 
-  const timeRange = { min: moment(alert.start).subtract(20, 'minutes'), max: moment(new Date()) };
+  const alertStart = moment(alert.start);
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
+
+  const timeRange = {
+    min: alertStart.subtract(20, 'minutes'),
+    max: alertEnd ? alertEnd.add(5, 'minutes') : moment(new Date()),
+  };
+
+  const initialAnalysisStart = {
+    baselineMin: alertStart.subtract(10, 'minutes').valueOf(),
+    baselineMax: alertStart.subtract(1, 'minutes').valueOf(),
+    deviationMin: alertStart.valueOf(),
+    deviationMax:
+      alertStart.add(5, 'minutes') > moment(new Date())
+        ? moment(new Date()).valueOf()
+        : alertStart.add(5, 'minutes').valueOf(),
+  };
 
   const coPilotService = useCoPilot();
 
@@ -123,7 +140,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
               dataView={dataView}
               timeRange={timeRange}
               esSearchQuery={esSearchQuery}
-              initialAnalysisStart={alert.start}
+              initialAnalysisStart={initialAnalysisStart}
               appDependencies={pick(services, [
                 'application',
                 'data',
