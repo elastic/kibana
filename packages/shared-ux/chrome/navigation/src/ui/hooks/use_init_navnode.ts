@@ -44,6 +44,11 @@ function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNav
     // If a link is provided, but no deepLink is found, don't render anything
     return false;
   }
+
+  if (deepLink) {
+    return !deepLink.hidden;
+  }
+
   return true;
 }
 
