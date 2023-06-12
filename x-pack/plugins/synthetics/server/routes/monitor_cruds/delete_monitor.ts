@@ -78,8 +78,12 @@ export const deleteMonitor = async ({
     server
   );
 
+  let deletePromise;
+
   try {
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
+
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       [
         {
@@ -93,7 +97,6 @@ export const deleteMonitor = async ({
       savedObjectsClient,
       spaceId
     );
-    const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
     const [errors] = await Promise.all([deleteSyncPromise, deletePromise]).catch((e) => {
       server.logger.error(e);
@@ -114,6 +117,9 @@ export const deleteMonitor = async ({
 
     return errors;
   } catch (e) {
+    if (deletePromise) {
+      await deletePromise;
+    }
     server.logger.error(
       `Unable to delete Synthetics monitor ${monitor.attributes[ConfigKey.NAME]}`
     );

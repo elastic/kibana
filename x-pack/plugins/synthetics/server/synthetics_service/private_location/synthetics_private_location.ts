@@ -365,6 +365,9 @@ export class SyntheticsPrivateLocation {
   }
 
   async deleteMonitors(configs: HeartbeatConfig[], request: KibanaRequest, spaceId: string) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const esClient = this.server.uptimeEsClient.baseESClient;
+
     const policyIdsToDelete = [];
     for (const config of configs) {
       const { locations } = config;
@@ -381,7 +384,19 @@ export class SyntheticsPrivateLocation {
       }
     }
     if (policyIdsToDelete.length > 0) {
-      await this.deletePolicyBulk(policyIdsToDelete);
+      const result = await this.server.fleet.packagePolicyService.delete(
+        soClient,
+        esClient,
+        policyIdsToDelete,
+        {
+          force: true,
+        }
+      );
+      const failedPolicies = result?.filter((policy) => !policy.success);
+      if (failedPolicies?.length === policyIdsToDelete.length) {
+        throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
+      }
+      return result;
     }
   }
 
