@@ -25,7 +25,7 @@ import { DASHBOARD_CONTAINER_TYPE } from '..';
 import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import { createInject, createExtract, DashboardContainerInput } from '../../../common';
-import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -55,7 +55,7 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardFromSavedObjectReturn) => boolean;
+  validateLoadedSavedObject?: (result: LoadDashboardReturn) => boolean;
 }
 
 export class DashboardContainerFactoryDefinition

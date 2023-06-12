@@ -42,27 +42,33 @@ import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
 /**
- * Iterate over the matching test files, but only take ones that are assigned to this parallel job
- * There are `n` parallel jobs, so only process every nth file.
- **/
-const retrieveIntegrations = (
-  specPattern: string[],
-  chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-    : 1,
-  chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-    : 0
-) => {
+ * Retrieve test files using a glob pattern.
+ * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
+ */
+const retrieveIntegrations = (/** Pattern passed to globby to find spec files. */specPattern: string[]) => {
   const integrationsPaths = globby.sync(specPattern);
 
-  const integrationsPathsForChunk: string[] = [];
+  if (process.env.RUN_ALL_TESTS === 'true') {
+    return integrationsPaths;
+  } else {
 
-  for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
-    integrationsPathsForChunk.push(integrationsPaths[i]);
+    // The number of instances of this job were created
+    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+      : 1;
+    // An index which uniquely identifies this instance of the job
+    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+      : 0;
+
+    const integrationsPathsForChunk: string[] = [];
+
+    for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
+      integrationsPathsForChunk.push(integrationsPaths[i]);
+    }
+
+    return integrationsPathsForChunk;
   }
-
-  return integrationsPathsForChunk;
 };
 
 export const cli = () => {
