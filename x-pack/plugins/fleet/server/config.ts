@@ -174,6 +174,7 @@ export const config: PluginConfigDescriptor = {
       })
     ),
     enabled: schema.boolean({ defaultValue: true }),
+    createArtifactsBulkBatchSize: schema.maybe(schema.number()),
   }),
 };
 

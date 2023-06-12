@@ -11,9 +11,16 @@ import { errors } from '@elastic/elasticsearch';
 
 import type { TransportResult } from '@elastic/elasticsearch';
 
+import type { Logger } from '@kbn/core/server';
+
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
+
+import { appContextService } from '../app_context';
+import { createAppContextStartContractMock } from '../../mocks';
+
+import { newArtifactToElasticsearchProperties } from './mappings';
 
 import {
   generateArtifactEsGetSingleHitMock,
@@ -33,12 +40,14 @@ import {
 } from './artifacts';
 
 import type { NewArtifact } from './types';
-import { newArtifactToElasticsearchProperties } from './mappings';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  let logger: Logger;
 
   beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    logger = appContextService.getLogger().get('artifactsTest');
     esClientMock = elasticsearchServiceMock.createInternalClient();
   });
 
@@ -124,7 +133,13 @@ describe('When using the artifacts services', () => {
     });
 
     it('should create and return artifacts', async () => {
-      const { artifacts } = await bulkCreateArtifacts(esClientMock, [newArtifact]);
+      const { artifacts } = await bulkCreateArtifacts(
+        esClientMock,
+        [newArtifact],
+        false,
+        undefined,
+        logger
+      );
       const artifact = artifacts![0];
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
@@ -154,7 +169,13 @@ describe('When using the artifacts services', () => {
       const { ...generatedArtifact } = generateArtifactMock({ encodedSize: 1_500 });
       const newBigArtifact = generatedArtifact;
 
-      const { artifacts } = await bulkCreateArtifacts(esClientMock, [newBigArtifact]);
+      const { artifacts } = await bulkCreateArtifacts(
+        esClientMock,
+        [newBigArtifact],
+        false,
+        undefined,
+        logger
+      );
       const artifact = artifacts![0];
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
@@ -190,12 +211,13 @@ describe('When using the artifacts services', () => {
       const { ...generatedArtifact4 } = generateArtifactMock({ encodedSize: 2_500 });
       const newBigArtifact4 = generatedArtifact4;
 
-      const { artifacts } = await bulkCreateArtifacts(esClientMock, [
-        newBigArtifact1,
-        newBigArtifact2,
-        newBigArtifact3,
-        newBigArtifact4,
-      ]);
+      const { artifacts } = await bulkCreateArtifacts(
+        esClientMock,
+        [newBigArtifact1, newBigArtifact2, newBigArtifact3, newBigArtifact4],
+        false,
+        undefined,
+        logger
+      );
       const artifact1 = artifacts![0];
       const artifact2 = artifacts![1];
       const artifact3 = artifacts![2];
@@ -283,7 +305,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should create and return none artifact when none provided', async () => {
-      await bulkCreateArtifacts(esClientMock, []);
+      await bulkCreateArtifacts(esClientMock, [], false, undefined, logger);
 
       expect(esClientMock.bulk).toHaveBeenCalledTimes(0);
     });
@@ -293,9 +315,13 @@ describe('When using the artifacts services', () => {
         errors: true,
         items: [{ create: { status: 409 } as any }],
       } as any);
-      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
-        newArtifact,
-      ]);
+      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(
+        esClientMock,
+        [newArtifact],
+        false,
+        undefined,
+        logger
+      );
 
       expect(responseErrors).toBeUndefined();
       expect(artifacts?.length).toEqual(1);
@@ -306,9 +332,13 @@ describe('When using the artifacts services', () => {
         errors: true,
         items: [{ create: { status: 400, error: { reason: 'error' } } as any }],
       } as any);
-      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
-        newArtifact,
-      ]);
+      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(
+        esClientMock,
+        [newArtifact],
+        false,
+        undefined,
+        logger
+      );
 
       expect(responseErrors).toEqual([new Error('error')]);
       expect(artifacts).toBeUndefined();

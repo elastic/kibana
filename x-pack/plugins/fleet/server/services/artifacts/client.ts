@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { ListResult } from '../../../common/types';
+import type { FleetConfigType, ListResult } from '../../../common/types';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
@@ -34,7 +34,12 @@ import {
  * Exposes an interface for access artifacts from within the context of a single integration (`packageName`)
  */
 export class FleetArtifactsClient implements ArtifactsClientInterface {
-  constructor(private esClient: ElasticsearchClient, private packageName: string) {
+  constructor(
+    private esClient: ElasticsearchClient,
+    private packageName: string,
+    private config: FleetConfigType,
+    private logger: Logger
+  ) {
     if (!packageName) {
       throw new ArtifactsClientError('packageName is required');
     }
@@ -100,7 +105,13 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
       newArtifactsData.push(newArtifactData);
     }
 
-    return bulkCreateArtifacts(this.esClient, newArtifactsData);
+    return bulkCreateArtifacts(
+      this.esClient,
+      newArtifactsData,
+      false,
+      this.config.createArtifactsBulkBatchSize,
+      this.logger
+    );
   }
 
   async deleteArtifact(id: string) {

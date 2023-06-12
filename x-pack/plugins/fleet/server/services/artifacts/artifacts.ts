@@ -13,7 +13,7 @@ import { createHash } from 'crypto';
 
 import { isEmpty, sortBy } from 'lodash';
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { ListResult } from '../../../common/types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
@@ -92,7 +92,7 @@ const MAX_LENGTH_BYTES = 2_000;
 // Function to split artifacts in batches depending on the encoded_size value.
 const generateArtifactBatches = (
   artifacts: NewArtifact[],
-  maxLengthBytes: number = MAX_LENGTH_BYTES
+  maxLengthBytes: number
 ): {
   batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>>;
   artifactsEsResponse: Artifact[];
@@ -117,7 +117,7 @@ const generateArtifactBatches = (
     // Before adding the next artifact to the current batch, check if it can be added depending on the batch size limit.
     // If there is no artifact yet added to the current batch, we add it anyway ignoring the batch limit as the batch size has to be > 0.
     if (artifact.encodedSize + artifactsBatchLengthInBytes >= maxLengthBytes) {
-      artifactsBatchLengthInBytes = 0;
+      artifactsBatchLengthInBytes = artifact.encodedSize;
       // Use non sorted artifacts array to preserve the artifacts order in the response
       artifactsEsResponse.push(esArtifactResponse);
 
@@ -142,11 +142,21 @@ const generateArtifactBatches = (
 export const bulkCreateArtifacts = async (
   esClient: ElasticsearchClient,
   artifacts: NewArtifact[],
-  refresh = false
+  refresh = false,
+  createArtifactsBulkBatchSize: number = MAX_LENGTH_BYTES,
+  logger: Logger
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
-  const { batches, artifactsEsResponse } = generateArtifactBatches(artifacts);
+  const { batches, artifactsEsResponse } = generateArtifactBatches(
+    artifacts,
+    createArtifactsBulkBatchSize
+  );
   const nonConflictErrors = [];
+  logger.debug(`Number of batches generated for fleet artifacts: ${batches.length}`);
   for (let batchN = 0; batchN < batches.length; batchN++) {
+    logger.debug(
+      `Creating artifacts for batch ${batchN + 1} with ${batches[batchN].length / 2} artifacts`
+    );
+    logger.debug(`Artifacts in current batch: ${JSON.stringify(batches[batchN])}`);
     // Generate a bulk create for the current batch of artifacts
     const res = await withPackageSpan(`Bulk create fleet artifacts batch [${batchN}]`, () =>
       esClient.bulk({
