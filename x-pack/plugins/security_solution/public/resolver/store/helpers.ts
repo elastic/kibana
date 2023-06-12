@@ -39,6 +39,14 @@ export const EMPTY_RESOLVER: ResolverState = {
   },
 };
 
+/**
+ * Helper function to support use of immer within action creators.
+ * This allows reducers to be written in immer (direct mutation in appearance) over spread operators.
+ * More information on immer: https://immerjs.github.io/immer/
+ * @param actionCreator action creator
+ * @param handler reducer written in immer
+ * @returns reducer builder
+ */
 export function immerCase<S, P>(
   actionCreator: ActionCreator<P>,
   handler: (draft: Draft<S>, payload: P) => void

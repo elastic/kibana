@@ -131,6 +131,9 @@ const UnstyledProcessEventDot = React.memo(
     projectionMatrix,
     timeAtRender,
   }: {
+    /**
+     * Id that identify the scope of analyzer
+     */
     id: string;
     /**
      * A `className` string provided by `styled`
