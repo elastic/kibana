@@ -11,12 +11,3 @@ export const useGetFieldSpec = () => {
     type: 'string',
   });
 };
-
-// , () => {
-//   return {
-//     useGetFieldSpec: () => (name: string) => ({
-//       name,
-//       type: 'string',
-//     }),
-//   };
-// });

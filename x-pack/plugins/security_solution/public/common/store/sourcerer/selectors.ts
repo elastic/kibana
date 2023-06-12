@@ -98,10 +98,6 @@ export const getSourcererScopeSelector = () => {
   };
 };
 
-// TODO Event though this works every SecurityCellActions is creating creating new instances
-// of `getScopeSelector` and `getSourcererDataViewSelector` selectors.
-// It is not ideal and should be fixed before merging.
-// https://github.com/elastic/kibana/issues/159315
 export const getSelectedDataviewSelector = () => {
   const getSourcererDataViewSelector = sourcererDataViewSelector();
   const getScopeSelector = scopeIdSelector();

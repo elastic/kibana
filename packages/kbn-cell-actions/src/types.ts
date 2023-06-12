@@ -99,7 +99,7 @@ export interface CellActionCompatibilityContext<
   /**
    * CellActionsData containing the field spec but not the value for the compatibility check
    */
-  data: Array<Omit<C['data'][number], 'value'>>; // Typescript is kind of magic
+  data: Array<Omit<C['data'][number], 'value'>>;
 
   /**
    * Extra configurations for actions.
