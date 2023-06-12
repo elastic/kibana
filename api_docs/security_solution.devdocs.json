@@ -2225,6 +2225,22 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getServerBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getServerBasePath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getEndpointAuthz",
             "type": "Function",
             "tags": [],
@@ -2731,7 +2747,7 @@
         "signature": [
           "readonly (",
           "AppFeatureSecurityKey",
-          ".advancedInsights | ",
+          " | ",
           "AppFeatureCasesKey",
           ".casesConnectors)[]"
         ],
