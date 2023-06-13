@@ -63,6 +63,33 @@ describe('TextBasedLanguagesEditor', () => {
     });
   });
 
+  it('should  render the date info with no @timestamp detected', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
+      ).toStrictEqual('@timestamp not detected');
+    });
+  });
+
+  it('should render the date info with @timestamp detected if detectTimestamp is true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      detectTimestamp: true,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
+      ).toStrictEqual('@timestamp detected');
+    });
+  });
+
   it('should  render the errors badge for the inline mode by default if errors are provides', async () => {
     const newProps = {
       ...props,

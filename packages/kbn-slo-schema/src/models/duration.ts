@@ -49,6 +49,10 @@ class Duration {
     return !this.isShorterThan(other);
   }
 
+  isEqual(other: Duration): boolean {
+    return this.value === other.value && this.unit === other.unit;
+  }
+
   format(): string {
     return `${this.value}${this.unit}`;
   }

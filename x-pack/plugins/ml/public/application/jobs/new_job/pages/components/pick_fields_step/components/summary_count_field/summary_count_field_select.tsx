@@ -8,9 +8,9 @@
 import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import type { Field } from '@kbn/ml-anomaly-utils';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field } from '../../../../../../../../../common/types/fields';
 import {
   createFieldOptions,
   createDocCountFieldOption,

@@ -9,10 +9,12 @@ import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { number } from 'io-ts';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  getSafeVulnerabilitiesQueryFilter,
+  LATEST_VULNERABILITIES_INDEX_PATTERN,
+} from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { FindingsBaseEsQuery } from '../../../common/types';
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<any, FindingsAggs>>;
@@ -24,29 +26,15 @@ interface FindingsAggs {
 interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
   sort: estypes.Sort;
   enabled: boolean;
+  pageIndex: number;
+  pageSize: number;
 }
 
-export const getFindingsQuery = ({ query, sort }: VulnerabilitiesQuery) => ({
+export const getFindingsQuery = ({ query, sort, pageIndex, pageSize }: VulnerabilitiesQuery) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query: {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter || []),
-        { exists: { field: 'vulnerability.score.base' } },
-        { exists: { field: 'vulnerability.score.version' } },
-        { exists: { field: 'vulnerability.severity' } },
-        { exists: { field: 'resource.name' } },
-        { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
-      ],
-      must_not: [
-        ...(query?.bool?.must_not || []),
-        { match_phrase: { 'vulnerability.severity': 'UNKNOWN' } },
-      ],
-    },
-  },
-  size: MAX_FINDINGS_TO_LOAD,
+  query: getSafeVulnerabilitiesQueryFilter(query),
+  from: pageIndex * pageSize,
+  size: pageSize,
   sort,
 });
 
@@ -56,7 +44,7 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
     notifications: { toasts },
   } = useKibana().services;
   return useQuery(
-    [LATEST_VULNERABILITIES_INDEX_PATTERN, { params: options }],
+    [LATEST_VULNERABILITIES_INDEX_PATTERN, options],
     async () => {
       const {
         rawResponse: { hits },
@@ -72,8 +60,9 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
       };
     },
     {
-      enabled: options.enabled,
+      staleTime: 5000,
       keepPreviousData: true,
+      enabled: options.enabled,
       onError: (err: Error) => showErrorToast(toasts, err),
     }
   );

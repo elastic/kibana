@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitor,
@@ -12,7 +13,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 export const createMonitorAPI = async ({
@@ -20,7 +21,24 @@ export const createMonitorAPI = async ({
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
-  return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor);
+};
+
+export interface MonitorInspectResponse {
+  publicConfigs: any[];
+  privateConfig: PackagePolicy | null;
+}
+
+export const inspectMonitorAPI = async ({
+  monitor,
+  hideParams,
+}: {
+  hideParams?: boolean;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+}): Promise<{ result: MonitorInspectResponse; decodedCode: string }> => {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, undefined, {
+    hideParams,
+  });
 };
 
 export const updateMonitorAPI = async ({
@@ -30,7 +48,7 @@ export const updateMonitorAPI = async ({
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitorWithId> => {
-  return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
+  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
 };
 
 export const getDecryptedMonitorAPI = async ({
@@ -38,15 +56,18 @@ export const getDecryptedMonitorAPI = async ({
 }: {
   id: string;
 }): Promise<DecryptedSyntheticsMonitorSavedObject> => {
-  return await apiService.get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id), {
-    decrypted: true,
-  });
+  return await apiService.get(
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id),
+    {
+      decrypted: true,
+    }
+  );
 };
 
 export const fetchServiceAPIKey = async (): Promise<{
   apiKey: { encoded: string };
 }> => {
-  return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
+  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_APIKEY);
 };
 
 export const deletePackagePolicy = async (

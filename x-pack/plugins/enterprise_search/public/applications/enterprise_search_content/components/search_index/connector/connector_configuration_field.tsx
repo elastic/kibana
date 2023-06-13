@@ -27,13 +27,14 @@ import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_co
 
 import {
   ConnectorConfigurationLogic,
-  ConfigEntry,
+  ConfigEntryView,
   ensureStringType,
   ensureBooleanType,
 } from './connector_configuration_logic';
+import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
 
 interface ConnectorConfigurationFieldProps {
-  configEntry: ConfigEntry;
+  configEntry: ConfigEntryView;
 }
 
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
@@ -119,21 +120,25 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
     case DisplayType.TOGGLE:
-      const toggleLabel = (
-        <EuiToolTip content={tooltip}>
-          <p>{label}</p>
-        </EuiToolTip>
-      );
-
-      return (
+      const toggleSwitch = (
         <EuiSwitch
           checked={ensureBooleanType(value)}
           disabled={status === Status.LOADING}
-          label={toggleLabel}
+          label={
+            <EuiToolTip content={tooltip}>
+              <p>{label}</p>
+            </EuiToolTip>
+          }
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.checked });
           }}
         />
+      );
+
+      return key !== 'document_level_security' ? (
+        toggleSwitch
+      ) : (
+        <DocumentLevelSecurityPanel toggleSwitch={toggleSwitch} />
       );
 
     default:

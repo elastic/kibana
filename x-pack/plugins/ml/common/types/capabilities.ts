@@ -39,6 +39,8 @@ export const userMlCapabilities = {
   canTestTrainedModels: false,
   canGetFieldInfo: false,
   canGetMlInfo: false,
+  // AIOps
+  canUseAiops: false,
 };
 
 export const adminMlCapabilities = {

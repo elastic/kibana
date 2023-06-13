@@ -22,20 +22,35 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { LanguageDefinition } from './languages/types';
+import { consoleDefinition } from './languages/console';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
+import { TryInConsoleButton } from './try_in_console_button';
 import './code_box.scss';
 
 interface CodeBoxProps {
   languages: LanguageDefinition[];
   code: keyof LanguageDefinition;
+  codeArgs: LanguageDefinitionSnippetArguments;
   // overrides the language type for syntax highlighting
   languageType?: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
 }
 
+const getCodeSnippet = (
+  language: Partial<LanguageDefinition>,
+  key: keyof LanguageDefinition,
+  args: LanguageDefinitionSnippetArguments
+): string => {
+  const snippetVal = language[key];
+  if (snippetVal === undefined) return '';
+  if (typeof snippetVal === 'string') return snippetVal;
+  return snippetVal(args);
+};
+
 export const CodeBox: React.FC<CodeBoxProps> = ({
   code,
+  codeArgs,
   languages,
   languageType,
   selectedLanguage,
@@ -71,12 +86,14 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
       </EuiButtonEmpty>
     </EuiThemeProvider>
   );
+  const codeSnippet = getCodeSnippet(selectedLanguage, code, codeArgs);
+  const showTryInConsole = code in consoleDefinition;
 
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xs" className="serverlessSearchCodeBlockControlsPanel">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
             <EuiThemeProvider colorMode="light">
               <EuiPopover
                 button={button}
@@ -90,7 +107,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
             </EuiThemeProvider>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={selectedLanguage[code] ?? ''}>
+            <EuiCopy textToCopy={codeSnippet}>
               {(copy) => (
                 <EuiButtonEmpty color="text" iconType="copy" size="s" onClick={copy}>
                   {i18n.translate('xpack.serverlessSearch.codeBox.copyButtonLabel', {
@@ -100,6 +117,11 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               )}
             </EuiCopy>
           </EuiFlexItem>
+          {showTryInConsole && (
+            <EuiFlexItem grow={false}>
+              <TryInConsoleButton request={getCodeSnippet(consoleDefinition, code, codeArgs)} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
         <EuiCodeBlock
@@ -107,7 +129,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           fontSize="m"
           language={languageType || selectedLanguage.languageStyling || selectedLanguage.id}
         >
-          {selectedLanguage[code]}
+          {codeSnippet}
         </EuiCodeBlock>
       </EuiPanel>
     </EuiThemeProvider>

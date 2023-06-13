@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useEffect } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiInMemoryTable,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  DATA_FRAME_TASK_STATE,
+  type DataFrameAnalyticsId,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { useRefreshAnalyticsList } from '../../../../common';
+import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
@@ -26,10 +30,9 @@ import {
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
   ItemIdToExpandedRowMap,
-  DATA_FRAME_TASK_STATE,
 } from './common';
 import { getAnalyticsFactory } from '../../services/analytics_service';
-import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
+import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
@@ -118,9 +121,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const refreshObs = useRefresh();
 
-  const disabled =
-    !checkPermission('canCreateDataFrameAnalytics') ||
-    !checkPermission('canStartStopDataFrameAnalytics');
+  const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics] = usePermissionCheck([
+    'canCreateDataFrameAnalytics',
+    'canStartStopDataFrameAnalytics',
+  ]);
+
+  const disabled = !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
 
   const getAnalytics = getAnalyticsFactory(
     setAnalytics,

@@ -7,22 +7,22 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
   MonitorOverviewItem,
 } from '../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: API_URLS.GET_SYNTHETICS_MONITOR,
+  path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR,
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),

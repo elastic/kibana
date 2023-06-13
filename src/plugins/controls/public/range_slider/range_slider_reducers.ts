@@ -40,6 +40,12 @@ export const rangeSliderReducers = {
   ) => {
     state.output.dataViewId = action.payload;
   },
+  setErrorMessage: (
+    state: WritableDraft<RangeSliderReduxState>,
+    action: PayloadAction<string | undefined>
+  ) => {
+    state.componentState.error = action.payload;
+  },
   setLoading: (state: WritableDraft<RangeSliderReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },

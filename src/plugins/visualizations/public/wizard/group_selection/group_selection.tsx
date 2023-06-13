@@ -58,7 +58,7 @@ function GroupSelection(props: GroupSelectionProps) {
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
         ].filter((visDefinition) => {
-          return !Boolean(visDefinition.disableCreate);
+          return !visDefinition.disableCreate;
         }),
         ['promotion', 'title'],
         ['asc', 'asc']
@@ -92,7 +92,9 @@ function GroupSelection(props: GroupSelectionProps) {
         <div className="visNewVisDialogGroupSelection__footer">
           <EuiSpacer size="l" />
           <EuiFlexGrid columns={2}>
-            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).length > 0 && (
+            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).filter((visDefinition) => {
+              return !visDefinition.disableCreate;
+            }).length > 0 && (
               <EuiFlexItem>
                 <EuiCard
                   titleSize="xs"

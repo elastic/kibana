@@ -63,6 +63,14 @@ export interface CasesClientArgs {
 export type CasesFindQueryParams = Partial<
   Pick<
     CasesFindRequest,
-    'tags' | 'reporters' | 'status' | 'severity' | 'owner' | 'from' | 'to' | 'assignees'
+    | 'tags'
+    | 'reporters'
+    | 'status'
+    | 'severity'
+    | 'owner'
+    | 'from'
+    | 'to'
+    | 'assignees'
+    | 'category'
   > & { sortByField?: string; authorizationFilter?: KueryNode }
 >;

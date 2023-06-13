@@ -10,8 +10,8 @@ import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
-
 import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -96,6 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
           const resp = await supertest
             .post(`/internal/aiops/explain_log_rate_spikes`)
             .set('kbn-xsrf', 'kibana')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             .send(body)
             .expect(200);
 
@@ -158,6 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              [ELASTIC_HTTP_VERSION_HEADER]: '1',
               'kbn-xsrf': 'stream',
             },
             body: JSON.stringify(body),

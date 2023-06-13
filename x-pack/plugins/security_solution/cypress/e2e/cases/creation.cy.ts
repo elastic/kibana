@@ -49,7 +49,7 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../tasks/create_new_case';
-import { loginWithUser, visitWithoutDateRange } from '../../tasks/login';
+import { loginWithUser, visit, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL, OVERVIEW_URL } from '../../urls/navigation';
 
@@ -121,7 +121,7 @@ describe('Cases', () => {
     cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
 
-    cy.visit(OVERVIEW_URL);
+    visit(OVERVIEW_URL);
     cy.get(OVERVIEW_CASE_NAME).should('have.text', this.mycase.name);
     cy.get(OVERVIEW_CASE_DESCRIPTION).should(
       'have.text',

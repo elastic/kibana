@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../lib/lib';
-import { DynamicSettings, DynamicSettingsType } from '../../../common/runtime_types';
+import {
+  DynamicSettings,
+  DynamicSettingsAttributes,
+  DynamicSettingsType,
+} from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '.';
 import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import {
@@ -71,7 +75,10 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMS
 
     if (isRight(decoded) && !certThresholdErrors) {
       const newSettings: DynamicSettings = decoded.right;
-      await savedObjectsAdapter.setUptimeDynamicSettings(savedObjectsClient, newSettings);
+      await savedObjectsAdapter.setUptimeDynamicSettings(
+        savedObjectsClient,
+        newSettings as DynamicSettingsAttributes
+      );
 
       return response.ok({
         body: {

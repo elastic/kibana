@@ -14,7 +14,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CoreProviders } from '../../apps/common_providers';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 import { LazyAssetDetailsWrapper } from './lazy_asset_details_wrapper';
-import type { AssetDetailsProps } from './asset_details';
+import type { AssetDetailsProps } from './types';
 
 export const ASSET_DETAILS_EMBEDDABLE = 'ASSET_DETAILS_EMBEDDABLE';
 
@@ -71,18 +71,15 @@ export class AssetDetailsEmbeddable extends Embeddable<AssetDetailsEmbeddableInp
         <EuiThemeProvider>
           <div style={{ width: '100%' }}>
             <LazyAssetDetailsWrapper
+              activeTabId={this.input.activeTabId}
               currentTimeRange={this.input.currentTimeRange}
               node={this.input.node}
               nodeType={this.input.nodeType}
-              showActionsColumn={this.input.showActionsColumn}
-              closeFlyout={this.input.closeFlyout}
-              renderedTabsSet={this.input.renderedTabsSet}
+              overrides={this.input.overrides}
+              renderMode={this.input.renderMode}
               tabs={this.input.tabs}
-              hostFlyoutOpen={this.input.hostFlyoutOpen}
-              setHostFlyoutState={this.input.setHostFlyoutState}
-              onTabClick={this.input.onTabClick}
+              onTabsStateChange={this.input.onTabsStateChange}
               links={this.input.links}
-              showInFlyout={this.input.showInFlyout}
             />
           </div>
         </EuiThemeProvider>

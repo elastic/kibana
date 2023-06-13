@@ -85,6 +85,10 @@ const CaseBasicRt = rt.strict({
    * The users assigned to this case
    */
   assignees: CaseAssigneesRt,
+  /**
+   * The category of the case.
+   */
+  category: rt.union([rt.string, rt.null]),
 });
 
 /**
@@ -162,6 +166,10 @@ export const CasePostRequestRt = rt.intersection([
        * default it to "low" if not provided.
        */
       severity: CaseSeverityRt,
+      /**
+       * The category of the case.
+       */
+      category: rt.string,
     })
   ),
 ]);
@@ -269,6 +277,10 @@ export const CasesFindRequestRt = rt.exact(
      */
 
     owner: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * The category of the case.
+     */
+    category: rt.union([rt.array(rt.string), rt.string]),
   })
 );
 
@@ -372,6 +384,9 @@ export const AllTagsFindRequestRt = rt.exact(
 );
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
+
+export const GetTagsResponseRt = rt.array(rt.string);
+export const GetReportersResponseRt = rt.array(UserRt);
 
 export const CasesBulkGetRequestRt = rt.strict({
   ids: rt.array(rt.string),

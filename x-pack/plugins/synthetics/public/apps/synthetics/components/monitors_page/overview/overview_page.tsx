@@ -72,11 +72,11 @@ export const OverviewPage: React.FC = () => {
 
   // fetch overview for all other page state changes
   useEffect(() => {
-    if (!monitorsLoaded) {
+    if (!overviewLoaded) {
       dispatch(fetchMonitorOverviewAction.get(pageState));
     }
     // change only needs to be triggered on pageState change
-  }, [dispatch, pageState, monitorsLoaded]);
+  }, [dispatch, pageState, overviewLoaded]);
 
   // fetch overview for refresh
   useEffect(() => {

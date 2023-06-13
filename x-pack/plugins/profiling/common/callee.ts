@@ -26,6 +26,7 @@ export interface CalleeTree {
 
   FileID: string[];
   FrameType: number[];
+  Inline: boolean[];
   ExeFilename: string[];
   AddressOrLine: number[];
   FunctionName: string[];
@@ -49,6 +50,7 @@ export function createCalleeTree(
     Edges: new Array(totalFrames),
     FileID: new Array(totalFrames),
     FrameType: new Array(totalFrames),
+    Inline: new Array(totalFrames),
     ExeFilename: new Array(totalFrames),
     AddressOrLine: new Array(totalFrames),
     FunctionName: new Array(totalFrames),
@@ -64,6 +66,7 @@ export function createCalleeTree(
 
   tree.FileID[0] = '';
   tree.FrameType[0] = 0;
+  tree.Inline[0] = false;
   tree.ExeFilename[0] = '';
   tree.AddressOrLine[0] = 0;
   tree.FunctionName[0] = '';
@@ -129,6 +132,7 @@ export function createCalleeTree(
         tree.FunctionOffset[node] = frame.FunctionOffset;
         tree.SourceLine[node] = frame.LineNumber;
         tree.SourceFilename[node] = frame.FileName;
+        tree.Inline[node] = frame.Inline;
         tree.CountInclusive[node] = samples;
         tree.CountExclusive[node] = 0;
 

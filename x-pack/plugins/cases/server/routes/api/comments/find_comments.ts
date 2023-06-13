@@ -29,7 +29,7 @@ export const findCommentsRoute = createCasesRoute({
       return response.ok({
         body: await client.attachments.find({
           caseID: request.params.case_id,
-          queryParams: query,
+          findQueryParams: query,
         }),
       });
     } catch (error) {

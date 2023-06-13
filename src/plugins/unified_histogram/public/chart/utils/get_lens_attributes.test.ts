@@ -739,4 +739,18 @@ describe('getLensAttributes', () => {
       }
     `);
   });
+
+  it('should return suggestion title if no title is given', () => {
+    expect(
+      getLensAttributes({
+        title: undefined,
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField: undefined,
+        suggestion: currentSuggestionMock,
+      }).attributes.title
+    ).toBe(currentSuggestionMock.title);
+  });
 });

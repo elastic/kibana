@@ -65,9 +65,7 @@ import {
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
-import { FleetFilesClient } from './services/files/client';
-
-import type { FleetFileClientInterface, FleetFileTransferDirection } from './services/files/types';
+import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -128,6 +126,7 @@ import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
+import type { FilesClientFactory } from './services/files/types';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -227,14 +226,7 @@ export interface FleetStartContract {
    * @param type
    * @param maxSizeBytes
    */
-  createFilesClient: (
-    /** The integration package name */
-    packageName: string,
-    /** Type of file */
-    type: FleetFileTransferDirection,
-    /** Max size for files created when `type` is `to-host` */
-    maxSizeBytes?: number
-  ) => FleetFileClientInterface;
+  createFilesClient: Readonly<FilesClientFactory>;
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
@@ -586,15 +578,12 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
-      createFilesClient: (packageName, type, maxFileBytes) => {
-        return new FleetFilesClient(
-          core.elasticsearch.client.asInternalUser,
-          this.initializerContext.logger.get('fleetFiles', packageName),
-          packageName,
-          type,
-          maxFileBytes
-        );
-      },
+      createFilesClient: Object.freeze(
+        getFilesClientFactory({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.initializerContext.logger,
+        })
+      ),
       messageSigningService,
       uninstallTokenService,
     };

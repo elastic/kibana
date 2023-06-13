@@ -17,7 +17,7 @@ import type {
   CaseExternalServiceBasic,
   GetCaseConnectorsPushDetails,
 } from '../../../common/api';
-import { GetCaseConnectorsResponseRt } from '../../../common/api';
+import { decodeOrThrow, GetCaseConnectorsResponseRt } from '../../../common/api';
 import {
   isConnectorUserAction,
   isCreateCaseUserAction,
@@ -50,7 +50,7 @@ export const getConnectors = async (
 
     await checkConnectorsAuthorization({ authorization, connectors, latestUserAction });
 
-    const results = await getConnectorsInfo({
+    const res = await getConnectorsInfo({
       caseId,
       actionsClient,
       connectors,
@@ -59,7 +59,7 @@ export const getConnectors = async (
       logger,
     });
 
-    return GetCaseConnectorsResponseRt.encode(results);
+    return decodeOrThrow(GetCaseConnectorsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case connectors case id: ${caseId}: ${error}`,
