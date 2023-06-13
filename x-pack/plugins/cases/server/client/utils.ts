@@ -163,8 +163,24 @@ const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
   );
 };
 
-const addCategoryFilter = (category: string): KueryNode => {
-  return nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.category`, `${category}`);
+const buildCategoryFilter = (
+  categories: CasesFindQueryParams['category']
+): KueryNode | undefined => {
+  if (categories === undefined) {
+    return;
+  }
+
+  const categoriesAsArray = Array.isArray(categories) ? categories : [categories];
+
+  if (categoriesAsArray.length === 0) {
+    return;
+  }
+
+  const categoryFilters = categoriesAsArray.map((category) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.category`, `${category}`)
+  );
+
+  return nodeBuilder.or(categoryFilters);
 };
 
 export const NodeBuilderOperators = {
@@ -384,7 +400,7 @@ export const constructQueryOptions = ({
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
-  const categoryFilter = category ? addCategoryFilter(category) : undefined;
+  const categoryFilter = buildCategoryFilter(category);
 
   const filters = combineFilters([
     statusFilter,

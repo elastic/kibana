@@ -159,11 +159,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('filters by category', async () => {
+      it('filters by a single category', async () => {
         await createCase(supertest, postCaseReq);
         const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
 
-        const cases = await findCases({ supertest, query: { category: 'foobar' } });
+        const cases = await findCases({ supertest, query: { category: ['foobar'] } });
 
         expect(cases).to.eql({
           ...findCasesResp,
@@ -173,15 +173,21 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('filters by empty category', async () => {
-        const myCase = await createCase(supertest, postCaseReq);
-        const cases = await findCases({ supertest, query: { category: null } });
+      it('filters by multiple categories', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+        const otherCategory = await createCase(supertest, { ...postCaseReq, category: 'other' });
+
+        const cases = await findCases({
+          supertest,
+          query: { category: ['foobar', 'other'] },
+        });
 
         expect(cases).to.eql({
           ...findCasesResp,
-          total: 1,
-          cases: [myCase],
-          count_open_cases: 1,
+          total: 2,
+          cases: [foobarCategory, otherCategory],
+          count_open_cases: 2,
         });
       });
 
