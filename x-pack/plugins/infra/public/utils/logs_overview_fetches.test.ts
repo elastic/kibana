@@ -13,7 +13,7 @@ import { createLogsSharedPluginStartMock } from '@kbn/logs-shared-plugin/public/
 import { createInfraPluginStartMock } from '../mocks';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './logs_overview_fetchers';
-import { createResolvedLogViewMock } from '@kbn/logs-shared-plugin/common';
+import { createResolvedLogViewMock } from '@kbn/logs-shared-plugin/common/mocks';
 
 const DEFAULT_PARAMS = {
   absoluteTime: { start: 1593430680000, end: 1593430800000 },

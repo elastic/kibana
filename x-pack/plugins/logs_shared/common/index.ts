@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { createResolvedLogViewMock } from './log_views/resolved_log_view.mock';
-
 // LogView runtime
 export {
   defaultFilterStateKey,
