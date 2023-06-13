@@ -6,21 +6,20 @@
  */
 
 import { useMemo } from 'react';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../contexts/kibana';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
-
 export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;
 
-export function dashboardServiceProvider(dashboard: DashboardStart) {
+export function dashboardServiceProvider(dashboardService: DashboardStart) {
   return {
     /**
      * Fetches dashboards
      */
     async fetchDashboards(query?: string) {
-      const findDashboardsService = await dashboard.findDashboardsService();
+      const findDashboardsService = await dashboardService.findDashboardsService();
       const responses = await findDashboardsService.search({
         search: query ? `${query}*` : '',
         size: 1000,
@@ -31,7 +30,7 @@ export function dashboardServiceProvider(dashboard: DashboardStart) {
      * Generates dashboard url with edit mode
      */
     async getDashboardEditUrl(dashboardId: string) {
-      return await dashboard.locator?.getUrl({
+      return await dashboardService.locator?.getUrl({
         dashboardId,
         viewMode: ViewMode.EDIT,
         useHash: false,
