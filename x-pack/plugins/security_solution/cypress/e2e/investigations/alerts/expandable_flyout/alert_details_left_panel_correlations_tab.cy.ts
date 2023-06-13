@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE } from '../../../../screens/expandable_flyout/alert_details_right_panel';
+import {
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT,
+  VIEW_CASE_TOASTER_LINK,
+} from '../../../../screens/expandable_flyout/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -24,7 +31,10 @@ import {
   openCorrelationsTab,
 } from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
-import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import {
+  expandDocumentDetailsExpandableFlyoutLeftSection,
+  openTakeActionButtonAndSelectItem,
+} from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
@@ -48,8 +58,20 @@ describe(
     });
 
     it('should render correlations details correctly', () => {
-      cy.log('should render the Insights header');
+      cy.log('link the alert to a new case');
 
+      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT).type('case');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT).type(
+        'case description'
+      );
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON).click();
+
+      cy.log('view for case link (case created)');
+      cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView();
+
+      cy.log('should render the Insights header');
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
         .should('be.visible')
         .and('have.text', 'Insights');
@@ -76,7 +98,7 @@ describe(
         .should('be.visible')
         .and('have.text', '1 alert related by session');
 
-      cy.get(CORRELATIONS_CASES_SECTION).should('be.visible').and('have.text', '0 related cases');
+      cy.get(CORRELATIONS_CASES_SECTION).should('be.visible').and('have.text', '1 related case');
 
       expandCorrelationsSection(CORRELATIONS_ANCESTRY_SECTION);
 
