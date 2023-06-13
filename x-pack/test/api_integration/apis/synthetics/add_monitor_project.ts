@@ -1394,10 +1394,11 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
+          .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send({ monitors: testMonitors })
           .expect(200);
