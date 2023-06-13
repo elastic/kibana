@@ -44,13 +44,15 @@ const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => 
 
 const getConfigFormSchemaAfterSecrets = (
   options: EuiComboBoxOptionOption[],
-  isLoading: boolean
+  isLoading: boolean,
+  isDisabled: boolean
 ): ConfigFieldSchema[] => [
   {
     id: 'allowedChannels',
     label: i18n.ALLOWED_CHANNELS,
     type: 'COMBO_BOX',
     euiFieldProps: {
+      isDisabled,
       isLoading,
       noSuggestions: false,
       options,
@@ -123,8 +125,8 @@ const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isE
   }
 
   const configFormSchemaAfterSecrets = useMemo(
-    () => getConfigFormSchemaAfterSecrets(channels, isLoading),
-    [channels, isLoading]
+    () => getConfigFormSchemaAfterSecrets(channels, isLoading, token.length > 0),
+    [channels, isLoading, token]
   );
 
   const debounceSetToken = debounce(setToken, INPUT_TIMEOUT);
@@ -149,7 +151,7 @@ const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isE
       readOnly={readOnly}
       configFormSchema={[]}
       secretsFormSchema={getSecretsFormSchema(docLinks)}
-      configFormSchemaAfterSecrets={token.length > 0 ? configFormSchemaAfterSecrets : []}
+      configFormSchemaAfterSecrets={configFormSchemaAfterSecrets}
     />
   );
 };
