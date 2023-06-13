@@ -13,7 +13,7 @@ import {
 } from '@kbn/apm-plugin/common/es_fields/apm';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { generateData } from './generate_data';
+import { generateLatencyData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -52,8 +52,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     describe('transaction_duration', () => {
       before(async () => {
-        await generateData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
-        await generateData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
+        await generateLatencyData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
+        await generateLatencyData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
       });
 
       after(() => synthtraceEsClient.clean());

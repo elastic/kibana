@@ -10,13 +10,17 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 export const config = {
   appleTransaction: {
     name: 'GET /apple',
+    successRate: 75,
+    failureRate: 25,
   },
   bananaTransaction: {
     name: 'GET /banana',
+    successRate: 50,
+    failureRate: 50,
   },
 };
 
-export async function generateData({
+export async function generateLatencyData({
   synthtraceEsClient,
   serviceName,
   start,
