@@ -30,26 +30,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
-  const transactionWithAlert = 'GET /api/product/list';
-
-  function createRule() {
-    return createApmRule({
-      supertest,
-      name: `Latency threshold | ${serviceName}`,
-      params: {
-        serviceName: serviceName,
-        transactionType: 'request',
-        transactionName: transactionWithAlert,
-        windowSize: 99,
-        windowUnit: 'y',
-        threshold: 99,
-        aggregationType: AggregationType.Avg,
-        environment: 'production',
-      },
-      ruleTypeId: ApmRuleType.TransactionDuration,
-    });
-  }
-
   async function getTransactionGroups(overrides?: {
     path?: {
       serviceName?: string;
@@ -89,22 +69,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
-    let ruleId: string;
-
     const transactions = [
       {
-        name: transactionWithAlert,
+        name: 'GET /api/task/avg',
+        duration: 100,
+        type: 'task',
+      },
+      {
+        name: 'GET /api/request/avg',
         duration: 100,
         type: 'request',
       },
       {
-        name: 'GET /api/product/list',
-        duration: 1000,
-        type: 'task',
+        name: 'GET /api/request/p99',
+        duration: 100,
+        type: 'request',
       },
       {
-        name: 'GET /api/product/list3',
-        duration: 10000,
+        name: 'GET /api/request/p95',
+        duration: 100,
+        type: 'request',
+      },
+      {
+        name: 'GET /api/failed/request',
+        duration: 100,
         type: 'request',
       },
     ];
@@ -130,9 +118,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
-            return transactions.map(({ name, duration }) => {
+            return transactions.map(({ name, duration, type }) => {
               return serviceGoProdInstance
-                .transaction({ transactionName: name })
+                .transaction({ transactionName: name, transactionType: type })
                 .timestamp(timestamp)
                 .duration(duration)
                 .failure();
@@ -141,17 +129,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
-    after(async () => {
-      synthtraceEsClient.clean();
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-      await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
-    });
+    describe('Transaction groups with avg transaction duration alerts', () => {
+      let ruleId: string;
 
-    describe('Transaction groups with alerts', () => {
       before(async () => {
-        const createdRule = await createRule();
+        const createdRule = await createApmRule({
+          supertest,
+          name: `Latency threshold | ${serviceName}`,
+          params: {
+            serviceName: serviceName,
+            transactionType: 'request',
+            transactionName: 'GET /api/request/avg',
+            windowSize: 99,
+            windowUnit: 'h',
+            threshold: 99,
+            aggregationType: AggregationType.Avg,
+            environment: 'production',
+          },
+          ruleTypeId: ApmRuleType.TransactionDuration,
+        });
+
         ruleId = createdRule.id;
         await waitForActiveAlert({ ruleId, esClient, log });
+      });
+
+      after(async () => {
+        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
       });
 
       it('returns the correct number of alert counts', async () => {
@@ -160,27 +163,120 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
-        expect(txGroupsTypeRequest.transactionGroups[1]).to.have.property(
-          'name',
-          transactionWithAlert
+
+        ['GET /api/failed/request', 'GET /api/request/p95', 'GET /api/request/p99'].map(
+          (txName) => {
+            expect(
+              txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName)
+            ).to.not.have.property('alertsCount');
+          }
         );
-        expect(txGroupsTypeRequest.transactionGroups[1]).to.have.property('alertsCount', 1);
+
+        ['GET /api/request/avg'].map((txName) => {
+          const tx = txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName);
+          expect(tx).to.have.property('alertsCount', 1);
+        });
       });
     });
 
-    describe('Transaction groups without alerts', () => {
-      it('returns the correct number of alerts', async () => {
-        const txGroupsTypeTask = await getTransactionGroups({
-          query: { transactionType: 'task' },
+    describe('Transaction groups with p99 transaction duration alerts', () => {
+      let ruleId: string;
+
+      before(async () => {
+        const createdRule = await createApmRule({
+          supertest,
+          name: `Latency threshold | ${serviceName}`,
+          params: {
+            serviceName: serviceName,
+            transactionType: 'request',
+            transactionName: 'GET /api/request/p99',
+            windowSize: 99,
+            windowUnit: 'h',
+            threshold: 10,
+            aggregationType: AggregationType.P99,
+            environment: 'production',
+          },
+          ruleTypeId: ApmRuleType.TransactionDuration,
         });
 
-        expect(txGroupsTypeTask.hasActiveAlerts).to.be.equal(false);
-        expect(txGroupsTypeTask.transactionGroups[0]).to.have.property(
-          'name',
-          'GET /api/product/list'
-        );
-        expect(txGroupsTypeTask.transactionGroups[0]).to.have.property('alertsCount', undefined);
+        ruleId = createdRule.id;
+        await waitForActiveAlert({ ruleId, esClient, log });
       });
+
+      after(async () => {
+        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+      });
+
+      it('returns the correct number of alert counts', async () => {
+        const txGroupsTypeRequest = await getTransactionGroups({
+          query: { transactionType: 'request', latencyAggregationType: LatencyAggregationType.p99 },
+        });
+
+        expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
+
+        ['GET /api/failed/request', 'GET /api/request/p95', 'GET /api/request/avg'].map(
+          (txName) => {
+            expect(
+              txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName)
+            ).to.not.have.property('alertsCount');
+          }
+        );
+
+        ['GET /api/request/p99'].map((txName) => {
+          const tx = txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName);
+          expect(tx).to.have.property('alertsCount', 1);
+        });
+      });
+    });
+
+    describe('Transaction groups with error rate alerts', () => {
+      let ruleId: string;
+
+      before(async () => {
+        const createdRule = await createApmRule({
+          supertest,
+          name: `Error rate | ${serviceName}`,
+          params: {
+            serviceName: serviceName,
+            transactionType: 'request',
+            transactionName: 'GET /api/failed/request',
+            windowSize: 99,
+            windowUnit: 'h',
+            threshold: 5,
+            environment: 'production',
+          },
+          ruleTypeId: ApmRuleType.TransactionErrorRate,
+        });
+
+        ruleId = createdRule.id;
+        await waitForActiveAlert({ ruleId, esClient, log });
+      });
+
+      after(async () => {
+        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+      });
+
+      it('returns the correct number of alert counts', async () => {
+        const txGroupsTypeRequest = await getTransactionGroups({
+          query: { transactionType: 'request', latencyAggregationType: LatencyAggregationType.p95 },
+        });
+
+        ['GET /api/request/avg', 'GET /api/request/p95', 'GET /api/request/p99'].map((txName) => {
+          expect(
+            txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName)
+          ).to.not.have.property('alertsCount');
+        });
+
+        ['GET /api/failed/request'].map((txName) => {
+          const tx = txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName);
+          expect(tx).to.have.property('alertsCount', 1);
+        });
+      });
+    });
+
+    after(async () => {
+      synthtraceEsClient.clean();
+      await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
     });
   });
 }
