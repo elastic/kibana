@@ -18,6 +18,9 @@ import {
   EuiSwitch,
   EuiTextArea,
   EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { Status } from '../../../../../../common/types/api';
@@ -40,6 +43,25 @@ interface ConnectorConfigurationFieldProps {
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
   configEntry,
 }) => {
+  return configEntry.tooltip ? (
+    <EuiToolTip content={configEntry.tooltip}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem>
+          <ConnectorConfigurationFieldType configEntry={configEntry} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIcon type="questionInCircle" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  ) : (
+    <ConnectorConfigurationFieldType configEntry={configEntry} />
+  );
+};
+
+export const ConnectorConfigurationFieldType: React.FC<ConnectorConfigurationFieldProps> = ({
+  configEntry,
+}) => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
 
@@ -50,6 +72,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     label,
     options,
     required,
+    placeholder,
     sensitive,
     tooltip,
     value,
@@ -89,6 +112,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}
+          placeholder={placeholder}
         />
       );
 
@@ -96,6 +120,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       const textarea = (
         <EuiTextArea
           disabled={status === Status.LOADING}
+          placeholder={placeholder}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
@@ -155,6 +180,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       ) : (
         <EuiFieldText
           disabled={status === Status.LOADING}
+          placeholder={placeholder}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {

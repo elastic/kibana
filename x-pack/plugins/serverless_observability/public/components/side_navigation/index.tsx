@@ -14,6 +14,7 @@ import {
   getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -29,11 +30,12 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'services-infra',
           children: [
-            { id: 'services', title: 'Services', href: '/app/apm/services' },
+            { link: 'apm:services' },
             {
-              id: 'infra',
-              title: 'Infrastructure',
-              href: '/app/metrics/inventory',
+              title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
+                defaultMessage: 'Infrastructure',
+              }),
+              link: 'metrics:inventory',
             },
           ],
         },
@@ -41,19 +43,13 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'alerts-cases-slos',
           children: [
             {
-              id: 'alerts',
-              title: 'Alerts',
-              href: '/app/observability/alerts',
+              link: 'observability-overview:alerts',
             },
             {
-              id: 'Cases',
-              title: 'Cases',
-              href: '/app/observability/cases',
+              link: 'observability-overview:cases',
             },
             {
-              id: 'slos',
-              title: 'SLOs',
-              href: '/app/observability/slos',
+              link: 'observability-overview:slos',
             },
           ],
         },
@@ -62,14 +58,13 @@ const navigationTree: NavigationTreeDefinition = {
           title: 'Signals',
           children: [
             {
-              id: 'traces',
-              title: 'Traces',
-              href: '/app/apm/traces',
+              link: 'apm:traces',
             },
             {
-              id: 'logs',
-              title: 'Logs',
-              href: '/app/logs/stream',
+              title: i18n.translate('xpack.serverlessObservability.nav.signalsLogs', {
+                defaultMessage: 'Logs',
+              }),
+              link: 'logs:stream',
             },
           ],
         },
@@ -78,14 +73,13 @@ const navigationTree: NavigationTreeDefinition = {
           title: 'Toolbox',
           children: [
             {
-              id: 'visualization',
-              title: 'Visualization',
-              href: '/app/visualize',
+              title: i18n.translate('xpack.serverlessObservability.nav.toolBoxVisualization', {
+                defaultMessage: 'Visualization',
+              }),
+              link: 'visualize',
             },
             {
-              id: 'dashboards',
-              title: 'Dashboards',
-              href: '/app/dashboards',
+              link: 'dashboards',
             },
           ],
         },
@@ -93,10 +87,11 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'on-boarding',
           children: [
             {
-              id: 'get-started',
-              title: 'Get started',
+              title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+                defaultMessage: 'Get started',
+              }),
               icon: 'launch',
-              href: '/app/observabilityOnboarding',
+              link: 'observabilityOnboarding',
             },
           ],
         },
