@@ -113,7 +113,7 @@ export function getColumns({
                 </EuiToolTip>
               );
             },
-          },
+          } as EuiBasicTableColumn<ServiceTransactionGroupItem>,
         ]
       : []),
     {
