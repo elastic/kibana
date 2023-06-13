@@ -7,8 +7,6 @@
 
 import { Observable } from 'rxjs';
 import {
-  SavedObjectsStart,
-  SavedObjectsClientContract,
   IUiSettingsClient,
   ChromeBreadcrumb,
   IBasePath,
