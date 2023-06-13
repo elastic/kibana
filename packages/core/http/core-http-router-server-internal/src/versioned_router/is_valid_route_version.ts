@@ -17,10 +17,15 @@ const INTERNAL_VERSION_REGEX = /^[0-9]+$/;
  * @internal
  */
 export function isValidRouteVersion(isPublicApi: boolean, version: string): undefined | string {
+  /**
+   * Public routes should be of the form YYYY-MM-DD and be a valid date. Because we only allow a single public version
+   * at this time we keep this check simple.
+   */
   if (isPublicApi) {
-    return PUBLIC_VERSION_REGEX.test(version) && moment(version, 'YYYY-MM-DD').isValid()
-      ? undefined
-      : `Invalid version. Received "${version}", expected a valid date string formatted as YYYY-MM-DD.`;
+    if ('2023-10-31' !== version) {
+      return 'Invalid version, for now please use "2023-10-31" as the version for all public routes.';
+    }
+    return;
   }
   return INTERNAL_VERSION_REGEX.test(version) && version !== '0'
     ? undefined

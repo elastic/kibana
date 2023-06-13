@@ -203,6 +203,7 @@ export interface FullValidationConfig<P, Q, B> {
 export interface AddVersionOpts<P, Q, B> {
   /**
    * Version to assign to this route
+   * @note For public APIs current available version is `2023-10-31`. More may be added in future.
    * @experimental
    */
   version: ApiVersion;
