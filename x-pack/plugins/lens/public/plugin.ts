@@ -114,6 +114,7 @@ import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/emb
 import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
+  type TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
@@ -216,6 +217,14 @@ export interface LensPublicStart {
    */
   SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
   /**
+   * React component which can be used to embed a Lens Visualization Config Panel Component.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  EditLensConfigPanelApi: () => Promise<EditLensConfigPanelComponent>;
+  /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
    *
@@ -251,6 +260,14 @@ export interface LensPublicStart {
     suggestions: LensSuggestionsApi;
   }>;
 }
+
+export type EditLensConfigPanelComponent = React.ComponentType<{
+  attributes: TypedLensByValueInput['attributes'];
+  dataView: DataView;
+  updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
+  setIsFlyoutVisible?: (flag: boolean) => void;
+  datasourceId: 'formBased' | 'textBased';
+}>;
 
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -646,6 +663,17 @@ export class LensPlugin {
             });
           },
         };
+      },
+      EditLensConfigPanelApi: async () => {
+        const { getEditLensConfiguration } = await import('./async_services');
+        if (!this.editorFrameService) {
+          this.initDependenciesForApi();
+        }
+        const [visualizationMap, datasourceMap] = await Promise.all([
+          this.editorFrameService!.loadVisualizations(),
+          this.editorFrameService!.loadDatasources(),
+        ]);
+        return getEditLensConfiguration(core, startDependencies, visualizationMap, datasourceMap);
       },
     };
   }

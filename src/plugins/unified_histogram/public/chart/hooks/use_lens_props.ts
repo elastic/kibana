@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isEqual } from 'lodash';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -22,12 +22,14 @@ export const useLensProps = ({
   refetch$,
   attributesContext,
   onLoad,
+  isPlainRecord,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   attributesContext: LensAttributesContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  isPlainRecord?: boolean;
 }) => {
   const buildLensProps = useCallback(() => {
     const { attributes, requestData } = attributesContext;
@@ -49,6 +51,15 @@ export const useLensProps = ({
     const subscription = refetch$.subscribe(updateLensPropsContext);
     return () => subscription.unsubscribe();
   }, [refetch$, updateLensPropsContext]);
+
+  useEffect(() => {
+    if (isPlainRecord) {
+      const newProps = buildLensProps();
+      if (!isEqual(newProps, lensPropsContext)) {
+        updateLensPropsContext();
+      }
+    }
+  }, [buildLensProps, isPlainRecord, lensPropsContext, updateLensPropsContext]);
 
   return lensPropsContext;
 };

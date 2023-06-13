@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -112,6 +112,10 @@ export function Chart({
   onBrushEnd,
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [EditLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
+  const [suggestion, setSuggestion] = useState(currentSuggestion);
+  const needsToUpdatePanel = useRef<boolean>(true);
   const {
     showChartOptionsPopover,
     chartRef,
@@ -162,7 +166,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
-    currentSuggestion,
+    currentSuggestion: suggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,
@@ -202,18 +206,71 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
-        suggestion: currentSuggestion,
+        suggestion,
       }),
-    [
-      breakdown?.field,
-      chart?.timeInterval,
-      chart?.title,
-      currentSuggestion,
-      dataView,
-      filters,
-      query,
-    ]
+    [breakdown?.field, chart?.timeInterval, chart?.title, suggestion, dataView, filters, query]
   );
+
+  const updateSuggestion = useCallback(
+    (datasourceState, visualizationState) => {
+      const updatedSuggestion = {
+        ...suggestion,
+        ...(datasourceState && { datasourceState }),
+        ...(visualizationState && { visualizationState }),
+      } as Suggestion;
+      setSuggestion(updatedSuggestion);
+    },
+    [suggestion]
+  );
+
+  const onSuggestionSelectorChange = useCallback(
+    (s: Suggestion | undefined) => {
+      setSuggestion(s);
+      onSuggestionChange?.(s);
+    },
+    [onSuggestionChange]
+  );
+
+  useEffect(() => {
+    if (!chartVisible && isFlyoutVisible) {
+      setIsFlyoutVisible(false);
+    }
+  }, [chartVisible, isFlyoutVisible]);
+
+  useEffect(() => {
+    if (isPlainRecord) {
+      setSuggestion(currentSuggestion);
+      needsToUpdatePanel.current = true;
+    }
+  }, [currentSuggestion, isPlainRecord]);
+
+  useEffect(() => {
+    async function fetchLensConfigComponent() {
+      const Component = await services.lens.EditLensConfigPanelApi();
+      const panel = (
+        <Component
+          attributes={lensAttributesContext.attributes}
+          dataView={dataView}
+          updateAll={updateSuggestion}
+          setIsFlyoutVisible={setIsFlyoutVisible}
+          datasourceId="textBased"
+        />
+      );
+      setEditLensConfigPanel(panel);
+    }
+    if (isPlainRecord && needsToUpdatePanel.current) {
+      fetchLensConfigComponent();
+      needsToUpdatePanel.current = false;
+    }
+  }, [
+    lensAttributesContext.attributes,
+    suggestion,
+    services.lens,
+    dataView,
+    updateSuggestion,
+    isPlainRecord,
+    isFlyoutVisible,
+  ]);
 
   const onEditVisualization = useEditVisualization({
     services,
@@ -224,7 +281,25 @@ export function Chart({
   });
   const LensSaveModalComponent = services.lens.SaveModalComponent;
   const canSaveVisualization =
-    chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
+    chartVisible && suggestion && services.capabilities.dashboard?.showWriteControls;
+
+  const renderEditButton = useMemo(
+    () => (
+      <EuiButtonIcon
+        size="xs"
+        iconType="pencil"
+        onClick={() => setIsFlyoutVisible(true)}
+        data-test-subj="unifiedHistogramEditFlyoutVisualization"
+        aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
+          defaultMessage: 'Edit visualization',
+        })}
+        disabled={isFlyoutVisible}
+      />
+    ),
+    [isFlyoutVisible]
+  );
+
+  const canEditVisualizationOnTheFly = isPlainRecord;
 
   return (
     <EuiFlexGroup
@@ -266,12 +341,12 @@ export function Chart({
                     />
                   </EuiFlexItem>
                 )}
-                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+                {chartVisible && suggestion && allSuggestions && allSuggestions?.length > 1 && (
                   <EuiFlexItem css={breakdownFieldSelectorItemCss}>
                     <SuggestionSelector
                       suggestions={allSuggestions}
-                      activeSuggestion={currentSuggestion}
-                      onSuggestionChange={onSuggestionChange}
+                      activeSuggestion={suggestion}
+                      onSuggestionChange={onSuggestionSelectorChange}
                     />
                   </EuiFlexItem>
                 )}
@@ -295,6 +370,21 @@ export function Chart({
                       </EuiToolTip>
                     </EuiFlexItem>
                   </>
+                )}
+                {canEditVisualizationOnTheFly && (
+                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                    {!isFlyoutVisible ? (
+                      <EuiToolTip
+                        content={i18n.translate('unifiedHistogram.editVisualizationButton', {
+                          defaultMessage: 'Edit visualization',
+                        })}
+                      >
+                        {renderEditButton}
+                      </EuiToolTip>
+                    ) : (
+                      renderEditButton
+                    )}
+                  </EuiFlexItem>
                 )}
                 {onEditVisualization && (
                   <EuiFlexItem grow={false} css={chartToolButtonCss}>
@@ -387,6 +477,7 @@ export function Chart({
           isSaveable={false}
         />
       )}
+      {isFlyoutVisible && EditLensConfigPanel}
     </EuiFlexGroup>
   );
 }

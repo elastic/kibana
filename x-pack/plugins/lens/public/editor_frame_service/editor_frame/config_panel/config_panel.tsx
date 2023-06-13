@@ -52,7 +52,7 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, datasourceMap, indexPatternService } = props;
+  const { activeVisualization, datasourceMap, indexPatternService, onUpdateStateCb } = props;
   const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );
@@ -74,8 +74,12 @@ export function LayerPanels(
           newState,
         })
       );
+      if (onUpdateStateCb && activeDatasourceId) {
+        const dsState = datasourceStates[activeDatasourceId].state;
+        onUpdateStateCb?.(dsState, newState);
+      }
     },
-    [activeVisualization, dispatchLens]
+    [activeDatasourceId, activeVisualization.id, datasourceStates, dispatchLens, onUpdateStateCb]
   );
   const updateDatasource = useMemo(
     () =>
@@ -90,9 +94,10 @@ export function LayerPanels(
               dontSyncLinkedDimensions,
             })
           );
+          onUpdateStateCb?.(newState, visualization.state);
         }
       },
-    [dispatchLens]
+    [dispatchLens, onUpdateStateCb, visualization.state]
   );
   const updateDatasourceAsync = useMemo(
     () => (datasourceId: string | undefined, newState: unknown) => {
@@ -147,9 +152,10 @@ export function LayerPanels(
               },
             })
           );
+          onUpdateStateCb?.(newDatasourceState, newVisualizationState);
         }, 0);
       },
-    [dispatchLens]
+    [dispatchLens, onUpdateStateCb]
   );
 
   const toggleFullscreen = useMemo(
@@ -213,20 +219,21 @@ export function LayerPanels(
       visualizationId?: string;
       layerId?: string;
     }) => {
-      const indexPatterns = await props.indexPatternService.ensureIndexPattern({
+      const indexPatterns = await props.indexPatternService?.ensureIndexPattern({
         id: indexPatternId,
         cache: props.framePublicAPI.dataViews.indexPatterns,
       });
-
-      dispatchLens(
-        changeIndexPattern({
-          indexPatternId,
-          datasourceIds: datasourceId ? [datasourceId] : [],
-          visualizationIds: visualizationId ? [visualizationId] : [],
-          layerId,
-          dataViews: { indexPatterns },
-        })
-      );
+      if (indexPatterns) {
+        dispatchLens(
+          changeIndexPattern({
+            indexPatternId,
+            datasourceIds: datasourceId ? [datasourceId] : [],
+            visualizationIds: visualizationId ? [visualizationId] : [],
+            layerId,
+            dataViews: { indexPatterns },
+          })
+        );
+      }
     },
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
@@ -262,6 +269,7 @@ export function LayerPanels(
               updateVisualization={setVisualizationState}
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
+              displayLayerSettings={!props.hideLayerHeader}
               onChangeIndexPattern={(args) => {
                 onChangeIndexPattern(args);
                 const layersToRemove =
@@ -307,6 +315,22 @@ export function LayerPanels(
                 const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
                 const datasourceId = datasourcePublicAPI?.datasourceId;
                 dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
+                if (datasourceId && onUpdateStateCb) {
+                  const nextVisState = activeVisualization.removeDimension({
+                    layerId,
+                    columnId: dimensionProps.columnId,
+                    prevState: visualization.state,
+                    frame: props.framePublicAPI,
+                  });
+                  const activeDatasource = datasourceMap[datasourceId];
+                  const nextDsState = activeDatasource?.removeColumn({
+                    layerId: dimensionProps.layerId,
+                    columnId: dimensionProps.columnId,
+                    prevState: datasourceStates[datasourceId].state,
+                    indexPatterns: props.framePublicAPI.dataViews.indexPatterns,
+                  });
+                  onUpdateStateCb(nextDsState, nextVisState);
+                }
               }}
               toggleFullscreen={toggleFullscreen}
               indexPatternService={indexPatternService}
@@ -336,19 +360,21 @@ export function LayerPanels(
               indexPatternId = dataView.id;
             }
 
-            const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+            const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
               id: indexPatternId,
               cache: props.framePublicAPI.dataViews.indexPatterns,
             });
 
-            dispatchLens(
-              changeIndexPattern({
-                dataViews: { indexPatterns: newIndexPatterns },
-                datasourceIds: Object.keys(datasourceStates),
-                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
-                indexPatternId,
-              })
-            );
+            if (newIndexPatterns) {
+              dispatchLens(
+                changeIndexPattern({
+                  dataViews: { indexPatterns: newIndexPatterns },
+                  datasourceIds: Object.keys(datasourceStates),
+                  visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+                  indexPatternId,
+                })
+              );
+            }
           },
           registerLibraryAnnotationGroup: (groupInfo) =>
             dispatchLens(registerLibraryAnnotationGroup(groupInfo)),

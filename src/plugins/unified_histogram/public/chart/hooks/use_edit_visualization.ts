@@ -32,7 +32,7 @@ export const useEditVisualization = ({
   const [canVisualize, setCanVisualize] = useState(false);
 
   const checkCanVisualize = useCallback(async () => {
-    if (!dataView.id) {
+    if (!dataView.id || isPlainRecord) {
       return false;
     }
     if (!isPlainRecord && (!dataView.isTimeBased() || !dataView.getTimeField().visualizable)) {
