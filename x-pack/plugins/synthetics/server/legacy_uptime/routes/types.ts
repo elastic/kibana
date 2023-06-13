@@ -61,9 +61,7 @@ export type UMKibanaRoute = UMRouteDefinition<
  * This is an abstraction over the default Kibana route type. This allows us to use custom
  * arguments in our route handlers and impelement custom middleware.
  */
-export type UptimeRoute<ClientContract = unknown> = UMRouteDefinition<
-  UMRouteHandler<ClientContract>
->;
+export type UptimeRoute<ClientContract = {}> = UMRouteDefinition<UMRouteHandler<ClientContract>>;
 
 /**
  * Functions of this type accept custom lib functions and outputs a route object.
@@ -81,7 +79,7 @@ export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => Synthetics
  * object that the Kibana platform can consume.
  */
 export type UMKibanaRouteWrapper = (
-  uptimeRoute: UptimeRoute<{}>,
+  uptimeRoute: UptimeRoute,
   server: UptimeServerSetup
 ) => UMKibanaRoute;
 
