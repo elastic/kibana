@@ -88,7 +88,7 @@ describe('Cloud Plugin', () => {
           })
         );
         expect(decodeCloudIdMock).toHaveBeenCalledTimes(1);
-        expect(decodeCloudIdMock).toHaveBeenCalledWith('cloudId');
+        expect(decodeCloudIdMock).toHaveBeenCalledWith('cloudId', expect.any(Object));
       });
     });
   });

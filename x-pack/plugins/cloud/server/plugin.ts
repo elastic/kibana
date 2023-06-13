@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -84,9 +85,11 @@ export interface CloudStart {
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
+  private readonly logger: Logger;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
+    this.logger = this.context.logger.get();
   }
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
@@ -100,7 +103,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
     let decodedId: DecodedCloudId | undefined;
     if (this.config.id) {
-      decodedId = decodeCloudId(this.config.id);
+      decodedId = decodeCloudId(this.config.id, this.logger);
     }
 
     return {
