@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { RiskWeightTypes } from '../../../common/risk_engine';
 import {
   buildCategoryScoreAssignment,
   buildCategoryWeights,
   buildWeightingOfScoreByCategory,
-  RiskWeightTypes,
 } from './category_weights';
 
 describe('buildCategoryWeights', () => {
