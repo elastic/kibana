@@ -11,39 +11,36 @@ import { inspect } from 'util';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
-import {
-  MAIN_SAVED_OBJECT_INDEX,
-  ALL_SAVED_OBJECT_INDICES,
-  TASK_MANAGER_SAVED_OBJECT_INDEX,
-} from '@kbn/core-saved-objects-server';
+import { MAIN_SAVED_OBJECT_INDEX, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 /**
- * Deletes all saved object indices, or if onlyTaskManager==true, it deletes task_manager indices
+ * Deletes the specified saved object index (or all of them, if none specified)
  */
 export async function deleteSavedObjectIndices({
   client,
   stats,
-  onlyTaskManager = false,
   log,
+  index = ALL_SAVED_OBJECT_INDICES,
 }: {
   client: Client;
   stats: Stats;
-  onlyTaskManager?: boolean;
   log: ToolingLog;
+  index?: string | string[];
 }) {
-  const indexNames = (await fetchSavedObjectIndices(client)).filter(
-    (indexName) => !onlyTaskManager || indexName.includes(TASK_MANAGER_SAVED_OBJECT_INDEX)
-  );
-  if (!indexNames.length) {
+  const indices = new Array<string>().concat(index);
+  const existingSavedObjectIndices = await fetchSavedObjectIndices(client);
+  const toDelete = indices.filter((indexName) => existingSavedObjectIndices.includes(indexName));
+
+  if (!toDelete.length) {
     return;
   }
 
   await client.indices.putSettings(
     {
-      index: indexNames,
+      index: toDelete,
       body: { blocks: { read_only: false } },
     },
     {
@@ -54,11 +51,11 @@ export async function deleteSavedObjectIndices({
   await deleteIndex({
     client,
     stats,
-    index: indexNames,
+    index: toDelete,
     log,
   });
 
-  return indexNames;
+  return toDelete;
 }
 
 /**
@@ -111,15 +108,17 @@ export async function cleanSavedObjectIndices({
   client,
   stats,
   log,
+  index = ALL_SAVED_OBJECT_INDICES,
 }: {
   client: Client;
   stats: Stats;
   log: ToolingLog;
+  index?: string | string[];
 }) {
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: ALL_SAVED_OBJECT_INDICES,
+        index,
         body: {
           query: {
             bool: {

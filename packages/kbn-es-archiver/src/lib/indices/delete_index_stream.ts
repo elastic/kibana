@@ -17,6 +17,8 @@ import { cleanSavedObjectIndices } from './kibana_index';
 import { deleteDataStream } from './delete_data_stream';
 
 export function createDeleteIndexStream(client: Client, stats: Stats, log: ToolingLog) {
+  let cleanedSavedObjectIndices = false;
+
   return new Transform({
     readableObjectMode: true,
     writableObjectMode: true,
@@ -30,7 +32,11 @@ export function createDeleteIndexStream(client: Client, stats: Stats, log: Tooli
           const { index } = record.value;
 
           if (index.startsWith(MAIN_SAVED_OBJECT_INDEX)) {
-            await cleanSavedObjectIndices({ client, stats, log });
+            if (!cleanedSavedObjectIndices) {
+              await cleanSavedObjectIndices({ client, stats, log });
+              cleanedSavedObjectIndices = true;
+              log.debug(`Cleaned all saved object indices`);
+            }
           } else {
             await deleteIndex({ client, stats, log, index });
           }
@@ -42,6 +48,13 @@ export function createDeleteIndexStream(client: Client, stats: Stats, log: Tooli
 
           await deleteDataStream(client, dataStream, name);
           stats.deletedDataStream(dataStream, name);
+        } else if (record.type === 'doc') {
+          const index = record.value.index;
+          if (index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !cleanedSavedObjectIndices) {
+            await cleanSavedObjectIndices({ client, stats, log });
+            cleanedSavedObjectIndices = true;
+            log.debug(`Cleaned all saved object indices`);
+          }
         } else {
           this.push(record);
         }
