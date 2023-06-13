@@ -27,7 +27,7 @@ interface Props {
 
 export const LimitOptions = ({ limit, onChange }: Props) => {
   const [idSelected, setIdSelected] = useState(limit as number);
-  const onSelected = (value: number) => {
+  const onSelected = (_id: string, value: number) => {
     setIdSelected(value);
     onChange(value);
   };
@@ -70,7 +70,7 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
           })}
           idSelected={buildId(idSelected)}
           options={options}
-          onChange={(_, value: number) => onSelected(value)}
+          onChange={onSelected}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
