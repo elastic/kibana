@@ -153,7 +153,15 @@
               "\nValidation for this version of a route"
             ],
             "signature": [
-              "false | FullValidationConfig<P, Q, B>"
+              "false | ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.FullValidationConfig",
+                "text": "FullValidationConfig"
+              },
+              "<P, Q, B>"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
@@ -985,6 +993,85 @@
               "boolean | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.FullValidationConfig",
+        "type": "Interface",
+        "tags": [
+          "experimental"
+        ],
+        "label": "FullValidationConfig",
+        "description": [
+          "\nVersioned route validation"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.FullValidationConfig",
+            "text": "FullValidationConfig"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FullValidationConfig.request",
+            "type": "CompoundType",
+            "tags": [
+              "experimental"
+            ],
+            "label": "request",
+            "description": [
+              "\nValidation to run against route inputs: params, query and body"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteRequestValidation",
+                "text": "VersionedRouteRequestValidation"
+              },
+              "<P, Q, B> | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FullValidationConfig.response",
+            "type": "Object",
+            "tags": [
+              "note",
+              "experimental"
+            ],
+            "label": "response",
+            "description": [
+              "\nValidation to run against route output"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteResponseValidation",
+                "text": "VersionedRouteResponseValidation"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3401,38 +3488,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/runtime_fields/get_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/scripted_fields/get_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/default_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/get_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/get_data_views.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/has_user_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/routes/fields_for.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/routes/has_data_views.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
@@ -3730,6 +3785,10 @@
               },
               {
                 "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.ts"
               },
               {
@@ -3958,18 +4017,6 @@
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
               },
               {
@@ -4015,6 +4062,18 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/mapping.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -6555,42 +6614,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/fields/update_fields.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/runtime_fields/create_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/runtime_fields/update_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/scripted_fields/create_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/scripted_fields/update_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/create_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/default_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/routes/fields_for.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
@@ -7036,14 +7059,6 @@
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
               },
               {
@@ -7081,6 +7096,14 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -8929,18 +8952,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/runtime_fields/put_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/scripted_fields/put_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/routes/fields_for.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
@@ -9094,11 +9105,11 @@
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/engines.ts"
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -10121,18 +10132,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/runtime_fields/delete_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/scripted_fields/delete_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/delete_data_view.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
@@ -10254,10 +10253,6 @@
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
               },
               {
@@ -10271,6 +10266,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14196,6 +14195,38 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/get_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/default_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/get_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/get_data_views.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/has_user_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/json_schema.ts"
               },
@@ -14616,6 +14647,18 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/put_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
               },
@@ -14739,6 +14782,42 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/fields/update_fields.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/create_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/update_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/create_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/update_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/create_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/default_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/search.ts"
@@ -15287,6 +15366,18 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/delete_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/delete_data_view.ts"
+              },
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/search.ts"

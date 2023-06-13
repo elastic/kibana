@@ -23,6 +23,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -61,6 +62,7 @@ export interface PluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
+  share: SharePluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -189,9 +191,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: APPLICATIONS_PLUGIN.LOGO,
       id: APPLICATIONS_PLUGIN.ID,
-      navLinkStatus: AppNavLinkStatus.default,
-      searchable: true,
-      title: APPLICATIONS_PLUGIN.NAV_TITLE,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
@@ -205,6 +204,9 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(Applications, kibanaDeps, pluginData);
       },
+      navLinkStatus: AppNavLinkStatus.default,
+      searchable: true,
+      title: APPLICATIONS_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({
