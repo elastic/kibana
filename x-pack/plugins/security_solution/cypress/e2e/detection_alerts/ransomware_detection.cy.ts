@@ -17,12 +17,12 @@ import { createTimeline } from '../../tasks/timelines';
 
 describe('Ransomware Detection Alerts', () => {
   before(() => {
-    login();
     esArchiverLoad('ransomware_detection');
   });
 
   describe('Ransomware display in Alerts Section', () => {
     beforeEach(() => {
+      login();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
@@ -46,8 +46,8 @@ describe('Ransomware Detection Alerts', () => {
 
   describe('Ransomware in Timelines', () => {
     before(() => {
+      login();
       visit(TIMELINES_URL);
-
       createTimeline();
     });
 

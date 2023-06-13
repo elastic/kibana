@@ -56,12 +56,15 @@ describe('Alert details flyout', () => {
     });
   });
 
-  describe('With unmapped fields', { testIsolation: false }, () => {
+  describe('With unmapped fields', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('unmapped_fields');
-      login();
       createRule(getUnmappedRule());
+    });
+
+    beforeEach(() => {
+      login();
       visitWithoutDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -118,16 +121,16 @@ describe('Alert details flyout', () => {
     });
   });
 
-  describe('Url state management', { testIsolation: false }, () => {
+  describe('Url state management', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('query_alert');
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
     });
 
     beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
       expandFirstAlert();
     });
 
@@ -163,16 +166,16 @@ describe('Alert details flyout', () => {
     });
   });
 
-  describe('Localstorage management', { testIsolation: false }, () => {
+  describe('Localstorage management', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('query_alert');
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
     });
 
     beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
       expandFirstAlert();
     });
 

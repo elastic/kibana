@@ -27,6 +27,7 @@ const migrationsConfig = {
   retryAttempts: 15,
   batchSize: 1000,
   maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
+  maxReadBatchSizeBytes: ByteSizeValue.parse('500mb'),
 } as unknown as SavedObjectsMigrationConfigType;
 
 const createInitialStateCommonParams = {
@@ -217,7 +218,9 @@ describe('createInitialState', () => {
         "knownTypes": Array [],
         "legacyIndex": ".kibana_task_manager",
         "logs": Array [],
+        "maxBatchSize": 1000,
         "maxBatchSizeBytes": 104857600,
+        "maxReadBatchSizeBytes": 524288000,
         "migrationDocLinks": Object {
           "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
           "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
@@ -265,6 +268,7 @@ describe('createInitialState', () => {
           },
         },
         "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
+        "tempIndexAlias": ".kibana_task_manager_8.1.0_reindex_temp_alias",
         "tempIndexMappings": Object {
           "dynamic": false,
           "properties": Object {

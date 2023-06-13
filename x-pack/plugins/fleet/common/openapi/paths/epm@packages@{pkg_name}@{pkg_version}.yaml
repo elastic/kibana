@@ -23,6 +23,7 @@ get:
                       - not_installed
                   savedObject:
                     type: object
+                    deprecated: true
                   latestVersion:
                     type: string
                   keepPoliciesUpToDate:

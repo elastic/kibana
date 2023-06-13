@@ -1,4 +1,4 @@
-title: Rolling time window definition
+title: Rolling
 required:
   - duration
   - isRolling

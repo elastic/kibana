@@ -15,6 +15,7 @@ import { disableAutoApply } from '../../state_management/lens_slice';
 import { selectTriggerApplyChanges } from '../../state_management';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {
@@ -39,7 +40,11 @@ describe('Data Panel Wrapper', () => {
           core={{} as DatasourceDataPanelProps['core']}
           dropOntoWorkspace={(field: DragDropIdentifier) => {}}
           hasSuggestionForField={(field: DragDropIdentifier) => true}
-          plugins={{ uiActions: {} as UiActionsStart, dataViews: {} as DataViewsPublicPluginStart }}
+          plugins={{
+            uiActions: {} as UiActionsStart,
+            dataViews: {} as DataViewsPublicPluginStart,
+            eventAnnotationService: {} as EventAnnotationServiceType,
+          }}
           indexPatternService={createIndexPatternServiceMock()}
           frame={createMockFramePublicAPI()}
         />,

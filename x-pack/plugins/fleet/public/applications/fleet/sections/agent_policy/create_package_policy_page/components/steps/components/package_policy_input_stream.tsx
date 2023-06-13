@@ -21,9 +21,11 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
@@ -164,7 +166,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [updatePackagePolicy, packagePolicy]
     );
 
-    const { data: dataStreamsData } = useGetDataStreams();
+    const { data: dataStreamsData } = useQuery(['datastreams'], () => sendGetDataStreams(), {
+      enabled: packageInfo.type === 'input', // Only fetch datastream for input type package
+    });
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
 

@@ -34,12 +34,13 @@ export class ServerlessSearchPlugin
       appRoute: '/app/elasticsearch',
       async mount({ element }: AppMountParameters) {
         const { renderApp } = await import('./application');
-        const [coreStart, { cloud, security }] = await core.getStartServices();
+        const [coreStart, services] = await core.getStartServices();
+        const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
 
         const userProfile = await security.userProfiles.getCurrent();
 
-        return await renderApp(element, coreStart, { cloud, userProfile });
+        return await renderApp(element, coreStart, { userProfile, ...services });
       },
     });
     return {};

@@ -32,6 +32,7 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 import 'cypress-file-upload';
+import 'cypress-recurse/commands';
 
 Cypress.Commands.add(
   'attachFile',

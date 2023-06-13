@@ -7,6 +7,7 @@
  */
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { DataTableRecord } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 
@@ -29,6 +30,8 @@ export interface DocViewRenderProps {
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
+  query?: Query | AggregateQuery;
+  textBasedHits?: DataTableRecord[];
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;

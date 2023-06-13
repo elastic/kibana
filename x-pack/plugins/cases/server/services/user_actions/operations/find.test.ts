@@ -135,16 +135,13 @@ describe('UserActionsService: Finder', () => {
       );
     });
 
-    // TODO: Unskip when all types are converted to strict
-    it.skip('strips out excess attributes', async () => {
+    it('strips out excess attributes', async () => {
       const userAction = createUserActionSO();
       const attributes = { ...userAction.attributes, 'not-exists': 'not-exists' };
       const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
       method(soFindRes);
 
-      await expect(finder[soMethodName]({ caseId: '1' })).resolves.toEqual({
-        attributes: userAction.attributes,
-      });
+      await expect(finder[soMethodName]({ caseId: '1' })).resolves.toMatchSnapshot();
     });
   });
 });

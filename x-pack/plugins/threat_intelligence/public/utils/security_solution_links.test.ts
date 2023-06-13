@@ -6,24 +6,7 @@
  */
 
 import { threatIntelligencePages } from '../constants/navigation';
-import {
-  getSecuritySolutionDeepLink,
-  getSecuritySolutionLink,
-  getSecuritySolutionNavTab,
-} from './security_solution_links';
-
-describe('getSecuritySolutionDeepLink', () => {
-  it('gets the correct deeplink properties', () => {
-    const threatIntelligencePage = 'indicators';
-
-    const link = getSecuritySolutionDeepLink(threatIntelligencePage);
-
-    expect(link.id).toEqual(threatIntelligencePages[threatIntelligencePage].id);
-    expect(link.keywords).toEqual(threatIntelligencePages[threatIntelligencePage].keywords);
-    expect(link.path).toEqual(threatIntelligencePages[threatIntelligencePage].path);
-    expect(link.title).toEqual(threatIntelligencePages[threatIntelligencePage].newNavigationName);
-  });
-});
+import { getSecuritySolutionLink } from './security_solution_links';
 
 describe('getSecuritySolutionLink', () => {
   it('gets the correct link properties', () => {
@@ -38,21 +21,5 @@ describe('getSecuritySolutionLink', () => {
     expect(link.id).toEqual(threatIntelligencePages[threatIntelligencePage].id);
     expect(link.path).toEqual(threatIntelligencePages[threatIntelligencePage].path);
     expect(link.title).toEqual(threatIntelligencePages[threatIntelligencePage].newNavigationName);
-  });
-});
-
-describe('getSecuritySolutionNavTab', () => {
-  it('gets the correct navtab properties', () => {
-    const threatIntelligencePage = 'indicators';
-    const basePath = 'threat_intelligence/';
-
-    const navTab = getSecuritySolutionNavTab(threatIntelligencePage, basePath);
-
-    expect(navTab.disabled).toEqual(threatIntelligencePages[threatIntelligencePage].disabled);
-    expect(navTab.href).toEqual(
-      `${basePath}${threatIntelligencePages[threatIntelligencePage].path}`
-    );
-    expect(navTab.id).toEqual(threatIntelligencePages[threatIntelligencePage].id);
-    expect(navTab.name).toEqual(threatIntelligencePages[threatIntelligencePage].oldNavigationName);
   });
 });

@@ -18,7 +18,7 @@ import { combineMerge } from './utils';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from '../pack/utils';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
 
 export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -92,7 +92,7 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
         await Promise.all([
           ...install.map(async (installationPackAsset) => {
-            const packAssetSavedObject = await savedObjectsClient.get<PackSavedObjectAttributes>(
+            const packAssetSavedObject = await savedObjectsClient.get<PackSavedObject>(
               installationPackAsset.type,
               installationPackAsset.id
             );
@@ -138,19 +138,18 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             );
           }),
           ...update.map(async (updatePackAsset) => {
-            const packAssetSavedObject = await savedObjectsClient.get<PackSavedObjectAttributes>(
+            const packAssetSavedObject = await savedObjectsClient.get<PackSavedObject>(
               updatePackAsset.type,
               updatePackAsset.id
             );
 
-            const packSavedObjectsResponse =
-              await savedObjectsClient.find<PackSavedObjectAttributes>({
-                type: 'osquery-pack',
-                hasReference: {
-                  type: updatePackAsset.type,
-                  id: updatePackAsset.id,
-                },
-              });
+            const packSavedObjectsResponse = await savedObjectsClient.find<PackSavedObject>({
+              type: 'osquery-pack',
+              hasReference: {
+                type: updatePackAsset.type,
+                id: updatePackAsset.id,
+              },
+            });
 
             if (packSavedObjectsResponse.total) {
               await savedObjectsClient.update(

@@ -26,10 +26,10 @@ import { HOSTS_URL } from '../../../urls/navigation';
 describe('timeline flyout button', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });
@@ -63,10 +63,8 @@ describe('timeline flyout button', () => {
 
   it('the `(+)` button popover menu owns focus when open', () => {
     openCreateTimelineOptionsPopover();
-    cy.get(`${CREATE_NEW_TIMELINE}`)
-      .should('be.visible')
-      .pipe(($el) => $el.trigger('focus'))
-      .should('have.focus');
+    cy.get(CREATE_NEW_TIMELINE).focus();
+    cy.get(CREATE_NEW_TIMELINE).should('have.focus');
     closeCreateTimelineOptionsPopover();
     cy.get(CREATE_NEW_TIMELINE).should('not.exist');
   });
@@ -76,7 +74,7 @@ describe('timeline flyout button', () => {
     cy.get('[data-test-subj="nav-search-input"]').focus();
     cy.get('[data-test-subj="nav-search-input"]').should('be.focused');
     cy.get('[data-test-subj="nav-search-option"]').should('be.visible');
-    cy.get('[data-test-subj="nav-search-option"]').first().trigger('mouseenter');
+    cy.get('[data-test-subj="nav-search-option"]').first().realHover();
     // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
     cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
     closeTimelineUsingCloseButton();

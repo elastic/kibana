@@ -25,7 +25,7 @@ export const openHoverActions = () => {
 };
 
 export const mouseoverOnToOverflowItem = () => {
-  cy.get(OVERFLOW_ITEM).first().trigger('mouseover');
+  cy.get(OVERFLOW_ITEM).first().realHover();
 };
 
 export const clickOnFilterIn = () => {
@@ -45,5 +45,6 @@ export const clickOnShowTopN = () => {
 };
 
 export const clickOnCopyValue = () => {
-  cy.get(COPY).first().invoke('focus').click({ force: true });
+  cy.get(COPY).first().focus();
+  cy.focused().click({ force: true });
 };

@@ -21,6 +21,8 @@ export const FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreTitle';
 export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
+export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
+  'securitySolutionAlertDetailsFlyoutHeaderShareButton';
 
 /* Description section */
 
@@ -49,8 +51,6 @@ export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsTitle';
 export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsDetails';
-export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHighlightedFields';
-export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
 export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
@@ -67,7 +67,6 @@ export const ENTITIES_HOST_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
 export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
-export const ENTITY_PANEL_ICON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelTypeIcon';
 export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
 export const ENTITY_PANEL_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelHeader';

@@ -19,7 +19,7 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { omit } from 'lodash';
-import type { FleetFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 
 describe('Upload response action create API handler', () => {
   type UploadHttpApiTestSetupMock = HttpApiTestSetupMock<never, never, UploadActionApiRequestBody>;
@@ -29,7 +29,7 @@ describe('Upload response action create API handler', () => {
   let httpHandlerContextMock: UploadHttpApiTestSetupMock['httpHandlerContextMock'];
   let httpResponseMock: UploadHttpApiTestSetupMock['httpResponseMock'];
 
-  let fleetFilesClientMock: jest.Mocked<FleetFileClientInterface>;
+  let fleetFilesClientMock: jest.Mocked<FleetToHostFileClientInterface>;
 
   beforeEach(async () => {
     testSetup = createHttpApiTestSetupMock<never, never, UploadActionApiRequestBody>();
@@ -37,9 +37,8 @@ describe('Upload response action create API handler', () => {
     ({ httpHandlerContextMock, httpResponseMock } = testSetup);
     httpRequestMock = testSetup.createRequestMock();
 
-    fleetFilesClientMock = (await testSetup.endpointAppContextMock.service.getFleetFilesClient(
-      'from-host'
-    )) as jest.Mocked<FleetFileClientInterface>;
+    fleetFilesClientMock =
+      (await testSetup.endpointAppContextMock.service.getFleetToHostFilesClient()) as jest.Mocked<FleetToHostFileClientInterface>;
   });
 
   describe('registerActionFileUploadRoute()', () => {

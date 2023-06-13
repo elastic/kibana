@@ -7,8 +7,6 @@
 
 import { OVERLAY_CONTAINER } from '../../../screens/alerts';
 import {
-  closeAnalyzer,
-  closeSessionViewerFromAlertTable,
   openAnalyzerForFirstAlertInTimeline,
   openSessionViewerFromAlertTable,
 } from '../../../tasks/alerts';
@@ -18,10 +16,13 @@ import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts Table Action column', { testIsolation: false }, () => {
+describe('Alerts Table Action column', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('process_ancestry');
+  });
+
+  beforeEach(() => {
     login();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
@@ -34,14 +35,10 @@ describe('Alerts Table Action column', { testIsolation: false }, () => {
   it('should have session viewer button visible & open session viewer on click', () => {
     openSessionViewerFromAlertTable();
     cy.get(OVERLAY_CONTAINER).should('be.visible');
-    // cleanup
-    closeSessionViewerFromAlertTable();
   });
 
   it('should have analyzer button visible & open analyzer on click', () => {
     openAnalyzerForFirstAlertInTimeline();
     cy.get(OVERLAY_CONTAINER).should('be.visible');
-    // cleanup
-    closeAnalyzer();
   });
 });

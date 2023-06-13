@@ -13,6 +13,7 @@ import type {
   SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { createSavedObjectSanitizedDocSchema } from './schema';
+import { isVirtualModelVersion } from '../model_version';
 
 /**
  * Helper class that takes a {@link SavedObjectsValidationMap} and runs validations for a
@@ -45,13 +46,16 @@ export class SavedObjectsTypeValidator {
     this.orderedVersions = Object.keys(this.validationMap).sort(Semver.compare);
   }
 
-  public validate(document: SavedObjectSanitizedDoc, version?: string): void {
-    const docVersion =
-      version ??
-      document.typeMigrationVersion ??
-      document.migrationVersion?.[document.type] ??
-      this.defaultVersion;
-    const schemaVersion = previousVersionWithSchema(this.orderedVersions, docVersion);
+  public validate(document: SavedObjectSanitizedDoc): void {
+    let usedVersion: string;
+    const docVersion = document.typeMigrationVersion ?? document.migrationVersion?.[document.type];
+    if (docVersion) {
+      usedVersion = isVirtualModelVersion(docVersion) ? docVersion : this.defaultVersion;
+    } else {
+      usedVersion = this.defaultVersion;
+    }
+    const schemaVersion = previousVersionWithSchema(this.orderedVersions, usedVersion);
+
     if (!schemaVersion || !this.validationMap[schemaVersion]) {
       return;
     }
@@ -62,7 +66,7 @@ export class SavedObjectsTypeValidator {
       validationSchema.validate(document);
     } catch (e) {
       this.log.warn(
-        `Error validating object of type [${this.type}] against version [${docVersion}]`
+        `Error validating object of type [${this.type}] against version [${usedVersion}]`
       );
       throw e;
     }

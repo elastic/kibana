@@ -59,8 +59,8 @@ export const PageControlsComponent: FC<Props> = ({
   const currentPage = page + 1;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" style={{ margin: '0 12px' }}>
-      <EuiThemeProvider colorMode="dark">
+    <EuiThemeProvider colorMode="dark" wrapperProps={{ cloneElement: true }}>
+      <EuiFlexGroup alignItems="center" gutterSize="none" style={{ margin: '0 12px' }}>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             color="text"
@@ -94,8 +94,8 @@ export const PageControlsComponent: FC<Props> = ({
             aria-label="Next Page"
           />
         </EuiFlexItem>
-      </EuiThemeProvider>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </EuiThemeProvider>
   );
 };
 

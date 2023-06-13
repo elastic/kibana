@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export * from './create_composite_slo';
 export * from './composite_slo_repository';
+export * from './create_composite_slo';
+export * from './delete_composite_slo';
+export * from './find_composite_slo';
+export * from './summary_client';
+export * from './update_composite_slo';
