@@ -224,7 +224,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         allowCustomOptions
-        getExtendedField={(): Promise<FieldSpec[]> => Promise.resolve([field])}
+        getExtendedFields={(): Promise<FieldSpec[]> => Promise.resolve([field])}
       />
     );
 

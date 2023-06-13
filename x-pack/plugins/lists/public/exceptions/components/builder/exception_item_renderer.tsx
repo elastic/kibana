@@ -66,7 +66,7 @@ interface BuilderExceptionListItemProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
-  getExtendedField?: (fields: string[]) => Promise<DataViewField[]>;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -90,7 +90,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     isDisabled = false,
     operatorsList,
     allowCustomOptions = false,
-    getExtendedField,
+    getExtendedFields,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -164,7 +164,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           }
                           operatorsList={operatorsList}
                           allowCustomOptions={allowCustomOptions}
-                          getExtendedField={getExtendedField}
+                          getExtendedFields={getExtendedFields}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

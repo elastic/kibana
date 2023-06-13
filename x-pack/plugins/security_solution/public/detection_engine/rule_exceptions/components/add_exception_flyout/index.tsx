@@ -114,7 +114,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
-  const { isLoading, indexPatterns, getExtendedField } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -501,7 +501,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             onExceptionItemAdd={setExceptionItemsToAdd}
             onSetErrorExists={setConditionsValidationError}
             onFilterIndexPatterns={filterIndexPatterns}
-            getExtendedField={getExtendedField}
+            getExtendedFields={getExtendedFields}
           />
 
           {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (

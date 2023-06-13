@@ -88,7 +88,7 @@ export interface EntryItemProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
-  getExtendedField?: (fields: string[]) => Promise<DataViewField[]>;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -108,7 +108,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   isDisabled = false,
   operatorsList,
   allowCustomOptions = false,
-  getExtendedField,
+  getExtendedFields,
 }): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
@@ -185,14 +185,14 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
     const fetchExtendedField = async (): Promise<void> => {
       const fieldName = entry.field?.name;
-      if (getExtendedField && fieldName) {
-        const extendedFields = await getExtendedField([fieldName]);
+      if (getExtendedFields && fieldName) {
+        const extendedFields = await getExtendedFields([fieldName]);
         const field = extendedFields.find((f) => f.name === fieldName) ?? null;
         setExtendedField(field);
       }
     };
     fetchExtendedField();
-  }, [entry.field?.name, getExtendedField]);
+  }, [entry.field?.name, getExtendedFields]);
 
   const isFieldComponentDisabled = useMemo(
     (): boolean =>

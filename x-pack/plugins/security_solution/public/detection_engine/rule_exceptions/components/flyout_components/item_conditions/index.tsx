@@ -91,7 +91,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
     osTypes?: Array<'linux' | 'macos' | 'windows'> | undefined
   ) => DataViewBase;
 
-  getExtendedField?: (fields: string[]) => Promise<DataViewField[]>;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({
@@ -108,7 +108,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onExceptionItemAdd,
   onSetErrorExists,
   onFilterIndexPatterns,
-  getExtendedField,
+  getExtendedFields,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
   const isEndpointException = useMemo(
@@ -271,7 +271,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
         allowCustomFieldOptions: !isEndpointException,
-        getExtendedField,
+        getExtendedFields,
       })}
     </>
   );

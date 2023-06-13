@@ -22,7 +22,7 @@ import * as i18n from '../../../common/containers/source/translations';
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
   indexPatterns: DataViewBase;
-  getExtendedField: (fields: string[]) => Promise<DataViewField[]>;
+  getExtendedFields: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 /**
@@ -114,7 +114,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId]);
 
   // Fetch extended fields information
-  const getExtendedField = useCallback(
+  const getExtendedFields = useCallback(
     async (fields: string[]) => {
       let extendedFields: DataViewField[] = [];
       const dv = dataViewSpec ?? indexDataViewSpec;
@@ -145,6 +145,6 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   return {
     isLoading: isIndexPatternLoading || mlJobLoading || dataViewLoading,
     indexPatterns: indexPatternsToUse,
-    getExtendedField,
+    getExtendedFields,
   };
 };

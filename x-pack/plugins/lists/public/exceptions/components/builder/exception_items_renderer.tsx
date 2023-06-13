@@ -99,7 +99,7 @@ export interface ExceptionBuilderProps {
   operatorsList?: OperatorOption[];
   exceptionItemName?: string;
   allowCustomFieldOptions?: boolean;
-  getExtendedField?: (fields: string[]) => Promise<DataViewField[]>;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -123,7 +123,7 @@ export const ExceptionBuilderComponent = ({
   osTypes,
   operatorsList,
   allowCustomFieldOptions = false,
-  getExtendedField,
+  getExtendedFields,
 }: ExceptionBuilderProps): JSX.Element => {
   const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
@@ -445,7 +445,7 @@ export const ExceptionBuilderComponent = ({
                 isDisabled={isDisabled}
                 operatorsList={operatorsList}
                 allowCustomOptions={allowCustomFieldOptions}
-                getExtendedField={getExtendedField}
+                getExtendedFields={getExtendedFields}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
