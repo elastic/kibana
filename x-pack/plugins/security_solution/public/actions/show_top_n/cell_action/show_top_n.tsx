@@ -49,7 +49,7 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
       const field = data[0]?.field;
 
       return (
-        data.length === 1 && // TODO Add support for multiple values
+        data.length === 1 &&
         fieldHasCellActions(field.name) &&
         (field.esTypes ?? []).every(
           (esType) => !UNSUPPORTED_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)

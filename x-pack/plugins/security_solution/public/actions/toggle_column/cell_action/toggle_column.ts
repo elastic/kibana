@@ -43,7 +43,7 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
       const field = data[0]?.field;
 
       return (
-        data.length === 1 && // TODO Add support for multiple values
+        data.length === 1 &&
         fieldHasCellActions(field.name) &&
         !!metadata?.scopeId &&
         (isTimelineScope(metadata.scopeId) || isInTableScope(metadata.scopeId))
