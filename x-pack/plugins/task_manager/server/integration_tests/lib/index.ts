@@ -7,3 +7,4 @@
 
 export { injectTask } from './inject_task';
 export { setupTestServers } from './setup_test_servers';
+export { retry } from './retry';
