@@ -429,5 +429,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           />
         ) : null}
       </div>
+    </div>
   );
 };
