@@ -227,6 +227,34 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should unset the category of a case correctly', async () => {
+        const postedCase = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        // the default category
+        expect(postedCase.category).equal('foobar');
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                category: null,
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          category: null,
+          updated_by: defaultUser,
+        });
+      });
+
       it('should patch a case with new connector', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({

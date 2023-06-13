@@ -173,6 +173,18 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('filters by empty category', async () => {
+        const myCase = await createCase(supertest, postCaseReq);
+        const cases = await findCases({ supertest, query: { category: null } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [myCase],
+          count_open_cases: 1,
+        });
+      });
+
       it('filters by reporters', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const cases = await findCases({ supertest, query: { reporters: 'elastic' } });
