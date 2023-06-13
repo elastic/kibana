@@ -9,15 +9,7 @@
 import React, { FC, ComponentProps, Ref, useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import {
-  EuiPopoverTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDualRange,
-  EuiText,
-  EuiToolTip,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiPopoverTitle, EuiDualRange, EuiText } from '@elastic/eui';
 import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
 
 import { pluginServices } from '../../services';

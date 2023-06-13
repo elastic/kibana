@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -35,7 +35,10 @@ export class ClearControlAction implements Action<ClearControlActionContext> {
           data-test-subj={`control-action-${context.embeddable.id}-erase`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
-          onClick={() => this.execute(context)}
+          onClick={(event: SyntheticEvent<HTMLButtonElement>) => {
+            (event.target as HTMLButtonElement).blur();
+            this.execute(context);
+          }}
           color="text"
         />
       </EuiToolTip>
