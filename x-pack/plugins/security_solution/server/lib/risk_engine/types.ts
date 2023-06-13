@@ -7,15 +7,9 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { RiskWeights } from '../../../common/risk_engine';
 
 export type IdentifierType = 'user' | 'host';
-
-export interface RiskScoreWeight {
-  type: string;
-  value?: string;
-  user?: number;
-  host?: number;
-}
 
 export interface GetScoresParams {
   afterKeys: AfterKeys;
@@ -25,7 +19,7 @@ export interface GetScoresParams {
   identifierType?: IdentifierType;
   pageSize: number;
   range: { start: string; end: string };
-  weights?: RiskScoreWeight[];
+  weights?: RiskWeights;
 }
 
 export interface AfterKey {

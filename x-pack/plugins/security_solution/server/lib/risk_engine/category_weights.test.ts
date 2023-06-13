@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskWeightTypes } from '../../../common/risk_engine';
+import { RiskWeightTypes, RiskCategories } from '../../../common/risk_engine';
 import {
   buildCategoryScoreAssignment,
   buildCategoryWeights,
@@ -16,21 +16,29 @@ describe('buildCategoryWeights', () => {
   it('returns the default weights if nothing else is provided', () => {
     const result = buildCategoryWeights();
 
-    expect(result).toEqual([{ host: 1, type: 'risk_category', user: 1, value: 'alerts' }]);
+    expect(result).toEqual([
+      { host: 1, type: RiskWeightTypes.riskCategory, user: 1, value: RiskCategories.alerts },
+    ]);
   });
 
   it('allows user weights to override defaults', () => {
     const result = buildCategoryWeights([
-      { type: 'risk_category', value: 'alerts', host: 0.1, user: 0.2 },
+      { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1, user: 0.2 },
     ]);
 
-    expect(result).toEqual([{ host: 0.1, type: 'risk_category', user: 0.2, value: 'alerts' }]);
+    expect(result).toEqual([
+      { host: 0.1, type: RiskWeightTypes.riskCategory, user: 0.2, value: RiskCategories.alerts },
+    ]);
   });
 
   it('uses default category weights if unspecified in user-provided weight', () => {
-    const result = buildCategoryWeights([{ type: 'risk_category', value: 'alerts', host: 0.1 }]);
+    const result = buildCategoryWeights([
+      { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1 },
+    ]);
 
-    expect(result).toEqual([{ host: 0.1, type: 'risk_category', user: 1, value: 'alerts' }]);
+    expect(result).toEqual([
+      { host: 0.1, type: RiskWeightTypes.riskCategory, user: 1, value: RiskCategories.alerts },
+    ]);
   });
 });
 
@@ -74,7 +82,9 @@ describe('buildWeightingOfScoreByCategory', () => {
 
   it('returns specified weight when a category weight is provided', () => {
     const result = buildWeightingOfScoreByCategory({
-      userWeights: [{ type: RiskWeightTypes.riskCategory, value: 'alerts', host: 0.1, user: 0.2 }],
+      userWeights: [
+        { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1, user: 0.2 },
+      ],
       identifierType: 'host',
     });
 
@@ -85,7 +95,9 @@ describe('buildWeightingOfScoreByCategory', () => {
 
   it('returns a default weight when a category weight is provided but not the one being used', () => {
     const result = buildWeightingOfScoreByCategory({
-      userWeights: [{ type: RiskWeightTypes.riskCategory, value: 'alerts', host: 0.1 }],
+      userWeights: [
+        { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1 },
+      ],
       identifierType: 'user',
     });
 

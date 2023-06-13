@@ -35,6 +35,7 @@ const globalRiskWeightSchema = t.intersection([
   ),
   identifierWeights,
 ]);
+export type GlobalRiskWeight = t.TypeOf<typeof globalRiskWeightSchema>;
 
 const riskCategoryRiskWeightSchema = t.intersection([
   t.exact(
@@ -45,9 +46,12 @@ const riskCategoryRiskWeightSchema = t.intersection([
   ),
   identifierWeights,
 ]);
+export type RiskCategoryRiskWeight = t.TypeOf<typeof riskCategoryRiskWeightSchema>;
 
-export type RiskWeightSchema = t.TypeOf<typeof riskWeightSchema>;
 export const riskWeightSchema = t.union([globalRiskWeightSchema, riskCategoryRiskWeightSchema]);
+export type RiskWeightSchema = t.TypeOf<typeof riskWeightSchema>;
+export type RiskWeight = RiskWeightSchema;
 
-export type RiskWeightsSchema = t.TypeOf<typeof riskWeightsSchema>;
 export const riskWeightsSchema = t.array(riskWeightSchema);
+export type RiskWeightsSchema = t.TypeOf<typeof riskWeightsSchema>;
+export type RiskWeights = RiskWeightsSchema;

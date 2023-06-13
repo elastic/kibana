@@ -14,6 +14,7 @@ import {
   ALERT_RISK_SCORE,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { RiskWeights } from '../../../common/risk_engine';
 import { withSecuritySpan } from '../../utils/with_security_span';
 import {
   buildCategoryScoreAssignment,
@@ -30,7 +31,6 @@ import type {
   IdentifierType,
   RiskScore,
   RiskScoreBucket,
-  RiskScoreWeight,
 } from './types';
 
 const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
@@ -137,7 +137,7 @@ const buildIdentifierTypeAggregation = ({
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
-  weights?: RiskScoreWeight[];
+  weights?: RiskWeights;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
