@@ -113,7 +113,6 @@ export {
   builtInAggregationTypes,
   getFields,
   getIndexOptions,
-  getMatchingIndices,
   firstFieldOption,
   getTimeFieldOptions,
   GroupByExpression,
