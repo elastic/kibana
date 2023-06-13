@@ -13,19 +13,19 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { getToastNotifications, getDataViews } from './dependency_cache';
 
 export async function getDataViewNames() {
-  const dataViewsContract = getDataViews();
-  if (dataViewsContract === null) {
+  const dataViewsService = getDataViews();
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
-  return (await dataViewsContract.getIdsWithTitle()).map(({ title }) => title);
+  return (await dataViewsService.getIdsWithTitle()).map(({ title }) => title);
 }
 
 export async function getDataViewIdFromName(name: string): Promise<string | null> {
-  const dataViewsContract = getDataViews();
-  if (dataViewsContract === null) {
+  const dataViewsService = getDataViews();
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
-  const dataViews = await dataViewsContract.find(name);
+  const dataViews = await dataViewsService.find(name);
   const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
   if (!dataView) {
     return null;
@@ -34,15 +34,15 @@ export async function getDataViewIdFromName(name: string): Promise<string | null
 }
 
 export function getDataViewById(id: string): Promise<DataView> {
-  const dataViewsContract = getDataViews();
-  if (dataViewsContract === null) {
+  const dataViewsService = getDataViews();
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
 
   if (id) {
-    return dataViewsContract.get(id);
+    return dataViewsService.get(id);
   } else {
-    return dataViewsContract.create({});
+    return dataViewsService.create({});
   }
 }
 

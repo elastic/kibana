@@ -62,7 +62,7 @@ export interface PageDependencies {
   config: IUiSettingsClient;
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  dataViewsContract: DataViewsContract;
+  dataViewsService: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 

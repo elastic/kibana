@@ -71,7 +71,7 @@ export const timeSeriesExplorerRouteFactory = (
   enableDatePicker: true,
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC<PageProps> = () => {
   const mlApi = useMlApiContext();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {

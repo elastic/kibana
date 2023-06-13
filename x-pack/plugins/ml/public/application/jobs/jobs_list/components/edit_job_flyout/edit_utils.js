@@ -73,8 +73,8 @@ function saveDatafeed(datafeedConfig, job) {
 }
 
 export async function loadDataViewListItems() {
-  const dataViewsContract = getDataViews();
-  return (await dataViewsContract.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
+  const dataViewsService = getDataViews();
+  return (await dataViewsService.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function extractDescription(job, newJobData) {
