@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/dom';
 import { render } from '../../../utils/testing/rtl_helpers';
 import * as permissionsHooks from '../../../hooks';
 import * as locationHooks from './hooks/use_locations_api';
@@ -66,7 +65,6 @@ describe('<ManagePrivateLocations />', () => {
         expect(button).not.toBeDisabled();
       } else {
         const button = getByRole('button', { name: 'Create agent policy' });
-        screen.debug();
         expect(button).toBeDisabled();
         // hover over the button to see the tooltip
         fireEvent.mouseOver(button);
@@ -107,8 +105,9 @@ describe('<ManagePrivateLocations />', () => {
       } else {
         expect(button).toBeDisabled();
         fireEvent.mouseOver(button);
-        expect(await findByText(/You do not have sufficient permissions to perform this action./))
-          .toBeInTheDocument;
+        expect(
+          await findByText(/You do not have sufficient permissions to perform this action./)
+        ).toBeInTheDocument();
       }
     }
   );
@@ -161,8 +160,9 @@ describe('<ManagePrivateLocations />', () => {
       } else {
         expect(button).toBeDisabled();
         fireEvent.mouseOver(button);
-        expect(await findByText(/You do not have sufficient permissions to perform this action./))
-          .toBeInTheDocument;
+        expect(
+          await findByText('You do not have sufficient permissions to perform this action.')
+        ).toBeInTheDocument();
       }
     }
   );
