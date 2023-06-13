@@ -13,7 +13,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ExplainLogRateSpikesContent } from '@kbn/aiops-plugin/public';
+import {
+  ExplainLogRateSpikesContent,
+  type ExplainLogRateSpikesAnalysisResults,
+} from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -47,6 +50,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const { dataViews, logViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
+  const [analysisResults, setAnalysisResults] = useState<
+    ExplainLogRateSpikesAnalysisResults | undefined
+  >();
 
   useEffect(() => {
     const getDataView = async () => {
@@ -135,6 +141,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
             initialAnalysisStart={initialAnalysisStart}
             annotations={alert}
             barColorOverride={colorTransformer(Color.color0)}
+            onAnalysisCompleted={setAnalysisResults}
             appDependencies={pick(services, [
               'application',
               'data',
