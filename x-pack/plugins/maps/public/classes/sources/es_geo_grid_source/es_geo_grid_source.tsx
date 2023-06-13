@@ -37,7 +37,6 @@ import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_ge
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
-import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
@@ -627,8 +626,3 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     ];
   }
 }
-
-registerSource({
-  ConstructorFunction: ESGeoGridSource,
-  type: SOURCE_TYPES.ES_GEO_GRID,
-});
