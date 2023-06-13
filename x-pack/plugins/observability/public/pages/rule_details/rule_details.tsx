@@ -50,7 +50,9 @@ export interface RuleDetailsPathParams {
 export function RuleDetailsPage() {
   const {
     application: { capabilities, navigateToUrl },
-    charts,
+    charts: {
+      theme: { useChartsTheme, useChartsBaseTheme },
+    },
     http,
     share: {
       url: { locators },
@@ -95,6 +97,9 @@ export function RuleDetailsPage() {
       'kibana.alert.rule.uuid': ruleId,
     },
   });
+
+  const theme = useChartsTheme();
+  const baseTheme = useChartsBaseTheme();
 
   const [editRuleFlyoutVisible, setEditRuleFlyoutVisible] = useState<boolean>(false);
 
@@ -213,10 +218,7 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={{
-              theme: charts.theme.useChartsTheme(),
-              baseTheme: charts.theme.useChartsBaseTheme(),
-            }}
+            chartProps={{ theme, baseTheme }}
             featureIds={featureIds}
             filter={alertSummaryWidgetFilter.current}
             timeRange={alertSummaryWidgetTimeRange}
