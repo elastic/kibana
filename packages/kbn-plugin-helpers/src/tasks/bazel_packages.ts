@@ -26,9 +26,8 @@ export async function buildBazelPackages({ log, dist }: TaskContext) {
       }
     );
 
-    log.success('bazel run successfully and artifacts were created')
+    log.success('bazel run successfully and artifacts were created');
   } catch (e) {
     log.error(`bazel run failed: ${e}`);
   }
 }
-
