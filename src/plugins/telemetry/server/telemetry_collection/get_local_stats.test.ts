@@ -198,6 +198,19 @@ describe('get_local_stats', () => {
       expect(result.stack_stats).toEqual({ kibana: undefined, data: undefined });
     });
 
+    it('fallbacks to Kibana version if ES does not respond with it', () => {
+      const { version: _, ...clusterInfoWithoutVersion } = clusterInfo;
+      const result = handleLocalStats(
+        clusterInfoWithoutVersion as estypes.InfoResponse,
+        clusterStatsWithNodesUsage,
+        void 0,
+        void 0,
+        context
+      );
+
+      expect(result.version).toEqual('8.0.0');
+    });
+
     it('returns expected object with xpack', () => {
       const result = handleLocalStats(
         clusterInfo as estypes.InfoResponse,
