@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
