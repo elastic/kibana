@@ -190,13 +190,6 @@ export class KibanaFramework {
     );
   }
 
-  public async getIndexPatternsService(
-    savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient
-  ) {
-    return await this.createIndexPatternsService(savedObjectsClient, elasticsearchClient);
-  }
-
   private async createIndexPatternsService(
     savedObjectsClient: SavedObjectsClientContract,
     elasticsearchClient: ElasticsearchClient

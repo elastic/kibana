@@ -11,6 +11,14 @@ import { encode } from '@kbn/rison';
 import moment from 'moment';
 
 import { useUiTracker, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import {
+  LogEntryColumn,
+  LogEntryFieldColumn,
+  LogEntryMessageColumn,
+  LogEntryRowWrapper,
+  LogEntryTimestampColumn,
+  LogEntryContextMenu,
+} from '@kbn/logs-shared-plugin/public';
 import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
 import { TimeRange } from '../../../../../../common/time';
 import {
@@ -18,15 +26,7 @@ import {
   partitionField,
 } from '../../../../../../common/log_analysis';
 import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
-import {
-  LogEntryColumn,
-  LogEntryFieldColumn,
-  LogEntryMessageColumn,
-  LogEntryRowWrapper,
-  LogEntryTimestampColumn,
-} from '../../../../../components/logging/log_text_stream';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
-import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;

@@ -14,7 +14,7 @@ import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
@@ -24,7 +24,6 @@ import {
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';

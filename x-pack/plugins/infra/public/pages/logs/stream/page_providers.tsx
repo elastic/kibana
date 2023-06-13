@@ -7,7 +7,11 @@
 
 import stringify from 'json-stable-stringify';
 import React, { useMemo } from 'react';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import {
+  LogStreamProvider,
+  useLogViewContext,
+  useLogStreamContext,
+} from '@kbn/logs-shared-plugin/public';
 import {
   LogStreamPageActorRef,
   LogStreamPageCallbacks,
@@ -18,7 +22,6 @@ import {
   LogPositionStateProvider,
   useLogPositionStateContext,
 } from '../../../containers/logs/log_position';
-import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
 import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';

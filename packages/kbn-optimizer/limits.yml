@@ -87,6 +87,7 @@ pageLoadAssetSize:
   licensing: 29004
   lists: 22900
   logstash: 53548
+  logsShared: 184320
   management: 46112
   maps: 90000
   mapsEms: 26072

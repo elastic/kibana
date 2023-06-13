@@ -10,14 +10,17 @@ import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import {
+  LogEntryFlyout,
+  LogEntryStreamItem,
+  ScrollableLogTextStreamView,
+  useLogStreamContext,
+  useLogViewContext,
+} from '@kbn/logs-shared-plugin/public';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
-import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../../components/logging/log_minimap';
-import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
-import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
 import {
   useLogEntryFlyoutContext,
@@ -25,7 +28,6 @@ import {
 } from '../../../containers/logs/log_flyout';
 import { useLogHighlightsStateContext } from '../../../containers/logs/log_highlights';
 import { useLogPositionStateContext } from '../../../containers/logs/log_position';
-import { useLogStreamContext } from '../../../containers/logs/log_stream';
 import { WithSummary } from '../../../containers/logs/log_summary';
 import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';

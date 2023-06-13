@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { LogsSharedPluginRequestHandlerContext } from '../../../types';
 
 export interface FieldsAdapter {
   getIndexFields(
-    requestContext: InfraPluginRequestHandlerContext,
+    requestContext: LogsSharedPluginRequestHandlerContext,
     indices: string
   ): Promise<IndexFieldDescriptor[]>;
 }

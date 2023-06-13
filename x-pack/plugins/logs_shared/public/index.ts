@@ -20,9 +20,29 @@ export function plugin() {
   return new LogsSharedPlugin();
 }
 
-// Containers
+// Containers & Hook
 export { LogViewProvider, useLogViewContext } from './hooks/use_log_view';
+export { LogStreamProvider, useLogStreamContext } from './containers/logs/log_stream';
+export { useLogEntryFlyout } from './components/logging/log_entry_flyout';
 
 // Shared components
+export type {
+  LogEntryStreamItem,
+  LogEntryColumnWidths,
+} from './components/logging/log_text_stream';
+export {
+  iconColumnId,
+  LogColumnHeader,
+  LogColumnHeadersWrapper,
+  LogEntryColumn,
+  LogEntryContextMenu,
+  LogEntryFieldColumn,
+  LogEntryMessageColumn,
+  LogEntryRowWrapper,
+  LogEntryTimestampColumn,
+  ScrollableLogTextStreamView,
+  useColumnWidths,
+} from './components/logging/log_text_stream';
+export { LogEntryFlyout } from './components/logging/log_entry_flyout';
 export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';
 export type { LogStreamProps } from './components/log_stream';

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+export type { LogEntryStreamItem } from './item';
 export type { LogEntryColumnWidths } from './log_entry_column';
-export { LogEntryColumn, useColumnWidths, iconColumnId } from './log_entry_column';
+
+export { LogColumnHeader, LogColumnHeadersWrapper } from './column_headers';
+export { iconColumnId, LogEntryColumn, useColumnWidths } from './log_entry_column';
+export { LogEntryContextMenu } from './log_entry_context_menu';
 export { LogEntryFieldColumn } from './log_entry_field_column';
 export { LogEntryMessageColumn } from './log_entry_message_column';
 export { LogEntryRowWrapper } from './log_entry_row';
 export { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 export { ScrollableLogTextStreamView } from './scrollable_log_text_stream_view';
-export { LogEntryContextMenu } from './log_entry_context_menu';
