@@ -7,7 +7,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpResponsePayload } from '@kbn/core/server';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { RouteDependencies } from '../types';
