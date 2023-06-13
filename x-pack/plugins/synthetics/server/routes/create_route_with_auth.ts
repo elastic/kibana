@@ -12,7 +12,7 @@ import {
   SyntheticsRouteHandler,
 } from '../legacy_uptime/routes';
 
-export const createSyntheticsRouteWithAuth = <ClientContract = any>(
+export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
   libs: UMServerLibs,
   routeCreator: SyntheticsRestApiRouteFactory | SyntheticsStreamingRouteFactory
 ): SyntheticsRoute<ClientContract> => {
