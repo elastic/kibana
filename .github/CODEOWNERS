@@ -67,6 +67,7 @@ packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
+x-pack/plugins/cloud_integrations/cloud_chat_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboarding
 x-pack/plugins/cloud_defend @elastic/sec-cloudnative-integrations
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
@@ -306,6 +307,16 @@ src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
 packages/kbn-datemath @elastic/kibana-data-discovery
+packages/deeplinks/analytics @elastic/kibana-data-discovery
+packages/deeplinks/devtools @elastic/platform-deployment-management
+packages/deeplinks/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/deeplinks/ml @elastic/ml-ui
+packages/deeplinks/observability @elastic/apm-ui
+packages/deeplinks/search @elastic/enterprise-search-frontend
+packages/default-nav/analytics @elastic/kibana-data-discovery
+packages/default-nav/devtools @elastic/platform-deployment-management
+packages/default-nav/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/default-nav/ml @elastic/ml-ui
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations

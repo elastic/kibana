@@ -6,36 +6,69 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { LinkId } from '@kbn/deeplinks-ml';
 
 import type { AppDeepLink } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 
-const OVERVIEW_LINK_DEEP_LINK: AppDeepLink = {
-  id: 'mlOverviewDeepLink',
+const OVERVIEW_LINK_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'overview',
   title: i18n.translate('xpack.ml.deepLink.overview', {
     defaultMessage: 'Overview',
   }),
   path: `/${ML_PAGES.OVERVIEW}`,
 };
 
-const ANOMALY_DETECTION_DEEP_LINK: AppDeepLink = {
-  id: 'mlAnomalyDetectionDeepLink',
+const ANOMALY_DETECTION_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'anomalyDetection',
   title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
     defaultMessage: 'Anomaly Detection',
   }),
   path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
+  deepLinks: [
+    {
+      id: 'anomalyExplorer',
+      title: i18n.translate('xpack.ml.deepLink.anomalyExplorer', {
+        defaultMessage: 'Anomaly explorer',
+      }),
+      path: `/${ML_PAGES.ANOMALY_EXPLORER}`,
+    },
+    {
+      id: 'singleMetricViewer',
+      title: i18n.translate('xpack.ml.deepLink.singleMetricViewer', {
+        defaultMessage: 'Single metric viewer',
+      }),
+      path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
+    },
+  ],
 };
 
-const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
-  id: 'mlDataFrameAnalyticsDeepLink',
+const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'dataFrameAnalytics',
   title: i18n.translate('xpack.ml.deepLink.dataFrameAnalytics', {
     defaultMessage: 'Data Frame Analytics',
   }),
   path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
+  deepLinks: [
+    {
+      id: 'resultExplorer',
+      title: i18n.translate('xpack.ml.deepLink.resultExplorer', {
+        defaultMessage: 'Results explorer',
+      }),
+      path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`,
+    },
+    {
+      id: 'analyticsMap',
+      title: i18n.translate('xpack.ml.deepLink.analyticsMap', {
+        defaultMessage: 'Analytics map',
+      }),
+      path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`,
+    },
+  ],
 };
 
-const AIOPS_DEEP_LINK: AppDeepLink = {
-  id: 'aiOpsDeepLink',
+const AIOPS_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'aiOps',
   title: i18n.translate('xpack.ml.deepLink.aiOps', {
     defaultMessage: 'AIOps',
   }),
@@ -43,21 +76,21 @@ const AIOPS_DEEP_LINK: AppDeepLink = {
   path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
   deepLinks: [
     {
-      id: 'explainLogRateSpikesDeepLink',
+      id: 'explainLogRateSpikes',
       title: i18n.translate('xpack.ml.deepLink.explainLogRateSpikes', {
         defaultMessage: 'Explain Log Rate Spikes',
       }),
       path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
     },
     {
-      id: 'logPatternAnalysisDeepLink',
+      id: 'logPatternAnalysis',
       title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
         defaultMessage: 'Log Pattern Analysis',
       }),
       path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
     },
     {
-      id: 'changePointDetectionsDeepLink',
+      id: 'changePointDetections',
       title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
         defaultMessage: 'Change Point Detection',
       }),
@@ -66,41 +99,48 @@ const AIOPS_DEEP_LINK: AppDeepLink = {
   ],
 };
 
-const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink = {
-  id: 'mlModelManagementDeepLink',
+const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'modelManagement',
   title: i18n.translate('xpack.ml.deepLink.modelManagement', {
     defaultMessage: 'Model Management',
   }),
   path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
   deepLinks: [
     {
-      id: 'mlNodesOverviewDeepLink',
+      id: 'nodesOverview',
       title: i18n.translate('xpack.ml.deepLink.trainedModels', {
         defaultMessage: 'Trained Models',
       }),
       path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
     },
+    {
+      id: 'nodes',
+      title: i18n.translate('xpack.ml.deepLink.nodes', {
+        defaultMessage: 'Nodes',
+      }),
+      path: `/${ML_PAGES.NODES}`,
+    },
   ],
 };
 
-const MEMORY_USAGE_DEEP_LINK: AppDeepLink = {
-  id: 'mlMemoryUsageDeepLink',
+const MEMORY_USAGE_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'memoryUsage',
   title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
     defaultMessage: 'Memory Usage',
   }),
   path: `/${ML_PAGES.MEMORY_USAGE}`,
 };
 
-const DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
-  id: 'dataVisualizerDeepLink',
+const DATA_VISUALIZER_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'dataVisualizer',
   title: i18n.translate('xpack.ml.deepLink.dataVisualizer', {
     defaultMessage: 'Data Visualizer',
   }),
   path: `/${ML_PAGES.DATA_VISUALIZER}`,
 };
 
-const FILE_UPLOAD_DEEP_LINK: AppDeepLink = {
-  id: 'mlFileUploadDeepLink',
+const FILE_UPLOAD_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'fileUpload',
   title: i18n.translate('xpack.ml.deepLink.fileUpload', {
     defaultMessage: 'File Upload',
   }),
@@ -108,30 +148,30 @@ const FILE_UPLOAD_DEEP_LINK: AppDeepLink = {
   path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
 };
 
-const INDEX_DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
-  id: 'mlIndexDataVisualizerDeepLink',
+const INDEX_DATA_VISUALIZER_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'indexDataVisualizer',
   title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
     defaultMessage: 'Index Data Visualizer',
   }),
   path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
 };
 
-const SETTINGS_DEEP_LINK: AppDeepLink = {
-  id: 'mlSettingsDeepLink',
+const SETTINGS_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'settings',
   title: i18n.translate('xpack.ml.deepLink.settings', {
     defaultMessage: 'Settings',
   }),
   path: `/${ML_PAGES.SETTINGS}`,
   deepLinks: [
     {
-      id: 'mlCalendarSettingsDeepLink',
+      id: 'calendarSettings',
       title: i18n.translate('xpack.ml.deepLink.calendarSettings', {
         defaultMessage: 'Calendars',
       }),
       path: `/${ML_PAGES.CALENDARS_MANAGE}`,
     },
     {
-      id: 'mlFilterListsSettingsDeepLink',
+      id: 'filterListsSettings',
       title: i18n.translate('xpack.ml.deepLink.filterListsSettings', {
         defaultMessage: 'Filter Lists',
       }),
@@ -140,8 +180,8 @@ const SETTINGS_DEEP_LINK: AppDeepLink = {
   ],
 };
 
-const NOTIFICATIONS_DEEP_LINK: AppDeepLink = {
-  id: 'mlNotificationsDeepLink',
+const NOTIFICATIONS_DEEP_LINK: AppDeepLink<LinkId> = {
+  id: 'notifications',
   title: i18n.translate('xpack.ml.deepLink.notifications', {
     defaultMessage: 'Notifications',
   }),
@@ -149,7 +189,7 @@ const NOTIFICATIONS_DEEP_LINK: AppDeepLink = {
 };
 
 export function getDeepLinks(isFullLicense: boolean) {
-  const deepLinks: AppDeepLink[] = [
+  const deepLinks: Array<AppDeepLink<LinkId>> = [
     DATA_VISUALIZER_DEEP_LINK,
     FILE_UPLOAD_DEEP_LINK,
     INDEX_DATA_VISUALIZER_DEEP_LINK,

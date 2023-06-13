@@ -85,7 +85,7 @@ export const createMockEndpointAppContext = (
     config: () => Promise.resolve(config),
     serverConfig: config,
     service: createMockEndpointAppContextService(mockManifestManager),
-    experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental).features,
   };
 };
 

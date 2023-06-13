@@ -36,7 +36,9 @@ const defaultConfig: ConfigSchema = {
       metrics: { enabled: false },
       uptime: { enabled: false },
     },
+    thresholdRule: { enabled: false },
   },
+  compositeSlo: { enabled: false },
   coPilot: {
     enabled: false,
   },
