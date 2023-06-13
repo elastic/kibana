@@ -344,7 +344,7 @@ export const defineGetCspStatusRoute = (router: CspRouter): void =>
         }
         const status = await getCspStatus({
           ...cspContext,
-          esClient: cspContext.esClient.asInternalUser,
+          esClient: cspContext.esClient.asCurrentUser,
         });
         return response.ok({
           body: status,
