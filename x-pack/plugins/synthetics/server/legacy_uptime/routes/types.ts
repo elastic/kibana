@@ -81,7 +81,7 @@ export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => Synthetics
  * object that the Kibana platform can consume.
  */
 export type UMKibanaRouteWrapper = (
-  uptimeRoute: UptimeRoute<any>,
+  uptimeRoute: UptimeRoute<{}>,
   server: UptimeServerSetup
 ) => UMKibanaRoute;
 
