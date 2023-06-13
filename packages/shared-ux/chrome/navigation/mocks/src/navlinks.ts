@@ -11,10 +11,10 @@ import type { AppDeepLinkId, ChromeNavLink } from '@kbn/core-chrome-browser';
 const getNavLink = (id: string): ChromeNavLink => {
   return {
     id,
-    title: `Mocked ${id}`,
-    href: `/mocked/${id}`,
+    title: `Deeplink ${id}`,
+    href: `http://mocked/${id}`,
     baseUrl: `/mocked`,
-    url: `http://mocked/${id}`,
+    url: `/mocked/${id}`,
   };
 };
 
