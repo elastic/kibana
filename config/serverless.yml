@@ -37,5 +37,7 @@ server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includ
 # Disable embedding for serverless MVP
 server.securityResponseHeaders.disableEmbedding: true
 
-server.versioned.handlerResolution: newest # default to newest routes
-server.versioned.strictClientVersionCheck: false # do not enforce client version check
+# default to newest routes
+server.versioned.handlerResolution: newest
+# do not enforce client version check
+server.versioned.strictClientVersionCheck: false
