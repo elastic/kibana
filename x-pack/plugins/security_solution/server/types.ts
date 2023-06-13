@@ -32,6 +32,7 @@ export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
