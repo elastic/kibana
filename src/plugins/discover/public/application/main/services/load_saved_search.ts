@@ -109,7 +109,7 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   }
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
-  dataStateContainer.reset(savedSearch);
+  dataStateContainer.reset(savedSearch.searchSource.getField('query'));
   // set data service filters
   const filters = savedSearch.searchSource.getField('filter');
   if (Array.isArray(filters) && filters.length) {

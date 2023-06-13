@@ -57,6 +57,10 @@ export const buildStateSubscribe =
     const currentDataView = internalState.getState().dataView;
 
     if (isTextBasedQuery(nextQuery)) {
+      if (!isTextBasedQuery(prevState.query)) {
+        console.log({ nextQuery });
+        dataState.reset(nextQuery);
+      }
       const nextDataView = await getDataViewByTextBasedQueryLang(
         nextQuery,
         currentDataView,
@@ -97,7 +101,7 @@ export const buildStateSubscribe =
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);
-      dataState.reset(savedSearch);
+      dataState.reset(nextQuery);
       setDataView(nextDataView);
       savedSearchDataView = nextDataView;
     }

@@ -68,7 +68,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    dataState.reset(stateContainer.savedSearchState.getState());
+    dataState.reset(stateContainer.savedSearchState.getState().searchSource.getField('query'));
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     });

@@ -87,7 +87,7 @@ export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
    */
-  fetch: () => void;
+  fetch: (resetQuery?: boolean) => void;
   /**
    * Observable emitting when a next fetch is triggered
    */
@@ -107,7 +107,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: (savedSearch: SavedSearch) => void;
+  reset: (query?: Query | AggregateQuery) => void;
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
@@ -226,7 +226,7 @@ export function getDataStateContainer({
     };
   }
 
-  const fetchQuery = async (resetQuery?: boolean) => {
+  const fetchQuery = async (resetQuery = false) => {
     if (resetQuery) {
       refetch$.next('reset');
     } else {
@@ -235,8 +235,8 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = (savedSearch: SavedSearch) => {
-    const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
+  const reset = (query?: Query | AggregateQuery) => {
+    const recordType = getRawRecordType(query);
     sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
   };
 
