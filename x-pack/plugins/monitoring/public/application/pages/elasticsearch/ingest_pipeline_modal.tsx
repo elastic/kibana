@@ -25,7 +25,6 @@ const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 export const ingestPipelineTabOnClick = async (
   services: Partial<CoreStart & { dashboard: DashboardStart; fleet: FleetStart }>
 ) => {
-
   const dashboard = await services.savedObjects!.client.get(
     'dashboard',
     INGEST_PIPELINE_DASHBOARD_ID
