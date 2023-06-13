@@ -50,3 +50,16 @@ export interface SearchSessionsFindRestResponse {
    */
   statuses: Record<string, SearchSessionStatusRestResponse>;
 }
+
+export interface SearchSessionsUpdateRestResponse {
+  id: string;
+  type: string;
+  updated_at?: string;
+  version?: string;
+  namespaces?: string[];
+  references?: Array<{ id: string; type: string; name: string }>;
+  attributes: {
+    name?: string;
+    expires?: string;
+  };
+}

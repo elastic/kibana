@@ -14,11 +14,13 @@ import {
   SearchSessionRestResponse,
   SearchSessionStatusRestResponse,
   SearchSessionsFindRestResponse,
+  SearchSessionsUpdateRestResponse,
 } from './response_types';
 import {
   searchSessionSchema,
   searchSessionStatusSchema,
   searchSessionsFindSchema,
+  searchSessionsUpdateSchema,
 } from './response_schema';
 
 const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
@@ -262,17 +264,22 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             expires: schema.maybe(schema.string()),
           }),
         },
+        response: {
+          200: {
+            body: searchSessionsUpdateSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
-      console.log('put /{id}');
       const { id } = request.params;
       const { name, expires } = request.body;
       try {
         const searchContext = await context.search;
-        // todo
-        const response = await searchContext.updateSession(id, { name, expires });
-
+        const response: SearchSessionsUpdateRestResponse = await searchContext.updateSession(id, {
+          name,
+          expires,
+        });
         return res.ok({
           body: response,
         });
@@ -298,7 +305,6 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       },
     },
     async (context, request, res) => {
-      console.log('post /{id}/_extend');
       const { id } = request.params;
       const { expires } = request.body;
       try {

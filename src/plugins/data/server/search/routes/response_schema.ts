@@ -53,3 +53,20 @@ export const searchSessionsFindSchema = schema.object({
   saved_objects: schema.arrayOf(searchSessionSchema),
   statuses: schema.recordOf(schema.string(), searchSessionStatusSchema),
 });
+
+const referencesSchema = schema.arrayOf(
+  schema.object({ id: schema.string(), type: schema.string(), name: schema.string() })
+);
+
+export const searchSessionsUpdateSchema = schema.object({
+  id: schema.string(),
+  type: schema.string(),
+  updated_at: schema.maybe(schema.string()),
+  version: schema.maybe(schema.string()),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  references: schema.maybe(referencesSchema),
+  attributes: schema.object({
+    name: schema.maybe(schema.string()),
+    expires: schema.maybe(schema.string()),
+  }),
+});
