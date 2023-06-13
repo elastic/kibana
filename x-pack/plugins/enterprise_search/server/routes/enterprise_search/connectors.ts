@@ -208,6 +208,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
+          type: schema.maybe(schema.string()),
         }),
       },
     },
@@ -217,7 +218,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         client,
         request.params.connectorId,
         request.query.from,
-        request.query.size
+        request.query.size,
+        request.query.type as 'content' | 'access_control' | 'all'
       );
       return response.ok({ body: result });
     })

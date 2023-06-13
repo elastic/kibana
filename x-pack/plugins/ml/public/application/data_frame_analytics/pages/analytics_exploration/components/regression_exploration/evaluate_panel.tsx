@@ -26,8 +26,8 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getValuesFromResponse, loadEvalData, loadDocsCount, Eval } from '../../../../common';
 import {
@@ -44,7 +44,7 @@ import { EvaluateStat } from './evaluate_stat';
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DataFrameTaskStateType;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
 }
 
 const EMPTY_STATS = {
