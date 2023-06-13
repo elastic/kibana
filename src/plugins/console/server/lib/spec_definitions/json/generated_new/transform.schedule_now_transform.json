@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "POST"
-  ],
-  "patterns": [
-    "/_transform/{transform_id}/_schedule_now"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/schedule-now-transform.html"
-}

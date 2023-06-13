@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "GET"
-  ],
-  "patterns": [
-    "/_cat/tasks"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html"
-}

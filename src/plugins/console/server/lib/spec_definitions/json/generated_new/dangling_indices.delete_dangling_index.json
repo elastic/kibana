@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "DELETE"
-  ],
-  "patterns": [
-    "/_dangling/{index_uuid}"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-gateway-dangling-indices.html"
-}

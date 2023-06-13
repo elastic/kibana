@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "POST"
-  ],
-  "patterns": [
-    "/_ilm/migrate_to_data_tiers"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-migrate-to-data-tiers.html"
-}

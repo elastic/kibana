@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "POST"
-  ],
-  "patterns": [
-    "/{index}/_ilm/remove"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-remove-policy.html"
-}

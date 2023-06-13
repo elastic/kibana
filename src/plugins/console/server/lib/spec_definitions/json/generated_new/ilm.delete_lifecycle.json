@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "DELETE"
-  ],
-  "patterns": [
-    "/_ilm/policy/{policy}"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-delete-lifecycle.html"
-}

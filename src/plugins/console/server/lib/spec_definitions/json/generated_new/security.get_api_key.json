@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "GET"
-  ],
-  "patterns": [
-    "/_security/api_key"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-api-key.html"
-}

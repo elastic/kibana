@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "PUT"
-  ],
-  "patterns": [
-    "/_data_stream/{name}/_lifecycle"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/dlm-put-lifecycle.html"
-}

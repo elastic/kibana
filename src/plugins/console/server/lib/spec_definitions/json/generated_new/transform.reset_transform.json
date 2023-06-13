@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "POST"
-  ],
-  "patterns": [
-    "/_transform/{transform_id}/_reset"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reset-transform.html"
-}

@@ -1,9 +1,0 @@
-{
-  "methods": [
-    "DELETE"
-  ],
-  "patterns": [
-    "/_ingest/pipeline/{id}"
-  ],
-  "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-pipeline-api.html"
-}
