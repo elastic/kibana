@@ -334,6 +334,7 @@ function getSendEmailOptions(
     content: {
       ...content,
       message: 'a message',
+      messageHTML: null,
       subject: 'a subject',
     },
     routing: {

@@ -439,6 +439,7 @@ describe('params validation', () => {
           "text": "Go to Elastic",
         },
         "message": "this is the message",
+        "messageHTML": null,
         "subject": "this is a test",
         "to": Array [
           "bob@example.com",
@@ -506,6 +507,7 @@ describe('execute()', () => {
     bcc: ['jimmy@example.com'],
     subject: 'the subject',
     message: 'a message to you',
+    messageHTML: null,
     kibanaFooterLink: {
       path: '/',
       text: 'Go to Elastic',
@@ -547,6 +549,7 @@ describe('execute()', () => {
       ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": true,
@@ -598,6 +601,7 @@ describe('execute()', () => {
       ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -649,6 +653,7 @@ describe('execute()', () => {
       ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -709,6 +714,49 @@ describe('execute()', () => {
       bcc: ['jim', '{{rogue}}', 'bob'],
       subject: '{{rogue}}',
       message: '{{rogue}}',
+      messageHTML: null,
+      kibanaFooterLink: {
+        path: '/',
+        text: 'Go to Elastic',
+      },
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const renderedParams = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+
+    expect(renderedParams.message).toBe('\\*bold\\*');
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "bcc": Array [
+          "jim",
+          "*bold*",
+          "bob",
+        ],
+        "cc": Array [
+          "*bold*",
+        ],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Elastic",
+        },
+        "message": "\\\\*bold\\\\*",
+        "messageHTML": null,
+        "subject": "*bold*",
+        "to": Array [],
+      }
+    `);
+  });
+
+  test('renders parameter templates with HTML as expected', async () => {
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      to: [],
+      cc: ['{{rogue}}'],
+      bcc: ['jim', '{{rogue}}', 'bob'],
+      subject: '{{rogue}}',
+      message: '{{rogue}}',
+      messageHTML: `<html><body><span>{{rogue}}</span></body></html>`,
       kibanaFooterLink: {
         path: '/',
         text: 'Go to Elastic',
@@ -736,6 +784,7 @@ describe('execute()', () => {
           "text": "Go to Elastic",
         },
         "message": "\\\\*bold\\\\*",
+        "messageHTML": "<html><body><span>*bold*</span></body></html>",
         "subject": "*bold*",
         "to": Array [],
       }

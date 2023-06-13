@@ -61,6 +61,7 @@ export const getEmailBodyContent = (
       if (error) {
         reject(error);
       } else {
+        const tags = caseData.attributes.tags.length ? caseData.attributes.tags : ['-'];
         const hasMoreTags = caseData.attributes.tags.length > 3;
         const template = mustache.render(data, {
           title: caseData.attributes.title,
@@ -69,7 +70,7 @@ export const getEmailBodyContent = (
           severity: caseData.attributes.severity,
           severityColor: getSeverityColor(caseData.attributes.severity),
           hasMoreTags: hasMoreTags ? caseData.attributes.tags.length - 3 : null,
-          tags: hasMoreTags ? caseData.attributes.tags.slice(0, 3) : caseData.attributes.tags,
+          tags: hasMoreTags ? tags.slice(0, 3) : tags,
           description:
             caseData.attributes.description.length > 300
               ? `${caseData.attributes.description.slice(0, 300)}...`
