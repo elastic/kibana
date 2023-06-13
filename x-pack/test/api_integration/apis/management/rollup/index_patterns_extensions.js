@@ -7,10 +7,10 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
-import { INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
 export default function ({ getService }) {
@@ -21,14 +21,12 @@ export default function ({ getService }) {
 
   describe('index patterns extension', () => {
     describe('Fields for wildcards', () => {
-      const BASE_URI = `${INDEX_PATTERNS_EXTENSION_BASE_PATH}/_fields_for_wildcard`;
-
       describe('query params validation', () => {
         let uri;
         let body;
 
         it('"pattern" is required', async () => {
-          uri = `${BASE_URI}`;
+          uri = `${FIELDS_FOR_WILDCARD_PATH}`;
           ({ body } = await supertest
             .get(uri)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
@@ -39,7 +37,7 @@ export default function ({ getService }) {
         });
 
         it('should return 404 the rollup index to query does not exist', async () => {
-          uri = `${BASE_URI}?${stringify(
+          uri = `${FIELDS_FOR_WILDCARD_PATH}?${stringify(
             {
               pattern: 'foo',
               type: 'rollup',
@@ -68,7 +66,7 @@ export default function ({ getService }) {
           type: 'rollup',
           rollup_index: rollupIndex,
         };
-        const uri = `${BASE_URI}?${stringify(params, { sort: false })}`;
+        const uri = `${FIELDS_FOR_WILDCARD_PATH}?${stringify(params, { sort: false })}`;
         const { body } = await supertest
           .get(uri)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)

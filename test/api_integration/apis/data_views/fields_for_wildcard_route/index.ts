@@ -9,7 +9,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('index_patterns/_fields_for_wildcard route', () => {
+  describe('/internal/data_views/_fields_for_wildcard route', () => {
     loadTestFile(require.resolve('./params'));
     loadTestFile(require.resolve('./conflicts'));
     loadTestFile(require.resolve('./response'));

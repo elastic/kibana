@@ -10,8 +10,8 @@ import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
+import { FIELDS_FOR_WILDCARD_PATH, HAS_USER_DATA_VIEW_PATH } from '../../common/constants';
 
-const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
 
 /**
@@ -41,10 +41,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     });
   }
 
-  private _getUrl(path: string[]) {
-    return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
-  }
-
   /**
    * Get field list for a given index pattern
    * @param options options for fields request
@@ -61,7 +57,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       fields,
     } = options;
     return this._request<FieldsForWildcardResponse>(
-      this._getUrl(['_fields_for_wildcard']),
+      FIELDS_FOR_WILDCARD_PATH,
       {
         pattern,
         meta_fields: metaFields,
@@ -81,9 +77,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    * Does a user created data view exist?
    */
   async hasUserDataView(): Promise<boolean> {
-    const response = await this._request<{ result: boolean }>(
-      this._getUrl(['has_user_index_pattern'])
-    );
+    const response = await this._request<{ result: boolean }>(HAS_USER_DATA_VIEW_PATH);
     return response?.result ?? false;
   }
 }
