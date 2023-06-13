@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../ftr_provider_context';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';

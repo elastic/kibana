@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { data, MockTelemetryFindings } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 

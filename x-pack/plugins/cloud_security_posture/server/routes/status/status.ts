@@ -16,6 +16,7 @@ import type {
 import moment from 'moment';
 import { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   STATUS_ROUTE_PATH,
@@ -48,7 +49,6 @@ import {
   getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
-import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 240;
