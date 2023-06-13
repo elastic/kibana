@@ -32,6 +32,7 @@ import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
+import { esqlValidator } from '../esql_fields_select/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
   EQL_QUERY_REQUIRED,
@@ -183,6 +184,9 @@ export const schema: FormSchema<DefineStepRule> = {
       },
       {
         validator: debounceAsync(eqlValidator, 300),
+      },
+      {
+        validator: debounceAsync(esqlValidator, 300),
       },
     ],
   },

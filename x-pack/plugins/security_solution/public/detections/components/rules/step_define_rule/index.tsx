@@ -85,6 +85,7 @@ import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils'
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
 import { EsqlFieldsSelect } from '../esql_fields_select/esql_fields_select';
+import { useEsqlQuery } from '../esql_fields_select/use_esql_query';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useEsqlFieldOptions } from '../../../hooks/use_esql_field_options';
 import {
@@ -483,10 +484,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       : undefined
   );
 
+  console.log('INSIDE FORM', JSON.stringify(esqlFieldOptions, null, 4));
   const isEsqlGrouping =
     isEsqlRule(ruleType) && typeof queryBar.query.query === 'string'
       ? /\sstats\s.*\sby\s/.test(queryBar.query.query)
       : false;
+
+  const { getEsqlFields } = useEsqlQuery();
 
   const EsqlDurationOptions = useCallback(
     ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlSuppressionMode }) => (
@@ -675,6 +679,55 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     handleResetIndices,
   ]);
 
+  const queryBarProps = useMemo(
+    () =>
+      ({
+        browserFields,
+        idAria: 'detectionEngineStepDefineRuleQueryBar',
+        indexPattern,
+        isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
+        resetToSavedQuery: formShouldLoadQueryDynamically,
+        isLoading: isIndexPatternLoading || timelineQueryLoading,
+        dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+        openTimelineSearch,
+        onValidityChange: setIsQueryBarValid,
+        onCloseTimelineSearch: handleCloseTimelineSearch,
+        onSavedQueryError: handleSavedQueryError,
+        defaultSavedQuery,
+        onOpenTimeline,
+      } as QueryBarDefineRuleProps),
+    [
+      formShouldLoadQueryDynamically,
+      browserFields,
+      indexPattern,
+      isLoading,
+      timelineQueryLoading,
+      isIndexPatternLoading,
+      openTimelineSearch,
+      handleCloseTimelineSearch,
+      handleSavedQueryError,
+      defaultSavedQuery,
+      onOpenTimeline,
+    ]
+  );
+
+  const EsqlQueryBarMemo = useMemo(
+    () => (
+      <UseField
+        key="QueryBarDefineRule"
+        path="queryBar"
+        validationDataProvider={() => Promise.resolve({ getEsqlFields })}
+        config={{
+          ...schema.queryBar,
+          label: 'ESQL query',
+        }}
+        component={QueryBarDefineRule}
+        componentProps={queryBarProps}
+      />
+    ),
+    [queryBarProps, getEsqlFields]
+  );
+
   const QueryBarMemo = useMemo(
     () => (
       <UseField
@@ -816,6 +869,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     label: i18n.EQL_QUERY_BAR_LABEL,
                   }}
                 />
+              ) : isEsqlRule(ruleType) ? (
+                EsqlQueryBarMemo
               ) : (
                 QueryBarMemo
               )}

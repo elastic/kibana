@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-
-import { debounce } from 'lodash';
+import useDebounce from 'react-use/lib/useDebounce';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
@@ -18,22 +18,64 @@ type UseEsqlFieldOptions = (query: string | undefined) => {
   options: Array<EuiComboBoxOptionOption<string>>;
 };
 
-const debouncedFetchESQL = debounce(fetchFieldsFromESQL, 300);
-
 export const useEsqlFieldOptions: UseEsqlFieldOptions = (query) => {
+  const [queryDebounced, setQueryDebounced] = useState<string | undefined>(undefined);
   const kibana = useKibana<{ expressions: ExpressionsStart }>();
+
+  useDebounce(() => setQueryDebounced(query), 300, [query]);
+
   const { expressions } = kibana.services;
 
-  const queryToPerform = `${query} | limit 0`;
-  const { data, isLoading } = useQuery<Datatable | undefined>([queryToPerform], async () => {
-    if (!queryToPerform) {
-      return;
+  const queryToPerform = `${queryDebounced} | limit 2`;
+
+  const { data, isLoading } = useQuery<Datatable | undefined>(
+    [`${queryDebounced?.trim()}`],
+    async () => {
+      if (!queryDebounced) {
+        return;
+      }
+      // return undefined;
+      return fetchFieldsFromESQL({ esql: queryToPerform }, expressions);
+    },
+    {
+      staleTime: 60 * 1000,
     }
-    return fetchFieldsFromESQL({ esql: queryToPerform }, expressions);
-  });
+  );
+
+  const options = (data?.columns ?? []).map(({ id }) => ({ label: id }));
 
   return {
-    options: (data?.columns ?? []).map(({ id }) => ({ label: id })),
+    options,
     isLoading,
   };
 };
+
+// export const useEsqlFieldOptions: UseEsqlFieldOptions = (query) => {
+//   const [queryDebounced, setQueryDebounced] = useState<string | undefined>(undefined);
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+//   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+//   const kibana = useKibana<{ expressions: ExpressionsStart }>();
+
+//   useDebounce(() => setQueryDebounced(query), 300, [query]);
+
+//   const { expressions } = kibana.services;
+
+//   useEffect(() => {
+//     const queryToPerform = `${queryDebounced} | limit 2`;
+
+//     fetchFieldsFromESQL({ esql: queryToPerform }, expressions)
+//       .then((data) => {
+//         setIsLoading(true);
+//         setOptions((data?.columns ?? []).map(({ id }) => ({ label: id })));
+//       })
+//       .finally(() => {
+//         setIsLoading(false);
+//       });
+//   }, [expressions, queryDebounced]);
+
+//   console.log('>>>>> queryDebounced', queryDebounced, JSON.stringify(options, null, 2));
+//   return {
+//     options,
+//     isLoading,
+//   };
+// };
