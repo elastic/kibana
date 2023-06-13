@@ -7,37 +7,51 @@
 
 import React from 'react';
 
+import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+
+import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
+
 import { createFleetTestRendererMock } from '../../mock';
+
+import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_tokens';
+
+import type { RequestError } from '../../hooks';
 
 import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
-import { useCommands } from './hooks';
-import type { Commands } from './types';
 
-jest.mock('./hooks', () => ({
-  useCommands: jest.fn(),
+jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
+  useGetUninstallTokens: jest.fn(),
 }));
 
+type MockReturnType = Partial<UseRequestResponse<GetUninstallTokensResponse, RequestError>>;
+
 describe('UninstallCommandFlyout', () => {
-  const defaultCommands: Commands = {
-    linux: 'command for linux',
-    mac: 'command for mac',
-    deb: 'commands for deb',
-    windows: 'commands for windows',
-    rpm: 'commands for rpm',
-  };
-  const useCommandsMock = useCommands as jest.Mock;
+  const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
 
   const render = (props: Partial<UninstallCommandFlyoutProps> = {}) => {
     const renderer = createFleetTestRendererMock();
 
     return renderer.render(
-      <UninstallCommandFlyout onClose={() => {}} target="agent" policyId="-" {...props} />
+      <UninstallCommandFlyout onClose={() => {}} target="agent" policyId="policy_id" {...props} />
     );
   };
 
   beforeEach(() => {
-    useCommandsMock.mockReturnValue(defaultCommands);
+    const response: GetUninstallTokensResponse = {
+      items: [{ policy_id: 'policy_id', token: '123456789' }],
+      total: 1,
+      page: 1,
+      perPage: 20,
+    };
+
+    const mockReturn: MockReturnType = {
+      isLoading: false,
+      error: null,
+      data: response,
+    };
+
+    useGetUninstallTokensMock.mockReturnValue(mockReturn);
   });
 
   describe('uninstall command targets', () => {
@@ -58,43 +72,97 @@ describe('UninstallCommandFlyout', () => {
     });
   });
 
-  describe('rendering commands only for received platforms', () => {
-    it('renders commands for e.g. Linux and Mac', () => {
-      useCommandsMock.mockReturnValue({
-        linux: 'command for linux',
-        mac: 'command for mac',
-      });
+  describe('when fetching the tokens is successful', () => {
+    it('shows loading spinner while fetching', () => {
+      const mockReturn: MockReturnType = {
+        isLoading: true,
+        error: null,
+        data: null,
+      };
+      useGetUninstallTokensMock.mockReturnValue(mockReturn);
 
       const renderResult = render();
 
-      const platformsButtonGroup = renderResult.getByTestId(
-        'uninstall-commands-flyout-platforms-btn-group'
-      );
-      expect(platformsButtonGroup).toHaveTextContent('Mac');
-      expect(platformsButtonGroup).toHaveTextContent('Linux');
-      expect(platformsButtonGroup).not.toHaveTextContent('Windows');
-      expect(platformsButtonGroup).not.toHaveTextContent('RPM');
-      expect(platformsButtonGroup).not.toHaveTextContent('DEB');
+      expect(renderResult.queryByTestId('loadingSpinner')).toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('uninstall-commands-flyout-code-block')
+      ).not.toBeInTheDocument();
     });
 
-    it('renders commands for e.g. Mac, Windows, DEB and RPM', () => {
-      useCommandsMock.mockReturnValue({
-        mac: 'command for mac',
-        deb: 'commands for deb',
-        windows: 'commands for windows',
-        rpm: 'commands for rpm',
-      });
-
+    it('renders buttons for Linux/Mac and for Windows', () => {
       const renderResult = render();
 
+      expect(renderResult.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
       const platformsButtonGroup = renderResult.getByTestId(
         'uninstall-commands-flyout-platforms-btn-group'
       );
-      expect(platformsButtonGroup).toHaveTextContent('Mac');
+      expect(platformsButtonGroup).toHaveTextContent('Linux or Mac');
       expect(platformsButtonGroup).toHaveTextContent('Windows');
-      expect(platformsButtonGroup).toHaveTextContent('RPM');
-      expect(platformsButtonGroup).toHaveTextContent('DEB');
-      expect(platformsButtonGroup).not.toHaveTextContent('Linux');
+    });
+
+    it('renders commands for Linux/Mac on default', () => {
+      const renderResult = render();
+
+      const uninstallInstructions = renderResult.getByTestId(
+        'uninstall-commands-flyout-code-block'
+      );
+      expect(uninstallInstructions).toHaveTextContent(
+        'sudo elastic-agent uninstall --uninstall-token 123456789'
+      );
+    });
+
+    it('when user selects Windows, it renders commands for Windows', () => {
+      const renderResult = render();
+
+      renderResult.getByTestId('windows').click();
+
+      const uninstallInstructions = renderResult.getByTestId(
+        'uninstall-commands-flyout-code-block'
+      );
+      expect(uninstallInstructions).toHaveTextContent(
+        'C:\\"Program Files"\\Elastic\\Agent\\elastic-agent.exe uninstall --uninstall-token 123456789'
+      );
+    });
+
+    it('displays the selected policy id to the user', () => {
+      const renderResult = render();
+
+      const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
+      expect(policyIdHint.textContent).toBe('Valid for the following agent policy: policy_id');
+    });
+  });
+
+  describe('when fetching the tokens is unsuccessful', () => {
+    it('shows error message when fetching returns an error', () => {
+      const mockReturn: MockReturnType = {
+        isLoading: false,
+        error: new Error('received error message'),
+        data: null,
+      };
+      useGetUninstallTokensMock.mockReturnValue(mockReturn);
+
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+
+      expect(renderResult.queryByText(/Unable to fetch uninstall token/)).toBeInTheDocument();
+      expect(renderResult.queryByText(/received error message/)).toBeInTheDocument();
+    });
+
+    it('shows "Unknown error" error message when token is missing from response', () => {
+      const mockReturn: MockReturnType = {
+        isLoading: false,
+        error: null,
+        data: null,
+      };
+      useGetUninstallTokensMock.mockReturnValue(mockReturn);
+
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+
+      expect(renderResult.queryByText(/Unable to fetch uninstall token/)).toBeInTheDocument();
+      expect(renderResult.queryByText(/Unknown error/)).toBeInTheDocument();
     });
   });
 });
