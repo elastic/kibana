@@ -7,7 +7,7 @@
 import memoizeOne from 'memoize-one';
 import { sortedUniqBy } from 'lodash';
 import { useState, useEffect, useMemo } from 'react';
-import {
+import type {
   AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
@@ -15,7 +15,7 @@ import {
   ProcessEvent,
   ProcessMap,
   ProcessEventsPage,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import {
   inferProcessFromLeaderInfo,
   updateAlertEventStatus,
@@ -140,7 +140,7 @@ export class ProcessImpl implements Process {
   }
 
   hasOutput() {
-    return !!this.findEventByAction(this.events, EventAction.text_output);
+    return !!this.findEventByAction(this.events, 'text_output');
   }
 
   hasAlerts() {
@@ -164,11 +164,11 @@ export class ProcessImpl implements Process {
   }
 
   hasExec() {
-    return !!this.findEventByAction(this.events, EventAction.exec);
+    return !!this.findEventByAction(this.events, 'exec');
   }
 
   hasExited() {
-    return !!this.findEventByAction(this.events, EventAction.end);
+    return !!this.findEventByAction(this.events, 'end');
   }
 
   getDetails() {
@@ -181,7 +181,7 @@ export class ProcessImpl implements Process {
   }
 
   getEndTime() {
-    const endEvent = this.findEventByAction(this.events, EventAction.end);
+    const endEvent = this.findEventByAction(this.events, 'end');
     return endEvent?.['@timestamp'] || '';
   }
 
@@ -241,11 +241,7 @@ export class ProcessImpl implements Process {
     const filtered = events.filter((processEvent) => {
       const action = processEvent?.event?.action;
 
-      return (
-        action?.includes(EventAction.fork) ||
-        action?.includes(EventAction.exec) ||
-        action?.includes(EventAction.end)
-      );
+      return action?.includes('fork') || action?.includes('exec') || action?.includes('end');
     });
 
     // there are some anomalous processes which are omitting event.action

@@ -34,6 +34,7 @@
     "@kbn/expression-gauge-plugin",
     "@kbn/expression-legacy-metric-vis-plugin",
     "@kbn/expression-metric-vis-plugin",
+    "@kbn/expression-tagcloud-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/event-annotation-plugin",
     "@kbn/expression-xy-plugin",
@@ -77,6 +78,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-lifecycle-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

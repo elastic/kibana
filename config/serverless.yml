@@ -36,3 +36,9 @@ telemetry.allowChangingOptInStatus: false
 server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includeSubDomains
 # Disable embedding for serverless MVP
 server.securityResponseHeaders.disableEmbedding: true
+
+# Enforce single "default" space
+xpack.spaces.maxSpaces: 1
+
+# Allow unauthenticated access to task manager utilization API for auto-scaling
+xpack.task_manager.unsafe.authenticate_background_task_utilization: false
