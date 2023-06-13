@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { startCase } from 'lodash';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -17,8 +18,9 @@ import type {
   ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  RESPONSE_ACTION_TYPE,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
@@ -195,17 +197,21 @@ export const useActionsLogFilter = ({
   setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
+  setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
   const {
     commands,
     statuses,
     hosts: selectedAgentIdsFromUrl,
+    types = [],
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
+    setUrlTypeFilters,
   } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const isHostsFilter = filterName === 'hosts';
+  const isTypeFilter = filterName === 'type';
   const { data: endpointsList, isFetching } = useGetEndpointsList({
     searchString,
     selectedAgentIds: selectedAgentIdsFromUrl,
@@ -224,7 +230,14 @@ export const useActionsLogFilter = ({
 
   // filter options
   const [items, setItems] = useState<FilterItems>(
-    isStatusesFilter
+    isTypeFilter
+      ? RESPONSE_ACTION_TYPE.map((type) => ({
+          key: type,
+          label: startCase(type),
+          checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
+        }))
+      : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
           label: (
@@ -296,5 +309,6 @@ export const useActionsLogFilter = ({
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
+    setUrlTypeFilters,
   };
 };

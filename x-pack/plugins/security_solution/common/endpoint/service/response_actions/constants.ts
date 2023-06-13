@@ -9,6 +9,8 @@ import type { EndpointAuthzKeyList } from '../../types/authz';
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
 export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 
+export const RESPONSE_ACTION_TYPE = ['automated', 'manual'] as const;
+export type ResponseActionType = typeof RESPONSE_ACTION_TYPE[number];
 /**
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
  */
