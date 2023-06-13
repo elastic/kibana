@@ -158,7 +158,7 @@ describe('GettingStartedPage', () => {
     expect(queryByLabelText('Agent policy')).toBeInTheDocument();
     expect(queryByRole('button', { name: 'Save' })).toBeInTheDocument();
     expect(queryByRole('button', { name: 'Save' })).toBeDisabled();
-    fireEvent.mouseOver(queryByRole('button', { name: 'Save' }));
+    fireEvent.mouseOver(getByRole('button', { name: 'Save' }));
     expect(
       await findByText(/You do not have sufficient permissions to perform this action./)
     ).toBeInTheDocument();
