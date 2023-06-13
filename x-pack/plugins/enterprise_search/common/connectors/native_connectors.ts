@@ -843,7 +843,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: ''
+        value: '',
       },
       tenant_name: {
         default_value: null,
@@ -858,7 +858,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: ''
+        value: '',
       },
       client_id: {
         default_value: null,
@@ -873,7 +873,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: ''
+        value: '',
       },
       secret_value: {
         default_value: null,
@@ -888,7 +888,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: ''
+        value: '',
       },
       site_collections: {
         default_value: null,
@@ -899,12 +899,13 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 5,
         required: true,
         sensitive: false,
-        tooltip: 'A comma-separated list of sites to ingest data from. Use * to include all available sites.',
+        tooltip:
+          'A comma-separated list of sites to ingest data from. Use * to include all available sites.',
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: ''
-      }
+        value: '',
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -916,5 +917,5 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'Sharepoint Online',
     }),
     serviceType: 'sharepoint_online',
-  }
+  },
 };
