@@ -26,7 +26,7 @@ import type {
   TimelineStatus,
   TimelineType,
 } from '../../../../common/types/timeline/api';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event/api';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
