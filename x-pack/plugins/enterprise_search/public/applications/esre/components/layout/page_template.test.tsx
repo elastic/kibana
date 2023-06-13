@@ -28,7 +28,7 @@ describe('EnterpriseSearchEsrePageTemplate', () => {
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
-    expect(wrapper.prop('solutionNav')).toEqual({ name: 'Enterprise Search', items: [] });
+    expect(wrapper.prop('solutionNav')).toEqual({ name: 'ESRE', items: [] });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
 
