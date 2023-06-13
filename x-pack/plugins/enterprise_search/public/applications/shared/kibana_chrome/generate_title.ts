@@ -49,5 +49,4 @@ export const workplaceSearchTitle = (page: Title = []) =>
 export const searchExperiencesTitle = (page: Title = []) =>
   generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);
 
-export const esreTitle = (page: Title = []) =>
-  generateTitle([...page, ESRE_PLUGIN.NAME]);
+export const esreTitle = (page: Title = []) => generateTitle([...page, ESRE_PLUGIN.NAME]);
