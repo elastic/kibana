@@ -34,22 +34,28 @@ export function registerUserContext(
     context$: from(authc.getCurrentUser()).pipe(
       map((user) => {
         if (user.elastic_cloud_user) {
+          let userId = user.username;
           // If the user is managed by ESS, use the plain username as the user ID:
           // The username is expected to be unique for these users,
           // and it matches how users are identified in the Cloud UI, so it allows us to correlate them.
-          return { userId: user.username, isElasticCloudUser: true };
+
+          if (!/^[0-9]+$/.test(userId)) {
+            // If the userId is not a number, we don't want to risk reporting any PII, so we choose to hash it.
+            userId = sha256(userId);
+          }
+
+          return { userId, isElasticCloudUser: true };
         }
 
         return {
           // For the rest of the authentication providers, we want to add the cloud deployment ID to make it unique.
           // Especially in the case of Elasticsearch-backed authentication, where users are commonly repeated
           // across multiple deployments (i.e.: `elastic` superuser).
-          userId: cloudId ? `${cloudId}:${user.username}` : user.username,
+          // We also hash it to ensure we don't leak any potential PII.
+          userId: sha256(cloudId ? `${cloudId}:${user.username}` : user.username),
           isElasticCloudUser: false,
         };
       }),
-      // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-      map(({ userId, isElasticCloudUser }) => ({ userId: sha256(userId), isElasticCloudUser })),
       catchError(() => of({ userId: undefined, isElasticCloudUser: false }))
     ),
     schema: {

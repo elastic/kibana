@@ -71,7 +71,7 @@ describe('registerUserContext', () => {
     expect(hashId1).not.toEqual(hashId2);
   });
 
-  test('user hash does not include cloudId when user is an Elastic Cloud user', async () => {
+  test('user is not hashed when user is an Elastic Cloud user and it is a numeric username', async () => {
     authentication.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ username, elastic_cloud_user: true })
     );
@@ -84,10 +84,34 @@ describe('registerUserContext', () => {
     )!;
 
     await expect(firstValueFrom(context$)).resolves.toEqual({
-      userId: expectedHashedPlainUsername,
+      userId: username,
       isElasticCloudUser: true,
     });
   });
+
+  test.each(['1a@user.test', 'a1@user.test', '1234abc'])(
+    'user is hashed when user is an Elastic Cloud user and it is not a numeric username (%p)',
+    async (nonNumbericUser) => {
+      authentication.getCurrentUser.mockResolvedValue(
+        securityMock.createMockAuthenticatedUser({
+          username: nonNumbericUser,
+          elastic_cloud_user: true,
+        })
+      );
+      registerUserContext(analytics, authentication, 'cloudDeploymentId');
+
+      expect(analytics.registerContextProvider).toHaveBeenCalled();
+
+      const [{ context$ }] = analytics.registerContextProvider.mock.calls.find(
+        ([{ name }]) => name === 'user_id'
+      )!;
+
+      await expect(firstValueFrom(context$)).resolves.toEqual({
+        userId: new Sha256().update(nonNumbericUser, 'utf8').digest('hex'),
+        isElasticCloudUser: true,
+      });
+    }
+  );
 
   test('user hash does not include cloudId when not provided', async () => {
     authentication.getCurrentUser.mockResolvedValue(
