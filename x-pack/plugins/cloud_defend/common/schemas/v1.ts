@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { type TypeOf, schema } from '@kbn/config-schema';
+import { DEFAULT_POLICIES_PER_PAGE } from '../constants';
 
-export const DEFAULT_POLICIES_PER_PAGE = 20;
-export const POLICIES_PACKAGE_POLICY_PREFIX = 'package_policy.';
 export const policiesQueryParamsSchema = schema.object({
   /**
    * The page of objects to return
