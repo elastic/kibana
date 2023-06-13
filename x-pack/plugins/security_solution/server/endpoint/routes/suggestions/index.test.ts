@@ -13,7 +13,11 @@ import {
   httpServerMock,
   httpServiceMock,
 } from '@kbn/core/server/mocks';
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import type { Observable } from 'rxjs';
 import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
@@ -22,6 +26,7 @@ import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
@@ -206,11 +211,14 @@ describe('when calling the Suggestions route handler', () => {
         );
 
         const mockRequest = httpServerMock.createKibanaRequest({ params });
-        const [, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-          path.startsWith(routePrefix)
-        )!;
+        const { routeHandler } = getRegisteredVersionedRouteMock(
+          routerMock,
+          'post',
+          routePrefix,
+          '2023-10-31'
+        );
 
-        await routeHandler(ctx, mockRequest, mockResponse);
+        await routeHandler(ctx as unknown as RequestHandlerContext, mockRequest, mockResponse);
       };
     });
 
