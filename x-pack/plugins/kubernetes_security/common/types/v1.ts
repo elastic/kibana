@@ -5,6 +5,28 @@
  * 2.0.
  */
 
+interface Aggregate {
+  key: string | number;
+  doc_count: number;
+}
+
+interface Bucket extends Aggregate {
+  key_as_string?: string;
+  count_by_aggs?: {
+    value: number;
+  };
+}
+
+export interface AggregateResult {
+  buckets: Bucket[];
+  hasNextPage: boolean;
+}
+
+export interface AggregateBucketPaginationResult {
+  buckets: Bucket[];
+  hasNextPage: boolean;
+}
+
 export interface MultiTermsAggregateGroupBy {
   field: string;
   maybe?: string;
@@ -15,7 +37,7 @@ interface MultiTermsAggregate {
   doc_count: number;
 }
 
-export interface Bucket extends MultiTermsAggregate {
+export interface MultiTermsBucket extends MultiTermsAggregate {
   key_as_string?: string;
   count_by_aggs?: {
     value: number;
