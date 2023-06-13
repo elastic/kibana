@@ -27,6 +27,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { MAX_NUMBER_OF_TX_GROUPS } from './get_service_transaction_groups';
@@ -44,6 +45,12 @@ export type ServiceTransactionGroupAlertsResponse = Array<{
   name: string;
   alertsCount: number;
 }>;
+
+const RuleAggregationType = {
+  [LatencyAggregationType.avg]: AggregationType.Avg,
+  [LatencyAggregationType.p99]: AggregationType.P99,
+  [LatencyAggregationType.p95]: AggregationType.P95,
+} as const;
 
 export async function getServiceTranactionGroupsAlerts({
   apmAlertsClient,
@@ -73,15 +80,36 @@ export async function getServiceTranactionGroupsAlerts({
         filter: [
           ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...termQuery(
-            ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
-            latencyAggregationType
-          ),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),
           ...termQuery(SERVICE_NAME, serviceName),
           ...termQuery(TRANSACTION_TYPE, transactionType),
           ...environmentQuery(environment),
+        ],
+        must: [
+          {
+            bool: {
+              should: [
+                {
+                  ...termQuery(
+                    ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
+                    RuleAggregationType[latencyAggregationType]
+                  ),
+                },
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        exists: {
+                          field: RuleAggregationType[latencyAggregationType],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     },
@@ -105,7 +133,7 @@ export async function getServiceTranactionGroupsAlerts({
 
   const response = await apmAlertsClient.search(params);
   const { buckets } = (response.aggregations?.transaction_groups ?? {
-    buckets: {},
+    buckets: [],
   }) as ServiceTransactionGroupAlertsAggResponse;
 
   const servicesTransactionGroupsAlertsCount = buckets.map((bucket) => ({

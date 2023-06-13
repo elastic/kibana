@@ -82,7 +82,7 @@ export function getColumns({
               'xpack.apm.transactionsTableColumnName.alertsColumnLabel',
               { defaultMessage: 'Active alerts' }
             ),
-            width: `${unit * 8}px`,
+            width: `${unit * 6}px`,
             render: (_, { alertsCount }) => {
               if (!alertsCount) {
                 return null;
