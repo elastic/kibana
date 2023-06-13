@@ -28,6 +28,8 @@ import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../../spike_analysis_table/spike_analysis_table_row_provider';
 
+import type { ExplainLogRateSpikesAnalysisResults } from '../explain_log_rate_spikes_analysis';
+
 import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content';
 
 const localStorage = new Storage(window.localStorage);
@@ -44,8 +46,12 @@ export interface ExplainLogRateSpikesContentWrapperProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentWrapperProps> = ({
@@ -57,6 +63,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   esSearchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  onAnalysisCompleted,
 }) => {
   if (!dataView) return null;
 
@@ -101,6 +108,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   esSearchQuery={esSearchQuery}
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
+                  onAnalysisCompleted={onAnalysisCompleted}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

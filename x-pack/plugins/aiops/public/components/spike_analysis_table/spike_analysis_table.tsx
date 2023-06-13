@@ -56,7 +56,9 @@ interface SpikeAnalysisTableProps {
   isExpandedRow?: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
+  /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
 }
 

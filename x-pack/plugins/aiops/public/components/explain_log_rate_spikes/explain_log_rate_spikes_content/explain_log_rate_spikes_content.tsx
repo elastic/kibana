@@ -21,10 +21,12 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import { useData } from '../../../hooks/use_data';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
+import {
+  ExplainLogRateSpikesAnalysis,
+  type ExplainLogRateSpikesAnalysisResults,
+} from '../explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../../spike_analysis_table/spike_analysis_table_row_provider';
-
-import { ExplainLogRateSpikesAnalysis } from '../explain_log_rate_spikes_analysis';
 
 const DEFAULT_SEARCH_QUERY = { match_all: {} };
 
@@ -50,8 +52,12 @@ export interface ExplainLogRateSpikesContentProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> = ({
@@ -62,6 +68,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
   esSearchQuery = DEFAULT_SEARCH_QUERY,
   barColorOverride,
   barHighlightColorOverride,
+  onAnalysisCompleted,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
@@ -145,6 +152,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
                 sampleProbability={sampleProbability}
                 barColorOverride={barColorOverride}
                 barHighlightColorOverride={barHighlightColorOverride}
+                onAnalysisCompleted={onAnalysisCompleted}
               />
             )}
             {windowParameters === undefined && (
