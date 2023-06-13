@@ -13518,11 +13518,11 @@
               },
               {
                 "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
                 "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
                 "plugin": "ml",
@@ -21140,11 +21140,11 @@
               },
               {
                 "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
                 "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
                 "plugin": "ml",

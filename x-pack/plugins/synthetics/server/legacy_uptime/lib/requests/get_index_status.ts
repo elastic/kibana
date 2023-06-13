@@ -5,24 +5,41 @@
  * 2.0.
  */
 
-import { UMElasticsearchQueryFn } from '../adapters';
+import { UptimeEsClient } from '../lib';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
 
-export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
+export const getIndexStatus = async ({
   uptimeEsClient,
-}) => {
+  range,
+}: {
+  uptimeEsClient: UptimeEsClient;
+  range?: { to: string; from: string };
+}): Promise<StatesIndexStatus> => {
+  const { to, from } = range || {};
   try {
     const {
       indices,
       result: {
-        body: {
-          _shards: { total },
-        },
+        body: { count },
       },
-    } = await uptimeEsClient.count({ terminate_after: 1 });
+    } = await uptimeEsClient.count({
+      terminate_after: 1,
+      ...(to && from
+        ? {
+            query: {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
+                },
+              },
+            },
+          }
+        : {}),
+    });
     return {
       indices,
-      indexExists: total > 0,
+      indexExists: count > 0,
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
