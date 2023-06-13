@@ -59,4 +59,4 @@ export const PLUGIN_NAME = 'DataViews';
 
 export const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildcard';
 
-export const HAS_USER_DATA_VIEW_PATH = '/internal/data_views/_has_user_index_pattern';
+export const HAS_USER_DATA_VIEW_PATH = '/internal/data_views/has_user_index_pattern';
