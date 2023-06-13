@@ -6,9 +6,13 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { useStorage } from '@kbn/ml-local-storage';
+import { ML_OVERVIEW_PANELS, MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
+import { CollapsiblePanel } from '../components/collapsible_panel';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { OverviewContent } from './components/content';
@@ -22,6 +26,12 @@ import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { useIsServerless } from '../contexts/kibana/use_is_serverless';
+
+export const overviewPanelDefaultState = Object.freeze({
+  nodes: true,
+  adJobs: true,
+  dfaJobs: true,
+});
 
 export const OverviewPage: FC = () => {
   const serverless = useIsServerless();
@@ -37,6 +47,11 @@ export const OverviewPage: FC = () => {
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
+
+  const [panelsState, setPanelsState] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_OVERVIEW_PANELS>
+  >(ML_OVERVIEW_PANELS, overviewPanelDefaultState);
 
   return (
     <div>
@@ -63,9 +78,17 @@ export const OverviewPage: FC = () => {
 
       {canViewMlNodes && serverless === false ? (
         <>
-          <EuiPanel hasShadow={false} hasBorder>
+          <CollapsiblePanel
+            isOpen={panelsState.nodes}
+            onToggle={(update) => {
+              setPanelsState({ ...panelsState, nodes: update });
+            }}
+            header={
+              <FormattedMessage id="xpack.ml.overview.nodesPanel.header" defaultMessage="Nodes" />
+            }
+          >
             <NodesList compactView />
-          </EuiPanel>
+          </CollapsiblePanel>
           <EuiSpacer size="m" />
         </>
       ) : null}

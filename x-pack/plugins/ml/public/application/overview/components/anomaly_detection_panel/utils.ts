@@ -76,40 +76,40 @@ export function getGroupsFromJobs(jobs: MlSummaryJobs): {
 
 export function getStatsBarData(jobsList: any) {
   const jobStats = {
-    activeNodes: {
-      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML nodes',
-      }),
-      value: 0,
-      show: true,
-    },
     total: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.totalJobsLabel', {
-        defaultMessage: 'Total jobs',
+        defaultMessage: 'Total',
       }),
       value: 0,
       show: true,
     },
     open: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.openJobsLabel', {
-        defaultMessage: 'Open jobs',
+        defaultMessage: 'Open',
       }),
       value: 0,
       show: true,
     },
     closed: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.closedJobsLabel', {
-        defaultMessage: 'Closed jobs',
+        defaultMessage: 'Closed',
       }),
       value: 0,
       show: true,
     },
     failed: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.failedJobsLabel', {
-        defaultMessage: 'Failed jobs',
+        defaultMessage: 'Failed',
       }),
       value: 0,
       show: false,
+    },
+    activeNodes: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
+        defaultMessage: 'Active ML nodes',
+      }),
+      value: 0,
+      show: true,
     },
     activeDatafeeds: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
