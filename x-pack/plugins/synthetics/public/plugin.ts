@@ -335,6 +335,14 @@ function registerSyntheticsRoutesWithNavigation(
                   ignoreTrailingSlash: true,
                   isNewFeature: true,
                 },
+                {
+                  label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
+                    defaultMessage: 'TLS Certificates',
+                  }),
+                  app: 'synthetics',
+                  path: '/certificates',
+                  matchFullPath: true,
+                },
               ],
             },
           ];

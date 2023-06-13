@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
-import { CertMonitor } from '../../../../common/runtime_types';
-import { MonitorPageLink } from '../common/monitor_page_link';
+import { MonitorPageLink } from './monitor_page_link';
+import { CertMonitor } from '../../../../../common/runtime_types';
 
 interface Props {
   monitors: CertMonitor[];
@@ -21,9 +21,7 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
         <span key={mon.id}>
           {ind > 0 && ', '}
           <EuiToolTip content={mon.url}>
-            <MonitorPageLink monitorId={mon.id!} linkParameters={''}>
-              {mon.name || mon.id}
-            </MonitorPageLink>
+            <MonitorPageLink configId={mon.configId!}>{mon.name || mon.id}</MonitorPageLink>
           </EuiToolTip>
         </span>
       ))}
