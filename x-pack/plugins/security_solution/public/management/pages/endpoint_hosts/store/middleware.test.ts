@@ -117,6 +117,7 @@ describe('endpoint list middleware', () => {
         pageSize: '10',
         kuery: '',
       },
+      version: '2023-10-31',
     });
     expect(listData(getState())).toEqual(apiResponse.data);
   });
@@ -151,6 +152,7 @@ describe('endpoint list middleware', () => {
         pageSize: '10',
         kuery: '',
       },
+      version: '2023-10-31',
     });
     expect(listData(getState())).toEqual(apiResponse.data);
   });
@@ -373,7 +375,8 @@ describe('endpoint list middleware', () => {
       await waitForAction('endpointPendingActionsStateChanged');
 
       expect(fakeHttpServices.get).toHaveBeenCalledWith(
-        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId })
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
+        { version: '2023-10-31' }
       );
     });
 
@@ -396,7 +399,8 @@ describe('endpoint list middleware', () => {
       await waitForAction('endpointPendingActionsStateChanged');
 
       expect(fakeHttpServices.get).toHaveBeenCalledWith(
-        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId })
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId }),
+        { version: '2023-10-31' }
       );
     });
   });
