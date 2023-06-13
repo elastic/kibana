@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Lang as CssLang } from './css';
-import { Lang as HandlebarsLang } from './handlebars';
-import { Lang as MarkdownLang } from './markdown';
-import { Lang as YamlLang } from './yaml';
-import { Lang as HJson } from './hjson';
-import { Lang as GrokLang } from './grok';
+import { LangModuleType } from '@kbn/monaco';
+import { languageConfiguration, lexerRules } from './language';
 
-export { CssLang, HandlebarsLang, MarkdownLang, YamlLang, HJson, GrokLang };
+export const Lang: LangModuleType = { ID: 'grok', languageConfiguration, lexerRules };
