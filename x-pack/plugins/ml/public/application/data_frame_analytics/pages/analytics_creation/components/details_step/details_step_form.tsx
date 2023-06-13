@@ -17,7 +17,7 @@ import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validat
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 import { DetailsStepTimeField } from './details_step_time_field';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
@@ -39,8 +39,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     services: { docLinks, notifications },
   } = useMlKibana();
 
-  const mlContext = useMlContext();
-  const { currentDataView } = mlContext;
+  const { currentDataView } = useDataSource();
 
   const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;

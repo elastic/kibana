@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
-import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 
@@ -36,8 +35,7 @@ import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/gener
 
 export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
   const defaultUrl = 'https://localhost:9200';
-  const url =
-    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || defaultUrl;
+  const url = cloudContext.elasticsearchUrl || defaultUrl;
   return url;
 };
 

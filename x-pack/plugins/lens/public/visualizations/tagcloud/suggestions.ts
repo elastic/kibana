@@ -11,7 +11,7 @@ import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 
-export function suggestions({
+export function getSuggestions({
   table,
   state,
   keptLayerIds,
