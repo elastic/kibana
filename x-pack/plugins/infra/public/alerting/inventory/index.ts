@@ -39,9 +39,7 @@ const inventoryDefaultActionMessage = i18n.translate(
 const inventoryDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.metrics.alerting.inventory.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
-
-\\{\\{rule.name\\}\\} has recovered.
+    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
 
 - Affected: \\{\\{context.group\\}\\}
 - Metric: \\{\\{context.metric\\}\\}

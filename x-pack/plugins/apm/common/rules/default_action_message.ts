@@ -80,7 +80,9 @@ export const transactionDurationRecoveryMessage = i18n.translate(
 export const transactionErrorRateMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{rule.name\\}\\} is active with the following conditions:
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active with the following conditions:
 
 - Service name: \\{\\{context.serviceName\\}\\}
 - Type: \\{\\{context.transactionType\\}\\}
@@ -95,7 +97,9 @@ export const transactionErrorRateMessage = i18n.translate(
 export const transactionErrorRateRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionErrorRate.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} has recovered.
 
 - Service name: \\{\\{context.serviceName\\}\\}
 - Type: \\{\\{context.transactionType\\}\\}
