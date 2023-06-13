@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -293,14 +293,25 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     const itemCount = significantTerms?.length ?? 0;
 
     let items: SignificantTerm[] = significantTerms ?? [];
-    items = sortBy(significantTerms, (item) => {
-      if (item && typeof item[sortField] === 'string') {
-        // @ts-ignore Object is possibly null or undefined
-        return item[sortField].toLowerCase();
-      }
-      return item[sortField];
-    });
-    items = sortDirection === 'asc' ? items : items.reverse();
+
+    const sortIteratees = [
+      (item: SignificantTerm) => {
+        if (item && typeof item[sortField] === 'string') {
+          // @ts-ignore Object is possibly null or undefined
+          return item[sortField].toLowerCase();
+        }
+        return item[sortField];
+      },
+    ];
+    const sortDirections = [sortDirection];
+
+    // Only if the table is sorted by p-value, add a secondary sort by doc count.
+    if (sortField === 'pValue') {
+      sortIteratees.push((item: SignificantTerm) => item.doc_count);
+      sortDirections.push(sortDirection);
+    }
+
+    items = orderBy(significantTerms, sortIteratees, sortDirections);
 
     return {
       pageOfItems: items.slice(pageStart, pageStart + pageSize),
