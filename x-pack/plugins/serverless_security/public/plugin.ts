@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+
 import { getSecurityGetStartedComponent } from './components/get_started';
 import { getSecuritySideNavComponent } from './components/side_navigation';
 import {
