@@ -128,6 +128,8 @@
       "@kbn/cli-dev-mode/*": ["packages/kbn-cli-dev-mode/*"],
       "@kbn/cloud-chat-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat"],
       "@kbn/cloud-chat-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat/*"],
+      "@kbn/cloud-chat-provider-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat_provider"],
+      "@kbn/cloud-chat-provider-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat_provider/*"],
       "@kbn/cloud-data-migration-plugin": ["x-pack/plugins/cloud_integrations/cloud_data_migration"],
       "@kbn/cloud-data-migration-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_data_migration/*"],
       "@kbn/cloud-defend-plugin": ["x-pack/plugins/cloud_defend"],

@@ -97,5 +97,6 @@
     "@kbn/ml-runtime-field-utils",
     "@kbn/ml-date-utils",
     "@kbn/deeplinks-ml",
+    "@kbn/core-notifications-browser-mocks",
   ],
 }

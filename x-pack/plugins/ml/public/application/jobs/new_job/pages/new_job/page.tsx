@@ -34,7 +34,7 @@ import { ChartLoader } from '../../common/chart_loader';
 import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
-import { useMlContext } from '../../../../contexts/ml';
+import { useDataSource } from '../../../../contexts/ml';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
@@ -53,7 +53,7 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
-  const mlContext = useMlContext();
+  const mlContext = useDataSource();
   const {
     services: { maps: mapsPlugin },
   } = useMlKibana();
