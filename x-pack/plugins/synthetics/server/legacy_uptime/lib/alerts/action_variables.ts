@@ -36,7 +36,8 @@ export const ACTION_VARIABLES = {
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description',
       {
-        defaultMessage: 'Link to the alert troubleshooting view for further context and details',
+        defaultMessage:
+          'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
       }
     ),
     usesPublicBaseUrl: true,

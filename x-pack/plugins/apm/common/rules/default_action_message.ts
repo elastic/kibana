@@ -85,7 +85,7 @@ export const transactionErrorRateMessage = i18n.translate(
 \\{\\{rule.name\\}\\} is active with the following conditions:
 
 - Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
+- Transaction type: \\{\\{context.transactionType\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Failed transaction rate: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\}%
@@ -102,7 +102,7 @@ export const transactionErrorRateRecoveryMessage = i18n.translate(
 \\{\\{rule.name\\}\\} has recovered.
 
 - Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
+- Transaction type: \\{\\{context.transactionType\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Failed transaction rate: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\}%
@@ -120,7 +120,7 @@ export const anomalyMessage = i18n.translate(
 \\{\\{rule.name\\}\\} is active with the following conditions:
 
 - Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
+- Transaction type: \\{\\{context.transactionType\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Severity: \\{\\{context.triggerValue\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\}
@@ -137,7 +137,7 @@ export const anomalyRecoveryMessage = i18n.translate(
 \\{\\{rule.name\\}\\} has recovered.
 
 - Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
+- Transaction type: \\{\\{context.transactionType\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Severity: \\{\\{context.triggerValue\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\}

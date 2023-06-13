@@ -13,7 +13,7 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.alertDetailsUrl',
       {
         defaultMessage:
-          'Link to the alert troubleshooting view for further context and details',
+          'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
       }
     ),
     name: 'alertDetailsUrl' as const,

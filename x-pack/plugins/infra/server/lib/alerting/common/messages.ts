@@ -179,7 +179,8 @@ export const alertStateActionVariableDescription = i18n.translate(
 export const alertDetailUrlActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.alertDetailUrlActionVariableDescription',
   {
-    defaultMessage: 'Link to the alert troubleshooting view for further context and details',
+    defaultMessage:
+      'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
   }
 );
 
