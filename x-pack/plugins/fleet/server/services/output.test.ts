@@ -1050,11 +1050,12 @@ describe('Output Service', () => {
       mockedAppContextService.getConfig.mockReset();
       mockedAppContextService.getConfig.mockReset();
     });
-    it('Should use cloud ID as the source of truth for ES hosts', () => {
+    it('Should use cloud plugin as the source of truth for ES hosts', () => {
       // @ts-expect-error
       mockedAppContextService.getCloud.mockReturnValue({
         isCloudEnabled: true,
         cloudId: CLOUD_ID,
+        elasticsearchUrl: 'https://cec6f261a74bf24ce33bb8811b84294f.us-east-1.aws.found.io:443',
       });
 
       mockedAppContextService.getConfig.mockReturnValue(CONFIG_WITH_ES_HOSTS);

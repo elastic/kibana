@@ -51,7 +51,6 @@ export const OverviewContent: FC<Props> = ({
     <>
       <AnomalyDetectionPanel
         anomalyTimelineService={anomalyTimelineService}
-        jobCreationDisabled={createAnomalyDetectionJobDisabled}
         setLazyJobCount={setAdLazyJobCount}
       />
       <EuiSpacer size="m" />

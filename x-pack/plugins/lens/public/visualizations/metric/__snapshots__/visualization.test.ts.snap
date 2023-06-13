@@ -15,9 +15,6 @@ Object {
       "enableDimensionEditor": true,
       "enableFormatSelector": true,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "metric",
       "groupLabel": "Primary metric",
       "isMetricDimension": true,
@@ -37,9 +34,6 @@ Object {
       "enableDimensionEditor": true,
       "enableFormatSelector": true,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "secondaryMetric",
       "groupLabel": "Secondary metric",
       "isMetricDimension": true,
@@ -58,9 +52,6 @@ Object {
       "enableDimensionEditor": true,
       "enableFormatSelector": false,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "max",
       "groupLabel": "Maximum value",
       "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
@@ -82,9 +73,6 @@ Object {
       "enableDimensionEditor": true,
       "enableFormatSelector": true,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "breakdownBy",
       "groupLabel": "Break down by",
       "supportsMoreColumns": false,
