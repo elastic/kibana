@@ -24,6 +24,7 @@ const defaultConfig = { apiProvider: 'OpenAI' };
 // eslint-disable-next-line import/no-default-export
 export default function genAiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
 
   const createConnector = async (apiUrl: string) => {
@@ -269,6 +270,49 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               status: 'ok',
               connector_id: genAiActionId,
               data: genAiSuccessResponse,
+            });
+          });
+
+          it('should create a dashboard when user has correct permissions', async () => {
+            const { body } = await supertest
+              .post(`/api/actions/connector/${genAiActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getDashboard',
+                  subActionParams: {
+                    dashboardId: 'specific-dashboard-id',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: genAiActionId,
+              data: { available: true },
+            });
+          });
+
+          it('should not create a dashboard when user does not have kibana event log permissions', async () => {
+            const { body } = await supertestWithoutAuth
+              .post(`/api/actions/connector/${genAiActionId}/_execute`)
+              .auth('global_read', 'global_read-password')
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getDashboard',
+                  subActionParams: {
+                    dashboardId: 'specific-dashboard-id',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: genAiActionId,
+              data: { available: false },
             });
           });
         });
