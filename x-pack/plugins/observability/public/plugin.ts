@@ -76,6 +76,9 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
+    thresholdRule: {
+      enabled: boolean;
+    };
   };
   coPilot?: {
     enabled?: boolean;

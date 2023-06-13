@@ -339,7 +339,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body[dataViewConfig.serviceKey].namespaces).to.eql([fooNamespace]);
 
         const getResponse = await supertest.get(`/s/${fooNamespace}${dataViewConfig.basePath}`);
-        const dataView = getResponse.body.data_view.find((dv: any) => dv.title === title);
+        const dataView = getResponse.body[dataViewConfig.serviceKey].find(
+          (dv: any) => dv.title === title
+        );
 
         expect(dataView.namespaces).to.eql([fooNamespace]);
       });

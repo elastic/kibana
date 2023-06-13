@@ -72,7 +72,6 @@ export interface UseCorrelationsResult {
 /**
  * Retrieves all correlations data from custom hooks
  */
-// eslint-disable-next-line complexity
 export const useCorrelations = ({
   eventId,
   dataAsNestedObject,
@@ -165,7 +164,7 @@ export const useCorrelations = ({
     loading:
       casesLoading || ancestryAlertsLoading || alertsBySessionLoading || sameSourceAlertsLoading,
     error: data.length === 0,
-    data: data || [],
-    dataCount: data.length || 0,
+    data,
+    dataCount: data.length,
   };
 };
