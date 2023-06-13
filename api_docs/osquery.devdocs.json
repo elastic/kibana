@@ -44,11 +44,11 @@
             "OsqueryActionProps",
             " & { ecsData?: ",
             {
-              "pluginId": "@kbn/securitysolution-ecs",
+              "pluginId": "cases",
               "scope": "common",
-              "docId": "kibKbnSecuritysolutionEcsPluginApi",
-              "section": "def-common.EcsSecurityExtension",
-              "text": "EcsSecurityExtension"
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.Ecs",
+              "text": "Ecs"
             },
             " | undefined; }) => JSX.Element) | undefined"
           ],

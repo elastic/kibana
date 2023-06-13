@@ -60,7 +60,6 @@ export const ML_PAGES = {
   FILTER_LISTS_MANAGE: 'settings/filter_lists',
   FILTER_LISTS_NEW: 'settings/filter_lists/new_filter_list',
   FILTER_LISTS_EDIT: 'settings/filter_lists/edit_filter_list',
-  ACCESS_DENIED: 'access-denied',
   OVERVIEW: 'overview',
   NOTIFICATIONS: 'notifications',
   AIOPS: 'aiops',
