@@ -395,8 +395,7 @@ export const ExceptionBuilderComponent = ({
     if (exceptionListItems.length > 0) {
       setUpdateExceptions(exceptionListItems);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [exceptionListItems, setUpdateExceptions]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">

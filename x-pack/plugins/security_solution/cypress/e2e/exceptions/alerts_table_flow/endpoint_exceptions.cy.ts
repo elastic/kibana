@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
@@ -42,10 +43,11 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
   before(() => {
     esArchiverResetKibana();
-    esArchiverLoad('endpoint');
   });
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
+    esArchiverLoad('endpoint');
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
