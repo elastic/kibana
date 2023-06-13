@@ -6,7 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const saveMonitor = async (monitor: MonitorFields) => {
       const res = await supertest
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(monitor)
         .expect(200);
@@ -59,13 +59,13 @@ export default function ({ getService }: FtrProviderContext) {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
 
       const deleteResponse = await supertest
-        .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
         .set('kbn-xsrf', 'true');
 
       expect(deleteResponse.body).eql(monitorId);
 
       // Hit get endpoint and expect 404 as well
-      await supertest.get(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
+      await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
     });
 
     it('returns 404 if monitor id is not found', async () => {
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
       const deleteResponse = await supertest
-        .delete(API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
         .set('kbn-xsrf', 'true');
 
       expect(deleteResponse.status).eql(404);
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Route DELETE '/${SYNTHETICS_MONITORS}' should not exist
       await supertest
-        .delete(API_URLS.SYNTHETICS_MONITORS + '/' + emptyMonitorId)
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + emptyMonitorId)
         .set('kbn-xsrf', 'true')
         .expect(404);
     });
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       const veryLargeMonId = new Array(1050).fill('1').join('');
 
       await supertest
-        .delete(API_URLS.SYNTHETICS_MONITORS + '/' + veryLargeMonId)
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + veryLargeMonId)
         .set('kbn-xsrf', 'true')
         .expect(400);
     });
@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         await kibanaServer.savedObjects.clean({ types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE] });
 
         await supertestWithoutAuth
-          .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .expect(500);

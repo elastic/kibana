@@ -27,14 +27,14 @@ import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_co
 
 import {
   ConnectorConfigurationLogic,
-  ConfigEntry,
+  ConfigEntryView,
   ensureStringType,
   ensureBooleanType,
 } from './connector_configuration_logic';
 import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
 
 interface ConnectorConfigurationFieldProps {
-  configEntry: ConfigEntry;
+  configEntry: ConfigEntryView;
 }
 
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
