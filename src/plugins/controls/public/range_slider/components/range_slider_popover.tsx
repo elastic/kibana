@@ -127,7 +127,7 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
   }, [fieldSpec, dataViewId, getDataViewById]);
 
   return (
-    <>
+    <div data-test-subj="rangeSlider__popover">
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
       <EuiDualRange
         id={id}
@@ -157,6 +157,6 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
       >
         {errorMessage || helpText}
       </EuiText>
-    </>
+    </div>
   );
 };

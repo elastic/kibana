@@ -335,6 +335,12 @@ export class DashboardPageControls extends FtrService {
     await this.common.clickConfirmOnModal();
   }
 
+  public async clearControlSelections(controlId: string) {
+    this.log.debug(`clearing all selections from control ${controlId}`);
+    await this.hoverOverExistingControl(controlId);
+    await this.testSubjects.click(`control-action-${controlId}-erase`);
+  }
+
   public async verifyControlType(controlId: string, expectedType: string) {
     const controlButton = await this.find.byXPath(
       `//div[@id='controlFrame--${controlId}']//button`
@@ -506,12 +512,6 @@ export class DashboardPageControls extends FtrService {
     await this.optionsListPopoverClearSearch();
   }
 
-  public async optionsListPopoverClearSelections() {
-    this.log.debug(`clearing all selections from options list`);
-    await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.click(`optionsList-control-clear-all-selections`);
-  }
-
   public async optionsListPopoverSetIncludeSelections(include: boolean) {
     this.log.debug(`exclude selections`);
     await this.optionsListPopoverAssertOpen();
@@ -659,33 +659,26 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
     await this.testSubjects.click(`range-slider-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`rangeSlider-control-actions`);
+      await this.testSubjects.existOrFail(`rangeSlider__popover`);
     });
   }
 
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
     await this.testSubjects.click(`range-slider-control-${controlId}`);
-    await this.testSubjects.waitForDeleted(`rangeSlider-control-actions`);
+    await this.testSubjects.waitForDeleted(`rangeSlider__popover`);
   }
 
   public async rangeSliderPopoverAssertOpen() {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(`rangeSlider-control-actions`))) {
-        throw new Error('options list popover must be open before calling selectOption');
+      if (!(await this.testSubjects.exists(`rangeSlider__popover`))) {
+        throw new Error('range slider popover must be open before calling selectOption');
       }
     });
   }
 
   public async rangeSliderWaitForLoading() {
     await this.testSubjects.waitForDeleted('range-slider-loading-spinner');
-  }
-
-  public async rangeSliderClearSelection(controlId: string) {
-    this.log.debug(`Clearing range slider selection from control: ${controlId}`);
-    await this.rangeSliderOpenPopover(controlId);
-    await this.rangeSliderPopoverAssertOpen();
-    await this.testSubjects.click('rangeSlider__clearRangeButton');
   }
 
   public async validateRange(
