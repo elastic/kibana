@@ -214,9 +214,14 @@ export interface EnrichedDeprecationInfo
   extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
   type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator';
   isCritical: boolean;
-  status?: estypes.HealthReportIndicatorHealthStatus; 
+  status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
-  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction | HealthIndicatorAction;
+  correctiveAction?:
+    | ReindexAction
+    | MlAction
+    | IndexSettingAction
+    | ClusterSettingAction
+    | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
 }
 

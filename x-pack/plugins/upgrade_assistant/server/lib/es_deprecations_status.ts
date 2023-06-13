@@ -15,39 +15,39 @@ import {
   convertFeaturesToIndicesArray,
 } from './es_system_indices_migration';
 
-
-export async function getHealthIndicators(dataClient: IScopedClusterClient): Promise<EnrichedDeprecationInfo[]> {
+export async function getHealthIndicators(
+  dataClient: IScopedClusterClient
+): Promise<EnrichedDeprecationInfo[]> {
   const healthIndicators = await dataClient.asCurrentUser.healthReport();
-console.log('healthIndicators.indicators.shards_capacity:', healthIndicators.indicators.shards_capacity);
+  console.log(
+    'healthIndicators.indicators.shards_capacity:',
+    healthIndicators.indicators.shards_capacity
+  );
   return [
     healthIndicators.indicators.disk,
-    //@ts-ignore
+    // @ts-ignore
     healthIndicators.indicators.shards_capacity,
-  ].filter(({ status }) => {
-    return status !== 'green';
-  }).flatMap(({
-    status,
-    symptom,
-    details,
-    diagnosis,
-  }) => {
-    return diagnosis.map(({ cause, action, help_url }) => ({
-      type: 'healthIndicator',
-      details,
-      message: cause,
-      url: help_url,
-      isCritical: true,
-      resolveDuringUpgrade: false,
-      correctiveAction: { type: 'healthIndicator', action },
-    }));
-  })
+  ]
+    .filter(({ status }) => {
+      return status !== 'green';
+    })
+    .flatMap(({ status, symptom, details, diagnosis }) => {
+      return diagnosis.map(({ cause, action, help_url }) => ({
+        type: 'healthIndicator',
+        details,
+        message: cause,
+        url: help_url,
+        isCritical: true,
+        resolveDuringUpgrade: false,
+        correctiveAction: { type: 'healthIndicator', action },
+      }));
+    });
 }
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient,
   featureSet: FeatureSet
 ): Promise<ESUpgradeStatus> {
-
   const getCombinedDeprecations = async () => {
     const healthIndicators = await getHealthIndicators(dataClient);
     const deprecations = await dataClient.asCurrentUser.migration.deprecations();
@@ -55,76 +55,78 @@ export async function getESUpgradeStatus(
     const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
     const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
+    const enrichedDeprecations = Object.keys(deprecations).reduce(
+      (combinedDeprecations, deprecationType) => {
+        if (deprecationType === 'index_settings') {
+          // We need to exclude all index related deprecations for system indices since
+          // they are resolved separately through the system indices upgrade section in
+          // the Overview page.
+          const withoutSystemIndices = indices.filter(
+            (index) => !systemIndicesList.includes(index.index!)
+          );
 
-    const enrichedDeprecations = Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
-      if (deprecationType === 'index_settings') {
-        // We need to exclude all index related deprecations for system indices since
-        // they are resolved separately through the system indices upgrade section in
-        // the Overview page.
-        const withoutSystemIndices = indices.filter(
-          (index) => !systemIndicesList.includes(index.index!)
-        );
+          combinedDeprecations = combinedDeprecations.concat(withoutSystemIndices);
+        } else {
+          const deprecationsByType = deprecations[
+            deprecationType as keyof estypes.MigrationDeprecationsResponse
+          ] as estypes.MigrationDeprecationsDeprecation[];
 
-        combinedDeprecations = combinedDeprecations.concat(withoutSystemIndices);
-      } else {
-        const deprecationsByType = deprecations[
-          deprecationType as keyof estypes.MigrationDeprecationsResponse
-        ] as estypes.MigrationDeprecationsDeprecation[];
-
-        const enrichedDeprecationInfo = deprecationsByType
-          .map(
-            ({
-              details,
-              level,
-              message,
-              url,
-              // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
-              _meta: metadata,
-              // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
-              resolve_during_rolling_upgrade: resolveDuringUpgrade,
-            }) => {
-              return {
+          const enrichedDeprecationInfo = deprecationsByType
+            .map(
+              ({
                 details,
+                level,
                 message,
                 url,
-                type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
-                isCritical: level === 'critical',
-                resolveDuringUpgrade,
-                correctiveAction: getCorrectiveAction(message, metadata),
-              };
-            }
-          )
-          .filter(({ correctiveAction, type }) => {
-            /**
-             * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
-             * is set to `false`.
-             *
-             * This config should be set to true only on the `x.last` versions, or when
-             * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
-             * is incremented to something higher than 7.0.0 in the Elasticsearch code.
-             */
-            if (!featureSet.mlSnapshots) {
-              if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
+                // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
+                _meta: metadata,
+                // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
+                resolve_during_rolling_upgrade: resolveDuringUpgrade,
+              }) => {
+                return {
+                  details,
+                  message,
+                  url,
+                  type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
+                  isCritical: level === 'critical',
+                  resolveDuringUpgrade,
+                  correctiveAction: getCorrectiveAction(message, metadata),
+                };
+              }
+            )
+            .filter(({ correctiveAction, type }) => {
+              /**
+               * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
+               * is set to `false`.
+               *
+               * This config should be set to true only on the `x.last` versions, or when
+               * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+               * is incremented to something higher than 7.0.0 in the Elasticsearch code.
+               */
+              if (!featureSet.mlSnapshots) {
+                if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
+                  return false;
+                }
+              }
+
+              /**
+               * This disables showing the reindexing deprecations in the UA if
+               * `featureSet.reindexCorrectiveActions` is set to `false`.
+               */
+              if (!featureSet.reindexCorrectiveActions && correctiveAction?.type === 'reindex') {
                 return false;
               }
-            }
 
-            /**
-             * This disables showing the reindexing deprecations in the UA if
-             * `featureSet.reindexCorrectiveActions` is set to `false`.
-             */
-            if (!featureSet.reindexCorrectiveActions && correctiveAction?.type === 'reindex') {
-              return false;
-            }
+              return true;
+            });
 
-            return true;
-          });
+          combinedDeprecations = combinedDeprecations.concat(enrichedDeprecationInfo);
+        }
 
-        combinedDeprecations = combinedDeprecations.concat(enrichedDeprecationInfo);
-      }
-
-      return combinedDeprecations;
-    }, [] as EnrichedDeprecationInfo[]);
+        return combinedDeprecations;
+      },
+      [] as EnrichedDeprecationInfo[]
+    );
 
     console.log('healthIndicators::', healthIndicators);
 
