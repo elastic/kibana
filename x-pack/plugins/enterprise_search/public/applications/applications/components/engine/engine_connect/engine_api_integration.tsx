@@ -48,7 +48,6 @@ curl --location --request POST '${esUrl}/_application/search_application/${engin
 --header 'Content-Type: application/json' \\
 --data-raw '${JSON.stringify({ params }, null, 2)}'`;
 
-
 // type TabId = 'apiRequest' | 'ruby' | 'python' | 'java' | 'javascript' | 'curl';
 
 const apiRequestSnippet = (
@@ -218,7 +217,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
         </h5>
       </EuiText>
       <EuiSpacer size="s" />
-     <EuiCodeBlock isCopyable={Tabs[selectedTab].copy} language={Tabs[selectedTab].language}>
+      <EuiCodeBlock isCopyable={Tabs[selectedTab].copy} language={Tabs[selectedTab].language}>
         {Tabs[selectedTab].code}
       </EuiCodeBlock>
       {selectedTab === 'apirequest' && consolePreviewLink && (
