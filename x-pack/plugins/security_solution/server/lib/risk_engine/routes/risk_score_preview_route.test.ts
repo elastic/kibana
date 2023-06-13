@@ -191,7 +191,23 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          'Invalid value "1.1" supplied to "weights,host"'
+          expect.stringContaining('Invalid value "1.1" supplied to "weights,host"')
+        );
+      });
+
+      it('rejects unknown weight types', async () => {
+        const request = buildRequest({
+          weights: [
+            {
+              type: 'something new',
+              host: 1.1,
+            },
+          ],
+        });
+
+        const result = await server.validate(request);
+        expect(result.badRequest).toHaveBeenCalledWith(
+          'Invalid value "{"type":"something new","host":1.1}" supplied to "weights"'
         );
       });
     });
