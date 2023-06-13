@@ -19020,7 +19020,6 @@
     "xpack.infra.metrics.alerting.threshold.belowRecovery": "低于",
     "xpack.infra.metrics.alerting.threshold.betweenRecovery": "介于",
     "xpack.infra.metrics.alerting.threshold.customEquation": "定制方程",
-    "xpack.infra.metrics.alerting.threshold.defaultActionMessage": "\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} 处于 \\{\\{context.alertState\\}\\} 状态\n\n原因：\n\\{\\{context.reason\\}\\}\n",
     "xpack.infra.metrics.alerting.threshold.documentCount": "文档计数",
     "xpack.infra.metrics.alerting.threshold.errorState": "错误",
     "xpack.infra.metrics.alerting.threshold.fired": "告警",
