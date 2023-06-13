@@ -137,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           supertest,
           name: `Latency threshold | ${serviceName}`,
           params: {
-            serviceName: serviceName,
+            serviceName,
             transactionType: 'request',
             transactionName: 'GET /api/request/avg',
             windowSize: 99,
@@ -187,7 +187,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           supertest,
           name: `Latency threshold | ${serviceName}`,
           params: {
-            serviceName: serviceName,
+            serviceName,
             transactionType: 'request',
             transactionName: 'GET /api/request/p99',
             windowSize: 99,
@@ -237,7 +237,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           supertest,
           name: `Error rate | ${serviceName}`,
           params: {
-            serviceName: serviceName,
+            serviceName,
             transactionType: 'request',
             transactionName: 'GET /api/failed/request',
             windowSize: 99,
