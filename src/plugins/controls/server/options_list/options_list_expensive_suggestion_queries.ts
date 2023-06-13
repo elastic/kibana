@@ -95,6 +95,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
           },
         };
       }
+
       return textOrKeywordQuery;
     },
     parse: (rawEsResult, request) => {

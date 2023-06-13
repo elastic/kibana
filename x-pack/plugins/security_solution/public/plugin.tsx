@@ -16,6 +16,7 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
@@ -172,6 +173,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         getStartedComponent$: this.getStartedComponent$,
         upselling: this.upsellingService,
         telemetry: this.telemetry.start(),
+        discoverFilterManager: new FilterManager(core.uiSettings),
       };
       return services;
     };

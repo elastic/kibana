@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -24,7 +25,6 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
@@ -33,6 +33,8 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
+import { DiscoverServices } from '../../build_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -43,11 +45,18 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+
+  providedServices?: Partial<CoreStart> & DiscoverServices;
 }
 
-export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
+export function DiscoverMainRoute({
+  customizationCallbacks,
+  isDev,
+  providedServices,
+}: MainRouteProps) {
   const history = useHistory();
-  const services = useDiscoverServices();
+  const discoverService = useDiscoverServices();
+  const services = providedServices ?? discoverService;
   const {
     core,
     chrome,
@@ -262,8 +271,14 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+        <DiscoverMainAppMemoized
+          stateContainer={stateContainer}
+          providedServices={providedServices}
+        />
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default DiscoverMainRoute;

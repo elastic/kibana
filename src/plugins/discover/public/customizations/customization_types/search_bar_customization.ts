@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, FC } from 'react';
+import { DiscoverTopNavProps } from '../../application/main/components/top_nav/discover_topnav';
 
 export interface SearchBarCustomization {
   id: 'search_bar';
   CustomDataViewPicker?: ComponentType;
+  CustomQueryBar?: FC<DiscoverTopNavProps>;
 }

@@ -62,6 +62,7 @@ const GraphTabContent = lazy(() => import('../graph_tab_content'));
 const NotesTabContent = lazy(() => import('../notes_tab_content'));
 const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 const SessionTabContent = lazy(() => import('../session_tab_content'));
+const DiscoverTab = lazy(() => import('../discover_tab_content'));
 
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -260,6 +261,12 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             />
           </HideShowContainer>
         )}
+        <HideShowContainer
+          $isVisible={TimelineTabs.discover === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
+        >
+          <DiscoverTab />
+        </HideShowContainer>
       </>
     );
   }
@@ -378,6 +385,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [activeTab, graphEventId, setQueryAsActiveTab]);
 
+  const setDiscoverAsActiveTab = useCallback(() => {
+    setActiveTab(TimelineTabs.discover);
+  }, [setActiveTab]);
+
   return (
     <>
       {!timelineFullScreen && (
@@ -463,6 +474,15 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.SECURITY_ASSISTANT}</span>
             </StyledEuiTab>
           )}
+          <StyledEuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
+            onClick={setDiscoverAsActiveTab}
+            isSelected={activeTab === TimelineTabs.discover}
+            disabled={false}
+            key={TimelineTabs.discover}
+          >
+            <span>{'Discover'}</span>
+          </StyledEuiTab>
         </EuiTabs>
       )}
 
