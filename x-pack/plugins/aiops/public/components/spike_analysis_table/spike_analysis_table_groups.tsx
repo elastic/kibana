@@ -59,7 +59,9 @@ interface SpikeAnalysisTableProps {
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
   dataView: DataView;
+  /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
 }
 
@@ -118,6 +120,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       );
     }

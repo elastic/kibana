@@ -21,7 +21,9 @@ interface MiniHistogramProps {
   chartData?: SignificantTermHistogramItem[];
   isLoading: boolean;
   label: string;
+  /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
 }
 

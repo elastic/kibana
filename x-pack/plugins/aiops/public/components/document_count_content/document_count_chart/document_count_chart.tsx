@@ -25,7 +25,6 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 
-import { ALERT_END } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
@@ -69,7 +68,9 @@ interface DocumentCountChartProps {
   /* Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
 }
 
