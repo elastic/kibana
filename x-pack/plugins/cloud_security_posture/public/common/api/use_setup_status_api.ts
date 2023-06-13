@@ -18,7 +18,7 @@ export const useCspSetupStatusApi = (
   const { http } = useKibana().services;
   return useQuery<CspSetupStatus, unknown, CspSetupStatus>(
     [getCspSetupStatusQueryKey],
-    () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH),
+    () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH, { version: '1' }),
     options
   );
 };

@@ -29,7 +29,12 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import type { CspApiRequestHandlerContext, CspRouter, StatusResponseInfo } from '../../types';
+import type {
+  CspApiRequestHandlerContext,
+  CspRequestHandlerContext,
+  CspRouter,
+  StatusResponseInfo,
+} from '../../types';
 import type {
   CspSetupStatus,
   CspStatusCode,
@@ -43,6 +48,7 @@ import {
   getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
+import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 240;
@@ -328,44 +334,55 @@ export const statusQueryParamsSchema = schema.object({
   check: schema.oneOf([schema.literal('all'), schema.literal('init')], { defaultValue: 'all' }),
 });
 
-export const defineGetCspStatusRoute = (router: CspRouter): void =>
-  router.get(
-    {
+export const defineGetCspStatusRoute = (
+  router: CspRouter
+): VersionedRoute<'get', CspRequestHandlerContext> =>
+  router.versioned
+    .get({
+      access: 'internal',
       path: STATUS_ROUTE_PATH,
-      validate: { query: statusQueryParamsSchema },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
-    },
-    async (context, request, response) => {
-      const cspContext = await context.csp;
-      try {
-        if (request.query.check === 'init') {
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: statusQueryParamsSchema,
+          },
+        },
+      },
+      async (context, request, response) => {
+        const cspContext = await context.csp;
+        try {
+          if (request.query.check === 'init') {
+            return response.ok({
+              body: {
+                isPluginInitialized: cspContext.isPluginInitialized(),
+              },
+            });
+          }
+          const status = await getCspStatus({
+            ...cspContext,
+            esClient: cspContext.esClient.asInternalUser,
+          });
           return response.ok({
-            body: {
-              isPluginInitialized: cspContext.isPluginInitialized(),
-            },
+            body: status,
+          });
+        } catch (err) {
+          cspContext.logger.error(`Error getting csp status`);
+          cspContext.logger.error(err);
+
+          const error = transformError(err);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
           });
         }
-        const status = await getCspStatus({
-          ...cspContext,
-          esClient: cspContext.esClient.asInternalUser,
-        });
-        return response.ok({
-          body: status,
-        });
-      } catch (err) {
-        cspContext.logger.error(`Error getting csp status`);
-        cspContext.logger.error(err);
-
-        const error = transformError(err);
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 
 const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
   const {

@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -49,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: res }: { body: CspSetupStatus } = await supertest
         .get(`/internal/cloud_security_posture/status`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -70,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: res }: { body: CspSetupStatus } = await supertest
         .get(`/internal/cloud_security_posture/status`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -92,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: res }: { body: CspSetupStatus } = await supertest
         .get(`/internal/cloud_security_posture/status`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
