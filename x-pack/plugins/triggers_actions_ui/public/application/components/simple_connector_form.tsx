@@ -7,8 +7,12 @@
 
 import React, { memo, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  ComboBoxField,
+  Field,
+  PasswordField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 
@@ -16,11 +20,13 @@ export interface CommonFieldSchema {
   id: string;
   label: string;
   helpText?: string | ReactNode;
+  type?: keyof typeof FIELD_TYPES;
+  euiFieldProps?: Record<string, unknown>;
 }
 
 export interface ConfigFieldSchema extends CommonFieldSchema {
   isUrlField?: boolean;
-  defaultValue?: string;
+  defaultValue?: string | string[];
 }
 
 export interface SecretsFieldSchema extends CommonFieldSchema {
@@ -32,21 +38,25 @@ interface SimpleConnectorFormProps {
   readOnly: boolean;
   configFormSchema: ConfigFieldSchema[];
   secretsFormSchema: SecretsFieldSchema[];
+  configFormSchemaAfterSecrets?: ConfigFieldSchema[];
 }
 
 type FormRowProps = ConfigFieldSchema & SecretsFieldSchema & { readOnly: boolean };
 
-const UseField = getUseField({ component: Field });
+const UseTextField = getUseField({ component: Field });
+const UseComboBoxField = getUseField({ component: ComboBoxField });
 const { emptyField, urlField } = fieldValidators;
 
 const getFieldConfig = ({
   label,
   isUrlField = false,
   defaultValue,
+  type,
 }: {
   label: string;
   isUrlField?: boolean;
-  defaultValue?: string;
+  defaultValue?: string | string[];
+  type?: keyof typeof FIELD_TYPES;
 }) => ({
   label,
   validations: [
@@ -77,6 +87,9 @@ const getFieldConfig = ({
       : []),
   ],
   defaultValue,
+  ...(type && FIELD_TYPES[type]
+    ? { type: FIELD_TYPES[type], defaultValue: Array.isArray(defaultValue) ? defaultValue : [] }
+    : {}),
 });
 
 const FormRow: React.FC<FormRowProps> = ({
@@ -87,8 +100,14 @@ const FormRow: React.FC<FormRowProps> = ({
   isUrlField,
   helpText,
   defaultValue,
+  euiFieldProps = {},
+  type,
 }) => {
   const dataTestSub = `${id}-input`;
+  let UseField = UseTextField;
+  if (type && FIELD_TYPES[type] === FIELD_TYPES.COMBO_BOX) {
+    UseField = UseComboBoxField;
+  }
   return (
     <>
       <EuiFlexGroup>
@@ -96,20 +115,25 @@ const FormRow: React.FC<FormRowProps> = ({
           {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({ label, isUrlField, defaultValue })}
-              helpText={helpText}
+              config={getFieldConfig({ label, isUrlField, defaultValue, type })}
               componentProps={{
-                euiFieldProps: { readOnly, fullWidth: true, 'data-test-subj': dataTestSub },
+                euiFieldProps: {
+                  ...euiFieldProps,
+                  readOnly,
+                  fullWidth: true,
+                  'data-test-subj': dataTestSub,
+                },
               }}
             />
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({ label })}
+              config={getFieldConfig({ label, type })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{
                 euiFieldProps: {
+                  ...euiFieldProps,
                   'data-test-subj': dataTestSub,
                   readOnly,
                 },
@@ -127,6 +151,7 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
   readOnly,
   configFormSchema,
   secretsFormSchema,
+  configFormSchemaAfterSecrets = [],
 }) => {
   return (
     <>
@@ -160,6 +185,12 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
             readOnly={readOnly}
           />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
+        </React.Fragment>
+      ))}
+      {configFormSchemaAfterSecrets.map(({ id, ...restConfigSchema }, index) => (
+        <React.Fragment key={`config.${id}`}>
+          <FormRow id={`config.${id}`} {...restConfigSchema} readOnly={readOnly} />
+          {index !== configFormSchemaAfterSecrets.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}
     </>
