@@ -9,7 +9,7 @@ import { getSections } from './sections';
 import { ActiveCard, Card, CardId, ProductId, SectionId, StepId } from './types';
 
 export const getCardTimeInMinutes = (card: Card, stepsDone: Set<StepId>) =>
-  card?.steps?.reduce(
+  card.steps?.reduce(
     (totalMin, { timeInMinutes, id: stepId }) =>
       (totalMin += stepsDone.has(stepId) ? 0 : timeInMinutes ?? 0),
     0
