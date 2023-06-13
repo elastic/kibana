@@ -331,7 +331,7 @@ export function getTextBasedDatasource({
       };
     },
 
-    toExpression: (state, layerId, indexPatterns) => {
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
       return toExpression(state, layerId);
     },
     getSelectedFields(state) {
