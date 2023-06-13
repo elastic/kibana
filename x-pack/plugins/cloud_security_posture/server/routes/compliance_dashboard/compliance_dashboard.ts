@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { getComplianceDashboardSchema } from '../../../common/schemas/stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import type {
   PosturePolicyTemplate,
@@ -20,7 +21,6 @@ import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
-import { getComplianceDashboardSchema } from '@kbn/cloud-security-posture-plugin/common/schemas/stats';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
