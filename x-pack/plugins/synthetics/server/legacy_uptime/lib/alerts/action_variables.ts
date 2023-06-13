@@ -47,8 +47,7 @@ export const ACTION_VARIABLES = {
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
       {
-        defaultMessage:
-          'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+        defaultMessage: 'Link to the alert source',
       }
     ),
     usesPublicBaseUrl: true,

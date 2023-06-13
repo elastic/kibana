@@ -225,8 +225,7 @@ export const thresholdActionVariableDescription = i18n.translate(
 export const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view or feature within Elastic that can assist with further investigation',
+    defaultMessage: 'Link to the alert source',
   }
 );
 
