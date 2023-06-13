@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
-import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
+import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 
 import { EngineIndicesLogic, EngineIndicesLogicValues } from './engine_indices_logic';
 
@@ -45,13 +45,15 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
 
 describe('EngineViewLogic', () => {
   const { mount } = new LogicMounter(EngineIndicesLogic);
-  const { mount: mountFetchEngineApiLogic } = new LogicMounter(FetchEngineApiLogic);
+  const { mount: mountFetchSearchApplicationApiLogic } = new LogicMounter(
+    FetchSearchApplicationApiLogic
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
 
-    mountFetchEngineApiLogic();
+    mountFetchSearchApplicationApiLogic();
     mount(
       {
         engineName: DEFAULT_VALUES.engineName,
@@ -68,7 +70,7 @@ describe('EngineViewLogic', () => {
 
   describe('listeners', () => {
     beforeEach(() => {
-      FetchEngineApiLogic.actions.apiSuccess(mockEngineData);
+      FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
     });
     it('has engine data', () => {
       expect(EngineIndicesLogic.values.engineData).toEqual(mockEngineData);
@@ -85,7 +87,7 @@ describe('EngineViewLogic', () => {
 
         expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledTimes(1);
         expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledWith({
-          engineName: DEFAULT_VALUES.engineName,
+          name: DEFAULT_VALUES.engineName,
         });
       });
     });
@@ -97,7 +99,7 @@ describe('EngineViewLogic', () => {
 
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledTimes(1);
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledWith({
-          engineName: DEFAULT_VALUES.engineName,
+          name: DEFAULT_VALUES.engineName,
           indices: ['search-002'],
         });
       });
@@ -110,7 +112,7 @@ describe('EngineViewLogic', () => {
 
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledTimes(1);
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledWith({
-          engineName: DEFAULT_VALUES.engineName,
+          name: DEFAULT_VALUES.engineName,
           indices: ['search-001', 'search-002', 'search-003'],
         });
       });

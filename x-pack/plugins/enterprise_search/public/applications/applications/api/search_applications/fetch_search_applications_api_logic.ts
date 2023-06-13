@@ -11,15 +11,15 @@ import { EnterpriseSearchApplicationsResponse } from '../../../../../common/type
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export interface EnginesListAPIArguments {
+export interface SearchApplicationsListAPIArguments {
   meta: Page;
   searchQuery?: string;
 }
 
-export const fetchEngines = async ({
+export const fetchSearchApplications = async ({
   meta,
   searchQuery,
-}: EnginesListAPIArguments): Promise<EnterpriseSearchApplicationsResponse> => {
+}: SearchApplicationsListAPIArguments): Promise<EnterpriseSearchApplicationsResponse> => {
   const route = '/internal/enterprise_search/search_applications';
   const query = {
     from: meta.from,
@@ -34,4 +34,7 @@ export const fetchEngines = async ({
   return { ...response, params: query };
 };
 
-export const FetchEnginesAPILogic = createApiLogic(['content', 'engines_api_logic'], fetchEngines);
+export const FetchSearchApplicationsAPILogic = createApiLogic(
+  ['searchApplications', 'search_applications_api_logic'],
+  fetchSearchApplications
+);

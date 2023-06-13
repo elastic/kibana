@@ -12,7 +12,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { HttpError, Status } from '../../../../../common/types/api';
 import { EnterpriseSearchApplication } from '../../../../../common/types/search_applications';
 
-import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
+import { FetchSearchApplicationsAPILogic } from '../../api/search_applications/fetch_search_applications_api_logic';
 
 import { EnginesListLogic } from './engines_list_logic';
 import { DEFAULT_META } from './types';
@@ -58,7 +58,7 @@ const mockData = {
 };
 
 describe('EnginesListLogic', () => {
-  const { mount: apiLogicMount } = new LogicMounter(FetchEnginesAPILogic);
+  const { mount: apiLogicMount } = new LogicMounter(FetchSearchApplicationsAPILogic);
   const { mount } = new LogicMounter(EnginesListLogic);
 
   beforeEach(() => {
@@ -177,7 +177,10 @@ describe('EnginesListLogic', () => {
   describe('reducers', () => {
     describe('meta', () => {
       beforeEach(() => {
-        FetchEnginesAPILogic.actions.apiSuccess({ ...mockData, params: { from: 10, size: 20 } });
+        FetchSearchApplicationsAPILogic.actions.apiSuccess({
+          ...mockData,
+          params: { from: 10, size: 20 },
+        });
       });
       it('has engine data', () => {
         expect(EnginesListLogic.values.data).toEqual({
@@ -193,7 +196,7 @@ describe('EnginesListLogic', () => {
           size: 20,
           total: newCount,
         };
-        FetchEnginesAPILogic.actions.apiSuccess({
+        FetchSearchApplicationsAPILogic.actions.apiSuccess({
           ...mockData,
           count: newCount,
           params: { from: newPageMeta.from, size: newPageMeta.size },
@@ -227,7 +230,7 @@ describe('EnginesListLogic', () => {
     });
     describe('request to delete Engine', () => {
       it('should set isDeleteLoading to true on delete engine request', () => {
-        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteEngine({ searchApplicationName: results[0].name });
         EnginesListLogic.actions.deleteError({} as HttpError);
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -236,7 +239,7 @@ describe('EnginesListLogic', () => {
         });
       });
       it('should set isDeleteLoading to false on delete apiError', () => {
-        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteEngine({ searchApplicationName: results[0].name });
         EnginesListLogic.actions.deleteError({} as HttpError);
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -245,8 +248,8 @@ describe('EnginesListLogic', () => {
         });
       });
       it('should set isDeleteLoading to false on delete apiSuccess', () => {
-        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
-        EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteEngine({ searchApplicationName: results[0].name });
+        EnginesListLogic.actions.deleteSuccess({ searchApplicationName: results[0].name });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           deleteStatus: Status.SUCCESS,
@@ -310,7 +313,7 @@ describe('EnginesListLogic', () => {
     it('calls flashSuccessToast, closeDeleteEngineModal and fetchEngines on deleteSuccess', () => {
       EnginesListLogic.actions.fetchEngines = jest.fn();
       EnginesListLogic.actions.closeDeleteEngineModal = jest.fn();
-      EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
+      EnginesListLogic.actions.deleteSuccess({ searchApplicationName: results[0].name });
 
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
       expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith();

@@ -67,7 +67,7 @@ export const EngineListIndicesFlyout: React.FC = () => {
         <EuiLinkTo
           data-test-subj="engine-index-link"
           data-telemetry-id="entSearchApplications-list-viewIndex"
-          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/${generateEncodedPath(SEARCH_INDEX_PATH, {
+          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_PATH, {
             indexName,
           })}`}
           shouldNotCreateHref

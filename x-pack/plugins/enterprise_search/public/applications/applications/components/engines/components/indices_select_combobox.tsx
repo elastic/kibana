@@ -26,7 +26,7 @@ import { Status } from '../../../../../../common/types/api';
 import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
-import { FetchIndicesForEnginesAPILogic } from '../../../api/engines/fetch_indices_api_logic';
+import { FetchIndicesForSearchApplicationsAPILogic } from '../../../api/search_applications/fetch_indices_api_logic';
 
 export type IndicesSelectComboBoxOption = EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>;
 
@@ -40,8 +40,8 @@ export type IndicesSelectComboBoxProps = Omit<
 
 export const IndicesSelectComboBox = ({ ignoredOptions, ...props }: IndicesSelectComboBoxProps) => {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
-  const { makeRequest } = useActions(FetchIndicesForEnginesAPILogic);
-  const { status, data } = useValues(FetchIndicesForEnginesAPILogic);
+  const { makeRequest } = useActions(FetchIndicesForSearchApplicationsAPILogic);
+  const { status, data } = useValues(FetchIndicesForSearchApplicationsAPILogic);
 
   useEffect(() => {
     makeRequest({ searchQuery });

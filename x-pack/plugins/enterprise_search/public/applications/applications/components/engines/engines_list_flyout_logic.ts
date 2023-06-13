@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
+import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 import { EngineViewActions, EngineViewLogic, EngineViewValues } from '../engine/engine_view_logic';
 
 export interface EngineListFlyoutValues {
@@ -66,8 +66,8 @@ export const EnginesListFlyoutLogic = kea<
     ],
   }),
   listeners: ({}) => ({
-    openFetchEngineFlyout: async (input) => {
-      FetchEngineApiLogic.actions.makeRequest(input);
+    openFetchEngineFlyout: async ({ engineName }) => {
+      FetchSearchApplicationApiLogic.actions.makeRequest({ name: engineName });
     },
   }),
 });

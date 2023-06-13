@@ -93,7 +93,7 @@ export const EngineIndices: React.FC = () => {
         ) : (
           <EuiLinkTo
             data-test-subj="engine-index-link"
-            to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/${generateEncodedPath(SEARCH_INDEX_PATH, {
+            to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_PATH, {
               indexName: name,
             })}`}
             shouldNotCreateHref

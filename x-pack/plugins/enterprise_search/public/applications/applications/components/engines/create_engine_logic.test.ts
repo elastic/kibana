@@ -10,7 +10,7 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { CreateEngineApiLogic } from '../../api/engines/create_engine_api_logic';
+import { CreateSearchApplicationApiLogic } from '../../api/search_applications/create_search_application_api_logic';
 
 import { ENGINES_PATH } from '../../routes';
 
@@ -32,7 +32,7 @@ const INVALID_ENGINE_NAME = 'TEST';
 const VALID_INDICES_DATA = ['search-index-01'];
 
 describe('CreateEngineLogic', () => {
-  const { mount: apiLogicMount } = new LogicMounter(CreateEngineApiLogic);
+  const { mount: apiLogicMount } = new LogicMounter(CreateSearchApplicationApiLogic);
   const { mount } = new LogicMounter(CreateEngineLogic);
 
   beforeEach(() => {
@@ -57,8 +57,8 @@ describe('CreateEngineLogic', () => {
 
       expect(CreateEngineLogic.actions.createEngineRequest).toHaveBeenCalledTimes(1);
       expect(CreateEngineLogic.actions.createEngineRequest).toHaveBeenCalledWith({
-        engineName: VALID_ENGINE_NAME,
         indices: ['search-index-01'],
+        name: VALID_ENGINE_NAME,
       });
     });
 
@@ -72,8 +72,8 @@ describe('CreateEngineLogic', () => {
 
       expect(CreateEngineLogic.actions.createEngineRequest).toHaveBeenCalledTimes(1);
       expect(CreateEngineLogic.actions.createEngineRequest).toHaveBeenCalledWith({
-        engineName: INVALID_ENGINE_NAME,
         indices: ['search-index-01'],
+        name: INVALID_ENGINE_NAME,
       });
     });
     it('createEngine returns error when duplicate search application is created', () => {
@@ -86,7 +86,7 @@ describe('CreateEngineLogic', () => {
         fetchOptions: {},
         request: {},
       } as HttpError;
-      CreateEngineApiLogic.actions.apiError(httpError);
+      CreateSearchApplicationApiLogic.actions.apiError(httpError);
       expect(CreateEngineLogic.values.createEngineError).toEqual(httpError);
     });
 
@@ -95,7 +95,7 @@ describe('CreateEngineLogic', () => {
       jest
         .spyOn(KibanaLogic.values, 'navigateToUrl')
         .mockImplementationOnce(() => Promise.resolve());
-      CreateEngineApiLogic.actions.apiSuccess({
+      CreateSearchApplicationApiLogic.actions.apiSuccess({
         result: 'created',
       });
       expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(ENGINES_PATH);
@@ -143,9 +143,9 @@ describe('CreateEngineLogic', () => {
     });
     describe('formDisabled', () => {
       it('returns true while create request in progress', () => {
-        CreateEngineApiLogic.actions.makeRequest({
-          engineName: VALID_ENGINE_NAME,
+        CreateSearchApplicationApiLogic.actions.makeRequest({
           indices: [VALID_INDICES_DATA[0]],
+          name: VALID_ENGINE_NAME,
         });
 
         expect(CreateEngineLogic.values.formDisabled).toEqual(true);

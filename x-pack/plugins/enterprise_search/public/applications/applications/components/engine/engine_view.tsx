@@ -57,7 +57,7 @@ export const EngineView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchEngine({ engineName });
+    fetchEngine({ name: engineName });
   }, [engineName]);
 
   if (fetchEngineApiStatus === Status.ERROR) {

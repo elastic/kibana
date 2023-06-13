@@ -12,11 +12,11 @@ import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_lo
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { HttpLogic } from '../../../shared/http';
 
-export interface EnginesFetchIndicesApiParams {
+export interface SearchApplicationsFetchIndicesApiParams {
   searchQuery?: string;
 }
 
-export interface EnginesFetchIndicesApiResponse {
+export interface SearchApplicationsFetchIndicesApiResponse {
   indices: ElasticsearchIndexWithIngestion[];
   meta: Meta;
   searchQuery?: string;
@@ -26,7 +26,7 @@ const INDEX_SEARCH_PAGE_SIZE = 40;
 
 export const fetchIndices = async ({
   searchQuery,
-}: EnginesFetchIndicesApiParams): Promise<EnginesFetchIndicesApiResponse> => {
+}: SearchApplicationsFetchIndicesApiParams): Promise<SearchApplicationsFetchIndicesApiResponse> => {
   const { http } = HttpLogic.values;
   const route = '/internal/enterprise_search/indices';
   const query = {
@@ -45,15 +45,15 @@ export const fetchIndices = async ({
   return { ...response, searchQuery };
 };
 
-export const FetchIndicesForEnginesAPILogic = createApiLogic(
-  ['content', 'engines_fetch_indices_api_logic'],
+export const FetchIndicesForSearchApplicationsAPILogic = createApiLogic(
+  ['search_applications', 'fetch_indices_api_logic'],
   fetchIndices,
   {
     requestBreakpointMS: INPUT_THROTTLE_DELAY_MS,
   }
 );
 
-export type FetchIndicesForEnginesAPILogicActions = Actions<
-  EnginesFetchIndicesApiParams,
-  EnginesFetchIndicesApiResponse
+export type FetchIndicesForSearchApplicationsAPILogicActions = Actions<
+  SearchApplicationsFetchIndicesApiParams,
+  SearchApplicationsFetchIndicesApiResponse
 >;

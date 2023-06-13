@@ -10,7 +10,7 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { DeleteEnginesApiLogicResponse } from '../../api/engines/delete_engines_api_logic';
+import { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applications/delete_search_application_api_logic';
 import { ENGINES_PATH } from '../../routes';
 import { EnginesListLogic } from '../engines/engines_list_logic';
 
@@ -53,7 +53,7 @@ describe('EngineViewLogic', () => {
         jest
           .spyOn(KibanaLogic.values, 'navigateToUrl')
           .mockImplementationOnce(() => Promise.resolve());
-        EnginesListLogic.actions.deleteSuccess({} as DeleteEnginesApiLogicResponse);
+        EnginesListLogic.actions.deleteSuccess({} as DeleteSearchApplicationApiLogicResponse);
 
         expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(ENGINES_PATH);
       });

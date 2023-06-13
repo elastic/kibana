@@ -9,21 +9,21 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { deleteEngine } from './delete_engines_api_logic';
+import { deleteSearchApplication } from './delete_search_application_api_logic';
 
-describe('deleteEngineApiLogic', () => {
+describe('DeleteSearchApplicationAPILogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('deleteEngine', () => {
+  describe('deleteSearchApplication', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve();
       http.post.mockReturnValue(promise);
-      const result = deleteEngine({ engineName: 'deleteEngineName' });
+      const result = deleteSearchApplication({ searchApplicationName: 'search-application' });
       await nextTick();
       expect(http.delete).toHaveBeenCalledWith(
-        '/internal/enterprise_search/search_applications/deleteEngineName'
+        '/internal/enterprise_search/search_applications/search-application'
       );
       await expect(result).resolves;
     });

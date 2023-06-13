@@ -9,25 +9,25 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { updateEngine } from './update_engine_api_logic';
+import { updateSearchApplication } from './update_search_application_api_logic';
 
-describe('UpdateEngineApiLogic', () => {
+describe('UpdateSearchApplicationApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('updateEngine', () => {
+  describe('updateSearchApplication', () => {
     it('calls correct api', async () => {
-      const engine = { engineName: 'my-engine', indices: ['an-index'] };
+      const searchApplication = { name: 'my-search-application', indices: ['an-index'] };
       const response = { result: 'updated' };
       const promise = Promise.resolve(response);
       http.put.mockReturnValue(promise);
-      const result = updateEngine(engine);
+      const result = updateSearchApplication(searchApplication);
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
-        '/internal/enterprise_search/search_applications/my-engine',
+        '/internal/enterprise_search/search_applications/my-search-application',
         {
-          body: '{"indices":["an-index"],"name":"my-engine"}',
+          body: '{"indices":["an-index"],"name":"my-search-application"}',
         }
       );
       await expect(result).resolves.toEqual(response);

@@ -13,10 +13,10 @@ import { SchemaField } from '../../../../../common/types/search_applications';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
-  FetchEngineApiLogic,
-  FetchEngineApiLogicActions,
-} from '../../api/engines/fetch_engine_api_logic';
-import { FetchEngineFieldCapabilitiesApiLogic } from '../../api/engines/fetch_engine_field_capabilities_api_logic';
+  FetchSearchApplicationApiLogic,
+  FetchSearchApplicationApiLogicActions,
+} from '../../api/search_applications/fetch_search_application_api_logic';
+import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
 
 import { ENGINES_PATH } from '../../routes';
 
@@ -27,19 +27,19 @@ import { EngineNameLogic } from './engine_name_logic';
 export interface EngineViewActions {
   closeDeleteEngineModal(): void;
   deleteSuccess: EnginesListActions['deleteSuccess'];
-  fetchEngine: FetchEngineApiLogicActions['makeRequest'];
-  fetchEngineSchema: FetchEngineApiLogicActions['makeRequest'];
+  fetchEngine: FetchSearchApplicationApiLogicActions['makeRequest'];
+  fetchEngineSchema: FetchSearchApplicationApiLogicActions['makeRequest'];
   openDeleteEngineModal(): void;
 }
 
 export interface EngineViewValues {
-  engineData: typeof FetchEngineApiLogic.values.data;
+  engineData: typeof FetchSearchApplicationApiLogic.values.data;
   engineName: typeof EngineNameLogic.values.engineName;
-  engineSchemaData: typeof FetchEngineFieldCapabilitiesApiLogic.values.data;
-  fetchEngineApiError?: typeof FetchEngineApiLogic.values.error;
-  fetchEngineApiStatus: typeof FetchEngineApiLogic.values.status;
-  fetchEngineSchemaApiError?: typeof FetchEngineFieldCapabilitiesApiLogic.values.error;
-  fetchEngineSchemaApiStatus: typeof FetchEngineFieldCapabilitiesApiLogic.values.status;
+  engineSchemaData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
+  fetchEngineApiError?: typeof FetchSearchApplicationApiLogic.values.error;
+  fetchEngineApiStatus: typeof FetchSearchApplicationApiLogic.values.status;
+  fetchEngineSchemaApiError?: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.error;
+  fetchEngineSchemaApiStatus: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.status;
   hasSchemaConflicts: boolean;
   isDeleteModalVisible: boolean;
   isLoadingEngine: boolean;
@@ -54,9 +54,9 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
   },
   connect: {
     actions: [
-      FetchEngineApiLogic,
+      FetchSearchApplicationApiLogic,
       ['makeRequest as fetchEngine'],
-      FetchEngineFieldCapabilitiesApiLogic,
+      FetchSearchApplicationFieldCapabilitiesApiLogic,
       ['makeRequest as fetchEngineSchema'],
       EnginesListLogic,
       ['deleteSuccess'],
@@ -64,9 +64,9 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
     values: [
       EngineNameLogic,
       ['engineName'],
-      FetchEngineApiLogic,
+      FetchSearchApplicationApiLogic,
       ['data as engineData', 'status as fetchEngineApiStatus', 'error as fetchEngineApiError'],
-      FetchEngineFieldCapabilitiesApiLogic,
+      FetchSearchApplicationFieldCapabilitiesApiLogic,
       [
         'data as engineSchemaData',
         'status as fetchEngineSchemaApiStatus',
@@ -79,8 +79,8 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       actions.closeDeleteEngineModal();
       KibanaLogic.values.navigateToUrl(ENGINES_PATH);
     },
-    fetchEngine: ({ engineName }) => {
-      actions.fetchEngineSchema({ engineName });
+    fetchEngine: ({ name: engineName }) => {
+      actions.fetchEngineSchema({ name: engineName });
     },
   }),
   path: ['enterprise_search', 'content', 'engine_view_logic'],

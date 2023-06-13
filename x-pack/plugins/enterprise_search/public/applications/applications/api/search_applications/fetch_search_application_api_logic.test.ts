@@ -9,23 +9,23 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { fetchEngineFieldCapabilities } from './fetch_engine_field_capabilities_api_logic';
+import { fetchSearchApplication } from './fetch_search_application_api_logic';
 
-describe('FetchEngineFieldCapabilitiesApiLogic', () => {
+describe('FetchSearchApplicationApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('fetchEngineFieldCapabilities', () => {
-    it('requests the field_capabilities api', async () => {
-      const promise = Promise.resolve({ result: 'result' });
+  describe('fetchSearchApplication', () => {
+    it('calls correct api', async () => {
+      const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
-      const result = fetchEngineFieldCapabilities({ engineName: 'foobar' });
+      const result = fetchSearchApplication({ name: 'search-application' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        '/internal/enterprise_search/search_applications/foobar/field_capabilities'
+        '/internal/enterprise_search/search_applications/search-application'
       );
-      await expect(result).resolves.toEqual({ result: 'result' });
+      await expect(result).resolves.toEqual('result');
     });
   });
 });

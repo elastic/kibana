@@ -11,18 +11,18 @@ import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
-  CreateEngineApiLogic,
-  CreateEngineApiLogicActions,
-} from '../../api/engines/create_engine_api_logic';
+  CreateSearchApplicationApiLogic,
+  CreateSearchApplicationApiLogicActions,
+} from '../../api/search_applications/create_search_application_api_logic';
 import { ENGINES_PATH } from '../../routes';
 
 import { EnginesListLogic } from './engines_list_logic';
 
 export interface CreateEngineLogicActions {
   createEngine: () => void;
-  createEngineRequest: CreateEngineApiLogicActions['makeRequest'];
-  engineCreateError: CreateEngineApiLogicActions['apiError'];
-  engineCreated: CreateEngineApiLogicActions['apiSuccess'];
+  createEngineRequest: CreateSearchApplicationApiLogicActions['makeRequest'];
+  engineCreateError: CreateSearchApplicationApiLogicActions['apiError'];
+  engineCreated: CreateSearchApplicationApiLogicActions['apiSuccess'];
   fetchEngines: () => void;
   setEngineName: (engineName: string) => { engineName: string };
   setSelectedIndices: (indices: string[]) => {
@@ -32,8 +32,8 @@ export interface CreateEngineLogicActions {
 
 export interface CreateEngineLogicValues {
   createDisabled: boolean;
-  createEngineError?: typeof CreateEngineApiLogic.values.error;
-  createEngineStatus: typeof CreateEngineApiLogic.values.status;
+  createEngineError?: typeof CreateSearchApplicationApiLogic.values.error;
+  createEngineStatus: typeof CreateSearchApplicationApiLogic.values.status;
   engineName: string;
   engineNameStatus: 'complete' | 'incomplete';
   formDisabled: boolean;
@@ -53,20 +53,23 @@ export const CreateEngineLogic = kea<
     actions: [
       EnginesListLogic,
       ['fetchEngines'],
-      CreateEngineApiLogic,
+      CreateSearchApplicationApiLogic,
       [
         'makeRequest as createEngineRequest',
         'apiSuccess as engineCreated',
         'apiError as engineCreateError',
       ],
     ],
-    values: [CreateEngineApiLogic, ['status as createEngineStatus', 'error as createEngineError']],
+    values: [
+      CreateSearchApplicationApiLogic,
+      ['status as createEngineStatus', 'error as createEngineError'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     createEngine: () => {
       actions.createEngineRequest({
-        engineName: values.engineName,
         indices: values.selectedIndices,
+        name: values.engineName,
       });
     },
     engineCreated: () => {

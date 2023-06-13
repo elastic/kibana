@@ -19,14 +19,14 @@ import {
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
 import {
-  DeleteEngineAPILogic,
-  DeleteEnginesApiLogicActions,
-} from '../../api/engines/delete_engines_api_logic';
+  DeleteSearchApplicationAPILogic,
+  DeleteSearchApplicationApiLogicActions,
+} from '../../api/search_applications/delete_search_application_api_logic';
 
 import {
-  EnginesListAPIArguments,
-  FetchEnginesAPILogic,
-} from '../../api/engines/fetch_engines_api_logic';
+  SearchApplicationsListAPIArguments,
+  FetchSearchApplicationsAPILogic,
+} from '../../api/search_applications/fetch_search_applications_api_logic';
 
 import { DEFAULT_META, updateMetaPageIndex, updateMetaTotalState } from './types';
 
@@ -35,14 +35,14 @@ interface EuiBasicTableOnChange {
 }
 
 export type EnginesListActions = Pick<
-  Actions<EnginesListAPIArguments, EnterpriseSearchApplicationsResponse>,
+  Actions<SearchApplicationsListAPIArguments, EnterpriseSearchApplicationsResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   closeDeleteEngineModal(): void;
 
-  deleteEngine: DeleteEnginesApiLogicActions['makeRequest'];
-  deleteError: DeleteEnginesApiLogicActions['apiError'];
-  deleteSuccess: DeleteEnginesApiLogicActions['apiSuccess'];
+  deleteEngine: DeleteSearchApplicationApiLogicActions['makeRequest'];
+  deleteError: DeleteSearchApplicationApiLogicActions['apiError'];
+  deleteSuccess: DeleteSearchApplicationApiLogicActions['apiSuccess'];
 
   fetchEngines(): void;
 
@@ -57,10 +57,10 @@ export type EnginesListActions = Pick<
 };
 
 interface EngineListValues {
-  data: typeof FetchEnginesAPILogic.values.data;
+  data: typeof FetchSearchApplicationsAPILogic.values.data;
   deleteModalEngine: EnterpriseSearchApplication | null;
   deleteModalEngineName: string;
-  deleteStatus: typeof DeleteEngineAPILogic.values.status;
+  deleteStatus: typeof DeleteSearchApplicationAPILogic.values.status;
   hasNoEngines: boolean;
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
@@ -70,7 +70,7 @@ interface EngineListValues {
   parameters: { count: number; meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchApplication[]; // stores engine list value from data
   searchQuery: string;
-  status: typeof FetchEnginesAPILogic.values.status;
+  status: typeof FetchSearchApplicationsAPILogic.values.status;
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
@@ -84,15 +84,15 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   },
   connect: {
     actions: [
-      FetchEnginesAPILogic,
+      FetchSearchApplicationsAPILogic,
       ['makeRequest', 'apiSuccess', 'apiError'],
-      DeleteEngineAPILogic,
+      DeleteSearchApplicationAPILogic,
       ['apiSuccess as deleteSuccess', 'makeRequest as deleteEngine', 'apiError as deleteError'],
     ],
     values: [
-      FetchEnginesAPILogic,
+      FetchSearchApplicationsAPILogic,
       ['data', 'status'],
-      DeleteEngineAPILogic,
+      DeleteSearchApplicationAPILogic,
       ['status as deleteStatus'],
     ],
   },

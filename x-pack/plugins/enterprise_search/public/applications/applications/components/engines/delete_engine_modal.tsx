@@ -32,7 +32,7 @@ export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName
       })}
       onCancel={onClose}
       onConfirm={() => {
-        deleteEngine({ engineName });
+        deleteEngine({ searchApplicationName: engineName });
         sendEnterpriseSearchTelemetry({
           action: 'clicked',
           metric: 'entSearchApplications-engineView-deleteEngineConfirm',

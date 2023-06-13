@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { UpdateEngineApiLogic } from '../../api/engines/update_engine_api_logic';
+import { UpdateSearchApplicationApiLogic } from '../../api/search_applications/update_search_application_api_logic';
 
 import { EngineIndicesLogic, EngineIndicesLogicActions } from './engine_indices_logic';
 
@@ -23,8 +23,8 @@ export interface AddIndicesLogicActions {
 
 export interface AddIndicesLogicValues {
   selectedIndices: string[];
-  updateEngineError: typeof UpdateEngineApiLogic.values.error | undefined;
-  updateEngineStatus: typeof UpdateEngineApiLogic.values.status;
+  updateEngineError: typeof UpdateSearchApplicationApiLogic.values.error | undefined;
+  updateEngineStatus: typeof UpdateSearchApplicationApiLogic.values.status;
 }
 
 export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndicesLogicActions>>({
@@ -34,7 +34,10 @@ export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndic
   },
   connect: {
     actions: [EngineIndicesLogic, ['addIndicesToEngine', 'engineUpdated', 'closeAddIndicesFlyout']],
-    values: [UpdateEngineApiLogic, ['status as updateEngineStatus', 'error as updateEngineError']],
+    values: [
+      UpdateSearchApplicationApiLogic,
+      ['status as updateEngineStatus', 'error as updateEngineError'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     engineUpdated: () => {

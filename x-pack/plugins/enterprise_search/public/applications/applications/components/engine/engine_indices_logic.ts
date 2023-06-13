@@ -8,20 +8,20 @@
 import { kea, MakeLogicType } from 'kea';
 
 import {
-  UpdateEngineApiLogic,
-  UpdateEngineApiLogicActions,
-} from '../../api/engines/update_engine_api_logic';
+  UpdateSearchApplicationApiLogic,
+  UpdateSearchApplicationApiLogicActions,
+} from '../../api/search_applications/update_search_application_api_logic';
 
 import { EngineViewActions, EngineViewLogic, EngineViewValues } from './engine_view_logic';
 
 export interface EngineIndicesLogicActions {
   addIndicesToEngine: (indices: string[]) => { indices: string[] };
   closeAddIndicesFlyout: () => void;
-  engineUpdated: UpdateEngineApiLogicActions['apiSuccess'];
+  engineUpdated: UpdateSearchApplicationApiLogicActions['apiSuccess'];
   fetchEngine: EngineViewActions['fetchEngine'];
   openAddIndicesFlyout: () => void;
   removeIndexFromEngine: (indexName: string) => { indexName: string };
-  updateEngineRequest: UpdateEngineApiLogicActions['makeRequest'];
+  updateEngineRequest: UpdateSearchApplicationApiLogicActions['makeRequest'];
 }
 
 export interface EngineIndicesLogicValues {
@@ -44,7 +44,7 @@ export const EngineIndicesLogic = kea<
     actions: [
       EngineViewLogic,
       ['fetchEngine'],
-      UpdateEngineApiLogic,
+      UpdateSearchApplicationApiLogic,
       ['makeRequest as updateEngineRequest', 'apiSuccess as engineUpdated'],
     ],
     values: [EngineViewLogic, ['engineData', 'engineName', 'isLoadingEngine']],
@@ -55,12 +55,12 @@ export const EngineIndicesLogic = kea<
       const existingIndicesNames = values.engineData.indices.map((index) => index.name);
       const updatedIndices = Array.from(new Set([...existingIndicesNames, ...indices]));
       actions.updateEngineRequest({
-        engineName: values.engineName,
+        name: values.engineName,
         indices: updatedIndices,
       });
     },
     engineUpdated: () => {
-      actions.fetchEngine({ engineName: values.engineName });
+      actions.fetchEngine({ name: values.engineName });
     },
     removeIndexFromEngine: ({ indexName }) => {
       if (!values.engineData) return;
@@ -68,7 +68,7 @@ export const EngineIndicesLogic = kea<
         .filter((index) => index.name !== indexName)
         .map((index) => index.name);
       actions.updateEngineRequest({
-        engineName: values.engineName,
+        name: values.engineName,
         indices: updatedIndices,
       });
     },

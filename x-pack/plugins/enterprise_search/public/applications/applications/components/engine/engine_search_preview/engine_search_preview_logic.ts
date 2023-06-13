@@ -9,15 +9,15 @@ import { kea, MakeLogicType } from 'kea';
 
 import { FieldConfiguration } from '@elastic/search-ui';
 
-import { FetchEngineFieldCapabilitiesApiLogic } from '../../../api/engines/fetch_engine_field_capabilities_api_logic';
+import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
 import { EngineNameLogic } from '../engine_name_logic';
 
 interface EngineSearchPreviewActions {
-  fetchEngineFieldCapabilities: typeof FetchEngineFieldCapabilitiesApiLogic.actions.makeRequest;
+  fetchEngineFieldCapabilities: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.actions.makeRequest;
 }
 
 export interface EngineSearchPreviewValues {
-  engineFieldCapabilitiesData: typeof FetchEngineFieldCapabilitiesApiLogic.values.data;
+  engineFieldCapabilitiesData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
   engineName: typeof EngineNameLogic.values.engineName;
   fieldTypesByIndex: Record<string, Record<string, string>>;
   resultFields: Record<string, FieldConfiguration>;
@@ -29,13 +29,13 @@ export const EngineSearchPreviewLogic = kea<
 >({
   connect: {
     actions: [
-      FetchEngineFieldCapabilitiesApiLogic,
+      FetchSearchApplicationFieldCapabilitiesApiLogic,
       ['makeRequest as fetchEngineFieldCapabilities'],
     ],
     values: [
       EngineNameLogic,
       ['engineName'],
-      FetchEngineFieldCapabilitiesApiLogic,
+      FetchSearchApplicationFieldCapabilitiesApiLogic,
       ['data as engineFieldCapabilitiesData'],
     ],
   },
@@ -43,7 +43,7 @@ export const EngineSearchPreviewLogic = kea<
     afterMount: () => {
       if (!values.engineFieldCapabilitiesData) {
         actions.fetchEngineFieldCapabilities({
-          engineName: values.engineName,
+          name: values.engineName,
         });
       }
     },

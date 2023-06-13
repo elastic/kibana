@@ -9,18 +9,18 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { fetchEngines } from './fetch_engines_api_logic';
+import { fetchSearchApplications } from './fetch_search_applications_api_logic';
 
-describe('FetchEnginesAPILogic', () => {
+describe('FetchSearchApplicationsAPILogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('fetchEnginesAPILogic', () => {
-    it('request list engines api without search query', async () => {
+  describe('fetchSearchApplications', () => {
+    it('request list search applications api without search query', async () => {
       const promise = Promise.resolve({ result: 'result' });
       http.get.mockReturnValue(promise);
-      const result = fetchEngines({
+      const result = fetchSearchApplications({
         meta: { from: 0, size: 10, total: 0 },
       });
       await nextTick();
@@ -36,10 +36,10 @@ describe('FetchEnginesAPILogic', () => {
         },
       });
     });
-    it('request list engines api with search query', async () => {
+    it('request list search applications api with search query', async () => {
       const promise = Promise.resolve({ result: 'result' });
       http.get.mockReturnValue(promise);
-      const result = fetchEngines({
+      const result = fetchSearchApplications({
         meta: { from: 0, size: 10, total: 0 },
         searchQuery: 'te',
       });

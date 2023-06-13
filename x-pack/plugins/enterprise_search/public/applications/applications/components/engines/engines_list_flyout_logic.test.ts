@@ -11,7 +11,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { Status } from '../../../../../common/types/api';
 import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
 
-import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
+import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 
 import { EngineListFlyoutValues, EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 
@@ -49,7 +49,7 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
 
 describe('EngineListFlyoutLogic', () => {
   const { mount } = new LogicMounter(EnginesListFlyoutLogic);
-  const { mount: apiLogicMount } = new LogicMounter(FetchEngineApiLogic);
+  const { mount: apiLogicMount } = new LogicMounter(FetchSearchApplicationApiLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -85,7 +85,7 @@ describe('EngineListFlyoutLogic', () => {
   describe('selectors', () => {
     it('receives fetchEngine indices data on success', () => {
       expect(EnginesListFlyoutLogic.values).toEqual(DEFAULT_VALUES);
-      FetchEngineApiLogic.actions.apiSuccess(mockEngineData);
+      FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
       expect(EnginesListFlyoutLogic.values).toEqual({
         ...DEFAULT_VALUES,
         fetchEngineApiStatus: Status.SUCCESS,
@@ -95,7 +95,7 @@ describe('EngineListFlyoutLogic', () => {
   });
   describe('listeners', () => {
     beforeEach(() => {
-      FetchEngineApiLogic.actions.apiSuccess(mockEngineData);
+      FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
     });
     it('fetch engines flyout when flyout is visible', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });

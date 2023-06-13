@@ -9,25 +9,25 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { createEngine } from './create_engine_api_logic';
+import { createSearchApplication } from './create_search_application_api_logic';
 
-describe('CreateEngineApiLogic', () => {
+describe('CreateSearchApplicationApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('createEngine', () => {
+  describe('createSearchApplication', () => {
     it('calls correct api', async () => {
-      const engine = { engineName: 'my-engine', indices: ['an-index'] };
+      const searchApplication = { indices: ['an-index'], name: 'my-search-application' };
       const response = { result: 'created' };
       const promise = Promise.resolve(response);
       http.put.mockReturnValue(promise);
-      const result = createEngine(engine);
+      const result = createSearchApplication(searchApplication);
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
-        '/internal/enterprise_search/search_applications/my-engine',
+        '/internal/enterprise_search/search_applications/my-search-application',
         {
-          body: '{"indices":["an-index"],"name":"my-engine"}',
+          body: '{"indices":["an-index"],"name":"my-search-application"}',
           query: { create: true },
         }
       );
