@@ -11,7 +11,7 @@ import { isValidRouteVersion } from './is_valid_route_version';
 describe('isValidRouteVersion', () => {
   describe('public', () => {
     test('allows valid dates', () => {
-      expect(isValidRouteVersion(true, '2023-10-31')).toBe(undefined);
+      expect(isValidRouteVersion(true, '2010-02-01')).toBe(undefined);
     });
     test.each([['2020.02.01'], ['2020-99-99'], [''], ['abc']])(
       '%p returns an error message',
