@@ -24,9 +24,9 @@ import { i18n } from '@kbn/i18n';
 import { IndexViewLogic } from '../index_view_logic';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
-import { ConfigEntry, ConnectorConfigurationLogic } from './connector_configuration_logic';
+import { ConfigEntryView, ConnectorConfigurationLogic } from './connector_configuration_logic';
 
-function entryToDisplaylistItem(entry: ConfigEntry): { description: string; title: string } {
+function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; title: string } {
   return {
     description: entry.sensitive && !!entry.value ? '********' : String(entry.value) || '--',
     title: entry.label,
