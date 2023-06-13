@@ -23,6 +23,10 @@ export function plugin() {
 // Containers & Hook
 export { LogViewProvider, useLogViewContext } from './hooks/use_log_view';
 export { LogStreamProvider, useLogStreamContext } from './containers/logs/log_stream';
+export {
+  LogPositionStateProvider,
+  useLogPositionStateContext,
+} from './containers/logs/log_position';
 export { useLogEntryFlyout } from './components/logging/log_entry_flyout';
 
 // Shared components

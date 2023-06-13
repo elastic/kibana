@@ -6,14 +6,14 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createResolvedLogViewMock } from '@kbn/logs-shared-plugin/common/mocks';
 import { createLogsSharedPluginStartMock } from '@kbn/logs-shared-plugin/public/mocks';
+import { of } from 'rxjs';
 import { createInfraPluginStartMock } from '../mocks';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './logs_overview_fetchers';
-import { createResolvedLogViewMock } from '@kbn/logs-shared-plugin/common/mocks';
 
 const DEFAULT_PARAMS = {
   absoluteTime: { start: 1593430680000, end: 1593430800000 },

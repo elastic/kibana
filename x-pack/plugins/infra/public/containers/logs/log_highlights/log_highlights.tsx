@@ -9,10 +9,10 @@ import createContainer from 'constate';
 import { useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
 import { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { useLogPositionStateContext } from '@kbn/logs-shared-plugin/public';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
-import { useLogPositionStateContext } from '../log_position';
 import { TimeKey } from '../../../../common/time';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
