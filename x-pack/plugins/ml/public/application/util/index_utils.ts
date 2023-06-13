@@ -7,13 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { Query, Filter } from '@kbn/es-query';
-import { getToastNotifications, getSavedSearch, getDataViews } from './dependency_cache';
-
-export async function loadSavedSearchById(id: string) {
-  return getSavedSearch().get(id);
-}
+import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { getToastNotifications, getDataViews } from './dependency_cache';
 
 export async function getDataViewNames() {
   const dataViewsContract = getDataViews();
@@ -54,7 +51,15 @@ export interface DataViewAndSavedSearch {
   dataView: DataView | null;
 }
 
-export async function getDataViewAndSavedSearch(savedSearchId: string) {
+export async function getDataViewAndSavedSearch({
+  savedSearchService,
+  dataViewsService: dataViews,
+  savedSearchId,
+}: {
+  savedSearchService: SavedSearchPublicPluginStart;
+  dataViewsService: DataViewsContract;
+  savedSearchId: string;
+}) {
   const resp: DataViewAndSavedSearch = {
     savedSearch: null,
     dataView: null,
@@ -64,12 +69,12 @@ export async function getDataViewAndSavedSearch(savedSearchId: string) {
     return resp;
   }
 
-  const ss = await loadSavedSearchById(savedSearchId);
+  const ss = await savedSearchService.get(savedSearchId);
   if (ss === null) {
     return resp;
   }
   const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
-  resp.dataView = await getDataViewById(dataViewId!);
+  resp.dataView = await dataViews.get(dataViewId!);
   resp.savedSearch = ss;
   return resp;
 }
@@ -79,10 +84,6 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
     query: savedSearch.searchSource.getField('query')! as Query,
     filter: savedSearch.searchSource.getField('filter') as Filter[],
   };
-}
-
-export function getSavedSearchById(id: string): Promise<SavedSearch> {
-  return getSavedSearch().get(id);
 }
 
 /**

@@ -12,6 +12,8 @@ import { KibanaObjects } from './page';
  * Gets kibana objects with an existence check.
  */
 export const checkForSavedObjects = async (objects: KibanaObjects): Promise<KibanaObjects> => {
+  // @TODO: remove
+
   const savedObjectsClient = getSavedObjectsClient();
   try {
     return await Object.keys(objects).reduce(async (prevPromise, type) => {

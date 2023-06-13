@@ -8,13 +8,27 @@
 import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { QuickGeoJobCreator } from './quick_create_job';
-import { ml } from '../../../services/ml_api_service';
+import { ml, MlApiServices } from '../../../services/ml_api_service';
 
 import { getUiSettings, getTimefilter, getShare } from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 export async function resolver(
+  {
+    kibanaConfig,
+    timeFilter,
+    share,
+    mlApiServices,
+  }: {
+    kibanaConfig: IUiSettingsClient;
+    timeFilter: TimefilterContract;
+    share: SharePluginStart;
+    mlApiServices: MlApiServices;
+  },
   dashboard: string,
   dataViewId: string,
   embeddable: string,

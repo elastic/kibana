@@ -6,6 +6,7 @@
  */
 
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { getDataViewAndSavedSearch } from '../../util/index_utils';
 import { JobType } from '../../../../common/types/saved_objects';
 import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
@@ -19,7 +20,8 @@ export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 export function loadNewJobCapabilities(
   dataViewId: string,
   savedSearchId: string,
-  dataViewContract: DataViewsContract,
+  dataViewsService: DataViewsContract,
+  savedSearchService: SavedSearchPublicPluginStart,
   jobType: JobType
 ) {
   return new Promise(async (resolve, reject) => {
@@ -29,14 +31,17 @@ export function loadNewJobCapabilities(
 
       if (dataViewId !== undefined) {
         // index pattern is being used
-        const dataView: DataView = await dataViewContract.get(dataViewId);
+        const dataView: DataView = await dataViewsService.get(dataViewId);
         await serviceToUse.initializeFromDataVIew(dataView);
         resolve(serviceToUse.newJobCaps);
       } else if (savedSearchId !== undefined) {
         // saved search is being used
         // load the data view from the saved search
-        const { dataView } = await getDataViewAndSavedSearch(savedSearchId);
-
+        const { dataView } = await getDataViewAndSavedSearch({
+          savedSearchService,
+          dataViewsService,
+          savedSearchId,
+        });
         if (dataView === null) {
           // eslint-disable-next-line no-console
           console.error('Cannot retrieve data view from saved search');

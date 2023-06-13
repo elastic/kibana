@@ -191,18 +191,12 @@ export function getBasePath() {
   return cache.basePath;
 }
 
+// @TODO: remove
 export function getSavedObjectsClient() {
   if (cache.savedObjectsClient === null) {
     throw new Error("savedObjectsClient hasn't been initialized");
   }
   return cache.savedObjectsClient;
-}
-
-export function getSavedSearch() {
-  if (cache.savedSearch === null) {
-    throw new Error("savedSearch hasn't been initialized");
-  }
-  return cache.savedSearch;
 }
 
 export function getApplication() {

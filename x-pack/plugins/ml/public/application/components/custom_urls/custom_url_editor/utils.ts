@@ -241,6 +241,8 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
   // Get the complete list of attributes for the selected dashboard (query, filters).
   const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
 
+  // @TODO: remove
+
   const savedObjectsClient = getSavedObjectsClient();
 
   const response = await savedObjectsClient.get('dashboard', dashboardId ?? '');

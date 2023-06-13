@@ -8,23 +8,34 @@
 import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
-import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { LensPublicStart, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { QuickLensJobCreator } from './quick_create_job';
-import { ml } from '../../../services/ml_api_service';
+import { MlApiServices } from '../../../services/ml_api_service';
 
-import {
-  getUiSettings,
-  getSavedObjectsClient,
-  getTimefilter,
-  getShare,
-  getLens,
-} from '../../../util/dependency_cache';
+import { getSavedObjectsClient } from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 /**
  * TODO update route resolver to use Kibana context instead of the deps cache
  */
 export async function resolver(
+  {
+    lens,
+    kibanaConfig,
+    timeFilter,
+    share,
+    mlApiServices,
+  }: {
+    lens: LensPublicStart;
+    kibanaConfig: IUiSettingsClient;
+    timeFilter: TimefilterContract;
+    share: SharePluginStart;
+    mlApiServices: MlApiServices;
+  },
+
   lensSavedObjectId: string | undefined,
   lensSavedObjectRisonString: string | undefined,
   fromRisonStrong: string,
@@ -74,17 +85,13 @@ export async function resolver(
     layerIndex = undefined;
   }
 
-  const jobCreator = new QuickLensJobCreator(
-    getLens(),
-    getUiSettings(),
-    getTimefilter(),
-    getShare(),
-    ml
-  );
+  const jobCreator = new QuickLensJobCreator(lens, kibanaConfig, timeFilter, share, mlApiServices);
   await jobCreator.createAndStashADJob(vis, from, to, query, filters, layerIndex);
 }
 
 async function getLensSavedObject(id: string) {
+  // @TODO: remove
+
   const savedObjectClient = getSavedObjectsClient();
   const so = await savedObjectClient.get<LensSavedObjectAttributes>('lens', id);
   return so.attributes;
