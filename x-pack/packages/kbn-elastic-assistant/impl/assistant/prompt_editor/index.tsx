@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import { Conversation } from '../../..';
 import type { PromptContext } from '../prompt_context/types';
 import { SystemPrompt } from './system_prompt';
+import type { SelectedPromptContext } from '../types';
 
 import * as i18n from './translations';
 import { SelectedPromptContexts } from './selected_prompt_contexts';
@@ -22,8 +23,10 @@ export interface Props {
   isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   promptTextPreview: string;
-  selectedPromptContextIds: string[];
-  setSelectedPromptContextIds: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedPromptContexts: Record<string, SelectedPromptContext>;
+  setSelectedPromptContexts: React.Dispatch<
+    React.SetStateAction<Record<string, SelectedPromptContext>>
+  >;
 }
 
 const PreviewText = styled(EuiText)`
@@ -35,8 +38,8 @@ const PromptEditorComponent: React.FC<Props> = ({
   isNewConversation,
   promptContexts,
   promptTextPreview,
-  selectedPromptContextIds,
-  setSelectedPromptContextIds,
+  selectedPromptContexts,
+  setSelectedPromptContexts,
 }) => {
   const commentBody = useMemo(
     () => (
@@ -46,8 +49,8 @@ const PromptEditorComponent: React.FC<Props> = ({
         <SelectedPromptContexts
           isNewConversation={isNewConversation}
           promptContexts={promptContexts}
-          selectedPromptContextIds={selectedPromptContextIds}
-          setSelectedPromptContextIds={setSelectedPromptContextIds}
+          selectedPromptContexts={selectedPromptContexts}
+          setSelectedPromptContexts={setSelectedPromptContexts}
         />
 
         <PreviewText color="subdued" data-test-subj="previewText">
@@ -60,8 +63,8 @@ const PromptEditorComponent: React.FC<Props> = ({
       isNewConversation,
       promptContexts,
       promptTextPreview,
-      selectedPromptContextIds,
-      setSelectedPromptContextIds,
+      selectedPromptContexts,
+      setSelectedPromptContexts,
     ]
   );
 

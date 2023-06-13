@@ -15,3 +15,10 @@ export interface Prompt {
   isDefault?: boolean;
   isNewConversationDefault?: boolean;
 }
+
+export interface SelectedPromptContext {
+  allow: string[];
+  allowReplacement: string[];
+  promptContextId: string;
+  rawData: string | Record<string, string[]>;
+}

@@ -7,8 +7,10 @@
 
 import type { Message } from '../../assistant_context/types';
 import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
-import type { PromptContext } from '../prompt_context/types';
-import type { Prompt } from '../types';
+
+import { transformRawData } from '../../data_anonymization/transform_raw_data';
+import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
+import type { Prompt, SelectedPromptContext } from '../types';
 
 export const getSystemMessages = ({
   isNewChat,
@@ -31,35 +33,45 @@ export const getSystemMessages = ({
 };
 
 export async function getCombinedMessage({
+  currentReplacements,
+  getAnonymizedValue = defaultGetAnonymizedValue,
   isNewChat,
-  promptContexts,
+  onNewReplacements,
   promptText,
-  selectedPromptContextIds,
+  selectedPromptContexts,
   selectedSystemPrompt,
 }: {
+  currentReplacements: Record<string, string> | undefined;
+  getAnonymizedValue?: ({
+    currentReplacements,
+    rawValue,
+  }: {
+    currentReplacements: Record<string, string> | undefined;
+    rawValue: string;
+  }) => string;
   isNewChat: boolean;
-  promptContexts: Record<string, PromptContext>;
+  onNewReplacements: (newReplacements: Record<string, string>) => void;
   promptText: string;
-  selectedPromptContextIds: string[];
+  selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
 }): Promise<Message> {
-  const selectedPromptContexts = selectedPromptContextIds.reduce<PromptContext[]>((acc, id) => {
-    const promptContext = promptContexts[id];
-    return promptContext != null ? [...acc, promptContext] : acc;
-  }, []);
-
-  const promptContextsContent = await Promise.all(
-    selectedPromptContexts.map(async ({ getPromptContext }) => {
-      const promptContext = await getPromptContext();
+  const promptContextsContent = Object.keys(selectedPromptContexts)
+    .sort()
+    .map((id) => {
+      const promptContext = transformRawData({
+        currentReplacements,
+        getAnonymizedValue,
+        onNewReplacements,
+        selectedPromptContext: selectedPromptContexts[id],
+      });
 
       return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
-    })
-  );
+    });
 
   return {
-    content: `${isNewChat ? `${selectedSystemPrompt?.content ?? ''}` : `${promptContextsContent}`}
-
-${promptContextsContent}
+    content: `${
+      isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
+    }${promptContextsContent}
 
 ${promptText}`,
     role: 'user', // we are combining the system and user messages into one message

@@ -82,9 +82,9 @@ export const allowedExperimentalValues = Object.freeze({
   securityFlyoutEnabled: false,
 
   /**
-   * Enables the Elastic Security Assistant
+   * Enables the Elastic AI Assistant
    */
-  assistantEnabled: false,
+  assistantEnabled: true,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
