@@ -39,6 +39,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   const [{ config, id, name }] = useFormData({
     watch: ['config.apiProvider'],
   });
+
   const {
     services: {
       application: { navigateToUrl },

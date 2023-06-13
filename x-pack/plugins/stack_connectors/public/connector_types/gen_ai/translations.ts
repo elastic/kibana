@@ -90,6 +90,6 @@ export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string)
 export const GET_DASHBOARD_API_ERROR = i18n.translate(
   'xpack.stackConnectors.components.genAi.error.dashboardApiError',
   {
-    defaultMessage: 'Error finding Generateive AI Token Usage Dashboard.',
+    defaultMessage: 'Error finding Generative AI Token Usage Dashboard.',
   }
 );
