@@ -20,7 +20,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -48,8 +47,6 @@ curl --location --request POST '${esUrl}/_application/search_application/${engin
 --header 'Content-Type: application/json' \\
 --data-raw '${JSON.stringify({ params }, null, 2)}'`;
 
-// type TabId = 'apiRequest' | 'ruby' | 'python' | 'java' | 'javascript' | 'curl';
-
 const apiRequestSnippet = (
   esUrl: string,
   searchApplicationName: string,
@@ -72,7 +69,7 @@ const consoleRequest = (searchApplicationName: string, params: unknown) =>
   `POST /_application/search_application/${searchApplicationName}/_search
 ${JSON.stringify({ params }, null, 2)}`;
 
-type TabId = 'curl' | 'searchui' | 'apirequest';
+type TabId = 'apirequest' | 'curl' | 'searchui';
 
 interface Tab {
   code: string;
@@ -98,53 +95,34 @@ export const EngineApiIntegrationStage: React.FC = () => {
       code: apiRequestSnippet(elasticsearchUrl(cloudContext), engineName, apiKey, params),
       copy: false,
       language: 'http',
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.apiRequestTitle', {
-        defaultMessage: 'API Request',
-      }),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplications.safeSearchApi.step1.apirequestTitle',
+        {
+          defaultMessage: 'API Request',
+        }
+      ),
     },
     curl: {
       code: cURLSnippet(elasticsearchUrl(cloudContext), engineName, apiKey, params),
       copy: true,
       language: 'bash',
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.apiRequestTitle', {
-        defaultMessage: 'API Request',
-      }),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplications.safeSearchApi.step2.curlTitle',
+        {
+          defaultMessage: 'cURL',
+        }
+      ),
     },
-    ruby: {
-      code: SearchUISnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
-      language: 'ruby',
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step2.rubyTitle', {
-        defaultMessage: 'Ruby',
-      }),
-    },
-    python: {
-      code: SearchUISnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
-      language: 'python',
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.pythonTitle', {
-        defaultMessage: 'Python',
-      }),
-    },
-    java: {
-      code: SearchUISnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
-      language: 'java',
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step4.javaTitle', {
-        defaultMessage: 'Java',
-      }),
-    },
-    javascript: {
+    searchui: {
       code: SearchUISnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
       copy: true,
       language: 'javascript',
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step5.javascriptTitle', {
-        defaultMessage: 'Javascript',
-      }),
-    },
-    curl: {
-      code: cURLSnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
-      language: 'bash',
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step6.curlTitle', {
-        defaultMessage: 'cURL',
-      }),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplications.safeSearchApi.step3.searchUITitle',
+        {
+          defaultMessage: 'Search UI',
+        }
+      ),
     },
   };
 
@@ -167,14 +145,14 @@ export const EngineApiIntegrationStage: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.content.engine.api.step3.intro"
-            defaultMessage="Simplify your API calls by integrating one of our programming language clients. {clientsDocumentationLink}"
+            defaultMessage="Simplify your API calls by integrating one of our {clientsDocumentationLink}."
             values={{
               clientsDocumentationLink: (
                 <EuiLink href={docLinks.clientsGuide}>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.engine.safeSearchApi.step3.clientDocumenation',
                     {
-                      defaultMessage: 'Learn more about clients.',
+                      defaultMessage: 'programming language clients',
                     }
                   )}
                 </EuiLink>
@@ -197,15 +175,17 @@ export const EngineApiIntegrationStage: React.FC = () => {
         ))}
       </EuiTabs>
       <EuiSpacer size="l" />
-      <EuiText color="inherit">
-        <h5>
-          {i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.apiCall', {
-            defaultMessage: 'API Call',
-          })}
-        </h5>
-      </EuiText>
+      {selectedTab === 'apirequest' && (
+        <EuiText color="inherit">
+          <h5>
+            {i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.apiCall', {
+              defaultMessage: 'API Call',
+            })}
+          </h5>
+        </EuiText>
+      )}
       <EuiSpacer size="s" />
-      <EuiCodeBlock isCopyable lang={Tabs[selectedTab].language}>
+      <EuiCodeBlock isCopyable={Tabs[selectedTab].copy} lang={Tabs[selectedTab].language}>
         {Tabs[selectedTab].code}
       </EuiCodeBlock>
       <EuiSpacer size="l" />

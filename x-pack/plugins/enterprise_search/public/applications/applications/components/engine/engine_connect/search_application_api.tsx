@@ -109,24 +109,20 @@ export const SearchApplicationAPI = () => {
         <>
           <EuiText>
             <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning',
-                {
-                  defaultMessage:
-                    'This API key will only be able to access your Safe Search endpoint. Learn more about API keys.',
-                }
-              )}
-              <EuiLink
-                href={docLinks.apiKeys}
-                data-telemetry-id="entSearchApplications-searchApplication-safeSearchApi-step2-learnMoreLink"
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.learnMoreLink',
-                  {
-                    defaultMessage: 'Learn more about API keys.',
-                  }
-                )}
-              </EuiLink>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning"
+                defaultMessage="This {apiKeyDocumentation} will only be able to access your Safe Search endpoint."
+                values={{
+                  apiKeyDocumentation: (
+                    <EuiLink href={docLinks.apiKeys}>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning.APIkeyDocLink"
+                        defaultMessage="API key"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
           <EuiSpacer size="l" />
@@ -232,7 +228,42 @@ export const SearchApplicationAPI = () => {
       >
         <FormattedMessage
           id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body"
-          defaultMessage="The Safe Search API allows you to create a secure, public-facing search endpoint for your search application. This endpoint only accepts queries that match the parameters defined in your search template. {safeSearchDocumentation}"
+          defaultMessage="The {safeSearchDocumentation} allows you to create a secure, public-facing search endpoint for your search application. This endpoint only accepts queries that match the parameters defined in your {searchTemplateDocumenation}."
+          values={{
+            safeSearchDocumentation: (
+              <EuiLink
+                data-test-subj="safe-search-documentation-link"
+                href="#"
+                data-telemetry-id="entSearchApplications-searchTemplate-documentation-viewDocumentaion"
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocumentationLink',
+                  {
+                    defaultMessage: 'Safe Search API',
+                  }
+                )}
+              </EuiLink>
+            ),
+            searchTemplateDocumenation: (
+              <EuiLink
+                data-test-subj="search-template-documentation-link"
+                href={docLinks.searchTemplates}
+                data-telemetry-id="entSearchApplications-searchTemplate-documentation-viewDocumentaion"
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocumentationLink',
+                  {
+                    defaultMessage: 'search template',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+        <EuiSpacer size="l" />
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.safeSearchLearnMore"
+          defaultMessage="{safeSearchDocumentation}"
           values={{
             safeSearchDocumentation: (
               <EuiLink
@@ -242,7 +273,7 @@ export const SearchApplicationAPI = () => {
                 data-telemetry-id="entSearchApplications-documentation-viewDocumentaion"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.documentationLink',
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocumentationLink',
                   {
                     defaultMessage: 'Learn more about the Safe Search API',
                   }
