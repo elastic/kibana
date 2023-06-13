@@ -8,16 +8,24 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_INDEX_DEFAULT_NS,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 import { setupFleetAndAgents } from '../../../fleet_api_integration/apis/agents/services';
 import { generateAgent } from '../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteIndex, addIndex } from './helper';
 
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
-const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
-const VULN_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';
-const VULN_INDEX = 'logs-cloud_security_posture.vulnerabilities-default';
-const INDEX_ARRAY = [FINDINGS_INDEX, FINDINGS_LATEST_INDEX, VULN_LATEST_INDEX, VULN_INDEX];
+const INDEX_ARRAY = [
+  FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_INDEX_DEFAULT_NS,
+];
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
@@ -196,8 +204,8 @@ export default function (providerContext: FtrProviderContext) {
         agentPolicyId = agentPolicyResponse.item.id;
 
         await deleteIndex(es, INDEX_ARRAY);
-        await addIndex(es, findingsMockData, FINDINGS_LATEST_INDEX);
-        await addIndex(es, vulnerabilityMockData, VULN_LATEST_INDEX);
+        await addIndex(es, findingsMockData, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await addIndex(es, vulnerabilityMockData, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
       });
 
       afterEach(async () => {
@@ -564,6 +572,152 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('status = unprivileged test indices', () => {
+      const createUnprivilegedUser = async () => {
+        await security.user.create(UNPRIVILEGED_USERNAME, {
+          password: 'changeme',
+          roles: [UNPRIVILEGED_ROLE],
+          full_name: 'a reporting user',
+        });
+      };
+
+      const createRoleWithUnprivilegedIndices = async (indicesName: string) => {
+        await security.role.create(UNPRIVILEGED_ROLE, {
+          elasticsearch: {
+            indices: [
+              {
+                names: [indicesName],
+                privileges: ['read'],
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: { siem: ['read'], fleetv2: ['all'], fleet: ['read'] },
+              spaces: ['*'],
+            },
+          ],
+        });
+      };
+
+      const deleteUnprivilegedRole = async () => {
+        await security.role.delete(UNPRIVILEGED_ROLE);
+      };
+
+      const deleteUnprivilegedUser = async () => {
+        await security.user.delete(UNPRIVILEGED_USERNAME);
+      };
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
+
+        agentPolicyId = agentPolicyResponse.item.id;
+      });
+
+      afterEach(async () => {
+        await deleteUnprivilegedUser();
+        await deleteUnprivilegedRole();
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+
+      it(`status should return unprivileged when users don't have access to findings_latest indices `, async () => {
+        await createRoleWithUnprivilegedIndices(LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await createUnprivilegedUser();
+
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'kspm',
+          'cloudbeat/cis_k8s',
+          'vanilla',
+          'kspm'
+        );
+
+        const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .expect(200);
+
+        expect(res.kspm.status).to.be('unprivileged');
+        expect(res.cspm.status).to.be('unprivileged');
+        expect(res.vuln_mgmt.status).to.be('unprivileged');
+
+        expect(res.indicesDetails[0].status).to.be('empty');
+        expect(res.indicesDetails[1].status).to.be('empty');
+        expect(res.indicesDetails[2].status).to.be('unprivileged');
+        expect(res.indicesDetails[3].status).to.be('unprivileged');
+      });
+
+      it(`status should return unprivileged when users don't have access to scores indices `, async () => {
+        await createRoleWithUnprivilegedIndices(BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        await createUnprivilegedUser();
+
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'kspm',
+          'cloudbeat/cis_k8s',
+          'vanilla',
+          'kspm'
+        );
+
+        const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .expect(200);
+
+        expect(res.kspm.status).to.be('unprivileged');
+        expect(res.cspm.status).to.be('unprivileged');
+        expect(res.vuln_mgmt.status).to.be('unprivileged');
+
+        expect(res.indicesDetails[0].status).to.be('unprivileged');
+        expect(res.indicesDetails[1].status).to.be('empty');
+        expect(res.indicesDetails[2].status).to.be('empty');
+        expect(res.indicesDetails[3].status).to.be('unprivileged');
+      });
+
+      it(`status should return unprivileged when users don't have access to vulnerabilities_latest indices `, async () => {
+        await createRoleWithUnprivilegedIndices(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
+        await createUnprivilegedUser();
+
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'kspm',
+          'cloudbeat/cis_k8s',
+          'vanilla',
+          'kspm'
+        );
+
+        const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .expect(200);
+
+        expect(res.kspm.status).to.be('unprivileged');
+        expect(res.cspm.status).to.be('unprivileged');
+        expect(res.vuln_mgmt.status).to.be('not-installed');
+
+        expect(res.indicesDetails[0].status).to.be('unprivileged');
+        expect(res.indicesDetails[1].status).to.be('empty');
+        expect(res.indicesDetails[2].status).to.be('unprivileged');
+        expect(res.indicesDetails[3].status).to.be('empty');
+      });
+    });
+
     describe('status = indexing test', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
@@ -579,8 +733,8 @@ export default function (providerContext: FtrProviderContext) {
 
         agentPolicyId = agentPolicyResponse.item.id;
         await deleteIndex(es, INDEX_ARRAY);
-        await addIndex(es, findingsMockData, FINDINGS_INDEX);
-        await addIndex(es, vulnerabilityMockData, VULN_INDEX);
+        await addIndex(es, findingsMockData, FINDINGS_INDEX_DEFAULT_NS);
+        await addIndex(es, vulnerabilityMockData, VULNERABILITIES_INDEX_DEFAULT_NS);
       });
 
       afterEach(async () => {
