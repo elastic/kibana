@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedTimeline } from '../../../../common/types/timeline';
+import type { SavedTimeline } from '../../../../common/types/timeline/api';
 
 export const defaultColumnHeaderType = 'not-filtered';
 
