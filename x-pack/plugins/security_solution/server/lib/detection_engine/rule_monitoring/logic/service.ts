@@ -18,7 +18,7 @@ import type { IDetectionEngineHealthClient } from './detection_engine_health/det
 import type { IRuleExecutionLogForRoutes } from './rule_execution_log/client_for_routes/client_interface';
 import { createRuleExecutionLogClientForRoutes } from './rule_execution_log/client_for_routes/client';
 import type { IRuleExecutionLogForExecutors } from './rule_execution_log/client_for_executors/client_interface';
-import { createRuleExcutionLogClientForExecutors } from './rule_execution_log/client_for_executors/client';
+import { createRuleExecutionLogClientForExecutors } from './rule_execution_log/client_for_executors/client';
 
 import { registerEventLogProvider } from './event_log/register_event_log_provider';
 import { createDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client';
@@ -28,7 +28,7 @@ import { createEventLogReader } from './rule_execution_log/event_log/event_log_r
 import { createEventLogWriter } from './rule_execution_log/event_log/event_log_writer';
 import { fetchRuleExecutionSettings } from './rule_execution_log/execution_settings/fetch_rule_execution_settings';
 import type {
-  RuleExcutionLogClientForExecutorsParams,
+  RuleExecutionLogClientForExecutorsParams,
   RuleExecutionLogClientForRoutesParams,
   IRuleMonitoringService,
   DetectionEngineHealthClientParams,
@@ -67,11 +67,11 @@ export const createRuleMonitoringService = (
       return createRuleExecutionLogClientForRoutes(eventLogReader, logger);
     },
 
-    createRuleExcutionLogClientForExecutors: (
-      params: RuleExcutionLogClientForExecutorsParams
+    createRuleExecutionLogClientForExecutors: (
+      params: RuleExecutionLogClientForExecutorsParams
     ): Promise<IRuleExecutionLogForExecutors> => {
       return withSecuritySpan(
-        'IRuleMonitoringService.createRuleExcutionLogClientForExecutors',
+        'IRuleMonitoringService.createRuleExecutionLogClientForExecutors',
         async () => {
           const { savedObjectsClient, context, ruleMonitoringService, ruleResultService } = params;
 
@@ -89,7 +89,7 @@ export const createRuleMonitoringService = (
 
           const eventLogWriter = createEventLogWriter(plugins.eventLog);
 
-          return createRuleExcutionLogClientForExecutors(
+          return createRuleExecutionLogClientForExecutors(
             ruleExecutionSettings,
             eventLogWriter,
             childLogger,

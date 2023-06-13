@@ -38,7 +38,7 @@ import type {
   StatusChangeArgs,
 } from './client_interface';
 
-export const createRuleExcutionLogClientForExecutors = (
+export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
   eventLog: IEventLogWriter,
   logger: Logger,

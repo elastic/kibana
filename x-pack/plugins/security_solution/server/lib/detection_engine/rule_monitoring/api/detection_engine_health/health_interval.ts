@@ -28,9 +28,8 @@ export const validateHealthInterval = (
 ): HealthInterval => {
   const parameters = params ?? DEFAULT_INTERVAL_PARAMETERS;
 
-  // NOTE: it's important to clone "now" because moment objects are mutable
-  const from = getFrom(parameters, moment(now));
-  const to = getTo(parameters, moment(now));
+  const from = getFrom(parameters, now);
+  const to = getTo(parameters, now);
   const duration = moment.duration(to.diff(from));
 
   // TODO: https://github.com/elastic/kibana/issues/125642 Validate that:
@@ -50,23 +49,27 @@ export const validateHealthInterval = (
 const getFrom = (params: HealthIntervalParameters, now: moment.Moment): moment.Moment => {
   const { type } = params;
 
+  // NOTE: it's important to clone `now` with `moment(now)` because moment objects are mutable.
+  // If you call .subtract() or other methods on the original `now`, you will change it which
+  // might cause bugs depending on how you use it in your calculations later.
+
   if (type === HealthIntervalType.custom_range) {
     return moment(params.from);
   }
   if (type === HealthIntervalType.last_hour) {
-    return now.subtract(1, 'hour');
+    return moment(now).subtract(1, 'hour');
   }
   if (type === HealthIntervalType.last_day) {
-    return now.subtract(1, 'day');
+    return moment(now).subtract(1, 'day');
   }
   if (type === HealthIntervalType.last_week) {
-    return now.subtract(1, 'week');
+    return moment(now).subtract(1, 'week');
   }
   if (type === HealthIntervalType.last_month) {
-    return now.subtract(1, 'month');
+    return moment(now).subtract(1, 'month');
   }
   if (type === HealthIntervalType.last_year) {
-    return now.subtract(1, 'year');
+    return moment(now).subtract(1, 'year');
   }
 
   return assertUnreachable(type, 'Unhandled health interval type');
@@ -79,5 +82,9 @@ const getTo = (params: HealthIntervalParameters, now: moment.Moment): moment.Mom
     return moment(params.to);
   }
 
-  return now;
+  // NOTE: it's important to clone `now` with `moment(now)` because moment objects are mutable. If you
+  // return the original now from this method and then call .subtract() or other methods on it, it will
+  // change the original now which might cause bugs depending on how you use it in your calculations later.
+
+  return moment(now);
 };

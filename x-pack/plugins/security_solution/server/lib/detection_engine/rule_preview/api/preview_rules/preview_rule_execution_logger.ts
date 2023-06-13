@@ -12,7 +12,7 @@ import type {
 } from '../../../rule_monitoring';
 
 export interface IPreviewRuleExecutionLogger {
-  factory: IRuleMonitoringService['createRuleExcutionLogClientForExecutors'];
+  factory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
 }
 
 export const createPreviewRuleExecutionLogger = (

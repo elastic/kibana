@@ -31,8 +31,8 @@ export interface IRuleMonitoringService {
     params: RuleExecutionLogClientForRoutesParams
   ): IRuleExecutionLogForRoutes;
 
-  createRuleExcutionLogClientForExecutors(
-    params: RuleExcutionLogClientForExecutorsParams
+  createRuleExecutionLogClientForExecutors(
+    params: RuleExecutionLogClientForExecutorsParams
   ): Promise<IRuleExecutionLogForExecutors>;
 }
 
@@ -48,7 +48,7 @@ export interface RuleExecutionLogClientForRoutesParams {
   eventLogClient: IEventLogClient;
 }
 
-export interface RuleExcutionLogClientForExecutorsParams {
+export interface RuleExecutionLogClientForExecutorsParams {
   savedObjectsClient: SavedObjectsClientContract;
   ruleMonitoringService?: PublicRuleMonitoringService;
   ruleResultService?: PublicRuleResultService;

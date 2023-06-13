@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_PERCENTILES: number[] = [1, 5, 25, 50, 75, 95, 99];
+export const DEFAULT_PERCENTILES: number[] = [50, 95, 99, 99.9];

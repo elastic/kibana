@@ -133,7 +133,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   config: ConfigType;
   publicBaseUrl: string | undefined;
   ruleDataClient: IRuleDataClient;
-  ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExcutionLogClientForExecutors'];
+  ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
 }

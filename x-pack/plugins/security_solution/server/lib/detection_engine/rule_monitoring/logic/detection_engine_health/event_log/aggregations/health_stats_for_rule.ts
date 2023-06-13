@@ -60,7 +60,10 @@ export const normalizeRuleHealthAggregationResult = (
 ): Omit<RuleHealthSnapshot, 'stats_at_the_moment'> => {
   const aggregations = result.aggregations ?? {};
   return {
-    stats_over_interval: normalizeStatsOverInterval(aggregations),
+    stats_over_interval: normalizeRuleExecutionStatsAggregationResult(
+      aggregations,
+      'whole-interval'
+    ),
     history_over_interval: normalizeHistoryOverInterval(aggregations),
     debug: {
       eventLog: {
@@ -69,12 +72,6 @@ export const normalizeRuleHealthAggregationResult = (
       },
     },
   };
-};
-
-const normalizeStatsOverInterval = (
-  aggregations: Record<string, RawData>
-): RuleHealthStatsOverInterval => {
-  return normalizeRuleExecutionStatsAggregationResult(aggregations, 'whole-interval');
 };
 
 const normalizeHistoryOverInterval = (
