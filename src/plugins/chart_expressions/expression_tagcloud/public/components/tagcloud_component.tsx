@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
@@ -91,11 +91,6 @@ export const TagCloudChart = ({
   }, [bucket, visData.columns]);
 
   const tagCloudData = useMemo(() => {
-    // clear warning when data changes
-    if (warning) {
-      setWarning(false);
-    }
-
     const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
     const tagColumn = bucket ? bucketColumn!.id : null;
     const metricColumn = getColumnByAccessor(metric, visData.columns)!.id;
@@ -126,6 +121,13 @@ export const TagCloudChart = ({
     visData.columns,
     visData.rows,
   ]);
+
+  useEffect(() => {
+    // clear warning when data changes
+    if (warning) {
+      setWarning(false);
+    }
+  }, [tagCloudData]);
 
   const label = bucket
     ? `${getColumnByAccessor(bucket, visData.columns)!.name} - ${
