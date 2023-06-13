@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { rootRequest } from '../common';
 
@@ -34,7 +35,7 @@ export const createSavedQuery = (
         },
       ],
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', version: '1' },
+    headers: { 'kbn-xsrf': 'cypress-creds', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
   });
 
 export const deleteSavedQueries = () => {
