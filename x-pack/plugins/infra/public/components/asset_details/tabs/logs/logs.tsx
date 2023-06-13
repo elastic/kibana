@@ -22,7 +22,7 @@ export interface LogsProps {
   nodeType: InventoryItemType;
 }
 
-const textQueryThrottleIntervalMs = 1000;
+const TEXT_QUERY_THROTTLE_INTERVAL_MS = 1000;
 
 export const Logs = ({ nodeId, nodeType, currentTime }: LogsProps) => {
   const { services } = useKibanaContextForPlugin();
@@ -31,7 +31,7 @@ export const Logs = ({ nodeId, nodeType, currentTime }: LogsProps) => {
   const [textQueryDebounced, setTextQueryDebounced] = useState('');
   const startTimestamp = currentTime - 60 * 60 * 1000; // 60 minutes
 
-  useDebounce(() => setTextQueryDebounced(textQuery), textQueryThrottleIntervalMs, [textQuery]);
+  useDebounce(() => setTextQueryDebounced(textQuery), TEXT_QUERY_THROTTLE_INTERVAL_MS, [textQuery]);
 
   const filter = useMemo(() => {
     const query = [

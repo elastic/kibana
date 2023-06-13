@@ -10,7 +10,7 @@ import { EuiText } from '@elastic/eui';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { colorTransformer } from '../../../../../common/color_palette';
-import { MetricsExplorerOptionsMetric } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import type { MetricsExplorerOptionsMetric } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 interface Props {
   title: string;

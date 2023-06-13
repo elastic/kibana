@@ -10,7 +10,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { getNodeDetailUrl } from '../../../pages/link_to';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface LinkToAlertsRule {
   currentTime: number;
