@@ -12,6 +12,7 @@ import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
+const version = '1';
 
 /**
  * Data Views API Client - client implementation
@@ -29,8 +30,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
 
   private _request<T = unknown>(url: string, query?: {}, body?: string): Promise<T | undefined> {
     const request = body
-      ? this.http.post<T>(url, { query, body })
-      : this.http.fetch<T>(url, { query });
+      ? this.http.post<T>(url, { query, body, version })
+      : this.http.fetch<T>(url, { query, version });
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
