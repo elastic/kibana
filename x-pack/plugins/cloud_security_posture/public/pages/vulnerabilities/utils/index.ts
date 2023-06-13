@@ -6,7 +6,6 @@
  */
 
 export * from './custom_sort_script';
-export * from './get_vulnerability_filter';
 export * from './vulnerabilities_pathname_handler';
 export * from './get_filters';
 export * from './get_vector_score_list';

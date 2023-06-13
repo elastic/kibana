@@ -17,12 +17,16 @@ import {
   AggregationsStringTermsBucketKeys,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  VULNERABILITIES_SEVERITY,
+} from '../../../../common/constants';
+import { getSafeVulnerabilitiesQueryFilter } from '../../../../common/utils/get_safe_vulnerabilities_query_filter';
+
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { FindingsBaseEsQuery } from '../../../common/types';
-import { getVulnerabilityFilter } from '../utils';
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<SearchResponse<any, VulnerabilitiesAggs>>;
@@ -56,13 +60,7 @@ export const getQuery = ({
   pageSize,
 }: VulnerabilitiesQuery) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query: {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [...(query?.bool?.filter || []), ...getVulnerabilityFilter()],
-    },
-  },
+  query: getSafeVulnerabilitiesQueryFilter(query),
   aggs: {
     total: { cardinality: { field: 'resource.id' } },
     resources: {
@@ -110,7 +108,13 @@ export const getQuery = ({
               filter: [
                 {
                   bool: {
-                    should: [{ term: { 'vulnerability.severity': { value: 'CRITICAL' } } }],
+                    should: [
+                      {
+                        term: {
+                          'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
+                        },
+                      },
+                    ],
                     minimum_should_match: 1,
                   },
                 },
@@ -124,7 +128,13 @@ export const getQuery = ({
               filter: [
                 {
                   bool: {
-                    should: [{ term: { 'vulnerability.severity': { value: 'HIGH' } } }],
+                    should: [
+                      {
+                        term: {
+                          'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
+                        },
+                      },
+                    ],
                     minimum_should_match: 1,
                   },
                 },
@@ -138,7 +148,13 @@ export const getQuery = ({
               filter: [
                 {
                   bool: {
-                    should: [{ term: { 'vulnerability.severity': { value: 'MEDIUM' } } }],
+                    should: [
+                      {
+                        term: {
+                          'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
+                        },
+                      },
+                    ],
                     minimum_should_match: 1,
                   },
                 },
@@ -152,7 +168,11 @@ export const getQuery = ({
               filter: [
                 {
                   bool: {
-                    should: [{ term: { 'vulnerability.severity': { value: 'LOW' } } }],
+                    should: [
+                      {
+                        term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
+                      },
+                    ],
                     minimum_should_match: 1,
                   },
                 },
