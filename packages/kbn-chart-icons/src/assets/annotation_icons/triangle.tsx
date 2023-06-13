@@ -8,8 +8,6 @@
 
 import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
-import { cx } from '@emotion/css';
-import { noFill } from '../common_styles';
 
 export const IconTriangle = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
