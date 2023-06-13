@@ -183,8 +183,7 @@ export const alertStateActionVariableDescription = i18n.translate(
 export const alertDetailUrlActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.alertDetailUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view within Elastic that shows further details and context surrounding this alert',
+    defaultMessage: 'Link to the alert troubleshooting view for further context and details',
   }
 );
 

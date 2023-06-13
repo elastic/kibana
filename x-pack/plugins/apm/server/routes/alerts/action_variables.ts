@@ -12,8 +12,7 @@ export const apmActionVariables = {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.alertDetailsUrl',
       {
-        defaultMessage:
-          'Link to the view within Elastic that shows further details and context surrounding this alert',
+        defaultMessage: 'Link to the alert troubleshooting view for further context and details',
       }
     ),
     name: 'alertDetailsUrl' as const,
