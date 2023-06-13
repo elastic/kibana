@@ -356,7 +356,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
         snooze_schedule: {
           ...SNOOZE_SCHEDULE,
-          duration: 1000,
+          duration: 10000,
         },
       });
 
@@ -371,7 +371,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         expect(updatedAlert.snooze_schedule).to.eql([
           {
             ...SNOOZE_SCHEDULE,
-            duration: 1000,
+            duration: 10000,
           },
         ]);
       });
