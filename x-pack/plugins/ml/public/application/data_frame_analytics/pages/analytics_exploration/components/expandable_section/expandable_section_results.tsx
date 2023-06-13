@@ -10,6 +10,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { escapeKuery } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
+import moment from 'moment';
 
 import {
   EuiButtonIcon,
@@ -48,11 +50,14 @@ import { useColorRange, ColorRangeLegend } from '../../../../../components/color
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
+import { supportedUnits } from '../../../../../../../common/util/parse_interval';
 
 import {
   replaceTokensInDFAUrlValue,
   openCustomUrlWindow,
 } from '../../../../../util/custom_url_utils';
+import { replaceStringTokens } from '../../../../../util/string_utils';
+import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
 import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
@@ -227,13 +232,56 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   );
 
   const openCustomUrl = (item: DataGridItem, customUrl: MlKibanaUrlConfig) => {
-    // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
-    const urlPath = replaceTokensInDFAUrlValue(
-      customUrl,
-      item,
-      data.query.timefilter.timefilter.getTime()
-    );
-    openCustomUrlWindow(urlPath, customUrl, basePath.get());
+    // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
+    // Create a copy of the record as we are adding properties into it.
+    const record = cloneDeep(item);
+    const timestamp = record[indexPattern!.timeFieldName!];
+    const configuredUrlValue = customUrl.url_value;
+    const timeRangeInterval =
+      customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
+    const intervalString = timeRangeInterval?.humanize();
+    const interval = supportedUnits.find((unit) => intervalString?.includes(unit)) ?? 'day';
+
+    if (configuredUrlValue.includes('$earliest$')) {
+      let earliestMoment = moment(timestamp);
+      if (timeRangeInterval !== null) {
+        earliestMoment.subtract(timeRangeInterval);
+      } else {
+        earliestMoment = moment(timestamp).startOf(interval);
+        if (interval === 'hour') {
+          // Start from the previous hour.
+          earliestMoment.subtract(1, 'h');
+        }
+      }
+      record.earliest = earliestMoment.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
+    }
+
+    if (configuredUrlValue.includes('$latest$') || configuredUrlValue.includes('$earliest$')) {
+      const latestMoment = moment(timestamp);
+      if (timeRangeInterval !== null) {
+        latestMoment.add(timeRangeInterval);
+      } else {
+        if (interval === 'hour') {
+          // Show to the end of the next hour.
+          latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
+        }
+        latestMoment.subtract(1, 'ms').endOf(interval); // e.g. 2016-02-08T18:59:59.999Z
+      }
+      record.latest = latestMoment.toISOString();
+    }
+
+    if (configuredUrlValue.includes('$latest$')) {
+      const urlPath = replaceStringTokens(customUrl.url_value, record, true);
+      openCustomUrlWindow(urlPath, customUrl, basePath.get());
+    } else {
+      // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
+      const urlPath = replaceTokensInDFAUrlValue(
+        customUrl,
+        item,
+        data.query.timefilter.timefilter.getTime()
+      );
+      openCustomUrlWindow(urlPath, customUrl, basePath.get());
+    }
   };
 
   const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [

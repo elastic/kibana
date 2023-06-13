@@ -24,6 +24,7 @@ import { useMlKibana } from '../../../contexts/kibana';
 interface CustomUrlTimeRangePickerProps {
   onCustomTimeRangeChange: (customTimeRange?: { start: Moment; end: Moment }) => void;
   customTimeRange?: { start: Moment; end: Moment };
+  disabled: boolean;
 }
 
 /*
@@ -32,6 +33,7 @@ interface CustomUrlTimeRangePickerProps {
 export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
   onCustomTimeRangeChange,
   customTimeRange,
+  disabled,
 }) => {
   const [showCustomTimeRangeSelector, setShowCustomTimeRangeSelector] = useState<boolean>(false);
   const {
@@ -44,14 +46,6 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
     },
   } = useMlKibana();
 
-  const onCustomTimeRangeSwitchChange = (checked: boolean) => {
-    if (checked === false) {
-      // Clear the custom time range so it isn't persisted
-      onCustomTimeRangeChange(undefined);
-    }
-    setShowCustomTimeRangeSelector(checked);
-  };
-
   // If the custom time range is not set, default to the timefilter settings
   const currentTimeRange = useMemo(
     () =>
@@ -61,6 +55,16 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
       },
     [customTimeRange, timefilter]
   );
+
+  const onCustomTimeRangeSwitchChange = (checked: boolean) => {
+    if (checked === false) {
+      // Clear the custom time range so it isn't persisted
+      onCustomTimeRangeChange(undefined);
+    } else {
+      onCustomTimeRangeChange(currentTimeRange);
+    }
+    setShowCustomTimeRangeSelector(checked);
+  };
 
   const handleStartChange = (date: moment.Moment) => {
     onCustomTimeRangeChange({ ...currentTimeRange, start: date });
@@ -73,8 +77,18 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
 
   return (
     <>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize={'none'}>
+      <EuiFlexGroup gutterSize={'none'} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            disabled={disabled}
+            label={i18n.translate('xpack.ml.customUrlsEditor.addCustomTimeRangeSwitchLabel', {
+              defaultMessage: 'Add custom time range?',
+            })}
+            checked={showCustomTimeRangeSelector}
+            onChange={(e) => onCustomTimeRangeSwitchChange(e.target.checked)}
+            compressed
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
             content={i18n.translate('xpack.ml.customUrlsEditor.customTimeRangeTooltip', {
@@ -83,30 +97,6 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
             position="top"
             type="iInCircle"
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            display="columnCompressedSwitch"
-            label={
-              <FormattedMessage
-                id="xpack.ml.customUrlsEditor.customTimeRangeSwitch"
-                defaultMessage="Add custom time range?"
-              />
-            }
-          >
-            <EuiSwitch
-              showLabel={false}
-              label={
-                <FormattedMessage
-                  id="xpack.ml.customUrlsEditor.addCustomTimeRangeSwitchLabel"
-                  defaultMessage="Add custom time range switch"
-                />
-              }
-              checked={showCustomTimeRangeSelector}
-              onChange={(e) => onCustomTimeRangeSwitchChange(e.target.checked)}
-              compressed
-            />
-          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       {showCustomTimeRangeSelector ? (

@@ -43,7 +43,6 @@ import {
 } from '../../jobs/jobs_list/components/edit_job_flyout/edit_utils';
 import { openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { CustomUrlsWrapperProps } from './custom_urls_wrapper';
-import { isAnomalyDetectionJob } from '../../../../common/types/anomaly_detection_jobs';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
 
@@ -208,7 +207,6 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const editMode = this.props.editMode ?? 'inline';
     const editor = (
       <CustomUrlEditor
-        showTimeRangeSelector={isAnomalyDetectionJob(this.props.job)}
         showCustomTimeRangeSelector={isDataFrameAnalyticsConfigs(this.props.job)}
         customUrl={editorSettings}
         setEditCustomUrl={this.setEditCustomUrl}

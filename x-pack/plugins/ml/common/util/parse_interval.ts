@@ -10,6 +10,26 @@ import dateMath from '@kbn/datemath';
 
 type SupportedUnits = unitOfTime.Base;
 
+export const supportedUnits: SupportedUnits[] = [
+  'year',
+  'years',
+  'month',
+  'months',
+  'week',
+  'weeks',
+  'day',
+  'days',
+  'hour',
+  'hours',
+  'minute',
+  'minutes',
+  'second',
+  'seconds',
+  'millisecond',
+  'milliseconds',
+  'ms',
+];
+
 // Assume interval is in the form (value)(unit), such as "1h"
 const INTERVAL_STRING_RE = new RegExp('^([0-9]*)\\s*(' + dateMath.units.join('|') + ')$');
 
