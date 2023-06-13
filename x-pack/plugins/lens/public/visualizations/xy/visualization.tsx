@@ -110,8 +110,8 @@ import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
-import { IgnoredGlobalFiltersEntries } from './info_badges';
 import { LayerSettings } from './layer_settings';
+import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 
 const XY_ID = 'lnsXY';
 
@@ -1187,7 +1187,10 @@ function getNotifiableFeatures(
       }),
       longMessage: (
         <IgnoredGlobalFiltersEntries
-          layers={annotationsWithIgnoreFlag}
+          layers={annotationsWithIgnoreFlag.map(({ layerId, indexPatternId }) => ({
+            layerId,
+            indexPatternId,
+          }))}
           visualizationInfo={visualizationInfo}
           dataViews={frame.dataViews}
         />
