@@ -10,7 +10,7 @@ import {
   buildCategoryScoreAssignment,
   buildCategoryWeights,
   buildWeightingOfScoreByCategory,
-} from './category_weights';
+} from './risk_weights';
 
 describe('buildCategoryWeights', () => {
   it('returns the default weights if nothing else is provided', () => {

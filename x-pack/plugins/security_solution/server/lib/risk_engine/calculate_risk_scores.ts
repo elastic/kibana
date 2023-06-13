@@ -14,14 +14,15 @@ import {
   ALERT_RISK_SCORE,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { AfterKey, AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
+import type { AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
 import { withSecuritySpan } from '../../utils/with_security_span';
+import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
 import {
   buildCategoryScoreAssignment,
   buildCategoryScoreDeclarations,
   buildWeightingOfScoreByCategory,
   getGlobalWeightForIdentifierType,
-} from './category_weights';
+} from './risk_weights';
 import type {
   CalculateRiskScoreAggregations,
   GetScoresParams,
@@ -29,17 +30,6 @@ import type {
   RiskScore,
   RiskScoreBucket,
 } from './types';
-
-const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
-  identifierType === 'host' ? 'host.name' : 'user.name';
-
-const getAfterKeyForIdentifierType = ({
-  afterKeys,
-  identifierType,
-}: {
-  afterKeys: AfterKeys;
-  identifierType: IdentifierType;
-}): AfterKey | undefined => afterKeys[identifierType];
 
 const bucketToResponse = ({
   bucket,

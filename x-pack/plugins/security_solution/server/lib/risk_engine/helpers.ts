@@ -7,6 +7,7 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import type { AfterKey, AfterKeys, IdentifierType } from '../../../common/risk_engine';
 
 export const getRiskInputsIndex = async ({
   dataViewId,
@@ -24,3 +25,14 @@ export const getRiskInputsIndex = async ({
     logger.debug(`No dataview found for ID '${dataViewId}'`);
   }
 };
+
+export const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
+  identifierType === 'host' ? 'host.name' : 'user.name';
+
+export const getAfterKeyForIdentifierType = ({
+  afterKeys,
+  identifierType,
+}: {
+  afterKeys: AfterKeys;
+  identifierType: IdentifierType;
+}): AfterKey | undefined => afterKeys[identifierType];
