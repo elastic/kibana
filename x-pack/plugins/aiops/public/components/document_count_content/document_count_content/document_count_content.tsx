@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState, type FC } from 'react';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -34,6 +34,10 @@ export interface DocumentCountContentProps {
   sampleProbability: number;
   windowParameters?: WindowParameters;
   incomingInitialAnalysisStart?: number | WindowParameters;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -46,6 +50,8 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   sampleProbability,
   windowParameters,
   incomingInitialAnalysisStart,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
@@ -133,6 +139,8 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           chartPointsSplitLabel={documentCountStatsSplitLabel}
           isBrushCleared={isBrushCleared}
           autoAnalysisStart={initialAnalysisStart}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       )}
     </>
