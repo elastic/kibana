@@ -24,7 +24,7 @@ import type { Method } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
-import { isValidRouteVersion } from './is_valid_route_version';
+import { isAllowedPublicVersion, isValidRouteVersion } from './is_valid_route_version';
 import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
@@ -195,9 +195,20 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   private validateVersion(version: string) {
-    const message = isValidRouteVersion(this.isPublic, version);
-    if (message) {
-      throw new Error(message);
+    // We do an additional check here while we only have a single allowed public version
+    // for all public Kibana HTTP APIs
+    if (this.router.isDev && this.isPublic) {
+      const message = isAllowedPublicVersion(version);
+      if (message) {
+        throw new Error(message);
+      }
+    }
+
+    {
+      const message = isValidRouteVersion(this.isPublic, version);
+      if (message) {
+        throw new Error(message);
+      }
     }
 
     if (this.handlers.has(version as ApiVersion)) {

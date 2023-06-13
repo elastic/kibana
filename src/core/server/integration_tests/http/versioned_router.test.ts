@@ -160,8 +160,8 @@ describe('Routing versioned requests', () => {
   it('returns the version in response headers', async () => {
     router.versioned
       .get({ path: '/my-path', access: 'public' })
-      .addVersion({ validate: false, version: '2020-02-02' }, async (ctx, req, res) => {
-        return res.ok({ body: { v: '2020-02-02' } });
+      .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
+        return res.ok({ body: { foo: 'bar' } });
       });
 
     await server.start();
@@ -169,10 +169,10 @@ describe('Routing versioned requests', () => {
     await expect(
       supertest
         .get('/my-path')
-        .set('Elastic-Api-Version', '2020-02-02')
+        .set('Elastic-Api-Version', '2023-10-31')
         .expect(200)
         .then(({ header }) => header)
-    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2020-02-02' }));
+    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2023-10-31' }));
   });
 
   it('runs response validation when in dev', async () => {
@@ -248,20 +248,23 @@ describe('Routing versioned requests', () => {
   });
 
   it.each([
-    ['public', '2022-02-02', '2022-02-03'],
+    ['public', '2023-10-31', ''],
     ['internal', '1', '2'],
-  ])('requires version headers to be set %p when in dev', async (access, v1, v2) => {
+  ])('requires version headers to be set for %p endpoints when in dev', async (access, v1, v2) => {
     await setupServer({ dev: true });
-    router.versioned
-      .get({ path: '/my-path', access: access as 'internal' | 'public' })
-      .addVersion(
-        { version: v1, validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      )
-      .addVersion(
-        { version: v2, validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      );
+    let route = router.versioned.get({
+      path: '/my-path',
+      access: access as 'internal' | 'public',
+    });
+
+    [v1, v2].forEach((version) => {
+      if (version) {
+        route = route.addVersion(
+          { version, validate: { response: { 200: { body: schema.number() } } } },
+          async (ctx, req, res) => res.ok()
+        );
+      }
+    });
     await server.start();
 
     await expect(
