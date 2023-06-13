@@ -76,7 +76,7 @@ export const getActions = async ({
     },
   ];
 
-  const getTypesFilter: SearchRequest = () => {
+  const getTypesFilter = (): SearchRequest => {
     const singleType = types?.length === 1 && types[0];
     if (!singleType) {
       return {};
