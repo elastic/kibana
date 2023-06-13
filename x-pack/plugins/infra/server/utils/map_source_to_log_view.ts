@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  LogIndexReference,
-  LogView,
-  LogViewAttributes,
-} from '@kbn/logs-shared-plugin/common/log_views';
+import { LogIndexReference, LogView, LogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import { LogIndexReference as SourceConfigurationLogIndexReference } from '../../common/source_configuration/source_configuration';
 import { InfraSource } from '../lib/sources';
 

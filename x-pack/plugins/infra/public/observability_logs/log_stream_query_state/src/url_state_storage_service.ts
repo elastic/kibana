@@ -18,7 +18,7 @@ import {
   DEFAULT_REFRESH_INTERVAL,
   getTimeRangeStartFromTime,
   getTimeRangeEndFromTime,
-} from '../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
 import { minimalTimeKeyRT } from '../../../../common/time';
 import { datemathStringRT } from '../../../utils/datemath';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';

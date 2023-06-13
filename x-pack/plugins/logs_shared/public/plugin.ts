@@ -5,17 +5,33 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
+import { CoreStart } from '@kbn/core/public';
+import { LogViewsService } from './services/log_views';
+import { LogsSharedClientPluginClass, LogsSharedClientStartDeps } from './types';
 
-export class LogsSharedPlugin implements Plugin<LogsSharedPluginSetup, LogsSharedPluginStart> {
-  public setup(core: CoreSetup): LogsSharedPluginSetup {
-    // Return methods that should be available to other plugins
-    return {};
+export class LogsSharedPlugin implements LogsSharedClientPluginClass {
+  private logViews: LogViewsService;
+
+  constructor() {
+    this.logViews = new LogViewsService();
   }
 
-  public start(core: CoreStart): LogsSharedPluginStart {
-    return {};
+  public setup() {
+    const logViews = this.logViews.setup();
+
+    return { logViews };
+  }
+
+  public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
+    const logViews = this.logViews.start({
+      http: core.http,
+      dataViews: plugins.dataViews,
+      search: plugins.data.search,
+    });
+
+    return {
+      logViews,
+    };
   }
 
   public stop() {}

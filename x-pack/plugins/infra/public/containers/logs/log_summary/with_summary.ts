@@ -8,7 +8,7 @@
 import { useSelector } from '@xstate/react';
 import stringify from 'json-stable-stringify';
 import useThrottle from 'react-use/lib/useThrottle';
-import { useLogViewContext } from '../../../hooks/use_log_view';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state';
 import { RendererFunction } from '../../../utils/typed_react';
 import { useLogPositionStateContext } from '../log_position';

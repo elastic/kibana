@@ -11,6 +11,8 @@ import { LogsSharedPlugin } from './plugin';
 export type { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
 export type { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
 
+export { logViewSavedObjectName } from './saved_objects';
+
 export function plugin(context: PluginInitializerContext) {
   return new LogsSharedPlugin(context);
 }

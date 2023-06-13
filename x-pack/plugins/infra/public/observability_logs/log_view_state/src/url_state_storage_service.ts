@@ -12,12 +12,12 @@ import { InvokeCreator } from 'xstate';
 import * as Either from 'fp-ts/lib/Either';
 import { identity, pipe } from 'fp-ts/lib/function';
 import { map } from 'rxjs';
-import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import {
   LogViewReference,
   logViewReferenceRT,
   PersistedLogViewReference,
-} from '../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
+import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import { LogViewContext, LogViewEvent } from './types';
 
 export const defaultLogViewKey = 'logView';

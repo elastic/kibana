@@ -12,11 +12,14 @@ import {
   LogView,
   LogViewAttributes,
   LogViewReference,
+  LogViewsStaticConfig,
   LogViewStatus,
   ResolvedLogView,
 } from '../../../common/log_views';
 
-export type LogViewsServiceSetup = void;
+export interface LogViewsServiceSetup {
+  setLogViewsStaticConfig: (config: LogViewsStaticConfig) => void;
+}
 
 export interface LogViewsServiceStart {
   client: ILogViewsClient;

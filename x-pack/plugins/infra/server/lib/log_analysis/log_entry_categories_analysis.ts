@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import {
   CategoriesSort,
   compareDatasetsByMaximumAnomalyScore,
@@ -15,7 +16,6 @@ import {
   logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
 import { LogEntryContext } from '../../../common/log_entry';
-import { PersistedLogViewReference, ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';

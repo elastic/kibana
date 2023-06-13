@@ -7,13 +7,13 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
+import { logViewColumnConfigurationRT, logViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import {
   logEntryAfterCursorRT,
   logEntryBeforeCursorRT,
   logEntryCursorRT,
   logEntryRT,
 } from '../../log_entry';
-import { logViewColumnConfigurationRT, logViewReferenceRT } from '../../log_views';
 import { jsonObjectRT } from '../../typed_json';
 import { searchStrategyErrorRT } from '../common/errors';
 

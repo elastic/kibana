@@ -6,8 +6,8 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
+import type { LogViewStatus } from '@kbn/logs-shared-plugin/common';
 import { TimeKey } from '../../../../../common/time';
-import type { LogViewStatus } from '../../../../../common/log_views';
 import {
   JumpToTargetPositionEvent,
   LogStreamPositionContext,

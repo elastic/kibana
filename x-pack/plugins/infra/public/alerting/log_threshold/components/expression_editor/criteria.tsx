@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   PersistedLogViewReference,
   ResolvedLogViewField,
-} from '../../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
 import { Criterion } from './criterion';
 import {
   PartialRuleParams,

@@ -1,15 +1,15 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
 
-<Meta title="infra/LogStream/Overview" />
+<Meta title="logsShared/LogStream/Overview" />
 
 # Embeddable `<LogStream />` component
 
 The purpose of this component is to allow you, the developer, to have your very own Log Stream in your plugin.
 
-The component is exposed through `infra/public`. Since Kibana uses relative paths, it is up to you to find how to import it (sorry).
+The component is exposed through `logs_shared/public`. Since Kibana uses relative paths, it is up to you to find how to import it (sorry).
 
 ```tsx
-import { LogStream } from '../../../../../../infra/public';
+import { LogStream } from '../../../../../../logs_shared/public';
 //                         ^^ Modify appropriately
 ```
 
@@ -17,7 +17,7 @@ import { LogStream } from '../../../../../../infra/public';
 
 To use the component your plugin needs to follow certain criteria:
 
-- Ensure `"infra"` and `"data"` are specified as a `requiredPlugins` in your plugin's `kibana.json`.
+- Ensure `"logsShared"` and `"data"` are specified as a `requiredPlugins` in your plugin's `kibana.json`.
 - Ensure the `<LogStream />` component is mounted inside the hierachy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45). At a minimum, the kibana-react provider must pass `http` (from core start services) and `data` (from core plugin start dependencies).
 - Ensure the `<LogStream />` component is mounted inside the hierachy of a [`KibanaThemeProvider`](https://github.com/elastic/kibana/blob/31d2db035c905fb5819fa6dc2354f3be795a34cf/src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx#L27).
 - Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/common/eui_styled_components.tsx). This is not the same as the provider exported by EUI. It bridges the gap between EUI and styled components and predates the css-in-js support in EUI.
@@ -35,7 +35,7 @@ const startTimestamp = endTimestamp - 15 * 60 * 1000; // 15 minutes
 
 This will show a list of log entries between the specified timestamps.
 
-<Story id="infra-logstream--basic-date-range" />
+<Story id="logsShared-logstream--basic-date-range" />
 
 ## Query log entries
 
@@ -80,7 +80,7 @@ The component also has a `filters` prop that accepts valid es-query `filters`. T
 
 ## Center the view on a specific entry
 
-By default the component will load at the bottom of the list, showing the newest entries. You can change the rendering point with the `center` prop. The prop takes a [`LogEntriesCursor`](https://github.com/elastic/kibana/blob/0a6c748cc837c016901f69ff05d81395aa2d41c8/x-pack/plugins/infra/common/http_api/log_entries/common.ts#L9-L13).
+By default the component will load at the bottom of the list, showing the newest entries. You can change the rendering point with the `center` prop. The prop takes a [`LogEntriesCursor`](https://github.com/elastic/kibana/blob/0a6c748cc837c016901f69ff05d81395aa2d41c8/x-pack/plugins/logs_shared/common/http_api/log_entries/common.ts#L9-L13).
 
 ```tsx
 <LogStream
@@ -90,7 +90,7 @@ By default the component will load at the bottom of the list, showing the newest
 />
 ```
 
-<Story id="infra-logstream--centered-on-log-entry" />
+<Story id="logsShared-logstream--centered-on-log-entry" />
 
 ## Highlight a specific entry
 
@@ -100,7 +100,7 @@ The component can highlight a specific line via the `highlight` prop. It takes t
 <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} highlight="entry-197" />
 ```
 
-<Story id="infra-logstream--highlighted-log-entry" />
+<Story id="logsShared-logstream--highlighted-log-entry" />
 
 ## Column configuration
 
@@ -131,7 +131,7 @@ The easiest way is to specify what columns you want with the `columns` prop.
 />
 ```
 
-<Story id="infra-logstream--custom-columns" />
+<Story id="logsShared-logstream--custom-columns" />
 
 The rendering of the column headers and the cell contents can also be customized with the following properties:
 
@@ -206,7 +206,7 @@ The rendering of the column headers and the cell contents can also be customized
 />
 ```
 
-<Story id="infra-logstream--custom-column-rendering" />
+<Story id="logsShared-logstream--custom-column-rendering" />
 
 ### With a static log view configuration
 
@@ -262,4 +262,4 @@ The component can render a button on the row that opens a flyout, via the `showF
   showFlyoutAction />
 ```
 
-<Story id="infra-logstream--flyout" />
+<Story id="logsShared-logstream--flyout" />

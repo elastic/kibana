@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogViewReference, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
+import { LogViewReference, LogViewStatus, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import { createNotificationChannel } from '../../xstate_helpers';
 import { LogViewContext, LogViewEvent } from './types';
 

@@ -17,6 +17,7 @@ import {
   AnnotationDomainType,
 } from '@elastic/charts';
 import React, { ReactElement, useEffect, useMemo } from 'react';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { ExecutionTimeRange } from '../../../../../types';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
@@ -29,7 +30,6 @@ import {
   PartialRuleParams,
   Threshold,
 } from '../../../../../../common/alerting/logs/log_threshold';
-import { PersistedLogViewReference } from '../../../../../../common/log_views';
 import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
 import { getChartTheme } from '../../../../../utils/get_chart_theme';
 import {

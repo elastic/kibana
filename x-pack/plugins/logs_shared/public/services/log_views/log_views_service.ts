@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { LogViewsStaticConfig } from '../../../common/log_views';
+import { defaultLogViewsStaticConfig, LogViewsStaticConfig } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import { LogViewsServiceStartDeps, LogViewsServiceSetup, LogViewsServiceStart } from './types';
 
 export class LogViewsService {
-  constructor(private readonly config: LogViewsStaticConfig) {}
+  private logViewsStaticConfig: LogViewsStaticConfig = defaultLogViewsStaticConfig;
 
-  public setup(): LogViewsServiceSetup {}
+  public setup(): LogViewsServiceSetup {
+    return {
+      setLogViewsStaticConfig: (config: LogViewsStaticConfig) => {
+        this.logViewsStaticConfig = config;
+      },
+    };
+  }
 
   public start({ dataViews, http, search }: LogViewsServiceStartDeps): LogViewsServiceStart {
-    const client = new LogViewsClient(dataViews, http, search.search, this.config);
+    const client = new LogViewsClient(dataViews, http, search.search, this.logViewsStaticConfig);
 
     return {
       client,

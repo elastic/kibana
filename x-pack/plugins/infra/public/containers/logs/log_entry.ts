@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { LogViewReference } from '../../../common/log_views';
+import { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logEntrySearchRequestParamsRT,

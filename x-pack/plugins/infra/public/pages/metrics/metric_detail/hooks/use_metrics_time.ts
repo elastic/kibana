@@ -13,7 +13,7 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { replaceStateKeyInQueryString } from '../../../../../common/log_views';
+import { replaceStateKeyInQueryString } from '@kbn/logs-shared-plugin/common';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 const parseRange = (range: MetricsTimeInput) => {

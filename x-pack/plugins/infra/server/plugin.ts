@@ -24,7 +24,6 @@ import {
   LOGS_FEATURE_ID,
   METRICS_FEATURE_ID,
 } from '../common/constants';
-import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -209,8 +208,7 @@ export class InfraServerPlugin
       return mapSourceToLogView(sourceConfiguration);
     });
     plugins.logsShared.logViews.setLogViewsStaticConfig({
-      messageFields:
-        this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
+      messageFields: this.config.sources?.default?.fields?.message,
     });
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [

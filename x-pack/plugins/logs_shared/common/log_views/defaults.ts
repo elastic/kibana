@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogViewAttributes, LogViewsStaticConfig } from './types';
+import { DefaultLogViewsStaticConfig, LogViewAttributes } from './types';
 
 export const defaultLogViewId = 'default';
 export const defaultFilterStateKey = 'logFilter';
@@ -40,7 +40,7 @@ export const defaultLogViewAttributes: LogViewAttributes = {
   ],
 };
 
-export const defaultLogViewsStaticConfig: LogViewsStaticConfig = {
+export const defaultLogViewsStaticConfig: DefaultLogViewsStaticConfig = {
   messageFields: ['message', '@message'],
 };
 

@@ -10,8 +10,8 @@ import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
+import { LogViewColumnConfiguration, LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { LogEntryAfterCursor } from '../../../../common/log_entry';
-import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,

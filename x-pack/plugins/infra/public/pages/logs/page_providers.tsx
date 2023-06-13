@@ -6,9 +6,9 @@
  */
 
 import React, { useState } from 'react';
+import { LogViewProvider } from '@kbn/logs-shared-plugin/public';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { LogViewProvider } from '../../hooks/use_log_view';
 import {
   initializeFromUrl as createInitializeFromUrl,
   updateContextInUrl as createUpdateContextInUrl,
@@ -20,7 +20,7 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const {
     services: {
       notifications: { toasts: toastsService },
-      logViews: { client },
+      logsShared,
     },
   } = useKibanaContextForPlugin();
 
@@ -38,7 +38,7 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
 
   return (
     <LogViewProvider
-      logViews={client}
+      logViews={logsShared.logViews.client}
       initializeFromUrl={initializeFromUrl}
       updateContextInUrl={updateContextInUrl}
       listenForUrlChanges={listenForUrlChanges}

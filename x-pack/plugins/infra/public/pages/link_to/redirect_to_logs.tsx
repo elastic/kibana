@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { DEFAULT_LOG_VIEW } from '../../../common/log_views';
+import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 

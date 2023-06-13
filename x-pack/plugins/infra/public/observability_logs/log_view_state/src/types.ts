@@ -12,7 +12,7 @@ import type {
   LogViewReference,
   LogViewStatus,
   ResolvedLogView,
-} from '../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
 import { type NotificationChannel } from '../../xstate_helpers';
 import { type LogViewNotificationEvent } from './notifications';
 

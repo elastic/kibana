@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { isCategoryAnomaly, LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
-import { useLogViewContext } from '../../../../../hooks/use_log_view';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
 

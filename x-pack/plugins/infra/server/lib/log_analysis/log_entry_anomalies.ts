@@ -16,7 +16,6 @@ import {
   logEntryRateJobTypes,
   Pagination,
 } from '../../../common/log_analysis';
-import { PersistedLogViewReference, ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
@@ -39,6 +38,7 @@ import {
   createLogEntryExamplesQuery,
   logEntryExamplesResponseRT,
 } from './queries/log_entry_examples';
+import { PersistedLogViewReference, ResolvedLogView } from '.@kbn/logs-shared-plugin/common';
 
 interface MappedAnomalyHit {
   id: string;

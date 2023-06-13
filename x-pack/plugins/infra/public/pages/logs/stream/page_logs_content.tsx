@@ -10,6 +10,7 @@ import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -30,7 +31,6 @@ import { useLogViewConfigurationContext } from '../../../containers/logs/log_vie
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import {
   LogStreamPageActorRef,
   LogStreamPageCallbacks,

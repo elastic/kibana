@@ -16,15 +16,18 @@ import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/publ
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
-import { LogViewsServiceStart } from './services/log_views';
+import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views';
 
 // Our own setup and start contract values
-export interface LogsSharedClientSetupExports {}
+export interface LogsSharedClientSetupExports {
+  logViews: LogViewsServiceSetup;
+}
 
 export interface LogsSharedClientStartExports {
   logViews: LogViewsServiceStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsSharedClientSetupDeps {}
 
 export interface LogsSharedClientStartDeps {

@@ -6,8 +6,8 @@
  */
 
 import faker from 'faker';
+import { LogViewColumnConfiguration } from '@kbn/logs-shared-plugin/common';
 import { LogEntry } from '../../common/log_entry';
-import { LogViewColumnConfiguration } from '../../common/log_views';
 
 export const ENTRIES_EMPTY = {
   data: {

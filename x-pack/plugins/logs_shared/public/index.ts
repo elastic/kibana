@@ -7,11 +7,21 @@
 
 import { LogsSharedPlugin } from './plugin';
 
+export type {
+  LogsSharedClientSetupExports,
+  LogsSharedClientStartExports,
+  LogsSharedClientSetupDeps,
+  LogsSharedClientStartDeps,
+} from './types';
+
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
   return new LogsSharedPlugin();
 }
+
+// Containers
+export { LogViewProvider, useLogViewContext } from './hooks/use_log_view';
 
 // Shared components
 export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';

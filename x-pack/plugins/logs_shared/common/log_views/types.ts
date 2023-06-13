@@ -7,9 +7,11 @@
 
 import * as rt from 'io-ts';
 
-export interface LogViewsStaticConfig {
+export interface DefaultLogViewsStaticConfig {
   messageFields: string[];
 }
+
+export type LogViewsStaticConfig = Partial<DefaultLogViewsStaticConfig>;
 
 export const logViewOriginRT = rt.keyof({
   stored: null,

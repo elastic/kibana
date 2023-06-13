@@ -13,7 +13,7 @@ import type { NodeLogsLocatorParams } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findInventoryFields } from '../inventory_models';
 import moment from 'moment';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '../log_views';
+import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
 
 const setupLogsLocator = async () => {
   const deps: LogsLocatorDependencies = {

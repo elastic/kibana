@@ -30,7 +30,7 @@ import {
   CoPilotContextProvider,
 } from '@kbn/observability-plugin/public';
 import { CoPilotPromptId } from '@kbn/observability-plugin/common';
-import { LogViewReference } from '../../../../common/log_views';
+import { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
