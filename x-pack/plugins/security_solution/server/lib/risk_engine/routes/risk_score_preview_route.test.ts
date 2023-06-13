@@ -110,6 +110,17 @@ describe('POST risk_engine/preview route', () => {
           expect.objectContaining({ range: { start: 'now-30d', end: 'now-20d' } })
         );
       });
+
+      it('rejects an invalid date range', async () => {
+        const request = buildRequest({
+          range: { end: 'now' },
+        });
+
+        const result = await server.validate(request);
+        expect(result.badRequest).toHaveBeenCalledWith(
+          expect.stringContaining('Invalid value "undefined" supplied to "range,start"')
+        );
+      });
     });
 
     describe('data filter', () => {
