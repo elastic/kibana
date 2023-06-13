@@ -86,6 +86,13 @@
       },
       "ownerId": {
         "type": "keyword"
+      },
+      "skip": {
+        "properties": {
+          "attempts": {
+            "type": "integer"
+          }
+        }
       }
     }
   },
@@ -874,17 +881,6 @@
       }
     }
   },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
   "tag": {
     "properties": {
       "name": {
@@ -894,6 +890,17 @@
         "type": "text"
       },
       "color": {
+        "type": "text"
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
         "type": "text"
       }
     }
