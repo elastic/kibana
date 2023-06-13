@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Metadata } from '../tabs/metadata/metadata';
-import { Processes } from '../tabs/processes/processes';
+import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs } from '../tabs';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 
 type Props = Pick<
@@ -16,11 +15,11 @@ type Props = Pick<
   'currentTimeRange' | 'node' | 'nodeType' | 'overrides' | 'onTabsStateChange'
 >;
 
-export const TabContent = ({
+export const Content = ({
   overrides,
   currentTimeRange,
   node,
-  nodeType,
+  nodeType = 'host',
   onTabsStateChange,
 }: Props) => {
   const onChange = (state: TabState) => {
@@ -33,19 +32,38 @@ export const TabContent = ({
 
   return (
     <>
+      <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
+        <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.LOGS}>
+        <Logs nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
+      </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
           currentTimeRange={currentTimeRange}
-          node={node}
+          nodeName={node.name}
           nodeType={nodeType}
           showActionsColumn={overrides?.metadata?.showActionsColumn}
           search={overrides?.metadata?.query}
           onSearchChange={(query) => onChange({ metadata: { query } })}
         />
       </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.METRICS}>
+        <Metrics
+          currentTime={currentTimeRange.to}
+          accountId={overrides?.metrics?.accountId}
+          customMetrics={overrides?.metrics?.customMetrics}
+          region={overrides?.metrics?.region}
+          nodeId={node.id}
+          nodeType={nodeType}
+        />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
+        <Osquery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
+      </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
         <Processes
-          node={node}
+          nodeName={node.name}
           nodeType={nodeType}
           currentTime={currentTimeRange.to}
           searchFilter={overrides?.processes?.query}
