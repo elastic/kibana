@@ -33146,7 +33146,6 @@
     "xpack.securitySolution.responseActionsList.list.expandButton.collapse": "折叠",
     "xpack.securitySolution.responseActionsList.list.expandButton.expand": "展开",
     "xpack.securitySolution.responseActionsList.list.filter.actions": "操作",
-    "xpack.securitySolution.responseActionsList.list.filter.automated": "自动",
     "xpack.securitySolution.responseActionsList.list.filter.clearAll": "全部清除",
     "xpack.securitySolution.responseActionsList.list.filter.Hosts": "主机",
     "xpack.securitySolution.responseActionsList.list.filter.statuses": "状态",
