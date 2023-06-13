@@ -5,8 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import moment from 'moment';
 
+const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
+
+export function isAllowedPublicVersion(version: string): undefined | string {
+  if ('2023-10-31' !== version) {
+    return 'Invalid public version, for now please use "2023-10-31" as the version for all public routes.';
+  }
+}
 
 /**
  * For public routes we must check that the version is a string that is YYYY-MM-DD.
