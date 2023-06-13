@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import { mockCases } from '../../../mocks';
 import { getEmailBodyContent, getStatusColor, getSeverityColor } from './notify_user_content';
 import {
@@ -107,5 +108,15 @@ describe('NotifyUserContent', () => {
     );
 
     expect(data).toBe(WithoutTagsEmailMock);
+  });
+
+  it('throws error correctly', async () => {
+    jest.spyOn(fs, 'readFile').mockImplementationOnce(() => {
+      throw new Error('Something went wrong while reading a file');
+    });
+
+    await expect(getEmailBodyContent(caseSO, mockCaseUrl)).rejects.toMatchInlineSnapshot(
+      `[Error: Something went wrong while reading a file]`
+    );
   });
 });
