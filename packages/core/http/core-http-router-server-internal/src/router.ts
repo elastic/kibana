@@ -119,7 +119,7 @@ function validOptions(
 }
 
 /** @internal */
-interface RouterOptions {
+export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
   /**
@@ -146,10 +146,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     public readonly routerPath: string,
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
-    private readonly options: RouterOptions = {
-      isDev: false,
-      versionedRouteResolution: 'oldest',
-    }
+    private readonly options: RouterOptions
   ) {
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
