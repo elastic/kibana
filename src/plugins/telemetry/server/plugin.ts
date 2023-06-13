@@ -37,7 +37,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import {
@@ -61,7 +61,6 @@ import { getTelemetryOptIn } from './telemetry_config';
 interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
-  security?: SecurityPluginSetup;
 }
 
 interface TelemetryPluginsDepsStart {
@@ -151,7 +150,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   public setup(
     { analytics, docLinks, http, savedObjects }: CoreSetup,
-    { usageCollection, security, telemetryCollectionManager }: TelemetryPluginsDepsSetup
+    { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
     this.isOptedIn$.subscribe((optedIn) => {
       const optInStatusMsg = optedIn ? 'enabled' : 'disabled';
@@ -198,14 +197,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       router,
       telemetryCollectionManager,
       savedObjectsInternalClient$: this.savedObjectsInternalClient$,
-      getSecurity: () => {
-        // The security plugin is always enabled in X-Pack.
-        // However, if ES has `xpack.security.enabled: false`, some APIs might throw.
-        // We want only want to return the security plugin if we can confirm it's enabled.
-        if (security?.license.isEnabled()) {
-          return this.security;
-        }
-      },
+      getSecurity: () => this.security,
     });
 
     registerTelemetrySavedObject((opts) => savedObjects.registerType(opts));
