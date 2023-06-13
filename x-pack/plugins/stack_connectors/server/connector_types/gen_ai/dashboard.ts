@@ -35,7 +35,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
             x: 0,
             y: 0,
             w: 48,
-            h: 3,
+            h: 4,
             i: '1c425103-57a6-4598-a092-03b8d550b440',
           },
           panelIndex: '1c425103-57a6-4598-a092-03b8d550b440',
