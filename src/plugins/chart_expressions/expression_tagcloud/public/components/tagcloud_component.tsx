@@ -88,7 +88,7 @@ export const TagCloudChart = ({
     return bucket
       ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
       : null;
-  }, [bucket]);
+  }, [bucket, visData.columns]);
 
   const tagCloudData = useMemo(() => {
     // clear warning when data changes
