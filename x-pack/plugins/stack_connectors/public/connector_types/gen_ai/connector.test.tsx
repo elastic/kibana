@@ -63,9 +63,7 @@ describe('GenerativeAiConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
-    await waitFor(() => {
-      expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    });
+    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(openAiConnector.config.apiUrl);
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
@@ -85,10 +83,7 @@ describe('GenerativeAiConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
-
-    await waitFor(() => {
-      expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    });
+    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(azureConnector.config.apiUrl);
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
