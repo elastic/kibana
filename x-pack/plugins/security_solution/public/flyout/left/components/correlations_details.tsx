@@ -16,7 +16,7 @@ import {
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
-import { useCorrelations } from '../../right/hooks/use_correlations';
+import { useCorrelations } from '../../shared/hooks/use_correlations';
 import { useLeftPanelContext } from '../context';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../../common';

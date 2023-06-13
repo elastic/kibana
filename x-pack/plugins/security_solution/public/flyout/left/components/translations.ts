@@ -121,10 +121,17 @@ export const CORRELATIONS_SEVERITY_COLUMN_TITLE = i18n.translate(
   }
 );
 
+export const CORRELATIONS_CASE_STATUS_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.statusColumnTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const CORRELATIONS_CASE_NAME_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.correlations.caseNameColumnTitle',
   {
-    defaultMessage: 'Case Name',
+    defaultMessage: 'Name',
   }
 );
 

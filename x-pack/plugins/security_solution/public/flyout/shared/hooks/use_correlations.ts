@@ -21,7 +21,7 @@ import {
   CORRELATIONS_SAME_SESSION_ALERTS,
   CORRELATIONS_SAME_SOURCE_EVENT_ALERT,
   CORRELATIONS_SAME_SOURCE_EVENT_ALERTS,
-} from '../components/translations';
+} from '../translations';
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from './use_fetch_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from './use_show_related_alerts_by_same_source_event';
