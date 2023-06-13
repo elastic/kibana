@@ -30,6 +30,46 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
       panelsJSON: JSON.stringify([
         {
           version: '8.9.0',
+          type: 'visualization',
+          gridData: {
+            x: 0,
+            y: 0,
+            w: 48,
+            h: 3,
+            i: '1c425103-57a6-4598-a092-03b8d550b440',
+          },
+          panelIndex: '1c425103-57a6-4598-a092-03b8d550b440',
+          embeddableConfig: {
+            savedVis: {
+              id: '',
+              title: '',
+              description: '',
+              type: 'markdown',
+              params: {
+                fontSize: 12,
+                openLinksInNewTab: false,
+                markdown:
+                  'The data powering this dashboard requires special index permissions. To access the dashboard data, contact a Kibana admin to set up a "read only" role for non-admin users who may want to view this dashboard. ',
+              },
+              uiState: {},
+              data: {
+                aggs: [],
+                searchSource: {
+                  query: {
+                    query: '',
+                    language: 'kuery',
+                  },
+                  filter: [],
+                },
+              },
+            },
+            hidePanelTitles: false,
+            enhancements: {},
+          },
+          title: 'Permissions note',
+        },
+        {
+          version: '8.9.0',
           type: 'lens',
           gridData: {
             x: 0,
