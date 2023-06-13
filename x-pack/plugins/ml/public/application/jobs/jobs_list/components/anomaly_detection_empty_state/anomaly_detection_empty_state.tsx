@@ -19,11 +19,12 @@ import {
 import adImage from './anomaly_detection_kibana.png';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contexts/kibana';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
 export const AnomalyDetectionEmptyState: FC = () => {
-  const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
+  const canCreateJob = usePermissionCheck('canCreateJob');
+  const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 
   const {
     services: { docLinks },

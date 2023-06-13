@@ -460,7 +460,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
-      {agentToGetUninstallCommand && (
+      {agentToGetUninstallCommand?.policy_id && (
         <EuiPortal>
           <UninstallCommandFlyout
             target="agent"
