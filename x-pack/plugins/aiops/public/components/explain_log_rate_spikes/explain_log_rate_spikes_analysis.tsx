@@ -27,6 +27,7 @@ import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -69,6 +70,11 @@ const groupResultsOnMessage = i18n.translate(
 const resultsGroupedOffId = 'aiopsExplainLogRateSpikesGroupingOff';
 const resultsGroupedOnId = 'aiopsExplainLogRateSpikesGroupingOn';
 
+export interface ExplainLogRateSpikesAnalysisResults {
+  significantTerms: SignificantTerm[];
+  significantTermsGroups: SignificantTermGroup[];
+}
+
 /**
  * ExplainLogRateSpikes props require a data view.
  */
@@ -90,6 +96,12 @@ interface ExplainLogRateSpikesAnalysisProps {
   searchQuery: estypes.QueryDslQueryContainer;
   /** Sample probability to be applied to random sampler aggregations */
   sampleProbability: number;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -102,6 +114,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   windowParameters,
   searchQuery,
   sampleProbability,
+  barColorOverride,
+  barHighlightColorOverride,
+  onAnalysisCompleted,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -182,6 +197,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         setOverrides({ loaded, remainingFieldCandidates, significantTerms: data.significantTerms });
       } else {
         setOverrides(undefined);
+        if (onAnalysisCompleted) {
+          onAnalysisCompleted({
+            significantTerms: data.significantTerms,
+            significantTermsGroups: data.significantTermsGroups,
+          });
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -392,6 +413,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
             dataView={dataView}
             timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
           />
         ) : null}
         {showSpikeAnalysisTable && !groupResults ? (
@@ -401,9 +424,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
             dataView={dataView}
             timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
           />
         ) : null}
       </div>
-    </div>
   );
 };

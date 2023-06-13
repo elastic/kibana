@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, useState, type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -25,6 +25,10 @@ export interface DocumentCountContentProps {
   totalCount: number;
   sampleProbability: number;
   initialAnalysisStart?: number | WindowParameters;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -36,6 +40,8 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   totalCount,
   sampleProbability,
   initialAnalysisStart,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -71,27 +77,27 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   }
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="m" direction="column">
+    <EuiFlexGroup gutterSize="m" direction="column">
+      <EuiFlexItem>
+        <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+      </EuiFlexItem>
+      {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+          <DocumentCountChart
+            brushSelectionUpdateHandler={brushSelectionUpdateHandler}
+            chartPoints={chartPoints}
+            chartPointsSplit={chartPointsSplit}
+            timeRangeEarliest={timeRangeEarliest}
+            timeRangeLatest={timeRangeLatest}
+            interval={documentCountStats.interval}
+            chartPointsSplitLabel={documentCountStatsSplitLabel}
+            isBrushCleared={isBrushCleared}
+            autoAnalysisStart={initialAnalysisStart}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
+          />
         </EuiFlexItem>
-        {documentCountStats.interval !== undefined && (
-          <EuiFlexItem>
-            <DocumentCountChart
-              brushSelectionUpdateHandler={brushSelectionUpdateHandler}
-              chartPoints={chartPoints}
-              chartPointsSplit={chartPointsSplit}
-              timeRangeEarliest={timeRangeEarliest}
-              timeRangeLatest={timeRangeLatest}
-              interval={documentCountStats.interval}
-              chartPointsSplitLabel={documentCountStatsSplitLabel}
-              isBrushCleared={isBrushCleared}
-              autoAnalysisStart={initialAnalysisStart}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </>
+      )}
+    </EuiFlexGroup>
   );
 };

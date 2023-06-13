@@ -22,7 +22,7 @@ export function Inspect() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="ghost" fill onClick={goBack}>
+            <EuiButton color="text" onClick={goBack}>
               Back
             </EuiButton>,
           ]}
