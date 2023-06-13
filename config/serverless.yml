@@ -38,6 +38,6 @@ server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includ
 server.securityResponseHeaders.disableEmbedding: true
 
 # default to newest routes
-server.versioned.handlerResolution: newest
+server.versioned.versionResolution: newest
 # do not enforce client version check
 server.versioned.strictClientVersionCheck: false

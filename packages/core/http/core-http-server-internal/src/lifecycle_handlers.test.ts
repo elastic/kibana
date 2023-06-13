@@ -454,7 +454,7 @@ describe('lifecycle handler registration', () => {
       csp: { header: '' },
       xsrf: {},
       versioned: {
-        handlerResolution: 'newest',
+        versionResolution: 'newest',
         strictClientVersionCheck: false,
       },
     } as unknown as HttpConfig;

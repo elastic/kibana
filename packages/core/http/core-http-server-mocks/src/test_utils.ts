@@ -65,7 +65,7 @@ export const createConfigService = ({
         socketTimeout: 120_000,
         restrictInternalApis: false,
         versioned: {
-          handlerResolution: 'oldest',
+          versionResolution: 'oldest',
           strictClientVersionCheck: true,
         },
         ...server,

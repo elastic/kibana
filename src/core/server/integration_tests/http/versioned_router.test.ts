@@ -36,7 +36,7 @@ describe('Routing versioned requests', () => {
           cliArgs.serverless === true
             ? {
                 versioned: {
-                  handlerResolution: 'newest',
+                  versionResolution: 'newest',
                   strictClientVersionCheck: false,
                 },
               }

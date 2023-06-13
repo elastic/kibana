@@ -485,7 +485,7 @@ test('does not start http server if configured with `autoListen:false`', async (
 test('passes versioned config to router', async () => {
   const configService = createConfigService({
     versioned: {
-      handlerResolution: 'newest',
+      versionResolution: 'newest',
       strictClientVersionCheck: false,
     },
   });

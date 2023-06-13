@@ -127,7 +127,7 @@ Object {
     "truststore": Object {},
   },
   "versioned": Object {
-    "handlerResolution": "oldest",
+    "versionResolution": "oldest",
     "strictClientVersionCheck": true,
   },
   "xsrf": Object {
