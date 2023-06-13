@@ -251,6 +251,11 @@ Array [
     "validationName": "durationRt",
   },
   Object {
+    "key": "session_sample_rate",
+    "type": "float",
+    "validationName": "floatRt",
+  },
+  Object {
     "key": "span_compression_enabled",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
