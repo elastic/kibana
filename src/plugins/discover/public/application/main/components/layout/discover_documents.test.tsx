@@ -34,9 +34,9 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const documents$ = new BehaviorSubject({
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    dataView: dataViewMock,
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.appState.update({ index: dataViewMock.id });
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {

@@ -44,7 +44,7 @@ export const buildStateSubscribe =
     setDataView: DiscoverStateContainer['actions']['setDataView'];
   }) =>
   async (nextState: DiscoverAppState) => {
-    let savedSearchDataView;
+    let savedSearchDataView = internalState.getState().dataView;
     const prevState = appState.getPrevious();
     const savedSearch = savedSearchState.getState();
     if (isEqualState(prevState, nextState)) {
@@ -55,18 +55,18 @@ export const buildStateSubscribe =
     const { hideChart, interval, breakdownField, sort } = appState.getPrevious();
     const nextQuery = nextState.query;
     const currentDataView = internalState.getState().dataView;
+    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
 
-    if (isTextBasedQuery(nextQuery)) {
-      if (!isTextBasedQuery(prevState.query)) {
-        console.log({ nextQuery });
-        dataState.reset(nextQuery);
-      }
+    if (isTextBasedQueryLang) {
       const nextDataView = await getDataViewByTextBasedQueryLang(
         nextQuery,
         currentDataView,
         services
       );
       if (currentDataView !== nextDataView) {
+        if (!isTextBasedQuery(prevState.query)) {
+          dataState.reset(nextQuery);
+        }
         addLog('[appstate] text based language change of data view', {
           current: currentDataView,
           next: nextDataView,
@@ -83,7 +83,7 @@ export const buildStateSubscribe =
     const chartIntervalChanged = nextState.interval !== interval;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const docTableSortChanged = !isEqual(nextState.sort, sort);
-    const dataViewChanged = !isEqual(nextState.index, currentDataView?.id);
+    const dataViewChanged = !isTextBasedQueryLang && !isEqual(nextState.index, currentDataView?.id);
     const queryChanged = !isEqual(nextState.query, prevState.query);
     const filterChanged = !isEqual(nextState.filters, prevState.filters);
 

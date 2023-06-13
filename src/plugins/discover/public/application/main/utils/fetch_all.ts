@@ -100,6 +100,7 @@ export function fetchAll(
           textBasedQueryColumns,
           recordRawType,
           query,
+          dataView,
         });
 
         checkHitCount(dataSubjects.main$, records.length);

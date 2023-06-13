@@ -56,7 +56,7 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
-      const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
+      const { columns: stateColumns, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
@@ -82,14 +82,11 @@ export function useTextBasedQueryLanguage({
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
 
-        const dataViewObj = stateContainer.internalState.getState().dataView!;
-
         // don't set the columns on initial fetch, to prevent overwriting existing state
         const addColumnsToState = Boolean(
           nextColumns.length && (!initialFetch || !stateColumns?.length)
         );
         // no need to reset index to state if it hasn't changed
-        const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
         const queryChanged = indexPatternFromQuery !== indexTitle.current;
         if (!addColumnsToState && !queryChanged) {
           return;
@@ -100,7 +97,7 @@ export function useTextBasedQueryLanguage({
         }
 
         const nextState = {
-          ...(addDataViewToState && { index: dataViewObj.id }),
+          ...{ index: undefined },
           ...(addColumnsToState && { columns: nextColumns }),
           ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),

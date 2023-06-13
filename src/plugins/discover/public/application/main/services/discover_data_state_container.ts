@@ -8,6 +8,7 @@
 import { BehaviorSubject, filter, map, Observable, share, Subject, tap } from 'rxjs';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
@@ -60,6 +61,7 @@ export interface DataMsg {
   error?: Error;
   recordRawType?: RecordRawType;
   query?: AggregateQuery | Query | undefined;
+  dataView?: DataView;
 }
 
 export interface DataMainMsg extends DataMsg {

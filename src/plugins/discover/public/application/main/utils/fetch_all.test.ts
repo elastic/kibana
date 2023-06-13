@@ -114,6 +114,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: 'document',
         result: documents,
+        dataView: dataViewMock,
       },
     ]);
   });
@@ -271,6 +272,7 @@ describe('test fetchAll', () => {
         result: documents,
         textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
+        dataView: dataViewMock,
       },
     ]);
   });

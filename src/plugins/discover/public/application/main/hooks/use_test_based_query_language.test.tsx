@@ -103,7 +103,7 @@ describe('useTextBasedQueryLanguage', () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
+    expect(replaceUrlState).toHaveBeenCalledWith({ index: undefined });
 
     replaceUrlState.mockReset();
 
@@ -112,7 +112,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
+        index: undefined,
         columns: ['field1', 'field2'],
       });
     });
@@ -124,7 +124,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      index: 'the-data-view-id',
+      index: undefined,
       viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     });
   });
@@ -151,7 +151,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
+        index: undefined,
         columns: ['field1'],
       });
     });
@@ -230,7 +230,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
+        index: undefined,
         columns: ['field1'],
       });
     });
@@ -239,7 +239,7 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite existing state columns on initial fetch', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
       columns: ['field1'],
-      index: 'the-data-view-id',
+      index: undefined,
     });
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -277,7 +277,7 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
       columns: [],
-      index: 'the-data-view-id',
+      index: undefined,
     });
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -370,7 +370,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
+        index: undefined,
         columns: ['field1'],
       });
     });
