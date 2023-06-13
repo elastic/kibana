@@ -27,7 +27,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/safer-lodash-set",
-    "@kbn/spaces-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-saved-objects-api-server",
