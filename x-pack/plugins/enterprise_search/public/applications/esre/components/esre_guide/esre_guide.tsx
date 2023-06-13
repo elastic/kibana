@@ -17,7 +17,7 @@ export const EsreGuide: React.FC = () => {
     <EnterpriseSearchEsrePageTemplate
       restrictWidth
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.searchExperiences.guide.pageTitle', {
+        pageTitle: i18n.translate('xpack.enterpriseSearch.esre.guide.pageTitle', {
           defaultMessage: 'Enhance your search with ESRE',
         }),
       }}
