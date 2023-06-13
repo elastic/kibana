@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  type Query,
-  type TimeRange,
-  type Filter,
-} from '@kbn/es-query';
+import React, { useCallback, useMemo } from 'react';
+import type { Query, TimeRange, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
@@ -42,11 +36,12 @@ export const UnifiedSearchBar = () => {
     onSubmit({ limit });
   };
 
-  const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
+  const onPanelFiltersChange = useCallback(
+    (panelFilters: Filter[]) => {
       onSubmit({ panelFilters });
-    }
-  };
+    },
+    [onSubmit]
+  );
 
   const handleRefresh = (payload: { query?: Query; dateRange: TimeRange }, isUpdate?: boolean) => {
     // This makes sure `onQueryChange` is only called when the submit button is clicked
@@ -73,6 +68,7 @@ export const UnifiedSearchBar = () => {
             showQueryInput
             showQueryMenu
             useDefaultBehaviors
+            isAutoRefreshDisabled
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -83,7 +79,6 @@ export const UnifiedSearchBar = () => {
                 dataView={dataView}
                 query={searchCriteria.query}
                 filters={searchCriteria.filters}
-                selectedOptions={searchCriteria.panelFilters}
                 onFiltersChange={onPanelFiltersChange}
               />
             </EuiFlexItem>
