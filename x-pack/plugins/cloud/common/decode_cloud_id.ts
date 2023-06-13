@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
+
 export interface DecodedCloudId {
   host: string;
   defaultPort: string;
@@ -13,13 +15,11 @@ export interface DecodedCloudId {
 }
 
 // decodeCloudId decodes the c.id into c.esURL and c.kibURL
-export function decodeCloudId(cid: string): DecodedCloudId | undefined {
+export function decodeCloudId(cid: string, logger: Logger): DecodedCloudId | undefined {
   // 1. Ignore anything before `:`.
   const id = cid.split(':').pop();
   if (!id) {
-    // throw new Error(`Unable to decode ${id}`);
-    // eslint-disable-next-line no-console
-    console.debug(`Unable to decode ${id}`);
+    logger.debug(`Unable to decode ${id}`);
     return;
   }
 
@@ -28,18 +28,14 @@ export function decodeCloudId(cid: string): DecodedCloudId | undefined {
   try {
     decoded = Buffer.from(id, 'base64').toString('utf8');
   } catch {
-    // throw new Error(`base64 decoding failed on ${id}`);
-    // eslint-disable-next-line no-console
-    console.debug(`base64 decoding failed on ${id}`);
+    logger.debug(`base64 decoding failed on ${id}`);
     return;
   }
 
   // 3. separate based on `$`
   const words = decoded.split('$');
   if (words.length < 3) {
-    // throw new Error(`Expected at least 3 parts in ${decoded}`);
-    // eslint-disable-next-line no-console
-    console.debug(`Expected at least 3 parts in ${decoded}`);
+    logger.debug(`Expected at least 3 parts in ${decoded}`);
     return;
   }
   // 4. extract port from the ES and Kibana host

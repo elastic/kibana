@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
@@ -37,10 +38,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly contextProviders: FC[] = [];
+  private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -56,7 +59,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     let decodedId: DecodedCloudId | undefined;
     if (id) {
-      decodedId = decodeCloudId(id);
+      decodedId = decodeCloudId(id, this.logger);
     }
 
     return {
