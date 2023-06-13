@@ -73,6 +73,7 @@ export interface BaseFilesClient<M = unknown> {
       kind: string;
       status?: string | string[];
       extension?: string | string[];
+      mimeType?: string | string[];
       name?: string | string[];
       meta?: M;
     } & Pagination &
