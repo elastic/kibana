@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   DefaultNavigation,
   NavigationKibanaProvider,
-  NavigationTreeDefinition,
+  type NavigationTreeDefinition,
   getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
+import { ml } from './ml';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -108,7 +109,7 @@ const navigationTree: NavigationTreeDefinition = {
     },
     {
       type: 'navGroup',
-      ...getPresets('ml'),
+      ...ml,
     },
   ],
   footer: [

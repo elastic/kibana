@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { NodeDefinitionWithChildren } from '.';
+import { NodeDefinitionWithChildren } from '@kbn/shared-ux-chrome-navigation';
 
 export type ID =
   | 'sharedux:ml'
@@ -41,62 +40,15 @@ export const ml: NodeDefinitionWithChildren<ID> = {
       title: '',
       id: 'root',
       children: [
-        {
-          id: 'overview',
-          title: 'Overview',
-          href: '/app/ml/overview',
-        },
+        // {
+        //   id: 'overview',
+        //   title: 'Overview',
+        //   href: '/app/ml/overview',
+        // },
         {
           id: 'notifications',
           title: 'Notifications',
           href: '/app/ml/notifications',
-        },
-      ],
-    },
-    {
-      title: 'Anomaly detection',
-      id: 'anomaly_detection',
-      children: [
-        {
-          id: 'jobs',
-          title: 'Jobs',
-          href: '/app/ml/jobs',
-        },
-        {
-          id: 'explorer',
-          title: 'Anomaly explorer',
-          href: '/app/ml/explorer',
-        },
-        {
-          id: 'single_metric_viewer',
-          title: 'Single metric viewer',
-          href: '/app/ml/timeseriesexplorer',
-        },
-        {
-          id: 'settings',
-          title: 'Settings',
-          href: '/app/ml/settings',
-        },
-      ],
-    },
-    {
-      id: 'data_frame_analytics',
-      title: 'Data frame analytics',
-      children: [
-        {
-          id: 'jobs',
-          title: 'Jobs',
-          href: '/app/ml/data_frame_analytics',
-        },
-        {
-          id: 'results_explorer',
-          title: 'Results explorer',
-          href: '/app/ml/data_frame_analytics/exploration',
-        },
-        {
-          id: 'analytics_map',
-          title: 'Analytics map',
-          href: '/app/ml/data_frame_analytics/map',
         },
       ],
     },
@@ -108,11 +60,6 @@ export const ml: NodeDefinitionWithChildren<ID> = {
           id: 'trained_models',
           title: 'Trained models',
           href: '/app/ml/trained_models',
-        },
-        {
-          id: 'nodes',
-          title: 'Nodes',
-          href: '/app/ml/nodes',
         },
       ],
     },
