@@ -7,7 +7,7 @@
 
 import { SavedObject } from '@kbn/core/server';
 import { ConfigKey, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const saveMonitor = async (monitor: MonitorFields) => {
       const res = await supertest
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(monitor)
         .expect(200);
@@ -32,7 +32,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
 
       _monitors = [
         getFixtureJson('icmp_monitor'),
@@ -53,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const apiResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '?perPage=1000') // 1000 to sort of load all saved monitors
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?perPage=1000') // 1000 to sort of load all saved monitors
           .expect(200);
 
         const found: Array<SavedObject<MonitorFields>> = apiResponse.body.monitors.filter(
@@ -71,10 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
         await Promise.all([...monitors, ...monitors].map(saveMonitor));
 
         const firstPageResp = await supertest
-          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
+          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
           .expect(200);
         const secondPageResp = await supertest
-          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
+          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
           .expect(200);
 
         expect(firstPageResp.body.total).greaterThan(6);
@@ -88,7 +91,9 @@ export default function ({ getService }: FtrProviderContext) {
         const [_, { id: id2 }] = await Promise.all(monitors.map(saveMonitor));
 
         const resp = await supertest
-          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&monitorQueryIds=${id2}`)
+          .get(
+            `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&monitorQueryIds=${id2}`
+          )
           .expect(200);
 
         const resultMonitorIds = resp.body.monitors.map(
@@ -103,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .get(
-            `${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${id2}&monitorQueryIds=${id3}`
+            `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${id2}&monitorQueryIds=${id3}`
           )
           .expect(200);
 
@@ -135,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .get(
-            `${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${customHeartbeatId0}&monitorQueryIds=${customHeartbeatId1}`
+            `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${customHeartbeatId0}&monitorQueryIds=${customHeartbeatId1}`
           )
           .expect(200);
 
@@ -152,7 +157,10 @@ export default function ({ getService }: FtrProviderContext) {
         const [{ id: id1 }] = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest
-          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id1) + '?decrypted=true')
+          .get(
+            SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id1) +
+              '?decrypted=true'
+          )
           .expect(200);
 
         expect(apiResponse.body.attributes).eql({
@@ -168,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
         const getResponse = await supertest
-          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', invalidMonitorId))
+          .get(SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', invalidMonitorId))
           .set('kbn-xsrf', 'true');
 
         expect(getResponse.status).eql(404);
@@ -179,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         const veryLargeMonId = new Array(1050).fill('1').join('');
 
         await supertest
-          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', veryLargeMonId))
+          .get(SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', veryLargeMonId))
           .set('kbn-xsrf', 'true')
           .expect(400);
       });

@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { KbnClient, uriencode } from '@kbn/test';
 import pMap from 'p-map';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
 import { firstDownHit, getUpHit } from './data/sample_docs';
 
@@ -28,7 +28,7 @@ export class SyntheticsServices {
     try {
       const { data } = await this.requester.request({
         description: 'get monitor by id',
-        path: API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
+        path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
         query: {
           decrypted: true,
         },
