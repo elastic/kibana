@@ -127,9 +127,9 @@ export const TagCloudChart = ({
     if (warning) {
       setWarning(false);
     }
-  // "warning" excluded from dependencies.
-  // Clear warning when "tagCloudData" changes. Do not clear warning when "warning" changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // "warning" excluded from dependencies.
+    // Clear warning when "tagCloudData" changes. Do not clear warning when "warning" changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tagCloudData]);
 
   const label = bucket
