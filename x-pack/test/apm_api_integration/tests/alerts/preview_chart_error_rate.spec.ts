@@ -28,8 +28,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       query: {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
-        serviceName: 'synth-go',
-        transactionType: 'request' as string | undefined,
+        serviceName,
+        transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         interval: '5m',
       },
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(`without data loaded`, { config: 'basic', archives: [] }, () => {
-    it('transaction_error_rate (without data)', async () => {
+    it('transaction_error_rate without data', async () => {
       const options = getOptions();
       const response = await apmApiClient.readUser({
         endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
@@ -50,14 +50,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
-    describe('errors distribution', () => {
+    describe('transaction_error_rate', () => {
       before(async () => {
         await generateData({ serviceName, start, end, synthtraceEsClient });
       });
 
       after(() => synthtraceEsClient.clean());
 
-      it('transaction_error_rate (with data)', async () => {
+      it('with data', async () => {
         const options = getOptions();
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
@@ -79,13 +79,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('transaction_error_rate with transaction name', async () => {
+      it('with transaction name', async () => {
         const options = {
           params: {
             query: {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
-              serviceName: 'synth-go',
+              serviceName,
               transactionName: 'GET /banana 🍌',
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
@@ -106,13 +106,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('transaction_error_rate with nonexistent transaction name', async () => {
+      it('with nonexistent transaction name', async () => {
         const options = {
           params: {
             query: {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
-              serviceName: 'synth-go',
+              serviceName,
               transactionName: 'foo',
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
@@ -130,7 +130,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.errorRateChartPreview).to.eql([]);
       });
 
-      it('transaction_error_rate with no group by parameter', async () => {
+      it('with no group by parameter', async () => {
         const options = getOptions();
         const response = await apmApiClient.readUser({
           ...options,
@@ -146,7 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(['synth-go_production_request']);
       });
 
-      it('transaction_error_rate with default group by fields', async () => {
+      it('with default group by fields', async () => {
         const options = {
           params: {
             query: {
@@ -170,7 +170,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(['synth-go_production_request']);
       });
 
-      it('transaction_error_rate with group by on transaction name', async () => {
+      it('with group by on transaction name', async () => {
         const options = {
           params: {
             query: {
@@ -203,7 +203,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('transaction_error_rate with group by on transaction name and filter on transaction name', async () => {
+      it('with group by on transaction name and filter on transaction name', async () => {
         const options = {
           params: {
             query: {
@@ -228,7 +228,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(['synth-go_production_request_GET /apple 🍎 ']);
       });
 
-      it('transaction_error_rate with empty service name, transaction name and transaction type', async () => {
+      it('with empty service name, transaction name and transaction type', async () => {
         const options = {
           params: {
             query: {
@@ -255,7 +255,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(['synth-go_production_request']);
       });
 
-      it('transaction_error_rate with empty service name, transaction name, transaction type and group by on transaction name', async () => {
+      it('with empty service name, transaction name, transaction type and group by on transaction name', async () => {
         const options = {
           params: {
             query: {
