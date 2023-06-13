@@ -22,7 +22,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-plugin",
     "@kbn/cloud-chat-plugin",
-    "@kbn/infra-plugin",
     "@kbn/features-plugin",
     "@kbn/lens-plugin",
     "@kbn/licensing-plugin",
