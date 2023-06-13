@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 
-import type { FieldHook, ValidationError, ValidationFunc } from '../../../../shared_imports';
+import type { ValidationError, ValidationFunc } from '../../../../shared_imports';
 import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';

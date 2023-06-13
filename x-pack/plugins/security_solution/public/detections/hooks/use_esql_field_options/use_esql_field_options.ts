@@ -6,7 +6,7 @@
  */
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';

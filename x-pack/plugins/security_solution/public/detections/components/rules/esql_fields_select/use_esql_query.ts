@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useCallback } from 'react';
-import { debounce } from 'lodash';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 
