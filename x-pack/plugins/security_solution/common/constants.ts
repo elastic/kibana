@@ -126,7 +126,7 @@ export enum SecurityPageName {
   policies = 'policy',
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
-  rulesAdd = 'add-rules',
+  rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   sessions = 'sessions',
   /*
