@@ -131,15 +131,16 @@ export const ActionsLogFilter = memo(
         onChangeFilterOptions(selectedItems);
       },
       [
-        shouldPinSelectedHosts,
-        filterName,
-        isFlyout,
         setItems,
+        isFlyout,
         onChangeFilterOptions,
+        filterName,
+        shouldPinSelectedHosts,
         setAreHostsSelectedOnMount,
         setUrlActionsFilters,
         setUrlHostsFilters,
         setUrlStatusesFilters,
+        setUrlTypeFilters,
       ]
     );
 
@@ -168,14 +169,15 @@ export const ActionsLogFilter = memo(
       // update query state
       onChangeFilterOptions([]);
     }, [
-      filterName,
-      isFlyout,
-      items,
       setItems,
+      items,
+      isFlyout,
       onChangeFilterOptions,
+      filterName,
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
+      setUrlTypeFilters,
     ]);
 
     return (
