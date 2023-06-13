@@ -17,6 +17,8 @@ import type {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
+import _ from 'lodash';
+
 import type {
   NewOutput,
   Output,
@@ -163,11 +165,16 @@ async function findPoliciesWithFleetServer(
   return [];
 }
 
-function validateLogstashOutputNotUsedInFleetServerPolicy(agentPolicies: AgentPolicy[]) {
+function validateLogstashOutputNotUsedInFleetServerPolicy(
+  agentPolicies: AgentPolicy[],
+  dataOutputType?: string
+) {
   // Validate no policy with fleet server use that policy
   for (const agentPolicy of agentPolicies) {
     throw new OutputInvalidError(
-      `Logstash output cannot be used with Fleet Server integration in ${agentPolicy.name}. Please create a new ElasticSearch output.`
+      `${_.capitalize(dataOutputType)} output cannot be used with Fleet Server integration in ${
+        agentPolicy.name
+      }. Please create a new ElasticSearch output.`
     );
   }
 }
@@ -187,10 +194,13 @@ async function validateTypeChanges(
   if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
     await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
   }
-  // prevent changing an ES output to logstash if it's used by fleet server policies
-  if (originalOutput.type === outputType.Elasticsearch && data?.type === outputType.Logstash) {
+  // prevent changing an ES output to logstash or kafka if it's used by fleet server policies
+  if (
+    originalOutput.type === outputType.Elasticsearch &&
+    (data?.type === outputType.Logstash || data?.type === outputType.Kafka)
+  ) {
     // Validate no policy with fleet server use that policy
-    validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
+    validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies, data.type);
   }
   await updateFleetServerPoliciesDataOutputId(
     soClient,
