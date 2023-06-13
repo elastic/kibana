@@ -101,7 +101,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
       header={
         <FormattedMessage
           id="xpack.ml.overview.analyticsList.PanelTitle"
-          defaultMessage="Analytics"
+          defaultMessage="Data Frame Analytics Jobs"
         />
       }
       headerItems={[
