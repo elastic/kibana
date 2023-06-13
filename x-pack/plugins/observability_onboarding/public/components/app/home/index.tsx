@@ -55,7 +55,7 @@ export function Home() {
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="l" />
-        <EuiTitle size="l">
+        <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
           <h1>
             {i18n.translate('xpack.observability_onboarding.home.title', {
               defaultMessage: 'Get started with Observability',
@@ -287,7 +287,10 @@ export function Home() {
         <EuiHorizontalRule margin="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleClickSkip}>
+        <EuiButtonEmpty
+          onClick={handleClickSkip}
+          data-test-subj="obltOnboardingHomeSkipButton"
+        >
           {i18n.translate('xpack.observability_onboarding.skipLinkLabel', {
             defaultMessage: 'Skip for now',
           })}

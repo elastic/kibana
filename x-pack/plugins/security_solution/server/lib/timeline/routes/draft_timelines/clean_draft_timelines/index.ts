@@ -23,7 +23,7 @@ import {
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
 import { cleanDraftTimelineSchema } from '../../../schemas/draft_timelines';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../../common/types/timeline/api';
 
 export const cleanDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
