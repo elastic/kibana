@@ -9,9 +9,7 @@ import React, { memo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
-import { LandingPageComponent } from '../../common/components/landing_page';
 import { useKibana } from '../../common/lib/kibana';
-import { PluginTemplateWrapper } from '../../common/components/plugin_template_wrapper';
 
 export const LandingPage = memo(() => {
   const { getStartedComponent$ } = useKibana().services;
@@ -19,11 +17,7 @@ export const LandingPage = memo(() => {
 
   return (
     <>
-      {GetStartedComponent ?? (
-        <PluginTemplateWrapper>
-          <LandingPageComponent />
-        </PluginTemplateWrapper>
-      )}
+      {GetStartedComponent}
       <SpyRoute pageName={SecurityPageName.landing} />
     </>
   );

@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { getSecurityGetStartedComponent } from './components/get_started';
 import {
   EssSecurityPluginSetup,
   EssSecurityPluginStart,
@@ -35,6 +36,9 @@ export class EssSecurityPlugin
     _core: CoreStart,
     _startDeps: EssSecurityPluginStartDependencies
   ): EssSecurityPluginStart {
+    const { securitySolution } = _startDeps;
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(_core, _startDeps));
+
     return {};
   }
 

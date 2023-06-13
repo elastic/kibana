@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { memo } from 'react';
+import { LandingCards } from '../../common/components/landing_cards';
 
-export const PLUGIN_ID = 'essSecurity';
-export const PLUGIN_NAME = 'essSecurity';
+export const GetStarted = memo(() => {
+  return <LandingCards />;
+});
 
-export const ADD_DATA_PATH = `/app/integrations/browse/security`;
+GetStarted.displayName = 'GetStarted';
