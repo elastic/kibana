@@ -32,12 +32,12 @@ describe('<Navigation />', () => {
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
           <Navigation homeRef="https://elastic.co">
             <Navigation.Group id="group1">
-              <Navigation.Item id="item1" title="Item 1" />
-              <Navigation.Item id="item2" title="Item 2" />
+              <Navigation.Item id="item1" title="Item 1" href="https://foo" />
+              <Navigation.Item id="item2" title="Item 2" href="https://foo" />
               <Navigation.Group id="group1A" title="Group1A">
-                <Navigation.Item id="item1" title="Group 1A Item 1" />
+                <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
                 <Navigation.Group id="group1A_1" title="Group1A_1">
-                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" />
+                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
                 </Navigation.Group>
               </Navigation.Group>
             </Navigation.Group>
@@ -72,11 +72,13 @@ describe('<Navigation />', () => {
               {
                 id: 'item1',
                 title: 'Item 1',
+                href: 'https://foo',
                 path: ['group1', 'item1'],
               },
               {
                 id: 'item2',
                 title: 'Item 2',
+                href: 'https://foo',
                 path: ['group1', 'item2'],
               },
               {
@@ -86,6 +88,7 @@ describe('<Navigation />', () => {
                 children: [
                   {
                     id: 'item1',
+                    href: 'https://foo',
                     title: 'Group 1A Item 1',
                     path: ['group1', 'group1A', 'item1'],
                   },
@@ -97,6 +100,7 @@ describe('<Navigation />', () => {
                       {
                         id: 'item1',
                         title: 'Group 1A_1 Item 1',
+                        href: 'https://foo',
                         path: ['group1', 'group1A', 'group1A_1', 'item1'],
                       },
                     ],
@@ -275,6 +279,83 @@ describe('<Navigation />', () => {
       });
     });
 
+    test('should not render the group if it does not have children AND no href or deeplink', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Title from deeplink',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+      const onProjectNavigationChange = jest.fn();
+
+      const { queryByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.Item<any> id="item1" link="notRegistered" />
+              </Navigation.Group>
+              <Navigation.Group id="group2">
+                <Navigation.Item<any> id="item1" link="item1" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await queryByTestId('nav-group-root.group1')).toBeNull();
+      expect(await queryByTestId('nav-item-root.group2.item1')).toBeVisible();
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
+        navigationTree: [
+          {
+            id: 'root',
+            path: ['root'],
+            title: '',
+            children: [
+              {
+                id: 'group1',
+                path: ['root', 'group1'],
+                title: '',
+              },
+              {
+                id: 'group2',
+                path: ['root', 'group2'],
+                title: '',
+                children: [
+                  {
+                    id: 'item1',
+                    path: ['root', 'group2', 'item1'],
+                    title: 'Title from deeplink',
+                    deepLink: {
+                      id: 'item1',
+                      title: 'Title from deeplink',
+                      baseUrl: '',
+                      url: '',
+                      href: '',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
     test('should render custom react element', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         {
@@ -300,7 +381,7 @@ describe('<Navigation />', () => {
                 <Navigation.Item<any> link="item1">
                   <div data-test-subj="my-custom-element">Custom element</div>
                 </Navigation.Item>
-                <Navigation.Item id="item2" title="Children prop">
+                <Navigation.Item id="item2" title="Children prop" href="http://foo">
                   {(navNode) => <div data-test-subj="my-other-custom-element">{navNode.title}</div>}
                 </Navigation.Item>
               </Navigation.Group>
@@ -348,6 +429,7 @@ describe('<Navigation />', () => {
                   },
                   {
                     id: 'item2',
+                    href: 'http://foo',
                     path: ['root', 'group1', 'item2'],
                     title: 'Children prop',
                     renderItem: expect.any(Function),

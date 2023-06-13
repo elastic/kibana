@@ -42,10 +42,12 @@ describe('<DefaultNavigation />', () => {
             {
               id: 'item1',
               title: 'Item 1',
+              href: 'http://foo',
             },
             {
               id: 'item2',
               title: 'Item 2',
+              href: 'http://foo',
             },
             {
               id: 'group1A',
@@ -54,6 +56,7 @@ describe('<DefaultNavigation />', () => {
                 {
                   id: 'item1',
                   title: 'Group 1A Item 1',
+                  href: 'http://foo',
                 },
                 {
                   id: 'group1A_1',
@@ -62,6 +65,7 @@ describe('<DefaultNavigation />', () => {
                     {
                       id: 'item1',
                       title: 'Group 1A_1 Item 1',
+                      href: 'http://foo',
                     },
                   ],
                 },
@@ -109,11 +113,13 @@ describe('<DefaultNavigation />', () => {
               {
                 id: 'item1',
                 title: 'Item 1',
+                href: 'http://foo',
                 path: ['group1', 'item1'],
               },
               {
                 id: 'item2',
                 title: 'Item 2',
+                href: 'http://foo',
                 path: ['group1', 'item2'],
               },
               {
@@ -124,6 +130,7 @@ describe('<DefaultNavigation />', () => {
                   {
                     id: 'item1',
                     title: 'Group 1A Item 1',
+                    href: 'http://foo',
                     path: ['group1', 'group1A', 'item1'],
                   },
                   {
@@ -134,6 +141,7 @@ describe('<DefaultNavigation />', () => {
                       {
                         id: 'item1',
                         title: 'Group 1A_1 Item 1',
+                        href: 'http://foo',
                         path: ['group1', 'group1A', 'group1A_1', 'item1'],
                       },
                     ],
