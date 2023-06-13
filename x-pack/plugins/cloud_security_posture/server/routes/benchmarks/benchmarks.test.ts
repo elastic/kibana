@@ -27,7 +27,8 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [config] = router.get.mock.calls[0];
+    // @ts-ignore: Property 'mock' does not exist on type 'VersionedRouteRegistrar<"get", any>'
+    const [config] = router.versioned.get.mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
   });
@@ -37,7 +38,10 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    // @ts-ignore: Property 'mock' does not exist on type 'VersionedRouteRegistrar<"get", any>'
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
@@ -54,7 +58,10 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    // @ts-ignore: Property 'mock' does not exist on type 'VersionedRouteRegistrar<"get", any>'
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     mockContext.fleet.authz.fleet.all = false;

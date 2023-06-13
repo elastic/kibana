@@ -40,7 +40,7 @@ export const useCspBenchmarkIntegrations = ({
 
   return useQuery(
     [QUERY_KEY, query],
-    () => http.get<ListResult<Benchmark>>(BENCHMARKS_ROUTE_PATH, { query }),
+    () => http.get<ListResult<Benchmark>>(BENCHMARKS_ROUTE_PATH, { query, version: '1' }),
     { keepPreviousData: true }
   );
 };
