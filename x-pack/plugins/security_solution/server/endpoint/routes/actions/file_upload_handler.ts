@@ -104,6 +104,7 @@ export const getActionFileUploadHandler = (
     const endpointData = await endpointContext.service
       .getEndpointMetadataService()
       .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
+    const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
 
     try {
       const casesClient = await endpointContext.service.getCasesClient(req);
@@ -111,7 +112,7 @@ export const getActionFileUploadHandler = (
         .getActionCreateService()
         .createAction<ResponseActionUploadOutputContent, ResponseActionUploadParameters>(
           createActionPayload,
-          endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id)
+          agentIds
         );
 
       // Update the file meta to include the action id, and if any errors (unlikely),

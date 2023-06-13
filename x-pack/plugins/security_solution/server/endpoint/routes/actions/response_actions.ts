@@ -196,10 +196,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       const endpointData = await endpointContext.service
         .getEndpointMetadataService()
         .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
-      action = await endpointContext.service.getActionCreateService().createAction(
-        createActionPayload,
-        endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id)
-      );
+      const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+
+      action = await endpointContext.service
+        .getActionCreateService()
+        .createAction(createActionPayload, agentIds);
 
       // update cases
       const casesClient = await endpointContext.service.getCasesClient(req);
