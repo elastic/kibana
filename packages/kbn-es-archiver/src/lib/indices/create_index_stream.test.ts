@@ -222,7 +222,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       expect(mockDeleteSavedObjectIndices).toHaveBeenCalledTimes(1);
       expect(mockDeleteSavedObjectIndices).toHaveBeenCalledWith(
-        expect.objectContaining({ index: '.kibana_task_manager_7.16.0_001' })
+        expect.objectContaining({ onlyTaskManager: true })
       );
     });
 
@@ -234,7 +234,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
       expect(mockDeleteSavedObjectIndices).toHaveBeenCalledTimes(2);
       expect(mockDeleteSavedObjectIndices).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining({ index: '.kibana_task_manager_7.16.0_001' })
+        expect.objectContaining({ onlyTaskManager: true })
       );
       expect(mockDeleteSavedObjectIndices).toHaveBeenNthCalledWith(
         2,

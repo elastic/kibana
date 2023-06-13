@@ -137,7 +137,7 @@ export function createCreateIndexStream({
           kibanaIndicesAlreadyDeleted = kibanaTaskManagerIndexAlreadyDeleted = true;
           log.debug(`Deleted all saved object indices`);
         } else if (isKibanaTaskManager && !kibanaTaskManagerIndexAlreadyDeleted) {
-          await deleteSavedObjectIndices({ client, stats, index, log }); // delete only .kibana_task_manager* index
+          await deleteSavedObjectIndices({ client, stats, onlyTaskManager: true, log }); // delete only .kibana_task_manager* indices
           kibanaTaskManagerIndexAlreadyDeleted = true;
           log.debug(`Deleted saved object index [${index}]`);
         }
