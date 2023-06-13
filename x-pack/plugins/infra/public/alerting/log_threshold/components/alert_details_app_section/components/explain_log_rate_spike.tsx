@@ -127,29 +127,27 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {dataView && (
-            <ExplainLogRateSpikesContent
-              dataView={dataView}
-              timeRange={timeRange}
-              esSearchQuery={esSearchQuery}
-              initialAnalysisStart={initialAnalysisStart}
-              appDependencies={pick(services, [
-                'application',
-                'data',
-                'executionContext',
-                'charts',
-                'fieldFormats',
-                'http',
-                'notifications',
-                'share',
-                'storage',
-                'uiSettings',
-                'unifiedSearch',
-                'theme',
-                'lens',
-              ])}
-            />
-          )}
+          <ExplainLogRateSpikesContent
+            dataView={dataView}
+            timeRange={timeRange}
+            esSearchQuery={esSearchQuery}
+            initialAnalysisStart={initialAnalysisStart}
+            appDependencies={pick(services, [
+              'application',
+              'data',
+              'executionContext',
+              'charts',
+              'fieldFormats',
+              'http',
+              'notifications',
+              'share',
+              'storage',
+              'uiSettings',
+              'unifiedSearch',
+              'theme',
+              'lens',
+            ])}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
