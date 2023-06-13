@@ -62,7 +62,7 @@ export interface Routing {
 export interface Content {
   subject: string;
   message: string;
-  messageHTML: string | null;
+  messageHTML?: string | null;
 }
 
 export async function sendEmail(

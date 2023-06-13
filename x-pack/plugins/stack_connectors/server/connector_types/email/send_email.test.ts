@@ -97,10 +97,7 @@ describe('send_email module', () => {
   });
 
   test('handles authenticated HTML email when available using service', async () => {
-    const sendEmailOptions = getSendEmailOptions({
-      content: { hasHTMLMessage: true },
-      transport: { service: 'other' },
-    });
+    const sendEmailOptions = getSendEmailOptions({ content:{hasHTMLMessage: true} ,transport: { service: 'other' } },);
     const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -781,9 +778,9 @@ describe('send_email module', () => {
 });
 
 function getSendEmailOptions(
-  { content = { hasHTMLMessage: false }, routing = {}, transport = {} } = {},
+  { content = {hasHTMLMessage:false}, routing = {}, transport = {} } = {},
   proxySettings?: ProxySettings,
-  customHostSettings?: CustomHostSettings
+  customHostSettings?: CustomHostSettings,
 ) {
   const configurationUtilities = actionsConfigMock.create();
   if (proxySettings) {
@@ -793,7 +790,7 @@ function getSendEmailOptions(
     configurationUtilities.getCustomHostSettings.mockReturnValue(customHostSettings);
   }
 
-  const HTMLmock = '<html><body><span>a message</span></body></html>';
+  const HTMLmock = "<html><body><span>a message</span></body></html>";
   return {
     content: {
       message: 'a message',
@@ -823,7 +820,7 @@ function getSendEmailOptions(
 function getSendEmailOptionsNoAuth(
   { content = {}, routing = {}, transport = {} } = {},
   proxySettings?: ProxySettings,
-  customHostSettings?: CustomHostSettings
+  customHostSettings?: CustomHostSettings,
 ) {
   const configurationUtilities = actionsConfigMock.create();
   if (proxySettings) {
@@ -836,7 +833,6 @@ function getSendEmailOptionsNoAuth(
     content: {
       ...content,
       message: 'a message',
-      messageHTML: null,
       subject: 'a subject',
     },
     routing: {

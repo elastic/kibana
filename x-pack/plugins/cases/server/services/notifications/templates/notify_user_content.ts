@@ -11,7 +11,7 @@ import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import { CaseStatuses, CaseSeverity } from '../../../../common/api';
 import { getDataPath } from './utils';
 
-const getStatusColor = (status: string): string => {
+export const getStatusColor = (status: string): string => {
   if (!status) {
     return '#000';
   }
@@ -28,7 +28,7 @@ const getStatusColor = (status: string): string => {
   }
 };
 
-const getSeverityColor = (severity: string): string => {
+export const getSeverityColor = (severity: string): string => {
   if (!severity) {
     return '#000';
   }

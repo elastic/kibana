@@ -5,7 +5,22 @@
  * 2.0.
  */
 
-export const CommonEmailMock = (caseUrl: string) => {
+import type { CaseStatuses, CaseSeverity } from '../../../common/api';
+
+interface Params {
+  description: string;
+  status: CaseStatuses;
+  statusColor: string;
+  severity: CaseSeverity;
+  severityColor: string;
+}
+
+export const CommonEmailMock = (caseUrl: string, caseData: Params) => {
+  const trimmedDesc =
+    caseData.description.length > 300
+      ? `${caseData.description.slice(0, 300)}...`
+      : caseData.description;
+
   return `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns=\"http://www.w3.org/1999/xhtml\">
 
@@ -76,20 +91,20 @@ export const CommonEmailMock = (caseUrl: string) => {
                     style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0px 40px;\"
                     bgcolor=\"#ffffff\">
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;\">
+                        <td width="100%" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;">
                             <h1 style=\"font-weight: bold; color: #1A1C21; font-size: 34px; margin: 0;\">Cases:
                                 Super Bad Security Issue</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;\">
+                        <td width="100%" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;">
                             <h3 style=\"color: #1A1C21; font-weight: bold; font-size: 22px; margin: 0;\">You are assigned
                                 to an Elastic Case</h3>
                         </td>
                     </tr>
                     <tr>
                         <td style=\"line-height: 30px; mso-line-height-rule: exactly; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0; padding: 60px 30px 30px;\">
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%"
                                 style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>
@@ -99,11 +114,11 @@ export const CommonEmailMock = (caseUrl: string) => {
                                             Status
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
-                                            style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #0077CC\">
-                                            open</span>
+                                            style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: ${caseData.statusColor}\">
+                                            ${caseData.status}</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -113,11 +128,11 @@ export const CommonEmailMock = (caseUrl: string) => {
                                             Severity
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
-                                            style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #54B399\">
-                                            low</span>
+                                            style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: ${caseData.severityColor}\">
+                                            ${caseData.severity}</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -126,7 +141,7 @@ export const CommonEmailMock = (caseUrl: string) => {
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">Tags
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span class=\"tags\"
                                             style=\"background-color: #E0E5EE; margin-right: 15px; align-items: center; justify-content: center; width: 70px; height: 18px; font-size: 12px; padding: 1px 8px; border-radius: 3px;\">defacement</span>
@@ -139,14 +154,14 @@ export const CommonEmailMock = (caseUrl: string) => {
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">
                                             Description</h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
-                                        <span>This is a brand new case of a bad meanie defacing data</span>
+                                        <span>${trimmedDesc}</span>
 
                                     </td>
                                 </tr>
                             </table>
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"
                                 style=\"width: 100%; margin-top: 60px; border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>
@@ -282,20 +297,20 @@ export const WithoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTM
                     style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0px 40px;\"
                     bgcolor=\"#ffffff\">
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;\">
+                        <td width="100%" style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;\">
                             <h1 style=\"font-weight: bold; color: #1A1C21; font-size: 34px; margin: 0;\">Cases:
                                 Super Bad Security Issue</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;\">
+                        <td width="100%" style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;\">
                             <h3 style=\"color: #1A1C21; font-weight: bold; font-size: 22px; margin: 0;\">You are assigned
                                 to an Elastic Case</h3>
                         </td>
                     </tr>
                     <tr>
                         <td style=\"line-height: 30px; mso-line-height-rule: exactly; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0; padding: 60px 30px 30px;\">
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width="100%"
                                 style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>
@@ -305,7 +320,7 @@ export const WithoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTM
                                             Status
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
                                             style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #0077CC\">
@@ -319,7 +334,7 @@ export const WithoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTM
                                             Severity
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
                                             style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #54B399\">
@@ -332,7 +347,7 @@ export const WithoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTM
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">Tags
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span class=\"tags\"
                                             style=\"background-color: #E0E5EE; margin-right: 15px; align-items: center; justify-content: center; width: 70px; height: 18px; font-size: 12px; padding: 1px 8px; border-radius: 3px;\">defacement</span>
@@ -345,14 +360,14 @@ export const WithoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTM
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">
                                             Description</h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span>This is a brand new case of a bad meanie defacing data</span>
 
                                     </td>
                                 </tr>
                             </table>
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width="100%"
                                 style=\"width: 100%; margin-top: 60px; border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>
@@ -480,20 +495,20 @@ export const MultiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0
                     style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0px 40px;\"
                     bgcolor=\"#ffffff\">
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;\">
+                        <td width="100%" style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;\">
                             <h1 style=\"font-weight: bold; color: #1A1C21; font-size: 34px; margin: 0;\">Cases:
                                 Super Bad Security Issue</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;\">
+                        <td width="100%" style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;\">
                             <h3 style=\"color: #1A1C21; font-weight: bold; font-size: 22px; margin: 0;\">You are assigned
                                 to an Elastic Case</h3>
                         </td>
                     </tr>
                     <tr>
                         <td style=\"line-height: 30px; mso-line-height-rule: exactly; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0; padding: 60px 30px 30px;\">
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width="100%"
                                 style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>
@@ -503,7 +518,7 @@ export const MultiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0
                                             Status
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
                                             style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #0077CC\">
@@ -517,7 +532,7 @@ export const MultiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0
                                             Severity
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
                                             style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #54B399\">
@@ -530,12 +545,15 @@ export const MultiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">Tags
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span class=\"tags\"
                                             style=\"background-color: #E0E5EE; margin-right: 15px; align-items: center; justify-content: center; width: 70px; height: 18px; font-size: 12px; padding: 1px 8px; border-radius: 3px;\">one</span>
                                         <span class=\"tags\"
                                             style=\"background-color: #E0E5EE; margin-right: 15px; align-items: center; justify-content: center; width: 70px; height: 18px; font-size: 12px; padding: 1px 8px; border-radius: 3px;\">two</span>
+                                        <span class="tags"
+                                            style="background-color: #E0E5EE; margin-right: 15px; align-items: center; justify-content: center; width: 70px; height: 18px; font-size: 12px; padding: 1px 8px; border-radius: 3px;">three</span>
+                                        <span style="color: #1A1C21; font-weight: normal; font-size: 12px;">+1 more</span>
 
                                     </td>
                                 </tr>
@@ -545,14 +563,14 @@ export const MultiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">
                                             Description</h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span>This is a brand new case of a bad meanie defacing data</span>
 
                                     </td>
                                 </tr>
                             </table>
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width="100%"
                                 style=\"width: 100%; margin-top: 60px; border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>
@@ -687,20 +705,20 @@ export const WithoutTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1
                     style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0px 40px;\"
                     bgcolor=\"#ffffff\">
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;\">
+                        <td width="100%" style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 30px;\">
                             <h1 style=\"font-weight: bold; color: #1A1C21; font-size: 34px; margin: 0;\">Cases:
                                 Super Bad Security Issue</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;\">
+                        <td width="100%" style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 40px 30px;\">
                             <h3 style=\"color: #1A1C21; font-weight: bold; font-size: 22px; margin: 0;\">You are assigned
                                 to an Elastic Case</h3>
                         </td>
                     </tr>
                     <tr>
                         <td style=\"line-height: 30px; mso-line-height-rule: exactly; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin: 0; padding: 60px 30px 30px;\">
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width="100%"
                                 style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>
@@ -710,7 +728,7 @@ export const WithoutTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1
                                             Status
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
                                             style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #0077CC\">
@@ -724,7 +742,7 @@ export const WithoutTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1
                                             Severity
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span
                                             style=\"width: 112px; font-size: 12px; line-height: 24px; padding: 4px 24px; border-radius: 12px; text-transform: uppercase; text-align: center; align-items: center; letter-spacing: 0.6px; color: #1A1C21; background-color: #54B399\">
@@ -737,8 +755,10 @@ export const WithoutTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">Tags
                                         </h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
+                                        <span class=\"tags\"
+                                            style=\"background-color: #E0E5EE; margin-right: 15px; align-items: center; justify-content: center; width: 70px; height: 18px; font-size: 12px; padding: 1px 8px; border-radius: 3px;\">-</span>
 
                                     </td>
                                 </tr>
@@ -748,14 +768,14 @@ export const WithoutTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1
                                         <h5 style=\"color: #1A1C21; font-weight: bold; font-size: 16px; margin: 0;\">
                                             Description</h5>
                                     </td>
-                                    <td
+                                    <td width="630px"
                                         style=\"border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 1px solid #E0E5EE; padding: 16px 0;\">
                                         <span>This is a brand new case of a bad meanie defacing data</span>
 
                                     </td>
                                 </tr>
                             </table>
-                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"
+                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width="100%"
                                 style=\"width: 100%; margin-top: 60px; border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt;\"
                                 align=\"center\">
                                 <tr>

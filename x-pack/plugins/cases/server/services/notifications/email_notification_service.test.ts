@@ -16,6 +16,7 @@ import {
   WithoutTagsEmailMock,
 } from './mock';
 import { EmailNotificationService } from './email_notification_service';
+import { getSeverityColor, getStatusColor } from './templates/notify_user_content';
 
 describe('EmailNotificationService', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -23,6 +24,16 @@ describe('EmailNotificationService', () => {
   const assignees = userProfiles.map((userProfile) => ({ uid: userProfile.uid }));
 
   const notifications = notificationsMock.createStart();
+
+  const defaultStatusColor = getStatusColor(caseSO.attributes.status);
+  const defaultSevColor = getSeverityColor(caseSO.attributes.severity);
+  const defaultCaseData = {
+    description: caseSO.attributes.description,
+    status: caseSO.attributes.status,
+    statusColor: defaultStatusColor,
+    severity: caseSO.attributes.severity,
+    severityColor: defaultSevColor,
+  };
 
   let emailNotificationService: EmailNotificationService;
 
@@ -58,7 +69,10 @@ describe('EmailNotificationService', () => {
       },
       message:
         'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
-      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
+      messageHTML: CommonEmailMock(
+        'https://example.com/app/security/cases/mock-id-1',
+        defaultCaseData
+      ),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -82,7 +96,10 @@ describe('EmailNotificationService', () => {
       },
       message:
         'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
-      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
+      messageHTML: CommonEmailMock(
+        'https://example.com/app/security/cases/mock-id-1',
+        defaultCaseData
+      ),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -111,7 +128,10 @@ describe('EmailNotificationService', () => {
       },
       message:
         'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
-      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
+      messageHTML: CommonEmailMock(
+        'https://example.com/app/security/cases/mock-id-1',
+        defaultCaseData
+      ),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['physical_dinosaur@elastic.co'],
     });
@@ -135,7 +155,10 @@ describe('EmailNotificationService', () => {
       },
       message:
         'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
-      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
+      messageHTML: CommonEmailMock(
+        'https://example.com/app/security/cases/mock-id-1',
+        defaultCaseData
+      ),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -167,7 +190,10 @@ describe('EmailNotificationService', () => {
       },
       message:
         'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/s/test-space/app/security/cases/mock-id-1',
-      messageHTML: CommonEmailMock('https://example.com/s/test-space/app/security/cases/mock-id-1'),
+      messageHTML: CommonEmailMock(
+        'https://example.com/s/test-space/app/security/cases/mock-id-1',
+        defaultCaseData
+      ),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -207,7 +233,10 @@ describe('EmailNotificationService', () => {
   it('shows multiple tags correctly', async () => {
     await emailNotificationService.notifyAssignees({
       assignees,
-      theCase: { ...caseSO, attributes: { ...caseSO.attributes, tags: ['one', 'two'] } },
+      theCase: {
+        ...caseSO,
+        attributes: { ...caseSO.attributes, tags: ['one', 'two', 'three', 'four'] },
+      },
     });
 
     expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
@@ -221,7 +250,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: one, two\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: one, two, three, four\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
       messageHTML: MultiTagsEmailMock,
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
