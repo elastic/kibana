@@ -37,7 +37,7 @@ const someHTMLEmail: HTMLEmail = {
   to: ['user1@email.com'],
   subject: 'Some subject',
   message: 'Some message',
-  messageHTML: '<html><body><span>Some message</span></body></html>'
+  messageHTML: '<html><body><span>Some message</span></body></html>',
 };
 
 describe('LicensedEmailService', () => {

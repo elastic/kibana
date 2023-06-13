@@ -164,7 +164,8 @@ export default function emailTest({ getService }: FtrProviderContext) {
             to: ['kibana-action-test@elastic.co'],
             subject: 'HTML message check',
             message: '_italic_ **bold** https://elastic.co link',
-            messageHTML: '<html><body><a href="https://elastic.co" style="font-weight: bold; font-style: italic">View at Elastic</a></body></html>'
+            messageHTML:
+              '<html><body><a href="https://elastic.co" style="font-weight: bold; font-style: italic">View at Elastic</a></body></html>',
           },
         })
         .expect(200)
