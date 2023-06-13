@@ -126,7 +126,7 @@ export const getActionFileUploadHandler = (
       }
 
       // update cases
-      updateCases({ casesClient, createActionPayload, endpointData });
+      await updateCases({ casesClient, createActionPayload, endpointData });
 
       return res.ok({
         body: {
