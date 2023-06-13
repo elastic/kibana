@@ -6,14 +6,42 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { kbnGenerateConsoleDefinitions } from './generate_console_definitions';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { generateConsoleDefinitions } from './generate_console_definitions';
 
 export function runGenerateConsoleDefinitionsCli() {
-  run((context) => {
-    const { log } = context;
-    log.info('starting console definitions generation');
-    kbnGenerateConsoleDefinitions();
-    log.info('completed console definitions generation');
-  });
+  run(
+    (context) => {
+      const { log, flags } = context;
+      log.info('starting console definitions generation');
+      log.info(flags);
+      const { source, dest } = flags;
+      if (!source) {
+        throw createFlagError(`Missing --source argument`);
+      }
+      let definitionsFolder = Path.resolve(REPO_ROOT, `${dest}`);
+      if (!dest) {
+        definitionsFolder = Path.resolve(
+          REPO_ROOT,
+          // replace with the constant from the console plugin
+          'src/plugins/console/server/lib/spec_definitions/json'
+        );
+      }
+      const specsRepo = Path.resolve(`${source}`);
+      generateConsoleDefinitions({ specsRepo, definitionsFolder });
+      log.info('completed console definitions generation');
+    },
+    {
+      flags: {
+        string: ['source', 'dest'],
+        help: `
+    --source        Folder containing the root of the Elasticsearch specification repo
+    --dest          Folder where console autocomplete definitions will be generated (relative to the Kibana repo root)
+  `,
+      },
+    }
+  );
 }

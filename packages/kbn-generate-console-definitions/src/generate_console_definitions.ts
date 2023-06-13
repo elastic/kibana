@@ -7,7 +7,7 @@
  */
 
 import fs from 'fs';
-import { join } from 'path';
+import Path, { join } from 'path';
 
 interface EndpointRequest {
   name: string;
@@ -124,20 +124,27 @@ const generateDefinition = (endpoint: Endpoint, schema: Schema): Definition => {
   return definition;
 };
 
-export function kbnGenerateConsoleDefinitions() {
-  const pathToSchemaFile =
-    '/Users/yulia/elastic/elasticsearch-specification/output/schema/schema.json';
+export function generateConsoleDefinitions({
+  specsRepo,
+  definitionsFolder,
+}: {
+  specsRepo: string;
+  definitionsFolder: string;
+}) {
+  console.log({ specsRepo, definitionsFolder });
+  const pathToSchemaFile = Path.resolve(specsRepo, 'output/schema/schema.json');
   const schema = JSON.parse(fs.readFileSync(pathToSchemaFile, 'utf8')) as Schema;
 
   const { endpoints } = schema;
-  const pathToDefinitionsFolder =
-    '/Users/yulia/elastic/kibana/src/plugins/console/server/lib/spec_definitions/json/generated_new';
   endpoints.forEach((endpoint) => {
     const { name } = endpoint;
     const definition = generateDefinition(endpoint, schema);
+    const fileContent: { [name: string]: Definition } = {
+      [name]: definition,
+    };
     fs.writeFileSync(
-      join(pathToDefinitionsFolder, `${name}.json`),
-      JSON.stringify(definition, null, 2),
+      join(definitionsFolder, `${name}.json`),
+      JSON.stringify(fileContent, null, 2),
       'utf8'
     );
   });
