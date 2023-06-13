@@ -29,6 +29,22 @@ const ActionTypeFieldComponent = ({
 }: ActionTypeFieldProps) => {
   const { endpointPrivileges } = useUserPrivileges();
   const [data] = useFormData();
+  // const currentCommand = get(data, `${basePath}.command`);
+  //
+  // const getSuffix = useCallback(
+  //   (name: string) => {
+  //     if (currentCommand === '') {
+  //       return '';
+  //     }
+  //     switch (name) {
+  //       case 'isolate':
+  //         return ' (quarantine a host from the network to prevent further spread of threats and limit potential damage)';
+  //       default:
+  //         return '';
+  //     }
+  //   },
+  //   [currentCommand]
+  // );
 
   const fieldOptions = useMemo(
     () =>
@@ -50,13 +66,36 @@ const ActionTypeFieldComponent = ({
     [data.responseActions, endpointPrivileges]
   );
 
+  // const commandLabel = useMemo(() => {
+  //   return (
+  //     <>
+  //       <EuiTitle size={'xxs'}>
+  //         <EuiText size={'s'}>
+  //           <FormattedMessage
+  //             id="xpack.securitySolution.responseActions.endpoint.commandLabel"
+  //             defaultMessage="Endpoint response action"
+  //           />
+  //         </EuiText>
+  //       </EuiTitle>
+  //       <EuiSpacer size={'s'} />
+  //       {/* <EuiText size={'s'}>*/}
+  //       {/*  <FormattedMessage*/}
+  //       {/*    id="xpack.securitySolution.responseActions.endpoint.commandDescription"*/}
+  //       {/*    defaultMessage="Select an Endpoint response action. The response action only runs on hosts with Elastic Defend installed."*/}
+  //       {/*  />*/}
+  //       {/* </EuiText>*/}
+  //       {/* <EuiSpacer size={'s'} />*/}
+  //     </>
+  //   );
+  // }, []);
+
   return (
     <UseField
       path={`${basePath}.command`}
       readDefaultValueOnForm={readDefaultValueOnForm}
       config={{
         label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
-          defaultMessage: 'Command',
+          defaultMessage: 'Endpoint response action',
         }),
         validations: [
           {
