@@ -26,7 +26,7 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
   timefilter: schema.maybe(schema.any()),
 });
 
-const responseCreateSchema = schema.object({
+const savedQueryResponseSchema = schema.object({
   id: schema.string(),
   attributes: SAVED_QUERY_ATTRS_CONFIG,
 });
@@ -46,7 +46,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         },
         response: {
           200: {
-            body: responseCreateSchema,
+            body: savedQueryResponseSchema,
           },
         },
       },
@@ -73,7 +73,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         },
         response: {
           200: {
-            body: responseCreateSchema,
+            body: savedQueryResponseSchema,
           },
         },
       },
@@ -100,7 +100,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         },
         response: {
           200: {
-            body: responseCreateSchema,
+            body: savedQueryResponseSchema,
           },
         },
       },
@@ -157,7 +157,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           200: {
             body: schema.object({
               total: schema.number(),
-              savedQueries: schema.arrayOf(responseCreateSchema),
+              savedQueries: schema.arrayOf(savedQueryResponseSchema),
             }),
           },
         },
@@ -185,7 +185,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           200: {
             body: schema.object({
               total: schema.number(),
-              savedQueries: schema.arrayOf(responseCreateSchema),
+              savedQueries: schema.arrayOf(savedQueryResponseSchema),
             }),
           },
         },
