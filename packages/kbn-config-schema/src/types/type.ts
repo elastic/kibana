@@ -106,16 +106,6 @@ export abstract class Type<V> {
     });
 
     if (error) {
-      console.log(
-        '************ value:',
-        value,
-        ' context:',
-        context,
-        ' namespace:',
-        namespace,
-        ' error:',
-        error
-      );
       throw new ValidationError(error as any, namespace);
     }
 

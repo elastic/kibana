@@ -59,7 +59,6 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    // console.log('###', mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls);
     const [[, getHandler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
 
     await getHandler(mockContext, mockRequest, mockResponse);
@@ -75,16 +74,11 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[1].value;
-    console.log(
-      'mockRouter',
-      typeof mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1]
-    );
     const statusHandler =
       mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1];
-    console.log('statusHandler', statusHandler);
 
     await statusHandler(mockContext, mockRequest, mockResponse);
-    // console.log();
+
     expect(mockContext.search!.getSessionStatus).toHaveBeenCalled();
     expect(mockContext.search!.getSessionStatus).toHaveBeenCalledWith(id);
   });
@@ -101,10 +95,6 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    console.log(
-      'HERE',
-      mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[PostHandlerIndex.FIND]
-    );
     const [, findHandler] =
       mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[PostHandlerIndex.FIND];
 
@@ -172,7 +162,6 @@ describe('registerSessionRoutes', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
 
-    console.log(mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1]);
     const [, extendHandler] =
       mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0]; /* [
         PostHandlerIndex.EXTEND
