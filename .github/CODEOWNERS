@@ -648,7 +648,7 @@ packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
-packages/kbn-slo-schema @elastic/actionable-observability
+x-pack/packages/kbn-slo-schema @elastic/actionable-observability
 x-pack/plugins/snapshot_restore @elastic/platform-deployment-management
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
