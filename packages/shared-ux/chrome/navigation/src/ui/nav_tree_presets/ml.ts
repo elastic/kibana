@@ -35,7 +35,7 @@ export type ID =
 export const ml: NodeDefinitionWithChildren<ID> = {
   id: 'sharedux:ml',
   title: 'Machine learning',
-  icon: 'indexMapping',
+  icon: 'machineLearningApp',
   children: [
     {
       title: '',
