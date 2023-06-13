@@ -13,7 +13,8 @@
       "chat"
     ],
     "requiredPlugins": [
-      "cloud"
+      "cloud",
+      "cloudChatProvider"
     ],
     "optionalPlugins": [
       "security"

@@ -9,7 +9,6 @@ import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getObservabilityOnboardingState } from '../custom_logs/get_observability_onboarding_state';
 import { generateYml } from './generate_yml';
-import { getCloudUrls } from '../custom_logs/get_cloud_urls';
 import { getFallbackUrls } from '../custom_logs/get_fallback_urls';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
@@ -17,19 +16,19 @@ const generateConfig = createObservabilityOnboardingServerRoute({
   options: { tags: [] },
   async handler(resources): Promise<string> {
     const { core, plugins, request } = resources;
-    const { apiKeyId, apiKey } = getAuthenticationAPIKey(request);
+    const authApiKey = getAuthenticationAPIKey(request);
 
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
 
-    const cloudId = plugins.cloud.setup.cloudId;
-    const { elasticsearchUrl } =
-      (cloudId && getCloudUrls(cloudId)) || getFallbackUrls(coreStart);
+    const elasticsearchUrl =
+      plugins.cloud?.setup?.elasticsearchUrl ??
+      getFallbackUrls(coreStart).elasticsearchUrl;
 
     const savedState = await getObservabilityOnboardingState({
       savedObjectsClient,
-      apiKeyId,
+      apiKeyId: authApiKey?.apiKeyId ?? '',
     });
 
     const yaml = generateYml({
@@ -37,7 +36,9 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       customConfigurations: savedState?.state.customConfigurations,
       logFilePaths: savedState?.state.logFilePaths,
       namespace: savedState?.state.namespace,
-      apiKey: `${apiKeyId}:${apiKey}`,
+      apiKey: authApiKey
+        ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}`
+        : '$API_KEY',
       esHost: [elasticsearchUrl],
       logfileId: `custom-logs-${Date.now()}`,
     });

@@ -6,21 +6,64 @@
  */
 
 import * as t from 'io-ts';
-import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { createShipperApiKey } from './create_shipper_api_key';
-import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
-import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
-import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
-import { getHasLogs } from './get_has_logs';
-import { getCloudUrls } from './get_cloud_urls';
+import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
+import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
+import { createShipperApiKey } from './api_key/create_shipper_api_key';
+import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
 import { getFallbackUrls } from './get_fallback_urls';
+import { getHasLogs } from './get_has_logs';
+import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
+import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
 
 const ELASTIC_AGENT_VERSION = '8.8.0'; // This should be defined from a source with the latest public release
 
-const createApiKeyRoute = createObservabilityOnboardingServerRoute({
+const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /internal/observability_onboarding/custom_logs/privileges',
+  options: { tags: [] },
+
+  handler: async (resources): Promise<{ hasPrivileges: boolean }> => {
+    const { context } = resources;
+
+    const {
+      elasticsearch: { client },
+    } = await context.core;
+
+    const hasPrivileges = await hasLogMonitoringPrivileges(
+      client.asCurrentUser
+    );
+
+    return { hasPrivileges };
+  },
+});
+
+const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   endpoint:
-    'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
+    'GET /internal/observability_onboarding/custom_logs/install_shipper_setup',
+  options: { tags: [] },
+  async handler(resources): Promise<{
+    apiEndpoint: string;
+    scriptDownloadUrl: string;
+    elasticAgentVersion: string;
+  }> {
+    const { core, plugins } = resources;
+    const coreStart = await core.start();
+
+    const kibanaUrl =
+      plugins.cloud?.setup?.kibanaUrl ?? getFallbackUrls(coreStart).kibanaUrl;
+    const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
+    const apiEndpoint = `${kibanaUrl}/api/observability_onboarding`;
+
+    return {
+      apiEndpoint,
+      scriptDownloadUrl,
+      elasticAgentVersion: ELASTIC_AGENT_VERSION,
+    };
+  },
+});
+
+const createApiKeyRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
   options: { tags: [] },
   params: t.type({
     body: t.type({
@@ -31,9 +74,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   async handler(resources): Promise<{
     apiKeyId: string;
     apiKeyEncoded: string;
-    apiEndpoint: string;
-    scriptDownloadUrl: string;
-    elasticAgentVersion: string;
   }> {
     const {
       context,
@@ -41,7 +81,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
         body: { name, state },
       },
       core,
-      plugins,
       request,
     } = resources;
     const coreStart = await core.start();
@@ -52,12 +91,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       client.asCurrentUser,
       name
     );
-
-    const cloudId = plugins.cloud.setup.cloudId;
-    const { kibanaUrl } =
-      (cloudId && getCloudUrls(cloudId)) || getFallbackUrls(coreStart);
-    const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
-    const apiEndpoint = `${kibanaUrl}/api/observability_onboarding`;
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
@@ -70,9 +103,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     return {
       apiKeyId,
       apiKeyEncoded,
-      apiEndpoint,
-      scriptDownloadUrl,
-      elasticAgentVersion: ELASTIC_AGENT_VERSION,
     };
   },
 });
@@ -98,7 +128,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       request,
       core,
     } = resources;
-    const { apiKeyId } = getAuthenticationAPIKey(request);
+    const authApiKey = getAuthenticationAPIKey(request);
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
@@ -106,7 +136,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     const savedObservabilityOnboardingState =
       await getObservabilityOnboardingState({
         savedObjectsClient,
-        apiKeyId,
+        apiKeyId: authApiKey?.apiKeyId as string,
       });
 
     if (!savedObservabilityOnboardingState) {
@@ -120,7 +150,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       savedObservabilityOnboardingState;
     await saveObservabilityOnboardingState({
       savedObjectsClient,
-      apiKeyId,
+      apiKeyId: authApiKey?.apiKeyId as string,
       observabilityOnboardingState: {
         ...observabilityOnboardingState,
         progress: {
@@ -190,6 +220,8 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
 });
 
 export const customLogsRouteRepository = {
+  ...logMonitoringPrivilegesRoute,
+  ...installShipperSetupRoute,
   ...createApiKeyRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,
