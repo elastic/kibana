@@ -6,22 +6,22 @@
  */
 
 import { useMemo } from 'react';
-import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import type { CtiEnrichment, EventFields } from '../../../../common/search_strategy';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
   parseExistingEnrichments,
   timelineDataToEnrichment,
-} from '../../../../common/components/event_details/cti_details/helpers';
-import { SecurityPageName } from '../../../../../common/constants';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+} from '../../../common/components/event_details/cti_details/helpers';
+import { SecurityPageName } from '../../../../common/constants';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { useLeftPanelContext } from '../../context';
+import { useInvestigationTimeEnrichment } from '../../../common/containers/cti/event_enrichment';
+import { useTimelineEventsDetails } from '../../../timelines/containers/details';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { useLeftPanelContext } from '../context';
 
 export interface ThreatIntelligenceDetailsValue {
   enrichments: CtiEnrichment[];

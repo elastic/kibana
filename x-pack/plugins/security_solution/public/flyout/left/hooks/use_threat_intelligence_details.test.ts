@@ -8,24 +8,24 @@
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { useLeftPanelContext } from '../../context';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
-import { SecurityPageName } from '../../../../../common/constants';
-import type { RouteSpyState } from '../../../../common/utils/route/types';
+import { useTimelineEventsDetails } from '../../../timelines/containers/details';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { useLeftPanelContext } from '../context';
+import { useInvestigationTimeEnrichment } from '../../../common/containers/cti/event_enrichment';
+import { SecurityPageName } from '../../../../common/constants';
+import type { RouteSpyState } from '../../../common/utils/route/types';
 import {
   type GetBasicDataFromDetailsData,
   useBasicDataFromDetailsData,
-} from '../../../../timelines/components/side_panel/event_details/helpers';
+} from '../../../timelines/components/side_panel/event_details/helpers';
 
-jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../common/containers/sourcerer');
-jest.mock('../../../../common/utils/route/use_route_spy');
-jest.mock('../../context');
-jest.mock('../../../../common/containers/cti/event_enrichment');
-jest.mock('../../../../timelines/components/side_panel/event_details/helpers');
+jest.mock('../../../timelines/containers/details');
+jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../common/utils/route/use_route_spy');
+jest.mock('../context');
+jest.mock('../../../common/containers/cti/event_enrichment');
+jest.mock('../../../timelines/components/side_panel/event_details/helpers');
 
 describe('useThreatIntelligenceDetails', () => {
   beforeEach(() => {
@@ -66,9 +66,11 @@ describe('useThreatIntelligenceDetails', () => {
     jest.mocked(useLeftPanelContext).mockReturnValue({
       indexName: 'test-index',
       eventId: 'test-event-id',
-      getFieldsData: () => {},
+      getFieldsData: () => null,
       dataFormattedForFieldBrowser: null,
-      data: {
+      scopeId: 'test-scope-id',
+      browserFields: null,
+      searchHit: {
         _id: 'testId',
         _index: 'testIndex',
       },
