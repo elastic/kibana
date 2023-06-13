@@ -48,6 +48,9 @@ describe('createApiKey lib function', () => {
               privileges: ['read'],
             },
           ],
+          restriction: {
+            workflows: ['search_application_query'],
+          },
         },
       },
     });
