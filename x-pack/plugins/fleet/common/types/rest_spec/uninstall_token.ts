@@ -18,3 +18,8 @@ export interface GetUninstallTokensRequest {
 }
 
 export type GetUninstallTokensResponse = ListResult<UninstallToken>;
+
+export interface GetUninstallTokensForOnePolicyResponse {
+  items: UninstallToken[];
+  total: number;
+}

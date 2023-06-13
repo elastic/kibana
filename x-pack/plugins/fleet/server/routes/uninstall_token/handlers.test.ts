@@ -19,18 +19,21 @@ import type { FleetRequestHandlerContext } from '../..';
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
-import type { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
+import type {
+  GetUninstallTokensForOnePolicyRequestSchema,
+  GetUninstallTokensRequestSchema,
+} from '../../types/rest_spec/uninstall_token';
 
 import { registerRoutes } from '.';
 
-import { getUninstallTokensHandler } from './handlers';
+import { getUninstallTokensForOnePolicyHandler, getUninstallTokensHandler } from './handlers';
 
-describe('getUninstallTokensHandler', () => {
+describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
-  let request: KibanaRequest<unknown, TypeOf<typeof GetUninstallTokensRequestSchema.query>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let appContextStartContractMock: MockedFleetAppContext;
   let getAllTokensMock: jest.Mock;
+  let getTokensForOnePolicyMock: jest.Mock;
 
   const uninstallTokensResponseFixture: GetUninstallTokensResponse = {
     items: [
@@ -46,12 +49,13 @@ describe('getUninstallTokensHandler', () => {
   beforeEach(async () => {
     context = coreMock.createCustomRequestHandlerContext(xpackMocks.createRequestHandlerContext());
     response = httpServerMock.createResponseFactory();
-    request = httpServerMock.createKibanaRequest();
 
     appContextStartContractMock = createAppContextStartContractMock();
-
     appContextService.start(appContextStartContractMock);
-    getAllTokensMock = appContextService.getUninstallTokenService()?.getAllTokens as jest.Mock;
+
+    const uninstallTokenService = appContextService.getUninstallTokenService()!;
+    getAllTokensMock = uninstallTokenService.getAllTokens as jest.Mock;
+    getTokensForOnePolicyMock = uninstallTokenService.getTokenForPolicyId as jest.Mock;
   });
 
   afterEach(async () => {
@@ -59,40 +63,97 @@ describe('getUninstallTokensHandler', () => {
     appContextService.stop();
   });
 
-  it('should return uninstall tokens for all policies', async () => {
-    getAllTokensMock.mockResolvedValue(uninstallTokensResponseFixture);
+  describe('getUninstallTokensHandler', () => {
+    let request: KibanaRequest<unknown, TypeOf<typeof GetUninstallTokensRequestSchema.query>>;
 
-    await getUninstallTokensHandler(context, request, response);
+    beforeEach(() => {
+      request = httpServerMock.createKibanaRequest();
+    });
 
-    expect(response.ok).toHaveBeenCalledWith({
-      body: uninstallTokensResponseFixture,
+    it('should return uninstall tokens for all policies', async () => {
+      getAllTokensMock.mockResolvedValue(uninstallTokensResponseFixture);
+
+      await getUninstallTokensHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: uninstallTokensResponseFixture,
+      });
+    });
+
+    it('should return internal error when uninstallTokenService is unavailable', async () => {
+      appContextService.stop();
+      appContextService.start({
+        ...appContextStartContractMock,
+        // @ts-expect-error
+        uninstallTokenService: undefined,
+      });
+
+      await getUninstallTokensHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Uninstall Token Service is unavailable.' },
+      });
+    });
+
+    it('should return internal error when uninstallTokenService throws error', async () => {
+      getAllTokensMock.mockRejectedValue(Error('something happened'));
+
+      await getUninstallTokensHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'something happened' },
+      });
     });
   });
 
-  it('should return internal error when uninstallTokenService is unavailable', async () => {
-    appContextService.stop();
-    appContextService.start({
-      ...appContextStartContractMock,
-      // @ts-expect-error
-      uninstallTokenService: undefined,
+  describe('getUninstallTokensForOnePolicyHandler', () => {
+    let request: KibanaRequest<TypeOf<typeof GetUninstallTokensForOnePolicyRequestSchema.params>>;
+
+    beforeEach(() => {
+      request = httpServerMock.createKibanaRequest({ params: { agentPolicyId: '123' } });
     });
 
-    await getUninstallTokensHandler(context, request, response);
+    it('should return uninstall tokens for all policies', async () => {
+      const tokenForOnePolicy = uninstallTokensResponseFixture.items[0];
+      getTokensForOnePolicyMock.mockResolvedValue(tokenForOnePolicy);
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: { message: 'Uninstall Token Service is unavailable.' },
+      await getUninstallTokensForOnePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [tokenForOnePolicy],
+          total: 1,
+        },
+      });
     });
-  });
 
-  it('should return internal error when uninstallTokenService throws error', async () => {
-    getAllTokensMock.mockRejectedValue(Error('something happened'));
+    it('should return internal error when uninstallTokenService is unavailable', async () => {
+      appContextService.stop();
+      appContextService.start({
+        ...appContextStartContractMock,
+        // @ts-expect-error
+        uninstallTokenService: undefined,
+      });
 
-    await getUninstallTokensHandler(context, request, response);
+      await getUninstallTokensForOnePolicyHandler(context, request, response);
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: { message: 'something happened' },
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Uninstall Token Service is unavailable.' },
+      });
+    });
+
+    it('should return internal error when uninstallTokenService throws error', async () => {
+      getTokensForOnePolicyMock.mockRejectedValue(Error('something really happened'));
+
+      await getUninstallTokensForOnePolicyHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'something really happened' },
+      });
     });
   });
 
@@ -104,15 +165,19 @@ describe('getUninstallTokensHandler', () => {
       router = mockRouter.create();
     });
 
-    it('should register handler if feature flag is enabled', () => {
+    it('should register handlers if feature flag is enabled', () => {
       config = { enableExperimental: ['agentTamperProtectionEnabled'] };
 
       registerRoutes(router, config);
 
       expect(router.get).toHaveBeenCalledWith(expect.any(Object), getUninstallTokensHandler);
+      expect(router.get).toHaveBeenCalledWith(
+        expect.any(Object),
+        getUninstallTokensForOnePolicyHandler
+      );
     });
 
-    it('should NOT register handler if feature flag is disabled', async () => {
+    it('should NOT register handlers if feature flag is disabled', async () => {
       config = { enableExperimental: [] };
 
       registerRoutes(router, config);
