@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -16,14 +16,23 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
+import { createPermissionFailureMessage } from '../capabilities/check_capabilities';
+import { MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 
-export const Page = () => {
+export interface AccessDeniedCalloutProps {
+  missingCapabilities?: MlCapabilitiesKey[];
+}
+
+export const AccessDeniedCallout: FC<AccessDeniedCalloutProps> = ({ missingCapabilities }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
+
+  const errorMessages = (missingCapabilities ?? []).map((c) => createPermissionFailureMessage(c));
+
   return (
     <>
       <EuiSpacer size="xxl" />
@@ -41,12 +50,19 @@ export const Page = () => {
                 </h2>
               }
               body={
-                <p>
+                <div>
                   <FormattedMessage
                     id="xpack.ml.accessDenied.description"
-                    defaultMessage="You don’t have permission to view the Machine Learning plugin. Access to the plugin requires the Machine Learning feature to be visible in this space."
+                    defaultMessage="You do not have permission to view this page."
                   />
-                </p>
+                  {errorMessages ? (
+                    <ul>
+                      {errorMessages.map((v) => (
+                        <li key={v}>{v}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
               }
             />
           </EuiPageContent>
