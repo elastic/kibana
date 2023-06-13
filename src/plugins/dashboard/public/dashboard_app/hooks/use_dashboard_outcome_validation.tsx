@@ -13,7 +13,7 @@ import { pluginServices } from '../../services/plugin_services';
 import { createDashboardEditUrl } from '../../dashboard_constants';
 import { getDashboardURL404String } from '../_dashboard_app_strings';
 import { useDashboardMountContext } from './dashboard_mount_context';
-import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 
 export const useDashboardOutcomeValidation = ({
   redirectTo,
@@ -37,7 +37,7 @@ export const useDashboardOutcomeValidation = ({
   } = pluginServices.getServices();
 
   const validateOutcome = useCallback(
-    ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardFromSavedObjectReturn) => {
+    ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
       if (!dashboardFound) {
         toasts.addDanger(getDashboardURL404String());
         redirectTo({ destination: 'listing' });
@@ -45,11 +45,7 @@ export const useDashboardOutcomeValidation = ({
       }
 
       if (resolveMeta && dashboardId) {
-        const {
-          outcome: loadOutcome,
-          alias_target_id: alias,
-          alias_purpose: aliasPurpose,
-        } = resolveMeta;
+        const { outcome: loadOutcome, aliasTargetId: alias, aliasPurpose } = resolveMeta;
         /**
          * Handle saved object resolve alias outcome by redirecting.
          */
