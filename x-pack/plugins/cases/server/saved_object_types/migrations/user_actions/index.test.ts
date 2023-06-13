@@ -23,31 +23,49 @@ import type {
   SavedObjectMigrationParams,
   SavedObjectsMigrationLogger,
 } from '@kbn/core-saved-objects-server';
-import { omit, partition } from 'lodash';
+import { omit, omitBy, partition, pickBy } from 'lodash';
 import gte from 'semver/functions/gte';
+import lt from 'semver/functions/lt';
 
 type PersistableStateAttachmentUserAction = Omit<CommentUserActionPayloadWithoutIds, 'payload'> & {
   payload: { comment: CommentRequestPersistableStateType };
 };
 
 describe('user actions migrations', () => {
-  const contextMock = savedObjectsServiceMock.createMigrationContext();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('lens migrations', () => {
-    it('should marked lens migrations as deferred correctly', () => {
-      const lensEmbeddableFactory = makeLensEmbeddableFactory(
-        () => ({}),
-        () => ({}),
-        {}
+    it('should remove lens migrations before 8.10.0', () => {
+      const lensMigrationObject = getLensMigrations();
+
+      const embeddableMigrations = omitBy(lensMigrationObject, (_, version: string) =>
+        lt(version, '8.10.0')
       );
 
-      const lensMigrations = lensEmbeddableFactory().migrations;
-      const lensMigrationObject =
-        typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
+      const migrations = createUserActionsMigrations({
+        persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
+        lensEmbeddableFactory: () => ({
+          id: 'test',
+          migrations: lensMigrationObject,
+        }),
+      });
+
+      const deferredMigrations = pickBy(
+        migrations,
+        (value: SavedObjectMigrationParams) => !!value.deferred
+      );
+
+      const totalDeferredMigrations = Object.keys(deferredMigrations).length;
+      const totalLensMigrations = Object.keys(embeddableMigrations).length;
+
+      expect(totalDeferredMigrations).toBe(totalLensMigrations);
+    });
+
+    it('should marked lens migrations as deferred correctly', () => {
+      const lensMigrationObject = getLensMigrations();
+
       const lensMigrationObjectWithFakeMigration = {
         ...lensMigrationObject,
         '8.9.0': jest.fn(),
@@ -75,9 +93,14 @@ describe('user actions migrations', () => {
       }
 
       for (const version of lensVersionToNotBeDeferred) {
-        const migration = migrations[version] as SavedObjectMigrationParams;
-        expect(migration.deferred).toBe(false);
-        expect(migration.transform).toEqual(expect.any(Function));
+        /**
+         * Lens migrations before 8.10.0 should not be merge
+         * with the user action migrations. For this reason,
+         * the migration will be either undefined or
+         * the deferred property will not exists
+         */
+        const migration = migrations[version] as SavedObjectMigrationParams | undefined;
+        expect(migration?.deferred).toBeUndefined();
       }
 
       const migrationsWithoutLens = omit<SavedObjectMigrationMap>(migrations, lensVersions);
@@ -90,6 +113,10 @@ describe('user actions migrations', () => {
     });
 
     it('migrates correctly persistable state lens attachments', () => {
+      const contextMock = savedObjectsServiceMock.createMigrationContext({
+        migrationVersion: '8.10.0',
+      });
+
       const lensUserAction =
         mockUsersActions[2] as unknown as SavedObject<PersistableStateAttachmentUserAction>;
 
@@ -108,11 +135,11 @@ describe('user actions migrations', () => {
         persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
         lensEmbeddableFactory: () => ({
           id: 'test',
-          migrations: { '8.9.0': migrateFunction },
+          migrations: { '8.10.0': migrateFunction },
         }),
       });
 
-      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.9.0'])(
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.10.0'])(
         lensUserAction,
         contextMock
       );
@@ -133,6 +160,10 @@ describe('user actions migrations', () => {
     });
 
     it('logs and do not throw in case of a migration error', () => {
+      const contextMock = savedObjectsServiceMock.createMigrationContext({
+        migrationVersion: '8.10.0',
+      });
+
       const lensUserAction =
         mockUsersActions[2] as unknown as SavedObject<PersistableStateAttachmentUserAction>;
 
@@ -144,11 +175,11 @@ describe('user actions migrations', () => {
         persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
         lensEmbeddableFactory: () => ({
           id: 'test',
-          migrations: { '8.9.0': migrateFunction },
+          migrations: { '8.10.0': migrateFunction },
         }),
       });
 
-      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.9.0'])(
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.10.0'])(
         lensUserAction,
         contextMock
       );
@@ -158,7 +189,7 @@ describe('user actions migrations', () => {
       const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
       expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Failed to migrate persistable lens attachment with doc id: mock-user-action-3 version: 8.0.0 error: an error",
+          "Failed to migrate user action persistable lens attachment with doc id: mock-user-action-3 version: 8.10.0 error: an error",
           Object {
             "migrations": Object {
               "comment": Object {
@@ -171,3 +202,17 @@ describe('user actions migrations', () => {
     });
   });
 });
+
+const getLensMigrations = () => {
+  const lensEmbeddableFactory = makeLensEmbeddableFactory(
+    () => ({}),
+    () => ({}),
+    {}
+  );
+
+  const lensMigrations = lensEmbeddableFactory().migrations;
+  const lensMigrationObject =
+    typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
+
+  return lensMigrationObject;
+};

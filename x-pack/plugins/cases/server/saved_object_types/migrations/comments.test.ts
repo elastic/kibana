@@ -396,7 +396,7 @@ describe('comments migrations', () => {
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "Failed to migrate persistable lens attachment with doc id: mock-comment-7 version: 8.0.0 error: an error",
+            "Failed to migrate comment persistable lens attachment with doc id: mock-comment-7 version: 8.0.0 error: an error",
             Object {
               "migrations": Object {
                 "comment": Object {
@@ -460,7 +460,7 @@ describe('comments migrations', () => {
       const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
       expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Failed to migrate comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
+          "Failed to migrate lens comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
           Object {
             "migrations": Object {
               "comment": Object {
@@ -490,7 +490,7 @@ describe('comments migrations', () => {
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "Failed to migrate comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
+            "Failed to migrate lens comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
             Object {
               "migrations": Object {
                 "comment": Object {

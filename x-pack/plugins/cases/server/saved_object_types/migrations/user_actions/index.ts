@@ -18,6 +18,9 @@ import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import { omitBy } from 'lodash';
+import lt from 'semver/functions/lt';
+import valid from 'semver/functions/valid';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { ConnectorTypes } from '../../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
@@ -32,7 +35,7 @@ import { addAssigneesToCreateUserAction } from './assignees';
 import {
   getLensMigrations,
   isDeferredMigration,
-  isPersistableStateAttachmentUserActionSO,
+  isPersistableStateLensAttachmentUserActionSO,
   logError,
 } from '../utils';
 import { MIN_USER_ACTIONS_DEFERRED_KIBANA_VERSION } from '../constants';
@@ -48,6 +51,19 @@ export const createUserActionsMigrations = (
   const embeddableMigrations = getLensMigrations({
     lensEmbeddableFactory: deps.lensEmbeddableFactory,
     migratorFactory: lensMigratorFactory,
+  });
+
+  /**
+   * In 8.9 we introduced the lens persistable attachment type.
+   * For that reason we want to migrate only the 8.10+ lens migrations.
+   * The code below, removes all <= 8.9 migrations and keeps the rest.
+   */
+  const embeddableMigrationsToMerge = omitBy(embeddableMigrations, (_, version: string) => {
+    if (!valid(version)) {
+      return true;
+    }
+
+    return lt(version, MIN_USER_ACTIONS_DEFERRED_KIBANA_VERSION);
   });
 
   const userActionsMigrations = {
@@ -103,7 +119,7 @@ export const createUserActionsMigrations = (
     '8.5.0': addAssigneesToCreateUserAction,
   };
 
-  return mergeSavedObjectMigrationMaps(userActionsMigrations, embeddableMigrations);
+  return mergeSavedObjectMigrationMaps(userActionsMigrations, embeddableMigrationsToMerge);
 };
 
 export const lensMigratorFactory = (
@@ -120,7 +136,7 @@ export const lensMigratorFactory = (
       context: SavedObjectMigrationContext
     ): SavedObjectSanitizedDoc<UserActionPersistedAttributes> => {
       try {
-        if (!isPersistableStateAttachmentUserActionSO(doc)) {
+        if (!isPersistableStateLensAttachmentUserActionSO(doc)) {
           return Object.assign(doc, { references: doc.references ?? [] });
         }
 
@@ -147,7 +163,7 @@ export const lensMigratorFactory = (
           id: doc.id,
           context,
           error,
-          docType: 'persistable lens attachment',
+          docType: 'user action persistable lens attachment',
           docKey: 'comment',
         });
         return Object.assign(doc, { references: doc.references ?? [] });

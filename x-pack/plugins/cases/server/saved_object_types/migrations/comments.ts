@@ -185,7 +185,7 @@ const migrateLensComment = ({
       references: doc.references ?? [],
     };
   } catch (error) {
-    logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
+    logError({ id: doc.id, context, error, docType: 'lens comment', docKey: 'comment' });
     return Object.assign(doc, { references: doc.references ?? [] });
   }
 };
@@ -217,7 +217,7 @@ const migratePersistableLensAttachment = ({
       id: doc.id,
       context,
       error,
-      docType: 'persistable lens attachment',
+      docType: 'comment persistable lens attachment',
       docKey: 'comment',
     });
     return Object.assign(doc, { references: doc.references ?? [] });

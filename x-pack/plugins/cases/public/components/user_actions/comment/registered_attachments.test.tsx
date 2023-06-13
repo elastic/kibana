@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
+import { screen } from '@testing-library/react';
 
 import type {
   AttachmentType,
@@ -14,6 +16,8 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { AttachmentTypeRegistry } from '../../../../common/registry';
 import { getMockBuilderArgs } from '../mock';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 const getLazyComponent = () =>
   React.lazy(() => {
@@ -28,6 +32,8 @@ const getLazyComponent = () =>
   });
 
 describe('createCommentUserActionBuilder', () => {
+  let appMockRender: AppMockRenderer;
+
   const attachmentTypeId = 'test';
   const builderArgs = getMockBuilderArgs();
   const registry = new AttachmentTypeRegistry<AttachmentType<CommonAttachmentViewProps>>(
@@ -70,6 +76,7 @@ describe('createCommentUserActionBuilder', () => {
   };
 
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -120,5 +127,15 @@ describe('createCommentUserActionBuilder', () => {
     expect(
       createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()
     ).toMatchSnapshot();
+  });
+
+  it('renders the children correctly', async () => {
+    const userAction =
+      createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()[0];
+
+    // @ts-expect-error: children is a proper React element
+    appMockRender.render(userAction.children);
+
+    expect(await screen.findByText('My component')).toBeInTheDocument();
   });
 });

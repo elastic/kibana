@@ -14,7 +14,7 @@ import {
   isUserCommentSO,
   logError,
   isPersistableStateAttachmentSO,
-  isPersistableStateAttachmentUserActionSO,
+  isPersistableStateLensAttachmentUserActionSO,
 } from './utils';
 
 describe('migration utils', () => {
@@ -93,13 +93,17 @@ describe('migration utils', () => {
     });
   });
 
-  describe('isPersistableStateAttachmentUserActionSO', () => {
-    it('should return true if it is a persistable attachment SO', () => {
-      expect(isPersistableStateAttachmentUserActionSO(mockUsersActions[1])).toBe(true);
+  describe('isPersistableStateLensAttachmentUserActionSO', () => {
+    it('should return false if it is not a persistable attachment SO', () => {
+      expect(isPersistableStateLensAttachmentUserActionSO(mockUsersActions[0])).toBe(false);
     });
 
-    it('should return false if it is not a persistable attachment SO', () => {
-      expect(isPersistableStateAttachmentUserActionSO(mockUsersActions[0])).toBe(false);
+    it('should return false if it is a persistable attachment SO but not of type .lens', () => {
+      expect(isPersistableStateLensAttachmentUserActionSO(mockUsersActions[1])).toBe(false);
+    });
+
+    it('should return true if it is a lens persistable attachment SO', () => {
+      expect(isPersistableStateLensAttachmentUserActionSO(mockUsersActions[2])).toBe(true);
     });
   });
 });
