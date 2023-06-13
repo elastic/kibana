@@ -14,11 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { DisplayType } from '../../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationField } from '../connector_configuration_field';
-import { ConfigEntry } from '../connector_configuration_logic';
+import { ConfigEntryView } from '../connector_configuration_logic';
 
 interface ConnectorConfigurationFormItemsProps {
   hasDocumentLevelSecurityEnabled: boolean;
-  items: ConfigEntry[];
+  items: ConfigEntryView[];
 }
 
 export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFormItemsProps> = ({

@@ -9,8 +9,8 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { isCategoryEntry } from '../../../../../../common/connectors/is_category_entry';
 import {
-  ConnectorConfigCategoryProperties,
   ConnectorConfigProperties,
   ConnectorConfiguration,
   ConnectorStatus,
@@ -57,11 +57,11 @@ interface ConnectorConfigurationValues {
   shouldStartInEditMode: boolean;
 }
 
-export interface ConfigEntry extends ConnectorConfigProperties {
+interface ConfigEntry extends ConnectorConfigProperties {
   key: string;
 }
 
-interface ConfigEntryView extends ConfigEntry {
+export interface ConfigEntryView extends ConfigEntry {
   is_valid: boolean;
   validation_errors: string[];
 }
@@ -239,12 +239,6 @@ export function dependenciesSatisfied(
   }
 
   return true;
-}
-
-function isCategoryEntry(
-  input: ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
-): input is ConnectorConfigCategoryProperties {
-  return input?.type === 'category';
 }
 
 export const ConnectorConfigurationLogic = kea<
