@@ -83,8 +83,6 @@ export function TransactionErrorRateRuleType(props: Props) {
     }
   );
 
-  const thresholdAsPercent = (params.threshold ?? 0) / 100;
-
   const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
@@ -193,8 +191,8 @@ export function TransactionErrorRateRuleType(props: Props) {
   ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
       series={errorRateChartPreview}
-      yTickFormat={(d: number | null) => asPercent(d, 1)}
-      threshold={thresholdAsPercent}
+      yTickFormat={(d: number | null) => asPercent(d, 100)}
+      threshold={params.threshold}
       uiSettings={services.uiSettings}
       timeSize={params.windowSize}
       timeUnit={params.windowUnit}
