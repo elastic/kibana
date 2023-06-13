@@ -82,6 +82,7 @@ export function getStatsBarData(jobsList: any) {
       }),
       value: 0,
       show: true,
+      group: 0,
     },
     open: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.openJobsLabel', {
@@ -89,6 +90,7 @@ export function getStatsBarData(jobsList: any) {
       }),
       value: 0,
       show: true,
+      group: 0,
     },
     closed: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.closedJobsLabel', {
@@ -96,6 +98,7 @@ export function getStatsBarData(jobsList: any) {
       }),
       value: 0,
       show: true,
+      group: 0,
     },
     failed: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.failedJobsLabel', {
@@ -103,6 +106,7 @@ export function getStatsBarData(jobsList: any) {
       }),
       value: 0,
       show: false,
+      group: 0,
     },
     activeNodes: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
@@ -110,6 +114,7 @@ export function getStatsBarData(jobsList: any) {
       }),
       value: 0,
       show: true,
+      group: 1,
     },
     activeDatafeeds: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
@@ -117,6 +122,7 @@ export function getStatsBarData(jobsList: any) {
       }),
       value: 0,
       show: true,
+      group: 1,
     },
   };
 

@@ -90,19 +90,19 @@ export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
 };
 
 export interface OverviewStatsBarProps {
-  inputStats: Record<string, number>;
+  inputStats: Array<{ label: string; value: number }>;
   dataTestSub?: string;
 }
 
 export const OverviewStatsBar: FC<OverviewStatsBarProps> = ({ inputStats, dataTestSub }) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'m'}>
-      {Object.entries(inputStats).map(([key, value]) => {
+      {inputStats.map(({ value, label }) => {
         return (
-          <EuiFlexItem grow={false} key={key}>
-            <EuiFlexGroup key={key} alignItems={'center'} gutterSize={'s'}>
+          <EuiFlexItem grow={false} key={label}>
+            <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
               <EuiFlexItem grow={false}>
-                <EuiText size={'s'}>{key}:</EuiText>
+                <EuiText size={'s'}>{label}:</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge>{value}</EuiBadge>

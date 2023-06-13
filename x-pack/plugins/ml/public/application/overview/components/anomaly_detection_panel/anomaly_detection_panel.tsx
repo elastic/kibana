@@ -8,7 +8,7 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { zipObject } from 'lodash';
+import { zipObject, groupBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useStorage } from '@kbn/ml-local-storage';
 import {
@@ -72,7 +72,9 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
-  const [statsBarData, setStatsBarData] = useState<Record<string, number>>();
+  const [statsBarData, setStatsBarData] = useState<Array<{ label: string; value: number }>>();
+  const [restStatsBarData, setRestStatsBarData] =
+    useState<Array<{ label: string; value: number }>>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const loadJobs = async () => {
@@ -91,13 +93,19 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
       const stats = getStatsBarData(jobsSummaryList);
 
-      const resultStats = Object.fromEntries(
-        Object.entries(stats).map(([k, v]) => [v.label, v.value])
+      const statGroups = groupBy(
+        Object.entries(stats)
+          .filter(([k, v]) => v.show)
+          .map(([k, v]) => v),
+        'group'
       );
 
       setIsLoading(false);
       setErrorMessage(undefined);
-      setStatsBarData(resultStats);
+
+      setStatsBarData(statGroups[0]);
+      setRestStatsBarData(statGroups[1]);
+
       setGroupsCount(count);
       setGroups(jobsGroups);
       loadOverallSwimLanes(jobsGroups);
@@ -168,10 +176,6 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
     typeof errorMessage === 'undefined' &&
     groupsCount === 0;
 
-  if (noAdJobs) {
-    return <AnomalyDetectionEmptyState />;
-  }
-
   return (
     <CollapsiblePanel
       isOpen={panelsState.adJobs}
@@ -184,21 +188,30 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
           defaultMessage="Anomaly Detection Jobs"
         />
       }
-      headerItems={
-        statsBarData
+      headerItems={[
+        ...(statsBarData
+          ? [<OverviewStatsBar inputStats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />]
+          : []),
+        ...(restStatsBarData
           ? [
-              <OverviewStatsBar inputStats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />,
-              <EuiLink href={manageJobsLink}>
-                {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
-                  defaultMessage: 'Manage jobs',
-                })}
-              </EuiLink>,
+              <OverviewStatsBar
+                inputStats={restStatsBarData}
+                dataTestSub={'mlOverviewJobStatsBarExtra'}
+              />,
             ]
-          : undefined
-      }
+          : []),
+        <EuiLink href={manageJobsLink}>
+          {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
+            defaultMessage: 'Manage jobs',
+          })}
+        </EuiLink>,
+      ]}
     >
+      {noAdJobs ? <AnomalyDetectionEmptyState /> : null}
+
       {typeof errorMessage !== 'undefined' && errorDisplay}
-      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
+
+      {isLoading ? <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" /> : null}
 
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 ? (
         <AnomalyDetectionTable items={groups} chartsService={chartsService} />
