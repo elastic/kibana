@@ -8,9 +8,9 @@
 import path, { join, resolve } from 'path';
 
 export const getDataPath = (filePath: string, fileName: string): string => {
-    const dir = resolve(join(__dirname, filePath));
-  
-    const dataPath = path.join(dir, fileName);
+  const dir = resolve(join(__dirname, filePath));
 
-    return dataPath ?? '';
-}
+  const dataPath = path.join(dir, fileName);
+
+  return dataPath ?? '';
+};

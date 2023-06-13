@@ -96,6 +96,46 @@ describe('send_email module', () => {
     `);
   });
 
+  test('handles authenticated HTML email when available using service', async () => {
+    const sendEmailOptions = getSendEmailOptions({ content:{hasHTMLMessage: true} ,transport: { service: 'other' } },);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "auth": Object {
+            "pass": "changeme",
+            "user": "elastic",
+          },
+          "host": undefined,
+          "port": undefined,
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": true,
+          },
+        },
+      ]
+    `);
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<html><body><span>a message</span></body></html>",
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+  });
+
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
     const getOAuthClientCredentialsAccessTokenMock =
@@ -146,7 +186,9 @@ describe('send_email module', () => {
           "options": Object {
             "connectorId": "1",
             "content": Object {
+              "hasHTMLMessage": false,
               "message": "a message",
+              "messageHTML": null,
               "subject": "a subject",
             },
             "hasAuth": true,
@@ -736,9 +778,9 @@ describe('send_email module', () => {
 });
 
 function getSendEmailOptions(
-  { content = {}, routing = {}, transport = {} } = {},
+  { content = {hasHTMLMessage:false}, routing = {}, transport = {} } = {},
   proxySettings?: ProxySettings,
-  customHostSettings?: CustomHostSettings
+  customHostSettings?: CustomHostSettings,
 ) {
   const configurationUtilities = actionsConfigMock.create();
   if (proxySettings) {
@@ -747,9 +789,12 @@ function getSendEmailOptions(
   if (customHostSettings) {
     configurationUtilities.getCustomHostSettings.mockReturnValue(customHostSettings);
   }
+
+  const HTMLmock = "<html><body><span>a message</span></body></html>";
   return {
     content: {
       message: 'a message',
+      messageHTML: content.hasHTMLMessage ? HTMLmock : null,
       subject: 'a subject',
       ...content,
     },
@@ -788,6 +833,7 @@ function getSendEmailOptionsNoAuth(
     content: {
       ...content,
       message: 'a message',
+      messageHTML: null,
       subject: 'a subject',
     },
     routing: {

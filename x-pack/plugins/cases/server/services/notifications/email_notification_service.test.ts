@@ -9,6 +9,12 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { userProfiles } from '../../client/user_profiles.mock';
 import { mockCases } from '../../mocks';
+import {
+  CommonEmailMock,
+  WithoutCaseUrlEmailMock,
+  MultiTagsEmailMock,
+  WithoutTagsEmailMock,
+} from './mock';
 import { EmailNotificationService } from './email_notification_service';
 
 describe('EmailNotificationService', () => {
@@ -40,7 +46,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -51,7 +57,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
+      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -63,7 +70,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -74,7 +81,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
+      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -91,7 +99,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -102,7 +110,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
+      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['physical_dinosaur@elastic.co'],
     });
@@ -114,7 +123,7 @@ describe('EmailNotificationService', () => {
       theCase: { ...caseSO, namespaces: ['space1'] },
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -125,7 +134,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
+      messageHTML: CommonEmailMock('https://example.com/app/security/cases/mock-id-1'),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -145,7 +155,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -156,7 +166,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/s/test-space/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\nView the case details: https://example.com/s/test-space/app/security/cases/mock-id-1',
+      messageHTML: CommonEmailMock('https://example.com/s/test-space/app/security/cases/mock-id-1'),
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -175,7 +186,7 @@ describe('EmailNotificationService', () => {
       theCase: caseSO,
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -187,6 +198,7 @@ describe('EmailNotificationService', () => {
       },
       message:
         'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n',
+      messageHTML: WithoutCaseUrlEmailMock,
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -198,7 +210,7 @@ describe('EmailNotificationService', () => {
       theCase: { ...caseSO, attributes: { ...caseSO.attributes, tags: ['one', 'two'] } },
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -209,7 +221,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: one, two\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: one, two\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
+      messageHTML: MultiTagsEmailMock,
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -221,7 +234,7 @@ describe('EmailNotificationService', () => {
       theCase: { ...caseSO, attributes: { ...caseSO.attributes, tags: [] } },
     });
 
-    expect(notifications.getEmailService().sendPlainTextEmail).toHaveBeenCalledWith({
+    expect(notifications.getEmailService().sendHTMLEmail).toHaveBeenCalledWith({
       context: {
         relatedObjects: [
           {
@@ -232,7 +245,8 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nView the case details: https://example.com/app/security/cases/mock-id-1',
+      messageHTML: WithoutTagsEmailMock,
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -249,7 +263,7 @@ describe('EmailNotificationService', () => {
     expect(clientArgs.logger.warn).toHaveBeenCalledWith(
       'Could not notifying assignees. Email service is not available.'
     );
-    expect(notifications.getEmailService().sendPlainTextEmail).not.toHaveBeenCalled();
+    expect(notifications.getEmailService().sendHTMLEmail).not.toHaveBeenCalled();
   });
 
   it('logs a warning and not notify assignees on error', async () => {
@@ -265,6 +279,6 @@ describe('EmailNotificationService', () => {
     expect(clientArgs.logger.warn).toHaveBeenCalledWith(
       'Error notifying assignees: Cannot get user profiles'
     );
-    expect(notifications.getEmailService().sendPlainTextEmail).not.toHaveBeenCalled();
+    expect(notifications.getEmailService().sendHTMLEmail).not.toHaveBeenCalled();
   });
 });

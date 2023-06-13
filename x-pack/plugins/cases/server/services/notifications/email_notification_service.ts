@@ -51,10 +51,7 @@ export class EmailNotificationService implements NotificationService {
     return `[Elastic][Cases] ${theCase.attributes.title}`;
   }
 
-  private static getPlainTextMessage(
-    theCase: CaseSavedObjectTransformed,
-    caseUrl: string|null,
-  ) {
+  private static getPlainTextMessage(theCase: CaseSavedObjectTransformed, caseUrl: string | null) {
     const lineBreak = '\r\n\r\n';
     let message = `You are assigned to an Elastic Case.${lineBreak}`;
     message = `${message}Title: ${theCase.attributes.title}${lineBreak}`;
@@ -65,9 +62,7 @@ export class EmailNotificationService implements NotificationService {
       message = `${message}Tags: ${theCase.attributes.tags.join(', ')}${lineBreak}`;
     }
 
-  
-
-    message = `${message}View the case details: ${caseUrl}`;
+    message = caseUrl ? `${message}View the case details: ${caseUrl}` : message;
 
     return message;
   }
@@ -79,12 +74,14 @@ export class EmailNotificationService implements NotificationService {
         return;
       }
 
-      const caseUrl = this.publicBaseUrl ? getCaseViewPath({
-        publicBaseUrl: this.publicBaseUrl,
-        caseId: theCase.id,
-        owner: theCase.attributes.owner,
-        spaceId: this.spaceId,
-      }) : null;
+      const caseUrl = this.publicBaseUrl
+        ? getCaseViewPath({
+            publicBaseUrl: this.publicBaseUrl,
+            caseId: theCase.id,
+            owner: theCase.attributes.owner,
+            spaceId: this.spaceId,
+          })
+        : null;
 
       const uids = new Set(assignees.map((assignee) => assignee.uid));
       const userProfiles = await this.security.userProfiles.bulkGet({ uids });
@@ -95,10 +92,7 @@ export class EmailNotificationService implements NotificationService {
         .map((user) => user.email);
 
       const subject = EmailNotificationService.getTitle(theCase);
-      const message = EmailNotificationService.getPlainTextMessage(
-        theCase,
-        caseUrl
-      );
+      const message = EmailNotificationService.getPlainTextMessage(theCase, caseUrl);
 
       const messageHTML = await getEmailBodyContent(theCase, caseUrl);
 
