@@ -97,6 +97,12 @@ export function getAnalyticsJobsStats(
   );
   resultStats.failed.show = resultStats.failed.value > 0;
   resultStats.total.value = analyticsStats.count;
+
+  if (resultStats.total.value === 0) {
+    resultStats.started.show = false;
+    resultStats.stopped.show = false;
+  }
+
   return resultStats;
 }
 
