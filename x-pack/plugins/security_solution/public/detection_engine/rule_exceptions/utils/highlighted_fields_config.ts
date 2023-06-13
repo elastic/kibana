@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * The highlightedFieldsPrefixToExclude is an array of prefixes
+ * that should be disregarded in the Rule Exception.These prefixes
+ * are irrelevant to the exception and should be ignored,even if
+ * they were retrieved as Highlighted Fields from the "getEventFieldsToDisplay".
+ */
 export const highlightedFieldsPrefixToExclude = ['kibana.alert.rule', 'signal.rule', 'rule'];
 
 export const getKibanaAlertIdField = (id: string) => `kibana.alert.${id}`;

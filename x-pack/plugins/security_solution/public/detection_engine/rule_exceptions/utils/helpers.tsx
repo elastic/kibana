@@ -780,7 +780,6 @@ export const defaultEndpointExceptionItems = (
 ): ExceptionsBuilderExceptionItem[] => {
   const eventCode = alertEcsData['event.code'] ?? alertEcsData.event?.code;
 
-  // TODO EventCode can be used from '@kbn/securitysolution-ecs';
   switch (eventCode) {
     case 'behavior':
       return [
