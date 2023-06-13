@@ -7,16 +7,15 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import { GetStartedComponent } from '@kbn/security-solution-plugin/public/types';
-import { GetStarted } from './get_started';
 import { KibanaServicesProvider } from '../../services';
 import { EssSecurityPluginStartDependencies } from '../../types';
+import { LandingCards } from '../../common/components/landing_cards';
 
 export const getSecurityGetStartedComponent =
-  (core: CoreStart, pluginsStart: EssSecurityPluginStartDependencies): GetStartedComponent =>
+  (core: CoreStart, pluginsStart: EssSecurityPluginStartDependencies): React.ComponentType =>
   () =>
     (
       <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
-        <GetStarted />
+        <LandingCards />
       </KibanaServicesProvider>
     );

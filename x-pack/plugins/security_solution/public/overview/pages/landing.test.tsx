@@ -16,12 +16,6 @@ jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../common/components/landing_page', () => ({
-  LandingPageComponent: jest
-    .fn()
-    .mockReturnValue(<div data-test-subj="default-get-started-page" />),
-}));
-
 jest.mock('react-use/lib/useObservable', () => jest.fn((fn) => fn()));
 
 describe('LandingPage', () => {
@@ -52,10 +46,6 @@ describe('LandingPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-  it('renders the default component', () => {
-    const { queryByTestId } = renderPage();
-    expect(queryByTestId('default-get-started-page')).toBeInTheDocument();
   });
 
   it('renders the get started component', () => {

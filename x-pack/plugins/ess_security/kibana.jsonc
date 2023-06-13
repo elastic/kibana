@@ -11,7 +11,9 @@
     "requiredPlugins": [
       "securitySolution"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "cloudExperiments",
+    ],
     "requiredBundles": [ "kibanaReact"]
   }
 }

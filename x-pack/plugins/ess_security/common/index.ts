@@ -7,5 +7,3 @@
 
 export const PLUGIN_ID = 'essSecurity';
 export const PLUGIN_NAME = 'essSecurity';
-
-export const ADD_DATA_PATH = `/app/integrations/browse/security`;

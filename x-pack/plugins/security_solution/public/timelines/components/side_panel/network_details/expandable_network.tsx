@@ -28,7 +28,6 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../explore/network/containers/details';
 import { networkModel } from '../../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
-import { LandingCards } from '../../../../common/components/landing_cards';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 interface ExpandableNetworkProps {
