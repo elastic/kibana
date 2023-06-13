@@ -7,7 +7,7 @@
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';

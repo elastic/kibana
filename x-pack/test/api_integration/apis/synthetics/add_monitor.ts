@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { ConfigKey, DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { SYNTHETICS_API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { format as formatUrl } from 'url';

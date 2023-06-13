@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   syntheticsApiKeyID,
   syntheticsApiKeyObjectType,
