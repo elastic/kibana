@@ -125,3 +125,19 @@ export interface GetCspRuleTemplateResponse {
   page: number;
   perPage: number;
 }
+
+// CNVM DASHBOARD
+
+export interface CnvmStatistics {
+  criticalCount: number | undefined;
+  highCount: number | undefined;
+  mediumCount: number | undefined;
+  resourcesScanned: number | undefined;
+  cloudRegions: number | undefined;
+}
+
+export interface CnvmDashboardData {
+  cnvmStatistics: CnvmStatistics;
+}
+
+export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
