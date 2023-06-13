@@ -8,26 +8,48 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
-import { BehaviorSubject } from 'rxjs';
 import { duration as momentDuration } from 'moment';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
-import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HttpService, createCookieSessionStorageFactory } from '@kbn/core-http-server-internal';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { httpServerMock, createConfigService } from '@kbn/core-http-server-mocks';
 
 let server: HttpService;
 
 let logger: ReturnType<typeof loggingSystemMock.create>;
 let env: Env;
 let coreContext: CoreContext;
-const configService = configServiceMock.create();
+
+const configService = createConfigService({
+  server: {
+    hosts: ['http://1.2.3.4'],
+    maxPayload: new ByteSizeValue(1024),
+    shutdownTimeout: momentDuration('5s'),
+    autoListen: true,
+    healthCheck: {
+      delay: 2000,
+    },
+    ssl: {
+      verificationMode: 'none',
+    } as any,
+    compression: { enabled: true, brotli: { enabled: false } as any },
+    xsrf: {
+      disableProtection: true,
+      allowlist: [],
+    },
+    requestId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
+  } as any,
+});
 const contextSetup = contextServiceMock.createSetupContract();
 const contextPreboot = contextServiceMock.createPrebootContract();
 
@@ -39,50 +61,6 @@ const setupDeps = {
 const prebootDeps = {
   context: contextPreboot,
 };
-
-configService.atPath.mockImplementation((path) => {
-  if (path === 'server') {
-    return new BehaviorSubject({
-      hosts: ['http://1.2.3.4'],
-      maxPayload: new ByteSizeValue(1024),
-      shutdownTimeout: momentDuration('5s'),
-      autoListen: true,
-      healthCheck: {
-        delay: 2000,
-      },
-      ssl: {
-        verificationMode: 'none',
-      },
-      compression: { enabled: true, brotli: { enabled: false } },
-      xsrf: {
-        disableProtection: true,
-        allowlist: [],
-      },
-      customResponseHeaders: {},
-      securityResponseHeaders: {},
-      requestId: {
-        allowFromAnyIp: true,
-        ipAllowlist: [],
-      },
-      cors: {
-        enabled: false,
-      },
-    } as any);
-  }
-  if (path === 'externalUrl') {
-    return new BehaviorSubject({
-      policy: [],
-    } as any);
-  }
-  if (path === 'csp') {
-    return new BehaviorSubject({
-      strict: false,
-      disableEmbedding: false,
-      warnLegacyBrowsers: true,
-    });
-  }
-  throw new Error(`Unexpected config path: ${path}`);
-});
 
 interface User {
   id: string;

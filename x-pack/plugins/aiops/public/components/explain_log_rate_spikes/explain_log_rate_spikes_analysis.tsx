@@ -27,6 +27,7 @@ import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -69,6 +70,11 @@ const groupResultsOnMessage = i18n.translate(
 const resultsGroupedOffId = 'aiopsExplainLogRateSpikesGroupingOff';
 const resultsGroupedOnId = 'aiopsExplainLogRateSpikesGroupingOn';
 
+export interface ExplainLogRateSpikesAnalysisResults {
+  significantTerms: SignificantTerm[];
+  significantTermsGroups: SignificantTermGroup[];
+}
+
 /**
  * ExplainLogRateSpikes props require a data view.
  */
@@ -85,6 +91,8 @@ interface ExplainLogRateSpikesAnalysisProps {
   searchQuery: estypes.QueryDslQueryContainer;
   /** Sample probability to be applied to random sampler aggregations */
   sampleProbability: number;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -94,6 +102,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   windowParameters,
   searchQuery,
   sampleProbability,
+  onAnalysisCompleted,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -174,6 +183,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         setOverrides({ loaded, remainingFieldCandidates, significantTerms: data.significantTerms });
       } else {
         setOverrides(undefined);
+        if (onAnalysisCompleted) {
+          onAnalysisCompleted({
+            significantTerms: data.significantTerms,
+            significantTermsGroups: data.significantTermsGroups,
+          });
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
