@@ -100,31 +100,28 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       },
     } = params;
 
+    const commonProps = {
+      environment,
+      kuery,
+      serviceName,
+      transactionType,
+      latencyAggregationType,
+      start,
+      end,
+    };
+
     const [serviceTransactionGroups, serviceTransactionGroupsAlerts] =
       await Promise.all([
         getServiceTransactionGroups({
-          environment,
-          kuery,
           apmEventClient,
-          serviceName,
-          transactionType,
-          latencyAggregationType,
-          start,
-          end,
           documentType,
           rollupInterval,
           useDurationSummary,
+          ...commonProps,
         }),
-
         getServiceTranactionGroupsAlerts({
           apmAlertsClient,
-          kuery,
-          environment,
-          serviceName,
-          transactionType,
-          latencyAggregationType,
-          start,
-          end,
+          ...commonProps,
         }),
       ]);
 

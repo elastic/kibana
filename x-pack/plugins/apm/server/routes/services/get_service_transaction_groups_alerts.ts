@@ -90,18 +90,16 @@ export async function getServiceTranactionGroupsAlerts({
           {
             bool: {
               should: [
-                {
-                  ...termQuery(
-                    ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
-                    RuleAggregationType[latencyAggregationType]
-                  ),
-                },
+                ...termQuery(
+                  ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
+                  RuleAggregationType[latencyAggregationType]
+                ),
                 {
                   bool: {
                     must_not: [
                       {
                         exists: {
-                          field: RuleAggregationType[latencyAggregationType],
+                          field: ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
                         },
                       },
                     ],
