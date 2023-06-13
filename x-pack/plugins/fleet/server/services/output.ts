@@ -37,7 +37,7 @@ import {
   kafkaPartitionType,
   kafkaCompressionType,
 } from '../../common/constants';
-import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents } from '../../common/services';
 import {
   OutputUnauthorizedError,
   OutputInvalidError,
@@ -301,8 +301,7 @@ class OutputService {
 
   public getDefaultESHosts(): string[] {
     const cloud = appContextService.getCloud();
-    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+    const cloudUrl = cloud?.elasticsearchUrl;
     const cloudHosts = cloudUrl ? [cloudUrl] : undefined;
     const flagHosts =
       appContextService.getConfig()!.agents?.elasticsearch?.hosts &&
