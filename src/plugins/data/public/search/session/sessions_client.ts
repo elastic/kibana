@@ -86,7 +86,7 @@ export class SessionsClient {
   }
 
   public async rename(sessionId: string, newName: string): Promise<void> {
-    await this.update(sessionId, { name: newName, version });
+    await this.update(sessionId, { name: newName });
   }
 
   public async extend(sessionId: string, expires: string): Promise<void> {
