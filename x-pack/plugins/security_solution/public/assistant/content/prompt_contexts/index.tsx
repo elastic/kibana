@@ -6,11 +6,11 @@
  */
 
 import type { PromptContext, PromptContextTemplate } from '@kbn/elastic-assistant';
-import { USER_PROMPTS } from '@kbn/elastic-assistant';
 import * as i18nDataQuality from '@kbn/ecs-data-quality-dashboard';
-import * as i18nEventDetails from '../../../common/components/event_details/translations';
-import * as i18nDetections from '../../../detections/pages/detection_engine/rules/translations';
 import * as i18n from './translations';
+import * as i18nDetections from '../../../detections/pages/detection_engine/rules/translations';
+import * as i18nEventDetails from '../../../common/components/event_details/translations';
+import * as i18nUserPrompts from '../prompts/user/translations';
 
 export const PROMPT_CONTEXT_ALERT_CATEGORY = 'alert';
 export const PROMPT_CONTEXT_EVENT_CATEGORY = 'event';
@@ -27,25 +27,27 @@ export const PROMPT_CONTEXTS: Record<PromptContext['category'], PromptContextTem
   /**
    * Alert summary view context, made available on the alert details flyout
    */
-  PROMPT_CONTEXT_ALERT_CATEGORY: {
+  [PROMPT_CONTEXT_ALERT_CATEGORY]: {
     category: PROMPT_CONTEXT_ALERT_CATEGORY,
-    suggestedUserPrompt: USER_PROMPTS.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
+    suggestedUserPrompt:
+      i18nUserPrompts.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
     description: i18nEventDetails.ALERT_SUMMARY_CONTEXT_DESCRIPTION(i18n.VIEW),
     tooltip: i18nEventDetails.ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   },
   /**
    * Event summary view context, made available from Timeline events
    */
-  PROMPT_CONTEXT_EVENT_CATEGORY: {
+  [PROMPT_CONTEXT_EVENT_CATEGORY]: {
     category: PROMPT_CONTEXT_EVENT_CATEGORY,
-    suggestedUserPrompt: USER_PROMPTS.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
+    suggestedUserPrompt:
+      i18nUserPrompts.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
     description: i18nEventDetails.EVENT_SUMMARY_CONTEXT_DESCRIPTION(i18n.VIEW),
     tooltip: i18nEventDetails.EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   },
   /**
    * Data Quality dashboard context, made available on the Data Quality dashboard
    */
-  DATA_QUALITY_DASHBOARD_CATEGORY: {
+  [DATA_QUALITY_DASHBOARD_CATEGORY]: {
     category: DATA_QUALITY_DASHBOARD_CATEGORY,
     suggestedUserPrompt: i18nDataQuality.DATA_QUALITY_SUGGESTED_USER_PROMPT,
     description: i18nDataQuality.DATA_QUALITY_PROMPT_CONTEXT_PILL(i18n.INDEX),
@@ -54,7 +56,7 @@ export const PROMPT_CONTEXTS: Record<PromptContext['category'], PromptContextTem
   /**
    * Detection Rules context, made available on the Rule Management page when rules are selected
    */
-  PROMPT_CONTEXT_DETECTION_RULES_CATEGORY: {
+  [PROMPT_CONTEXT_DETECTION_RULES_CATEGORY]: {
     category: PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
     suggestedUserPrompt: i18nDetections.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
     description: i18nDetections.RULE_MANAGEMENT_CONTEXT_DESCRIPTION,

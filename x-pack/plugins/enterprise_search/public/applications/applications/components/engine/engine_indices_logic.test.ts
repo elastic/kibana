@@ -33,6 +33,13 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
     },
   ],
   name: DEFAULT_VALUES.engineName,
+  template: {
+    script: {
+      lang: 'mustache',
+      params: { query_string: '*' },
+      source: '',
+    },
+  },
   updated_at_millis: 1679501369566,
 };
 
