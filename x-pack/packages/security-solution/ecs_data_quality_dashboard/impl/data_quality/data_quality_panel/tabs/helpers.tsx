@@ -66,6 +66,7 @@ export const getTabs = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  isAssistantEnabled,
   onAddToNewCase,
   partitionedFieldMetadata,
   pattern,
@@ -94,6 +95,7 @@ export const getTabs = ({
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   pattern: string;
@@ -113,6 +115,7 @@ export const getTabs = ({
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhase={ilmPhase}
         indexName={indexName}
+        isAssistantEnabled={isAssistantEnabled}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
         pattern={pattern}
@@ -140,6 +143,7 @@ export const getTabs = ({
         formatNumber={formatNumber}
         ilmPhase={ilmPhase}
         indexName={indexName}
+        isAssistantEnabled={isAssistantEnabled}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
         patternDocsCount={patternDocsCount}

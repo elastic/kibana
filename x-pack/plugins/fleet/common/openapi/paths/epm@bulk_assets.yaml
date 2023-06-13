@@ -1,0 +1,32 @@
+post:
+  summary: Bulk get assets
+  tags:
+    - Elastic Package Manager (EPM)
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/get_bulk_assets_response.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: bulk-get-assets
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            assetIds:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  id:
+                    type: string
+              description: list of items necessary to fetch assets
+          required:
+            - assetIds

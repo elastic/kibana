@@ -321,7 +321,7 @@ async function executor(
   }
 
   let actualMessage = params.message;
-  let actualHTMLMessage = params.messageHTML;
+  const actualHTMLMessage = params.messageHTML;
   if (configurationUtilities.enableFooterInEmail()) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,

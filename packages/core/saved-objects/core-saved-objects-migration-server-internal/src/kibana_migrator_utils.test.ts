@@ -17,16 +17,16 @@ import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   calculateTypeStatuses,
-  createMultiPromiseDefer,
+  createWaitGroupMap,
   getCurrentIndexTypesMap,
   getIndicesInvolvedInRelocation,
   indexMapToIndexTypesMap,
 } from './kibana_migrator_utils';
 import { INDEX_MAP_BEFORE_SPLIT } from './kibana_migrator_utils.fixtures';
 
-describe('createMultiPromiseDefer', () => {
+describe('createWaitGroupMap', () => {
   it('creates defer objects with the same Promise', () => {
-    const defers = createMultiPromiseDefer(['.kibana', '.kibana_cases']);
+    const defers = createWaitGroupMap(['.kibana', '.kibana_cases']);
     expect(Object.keys(defers)).toHaveLength(2);
     expect(defers['.kibana'].promise).toEqual(defers['.kibana_cases'].promise);
     expect(defers['.kibana'].resolve).not.toEqual(defers['.kibana_cases'].resolve);
@@ -34,7 +34,7 @@ describe('createMultiPromiseDefer', () => {
   });
 
   it('the common Promise resolves when all defers resolve', async () => {
-    const defers = createMultiPromiseDefer(['.kibana', '.kibana_cases']);
+    const defers = createWaitGroupMap(['.kibana', '.kibana_cases']);
     let resolved = 0;
     Object.values(defers).forEach((defer) => defer.promise.then(() => ++resolved));
     defers['.kibana'].resolve();

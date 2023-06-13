@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// Maximum number of aggregation buckets allowed
+const MAX_BUCKET_SIZE = 10000;
 
 export const getAggregatedAnomaliesQuery = ({
   from,
@@ -52,6 +54,7 @@ export const getAggregatedAnomaliesQuery = ({
     number_of_anomalies: {
       terms: {
         field: 'job_id',
+        size: MAX_BUCKET_SIZE,
       },
       aggs: {
         entity: {

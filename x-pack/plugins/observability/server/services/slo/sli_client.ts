@@ -13,13 +13,12 @@ import {
   MsearchMultisearchBody,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { assertNever } from '@kbn/std';
 import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-
-import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
+import { assertNever } from '@kbn/std';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
-import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 
 export interface SLIClient {
   fetchSLIDataFrom(
@@ -50,13 +49,13 @@ export class DefaultSLIClient implements SLIClient {
     const longestLookbackWindow = sortedLookbackWindows[0];
     const longestDateRange = toDateRange({
       duration: longestLookbackWindow.duration,
-      isRolling: true,
+      type: 'rolling',
     });
 
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
-        index: `${SLO_DESTINATION_INDEX_NAME}*`,
+        index: SLO_DESTINATION_INDEX_PATTERN,
         aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
       });
 
@@ -66,7 +65,7 @@ export class DefaultSLIClient implements SLIClient {
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
-        index: `${SLO_DESTINATION_INDEX_NAME}*`,
+        index: SLO_DESTINATION_INDEX_PATTERN,
         aggs: toLookbackWindowsSlicedAggregationsQuery(slo, sortedLookbackWindows),
       });
 
@@ -159,8 +158,8 @@ function handleWindowedResult(
   }
 
   const indicatorDataPerLookbackWindow: Record<WindowName, IndicatorData> = {};
-  lookbackWindows.forEach((lookbackWindow) => {
-    const windowAggBuckets = aggregations[lookbackWindow.name]?.buckets;
+  for (const lookbackWindow of lookbackWindows) {
+    const windowAggBuckets = aggregations[lookbackWindow.name]?.buckets ?? [];
     if (!Array.isArray(windowAggBuckets) || windowAggBuckets.length === 0) {
       throw new InternalQueryError('Invalid aggregation bucket response');
     }
@@ -176,7 +175,7 @@ function handleWindowedResult(
       total,
       dateRange: { from: new Date(bucket.from_as_string!), to: new Date(bucket.to_as_string!) },
     };
-  });
+  }
 
   return indicatorDataPerLookbackWindow;
 }
