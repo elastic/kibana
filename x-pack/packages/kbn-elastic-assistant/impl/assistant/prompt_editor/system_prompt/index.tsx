@@ -43,16 +43,17 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
   const handleEditSystemPrompt = useCallback(() => setIsEditing(true), []);
 
   return (
-    <div data-test-subj="systemPrompt">
+    <div>
       {selectedPrompt == null || isEditing ? (
         <SelectSystemPrompt
           clearSelectedSystemPrompt={handleClearSystemPrompt}
           conversation={conversation}
-          selectedPrompt={selectedPrompt}
-          setIsEditing={setIsEditing}
+          data-test-subj="systemPrompt"
+          isClearable={true}
           isEditing={isEditing}
           isOpen={isEditing}
-          isClearable={true}
+          selectedPrompt={selectedPrompt}
+          setIsEditing={setIsEditing}
         />
       ) : (
         <EuiFlexGroup alignItems="flexStart" gutterSize="none">

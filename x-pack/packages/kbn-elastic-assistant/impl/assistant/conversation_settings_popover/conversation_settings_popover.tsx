@@ -51,7 +51,7 @@ export const ConversationSettingsPopover: React.FC<ConversationSettingsPopoverPr
     }, []);
 
     // Hide settings panel when modal is visible (to keep visual clutter minimal)
-    const onConnectorModalVisibilityChange = useCallback((isVisible: boolean) => {
+    const onDescendantModalVisibilityChange = useCallback((isVisible: boolean) => {
       if (popoverPanelRef.current) {
         popoverPanelRef.current.style.visibility = isVisible ? 'hidden' : 'visible';
       }
@@ -97,7 +97,7 @@ export const ConversationSettingsPopover: React.FC<ConversationSettingsPopoverPr
               actionTypeRegistry={actionTypeRegistry}
               conversation={conversation}
               http={http}
-              onConnectorModalVisibilityChange={onConnectorModalVisibilityChange}
+              onConnectorModalVisibilityChange={onDescendantModalVisibilityChange}
             />
           </EuiFormRow>
 
@@ -110,8 +110,10 @@ export const ConversationSettingsPopover: React.FC<ConversationSettingsPopoverPr
           >
             <SelectSystemPrompt
               conversation={conversation}
-              selectedPrompt={selectedPrompt}
+              fullWidth={false}
               isEditing={true}
+              onSystemPromptModalVisibilityChange={onDescendantModalVisibilityChange}
+              selectedPrompt={selectedPrompt}
               showTitles={true}
             />
           </EuiFormRow>

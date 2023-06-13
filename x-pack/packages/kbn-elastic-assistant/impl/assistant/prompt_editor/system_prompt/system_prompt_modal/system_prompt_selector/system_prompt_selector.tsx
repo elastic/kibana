@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
-  EuiHealth,
   EuiHighlight,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -139,45 +138,43 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { color, label, value } = option;
+      const { label, value } = option;
       return (
         <EuiFlexGroup
           alignItems="center"
-          justifyContent="spaceBetween"
-          component={'span'}
           className={'parentFlexGroup'}
+          component={'span'}
+          gutterSize={'none'}
+          justifyContent="spaceBetween"
         >
-          <EuiFlexItem
-            grow={false}
-            component={'span'}
-            css={css`
-              max-width: 50%;
-            `}
-          >
-            <EuiHealth color={color}>
-              <span className={contentClassName}>
-                <EuiHighlight
-                  search={searchValue}
-                  css={css`
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    max-width: 50%;
-                  `}
-                >
-                  {label}
-                </EuiHighlight>
-              </span>
-            </EuiHealth>
+          <EuiFlexItem grow={1} component={'span'}>
+            <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
+              <EuiFlexItem grow={false} component={'span'}>
+                <span className={contentClassName}>
+                  <EuiHighlight
+                    search={searchValue}
+                    css={css`
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      max-width: 70%;
+                    `}
+                  >
+                    {label}
+                  </EuiHighlight>
+                </span>
+              </EuiFlexItem>
+              {value?.isNewConversationDefault && (
+                <EuiFlexItem grow={false} component={'span'}>
+                  <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
+                    <EuiIcon type={'starFilled'} />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {value?.isNewConversationDefault && (
-            <EuiFlexItem grow={false} component={'span'}>
-              <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
-                <EuiIcon type={'starFilled'} />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
+
           {!value?.isDefault && (
-            <EuiFlexItem grow={false} component={'span'}>
+            <EuiFlexItem grow={2} component={'span'}>
               <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
                 <EuiButtonIcon
                   iconType="cross"

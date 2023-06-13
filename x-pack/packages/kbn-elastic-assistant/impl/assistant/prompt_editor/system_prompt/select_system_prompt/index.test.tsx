@@ -16,6 +16,35 @@ const props: Props = {
   selectedPrompt: undefined,
 };
 
+const mockUseAssistantContext = {
+  allSystemPrompts: [
+    {
+      id: 'default-system-prompt',
+      content: 'default',
+      name: 'default',
+      promptType: 'system',
+      isDefault: true,
+      isNewConversationDefault: true,
+    },
+    {
+      id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
+      content: 'superhero',
+      name: 'superhero',
+      promptType: 'system',
+      isDefault: true,
+    },
+  ],
+  setAllSystemPrompts: jest.fn(),
+};
+jest.mock('../../../../assistant_context', () => {
+  const original = jest.requireActual('../../../../assistant_context');
+
+  return {
+    ...original,
+    useAssistantContext: () => mockUseAssistantContext,
+  };
+});
+
 describe('SelectSystemPrompt', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -31,8 +60,16 @@ describe('SelectSystemPrompt', () => {
     expect(queryByTestId('promptSuperSelect')).not.toBeInTheDocument();
   });
 
-  it('renders the clear system prompt button when isEditing is true', () => {
-    const { getByTestId } = render(<SelectSystemPrompt {...props} isEditing={true} />);
+  it('does NOT render the clear system prompt button when isEditing is true', () => {
+    const { queryByTestId } = render(<SelectSystemPrompt {...props} isEditing={true} />);
+
+    expect(queryByTestId('clearSystemPrompt')).not.toBeInTheDocument();
+  });
+
+  it('renders the clear system prompt button when isEditing is true AND isClearable is true', () => {
+    const { getByTestId } = render(
+      <SelectSystemPrompt {...props} isClearable={true} isEditing={true} />
+    );
 
     expect(getByTestId('clearSystemPrompt')).toBeInTheDocument();
   });
@@ -63,19 +100,25 @@ describe('SelectSystemPrompt', () => {
         {...props}
         clearSelectedSystemPrompt={clearSelectedSystemPrompt}
         isEditing={true}
+        isClearable={true}
       />
     );
 
     userEvent.click(getByTestId('clearSystemPrompt'));
 
-    expect(clearSelectedSystemPrompt).toHaveBeenCalledWith(null);
+    expect(clearSelectedSystemPrompt).toHaveBeenCalledTimes(1);
   });
 
   it('hides the select when the clear button is clicked', () => {
     const setIsEditing = jest.fn();
 
     const { getByTestId } = render(
-      <SelectSystemPrompt {...props} setIsEditing={setIsEditing} isEditing={true} />
+      <SelectSystemPrompt
+        {...props}
+        setIsEditing={setIsEditing}
+        isEditing={true}
+        isClearable={true}
+      />
     );
 
     userEvent.click(getByTestId('clearSystemPrompt'));

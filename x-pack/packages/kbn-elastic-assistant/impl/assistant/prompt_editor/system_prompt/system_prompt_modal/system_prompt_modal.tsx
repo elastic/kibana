@@ -34,7 +34,11 @@ import {
   SystemPromptSelector,
 } from './system_prompt_selector/system_prompt_selector';
 
-const StyledEuiModal = styled(EuiModal)``;
+const StyledEuiModal = styled(EuiModal)`
+  min-width: 400px;
+  max-width: 400px;
+  max-height: 80vh;
+`;
 
 interface Props {
   systemPrompts: Prompt[];
@@ -168,7 +172,7 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
             />
           </EuiFormRow>
 
-          <EuiFormRow label={i18n.SYSTEM_PROMPT_PROMPT} fullWidth>
+          <EuiFormRow label={i18n.SYSTEM_PROMPT_PROMPT}>
             <EuiTextArea onChange={handlePromptTextChange} value={prompt} />
           </EuiFormRow>
 

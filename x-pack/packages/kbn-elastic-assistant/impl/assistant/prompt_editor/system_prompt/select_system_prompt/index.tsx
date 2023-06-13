@@ -29,9 +29,11 @@ export interface Props {
   conversation: Conversation | undefined;
   selectedPrompt: Prompt | undefined;
   clearSelectedSystemPrompt?: () => void;
+  fullWidth?: boolean;
   isClearable?: boolean;
   isEditing?: boolean;
   isOpen?: boolean;
+  onSystemPromptModalVisibilityChange?: (isVisible: boolean) => void;
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
   showTitles?: boolean;
 }
@@ -40,10 +42,13 @@ const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
 const SelectSystemPromptComponent: React.FC<Props> = ({
   conversation,
-  isClearable = false,
-  isOpen = false,
   selectedPrompt,
+  clearSelectedSystemPrompt,
+  fullWidth = true,
+  isClearable = false,
   isEditing = false,
+  isOpen = false,
+  onSystemPromptModalVisibilityChange,
   setIsEditing,
   showTitles = false,
 }) => {
@@ -96,29 +101,34 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
     (newSystemPrompts: Prompt[]) => {
       setAllSystemPrompts(newSystemPrompts);
       setIsSystemPromptModalVisible(false);
+      onSystemPromptModalVisibilityChange?.(false);
     },
-    [setAllSystemPrompts]
+    [onSystemPromptModalVisibilityChange, setAllSystemPrompts]
   );
 
   // SuperSelect State/Actions
-  const options = useMemo(() => getOptions(allSystemPrompts), [allSystemPrompts]);
+  const options = useMemo(
+    () => getOptions({ prompts: allSystemPrompts, showTitles }),
+    [allSystemPrompts, showTitles]
+  );
   const onChange = useCallback(
     (selectedSystemPromptId) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
-        // onConnectorModalVisibilityChange?.(true);
+        onSystemPromptModalVisibilityChange?.(true);
         setIsSystemPromptModalVisible(true);
         return;
       }
       setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
       setIsEditing?.(false);
     },
-    [allSystemPrompts, setIsEditing, setSelectedSystemPrompt]
+    [allSystemPrompts, onSystemPromptModalVisibilityChange, setIsEditing, setSelectedSystemPrompt]
   );
 
   const clearSystemPrompt = useCallback(() => {
     setSelectedSystemPrompt(undefined);
     setIsEditing?.(false);
-  }, [setIsEditing, setSelectedSystemPrompt]);
+    clearSelectedSystemPrompt?.();
+  }, [clearSelectedSystemPrompt, setIsEditing, setSelectedSystemPrompt]);
 
   const onShowSelectSystemPrompt = useCallback(() => {
     setIsEditing?.(true);
@@ -127,7 +137,11 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup data-test-subj="selectSystemPrompt" gutterSize="none">
-      <EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          max-width: 100%;
+        `}
+      >
         {isEditing && (
           <EuiFormRow
             css={css`
@@ -136,7 +150,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           >
             <EuiSuperSelect
               data-test-subj="promptSuperSelect"
-              fullWidth={true}
+              fullWidth={fullWidth}
               hasDividers
               itemLayoutAlign="top"
               isOpen={isOpenLocal && !isSystemPromptModalVisible}

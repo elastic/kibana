@@ -118,10 +118,15 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
       (cId: string) => {
-        deleteConversation(cId);
+        if (selectedConversationId === cId) {
+          setSelectedConversationId(getPreviousConversationId(conversationIds, cId));
+        }
+        setTimeout(() => {
+          deleteConversation(cId);
+        }, 0);
         // onSystemPromptDeleted(cId);
       },
-      [deleteConversation]
+      [conversationIds, deleteConversation, selectedConversationId]
     );
 
     const onChange = useCallback(
