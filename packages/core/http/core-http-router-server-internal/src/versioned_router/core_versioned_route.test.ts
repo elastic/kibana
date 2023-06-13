@@ -116,7 +116,7 @@ describe('Versioned route', () => {
     ).not.toThrow();
   });
 
-  it('only allows versions date strings for public APIs', () => {
+  it('only allows correctly formatted version date strings for public APIs', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
@@ -136,7 +136,7 @@ describe('Versioned route', () => {
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'public' })
-        .addVersion({ version: '2020-02-02', validate: false }, handlerFn)
+        .addVersion({ version: '2023-10-31', validate: false }, handlerFn)
     ).not.toThrow();
   });
 
