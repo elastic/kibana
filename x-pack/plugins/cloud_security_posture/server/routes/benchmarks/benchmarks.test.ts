@@ -27,7 +27,6 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    // @ts-ignore: Property 'mock' does not exist on type 'VersionedRouteRegistrar<"get", any>'
     const [config] = router.versioned.get.mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
@@ -38,7 +37,6 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    // @ts-ignore: Property 'mock' does not exist on type 'VersionedRouteRegistrar<"get", any>'
     const versionedRouter = router.versioned.get.mock.results[0].value;
 
     const handler = versionedRouter.addVersion.mock.calls[0][1];
@@ -58,7 +56,6 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    // @ts-ignore: Property 'mock' does not exist on type 'VersionedRouteRegistrar<"get", any>'
     const versionedRouter = router.versioned.get.mock.results[0].value;
 
     const handler = versionedRouter.addVersion.mock.calls[0][1];
