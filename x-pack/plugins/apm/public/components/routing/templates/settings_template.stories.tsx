@@ -28,7 +28,6 @@ const coreMock = {
 const configMock = {
   featureFlags: {
     agentConfigurationAvailable: true,
-    schemaAvailable: true,
     configurableIndicesAvailable: true,
   },
 };

@@ -24,7 +24,6 @@ export interface ConfigSchema {
     migrationToFleetAvailable: boolean;
     sourcemapApiAvailable: boolean;
     spacesAvailable: boolean;
-    schemaAvailable: boolean;
     storageExplorerAvailable: boolean;
   };
 }

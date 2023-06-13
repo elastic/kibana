@@ -187,7 +187,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.spacesAvailable (any)',
-        'xpack.apm.featureFlags.schemaAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
