@@ -34,7 +34,7 @@ export const createSavedQuery = (
         },
       ],
     },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', version: '1' },
   });
 
 export const deleteSavedQueries = () => {
