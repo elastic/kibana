@@ -84,11 +84,18 @@ export const TagCloudChart = ({
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
 
-  const bucketFormatter = bucket
-    ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
-    : null;
+  const bucketFormatter = useMemo(() => {
+    return bucket
+      ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
+      : null;
+  }, [bucket]);
 
   const tagCloudData = useMemo(() => {
+    // clear warning when data changes
+    if (warning) {
+      setWarning(false);
+    }
+
     const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
     const tagColumn = bucket ? bucketColumn!.id : null;
     const metricColumn = getColumnByAccessor(metric, visData.columns)!.id;
