@@ -89,7 +89,9 @@ export const convertToTermsParams = ({
   aggs,
   metricColumns,
   visType,
-}: CommonBucketConverterArgs<BUCKET_TYPES.TERMS | BUCKET_TYPES.SIGNIFICANT_TERMS>): TermsParams | null => {
+}: CommonBucketConverterArgs<
+  BUCKET_TYPES.TERMS | BUCKET_TYPES.SIGNIFICANT_TERMS
+>): TermsParams | null => {
   if (!agg.aggParams) {
     return null;
   }
@@ -105,7 +107,7 @@ export const convertToTermsParams = ({
       include,
       exclude,
       orderBy: { type: 'significant' },
-    }
+    };
   }
 
   const orderByWithAgg = getOrderByWithAgg({ agg, dataView, aggs, metricColumns, visType });
@@ -129,7 +131,13 @@ export const convertToTermsParams = ({
 
 export const convertToTermsColumn = (
   aggId: string,
-  { agg, dataView, aggs, metricColumns, visType }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS | BUCKET_TYPES.SIGNIFICANT_TERMS>,
+  {
+    agg,
+    dataView,
+    aggs,
+    metricColumns,
+    visType,
+  }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS | BUCKET_TYPES.SIGNIFICANT_TERMS>,
   label: string,
   isSplit: boolean
 ): TermsColumn | null => {
