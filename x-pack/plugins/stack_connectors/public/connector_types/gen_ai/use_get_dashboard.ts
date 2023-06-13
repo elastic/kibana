@@ -31,13 +31,21 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
   const [spaceId, setSpaceId] = useState<string | null>(null);
 
   useEffect(() => {
+    let didCancel = false;
     if (spaces) {
-      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+      spaces.getActiveSpace().then((space) => {
+        if (!didCancel) setSpaceId(space.id);
+      });
     }
+
+    return () => {
+      didCancel = true;
+    };
   }, [spaces]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [dashboardUrl, setDashboardUrl] = useState<string | null>(null);
+  const [dashboardCheckComplete, setDashboardCheckComplete] = useState<boolean>(false);
   const abortCtrl = useRef(new AbortController());
 
   const setUrl = useCallback(
@@ -58,7 +66,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
     let didCancel = false;
     const fetchData = async (dashboardId: string) => {
       abortCtrl.current = new AbortController();
-      setIsLoading(true);
+      if (!didCancel) setIsLoading(true);
       try {
         const res = await getDashboard({
           http,
@@ -68,6 +76,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
         });
 
         if (!didCancel) {
+          setDashboardCheckComplete(true);
           setIsLoading(false);
           if (res.data?.available) {
             setUrl(dashboardId);
@@ -82,6 +91,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
         }
       } catch (error) {
         if (!didCancel) {
+          setDashboardCheckComplete(true);
           setIsLoading(false);
           toasts.addDanger({
             title: i18n.GET_DASHBOARD_API_ERROR,
@@ -91,7 +101,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
       }
     };
 
-    if (dashboardUrl == null && spaceId != null) {
+    if (spaceId != null && !dashboardCheckComplete) {
       abortCtrl.current.abort();
       fetchData(getDashboardId(spaceId));
     }
@@ -101,7 +111,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
       setIsLoading(false);
       abortCtrl.current.abort();
     };
-  }, [http, toasts, spaceId, dashboard.locator, setUrl, dashboardUrl, connectorId]);
+  }, [connectorId, dashboardCheckComplete, dashboardUrl, http, setUrl, spaceId, toasts]);
 
   return {
     isLoading,
