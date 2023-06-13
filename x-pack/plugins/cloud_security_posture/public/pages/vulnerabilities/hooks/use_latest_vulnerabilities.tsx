@@ -9,7 +9,10 @@ import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { number } from 'io-ts';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  getSafeVulnerabilitiesQueryFilter,
+  LATEST_VULNERABILITIES_INDEX_PATTERN,
+} from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { FindingsBaseEsQuery } from '../../../common/types';
@@ -29,24 +32,7 @@ interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
 
 export const getFindingsQuery = ({ query, sort, pageIndex, pageSize }: VulnerabilitiesQuery) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query: {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter || []),
-        { exists: { field: 'vulnerability.score.base' } },
-        { exists: { field: 'vulnerability.score.version' } },
-        { exists: { field: 'vulnerability.severity' } },
-        { exists: { field: 'resource.name' } },
-        { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
-      ],
-      must_not: [
-        ...(query?.bool?.must_not || []),
-        { match_phrase: { 'vulnerability.severity': 'UNKNOWN' } },
-      ],
-    },
-  },
+  query: getSafeVulnerabilitiesQueryFilter(query),
   from: pageIndex * pageSize,
   size: pageSize,
   sort,
