@@ -96,5 +96,6 @@
     "@kbn/ml-kibana-theme",
     "@kbn/ml-runtime-field-utils",
     "@kbn/ml-date-utils",
+    "@kbn/core-notifications-browser-mocks",
   ],
 }

@@ -25,6 +25,7 @@ import {
   RuleActionFrequency,
   RuleActionParam,
 } from '@kbn/alerting-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -246,6 +247,7 @@ export const ActionForm = ({
         group: defaultActionGroupId,
         params: {},
         frequency: defaultRuleFrequency,
+        uuid: uuidv4(),
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     } else {
@@ -259,6 +261,7 @@ export const ActionForm = ({
           group: defaultActionGroupId,
           params: {},
           frequency: DEFAULT_FREQUENCY,
+          uuid: uuidv4(),
         });
         setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
       }
@@ -431,7 +434,7 @@ export const ActionForm = ({
               actionItem={actionItem}
               actionConnector={actionConnector}
               index={index}
-              key={`action-form-action-at-${index}`}
+              key={`action-form-action-at-${actionItem.uuid}`}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
