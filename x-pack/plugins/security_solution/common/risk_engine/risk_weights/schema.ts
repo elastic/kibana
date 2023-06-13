@@ -21,8 +21,8 @@ const userWeight = t.type({
 
 const identifierWeights = t.union([
   t.exact(t.intersection([hostWeight, userWeight])),
-  t.exact(hostWeight),
-  t.exact(userWeight),
+  t.exact(t.intersection([hostWeight, t.partial({ user: t.undefined })])),
+  t.exact(t.intersection([userWeight, t.partial({ host: t.undefined })])),
 ]);
 
 const riskCategories = fromEnum('riskCategories', RiskCategories);
