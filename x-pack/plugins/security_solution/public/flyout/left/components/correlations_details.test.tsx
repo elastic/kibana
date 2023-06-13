@@ -14,7 +14,7 @@ import { CorrelationsDetails } from './correlations_details';
 import { type CasesByAlertId, CaseStatuses } from '@kbn/cases-plugin/common/api';
 import type { SelectedDataView } from '../../../common/store/sourcerer/model';
 import { TestProviders } from '../../../common/mock';
-import { LeftFlyoutContext } from '../context';
+import { LeftFlyoutContext, type LeftPanelContext } from '../context';
 
 jest.mock('../../../timelines/containers/details');
 jest.mock('../../../common/containers/sourcerer');
@@ -45,11 +45,13 @@ const mockUseCorrelationsResult: UseCorrelationsResult = {
   cases: mockCasesByAlertId,
 };
 
-const contextValue = {
+const contextValue: LeftPanelContext = {
   indexName: 'index',
   eventId: 'event',
   getFieldsData: () => {},
   dataFormattedForFieldBrowser: [],
+  data: undefined,
+  dataAsNestedObject: null,
 };
 
 const renderCorrelationDetails = () => {
