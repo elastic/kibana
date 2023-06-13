@@ -773,7 +773,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
+      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
