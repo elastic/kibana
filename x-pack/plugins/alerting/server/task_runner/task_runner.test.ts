@@ -106,7 +106,6 @@ describe('Task Runner', () => {
     skip: {
       enabled: false,
       delay: 3000,
-      max_attempts: 20,
     },
   };
 
@@ -1744,7 +1743,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, hasError: true }));
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
 
     testAlertingEventLogCalls({
       status: 'error',
@@ -1784,7 +1783,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, hasError: true }));
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
 
     testAlertingEventLogCalls({
       setRuleName: false,
@@ -1818,9 +1817,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(
-      generateRunnerResult({ successRatio: 0, interval: '5m', hasError: true })
-    );
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, interval: '5m' }));
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -2518,9 +2515,7 @@ describe('Task Runner', () => {
       }
     );
     const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(
-      generateRunnerResult({ successRatio: 0, success: false, hasError: true })
-    );
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, success: false }));
   });
 
   test('successfully stores the success ratio', async () => {
@@ -2555,11 +2550,7 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     ruleType.executor.mockClear();
     expect(runnerResult).toEqual(
-      generateRunnerResult({
-        successRatio: 0.75,
-        history: [true, true, true, false],
-        hasError: true,
-      })
+      generateRunnerResult({ successRatio: 0.75, history: [true, true, true, false] })
     );
   });
 
@@ -3110,7 +3101,6 @@ describe('Task Runner', () => {
         skip: {
           enabled: true,
           delay: mockedTaskConfig.skip.delay,
-          max_attempts: 20,
         },
       },
       context: taskRunnerFactoryInitializerParams,

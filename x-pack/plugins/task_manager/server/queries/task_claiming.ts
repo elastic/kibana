@@ -40,6 +40,7 @@ import {
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
+import { TaskConfig } from '../config';
 
 export interface TaskClaimingOpts {
   logger: Logger;
@@ -49,6 +50,7 @@ export interface TaskClaimingOpts {
   maxAttempts: number;
   excludedTaskTypes: string[];
   getCapacity: (taskType?: string) => number;
+  taskConfig: TaskConfig;
 }
 
 export interface OwnershipClaimingOpts {
@@ -108,6 +110,7 @@ export class TaskClaiming {
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
+  private readonly taskConfig: TaskConfig;
 
   /**
    * Constructs a new TaskStore.
@@ -125,6 +128,7 @@ export class TaskClaiming {
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
+    this.taskConfig = opts.taskConfig;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -224,7 +228,11 @@ export class TaskClaiming {
                 initialCapacity
               );
 
-              return { stats, docs, timing: stopTaskTimer() };
+              const filteredDocs = this.taskConfig.skip.enabled
+                ? this.removeDocsWithUnknownParams(docs)
+                : docs;
+
+              return { stats, docs: filteredDocs, timing: stopTaskTimer() };
             })
           );
         },
@@ -234,6 +242,20 @@ export class TaskClaiming {
         1
       )
     );
+  }
+  private removeDocsWithUnknownParams(docs: ConcreteTaskInstance[]): ConcreteTaskInstance[] {
+    return docs.filter((doc) => {
+      try {
+        const def = this.definitions.get(doc.taskType);
+        if (def.paramsSchema) {
+          def.paramsSchema.validate(doc.params);
+        }
+        return true;
+      } catch (e) {
+        this.logger.debug(`Task Manager has skipped claiming ${doc.id} as it has invalid params.`);
+        return false;
+      }
+    });
   }
 
   private executeClaimAvailableTasks = async ({

@@ -551,41 +551,26 @@ export class TaskManagerRunner implements TaskRunner {
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(
-        ({
-          runAt: originalRunAt,
-          schedule: reschedule,
-          state: originalState,
-          attempts = 0,
-        }: SuccessfulRunResult & { attempts: number }) => {
+        ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
           const { startedAt, schedule, state: taskState, taskType, id } = this.instance.task;
-          const { skip, hasError } = unwrap(result);
-          const interval = reschedule?.interval ?? schedule?.interval;
+          let processedRunAt =
+            runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!;
+          let processedState = state;
 
-          let runAt = originalRunAt || intervalFromDate(startedAt!, interval)!;
-          let state = originalState;
-          let skipAttempts = this.instance.task.skip?.attempts ?? 0;
-
-          if (skip) {
+          if (unwrap(result).skip) {
             this.logger.warn(
               `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
             );
-            runAt = moment().add(this.taskConfig.skip.delay, 'millisecond').toDate();
-            state = taskState;
-            skipAttempts = skipAttempts + 1;
-          }
-          if (!skip && !hasError) {
-            skipAttempts = 0;
+            processedRunAt = moment().add(this.taskConfig.skip.delay, 'millisecond').toDate();
+            processedState = taskState;
           }
 
           return asOk({
-            runAt,
-            state,
+            runAt: processedRunAt,
+            state: processedState,
             schedule: reschedule ?? schedule,
             attempts,
             status: TaskStatus.Idle,
-            skip: {
-              attempts: skipAttempts,
-            },
           });
         }
       ),

@@ -56,7 +56,6 @@ const getMockRunContext = (runTask: ConcreteTaskInstance) => ({
     skip: {
       enabled: false,
       delay: 3000,
-      max_attempts: 20,
     },
   },
   kbnServer: {},

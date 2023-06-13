@@ -40,7 +40,6 @@ const executeParams = {
     skip: {
       enabled: false,
       delay: 3000,
-      max_attempts: 20,
     },
   },
 };
@@ -886,7 +885,7 @@ test('throws an error when action data is invalid', async () => {
 
   const result = await actionExecutor.execute({
     ...executeParams,
-    taskConfig: { skip: { enabled: true, delay: 3000, max_attempts: 20 } },
+    taskConfig: { skip: { enabled: true, delay: 3000 } },
   });
 
   expect(result).toEqual({

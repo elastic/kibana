@@ -43,7 +43,6 @@ describe('config validation', () => {
           "skip": Object {
             "delay": 3000,
             "enabled": true,
-            "max_attempts": 20,
           },
         },
         "unsafe": Object {
@@ -102,7 +101,6 @@ describe('config validation', () => {
           "skip": Object {
             "delay": 3000,
             "enabled": true,
-            "max_attempts": 20,
           },
         },
         "unsafe": Object {
@@ -164,7 +162,6 @@ describe('config validation', () => {
           "skip": Object {
             "delay": 3000,
             "enabled": true,
-            "max_attempts": 20,
           },
         },
         "unsafe": Object {

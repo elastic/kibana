@@ -50,7 +50,6 @@ describe('Configuration Statistics Aggregator', () => {
         skip: {
           enabled: false,
           delay: 3000,
-          max_attempts: 20,
         },
       },
     };

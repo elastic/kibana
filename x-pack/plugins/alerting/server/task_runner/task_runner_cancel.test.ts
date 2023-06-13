@@ -84,7 +84,6 @@ describe('Task Runner Cancel', () => {
     skip: {
       enabled: false,
       delay: 3000,
-      max_attempts: 20,
     },
   };
   let alertingEventLoggerInitializer: RuleContextOpts;

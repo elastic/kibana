@@ -16,6 +16,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
+import { RecoveredActionGroupId } from '../common';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -73,7 +74,7 @@ describe('Create Lifecycle', () => {
 
   describe('register()', () => {
     test('throws if RuleType Id contains invalid characters', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: 'test',
         name: 'Test',
         actionGroups: [
@@ -109,7 +110,7 @@ describe('Create Lifecycle', () => {
     });
 
     test('throws if RuleType Id isnt a string', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: 123 as unknown as string,
         name: 'Test',
         actionGroups: [
@@ -135,7 +136,7 @@ describe('Create Lifecycle', () => {
     });
 
     test('throws if RuleType ruleTaskTimeout is not a valid duration', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: '123',
         name: 'Test',
         actionGroups: [
@@ -164,7 +165,7 @@ describe('Create Lifecycle', () => {
     });
 
     test('throws if defaultScheduleInterval isnt valid', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: '123',
         name: 'Test',
         actionGroups: [
@@ -194,7 +195,7 @@ describe('Create Lifecycle', () => {
     });
 
     test('logs warning if defaultScheduleInterval is less than configured minimumScheduleInterval and enforce = false', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: '123',
         name: 'Test',
         actionGroups: [
@@ -222,7 +223,7 @@ describe('Create Lifecycle', () => {
     });
 
     test('logs warning and updates default if defaultScheduleInterval is less than configured minimumScheduleInterval and enforce = true', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: '123',
         name: 'Test',
         actionGroups: [
@@ -255,7 +256,16 @@ describe('Create Lifecycle', () => {
     });
 
     test('throws if RuleType action groups contains reserved group id', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default' | 'NotReserved'> = {
+      const ruleType: RuleType<
+        never,
+        never,
+        never,
+        never,
+        never,
+        'default' | 'NotReserved',
+        'recovered',
+        {}
+      > = {
         id: 'test',
         name: 'Test',
         actionGroups: [
@@ -291,28 +301,29 @@ describe('Create Lifecycle', () => {
     });
 
     test('allows an RuleType to specify a custom recovery group', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome'> = {
-        id: 'test',
-        name: 'Test',
-        actionGroups: [
-          {
-            id: 'default',
-            name: 'Default',
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome', {}> =
+        {
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          recoveryActionGroup: {
+            id: 'backToAwesome',
+            name: 'Back To Awesome',
           },
-        ],
-        defaultActionGroupId: 'default',
-        recoveryActionGroup: {
-          id: 'backToAwesome',
-          name: 'Back To Awesome',
-        },
-        executor: jest.fn(),
-        producer: 'alerts',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        validate: {
-          params: { validate: (params) => params },
-        },
-      };
+          executor: jest.fn(),
+          producer: 'alerts',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          validate: {
+            params: { validate: (params) => params },
+          },
+        };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
@@ -330,25 +341,26 @@ describe('Create Lifecycle', () => {
     });
 
     test('allows an RuleType to specify a custom rule task timeout', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome'> = {
-        id: 'test',
-        name: 'Test',
-        actionGroups: [
-          {
-            id: 'default',
-            name: 'Default',
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome', {}> =
+        {
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          ruleTaskTimeout: '13m',
+          executor: jest.fn(),
+          producer: 'alerts',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          validate: {
+            params: { validate: (params) => params },
           },
-        ],
-        defaultActionGroupId: 'default',
-        ruleTaskTimeout: '13m',
-        executor: jest.fn(),
-        producer: 'alerts',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        validate: {
-          params: { validate: (params) => params },
-        },
-      };
+        };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(registry.get('test').ruleTaskTimeout).toBe('13m');
@@ -362,7 +374,8 @@ describe('Create Lifecycle', () => {
         never,
         never,
         'default' | 'backToAwesome',
-        'backToAwesome'
+        'backToAwesome',
+        {}
       > = {
         id: 'test',
         name: 'Test',
@@ -399,7 +412,7 @@ describe('Create Lifecycle', () => {
     });
 
     test('registers the executor with the task manager', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: 'test',
         name: 'Test',
         actionGroups: [
@@ -434,7 +447,7 @@ describe('Create Lifecycle', () => {
     });
 
     test('shallow clones the given rule type', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: 'test',
         name: 'Test',
         actionGroups: [
@@ -821,8 +834,17 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
   id: ActionGroupIds,
   context: string,
   state: string
-): RuleType<never, never, {}, never, never, ActionGroupIds> {
-  const baseAlert: RuleType<never, never, {}, never, never, ActionGroupIds> = {
+): RuleType<never, never, {}, never, never, ActionGroupIds, RecoveredActionGroupId, {}> {
+  const baseAlert: RuleType<
+    never,
+    never,
+    {},
+    never,
+    never,
+    ActionGroupIds,
+    RecoveredActionGroupId,
+    {}
+  > = {
     id,
     name: `${id}-name`,
     actionGroups: [],

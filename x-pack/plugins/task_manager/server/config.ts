@@ -55,7 +55,6 @@ const taskConfig = schema.object({
   skip: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     delay: schema.number({ defaultValue: 3000, min: 0 }),
-    max_attempts: schema.number({ defaultValue: 20, min: 1 }),
   }),
 });
 

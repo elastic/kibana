@@ -146,7 +146,6 @@ export class TaskRunnerFactory {
         if (
           taskConfig.skip.enabled &&
           executorResult.status === 'error' &&
-          (taskInstance.skip?.attempts || 0) < taskConfig.skip.max_attempts &&
           executorResult.message?.includes(validationErrorPrefix)
         ) {
           return { state: taskInstance.state, skip: true };
