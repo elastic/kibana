@@ -11,9 +11,9 @@ import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregati
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createApmRule } from '../alerts/alerting_api_helper';
-import { AggregationType, ApmRuleType } from '../../../../plugins/apm/common/rules/apm_rule_types';
 import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
 
 type TransactionsGroupsMainStatistics =
