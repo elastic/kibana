@@ -14,7 +14,7 @@ import {
   ALERT_RISK_SCORE,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { RiskWeights } from '../../../common/risk_engine';
+import type { IdentifierType, RiskWeights } from '../../../common/risk_engine';
 import { withSecuritySpan } from '../../utils/with_security_span';
 import {
   buildCategoryScoreAssignment,
@@ -28,7 +28,6 @@ import type {
   CalculateRiskScoreAggregations,
   GetScoresParams,
   GetScoresResponse,
-  IdentifierType,
   RiskScore,
   RiskScoreBucket,
 } from './types';

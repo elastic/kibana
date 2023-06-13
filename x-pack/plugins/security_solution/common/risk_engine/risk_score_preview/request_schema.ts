@@ -7,11 +7,11 @@
 
 import * as t from 'io-ts';
 import { DataViewId } from '../../detection_engine/rule_schema';
+import { identifierTypeSchema } from '../identifier_types';
 import { riskWeightsSchema } from '../risk_weights/schema';
 
 const afterKey = t.record(t.string, t.string);
 
-export type RiskScorePreviewRequestSchema = t.TypeOf<typeof riskScorePreviewRequestSchema>;
 export const riskScorePreviewRequestSchema = t.exact(
   t.partial({
     after_keys: t.partial({
@@ -22,7 +22,7 @@ export const riskScorePreviewRequestSchema = t.exact(
     debug: t.boolean,
     filter: t.unknown,
     page_size: t.number,
-    identifier_type: t.keyof({ user: null, host: null }),
+    identifier_type: identifierTypeSchema,
     range: t.type({
       start: t.string,
       end: t.string,
@@ -30,3 +30,4 @@ export const riskScorePreviewRequestSchema = t.exact(
     weights: riskWeightsSchema,
   })
 );
+export type RiskScorePreviewRequestSchema = t.TypeOf<typeof riskScorePreviewRequestSchema>;

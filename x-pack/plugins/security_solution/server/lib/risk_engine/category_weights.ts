@@ -8,13 +8,12 @@
 import { keyBy, merge } from 'lodash';
 import type {
   GlobalRiskWeight,
+  IdentifierType,
   RiskCategoryRiskWeight,
   RiskWeight,
   RiskWeights,
 } from '../../../common/risk_engine';
 import { RiskCategories, RiskWeightTypes } from '../../../common/risk_engine';
-
-import type { IdentifierType } from './types';
 
 const RISK_CATEGORIES = Object.values(RiskCategories);
 

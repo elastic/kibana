@@ -7,9 +7,7 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { RiskWeights } from '../../../common/risk_engine';
-
-export type IdentifierType = 'user' | 'host';
+import type { IdentifierType, RiskWeights } from '../../../common/risk_engine';
 
 export interface GetScoresParams {
   afterKeys: AfterKeys;

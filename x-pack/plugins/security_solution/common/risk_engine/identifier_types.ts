@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './risk_weights';
-export * from './identifier_types';
+import * as t from 'io-ts';
+
+export const identifierTypeSchema = t.keyof({ user: null, host: null });
+export type IdentifierTypeSchema = t.TypeOf<typeof identifierTypeSchema>;
+export type IdentifierType = IdentifierTypeSchema;
