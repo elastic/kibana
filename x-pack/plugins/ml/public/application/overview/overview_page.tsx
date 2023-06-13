@@ -7,10 +7,12 @@
 
 import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_OVERVIEW_PANELS, MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
 import { CollapsiblePanel } from '../components/collapsible_panel';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
@@ -21,11 +23,12 @@ import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warnin
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana, useMlLink } from '../contexts/kibana';
 import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { useIsServerless } from '../contexts/kibana/use_is_serverless';
+import { getMlNodesCount } from '../ml_nodes_check/check_ml_nodes';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -42,6 +45,10 @@ export const OverviewPage: FC = () => {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
+
+  const viewNodesLink = useMlLink({
+    page: ML_PAGES.MEMORY_USAGE,
+  });
 
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
@@ -86,6 +93,24 @@ export const OverviewPage: FC = () => {
             header={
               <FormattedMessage id="xpack.ml.overview.nodesPanel.header" defaultMessage="Nodes" />
             }
+            headerItems={[
+              <OverviewStatsBar
+                inputStats={[
+                  {
+                    label: i18n.translate('xpack.ml.overview.nodesPanel.totalNodesLabel', {
+                      defaultMessage: 'Total',
+                    }),
+                    value: getMlNodesCount(),
+                  },
+                ]}
+                dataTestSub={'mlOverviewAnalyticsStatsBar'}
+              />,
+              <EuiLink href={viewNodesLink}>
+                {i18n.translate('xpack.ml.overview.nodesPanel.viewNodeLink', {
+                  defaultMessage: 'View nodes',
+                })}
+              </EuiLink>,
+            ]}
           >
             <NodesList compactView />
           </CollapsiblePanel>
