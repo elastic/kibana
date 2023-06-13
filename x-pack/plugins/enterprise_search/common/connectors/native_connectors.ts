@@ -834,7 +834,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Tenant Id',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.tenantIdLabel',
+          {
+            defaultMessage: 'Tenant ID',
+          }
+        ),
         options: [],
         order: 1,
         required: true,
@@ -849,7 +854,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Tenant Name',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.tenantNameLabel',
+          {
+            defaultMessage: 'Tenant name',
+          }
+        ),
         options: [],
         order: 2,
         required: true,
@@ -864,7 +874,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Client Id',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.clientIdLabel',
+          {
+            defaultMessage: 'Client ID',
+          }
+        ),
         options: [],
         order: 3,
         required: true,
@@ -879,7 +894,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Secret Value',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.secretValueLabel',
+          {
+            defaultMessage: 'Secret value',
+          }
+        ),
         options: [],
         order: 4,
         required: true,
@@ -894,13 +914,24 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: 'Comma-separated list of sites',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.siteCollectionsLabel',
+          {
+            defaultMessage: 'Comma-separated list of sites',
+          }
+        ),
         options: [],
         order: 5,
         required: true,
         sensitive: false,
-        tooltip:
-          'A comma-separated list of sites to ingest data from. Use * to include all available sites.',
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.siteCollectionsTooltip',
+          {
+            defaultMessage:
+              'A comma-separated list of sites to ingest data from. ' +
+              'Use * to include all available sites.',
+          }
+        ),
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
