@@ -53,7 +53,7 @@ export interface DataViewAndSavedSearch {
 
 export async function getDataViewAndSavedSearch({
   savedSearchService,
-  dataViewsService: dataViews,
+  dataViewsService,
   savedSearchId,
 }: {
   savedSearchService: SavedSearchPublicPluginStart;
@@ -74,7 +74,7 @@ export async function getDataViewAndSavedSearch({
     return resp;
   }
   const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
-  resp.dataView = await dataViews.get(dataViewId!);
+  resp.dataView = await dataViewsService.get(dataViewId!);
   resp.savedSearch = ss;
   return resp;
 }
