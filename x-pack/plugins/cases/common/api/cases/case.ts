@@ -280,7 +280,7 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * The category of the case.
      */
-    category: rt.string,
+    category: rt.union([rt.array(rt.string), rt.string]),
   })
 );
 
