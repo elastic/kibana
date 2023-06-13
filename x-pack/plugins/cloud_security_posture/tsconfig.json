@@ -48,7 +48,6 @@
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
     "@kbn/share-plugin",
-    "@kbn/cloud-security-posture-plugin",
   ],
   "exclude": [
     "target/**/*",
