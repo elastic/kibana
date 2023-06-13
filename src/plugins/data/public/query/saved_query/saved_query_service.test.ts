@@ -9,6 +9,7 @@
 import { createSavedQueryService } from './saved_query_service';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SavedQueryAttributes } from '../../../common';
+import { SAVED_QUERY_BASE_URL } from '../../../common/constants';
 
 const http = httpServiceMock.createStartContract();
 
@@ -45,7 +46,7 @@ describe('saved query service', () => {
     it('should post the stringified given attributes', async () => {
       await createQuery(savedQueryAttributes);
       expect(http.post).toBeCalled();
-      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_create', {
+      expect(http.post).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/_create`, {
         body: '{"title":"foo","description":"bar","query":{"language":"kuery","query":"response:200"},"filters":[]}',
         version,
       });
@@ -56,7 +57,7 @@ describe('saved query service', () => {
     it('should put the ID & stringified given attributes', async () => {
       await updateQuery('foo', savedQueryAttributes);
       expect(http.put).toBeCalled();
-      expect(http.put).toHaveBeenCalledWith('/api/saved_query/foo', {
+      expect(http.put).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/foo`, {
         body: '{"title":"foo","description":"bar","query":{"language":"kuery","query":"response:200"},"filters":[]}',
         version,
       });
@@ -71,7 +72,7 @@ describe('saved query service', () => {
       });
       const result = await getAllSavedQueries();
       expect(http.post).toBeCalled();
-      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_all', { version });
+      expect(http.post).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/_all`, { version });
       expect(result).toEqual([{ attributes: savedQueryAttributes }]);
     });
   });
@@ -84,7 +85,7 @@ describe('saved query service', () => {
       });
       const result = await findSavedQueries();
       expect(http.post).toBeCalled();
-      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_find', {
+      expect(http.post).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/_find`, {
         body: '{"page":1,"perPage":50,"search":""}',
         version,
       });
@@ -99,7 +100,7 @@ describe('saved query service', () => {
     it('should get the given ID', async () => {
       await getSavedQuery('my_id');
       expect(http.get).toBeCalled();
-      expect(http.get).toHaveBeenCalledWith('/api/saved_query/my_id', { version });
+      expect(http.get).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/my_id`, { version });
     });
   });
 
@@ -107,7 +108,7 @@ describe('saved query service', () => {
     it('should delete the given ID', async () => {
       await deleteSavedQuery('my_id');
       expect(http.delete).toBeCalled();
-      expect(http.delete).toHaveBeenCalledWith('/api/saved_query/my_id', { version });
+      expect(http.delete).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/my_id`, { version });
     });
   });
 
@@ -115,7 +116,7 @@ describe('saved query service', () => {
     it('should get the total', async () => {
       await getSavedQueryCount();
       expect(http.get).toBeCalled();
-      expect(http.get).toHaveBeenCalledWith('/api/saved_query/_count', { version });
+      expect(http.get).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/_count`, { version });
     });
   });
 });

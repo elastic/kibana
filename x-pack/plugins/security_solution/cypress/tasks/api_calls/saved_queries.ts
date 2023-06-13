@@ -7,6 +7,7 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { SavedQuery } from '@kbn/data-plugin/public';
+import { SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common/constants';
 import { rootRequest } from '../common';
 
 export const createSavedQuery = (
@@ -16,7 +17,7 @@ export const createSavedQuery = (
 ) =>
   rootRequest<SavedQuery>({
     method: 'POST',
-    url: '/api/saved_query/_create',
+    url: `${SAVED_QUERY_BASE_URL}/_create`,
     body: {
       title,
       description: '',

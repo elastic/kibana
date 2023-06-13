@@ -9,12 +9,13 @@
 import { HttpStart } from '@kbn/core/public';
 import { SavedQuery } from './types';
 import type { SavedQueryAttributes } from '../../../common';
+import { SAVED_QUERY_BASE_URL } from '../../../common/constants';
 
 const version = '1';
 
 export const createSavedQueryService = (http: HttpStart) => {
   const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
-    const savedQuery = await http.post<SavedQuery>('/api/saved_query/_create', {
+    const savedQuery = await http.post<SavedQuery>(`${SAVED_QUERY_BASE_URL}/_create`, {
       body: JSON.stringify(attributes),
       version,
     });
@@ -22,7 +23,7 @@ export const createSavedQueryService = (http: HttpStart) => {
   };
 
   const updateQuery = async (id: string, attributes: SavedQueryAttributes) => {
-    const savedQuery = await http.put<SavedQuery>(`/api/saved_query/${id}`, {
+    const savedQuery = await http.put<SavedQuery>(`${SAVED_QUERY_BASE_URL}/${id}`, {
       body: JSON.stringify(attributes),
       version,
     });
@@ -32,7 +33,7 @@ export const createSavedQueryService = (http: HttpStart) => {
   // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
   const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
     const { savedQueries } = await http.post<{ savedQueries: SavedQuery[] }>(
-      '/api/saved_query/_all',
+      `${SAVED_QUERY_BASE_URL}/_all`,
       { version }
     );
     return savedQueries;
@@ -47,7 +48,7 @@ export const createSavedQueryService = (http: HttpStart) => {
     const { total, savedQueries: queries } = await http.post<{
       savedQueries: SavedQuery[];
       total: number;
-    }>('/api/saved_query/_find', {
+    }>(`${SAVED_QUERY_BASE_URL}/_find`, {
       body: JSON.stringify({ page, perPage, search }),
       version,
     });
@@ -56,15 +57,15 @@ export const createSavedQueryService = (http: HttpStart) => {
   };
 
   const getSavedQuery = (id: string): Promise<SavedQuery> => {
-    return http.get<SavedQuery>(`/api/saved_query/${id}`, { version });
+    return http.get<SavedQuery>(`${SAVED_QUERY_BASE_URL}/${id}`, { version });
   };
 
   const deleteSavedQuery = (id: string) => {
-    return http.delete<{}>(`/api/saved_query/${id}`, { version });
+    return http.delete<{}>(`${SAVED_QUERY_BASE_URL}/${id}`, { version });
   };
 
   const getSavedQueryCount = async (): Promise<number> => {
-    return http.get<number>('/api/saved_query/_count', { version });
+    return http.get<number>(`${SAVED_QUERY_BASE_URL}/_count`, { version });
   };
 
   return {

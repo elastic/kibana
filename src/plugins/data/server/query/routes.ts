@@ -10,8 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '@kbn/core/server';
 import { SavedQueryRouteHandlerContext } from './route_handler_context';
 import { SavedQueryRestResponse } from './route_types';
+import { SAVED_QUERY_BASE_URL } from '../../common/constants';
 
-const SAVED_QUERY_PATH = '/api/saved_query';
 const SAVED_QUERY_ID_CONFIG = schema.object({
   id: schema.string(),
 });
@@ -37,7 +37,7 @@ const version = '1';
 export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   const router = http.createRouter<SavedQueryRouteHandlerContext>();
 
-  router.versioned.post({ path: `${SAVED_QUERY_PATH}/_create`, access }).addVersion(
+  router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_create`, access }).addVersion(
     {
       version,
       validate: {
@@ -63,7 +63,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.versioned.put({ path: `${SAVED_QUERY_PATH}/{id}`, access }).addVersion(
+  router.versioned.put({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
       validate: {
@@ -91,7 +91,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.versioned.get({ path: `${SAVED_QUERY_PATH}/{id}`, access }).addVersion(
+  router.versioned.get({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
       validate: {
@@ -118,7 +118,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.versioned.get({ path: `${SAVED_QUERY_PATH}/_count`, access }).addVersion(
+  router.versioned.get({ path: `${SAVED_QUERY_BASE_URL}/_count`, access }).addVersion(
     {
       version,
       validate: {
@@ -142,7 +142,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.versioned.post({ path: `${SAVED_QUERY_PATH}/_find`, access }).addVersion(
+  router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_find`, access }).addVersion(
     {
       version,
       validate: {
@@ -176,7 +176,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.versioned.post({ path: `${SAVED_QUERY_PATH}/_all`, access }).addVersion(
+  router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_all`, access }).addVersion(
     {
       version,
       validate: {
@@ -204,7 +204,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.versioned.delete({ path: `${SAVED_QUERY_PATH}/{id}`, access }).addVersion(
+  router.versioned.delete({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
       validate: {
