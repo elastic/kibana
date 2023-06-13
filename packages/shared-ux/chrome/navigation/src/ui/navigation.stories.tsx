@@ -24,13 +24,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NavigationStorybookMock } from '../../mocks';
+import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ChromeNavigationViewModel, NavigationServices } from '../../types';
 import { Navigation } from './components';
-import { ProjectNavigationDefinition } from './types';
+import type { NonEmptyArray, ProjectNavigationDefinition } from './types';
 import { getPresets } from './nav_tree_presets';
 
 const storybookMock = new NavigationStorybookMock();
@@ -137,6 +137,15 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
               id: 'item3',
               title: 'Dashboards',
             },
+            {
+              id: 'item4',
+              title: 'External link',
+              href: 'https://elastic.co',
+            },
+            {
+              id: 'item5',
+              title: 'Another link',
+            },
           ],
         },
         {
@@ -165,7 +174,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
 export const SimpleObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -246,9 +255,9 @@ const navigationDefinition: ProjectNavigationDefinition = {
           ...child,
           children: child.children?.filter((item) => {
             // Hide discover and dashboard
-            return item.id !== 'discover' && item.id !== 'dashboard';
+            return item.link !== 'discover' && item.link !== 'dashboards';
           }),
-        })),
+        })) as NonEmptyArray<any>,
       },
     ],
     footer: [
@@ -280,7 +289,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
 export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -302,7 +311,7 @@ export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & Naviga
 export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -325,19 +334,22 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
             defaultIsCollapsed={false}
           >
             <Navigation.Group id="root">
-              <Navigation.Item id="item1" link="item1" />
+              <Navigation.Item<any> id="item1" link="item1" />
               <Navigation.Item id="item2" title="Alerts">
                 {(navNode) => {
                   return (
-                    <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    <div className="euiSideNavItemButton">
+                      <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    </div>
                   );
                 }}
               </Navigation.Item>
               <Navigation.Item id="item3" title="Title in ReactNode">
-                <EuiText size="s">
+                <div className="euiSideNavItemButton">
                   <EuiLink>Title in ReactNode</EuiLink>
-                </EuiText>
+                </div>
               </Navigation.Item>
+              <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
             </Navigation.Group>
 
             <Navigation.Group id="group:settings" title="Settings">
@@ -363,7 +375,7 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
 export const MinimalUI = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -425,7 +437,7 @@ export default {
 export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },

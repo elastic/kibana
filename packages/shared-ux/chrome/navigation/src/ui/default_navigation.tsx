@@ -7,13 +7,13 @@
  */
 
 import React, { FC, useCallback } from 'react';
+import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 
 import { Navigation } from './components';
 import type {
   GroupDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  NodeDefinition,
   ProjectNavigationDefinition,
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
@@ -22,7 +22,9 @@ import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
 
-type NodeDefinitionWithPreset = NodeDefinition & { preset?: NavigationGroupPreset };
+type NodeDefinitionWithPreset = NodeDefinition<AppDeepLinkId, string> & {
+  preset?: NavigationGroupPreset;
+};
 
 const isRootNavigationItemDefinition = (
   item: RootNavigationItemDefinition | NodeDefinitionWithPreset
@@ -79,7 +81,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
 
   const renderItems = useCallback(
     (
-      items: Array<RootNavigationItemDefinition | NodeDefinitionWithPreset> = [],
+      items: RootNavigationItemDefinition[] | NodeDefinitionWithPreset[] = [],
       path: string[] = []
     ) => {
       return items.map((item) => {
@@ -100,16 +102,17 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
           );
         }
 
-        const { type, ...rest } = item as GroupDefinition;
+        const { ...copy } = item as GroupDefinition;
+        delete (copy as any).type;
 
         return (
           <React.Fragment key={id}>
-            {rest.children ? (
-              <Navigation.Group {...rest}>
-                {renderItems(rest.children, [...path, id])}
+            {copy.children ? (
+              <Navigation.Group {...copy}>
+                {renderItems(copy.children, [...path, id])}
               </Navigation.Group>
             ) : (
-              <Navigation.Item {...rest} />
+              <Navigation.Item {...copy} />
             )}
           </React.Fragment>
         );
