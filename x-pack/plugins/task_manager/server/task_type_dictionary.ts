@@ -6,7 +6,6 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { ObjectType } from '@kbn/config-schema';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
@@ -66,8 +65,6 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
-
-  paramsSchema?: ObjectType;
 }
 
 /**

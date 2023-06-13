@@ -53,6 +53,7 @@ const mockedTaskConfig = {
   skip: {
     enabled: false,
     delay: 3000,
+    max_attempts: 20,
   },
 };
 
@@ -544,6 +545,7 @@ test('returns the existing state and delayed schedule to retry the task when ret
       skip: {
         enabled: true,
         delay: mockedTaskConfig.skip.delay,
+        max_attempts: 20,
       },
     },
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { TaskConfig } from './config';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
@@ -49,6 +49,7 @@ export type SuccessfulRunResult = {
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
+  hasError?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -147,8 +148,6 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
-
-    paramsSchema: schema.maybe(schema.any()),
   },
   {
     validate({ timeout }) {
@@ -163,13 +162,12 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
+export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
-  paramsSchema?: ObjectType;
 };
 
 export enum TaskStatus {
@@ -286,6 +284,13 @@ export interface TaskInstance {
    * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
    */
   enabled?: boolean;
+
+  /**
+   * Indicates the number of skipped executions.
+   */
+  skip?: {
+    attempts: number;
+  };
 }
 
 /**

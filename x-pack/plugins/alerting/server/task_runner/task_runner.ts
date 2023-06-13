@@ -14,6 +14,7 @@ import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
+import { isErr } from '@kbn/task-manager-plugin/server/lib/result_type';
 import { isValidationError } from '../lib/error_with_reason';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -770,7 +771,11 @@ export class TaskRunner<
   }
 
   private shouldSkipRun(err: Error) {
-    return this.taskConfig.skip.enabled && isValidationError(err);
+    return (
+      this.taskConfig.skip.enabled &&
+      (this.taskInstance.skip?.attempts || 0) < this.taskConfig.skip.max_attempts &&
+      isValidationError(err)
+    );
   }
 
   async run(): Promise<RuleTaskRunResult> {
@@ -909,6 +914,7 @@ export class TaskRunner<
 
         return { interval: retryInterval };
       }),
+      hasError: isErr(schedule),
       monitoring: this.ruleMonitoring.getMonitoring(),
     };
   }

@@ -128,7 +128,6 @@ export class TaskPollingLifecycle {
       taskStore,
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
-      taskConfig: this.config.task,
       definitions,
       unusedTypes,
       logger: this.logger,

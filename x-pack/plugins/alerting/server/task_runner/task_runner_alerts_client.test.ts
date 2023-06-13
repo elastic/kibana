@@ -113,6 +113,7 @@ describe('Task Runner', () => {
     skip: {
       delay: 3000,
       enabled: false,
+      max_attempts: 20,
     },
   };
 

@@ -18,6 +18,7 @@ const mockedTaskConfig = {
   skip: {
     enabled: false,
     delay: 3000,
+    max_attempts: 20,
   },
 };
 
