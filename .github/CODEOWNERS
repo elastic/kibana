@@ -67,6 +67,7 @@ packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
+x-pack/plugins/cloud_integrations/cloud_chat_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboarding
 x-pack/plugins/cloud_defend @elastic/sec-cloudnative-integrations
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
@@ -306,6 +307,16 @@ src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
 packages/kbn-datemath @elastic/kibana-data-discovery
+packages/deeplinks/analytics @elastic/kibana-data-discovery
+packages/deeplinks/devtools @elastic/platform-deployment-management
+packages/deeplinks/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/deeplinks/ml @elastic/ml-ui
+packages/deeplinks/observability @elastic/apm-ui
+packages/deeplinks/search @elastic/enterprise-search-frontend
+packages/default-nav/analytics @elastic/kibana-data-discovery
+packages/default-nav/devtools @elastic/platform-deployment-management
+packages/default-nav/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/default-nav/ml @elastic/ml-ui
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
@@ -464,7 +475,9 @@ x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/data_frame_analytics_utils @elastic/ml-ui
+x-pack/packages/ml/data_grid @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
+x-pack/packages/ml/date_utils @elastic/ml-ui
 x-pack/packages/ml/error_utils @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
@@ -476,6 +489,7 @@ x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
 x-pack/packages/ml/route_utils @elastic/ml-ui
+x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui

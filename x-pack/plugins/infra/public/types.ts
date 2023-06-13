@@ -31,7 +31,6 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-// import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -48,7 +47,7 @@ import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceStart } from './services/log_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
-import { InfraLocators } from './locators';
+import type { InfraLocators } from '../common/locators';
 
 // Our own setup and start contract values
 export interface InfraClientSetupExports {
@@ -96,7 +95,7 @@ export interface InfraClientStartDeps {
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  osquery?: unknown; // OsqueryPluginStart;
+  osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclic dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;

@@ -12,4 +12,6 @@ export interface Prompt {
   content: string;
   name: string;
   promptType: PromptType;
+  isDefault?: boolean;
+  isNewConversationDefault?: boolean;
 }
