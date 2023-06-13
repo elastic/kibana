@@ -8,6 +8,7 @@
 
 import {
   EuiHeader,
+  EuiHeaderLink,
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
@@ -68,6 +69,11 @@ const headerStrings = {
   logo: {
     ariaLabel: i18n.translate('core.ui.primaryNav.goToHome.ariaLabel', {
       defaultMessage: 'Go to home page',
+    }),
+  },
+  cloud: {
+    linkToDeployments: i18n.translate('core.ui.primaryNav.cloud.linkToDeployments', {
+      defaultMessage: 'My deployments',
     }),
   },
   nav: {
@@ -203,6 +209,12 @@ export const ProjectHeader = ({
 
           <EuiHeaderSectionItem>
             <HeaderNavControls navControls$={observables.navControlsLeft$} />
+          </EuiHeaderSectionItem>
+
+          <EuiHeaderSectionItem>
+            <EuiHeaderLink href="https://cloud.elastic.co/deployments">
+              {headerStrings.cloud.linkToDeployments}
+            </EuiHeaderLink>
           </EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem>
