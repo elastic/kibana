@@ -215,7 +215,7 @@ async function updateFleetServerPoliciesDataOutputId(
   // if a logstash output is updated to become default
   // if fleet server policies don't have data_output_id
   // update them to use the default output
-  if (data?.type === outputType.Logstash && isDefault) {
+  if ((data?.type === outputType.Logstash || data?.type === outputType.Kafka) && isDefault) {
     for (const policy of fleetServerPolicies) {
       if (!policy.data_output_id) {
         await agentPolicyService.update(
