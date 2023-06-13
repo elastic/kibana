@@ -315,7 +315,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -514,7 +513,6 @@ describe('<Navigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'group1',
