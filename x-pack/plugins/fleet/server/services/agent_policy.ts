@@ -373,7 +373,7 @@ class AgentPolicyService {
       withPackagePolicies?: boolean;
       fields?: string[];
       esClient?: ElasticsearchClient;
-      noAgentCount?: boolean;
+      withAgentCount?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -390,7 +390,7 @@ class AgentPolicyService {
       withPackagePolicies = false,
       fields,
       esClient,
-      noAgentCount = false,
+      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -445,7 +445,7 @@ class AgentPolicyService {
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     }
-    if (esClient && !noAgentCount) {
+    if (esClient && withAgentCount) {
       await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
     } else {
       agentPolicies.forEach((item) => (item.agents = 0));
