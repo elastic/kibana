@@ -227,7 +227,7 @@ export function ConfigureLogs() {
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <EuiFormRow
+          <OptionalFormRow
             label={i18n.translate(
               'xpack.observability_onboarding.configureLogs.serviceName',
               {
@@ -251,7 +251,7 @@ export function ConfigureLogs() {
               value={serviceName}
               onChange={(event) => setServiceName(event.target.value)}
             />
-          </EuiFormRow>
+          </OptionalFormRow>
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup
             alignItems="flexStart"
