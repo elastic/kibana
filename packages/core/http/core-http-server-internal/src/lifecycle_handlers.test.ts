@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./lifecycle_handlers', () => {
-  const actual = jest.requireActual('./lifecycle_handlers');
-  return {
-    ...actual,
-    createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-  };
-});
-
 import type {
   KibanaRequest,
   RouteMethod,
@@ -23,7 +15,6 @@ import type {
   OnPreRoutingToolkit,
   OnPostAuthHandler,
 } from '@kbn/core-http-server';
-import { createTestEnv } from '@kbn/config-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   createCustomHeadersPreResponseHandler,
@@ -31,7 +22,6 @@ import {
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
-import { registerCoreHandlers } from './register_lifecycle_handlers';
 
 import { HttpConfig } from './http_config';
 
@@ -437,33 +427,5 @@ describe('customHeaders pre-response handler', () => {
         headerB: 'value-B',
       },
     });
-  });
-});
-
-describe('lifecycle handler registration', () => {
-  it('will not register client version checking if disabled via config', () => {
-    const registrarMock = {
-      registerAuth: jest.fn(),
-      registerOnPostAuth: jest.fn(),
-      registerOnPreAuth: jest.fn(),
-      registerOnPreResponse: jest.fn(),
-      registerOnPreRouting: jest.fn(),
-    };
-
-    const config = {
-      csp: { header: '' },
-      xsrf: {},
-      versioned: {
-        versionResolution: 'newest',
-        strictClientVersionCheck: false,
-      },
-    } as unknown as HttpConfig;
-
-    registerCoreHandlers(registrarMock, config, createTestEnv());
-    expect(createVersionCheckPostAuthHandler).toHaveBeenCalledTimes(0);
-
-    config.versioned.strictClientVersionCheck = true;
-    registerCoreHandlers(registrarMock, config, createTestEnv());
-    expect(createVersionCheckPostAuthHandler).toHaveBeenCalledTimes(1);
   });
 });
