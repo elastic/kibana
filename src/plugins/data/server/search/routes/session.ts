@@ -273,7 +273,9 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         // todo
         const response = await searchContext.updateSession(id, { name, expires });
 
-        return res.ok();
+        return res.ok({
+          body: response,
+        });
       } catch (err) {
         logger.error(err);
         return reportServerError(res, err);
