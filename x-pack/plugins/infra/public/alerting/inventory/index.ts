@@ -20,7 +20,7 @@ interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
 }
 
-export const inventoryDefaultActionMessage = i18n.translate(
+const inventoryDefaultActionMessage = i18n.translate(
   'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}
@@ -36,7 +36,7 @@ export const inventoryDefaultActionMessage = i18n.translate(
 `,
   }
 );
-export const inventoryDefaultRecoveryMessage = i18n.translate(
+const inventoryDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.metrics.alerting.inventory.threshold.defaultRecoveryMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}

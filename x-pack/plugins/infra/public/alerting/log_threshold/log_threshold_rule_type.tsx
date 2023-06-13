@@ -19,7 +19,7 @@ import { InfraClientCoreSetup } from '../../types';
 import { createRuleFormatter } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
-export const logThresholdDefaultActionMessage = i18n.translate(
+const logThresholdDefaultActionMessage = i18n.translate(
   'xpack.infra.logs.alerting.threshold.defaultActionMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}
@@ -33,7 +33,7 @@ export const logThresholdDefaultActionMessage = i18n.translate(
 `,
   }
 );
-export const logThresholdDefaultRecoveryMessage = i18n.translate(
+const logThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.logs.alerting.threshold.defaultRecoveryMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}

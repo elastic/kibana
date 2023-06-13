@@ -20,7 +20,7 @@ export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
 }
 
-export const metricThresholdDefaultActionMessage = i18n.translate(
+const metricThresholdDefaultActionMessage = i18n.translate(
   'xpack.infra.metrics.alerting.metric.threshold.defaultActionMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}
@@ -36,7 +36,7 @@ export const metricThresholdDefaultActionMessage = i18n.translate(
 `,
   }
 );
-export const metricThresholdDefaultRecoveryMessage = i18n.translate(
+const metricThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.metrics.alerting.metric.threshold.defaultRecoveryMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}
