@@ -1282,7 +1282,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
+    it('project monitors - cannot update project monitors with read only privileges', async () => {
       const project = `test-project-${uuidv4()}`;
 
       const secondMonitor = {
@@ -1299,7 +1299,7 @@ export default function ({ getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                uptime: ['all'],
+                uptime: ['read'],
               },
               spaces: ['*'],
             },
@@ -1311,63 +1311,21 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
 
-        const { body } = await supertestWithoutAuth
+        await supertestWithoutAuth
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send({ monitors: testMonitors })
-          .expect(200);
-
-        expect(body).eql({
-          createdMonitors: [testMonitors[0].id],
-          updatedMonitors: [],
-          failedMonitors: [
-            {
-              details:
-                'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.',
-              id: 'test-id-2',
-              payload: {
-                content:
-                  'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
-                filter: {
-                  match: 'check if title is present',
-                },
-                id: 'test-id-2',
-                locations: ['localhost'],
-                name: 'check if title is present',
-                params: {},
-                playwrightOptions: {
-                  chromiumSandbox: false,
-                  headless: true,
-                },
-                privateLocations: ['Test private location 0'],
-                schedule: 10,
-                tags: [],
-                throttling: {
-                  download: 5,
-                  latency: 20,
-                  upload: 3,
-                },
-                hash: 'ekrjelkjrelkjre',
-              },
-              reason: 'Failed to create or update monitor',
-            },
-          ],
-        });
+          .expect(403);
       } finally {
-        await Promise.all([
-          testMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id, project, 'default');
-          }),
-        ]);
         await security.user.delete(username);
         await security.role.delete(roleName);
       }
     });
 
-    it('project monitors - returns a successful monitor when user defines a private location with fleet permissions', async () => {
+    it('project monitors - returns a successful monitor when user defines a private location, even without fleet permissions', async () => {
       const project = `test-project-${uuidv4()}`;
       const secondMonitor = {
         ...projectMonitors.monitors[0],

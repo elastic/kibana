@@ -186,21 +186,6 @@ export class ProjectMonitorFormatter {
     ]);
   };
 
-  validatePermissions = async ({ monitor }: { monitor: ProjectMonitor }) => {
-    if (this.writeIntegrationPoliciesPermissions || (monitor.privateLocations ?? []).length === 0) {
-      return;
-    }
-    const {
-      integrations: { writeIntegrationPolicies },
-    } = await this.server.fleet.authz.fromRequest(this.request);
-
-    this.writeIntegrationPoliciesPermissions = writeIntegrationPolicies;
-
-    if (!writeIntegrationPolicies) {
-      throw new Error(INSUFFICIENT_FLEET_PERMISSIONS);
-    }
-  };
-
   validateProjectMonitor = async ({
     monitor,
     publicLocations,
@@ -211,8 +196,6 @@ export class ProjectMonitorFormatter {
     privateLocations: PrivateLocation[];
   }) => {
     try {
-      await this.validatePermissions({ monitor });
-
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
         monitor,
         locations: this.publicLocations,
