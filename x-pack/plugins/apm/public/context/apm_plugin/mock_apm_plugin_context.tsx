@@ -78,7 +78,6 @@ const mockConfig: ConfigSchema = {
     infraUiAvailable: true,
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
-    spacesAvailable: true,
     storageExplorerAvailable: true,
   },
 };

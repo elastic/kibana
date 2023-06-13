@@ -118,14 +118,6 @@ const configSchema = schema.object({
       }),
       schema.oneOf([schema.literal(true)], { defaultValue: true })
     ),
-    spacesAvailable: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.boolean({
-        defaultValue: false,
-      }),
-      schema.oneOf([schema.literal(true)], { defaultValue: true })
-    ),
     storageExplorerAvailable: schema.conditional(
       schema.contextRef('serverless'),
       true,

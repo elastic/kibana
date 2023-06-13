@@ -23,7 +23,6 @@ export interface ConfigSchema {
     infraUiAvailable: boolean;
     migrationToFleetAvailable: boolean;
     sourcemapApiAvailable: boolean;
-    spacesAvailable: boolean;
     storageExplorerAvailable: boolean;
   };
 }
