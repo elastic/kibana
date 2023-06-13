@@ -83,9 +83,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   }
 
   start() {
-    return {
-      ...this.specDefinitionsService.start(),
-    };
+    this.specDefinitionsService.start();
   }
 
   stop() {
