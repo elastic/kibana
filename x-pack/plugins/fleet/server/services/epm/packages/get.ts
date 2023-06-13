@@ -122,6 +122,8 @@ export async function getPackages(
       )
     )
     .concat(uploadedPackagesNotInRegistry as Installable<any>)
+    // hides profiling collector and symbolizer packages
+    .filter((item) => item.id !== 'profiler_collector' && item.id !== 'profiler_symbolizer')
     .sort(sortByName);
 
   for (const pkg of packageList) {

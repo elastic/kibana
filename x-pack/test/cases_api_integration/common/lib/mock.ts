@@ -174,6 +174,7 @@ export const postCaseResp = (
   external_service: null,
   status: CaseStatuses.open,
   updated_by: null,
+  category: null,
 });
 
 interface CommentRequestWithID {
