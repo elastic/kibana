@@ -7,9 +7,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { DefaultLandingPage } from './default';
+import { ServerlessLandingPage } from './serverless';
 
 interface ManagementLandingPageProps {
   version: string;
@@ -22,42 +21,16 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
+  const isServerless = true;
   setBreadcrumbs();
 
   useEffect(() => {
     onAppMounted('');
   }, [onAppMounted]);
 
-  return (
-    <KibanaPageTemplate.EmptyPrompt
-      data-test-subj="managementHome"
-      iconType="managementApp"
-      title={
-        <h1>
-          <FormattedMessage
-            id="management.landing.header"
-            defaultMessage="Welcome to Stack Management {version}"
-            values={{ version }}
-          />
-        </h1>
-      }
-      body={
-        <>
-          <p>
-            <FormattedMessage
-              id="management.landing.subhead"
-              defaultMessage="Manage your indices, data views, saved objects, Kibana settings, and more."
-            />
-          </p>
-          <EuiHorizontalRule />
-          <p>
-            <FormattedMessage
-              id="management.landing.text"
-              defaultMessage="A complete list of apps is in the menu on the left."
-            />
-          </p>
-        </>
-      }
-    />
-  );
+  if (isServerless) {
+    return <ServerlessLandingPage version={version} />;
+  }
+
+  return <DefaultLandingPage version={version} />;
 };
