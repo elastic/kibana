@@ -46,3 +46,16 @@ export const ALLOWED_CHANNELS = i18n.translate(
     defaultMessage: 'Allowed channels',
   }
 );
+export const SUCCESS_FETCH_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.successFetchChannelsText',
+  {
+    defaultMessage: 'Fetch all channels',
+  }
+);
+
+export const ERROR_FETCH_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.errorFetchChannelsText',
+  {
+    defaultMessage: 'Cannot fetch channels, please check the validity of your token',
+  }
+);

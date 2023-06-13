@@ -20,6 +20,7 @@ export interface CommonFieldSchema {
   id: string;
   label: string;
   helpText?: string | ReactNode;
+  isRequired?: boolean;
   type?: keyof typeof FIELD_TYPES;
   euiFieldProps?: Record<string, unknown>;
 }
@@ -49,28 +50,34 @@ const { emptyField, urlField } = fieldValidators;
 
 const getFieldConfig = ({
   label,
+  isRequired = true,
   isUrlField = false,
   defaultValue,
   type,
 }: {
   label: string;
+  isRequired?: boolean;
   isUrlField?: boolean;
   defaultValue?: string | string[];
   type?: keyof typeof FIELD_TYPES;
 }) => ({
   label,
   validations: [
-    {
-      validator: emptyField(
-        i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requireFieldText',
+    ...(isRequired
+      ? [
           {
-            values: { label },
-            defaultMessage: `{label} is required.`,
-          }
-        )
-      ),
-    },
+            validator: emptyField(
+              i18n.translate(
+                'xpack.triggersActionsUI.sections.actionConnectorForm.error.requireFieldText',
+                {
+                  values: { label },
+                  defaultMessage: `{label} is required.`,
+                }
+              )
+            ),
+          },
+        ]
+      : []),
     ...(isUrlField
       ? [
           {
@@ -97,6 +104,7 @@ const FormRow: React.FC<FormRowProps> = ({
   label,
   readOnly,
   isPasswordField,
+  isRequired = true,
   isUrlField,
   helpText,
   defaultValue,
@@ -115,7 +123,8 @@ const FormRow: React.FC<FormRowProps> = ({
           {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({ label, isUrlField, defaultValue, type })}
+              config={getFieldConfig({ label, isUrlField, defaultValue, type, isRequired })}
+              helpText={helpText}
               componentProps={{
                 euiFieldProps: {
                   ...euiFieldProps,
@@ -128,7 +137,7 @@ const FormRow: React.FC<FormRowProps> = ({
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({ label, type })}
+              config={getFieldConfig({ label, type, isRequired })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{

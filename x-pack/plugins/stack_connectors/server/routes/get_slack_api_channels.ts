@@ -21,8 +21,8 @@ import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { SLACK_URL } from '../../common/slack_api/constants';
 import { GetChannelsResponse } from '../../common/slack_api/types';
 
-const paramSchema = schema.object({
-  token: schema.string(),
+const bodySchema = schema.object({
+  authToken: schema.string(),
 });
 
 export const getSlackApiChannelsRoute = (
@@ -30,11 +30,11 @@ export const getSlackApiChannelsRoute = (
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_slack_api/channels/{token}`,
+      path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_slack_api/channels`,
       validate: {
-        params: paramSchema,
+        body: bodySchema,
       },
     },
     handler
@@ -42,16 +42,16 @@ export const getSlackApiChannelsRoute = (
 
   async function handler(
     ctx: RequestHandlerContext,
-    req: KibanaRequest<{ token: string }, unknown, unknown>,
+    req: KibanaRequest<unknown, unknown, { authToken: string }>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     try {
-      const { token } = req.params;
+      const { authToken } = req.body;
 
       const axiosInstance = axios.create({
         baseURL: SLACK_URL,
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
           'Content-type': 'application/json; charset=UTF-8',
         },
       });

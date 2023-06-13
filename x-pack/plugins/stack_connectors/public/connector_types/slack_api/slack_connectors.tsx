@@ -17,7 +17,7 @@ import { EuiComboBoxOptionOption, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
 
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { debounce } from 'lodash';
 import * as i18n from './translations';
 import { ChannelsResponse, GetChannelsResponse } from '../../../common/slack_api/types';
@@ -49,7 +49,14 @@ const getConfigFormSchemaAfterSecrets = (
 ): ConfigFieldSchema[] => [
   {
     id: 'allowedChannels',
+    isRequired: false,
     label: i18n.ALLOWED_CHANNELS,
+    helpText: (
+      <FormattedMessage
+        id="xpack.stackConnectors.components.slack_api.allowedChannelsText"
+        defaultMessage="It will only fetch channels with a valid Slack Web API token. If it is empty, we will allow all channels."
+      />
+    ),
     type: 'COMBO_BOX',
     euiFieldProps: {
       isDisabled,
@@ -67,43 +74,42 @@ const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isE
     notifications: { toasts },
   } = useKibana().services;
 
-  const [{ secrets }] = useFormData();
-  const [token, setToken] = useState('');
+  const form = useFormContext();
+  const { setFieldValue } = form;
+  const [formData] = useFormData({ form });
+  const [authToken, setAuthToken] = useState('');
   const [channels, setChannels] = useState<EuiComboBoxOptionOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const abortCtrlRef = useRef(new AbortController());
   const isMounted = useRef(false);
 
-  async function fetchChannels(newToken: string) {
+  async function fetchChannels(newAuthToken: string) {
     setIsLoading(true);
     setChannels([]);
+    setFieldValue('config.allowedChannels', []);
     isMounted.current = true;
     abortCtrlRef.current.abort();
     abortCtrlRef.current = new AbortController();
 
     try {
-      const res = await http.get<GetChannelsResponse>(
-        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_slack_api/channels/${newToken}`
+      const res = await http.post<GetChannelsResponse>(
+        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_slack_api/channels`,
+        {
+          body: JSON.stringify({
+            authToken: newAuthToken,
+          }),
+          signal: abortCtrlRef.current.signal,
+        }
       );
 
-      if (isMounted.current) {
-        setIsLoading(false);
+      setIsLoading(false);
+      if (isMounted.current && res.ok) {
         setChannels(
           (res?.channels ?? []).map((channel: ChannelsResponse) => ({
             label: channel.name,
           }))
         );
-        // toasts.addSuccess(
-        //   i18n.translate(
-        //     'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
-        //     {
-        //       defaultMessage: "Created '{connectorName}'",
-        //       values: {
-        //         connectorName: res.name,
-        //       },
-        //     }
-        //   )
-        // );
+        toasts.addSuccess(i18n.SUCCESS_FETCH_CHANNELS);
       }
 
       return res;
@@ -111,39 +117,40 @@ const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isE
       if (isMounted.current) {
         setIsLoading(false);
         setChannels([]);
-        // if (error.name !== 'AbortError') {
-        //   toasts.addDanger(
-        //     error.body?.message ??
-        //       i18n.translate(
-        //         'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
-        //         { defaultMessage: 'Cannot create a connector.' }
-        //       )
-        //   );
-        // }
+        if (error.name !== 'AbortError') {
+          toasts.addDanger(error.body?.message ?? i18n.ERROR_FETCH_CHANNELS);
+        }
       }
     }
   }
 
   const configFormSchemaAfterSecrets = useMemo(
-    () => getConfigFormSchemaAfterSecrets(channels, isLoading, token.length > 0),
-    [channels, isLoading, token]
+    () => getConfigFormSchemaAfterSecrets(channels, isLoading, channels.length === 0),
+    [channels, isLoading]
   );
 
-  const debounceSetToken = debounce(setToken, INPUT_TIMEOUT);
+  const debounceSetToken = debounce(setAuthToken, INPUT_TIMEOUT);
   useEffect(() => {
-    if (secrets && secrets.token && secrets.token.length > 0) {
-      debounceSetToken(secrets.token);
+    if (formData.secrets && formData.secrets.token !== authToken) {
+      debounceSetToken(formData.secrets.token);
     }
-  }, [debounceSetToken, secrets]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.secrets]);
 
   useEffect(() => {
-    fetchChannels(token);
+    if (isMounted.current && authToken && authToken.length > 0) {
+      fetchChannels(authToken);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authToken]);
+
+  useEffect(() => {
+    isMounted.current = true;
     return () => {
       isMounted.current = false;
       abortCtrlRef.current.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
   return (
     <SimpleConnectorForm
