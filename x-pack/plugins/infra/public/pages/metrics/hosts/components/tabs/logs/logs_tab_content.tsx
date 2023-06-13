@@ -50,35 +50,33 @@ export const LogsTabContent = () => {
     [hostNodes]
   );
 
-  const logView: LogViewReference = useMemo(() => {
-    return {
-      type: 'log-view-inline',
-      id: 'hosts-logs-view',
-      attributes: {
-        name: 'Hosts Logs View',
-        description: 'Default view for hosts logs tab',
-        logIndices: logViewIndices!,
-        logColumns: [
-          {
-            timestampColumn: {
-              id: '5e7f964a-be8a-40d8-88d2-fbcfbdca0e2f',
-            },
+  const logView: LogViewReference = {
+    type: 'log-view-inline',
+    id: 'hosts-logs-view',
+    attributes: {
+      name: 'Hosts Logs View',
+      description: 'Default view for hosts logs tab',
+      logIndices: logViewIndices!,
+      logColumns: [
+        {
+          timestampColumn: {
+            id: '5e7f964a-be8a-40d8-88d2-fbcfbdca0e2f',
           },
-          {
-            fieldColumn: {
-              id: 'eb9777a8-fcd3-420e-ba7d-172fff6da7a2',
-              field: 'host.name',
-            },
+        },
+        {
+          fieldColumn: {
+            id: 'eb9777a8-fcd3-420e-ba7d-172fff6da7a2',
+            field: 'host.name',
           },
-          {
-            messageColumn: {
-              id: 'b645d6da-824b-4723-9a2a-e8cece1645c0',
-            },
+        },
+        {
+          messageColumn: {
+            id: 'b645d6da-824b-4723-9a2a-e8cece1645c0',
           },
-        ],
-      },
-    };
-  }, [logViewIndices]);
+        },
+      ],
+    },
+  };
 
   const logsLinkToStreamQuery = useMemo(() => {
     const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes.map((p) => p.name));
@@ -109,7 +107,7 @@ export const LogsTabContent = () => {
     );
   }
 
-  return (
+  return logViewIndices ? (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem>
@@ -126,19 +124,17 @@ export const LogsTabContent = () => {
       </EuiFlexGroup>
 
       <EuiFlexItem>
-        {logViewIndices ? (
-          <LogStream
-            height={500}
-            logView={logView}
-            startTimestamp={from}
-            endTimestamp={to}
-            filters={[hostsFilterQuery]}
-            query={filterQuery}
-          />
-        ) : null}
+        <LogStream
+          height={500}
+          logView={logView}
+          startTimestamp={from}
+          endTimestamp={to}
+          filters={[hostsFilterQuery]}
+          query={filterQuery}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
+  ) : null;
 };
 
 const createHostsFilterQueryParam = (hostNodes: string[]): string => {
