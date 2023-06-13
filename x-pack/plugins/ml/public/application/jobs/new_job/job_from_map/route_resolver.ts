@@ -12,9 +12,8 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { QuickGeoJobCreator } from './quick_create_job';
-import { ml, MlApiServices } from '../../../services/ml_api_service';
+import { MlApiServices } from '../../../services/ml_api_service';
 
-import { getUiSettings, getTimefilter, getShare } from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 export async function resolver(
@@ -89,7 +88,7 @@ export async function resolver(
     to = '';
   }
 
-  const jobCreator = new QuickGeoJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
+  const jobCreator = new QuickGeoJobCreator(kibanaConfig, timeFilter, share, mlApiServices);
 
   await jobCreator.createAndStashGeoJob(
     dvId,

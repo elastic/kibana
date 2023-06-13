@@ -36,7 +36,6 @@ import {
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjects } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
-import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -112,9 +111,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     try {
       const response = await getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
-
-      const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
-      setKibanaObjects(kibanaObjectsResult);
 
       setSaveState(SAVE_STATE.NOT_SAVED);
 

@@ -38,13 +38,14 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       uiSettings: kibanaConfig,
       mlServices: { mlApiServices },
       lens,
+      contentManagement,
     },
   } = useMlKibana();
 
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
       resolver(
-        { lens, mlApiServices, timeFilter, kibanaConfig, share },
+        { lens, mlApiServices, timeFilter, kibanaConfig, share, contentManagement },
         lensId,
         vis,
         from,

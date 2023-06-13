@@ -84,12 +84,14 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     dataViewsContract: deps.data.dataViews,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    contentManagement: deps.contentManagement,
   };
 
   const services = useMemo(() => {
     return {
       kibanaVersion: deps.kibanaVersion,
       share: deps.share,
+      contentManagement: deps.contentManagement,
       data: deps.data,
       security: deps.security,
       licenseManagement: deps.licenseManagement,

@@ -11,7 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
+import { cleanEmptyKeys, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
@@ -23,6 +23,8 @@ import {
   DEFAULT_RESULTS_FIELD,
 } from '@kbn/ml-data-frame-analytics-utils';
 
+import { isDefined } from '@kbn/ml-is-defined';
+import { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -38,7 +40,6 @@ import {
 } from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
-import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
 import {
   CombinedJob,
@@ -72,7 +73,7 @@ export interface CustomUrlSettings {
 
 export function getNewCustomUrlDefaults(
   job: Job | DataFrameAnalyticsConfig,
-  dashboards: Array<{ id: string; title: string }>,
+  dashboards: DashboardItems,
   dataViews: DataViewListItem[]
 ): CustomUrlSettings {
   // Returns the settings object in the format used by the custom URL editor
@@ -206,11 +207,14 @@ export function isValidCustomUrlSettings(
   return isValid;
 }
 
-export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
+export function buildCustomUrlFromSettings(
+  dashboard: DashboardStart,
+  settings: CustomUrlSettings
+): Promise<MlUrlConfig> {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
-    return buildDashboardUrlFromSettings(settings);
+    return buildDashboardUrlFromSettings(dashboard, settings);
   } else if (settings.type === URL_TYPE.KIBANA_DISCOVER) {
     return Promise.resolve(buildDiscoverUrlFromSettings(settings));
   } else {
@@ -237,15 +241,27 @@ function getUrlRangeFromSettings(settings: CustomUrlSettings) {
   };
 }
 
-async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
+async function buildDashboardUrlFromSettings(
+  dashboard: DashboardStart,
+  settings: CustomUrlSettings
+): Promise<MlUrlConfig> {
   // Get the complete list of attributes for the selected dashboard (query, filters).
   const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
 
-  // @TODO: remove
+  if (!dashboard) {
+    throw Error(`Missing dashboard service (got ${dashboard})`);
+  }
+  if (!isDefined(dashboardId)) {
+    throw Error(`DashboardId is invalid (got ${dashboardId})`);
+  }
 
-  const savedObjectsClient = getSavedObjectsClient();
+  const findDashboardsService = await dashboard.findDashboardsService();
+  const responses = await findDashboardsService.findByIds([dashboardId]);
 
-  const response = await savedObjectsClient.get('dashboard', dashboardId ?? '');
+  if (!responses || responses.length === 0 || responses[0].status === 'error') {
+    throw Error(`Unable to find dashboard with id ${dashboardId} (got ${responses})`);
+  }
+  const response = responses[0];
 
   // Query from the datafeed config will be saved as custom filters
   // Use them if there are set.
@@ -255,7 +271,7 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
   let query;
 
   // Override with filters and queries from saved dashboard if they are available.
-  const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = response.attributes.kibanaSavedObjectMeta.searchSourceJSON;
   if (searchSourceJSON !== undefined) {
     const searchSourceData = JSON.parse(searchSourceJSON);
     if (Array.isArray(searchSourceData.filter) && searchSourceData.filter.length > 0) {
@@ -269,11 +285,9 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
     query = queryFromEntityFieldNames;
   }
 
-  const dashboard = getDashboard();
-
   const { from, to } = getUrlRangeFromSettings(settings);
 
-  const location = await dashboard?.locator?.getLocation({
+  const location = await dashboard.locator?.getLocation({
     dashboardId,
     timeRange: {
       from,
