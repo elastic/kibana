@@ -13,34 +13,45 @@ import {
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Conversation } from '../..';
-import * as i18n from './translations';
-import { ConnectorSelector } from '../connectorland/connector_selector';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { Conversation, Prompt } from '../../..';
+import * as i18n from '../translations';
+import { ConnectorSelector } from '../../connectorland/connector_selector';
+import { SelectSystemPrompt } from '../prompt_editor/system_prompt/select_system_prompt';
 
-export interface SettingsPopoverProps {
+export interface ConversationSettingsPopoverProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   conversation: Conversation;
   http: HttpSetup;
   isDisabled?: boolean;
 }
 
-export const SettingsPopover: React.FC<SettingsPopoverProps> = React.memo(
+export const ConversationSettingsPopover: React.FC<ConversationSettingsPopoverProps> = React.memo(
   ({ actionTypeRegistry, conversation, http, isDisabled = false }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     // So we can hide the settings popover when the connector modal is displayed
     const popoverPanelRef = useRef<HTMLElement | null>(null);
+
+    const provider = useMemo(() => {
+      return conversation.apiConfig?.provider;
+    }, [conversation.apiConfig]);
+
+    const selectedPrompt: Prompt | undefined = useMemo(
+      () => conversation?.apiConfig.defaultSystemPrompt,
+      [conversation]
+    );
 
     const closeSettingsHandler = useCallback(() => {
       setIsSettingsOpen(false);
     }, []);
 
     // Hide settings panel when modal is visible (to keep visual clutter minimal)
-    const onConnectorModalVisibilityChange = useCallback((isVisible: boolean) => {
+    const onDescendantModalVisibilityChange = useCallback((isVisible: boolean) => {
       if (popoverPanelRef.current) {
         popoverPanelRef.current.style.visibility = isVisible ? 'hidden' : 'visible';
       }
@@ -86,7 +97,24 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = React.memo(
               actionTypeRegistry={actionTypeRegistry}
               conversation={conversation}
               http={http}
-              onConnectorModalVisibilityChange={onConnectorModalVisibilityChange}
+              onConnectorModalVisibilityChange={onDescendantModalVisibilityChange}
+            />
+          </EuiFormRow>
+
+          {provider === OpenAiProviderType.OpenAi && <></>}
+
+          <EuiFormRow
+            data-test-subj="prompt-field"
+            label={i18n.SETTINGS_PROMPT_TITLE}
+            helpText={i18n.SETTINGS_PROMPT_HELP_TEXT_TITLE}
+          >
+            <SelectSystemPrompt
+              conversation={conversation}
+              fullWidth={false}
+              isEditing={true}
+              onSystemPromptModalVisibilityChange={onDescendantModalVisibilityChange}
+              selectedPrompt={selectedPrompt}
+              showTitles={true}
             />
           </EuiFormRow>
         </div>
@@ -94,4 +122,4 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = React.memo(
     );
   }
 );
-SettingsPopover.displayName = 'SettingPopover';
+ConversationSettingsPopover.displayName = 'ConversationSettingsPopover';

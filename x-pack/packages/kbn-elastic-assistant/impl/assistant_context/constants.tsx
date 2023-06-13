@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-export type PromptType = 'system' | 'user';
-
-export interface Prompt {
-  id: string;
-  content: string;
-  name: string;
-  promptType: PromptType;
-  isDefault?: boolean;
-  isNewConversationDefault?: boolean;
-}
+export const DEFAULT_ASSISTANT_NAMESPACE = 'elasticAssistantDefault';
+export const QUICK_PROMPT_LOCAL_STORAGE_KEY = 'quickPrompts';
+export const SYSTEM_PROMPT_LOCAL_STORAGE_KEY = 'systemPrompts';
