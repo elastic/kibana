@@ -316,6 +316,7 @@ export interface GetFieldsOptions {
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
   fields?: string[];
+  signal?: AbortSignal;
 }
 
 /**

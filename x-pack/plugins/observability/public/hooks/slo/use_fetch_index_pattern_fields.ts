@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -24,19 +23,13 @@ export interface Field {
 export function useFetchIndexPatternFields(
   indexPattern?: string
 ): UseFetchIndexPatternFieldsResponse {
-  const { http } = useKibana().services;
+  const { dataViews } = useKibana().services;
 
   const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: ['fetchIndexPatternFields', indexPattern],
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<{ fields: Field[] }>(FIELDS_FOR_WILDCARD_PATH, {
-          query: {
-            pattern: indexPattern,
-          },
-          signal,
-        });
-        return response.fields;
+        return await dataViews.getFieldsForWildcard({ pattern: indexPattern!, signal });
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }
