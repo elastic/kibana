@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SetSearchExperiencesChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetEsreChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
 
 export const EsreGuide: React.FC = () => {

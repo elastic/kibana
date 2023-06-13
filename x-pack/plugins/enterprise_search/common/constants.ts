@@ -45,7 +45,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 export const ESRE_PLUGIN = {
   ID: 'enterpriseSearchEsre',
   NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
-    defaultMessage: 'Enterprise Search',
+    defaultMessage: 'ESRE',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
     defaultMessage: 'ESRE',
