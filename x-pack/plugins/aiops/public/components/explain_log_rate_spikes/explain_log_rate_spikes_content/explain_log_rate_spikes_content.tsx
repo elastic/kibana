@@ -19,7 +19,10 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import type { Moment } from 'moment';
 import { useData } from '../../../hooks/use_data';
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
-import { ExplainLogRateSpikesAnalysis } from '../explain_log_rate_spikes_analysis';
+import {
+  ExplainLogRateSpikesAnalysis,
+  type ExplainLogRateSpikesAnalysisResults,
+} from '../explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../../spike_analysis_table/spike_analysis_table_row_provider';
 
@@ -47,6 +50,8 @@ export interface ExplainLogRateSpikesContentProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> = ({
@@ -55,6 +60,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
   initialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
+  onAnalysisCompleted,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
@@ -134,6 +140,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
                 windowParameters={windowParameters}
                 searchQuery={esSearchQuery}
                 sampleProbability={sampleProbability}
+                onAnalysisCompleted={onAnalysisCompleted}
               />
             )}
             {windowParameters === undefined && (
