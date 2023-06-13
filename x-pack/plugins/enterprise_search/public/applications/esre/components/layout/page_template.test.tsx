@@ -34,9 +34,7 @@ describe('EnterpriseSearchEsrePageTemplate', () => {
 
   describe('page chrome', () => {
     it('takes a breadcrumb array & renders a product-specific page chrome', () => {
-      const wrapper = shallow(
-        <EnterpriseSearchEsrePageTemplate pageChrome={['Some page']} />
-      );
+      const wrapper = shallow(<EnterpriseSearchEsrePageTemplate pageChrome={['Some page']} />);
       const setPageChrome = wrapper
         .find(EnterpriseSearchPageTemplateWrapper)
         .prop('setPageChrome') as any;
@@ -48,9 +46,7 @@ describe('EnterpriseSearchEsrePageTemplate', () => {
 
   describe('page telemetry', () => {
     it('takes a metric & renders product-specific telemetry viewed event', () => {
-      const wrapper = shallow(
-        <EnterpriseSearchEsrePageTemplate pageViewTelemetry="some_page" />
-      );
+      const wrapper = shallow(<EnterpriseSearchEsrePageTemplate pageViewTelemetry="some_page" />);
 
       expect(wrapper.find(SendEnterpriseSearchTelemetry).prop('action')).toEqual('viewed');
       expect(wrapper.find(SendEnterpriseSearchTelemetry).prop('metric')).toEqual('some_page');
