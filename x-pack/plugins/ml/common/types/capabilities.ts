@@ -92,11 +92,11 @@ export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = FeatureMlCapabilities & UserMlCapabilities & AdminMlCapabilities;
 export type MlCapabilitiesKey = keyof MlCapabilities;
 
-export const basicLicenseMlCapabilities = [
+export const basicLicenseMlCapabilities: MlCapabilitiesKey[] = [
   'canFindFileStructure',
   'canGetFieldInfo',
   'canGetMlInfo',
-] as Array<keyof MlCapabilities>;
+];
 
 export function getDefaultCapabilities(): MlCapabilities {
   return {
@@ -198,3 +198,50 @@ export interface MlCapabilitiesResponse {
 }
 
 export type ResolveMlCapabilities = (request: KibanaRequest) => Promise<MlCapabilities | null>;
+
+interface FeatureCapabilities {
+  ad: MlCapabilitiesKey[];
+  dfa: MlCapabilitiesKey[];
+  nlp: MlCapabilitiesKey[];
+}
+
+export const featureCapabilities: FeatureCapabilities = {
+  ad: [
+    'canGetJobs',
+    'canGetDatafeeds',
+    'canGetCalendars',
+    'canGetAnnotations',
+    'canCreateAnnotation',
+    'canDeleteAnnotation',
+    'canCreateJob',
+    'canDeleteJob',
+    'canOpenJob',
+    'canCloseJob',
+    'canResetJob',
+    'canUpdateJob',
+    'canForecastJob',
+    'canCreateDatafeed',
+    'canDeleteDatafeed',
+    'canStartStopDatafeed',
+    'canUpdateDatafeed',
+    'canPreviewDatafeed',
+    'canGetFilters',
+    'canCreateCalendar',
+    'canDeleteCalendar',
+    'canCreateFilter',
+    'canDeleteFilter',
+  ],
+  dfa: [
+    'canGetDataFrameAnalytics',
+    'canCreateDataFrameAnalytics',
+    'canDeleteDataFrameAnalytics',
+    'canStartStopDataFrameAnalytics',
+  ],
+  nlp: [
+    'canGetTrainedModels',
+    'canTestTrainedModels',
+    'canCreateTrainedModels',
+    'canDeleteTrainedModels',
+    'canStartStopTrainedModels',
+  ],
+};

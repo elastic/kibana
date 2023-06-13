@@ -10,7 +10,11 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
-import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
+import {
+  MlCapabilities,
+  basicLicenseMlCapabilities,
+  featureCapabilities,
+} from '../../../common/types/capabilities';
 import { MlFeatures } from '../../types';
 
 export const setupCapabilitiesSwitcher = (
@@ -45,7 +49,7 @@ function getSwitcher(
         return { ml: applyEnabledFeatures(mlCaps, enabledFeatures) };
       }
 
-      // not full licence, switch off all capabilities
+      // not full license, switch off all capabilities
       Object.keys(mlCaps).forEach((k) => {
         mlCaps[k as keyof MlCapabilities] = false;
       });
@@ -67,5 +71,16 @@ function applyEnabledFeatures(mlCaps: MlCapabilities, enabledFeatures: MlFeature
   mlCaps.isADEnabled = enabledFeatures.ad;
   mlCaps.isDFAEnabled = enabledFeatures.dfa;
   mlCaps.isNLPEnabled = enabledFeatures.nlp;
+
+  if (enabledFeatures.ad === false) {
+    featureCapabilities.ad.forEach((c) => (mlCaps[c] = false));
+  }
+  if (enabledFeatures.dfa === false) {
+    featureCapabilities.dfa.forEach((c) => (mlCaps[c] = false));
+  }
+  if (enabledFeatures.nlp === false) {
+    featureCapabilities.nlp.forEach((c) => (mlCaps[c] = false));
+  }
+
   return mlCaps;
 }
