@@ -114,6 +114,20 @@ describe('Upload response action create API handler', () => {
         testSetup.endpointAppContextMock.service.getActionCreateService().createAction as jest.Mock
       ).mockResolvedValue(createdUploadAction);
 
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+            {
+              elastic: {
+                agent: {
+                  id: '123-456',
+                },
+              },
+            },
+          ]),
+        });
+
       const handler: ReturnType<typeof getActionFileUploadHandler> =
         testSetup.getRegisteredRouteHandler('post', UPLOAD_ROUTE);
 
