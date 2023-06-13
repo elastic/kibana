@@ -60,7 +60,7 @@ export class CoreAppsService {
 
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
-      // this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
+      this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
       this.registerStaticDirs(corePreboot);
     }
   }
