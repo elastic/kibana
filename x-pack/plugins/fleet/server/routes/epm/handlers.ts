@@ -612,6 +612,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
     const installationInfo: InstallationInfo = {
       ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
       installed_kibana: attributes.installed_kibana,
+      installed_kibana_space_id: attributes.installed_kibana_space_id,
       installed_es: attributes.installed_es,
       install_status: attributes.install_status,
       install_source: attributes.install_source,
@@ -619,9 +620,10 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       version: attributes.version,
       verification_status: attributes.verification_status,
       verification_key_id: attributes.verification_key_id,
+      experimental_data_stream_features: attributes.experimental_data_stream_features,
     };
     return {
-      // When savedObject gets deprecated, replace `pkg` with `...omit(pkg, 'savedObject')`
+      // When savedObject gets removed, replace `pkg` with `...omit(pkg, 'savedObject')`
       ...pkg,
       installationInfo,
     };
