@@ -84,7 +84,14 @@ export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
           ) : null}
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      {isOpen ? <EuiSplitPanel.Inner grow={false}>{children}</EuiSplitPanel.Inner> : null}
+      {isOpen ? (
+        <EuiSplitPanel.Inner
+          css={{ borderTop: `${euiTheme.euiBorderWidthThin} solid ${euiTheme.euiBorderColor}` }}
+          grow={false}
+        >
+          {children}
+        </EuiSplitPanel.Inner>
+      ) : null}
     </EuiSplitPanel.Outer>
   );
 };
