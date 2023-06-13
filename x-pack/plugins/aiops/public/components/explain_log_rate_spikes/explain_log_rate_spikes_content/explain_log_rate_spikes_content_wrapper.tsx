@@ -28,10 +28,9 @@ import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../../spike_analysis_table/spike_analysis_table_row_provider';
 
-import {
-  ExplainLogRateSpikesContent,
-  type ExplainLogRateSpikesAnalysisResults,
-} from './explain_log_rate_spikes_content';
+import type { ExplainLogRateSpikesAnalysisResults } from '../explain_log_rate_spikes_analysis';
+
+import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content';
 
 const localStorage = new Storage(window.localStorage);
 
