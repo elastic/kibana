@@ -15,7 +15,7 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../../constants';
+import { SERVICE_PATH } from '../../constants';
 
 interface HasUserDataViewArgs {
   dataViewsService: DataViewsService;
@@ -87,8 +87,4 @@ const hasUserDataViewRouteFactory =
 
 export const registerHasUserDataViewRoute = hasUserDataViewRouteFactory(
   `${SERVICE_PATH}/has_user_data_view`
-);
-
-export const registerHasUserDataViewRouteLegacy = hasUserDataViewRouteFactory(
-  `${SERVICE_PATH_LEGACY}/has_user_index_pattern`
 );

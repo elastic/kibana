@@ -10,7 +10,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
-import { FIELDS_FOR_WILDCARD_PATH, HAS_USER_DATA_VIEW_PATH } from '../../common/constants';
+import { FIELDS_FOR_WILDCARD_PATH, HAS_DATA_VIEWS_PATH } from '../../common/constants';
 
 const version = '1';
 
@@ -84,7 +84,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    * Does a user created data view exist?
    */
   async hasUserDataView(): Promise<boolean> {
-    const response = await this._request<{ result: boolean }>(HAS_USER_DATA_VIEW_PATH);
+    const response = await this._request<{ result: boolean }>(HAS_DATA_VIEWS_PATH);
     return response?.result ?? false;
   }
 }

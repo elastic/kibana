@@ -7,6 +7,7 @@
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
+import { HAS_DATA_VIEWS_PATH } from '../../common/constants';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { IndicesResponse, IndicesResponseModified } from '../types';
@@ -157,7 +158,7 @@ export class HasData {
   // Data Views
 
   private getHasDataViews = async ({ http }: { http: HttpStart }): Promise<HasDataViewsResponse> =>
-    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`, { version: '1' });
+    http.get<HasDataViewsResponse>(HAS_DATA_VIEWS_PATH, { version: '1' });
 
   private hasDataViews = (http: HttpStart): Promise<boolean> => {
     return this.getHasDataViews({ http })

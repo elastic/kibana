@@ -26,7 +26,7 @@ export const getDataViews = async ({
     fields: ['title'],
     search: `*`,
     searchFields: ['title'],
-    perPage: 100,
+    perPage: 1,
   });
 
 /**

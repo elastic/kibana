@@ -41,7 +41,6 @@ const routes = [
   getRoutes.registerGetDataViewRouteLegacy,
   getAllRoutes.registerGetDataViewsRoute,
   hasRoutes.registerHasUserDataViewRoute,
-  hasRoutes.registerHasUserDataViewRouteLegacy,
   updateRoutes.registerUpdateDataViewRoute,
   updateRoutes.registerUpdateDataViewRouteLegacy,
   ...Object.values(scriptedRoutes),

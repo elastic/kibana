@@ -56,7 +56,9 @@ export const PLUGIN_NAME = 'DataViews';
  * Fields for wildcard path.
  * @public
  */
-
 export const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildcard';
 
-export const HAS_USER_DATA_VIEW_PATH = '/internal/data_views/has_user_index_pattern';
+/**
+ * Has data views path.
+ */
+export const HAS_DATA_VIEWS_PATH = '/internal/data_views/has_data_views';

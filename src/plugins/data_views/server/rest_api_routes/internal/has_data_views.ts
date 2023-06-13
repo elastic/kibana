@@ -10,6 +10,7 @@ import { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { VersionedRoute } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { getDataViews, hasUserDataView } from '../../has_user_data_view';
+import { HAS_DATA_VIEWS_PATH } from '../../../common/constants';
 
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
 
@@ -38,7 +39,7 @@ export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => 
 export const registerHasDataViewsRoute = (router: IRouter): void => {
   router.versioned
     .get({
-      path: '/internal/data_views/has_data_views',
+      path: HAS_DATA_VIEWS_PATH,
       access: 'internal',
     })
     .addVersion(
