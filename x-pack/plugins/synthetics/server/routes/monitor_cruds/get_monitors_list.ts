@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { mapSavedObjectToMonitor } from './helper';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_MONITORS,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
   validate: {
     query: QuerySchema,
   },
