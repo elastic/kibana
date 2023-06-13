@@ -3,13 +3,14 @@
 API_KEY_ENCODED=$1
 API_ENDPOINT=$2
 ELASTIC_AGENT_VERSION=$3
-AUTO_DOWNLOAD_CONFIG=$4
+ONBOARDING_ID=$4
+AUTO_DOWNLOAD_CONFIG=$5
 
 updateStepProgress() {
   local STEPNAME="$1"
   local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
   curl --request GET \
-    --url "${API_ENDPOINT}/custom_logs/step/${STEPNAME}?status=${STATUS}" \
+    --url "${API_ENDPOINT}/custom_logs/${ONBOARDING_ID}/step/${STEPNAME}?status=${STATUS}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
