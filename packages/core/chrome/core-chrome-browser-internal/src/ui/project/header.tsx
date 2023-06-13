@@ -231,6 +231,7 @@ export const ProjectHeader = ({
 
       {headerActionMenuMounter.mount && (
         <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
+          <EuiHeaderSection />
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
               <HeaderActionMenu mounter={headerActionMenuMounter} />
