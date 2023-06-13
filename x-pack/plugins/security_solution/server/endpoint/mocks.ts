@@ -23,6 +23,7 @@ import type {
   SavedObjectsClientContract,
   RequestHandler,
   IRouter,
+  RouteMethod,
 } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -43,6 +44,7 @@ import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import type { VersionedRoute, VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
 import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { xpackMocks } from '../fixtures';
@@ -235,6 +237,8 @@ export function createRouteHandlerContext(
   return context;
 }
 
+type RouterMethod = Extract<keyof IRouter, RouteMethod>;
+
 export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   routerMock: ReturnType<typeof httpServiceMock.createRouter>;
   scopedEsClusterClientMock: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
@@ -245,15 +249,9 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   getEsClientMock: (type?: 'internalUser' | 'currentUser') => ElasticsearchClientMock;
   createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => KibanaRequest<P, Q, B>;
   /** Retrieves the handler that was registered with the `router` for a given `method` and `path` */
-  getRegisteredRouteHandler: (
-    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
-    path: string
-  ) => RequestHandler;
+  getRegisteredRouteHandler: (method: RouterMethod, path: string) => RequestHandler;
   /** Retrieves the route handler configuration that was registered with the router */
-  getRegisteredRouteConfig: (
-    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
-    path: string
-  ) => RouteConfig<any, any, any, any>;
+  getRegisteredRouteConfig: (method: RouterMethod, path: string) => RouteConfig<any, any, any, any>;
 }
 
 /**
@@ -327,5 +325,53 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 
     getRegisteredRouteHandler,
     getRegisteredRouteConfig,
+  };
+};
+
+interface RegisteredVersionedRoute {
+  routeConfig: VersionedRouteConfig<RouterMethod>;
+  versionConfig: AddVersionOpts<any, any, any>;
+  routeHandler: RequestHandler;
+}
+
+export const getRegisteredVersionedRouteMock = (
+  routerMock: jest.Mocked<IRouter<any>>,
+  method: RouterMethod,
+  path: string,
+  version: number | string
+): RegisteredVersionedRoute => {
+  const methodMock = (routerMock.versioned[method] as jest.Mock).mock;
+  const methodCalls = methodMock.calls as Array<[config: VersionedRouteConfig<RouterMethod>]>;
+
+  let index = -1;
+  const registeredRoute = methodCalls.find(([routeConfig], i) => {
+    if (routeConfig.path.startsWith(path)) {
+      index = i;
+      return true;
+    }
+
+    return false;
+  });
+
+  if (!registeredRoute) {
+    throw new Error(`No Route registered for [${method}][${path}] with versioned router`);
+  }
+
+  // now get the actual handler from `addVersion`
+  const versions = (methodMock.results[index].value as jest.Mocked<VersionedRoute>).addVersion.mock
+    .calls;
+
+  const registeredVersion = versions.find(([versionConfig, versionHandler]) => {
+    return versionConfig.version === version;
+  });
+
+  if (!registeredVersion) {
+    throw new Error(`Handler for [${method}][${path}] with version [${version}] no found!`);
+  }
+
+  return {
+    routeConfig: registeredRoute[0],
+    versionConfig: registeredVersion[0],
+    routeHandler: registeredVersion[1],
   };
 };
