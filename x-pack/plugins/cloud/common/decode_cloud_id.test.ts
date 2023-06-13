@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { decodeCloudId } from './decode_cloud_id';
 
-// Copied from Fleet's solution
-// x-pack/fleet/common/services/decode_cloud_id.test.ts
-describe('Enterprise Search - decodeCloudId', () => {
+describe('Fleet - decodeCloudId', () => {
+  let logger: MockedLogger;
+
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
   it('parses various CloudID formats', () => {
     const tests = [
       {
@@ -75,7 +80,7 @@ describe('Enterprise Search - decodeCloudId', () => {
     ];
 
     for (const test of tests) {
-      const decoded = decodeCloudId(test.cloudID);
+      const decoded = decodeCloudId(test.cloudID, logger);
       expect(decoded).toBeTruthy();
       expect(decoded?.elasticsearchUrl === test.expectedEsURL).toBe(true);
       expect(decoded?.kibanaUrl === test.expectedKibanaURL).toBe(true);
@@ -96,7 +101,7 @@ describe('Enterprise Search - decodeCloudId', () => {
     ];
 
     for (const test of tests) {
-      const decoded = decodeCloudId(test.cloudID);
+      const decoded = decodeCloudId(test.cloudID, logger);
       expect(decoded).toBe(undefined);
       // decodeCloudId currently only logs; not throws errors
     }
