@@ -416,6 +416,26 @@ describe('field level security', () => {
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledWith('newPattern');
   });
 
+  test('does not query availble fields for remote cluster indices', async () => {
+    const testProps = {
+      ...props,
+      indexType: 'remote_indices' as const,
+      indexPrivilege: {
+        ...props.indexPrivilege,
+        clusters: ['test-cluster'],
+        names: ['foo', 'bar-*'],
+      },
+      indicesAPIClient: indicesAPIClientMock.create(),
+      allowFieldLevelSecurity: true,
+    };
+
+    testProps.indicesAPIClient.getFields.mockResolvedValue(['a', 'b', 'c']);
+
+    mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+    await nextTick();
+    expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
+  });
+
   test('it displays a warning when no fields are granted', () => {
     const testProps = {
       ...props,

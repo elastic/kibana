@@ -139,7 +139,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       total: response.total,
       page: response.page,
       perPage: response.per_page,
-      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+      results: response.saved_objects.map((so) => toSLO(so.attributes)),
     };
   }
 

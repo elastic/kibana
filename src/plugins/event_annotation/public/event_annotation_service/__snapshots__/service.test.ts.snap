@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Event Annotation Service loadAnnotationGroup should properly load an annotation group with a multiple annotation 1`] = `
+Object {
+  "annotations": undefined,
+  "dataViewSpec": undefined,
+  "description": undefined,
+  "ignoreGlobalFilters": undefined,
+  "indexPatternId": "ipid",
+  "tags": undefined,
+  "title": "groupTitle",
+}
+`;

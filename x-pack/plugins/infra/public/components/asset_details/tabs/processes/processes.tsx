@@ -21,18 +21,16 @@ import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import { TabContent } from '../../../../pages/metrics/inventory_view/components/node_details/tabs/shared';
 import {
   SortBy,
   useProcessList,
   ProcessListContextProvider,
 } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
-import type { HostNodeRow } from '../../types';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 
 export interface ProcessesProps {
-  node: HostNodeRow;
+  nodeName: string;
   nodeType: InventoryItemType;
   currentTime: number;
   searchFilter?: string;
@@ -46,7 +44,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 
 export const Processes = ({
   currentTime,
-  node,
+  nodeName,
   nodeType,
   searchFilter,
   onSearchFilterChange,
@@ -63,8 +61,8 @@ export const Processes = ({
 
   const hostTerm = useMemo(() => {
     const field = getFieldByType(nodeType) ?? nodeType;
-    return { [field]: node.name };
-  }, [node, nodeType]);
+    return { [field]: nodeName };
+  }, [nodeName, nodeType]);
 
   const {
     loading,
@@ -99,93 +97,88 @@ export const Processes = ({
   }, [onSearchFilterChange]);
 
   return (
-    <TabContent>
-      <ProcessListContextProvider hostTerm={hostTerm} to={currentTime}>
-        <SummaryTable
-          isLoading={loading}
-          processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
-        />
-        <EuiSpacer size="m" />
-        <EuiText>
-          <h4>
-            {i18n.translate('xpack.infra.metrics.nodeDetails.processesHeader', {
-              defaultMessage: 'Top processes',
-            })}{' '}
-            <EuiIconTip
-              aria-label={i18n.translate(
-                'xpack.infra.metrics.nodeDetails.processesHeader.tooltipLabel',
-                {
-                  defaultMessage: 'More info',
-                }
-              )}
-              size="m"
-              type="iInCircle"
-              content={i18n.translate(
-                'xpack.infra.metrics.nodeDetails.processesHeader.tooltipBody',
-                {
-                  defaultMessage:
-                    'The table below aggregates the top CPU and top memory consuming processes. It does not display all processes.',
-                }
-              )}
-            />
-          </h4>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiSearchBar
-          query={searchBarState}
-          onChange={searchBarOnChange}
-          box={{
-            incremental: true,
-            placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
-              defaultMessage: 'Search for processes…',
-            }),
-          }}
-          filters={[
-            {
-              type: 'field_value_selection',
-              field: 'state',
-              name: 'State',
-              operator: 'exact',
-              multiSelect: false,
-              options,
-            },
-          ]}
-        />
-        <EuiSpacer size="m" />
-        {!error ? (
-          <ProcessesTable
-            currentTime={currentTime}
-            isLoading={loading || !response}
-            processList={response?.processList ?? []}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            clearSearchBar={clearSearchBar}
+    <ProcessListContextProvider hostTerm={hostTerm} to={currentTime}>
+      <SummaryTable
+        isLoading={loading}
+        processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
+      />
+      <EuiSpacer size="m" />
+      <EuiText>
+        <h4>
+          {i18n.translate('xpack.infra.metrics.nodeDetails.processesHeader', {
+            defaultMessage: 'Top processes',
+          })}{' '}
+          <EuiIconTip
+            aria-label={i18n.translate(
+              'xpack.infra.metrics.nodeDetails.processesHeader.tooltipLabel',
+              {
+                defaultMessage: 'More info',
+              }
+            )}
+            size="m"
+            type="iInCircle"
+            content={i18n.translate('xpack.infra.metrics.nodeDetails.processesHeader.tooltipBody', {
+              defaultMessage:
+                'The table below aggregates the top CPU and top memory consuming processes. It does not display all processes.',
+            })}
           />
-        ) : (
-          <EuiEmptyPrompt
-            iconType="warning"
-            title={
-              <h4>
-                {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
-                  defaultMessage: 'Unable to load process data',
-                })}
-              </h4>
-            }
-            actions={
-              <EuiButton
-                data-test-subj="infraTabComponentTryAgainButton"
-                color="primary"
-                fill
-                onClick={reload}
-              >
-                {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
-                  defaultMessage: 'Try again',
-                })}
-              </EuiButton>
-            }
-          />
-        )}
-      </ProcessListContextProvider>
-    </TabContent>
+        </h4>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiSearchBar
+        query={searchBarState}
+        onChange={searchBarOnChange}
+        box={{
+          incremental: true,
+          placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
+            defaultMessage: 'Search for processes…',
+          }),
+        }}
+        filters={[
+          {
+            type: 'field_value_selection',
+            field: 'state',
+            name: 'State',
+            operator: 'exact',
+            multiSelect: false,
+            options,
+          },
+        ]}
+      />
+      <EuiSpacer size="m" />
+      {!error ? (
+        <ProcessesTable
+          currentTime={currentTime}
+          isLoading={loading || !response}
+          processList={response?.processList ?? []}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          clearSearchBar={clearSearchBar}
+        />
+      ) : (
+        <EuiEmptyPrompt
+          iconType="warning"
+          title={
+            <h4>
+              {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
+                defaultMessage: 'Unable to load process data',
+              })}
+            </h4>
+          }
+          actions={
+            <EuiButton
+              data-test-subj="infraTabComponentTryAgainButton"
+              color="primary"
+              fill
+              onClick={reload}
+            >
+              {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
+                defaultMessage: 'Try again',
+              })}
+            </EuiButton>
+          }
+        />
+      )}
+    </ProcessListContextProvider>
   );
 };

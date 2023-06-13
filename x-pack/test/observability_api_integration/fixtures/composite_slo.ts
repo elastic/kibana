@@ -13,7 +13,7 @@ const defaultCompositeSLOInput: CreateCompositeSLOInput = {
   name: 'some composite slo',
   timeWindow: {
     duration: '7d',
-    isRolling: true,
+    type: 'rolling',
   },
   budgetingMethod: 'occurrences',
   objective: {

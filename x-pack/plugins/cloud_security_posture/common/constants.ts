@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { PostureTypes } from './types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { PostureTypes, VulnSeverity } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
+export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =
+  '/internal/cloud_security_posture/vulnerabilities_dashboard';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
+export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 // TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
@@ -101,3 +105,30 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
 
 export const VULNERABILITIES = 'vulnerabilities';
 export const CONFIGURATIONS = 'configurations';
+
+export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer) => ({
+  ...query,
+  bool: {
+    ...query?.bool,
+    filter: [
+      ...((query?.bool?.filter as []) || []),
+      { exists: { field: 'vulnerability.score.base' } },
+      { exists: { field: 'vulnerability.score.version' } },
+      { exists: { field: 'vulnerability.severity' } },
+      { exists: { field: 'resource.name' } },
+      { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
+    ],
+    must_not: [
+      ...((query?.bool?.must_not as []) || []),
+      { match_phrase: { 'vulnerability.severity': 'UNKNOWN' } },
+    ],
+  },
+});
+
+export const SEVERITY: Record<VulnSeverity, VulnSeverity> = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+  UNKNOWN: 'UNKNOWN',
+};

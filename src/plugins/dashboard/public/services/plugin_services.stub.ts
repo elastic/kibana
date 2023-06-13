@@ -37,12 +37,12 @@ import { usageCollectionServiceFactory } from './usage_collection/usage_collecti
 import { spacesServiceFactory } from './spaces/spaces.stub';
 import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
-import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object.stub';
+import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
 import { customBrandingServiceFactory } from './custom_branding/custom_branding.stub';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
-  dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory),
+  dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
   analytics: new PluginServiceProvider(analyticsServiceFactory),
   application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),

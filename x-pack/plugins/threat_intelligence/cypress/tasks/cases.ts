@@ -10,11 +10,6 @@ import {
   FLYOUT_ADD_TO_NEW_CASE_ITEM,
   INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
   INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
-  CASE_ACTION_WRAPPER,
-  CASE_ELLIPSE_BUTTON,
-  CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON,
-  CASE_ELLIPSE_DELETE_CASE_OPTION,
-  CREATE_CASE_BUTTON,
   NEW_CASE_CREATE_BUTTON,
   NEW_CASE_DESCRIPTION_INPUT,
   NEW_CASE_NAME_INPUT,
@@ -53,16 +48,6 @@ export const openAddToExistingCaseFromFlyout = () => {
 };
 
 /**
- * Create a new case by filling out the form from the Cases page
- */
-export const createNewCaseFromCases = () => {
-  cy.get(CREATE_CASE_BUTTON).click();
-  cy.get(NEW_CASE_NAME_INPUT).click().type('case');
-  cy.get(NEW_CASE_DESCRIPTION_INPUT).click().type('case description');
-  cy.get(NEW_CASE_CREATE_BUTTON).click();
-};
-
-/**
  * Create a new case from the Threat Intelligence page
  */
 export const createNewCaseFromTI = () => {
@@ -76,15 +61,6 @@ export const createNewCaseFromTI = () => {
  */
 export const navigateToCaseViaToaster = () => {
   cy.get(VIEW_CASE_TOASTER_LINK).click();
-};
-
-/**
- * Delete case from the Cases page
- */
-export const deleteCase = () => {
-  cy.get(CASE_ACTION_WRAPPER).find(CASE_ELLIPSE_BUTTON).click();
-  cy.get(CASE_ELLIPSE_DELETE_CASE_OPTION).click();
-  cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).click();
 };
 
 /**

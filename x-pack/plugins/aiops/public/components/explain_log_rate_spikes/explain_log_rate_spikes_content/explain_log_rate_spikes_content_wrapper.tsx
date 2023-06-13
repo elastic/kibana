@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { EuiCallOut } from '@elastic/eui';
 
+import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -39,7 +40,7 @@ export interface ExplainLogRateSpikesContentWrapperProps {
   /** On global timefilter update */
   setGlobalState?: any;
   /** Timestamp for start of initial analysis */
-  initialAnalysisStart?: number;
+  initialAnalysisStart?: number | WindowParameters;
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;

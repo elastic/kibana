@@ -13,7 +13,7 @@ import { AnnotationsPanel } from '.';
 import { FramePublicAPI } from '../../../../types';
 import { DatasourcePublicAPI } from '../../../..';
 import { createMockFramePublicAPI } from '../../../../mocks';
-import { State } from '../../types';
+import { State, XYState } from '../../types';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import moment from 'moment';
@@ -206,7 +206,7 @@ describe('AnnotationsPanel', () => {
 
       component.find('button[data-test-subj="lns-xyAnnotation-rangeSwitch"]').simulate('click');
 
-      expect(setState).toBeCalledWith({
+      expect(setState).toBeCalledWith<XYState[]>({
         ...state,
         layers: [
           {
@@ -232,7 +232,7 @@ describe('AnnotationsPanel', () => {
         ],
       });
       component.find('button[data-test-subj="lns-xyAnnotation-rangeSwitch"]').simulate('click');
-      expect(setState).toBeCalledWith({
+      expect(setState).toBeCalledWith<XYState[]>({
         ...state,
         layers: [
           {

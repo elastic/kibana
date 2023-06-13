@@ -161,6 +161,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
         // readOnly is boolean flag
+        'input_control_vis.readOnly (any)',
         'vis_type_gauge.readOnly (any)',
         'vis_type_heatmap.readOnly (any)',
         'vis_type_metric.readOnly (any)',
@@ -176,6 +177,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',
         'xpack.apm.ui.maxTraceItems (number)',
+        'xpack.apm.managedServiceUrl (any)',
+        'xpack.apm.serverlessOnboarding (any)',
         'xpack.apm.latestAgentVersionsUrl (string)',
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
@@ -213,8 +216,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.infra.logs.app_target (alternatives)',
         'xpack.infra.sources.default.fields.message (array)',
+        /**
+         * xpack.infra.logs is conditional and will resolve to an object of properties
+         * - xpack.infra.logs.app_target (string)
+         */
+        'xpack.infra.logs (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -237,6 +244,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.spaces.maxSpaces (number)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
@@ -247,9 +255,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
+        'xpack.observability.coPilot.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
+        'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large

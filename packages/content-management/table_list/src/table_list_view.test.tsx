@@ -450,7 +450,7 @@ describe('TableListView', () => {
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Name A-Z ',
         'Name Z-A ',
-        'Recently updated - Checked option. ',
+        'Recently updated. Checked option. ',
         'Least recently updated ',
       ]);
     });
@@ -532,7 +532,7 @@ describe('TableListView', () => {
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Name A-Z ',
         'Name Z-A ',
-        'Recently updated - Checked option. ', // checked
+        'Recently updated. Checked option. ', // checked
         'Least recently updated ',
       ]);
 
@@ -571,7 +571,7 @@ describe('TableListView', () => {
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Name A-Z ',
-        'Name Z-A - Checked option. ', // now this option is checked
+        'Name Z-A. Checked option. ', // now this option is checked
         'Recently updated ',
         'Least recently updated ',
       ]);

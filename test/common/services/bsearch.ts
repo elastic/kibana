@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import request from 'superagent';
 import type SuperTest from 'supertest';
 import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrService } from '../ftr_provider_context';
 
 /**
@@ -69,6 +70,7 @@ export class BsearchService extends FtrService {
     const { body } = await this.retry.try(async () => {
       return supertest
         .post(`${spaceUrl}/internal/search/${strategy}`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'true')
         .send(options)
         .expect(200);
