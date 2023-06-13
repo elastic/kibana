@@ -9,4 +9,12 @@ import type { UninstallToken } from '../models/uninstall_token';
 
 import type { ListResult } from './common';
 
+export interface GetUninstallTokensRequest {
+  query: {
+    policyId?: string;
+    perPage?: number;
+    page?: number;
+  };
+}
+
 export type GetUninstallTokensResponse = ListResult<UninstallToken>;
