@@ -43,6 +43,7 @@ describe('Upgrade risk scores', () => {
   });
 
   beforeEach(() => {
+    login();
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
     installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
@@ -87,11 +88,11 @@ versions.forEach((version) =>
   describe(`handles version ${version} upgrades`, () => {
     before(() => {
       cleanKibana();
-      login();
-      createRule(getNewRule({ rule_id: 'rule1' }));
     });
 
     beforeEach(() => {
+      login();
+      createRule(getNewRule({ rule_id: 'rule1' }));
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId, version);

@@ -228,13 +228,6 @@ export function getDiscoverStateContainer({
    */
   const internalStateContainer = getInternalStateContainer();
 
-  const dataStateContainer = getDataStateContainer({
-    services,
-    searchSessionManager,
-    getAppState: appStateContainer.getState,
-    getSavedSearch: savedSearchContainer.getState,
-  });
-
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
@@ -247,12 +240,19 @@ export function getDiscoverStateContainer({
       }
     }
   };
-
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
+
+  const dataStateContainer = getDataStateContainer({
+    services,
+    searchSessionManager,
+    getAppState: appStateContainer.getState,
+    getSavedSearch: savedSearchContainer.getState,
+    setDataView,
+  });
 
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);

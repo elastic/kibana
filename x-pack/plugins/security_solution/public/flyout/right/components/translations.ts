@@ -123,6 +123,11 @@ export const CORRELATIONS_TITLE = i18n.translate(
   { defaultMessage: 'Correlations' }
 );
 
+export const PREVALENCE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
+  { defaultMessage: 'Prevalence' }
+);
+
 export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
   { defaultMessage: 'Technical Preview' }
@@ -238,6 +243,20 @@ export const CORRELATIONS_RELATED_CASES = i18n.translate(
   }
 );
 
+export const PREVALENCE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText',
+  {
+    defaultMessage: 'fields of prevalence',
+  }
+);
+
+export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText',
+  {
+    defaultMessage: 'is uncommon',
+  }
+);
+
 export const VIEW_ALL = (text: string) =>
   i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
     values: { text },
@@ -259,6 +278,10 @@ export const ANALYZER_PREVIEW_TEXT = i18n.translate(
     defaultMessage: 'analyzer preview.',
   }
 );
+
+export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
+  defaultMessage: 'Share Alert',
+});
 
 export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.investigationGuideText',

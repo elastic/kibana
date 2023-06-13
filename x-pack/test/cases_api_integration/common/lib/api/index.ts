@@ -36,7 +36,7 @@ import {
   CasesStatusResponse,
   Configurations,
   AlertResponse,
-  ConnectorMappings,
+  ConnectorMappingsAttributes,
   CasesByAlertId,
   CaseResolveResponse,
   SingleCaseMetricsResponse,
@@ -282,7 +282,7 @@ export const ensureSavedObjectIsAuthorized = (
 };
 
 interface ConnectorMappingsSavedObject {
-  'cases-connector-mappings': ConnectorMappings;
+  'cases-connector-mappings': ConnectorMappingsAttributes;
 }
 
 /**

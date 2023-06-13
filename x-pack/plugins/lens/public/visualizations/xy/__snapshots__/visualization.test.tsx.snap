@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_visualization #appendLayer adding an annotation layer adds a by-reference annotation layer 1`] = `
+Object {
+  "__lastSaved": Object {
+    "annotations": Array [
+      Object {
+        "icon": "circle",
+        "id": "an1",
+        "key": Object {
+          "timestamp": "2022-03-18T08:25:17.140Z",
+          "type": "point_in_time",
+        },
+        "label": "Event 1",
+        "type": "manual",
+      },
+    ],
+    "description": "Some description",
+    "ignoreGlobalFilters": false,
+    "indexPatternId": "indexPattern1",
+    "tags": Array [],
+    "title": "Title",
+  },
+  "annotationGroupId": "some-annotation-group-id",
+  "annotations": Array [
+    Object {
+      "icon": "circle",
+      "id": "an1",
+      "key": Object {
+        "timestamp": "2022-03-18T08:25:17.140Z",
+        "type": "point_in_time",
+      },
+      "label": "Event 1",
+      "type": "manual",
+    },
+  ],
+  "ignoreGlobalFilters": false,
+  "indexPatternId": "indexPattern1",
+  "layerId": "",
+  "layerType": "annotations",
+}
+`;
+
+exports[`xy_visualization #appendLayer adding an annotation layer adds a by-value annotation layer 1`] = `
+Object {
+  "annotations": Array [],
+  "ignoreGlobalFilters": true,
+  "indexPatternId": "indexPattern1",
+  "layerId": "",
+  "layerType": "annotations",
+}
+`;
+
+exports[`xy_visualization #initialize should hydrate by-reference annotation groups 1`] = `
+Array [
+  Object {
+    "__lastSaved": Object {
+      "annotations": Array [
+        Object {
+          "icon": "circle",
+          "id": "an1",
+          "key": Object {
+            "timestamp": "2022-03-18T08:25:17.140Z",
+            "type": "point_in_time",
+          },
+          "label": "Event 1",
+          "type": "manual",
+        },
+      ],
+      "description": "",
+      "ignoreGlobalFilters": true,
+      "indexPatternId": "data-view-123",
+      "tags": Array [],
+      "title": "my title!",
+    },
+    "annotationGroupId": "my-annotation-group-id1",
+    "annotations": Array [
+      Object {
+        "icon": "circle",
+        "id": "an1",
+        "key": Object {
+          "timestamp": "2022-03-18T08:25:17.140Z",
+          "type": "point_in_time",
+        },
+        "label": "Event 1",
+        "type": "manual",
+      },
+    ],
+    "ignoreGlobalFilters": true,
+    "indexPatternId": "data-view-123",
+    "layerId": "annotation",
+    "layerType": "annotations",
+  },
+  Object {
+    "__lastSaved": Object {
+      "annotations": Array [
+        Object {
+          "icon": "circle",
+          "id": "an2",
+          "key": Object {
+            "timestamp": "2022-04-18T11:01:59.135Z",
+            "type": "point_in_time",
+          },
+          "label": "Annotation2",
+          "type": "manual",
+        },
+      ],
+      "description": "",
+      "ignoreGlobalFilters": true,
+      "indexPatternId": "data-view-773203",
+      "tags": Array [],
+      "title": "my other title!",
+    },
+    "annotationGroupId": "my-annotation-group-id2",
+    "annotations": Array [
+      Object {
+        "icon": "circle",
+        "id": "an2",
+        "key": Object {
+          "timestamp": "2022-04-18T11:01:59.135Z",
+          "type": "point_in_time",
+        },
+        "label": "Annotation2",
+        "type": "manual",
+      },
+    ],
+    "ignoreGlobalFilters": true,
+    "indexPatternId": "data-view-773203",
+    "layerId": "annotation",
+    "layerType": "annotations",
+  },
+]
+`;

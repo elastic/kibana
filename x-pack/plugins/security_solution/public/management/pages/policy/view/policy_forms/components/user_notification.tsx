@@ -159,7 +159,7 @@ export const UserNotification = React.memo(
                   </h4>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} data-test-subj={`${protection}TooltipIcon`}>
                 <EuiIconTip
                   position="right"
                   data-test-subj={`${protection}Tooltip`}

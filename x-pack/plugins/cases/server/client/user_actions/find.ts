@@ -18,6 +18,7 @@ import { formatSavedObjects } from './utils';
 import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export const find = async (
   { caseId, params }: UserActionFind,
@@ -54,12 +55,14 @@ export const find = async (
       userActions.saved_objects.map((so) => ({ owner: so.attributes.owner, id: so.id }))
     );
 
-    return UserActionFindResponseRt.encode({
+    const res = {
       userActions: formatSavedObjects(userActions),
       page: userActions.page,
       perPage: userActions.per_page,
       total: userActions.total,
-    });
+    };
+
+    return decodeOrThrow(UserActionFindResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find user actions for case id: ${caseId}: ${error}`,

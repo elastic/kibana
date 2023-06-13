@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
@@ -19,7 +20,7 @@ const StringOrArraySchema = schema.maybe(
 export const QuerySchema = schema.object({
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
-  sortField: schema.maybe(schema.string()),
+  sortField: MonitorSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
@@ -30,6 +31,7 @@ export const QuerySchema = schema.object({
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
+  monitorQueryIds: StringOrArraySchema,
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
@@ -75,6 +77,7 @@ export const getMonitors = async (
     searchAfter,
     projects,
     schedules,
+    monitorQueryIds,
   } = context.request.query;
 
   const filterStr = await getMonitorFilters({
@@ -84,10 +87,11 @@ export const getMonitors = async (
     locations,
     projects,
     schedules,
+    monitorQueryIds,
     context,
   });
 
-  return context.savedObjectsClient.find({
+  const findParams = {
     type: syntheticsMonitorType,
     perPage,
     page,
@@ -98,7 +102,9 @@ export const getMonitors = async (
     filter: filterStr,
     searchAfter,
     fields,
-  });
+  };
+
+  return context.savedObjectsClient.find(findParams);
 };
 
 export const getMonitorFilters = async ({
@@ -108,6 +114,7 @@ export const getMonitorFilters = async ({
   projects,
   monitorTypes,
   schedules,
+  monitorQueryIds,
   context,
 }: {
   filter?: string;
@@ -116,6 +123,7 @@ export const getMonitorFilters = async ({
   locations?: string | string[];
   projects?: string | string[];
   schedules?: string | string[];
+  monitorQueryIds?: string | string[];
   context: RouteContext;
 }) => {
   const locationFilter = await parseLocationFilter(context, locations);
@@ -127,6 +135,7 @@ export const getMonitorFilters = async ({
     getKqlFilter({ field: 'type', values: monitorTypes }),
     getKqlFilter({ field: 'locations.id', values: locationFilter }),
     getKqlFilter({ field: 'schedule.number', values: schedules }),
+    getKqlFilter({ field: 'id', values: monitorQueryIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -186,8 +195,17 @@ export const findLocationItem = (query: string, locations: ServiceLocations) => 
  * @param monitorQuery { MonitorsQuery }
  */
 export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
-  const { query, tags, monitorTypes, locations, status, filter, projects, schedules } =
-    monitorQuery;
+  const {
+    query,
+    tags,
+    monitorTypes,
+    locations,
+    status,
+    filter,
+    projects,
+    schedules,
+    monitorQueryIds,
+  } = monitorQuery;
 
   return (
     !!query ||
@@ -197,7 +215,8 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!tags?.length ||
     !!status?.length ||
     !!projects?.length ||
-    !!schedules?.length
+    !!schedules?.length ||
+    !!monitorQueryIds?.length
   );
 };
 

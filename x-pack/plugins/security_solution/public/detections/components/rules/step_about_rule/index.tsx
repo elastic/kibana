@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { memo, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
@@ -17,26 +17,17 @@ import type {
   AboutStepRule,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
-import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
-import type { FieldHook } from '../../../../shared_imports';
-import {
-  Field,
-  Form,
-  getUseField,
-  UseField,
-  useForm,
-  useFormData,
-} from '../../../../shared_imports';
+import type { FieldHook, FormHook } from '../../../../shared_imports';
+import { Field, Form, getUseField, UseField, useFormData } from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
-import { schema as defaultSchema, threatIndicatorPathRequiredSchemaValue } from './schema';
+import { schema as defaultSchema } from './schema';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
@@ -51,7 +42,13 @@ const CommonUseField = getUseField({ component: Field });
 interface StepAboutRuleProps extends RuleStepProps {
   defaultValues: AboutStepRule;
   defineRuleData?: DefineStepRule;
-  onRuleDataChange?: (data: AboutStepRule) => void;
+  form: FormHook<AboutStepRule>;
+}
+
+interface StepAboutRuleReadOnlyProps {
+  addPadding: boolean;
+  descriptionColumns: 'multi' | 'single' | 'singleSplit';
+  defaultValues: AboutStepRule;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -67,30 +64,17 @@ const TagContainer = styled.div`
 TagContainer.displayName = 'TagContainer';
 
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
-  addPadding = false,
   defaultValues: initialState,
   defineRuleData,
-  descriptionColumns = 'singleSplit',
-  isReadOnlyView,
   isUpdateView = false,
   isLoading,
-  onSubmit,
-  setForm,
-  onRuleDataChange,
+  form,
 }) => {
   const { data } = useKibana().services;
 
   const isThreatMatchRuleValue = useMemo(
     () => isThreatMatchRule(defineRuleData?.ruleType),
     [defineRuleData]
-  );
-
-  const schema = useMemo(
-    () =>
-      isThreatMatchRuleValue
-        ? { ...defaultSchema, threatIndicatorPath: threatIndicatorPathRequiredSchemaValue }
-        : defaultSchema,
-    [isThreatMatchRuleValue]
   );
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
@@ -130,34 +114,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     fetchSingleDataView();
   }, [data.dataViews, defineRuleData, indexIndexPattern, setIndexPattern]);
 
-  const { form } = useForm<AboutStepRule>({
-    defaultValue: initialState,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-  const { getFields, getFormData, submit } = form;
+  const { getFields } = form;
   const [{ severity: formSeverity, timestampOverride: formTimestampOverride }] =
     useFormData<AboutStepRule>({
       form,
-      watch: [
-        'isAssociatedToEndpointList',
-        'isBuildingBlock',
-        'riskScore',
-        'ruleNameOverride',
-        'severity',
-        'timestampOverride',
-        'threat',
-        'timestampOverrideFallbackDisabled',
-      ],
-      onChange: (aboutData: AboutStepRule) => {
-        if (onRuleDataChange) {
-          onRuleDataChange({
-            threatIndicatorPath: undefined,
-            timestampOverrideFallbackDisabled: undefined,
-            ...aboutData,
-          });
-        }
-      },
     });
 
   useEffect(() => {
@@ -173,44 +133,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     }
   }, [formSeverity?.value, getFields, severityValue]);
 
-  const getData = useCallback(async () => {
-    const result = await submit();
-    return result?.isValid
-      ? {
-          isValid: true,
-          data: {
-            threatIndicatorPath: undefined,
-            timestampOverrideFallbackDisabled: undefined,
-            ...result.data,
-          },
-        }
-      : {
-          isValid: false,
-          data: getFormData(),
-        };
-  }, [getFormData, submit]);
-
-  const handleSubmit = useCallback(() => {
-    if (onSubmit) {
-      onSubmit();
-    }
-  }, [onSubmit]);
-
-  useEffect(() => {
-    let didCancel = false;
-    if (setForm && !didCancel) {
-      setForm(RuleStep.aboutRule, getData);
-    }
-    return () => {
-      didCancel = true;
-    };
-  }, [getData, setForm]);
-
-  return isReadOnlyView ? (
-    <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={schema} data={initialState} />
-    </StepContentWrapper>
-  ) : (
+  return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form}>
@@ -438,12 +361,21 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
           </EuiAccordion>
         </Form>
       </StepContentWrapper>
-
-      {!isUpdateView && (
-        <NextStep dataTestSubj="about-continue" onClick={handleSubmit} isDisabled={isLoading} />
-      )}
     </>
   );
 };
 
 export const StepAboutRule = memo(StepAboutRuleComponent);
+
+const StepAboutRuleReadOnlyComponent: FC<StepAboutRuleReadOnlyProps> = ({
+  addPadding,
+  defaultValues: data,
+  descriptionColumns,
+}) => {
+  return (
+    <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
+      <StepRuleDescription columns={descriptionColumns} schema={defaultSchema} data={data} />
+    </StepContentWrapper>
+  );
+};
+export const StepAboutRuleReadOnly = memo(StepAboutRuleReadOnlyComponent);

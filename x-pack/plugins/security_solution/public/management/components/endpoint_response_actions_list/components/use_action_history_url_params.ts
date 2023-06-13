@@ -14,6 +14,7 @@ import {
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
+import { DEFAULT_DATE_RANGE_OPTIONS } from './hooks';
 
 interface UrlParamsActionsLogFilters {
   commands: string;
@@ -63,8 +64,8 @@ export const actionsLogFiltersFromUrlParams = (
     commands: [],
     hosts: [],
     statuses: [],
-    startDate: 'now-24h/h',
-    endDate: 'now',
+    startDate: DEFAULT_DATE_RANGE_OPTIONS.startDate,
+    endDate: DEFAULT_DATE_RANGE_OPTIONS.endDate,
     users: [],
     withOutputs: [],
     withAutomatedActions: undefined,

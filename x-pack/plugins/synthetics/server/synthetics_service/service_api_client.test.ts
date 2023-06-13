@@ -182,55 +182,42 @@ describe('callAPI', () => {
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    await apiClient.callAPI('POST', {
+    const serviceData = {
       monitors: testMonitors,
       output,
       license: licenseMock.license,
-    });
+      endpoint: 'monitors' as const,
+    };
+
+    await apiClient.callAPI('POST', serviceData);
 
     expect(spy).toHaveBeenCalledTimes(3);
     const devUrl = 'https://service.dev';
 
+    const monitorsByLocation = apiClient.processServiceData(serviceData);
+
     expect(spy).toHaveBeenNthCalledWith(
       1,
-      {
-        isEdit: undefined,
-        monitors: testMonitors.filter((monitor: any) =>
-          monitor.locations.some((loc: any) => loc.id === 'us_central')
-        ),
-        output,
-        license: licenseMock.license,
-      },
+      monitorsByLocation.find(({ location: { id } }) => id === 'us_central')?.data,
       'POST',
-      devUrl
+      devUrl,
+      'monitors'
     );
 
     expect(spy).toHaveBeenNthCalledWith(
       2,
-      {
-        isEdit: undefined,
-        monitors: testMonitors.filter((monitor: any) =>
-          monitor.locations.some((loc: any) => loc.id === 'us_central_qa')
-        ),
-        output,
-        license: licenseMock.license,
-      },
+      monitorsByLocation.find(({ location: { id } }) => id === 'us_central_qa')?.data,
       'POST',
-      'https://qa.service.elstc.co'
+      'https://qa.service.elstc.co',
+      'monitors'
     );
 
     expect(spy).toHaveBeenNthCalledWith(
       3,
-      {
-        isEdit: undefined,
-        monitors: testMonitors.filter((monitor: any) =>
-          monitor.locations.some((loc: any) => loc.id === 'us_central_staging')
-        ),
-        output,
-        license: licenseMock.license,
-      },
+      monitorsByLocation.find(({ location: { id } }) => id === 'us_central_staging')?.data,
       'POST',
-      'https://qa.service.stg.co'
+      'https://qa.service.stg.co',
+      'monitors'
     );
 
     expect(axiosSpy).toHaveBeenCalledTimes(3);

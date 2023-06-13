@@ -53,12 +53,12 @@ export const ConfigurationAttributesRt = rt.intersection([
 
 export const ConfigurationRt = rt.intersection([
   ConfigurationAttributesRt,
-  ConnectorMappingsRt,
   rt.strict({
     id: rt.string,
     version: rt.string,
     error: rt.union([rt.string, rt.null]),
     owner: rt.string,
+    mappings: ConnectorMappingsRt,
   }),
 ]);
 

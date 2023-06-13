@@ -25,14 +25,15 @@ import {
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ToggleField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  ToggleField,
+  SelectField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  type ActionConnectorFieldsProps,
-  HiddenField,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   firstFieldOption,
   getFields,
@@ -134,7 +135,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           />
         </h5>
       </EuiTitle>
-      <HiddenField path={'config.refresh'} />
+      <UseField path="config.refresh" component={HiddenField} />
       <EuiSpacer size="m" />
       <UseField path="config.index" config={getIndexConfig(docLinks)}>
         {(field) => {
