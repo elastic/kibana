@@ -44,7 +44,7 @@ Array [
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2023-10-31T10:15:00.000Z",
+                "gte": "2023-05-22T10:15:00.000Z",
                 "lt": "2023-05-29T10:15:00.000Z",
               },
             },
@@ -136,7 +136,7 @@ Array [
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2023-10-31T10:15:00.000Z",
+                "gte": "2023-05-22T10:15:00.000Z",
                 "lt": "2023-05-29T10:15:00.000Z",
               },
             },
