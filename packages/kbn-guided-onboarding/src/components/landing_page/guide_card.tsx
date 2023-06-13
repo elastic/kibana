@@ -74,7 +74,7 @@ export const GuideCard = ({
 
   const cardCss = css`
     position: relative;
-    min-height: 140px;
+    height: 125px;
     width: 380px;
     @media (max-width: ${euiTheme.breakpoint.s}px) {
       max-width: 335px;
