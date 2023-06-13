@@ -634,6 +634,8 @@ function getActionTypeForm({
       summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
       defaultNotifyWhenValue={defaultNotifyWhenValue}
+      producerId="infrastructure"
+      featureId="infrastructure"
     />
   );
 }
