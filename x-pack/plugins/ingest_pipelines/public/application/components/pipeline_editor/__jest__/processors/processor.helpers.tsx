@@ -196,4 +196,7 @@ type TestSubject =
   | 'precisionField.input'
   | 'patternDefinitionsField'
   | 'pipelineNameField.input'
-  | 'ignoreMissingPipelineSwitch.input';
+  | 'ignoreMissingPipelineSwitch.input'
+  | 'destinationField.input'
+  | 'datasetField.input'
+  | 'namespaceField.input';
