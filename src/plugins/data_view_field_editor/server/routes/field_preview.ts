@@ -30,11 +30,22 @@ const bodySchema = schema.object({
 });
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
-  router.post(
+  router.versioned.post({ path: `${API_BASE_PATH}/field_preview`, access: 'internal' }).addVersion(
     {
-      path: `${API_BASE_PATH}/field_preview`,
+      version: '1',
       validate: {
-        body: bodySchema,
+        request: {
+          body: bodySchema,
+        },
+        /* todo this needs to be defined
+        response: {
+          200: {
+            body: schema.object({
+              values:
+            });
+          }
+        }
+        */
       },
     },
     async (ctx, req, res) => {
@@ -53,8 +64,9 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         // client types need to be update to support this request format
         // @ts-expect-error
         const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
-        const fieldValue = result as HttpResponsePayload;
+        const fieldValue = result;
 
+        // todo this needs to be typed
         return res.ok({ body: { values: fieldValue } });
       } catch (error) {
         // Assume invalid painless script was submitted
