@@ -5,29 +5,13 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-
-import { decodeCloudId } from '../decode_cloud_id/decode_cloud_id';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export function getCloudEnterpriseSearchHost(cloud: CloudSetup | undefined): string | undefined {
-  if (cloud && cloud.isCloudEnabled && cloud.cloudId) {
-    const deploymentId = getDeploymentId(cloud.cloudId);
-    const res = decodeCloudId(cloud.cloudId);
-    if (!(deploymentId && res)) {
-      return;
-    }
-
+  if (cloud && cloud.isCloudEnabled && cloud.cloudId && cloud.deploymentId && cloud.cloudHost) {
     // Enterprise Search Server url are formed like this `https://<deploymentId>.ent.<host>
-    return `https://${deploymentId}.ent.${res.host}${
-      res.defaultPort !== '443' ? `:${res.defaultPort}` : ''
+    return `https://${cloud.deploymentId}.ent.${cloud.cloudHost}${
+      cloud.cloudDefaultPort && cloud.cloudDefaultPort !== '443' ? `:${cloud.cloudDefaultPort}` : ''
     }`;
-  }
-}
-
-function getDeploymentId(cloudId: string): string | undefined {
-  const [deploymentId, rest] = cloudId.split(':');
-
-  if (deploymentId && rest) {
-    return deploymentId;
   }
 }
