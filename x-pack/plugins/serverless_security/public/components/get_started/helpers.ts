@@ -20,7 +20,7 @@ export const getCardStepsLeft = (card: Card, stepsDone: Set<StepId>) =>
 
 export const isCardActive = (card: Card, activeProducts: Set<ProductId>) =>
   !card.productTypeRequired ||
-  card?.productTypeRequired?.some((condition) => activeProducts.has(condition));
+  card.productTypeRequired?.some((condition) => activeProducts.has(condition));
 
 export const setupCards = (
   finishedSteps: Record<CardId, Set<StepId>>,
