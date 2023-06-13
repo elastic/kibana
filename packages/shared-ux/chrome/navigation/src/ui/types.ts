@@ -8,36 +8,14 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import type {
-  ChromeProjectNavigationLink,
+  AppDeepLinkId,
   ChromeProjectNavigationNode,
+  NodeDefinition,
 } from '@kbn/core-chrome-browser';
 
 import type { CloudLinkProps, RecentlyAccessedProps } from './components';
 
-/**
- * @public
- *
- * A navigation node definition with its unique id, title, path in the tree and optional
- * deep link and children.
- */
-export interface NodeDefinition<T extends string = string, C extends string = T> {
-  /** Optional id, if not passed a "link" must be provided. */
-  id?: T;
-  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title?: string;
-  /** App id or deeplink id */
-  link?: ChromeProjectNavigationLink;
-  /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
-  icon?: string;
-  /** Optional children of the navigation node */
-  children?: Array<NodeDefinition<C>>;
-  /**
-   * Temporarilly we allow href to be passed.
-   * Once all the deeplinks will be exposed in packages we will not allow href anymore
-   * and force deeplink id to be passed
-   */
-  href?: string;
-}
+export type NonEmptyArray<T> = [T, ...T[]];
 
 /**
  * @public
@@ -45,7 +23,11 @@ export interface NodeDefinition<T extends string = string, C extends string = T>
  * A navigation node definition with its unique id, title, path in the tree and optional deep link.
  * Those are the props that can be passed to the Navigation.Group and Navigation.Item components.
  */
-export interface NodeProps extends Omit<NodeDefinition, 'children'> {
+export interface NodeProps<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   /**
    * Children of the node. For Navigation.Item (only) it allows a function to be set.
    * This function will receive the ChromeProjectNavigationNode object
@@ -58,7 +40,11 @@ export interface NodeProps extends Omit<NodeDefinition, 'children'> {
  *
  * Internally we enhance the Props passed to the Navigation.Item component.
  */
-export interface NodePropsEnhanced extends NodeProps {
+export interface NodePropsEnhanced<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends NodeProps<LinkId, Id, ChildrenId> {
   /**
    * This function correspond to the same "itemRender" function that can be passed to
    * the EuiSideNavItemType (see navigation_section_ui.tsx)
@@ -103,11 +89,14 @@ export interface CloudLinkDefinition extends CloudLinkProps {
  *
  * A group root item definition.
  */
-export interface GroupDefinition extends NodeDefinition {
+export interface GroupDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends NodeDefinition<LinkId, Id, ChildrenId> {
   type: 'navGroup';
   /** Flag to indicate if the group is initially collapsed or not. */
   defaultIsCollapsed?: boolean;
-  children?: NodeDefinition[];
   preset?: NavigationGroupPreset;
 }
 
@@ -116,12 +105,17 @@ export interface GroupDefinition extends NodeDefinition {
  *
  * The navigation definition for a root item in the side navigation.
  */
-export type RootNavigationItemDefinition =
-  | RecentlyAccessedDefinition
-  | CloudLinkDefinition
-  | GroupDefinition;
+export type RootNavigationItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = RecentlyAccessedDefinition | CloudLinkDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
 
-export type ProjectNavigationTreeDefinition = Array<Omit<GroupDefinition, 'type'>>;
+export type ProjectNavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = Array<Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>>;
 
 /**
  * @public
