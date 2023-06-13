@@ -79,7 +79,7 @@ const UpdateSchema = {
  * Elasticsearch schemas
  */
 
-export const ElasticSearchBaseSchema = {
+export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
@@ -95,7 +95,7 @@ const ElasticSearchUpdateSchema = {
  * Logstash schemas
  */
 
-export const LogstashBaseSchema = {
+export const LogstashSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
@@ -138,7 +138,7 @@ const KafkaTopicsSchema = schema.arrayOf(
   { minSize: 1 }
 );
 
-export const KafkaBaseSchema = {
+export const KafkaSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
@@ -186,13 +186,6 @@ export const KafkaBaseSchema = {
       ),
     })
   ),
-  ssl: schema.maybe(
-    schema.object({
-      certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-      certificate: schema.maybe(schema.string()),
-      key: schema.maybe(schema.string()),
-    })
-  ),
   partition: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaPartitionType.Random),
@@ -215,7 +208,7 @@ export const KafkaBaseSchema = {
 
 const KafkaUpdateSchema = {
   ...UpdateSchema,
-  ...KafkaBaseSchema,
+  ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
   hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
   auth_type: schema.maybe(
@@ -229,9 +222,9 @@ const KafkaUpdateSchema = {
 };
 
 export const OutputSchema = schema.oneOf([
-  schema.object({ ...ElasticSearchBaseSchema }),
-  schema.object({ ...LogstashBaseSchema }),
-  schema.object({ ...KafkaBaseSchema }),
+  schema.object({ ...ElasticSearchSchema }),
+  schema.object({ ...LogstashSchema }),
+  schema.object({ ...KafkaSchema }),
 ]);
 
 export const UpdateOutputSchema = schema.oneOf([

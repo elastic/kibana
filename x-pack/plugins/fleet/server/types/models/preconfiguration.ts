@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
-import { ElasticSearchBaseSchema, KafkaBaseSchema, LogstashBaseSchema } from '..';
+import { ElasticSearchSchema, KafkaSchema, LogstashSchema } from '..';
 
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 import type { PreconfiguredOutput } from '../../../common/types';
@@ -83,9 +83,9 @@ const PreconfiguredOutputBaseSchema = {
 
 export const PreconfiguredOutputsSchema = schema.arrayOf(
   schema.oneOf([
-    schema.object({ ...ElasticSearchBaseSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...LogstashBaseSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...KafkaBaseSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...LogstashSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...KafkaSchema }).extends(PreconfiguredOutputBaseSchema),
   ]),
   { defaultValue: [], validate: validatePreconfiguredOutputs }
 );
