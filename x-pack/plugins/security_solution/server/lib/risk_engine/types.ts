@@ -7,7 +7,7 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { IdentifierType, RiskWeights } from '../../../common/risk_engine';
+import type { AfterKey, AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
 
 export interface GetScoresParams {
   afterKeys: AfterKeys;
@@ -18,15 +18,6 @@ export interface GetScoresParams {
   pageSize: number;
   range: { start: string; end: string };
   weights?: RiskWeights;
-}
-
-export interface AfterKey {
-  [identifierField: string]: string;
-}
-
-export interface AfterKeys {
-  host?: AfterKey;
-  user?: AfterKey;
 }
 
 export interface GetScoresResponse {

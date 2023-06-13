@@ -7,17 +7,13 @@
 
 import * as t from 'io-ts';
 import { DataViewId } from '../../detection_engine/rule_schema';
+import { afterKeysSchema } from '../after_keys';
 import { identifierTypeSchema } from '../identifier_types';
 import { riskWeightsSchema } from '../risk_weights/schema';
 
-const afterKey = t.record(t.string, t.string);
-
 export const riskScorePreviewRequestSchema = t.exact(
   t.partial({
-    after_keys: t.partial({
-      host: afterKey,
-      user: afterKey,
-    }),
+    after_keys: afterKeysSchema,
     data_view_id: DataViewId,
     debug: t.boolean,
     filter: t.unknown,

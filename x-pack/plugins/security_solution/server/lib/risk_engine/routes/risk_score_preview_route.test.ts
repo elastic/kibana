@@ -211,5 +211,30 @@ describe('POST risk_engine/preview route', () => {
         );
       });
     });
+
+    describe('pagination', () => {
+      it('respects the provided after_key', async () => {
+        const afterKey = { 'host.name': 'hi mom' };
+        const request = buildRequest({ after_keys: { host: afterKey } });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+          expect.objectContaining({ afterKeys: { host: afterKey } })
+        );
+      });
+
+      it('rejects an invalid after_key', async () => {
+        const request = buildRequest({
+          after_keys: {
+            bad: 'key',
+          },
+        });
+
+        const result = await server.validate(request);
+        expect(result.badRequest).toHaveBeenCalledWith('invalid keys "bad"');
+      });
+    });
   });
 });
