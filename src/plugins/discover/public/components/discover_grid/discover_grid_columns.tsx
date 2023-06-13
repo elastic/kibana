@@ -106,7 +106,7 @@ function buildEuiGridColumn({
         })
       : dataViewField?.displayName || columnName;
 
-  let cellActions;
+  let cellActions: EuiDataGridColumnCellAction[];
   if (columnCellActions?.length) {
     cellActions = columnCellActions;
   } else {

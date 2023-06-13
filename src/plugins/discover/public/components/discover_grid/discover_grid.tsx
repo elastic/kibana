@@ -458,14 +458,14 @@ export const DiscoverGrid = ({
     () =>
       cellActionsTriggerId && !isPlainRecord
         ? visibleColumns.map((columnName) => {
-            if (columnName === '_source') {
-              // disable custom actions on _source column
+            const field = dataView.getFieldByName(columnName)?.spec;
+            if (field?.type === '_source' || field?.type === 'flattened') {
+              // disable custom actions on object columns
               return {
                 name: '',
                 type: '',
               };
             }
-            const field = dataView.getFieldByName(columnName)?.spec;
             return {
               name: columnName,
               type: field?.type ?? 'keyword',
