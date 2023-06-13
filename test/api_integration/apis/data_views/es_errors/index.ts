@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type {
-  ApiVersion,
-  AddVersionOpts,
-  FullValidationConfig,
-  VersionedRouteRequestValidation,
-  VersionedRouteResponseValidation,
-  VersionedRoute,
-  VersionedRouteConfig,
-  VersionedRouteRegistrar,
-  VersionedRouter,
-} from './types';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('index_patterns/service/lib', () => {
+    loadTestFile(require.resolve('./errors'));
+  });
+}
