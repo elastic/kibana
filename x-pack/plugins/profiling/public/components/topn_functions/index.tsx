@@ -26,7 +26,7 @@ import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
-import { CPULabelWithHint } from '../shared/cpu_label_with_hint';
+import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { GetLabel } from './get_label';
 

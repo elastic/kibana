@@ -10,7 +10,7 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-import { EnterpriseSearchEngine } from '../../../../../common/types/engines';
+import { EnterpriseSearchApplication } from '../../../../../common/types/search_applications';
 
 import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
 
@@ -34,7 +34,7 @@ const DEFAULT_VALUES = {
   status: Status.IDLE,
 };
 // may need to call mock engines response when ready
-const results: EnterpriseSearchEngine[] = [
+const results: EnterpriseSearchApplication[] = [
   {
     indices: ['index-18', 'index-23'],
     name: 'engine-name-1',

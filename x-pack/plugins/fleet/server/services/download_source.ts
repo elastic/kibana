@@ -12,7 +12,7 @@ import {
   DEFAULT_DOWNLOAD_SOURCE_ID,
 } from '../constants';
 
-import type { DownloadSource, DownloadSourceAttributes, DownloadSourceBase } from '../types';
+import type { DownloadSource, DownloadSourceSOAttributes, DownloadSourceBase } from '../types';
 import { DownloadSourceError, FleetError } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
 
@@ -20,7 +20,7 @@ import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 
-function savedObjectToDownloadSource(so: SavedObject<DownloadSourceAttributes>) {
+function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { source_id: sourceId, ...attributes } = so.attributes;
 
   return {
@@ -31,7 +31,7 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceAttributes>) 
 
 class DownloadSourceService {
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<DownloadSource> {
-    const soResponse = await soClient.get<DownloadSourceAttributes>(
+    const soResponse = await soClient.get<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id
     );
@@ -44,7 +44,7 @@ class DownloadSourceService {
   }
 
   public async list(soClient: SavedObjectsClientContract) {
-    const downloadSources = await soClient.find<DownloadSourceAttributes>({
+    const downloadSources = await soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -65,7 +65,7 @@ class DownloadSourceService {
     downloadSource: DownloadSourceBase,
     options?: { id?: string; overwrite?: boolean }
   ): Promise<DownloadSource> {
-    const data: DownloadSourceAttributes = downloadSource;
+    const data: DownloadSourceSOAttributes = downloadSource;
 
     await this.requireUniqueName(soClient, {
       name: downloadSource.name,
@@ -84,7 +84,7 @@ class DownloadSourceService {
       data.source_id = options?.id;
     }
 
-    const newSo = await soClient.create<DownloadSourceAttributes>(
+    const newSo = await soClient.create<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       data,
       {
@@ -101,7 +101,7 @@ class DownloadSourceService {
     id: string,
     newData: Partial<DownloadSource>
   ) {
-    const updateData: Partial<DownloadSourceAttributes> = newData;
+    const updateData: Partial<DownloadSourceSOAttributes> = newData;
 
     if (newData.name) {
       await this.requireUniqueName(soClient, {
@@ -117,7 +117,7 @@ class DownloadSourceService {
         await this.update(soClient, defaultDownloadSourceId, { is_default: false });
       }
     }
-    const soResponse = await soClient.update<DownloadSourceAttributes>(
+    const soResponse = await soClient.update<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id,
       updateData
@@ -183,7 +183,7 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     downloadSource: { name: string; id?: string }
   ) {
-    const results = await soClient.find<DownloadSourceAttributes>({
+    const results = await soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['name'],
       search: escapeSearchQueryPhrase(downloadSource.name),
@@ -205,7 +205,7 @@ class DownloadSourceService {
   }
 
   private async _getDefaultDownloadSourceSO(soClient: SavedObjectsClientContract) {
-    return await soClient.find<DownloadSourceAttributes>({
+    return await soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
