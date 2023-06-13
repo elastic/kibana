@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { EsArchiver } from '@kbn/es-archiver';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -58,7 +57,7 @@ const ALL_SPACE_RESULTS = [
   },
 ];
 
-export function getAllTestSuiteFactory(esArchiver: EsArchiver, supertest: SuperTest<any>) {
+export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectResults =
     (...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
@@ -91,9 +90,13 @@ export function getAllTestSuiteFactory(esArchiver: EsArchiver, supertest: SuperT
     (describeFn: DescribeFn) =>
     (description: string, { user = {}, spaceId, tests }: GetAllTestDefinition) => {
       describeFn(description, () => {
-        before(() => esArchiver.emptyKibanaIndex());
         before(() =>
           esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );

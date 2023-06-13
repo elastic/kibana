@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { deepFreeze } from '@kbn/std';
 import { SuperTest } from 'supertest';
-import type { EsArchiver } from '@kbn/es-archiver';
 import {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
@@ -193,10 +192,7 @@ const getRedactedSpaces = (authorizedSpace: string | undefined, spaces: string[]
   return redactedSpaces.sort((a, b) => (a === '?' ? 1 : b === '?' ? -1 : 0)); // unknown spaces are always at the end of the array
 };
 
-export function getShareableReferencesTestSuiteFactory(
-  esArchiver: EsArchiver,
-  supertest: SuperTest<any>
-) {
+export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody =
     (
@@ -262,9 +258,13 @@ export function getShareableReferencesTestSuiteFactory(
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(() => esArchiver.emptyKibanaIndex());
         before(() =>
           esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );

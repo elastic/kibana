@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { SuperAgent } from 'superagent';
-import type { EsArchiver } from '@kbn/es-archiver';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -29,7 +28,7 @@ interface GetTestDefinition {
 
 const nonExistantSpaceId = 'not-a-space';
 
-export function getTestSuiteFactory(esArchiver: EsArchiver, supertest: SuperAgent<any>) {
+export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>) {
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
@@ -79,9 +78,13 @@ export function getTestSuiteFactory(esArchiver: EsArchiver, supertest: SuperAgen
     (describeFn: DescribeFn) =>
     (description: string, { user = {}, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
       describeFn(description, () => {
-        before(() => esArchiver.emptyKibanaIndex());
         before(() =>
           esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );

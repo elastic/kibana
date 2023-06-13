@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { EsArchiver } from '@kbn/es-archiver';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -28,7 +27,7 @@ interface CreateTestDefinition {
   tests: CreateTests;
 }
 
-export function createTestSuiteFactory(esArchiver: EsArchiver, supertest: SuperTest<any>) {
+export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -68,9 +67,13 @@ export function createTestSuiteFactory(esArchiver: EsArchiver, supertest: SuperT
     (describeFn: DescribeFn) =>
     (description: string, { user = {}, spaceId, tests }: CreateTestDefinition) => {
       describeFn(description, () => {
-        beforeEach(() => esArchiver.emptyKibanaIndex());
         beforeEach(() =>
           esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        afterEach(() =>
+          esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );
