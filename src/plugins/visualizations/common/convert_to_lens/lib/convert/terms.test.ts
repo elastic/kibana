@@ -277,7 +277,7 @@ describe('convertToDateHistogramColumn', () => {
         },
       },
       () => {},
-    ]
+    ],
   ])('should return %s', (_, input, expected, actions) => {
     actions();
     if (expected === null) {
