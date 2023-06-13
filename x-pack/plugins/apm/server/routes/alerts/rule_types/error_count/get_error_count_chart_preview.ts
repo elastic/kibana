@@ -9,15 +9,20 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_GROUP_ID,
+  PROCESSOR_EVENT,
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
 import { AlertParams } from '../../route';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
 
 export type TransactionErrorCountChartPreviewResponse = Array<{
-  x: number;
-  y: number;
+  name: string;
+  data: Array<{ x: number; y: number | null }>;
 }>;
 
 export async function getTransactionErrorCountChartPreview({
@@ -27,16 +32,27 @@ export async function getTransactionErrorCountChartPreview({
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
 }): Promise<TransactionErrorCountChartPreviewResponse> {
-  const { serviceName, environment, errorGroupingKey, interval, start, end } =
+  const { serviceName, environment, errorGroupingKey, interval, end, groupBy } =
     alertParams;
+
+  const allGroupByFields = getAllGroupByFields(ApmRuleType.ErrorCount, groupBy);
+
+  const intervalAsSeconds = getIntervalInSeconds(interval);
+  const intervalAsMs = intervalAsSeconds * 1000;
+  const start = end - intervalAsMs;
 
   const query = {
     bool: {
       filter: [
-        ...termQuery(SERVICE_NAME, serviceName),
-        ...termQuery(ERROR_GROUP_ID, errorGroupingKey),
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(ERROR_GROUP_ID, errorGroupingKey, {
+          queryEmptyString: false,
+        }),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
+        { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
       ],
     },
   };
@@ -49,6 +65,15 @@ export async function getTransactionErrorCountChartPreview({
         extended_bounds: {
           min: start,
           max: end,
+        },
+      },
+      aggs: {
+        series: {
+          multi_terms: {
+            terms: getGroupByTerms(allGroupByFields),
+            size: 1000,
+            order: { _count: 'desc' as const },
+          },
         },
       },
     },
@@ -68,10 +93,27 @@ export async function getTransactionErrorCountChartPreview({
     return [];
   }
 
-  return resp.aggregations.timeseries.buckets.map((bucket) => {
-    return {
-      x: bucket.key,
-      y: bucket.doc_count,
-    };
-  });
+  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
+    (acc, bucket) => {
+      const x = bucket.key;
+      bucket.series.buckets.forEach((seriesBucket) => {
+        const bucketKey = seriesBucket.key.join('_');
+        const y = seriesBucket.doc_count;
+
+        if (acc[bucketKey]) {
+          acc[bucketKey].push({ x, y });
+        } else {
+          acc[bucketKey] = [{ x, y }];
+        }
+      });
+
+      return acc;
+    },
+    {} as Record<string, Array<{ x: number; y: number | null }>>
+  );
+
+  return Object.keys(seriesDataMap).map((key) => ({
+    name: key,
+    data: seriesDataMap[key],
+  }));
 }

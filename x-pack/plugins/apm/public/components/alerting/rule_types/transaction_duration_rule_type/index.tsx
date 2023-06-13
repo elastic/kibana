@@ -20,7 +20,11 @@ import { EuiSpacer } from '@elastic/eui';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   getMaxY,
@@ -44,6 +48,11 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
 
 export interface RuleParams {
   aggregationType: AggregationType;
@@ -101,7 +110,7 @@ export function TransactionDurationRuleType(props: Props) {
     }
   );
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
@@ -121,6 +130,7 @@ export function TransactionDurationRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
               },
             },
           }
@@ -135,6 +145,7 @@ export function TransactionDurationRuleType(props: Props) {
       params.transactionName,
       params.windowSize,
       params.windowUnit,
+      params.groupBy,
     ]
   );
 
@@ -147,16 +158,24 @@ export function TransactionDurationRuleType(props: Props) {
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = params.threshold * 1000;
 
-  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
-  const showChartPreview = false;
-  const chartPreview = showChartPreview ? (
+  const hasData = latencyChartPreview.length > 0;
+
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
       series={latencyChartPreview}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
     />
-  ) : null;
+  ) : (
+    <ErrorState />
+  );
 
   const onGroupByChange = useCallback(
     (group: string[] | null) => {

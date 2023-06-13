@@ -18,7 +18,11 @@ import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
@@ -36,6 +40,11 @@ import {
   TRANSACTION_NAME,
   ERROR_GROUP_ID,
 } from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
 
 export interface RuleParams {
   windowSize?: number;
@@ -72,7 +81,7 @@ export function ErrorCountRuleType(props: Props) {
     }
   );
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
@@ -90,6 +99,7 @@ export function ErrorCountRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
               },
             },
           }
@@ -102,6 +112,7 @@ export function ErrorCountRuleType(props: Props) {
       params.environment,
       params.serviceName,
       params.errorGroupingKey,
+      params.groupBy,
     ]
   );
 
@@ -162,16 +173,26 @@ export function ErrorCountRuleType(props: Props) {
     />,
   ];
 
-  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
-  const showChartPreview = false;
-  const chartPreview = showChartPreview ? (
+  const errorCountChartPreview = data?.errorCountChartPreview ?? [];
+
+  const hasData = errorCountChartPreview.length > 0;
+
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={[{ data: data?.errorCountChartPreview ?? [] }]}
+      series={errorCountChartPreview}
       threshold={params.threshold}
       yTickFormat={asInteger}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
     />
-  ) : null;
+  ) : (
+    <ErrorState />
+  );
 
   const groupAlertsBy = (
     <>

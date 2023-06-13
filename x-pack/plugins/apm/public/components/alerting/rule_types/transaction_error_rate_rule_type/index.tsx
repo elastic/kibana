@@ -18,7 +18,11 @@ import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
@@ -37,6 +41,11 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
 
 export interface RuleParams {
   windowSize?: number;
@@ -76,7 +85,7 @@ export function TransactionErrorRateRuleType(props: Props) {
 
   const thresholdAsPercent = (params.threshold ?? 0) / 100;
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
@@ -95,6 +104,7 @@ export function TransactionErrorRateRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
               },
             },
           }
@@ -108,6 +118,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.serviceName,
       params.windowSize,
       params.windowUnit,
+      params.groupBy,
     ]
   );
 
@@ -171,16 +182,26 @@ export function TransactionErrorRateRuleType(props: Props) {
     />,
   ];
 
-  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
-  const showChartPreview = false;
-  const chartPreview = showChartPreview ? (
+  const errorRateChartPreview = data?.errorRateChartPreview ?? [];
+
+  const hasData = errorRateChartPreview.length > 0;
+
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={[{ data: data?.errorRateChartPreview ?? [] }]}
+      series={errorRateChartPreview}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
     />
-  ) : null;
+  ) : (
+    <ErrorState />
+  );
 
   const groupAlertsBy = (
     <>

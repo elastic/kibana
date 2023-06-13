@@ -10,7 +10,10 @@ import {
   getTransactionDurationChartPreview,
   TransactionDurationChartPreviewResponse,
 } from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
-import { getTransactionErrorCountChartPreview } from './rule_types/error_count/get_error_count_chart_preview';
+import {
+  getTransactionErrorCountChartPreview,
+  TransactionErrorCountChartPreviewResponse,
+} from './rule_types/error_count/get_error_count_chart_preview';
 import {
   getTransactionErrorRateChartPreview,
   TransactionErrorRateChartPreviewResponse,
@@ -36,6 +39,9 @@ const alertParamsRt = t.intersection([
   rangeRt,
   t.type({
     interval: t.string,
+  }),
+  t.partial({
+    groupBy: t.array(t.string),
   }),
 ]);
 
@@ -70,7 +76,9 @@ const transactionErrorCountChartPreview = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{ errorCountChartPreview: Array<{ x: number; y: number }> }> => {
+  ): Promise<{
+    errorCountChartPreview: TransactionErrorCountChartPreviewResponse;
+  }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
 
@@ -112,7 +120,6 @@ const transactionDurationChartPreview = createApmServerRoute({
 
 export const alertsChartPreviewRouteRepository = {
   ...transactionErrorRateChartPreview,
-  ...transactionDurationChartPreview,
   ...transactionErrorCountChartPreview,
   ...transactionDurationChartPreview,
 };
