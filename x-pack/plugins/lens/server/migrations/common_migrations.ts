@@ -588,25 +588,26 @@ export const commonMigrateMetricFormatter = (attributes: LensDocShape860<unknown
   )) {
     const newColumns: Record<string, Record<string, unknown>> = {};
     for (const [id, column] of Object.entries(layer.columns)) {
-      const params = column.params as Record<
-        'format',
-        Record<string, { id: string; params: Record<string, string | boolean> }>
-      >;
+      const params = column.params as {
+        format?: { id: string; params: Record<string, string | boolean> };
+      };
       if (column.isBucketed) {
         newColumns[id] = column;
       } else {
         // When value formatting is set to Default, assume nothing
-        if (!params?.format) {
+        // Bytes and bits are already compact
+        if (!params?.format || ['bytes', 'bits'].includes(params.format.id)) {
           newColumns[id] = column;
         } else {
           // Metric only support numeric values
+          // suffix is not taken into account as it wasn't possible in metric visualization before this version
           newColumns[id] = {
             ...column,
             params: {
               ...params,
               format: {
-                id: 'number',
                 ...params?.format,
+                id: params?.format.id || 'number',
                 params: {
                   ...params?.format?.params,
                   compact: true,
