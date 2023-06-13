@@ -69,6 +69,13 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
     if (!columnsActions || !data || data.length === 0) {
       return [];
     }
+
+    // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
+    // It will eventually update to a consistent state
+    if (columnsActions.length !== data.length) {
+      return [];
+    }
+
     return columnsActions.map((actions, columnIndex) =>
       actions.map((action) =>
         createColumnCellAction({
