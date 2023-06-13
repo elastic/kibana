@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-
-const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
-const INTERNAL_VERSION_REGEX = /^[0-9]+$/;
+const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
 
 /**
  * For public routes we must check that the version is a string that is YYYY-MM-DD.

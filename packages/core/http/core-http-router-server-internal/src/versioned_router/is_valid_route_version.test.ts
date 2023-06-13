@@ -37,6 +37,7 @@ describe('isValidRouteVersion', () => {
       ['11 '],
       [' 11 '],
       ['-1'],
+      ['010'],
     ])('%p returns an error message', (value: string) => {
       expect(isValidRouteVersion(false, value)).toMatch(/Invalid version number/);
     });
