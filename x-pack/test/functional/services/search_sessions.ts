@@ -172,6 +172,7 @@ export class SearchSessionsService extends FtrService {
           this.log.debug(`Deleting search session: ${so.id}`);
           await this.security.testUserSupertest
             .delete(`/internal/session/${so.id}`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set(`kbn-xsrf`, `anything`)
             .expect(200);
         })
