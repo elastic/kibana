@@ -91,6 +91,10 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+
+  > div {
+    flex: 1;
+  }
 `;
 
 type DetectionEngineComponentProps = PropsFromRedux;

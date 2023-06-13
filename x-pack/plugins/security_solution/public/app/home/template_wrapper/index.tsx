@@ -98,6 +98,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             paddingSize="l"
             alignment={showEmptyState ? 'center' : 'top'}
             component="div"
+            grow
+            contentProps={{
+              css: { display: 'flex', flex: 1, width: '100%', alignItems: 'stretch' },
+            }}
           >
             {children}
           </KibanaPageTemplate.Section>

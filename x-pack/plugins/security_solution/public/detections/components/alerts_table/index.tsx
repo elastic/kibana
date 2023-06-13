@@ -67,6 +67,10 @@ export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean 
 `;
 
 const EuiDataGridContainer = styled.div<GridContainerProps>`
+  flex: 1;
+  display: flex;
+  width: 100%;
+
   ul.euiPagination__list {
     li.euiPagination__item:last-child {
       ${({ hideLastPage }) => {
@@ -85,7 +89,6 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
   div .siemEventsTable__trSupplement--summary {
     display: block;
   }
-  width: 100%;
 `;
 interface DetectionEngineAlertTableProps {
   configId: string;
