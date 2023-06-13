@@ -84,7 +84,9 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    * Does a user created data view exist?
    */
   async hasUserDataView(): Promise<boolean> {
-    const response = await this._request<{ result: boolean }>(HAS_DATA_VIEWS_PATH);
-    return response?.result ?? false;
+    const response = await this._request<{ hasDataView: boolean; hasUserDataView: boolean }>(
+      HAS_DATA_VIEWS_PATH
+    );
+    return response?.hasUserDataView ?? false;
   }
 }
