@@ -115,6 +115,7 @@ describe('LayerPanel', () => {
       onChangeIndexPattern: jest.fn(),
       indexPatternService: createIndexPatternServiceMock(),
       getUserMessages: () => [],
+      displayLayerSettings: true,
     };
   }
 
