@@ -44,7 +44,7 @@ export class SyntheticsServices {
 
   async enableMonitorManagedViaApi() {
     try {
-      await axios.put(this.kibanaUrl + '/internal/uptime/service/enablement', undefined, {
+      await axios.put(this.kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
         auth: { username: 'elastic', password: 'changeme' },
         headers: { 'kbn-xsrf': 'true' },
       });
@@ -70,8 +70,8 @@ export class SyntheticsServices {
       const response = await axios.post(
         this.kibanaUrl +
           (configId
-            ? `/internal/uptime/service/monitors?id=${configId}`
-            : `/internal/uptime/service/monitors`),
+            ? `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${configId}`
+            : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS),
         testData,
         {
           auth: { username: 'elastic', password: 'changeme' },
@@ -88,7 +88,7 @@ export class SyntheticsServices {
   async deleteTestMonitorByQuery(query: string) {
     const { data } = await this.requester.request({
       description: 'get monitors by name',
-      path: uriencode`/internal/uptime/service/monitors`,
+      path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
       query: {
         perPage: 10,
         page: 1,
@@ -105,7 +105,7 @@ export class SyntheticsServices {
       async (monitor: Record<string, any>) => {
         await this.requester.request({
           description: 'delete monitor',
-          path: uriencode`/internal/uptime/service/monitors/${monitor.id}`,
+          path: uriencode`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.id}`,
           method: 'DELETE',
         });
       },
