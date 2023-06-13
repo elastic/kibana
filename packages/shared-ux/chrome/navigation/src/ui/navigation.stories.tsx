@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NavigationStorybookMock } from '../../mocks';
+import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
@@ -175,7 +175,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
 export const SimpleObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -295,7 +295,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
 export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -317,7 +317,7 @@ export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & Naviga
 export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -385,7 +385,7 @@ export const MinimalUIAndCustomCloudLink = (
 ) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -453,7 +453,7 @@ export default {
 export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
