@@ -8,6 +8,20 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import { intersection, union } from 'lodash';
 
+// Sorts in order of `on` -> `mixed` -> `undefined`
+const checkedSortCallback = (a: EuiSelectableOption, b: EuiSelectableOption) => {
+  if (a.checked) {
+    if (b.checked) {
+      return a.checked < b.checked ? 1 : -1;
+    }
+    return -1;
+  }
+  if (b.checked) {
+    return 1;
+  }
+  return 0;
+};
+
 export const createInitialTagsState = (existingTags: string[][], defaultTags: string[]) => {
   const existingTagsIntersection = intersection(...existingTags);
   const existingTagsUnion = union(...existingTags);
@@ -23,5 +37,5 @@ export const createInitialTagsState = (existingTags: string[][], defaultTags: st
           : undefined,
       };
     })
-    .sort((a, b) => (a.checked ? a.checked < b.checked : true));
+    .sort(checkedSortCallback);
 };
