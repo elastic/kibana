@@ -17,8 +17,8 @@ const ALLOW_FIELDS = [
   'alert.attributes.snoozeSchedule.duration',
   'alert.attributes.alertTypeId',
   'alert.attributes.enabled',
-  'alert.attributes.params.*',
-  'alert.attributes.params.immutable', // TODO: Add support for "*" to validateFields() and remove this element
+  'alert.attributes.params.*', // TODO: https://github.com/elastic/kibana/issues/159602
+  'alert.attributes.params.immutable', // TODO: Remove after addressing https://github.com/elastic/kibana/issues/159602
 ];
 
 const ALLOW_AGG_TYPES = ['terms', 'composite', 'nested', 'filter'];
