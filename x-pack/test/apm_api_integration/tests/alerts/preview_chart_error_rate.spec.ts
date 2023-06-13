@@ -11,9 +11,10 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-plugin/common/es_fields/apm';
+import { TransactionErrorRateChartPreviewResponse } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/get_transaction_error_rate_chart_preview';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { generateData } from '../errors/generate_data';
+import { generateErrorData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -21,14 +22,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const serviceName = 'synth-go';
 
   const getOptions = () => ({
     params: {
       query: {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
-        serviceName,
+        serviceName: 'synth-go',
         transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         interval: '5m',
@@ -52,7 +52,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     describe('transaction_error_rate', () => {
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
+        await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
       });
 
       after(() => synthtraceEsClient.clean());
@@ -67,16 +68,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(
           response.body.errorRateChartPreview.some(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) =>
+            (item: TransactionErrorRateChartPreviewResponse) =>
               item.data.some((coordinate) => coordinate.x && coordinate.y)
           )
         ).to.equal(true);
-
-        expect(response.body.errorRateChartPreview[0].name).to.eql('synth-go_production_request');
-        expect(response.body.errorRateChartPreview[0].data[1]).to.eql({
-          x: 1609459500000,
-          y: 37.5,
-        });
       });
 
       it('with transaction name', async () => {
@@ -85,8 +80,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
-              serviceName,
-              transactionName: 'GET /banana 🍌',
+              serviceName: 'synth-go',
+              transactionName: 'GET /banana',
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
               interval: '5m',
@@ -100,10 +95,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview[0].data[0]).to.eql({
-          x: 1609459200000,
-          y: 50,
-        });
+        expect(
+          response.body.errorRateChartPreview.map(
+            (item: TransactionErrorRateChartPreviewResponse) => ({
+              name: item.name,
+              y: item.data[0].y,
+            })
+          )
+        ).to.eql([{ name: 'synth-go_production_request', y: 50 }]);
       });
 
       it('with nonexistent transaction name', async () => {
@@ -112,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
-              serviceName,
+              serviceName: 'synth-go',
               transactionName: 'foo',
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
@@ -141,9 +140,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.errorRateChartPreview.length).to.equal(1);
         expect(
           response.body.errorRateChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+            (item: TransactionErrorRateChartPreviewResponse) => ({
+              name: item.name,
+              y: item.data[0].y,
+            })
           )
-        ).to.eql(['synth-go_production_request']);
+        ).to.eql([{ name: 'synth-go_production_request', y: 37.5 }]);
       });
 
       it('with default group by fields', async () => {
@@ -165,9 +167,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.errorRateChartPreview.length).to.equal(1);
         expect(
           response.body.errorRateChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+            (item: TransactionErrorRateChartPreviewResponse) => ({
+              name: item.name,
+              y: item.data[0].y,
+            })
           )
-        ).to.eql(['synth-go_production_request']);
+        ).to.eql([{ name: 'synth-go_production_request', y: 37.5 }]);
       });
 
       it('with group by on transaction name', async () => {
@@ -187,20 +192,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body.errorRateChartPreview.length).to.equal(2);
-        expect(response.body.errorRateChartPreview[0].name).to.eql(
-          'synth-go_production_request_GET /apple 🍎 '
-        );
-        expect(response.body.errorRateChartPreview[1].name).to.eql(
-          'synth-go_production_request_GET /banana 🍌'
-        );
-        expect(response.body.errorRateChartPreview[0].data[0]).to.eql({
-          x: 1609459200000,
-          y: 25,
-        });
-        expect(response.body.errorRateChartPreview[1].data[0]).to.eql({
-          x: 1609459200000,
-          y: 50,
-        });
+        expect(
+          response.body.errorRateChartPreview.map(
+            (item: TransactionErrorRateChartPreviewResponse) => ({
+              name: item.name,
+              y: item.data[0].y,
+            })
+          )
+        ).to.eql([
+          {
+            name: 'synth-go_production_request_GET /apple',
+            y: 25,
+          },
+          {
+            name: 'synth-go_production_request_GET /banana',
+            y: 50,
+          },
+        ]);
       });
 
       it('with group by on transaction name and filter on transaction name', async () => {
@@ -208,7 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptions().params.query,
-              transactionName: 'GET /apple 🍎 ',
+              transactionName: 'GET /apple',
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
             },
           },
@@ -223,9 +231,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.errorRateChartPreview.length).to.equal(1);
         expect(
           response.body.errorRateChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+            (item: TransactionErrorRateChartPreviewResponse) => ({
+              name: item.name,
+              y: item.data[0].y,
+            })
           )
-        ).to.eql(['synth-go_production_request_GET /apple 🍎 ']);
+        ).to.eql([{ name: 'synth-go_production_request_GET /apple', y: 25 }]);
       });
 
       it('with empty service name, transaction name and transaction type', async () => {
@@ -250,9 +261,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(
           response.body.errorRateChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+            (item: TransactionErrorRateChartPreviewResponse) => ({
+              name: item.name,
+              y: item.data[0].y,
+            })
           )
-        ).to.eql(['synth-go_production_request']);
+        ).to.eql([
+          { name: 'synth-go_production_request', y: 37.5 },
+          { name: 'synth-java_production_request', y: 37.5 },
+        ]);
       });
 
       it('with empty service name, transaction name, transaction type and group by on transaction name', async () => {
@@ -277,14 +294,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorRateChartPreview
-            .map(
-              (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
-            )
-            .slice(0, 5)
+          response.body.errorRateChartPreview.map(
+            (item: TransactionErrorRateChartPreviewResponse) => ({
+              name: item.name,
+              y: item.data[0].y,
+            })
+          )
         ).to.eql([
-          'synth-go_production_request_GET /apple 🍎 ',
-          'synth-go_production_request_GET /banana 🍌',
+          {
+            name: 'synth-go_production_request_GET /apple',
+            y: 25,
+          },
+          {
+            name: 'synth-go_production_request_GET /banana',
+            y: 50,
+          },
+          {
+            name: 'synth-java_production_request_GET /apple',
+            y: 25,
+          },
+          {
+            name: 'synth-java_production_request_GET /banana',
+            y: 50,
+          },
         ]);
       });
     });
