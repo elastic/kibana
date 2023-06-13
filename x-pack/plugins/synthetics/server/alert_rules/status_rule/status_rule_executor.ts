@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
@@ -131,6 +131,9 @@ export class StatusRuleExecutor {
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
     } = await this.getMonitors();
+    const from = this.previousStartedAt
+      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
+      : 'now-2m';
 
     if (enabledMonitorQueryIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
@@ -138,7 +141,7 @@ export class StatusRuleExecutor {
         listOfLocations,
         {
           to: 'now',
-          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+          from,
         },
         enabledMonitorQueryIds,
         monitorLocationMap,
