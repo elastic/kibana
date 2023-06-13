@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
-import { EngineViewTabs, ENGINE_TAB_PATH } from '../../../routes';
+import { SearchApplicationViewTabs, SEARCH_APPLICATION_TAB_PATH } from '../../../routes';
 
 export interface APICallData {
   request: SearchRequest;
@@ -77,9 +77,9 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
             </EuiTab>
           </EuiTabs>
           <EuiLinkTo
-            to={generateEncodedPath(ENGINE_TAB_PATH, {
-              engineName,
-              tabId: EngineViewTabs.CONNECT,
+            to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
+              searchApplicationName: engineName,
+              tabId: SearchApplicationViewTabs.CONNECT,
             })}
             color="primary"
             target="_blank"

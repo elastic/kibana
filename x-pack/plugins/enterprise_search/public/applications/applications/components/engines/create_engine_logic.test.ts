@@ -12,7 +12,7 @@ import { HttpError, Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CreateSearchApplicationApiLogic } from '../../api/search_applications/create_search_application_api_logic';
 
-import { ENGINES_PATH } from '../../routes';
+import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 import { CreateEngineLogic, CreateEngineLogicValues } from './create_engine_logic';
 
@@ -98,7 +98,7 @@ describe('CreateEngineLogic', () => {
       CreateSearchApplicationApiLogic.actions.apiSuccess({
         result: 'created',
       });
-      expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(ENGINES_PATH);
+      expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(SEARCH_APPLICATIONS_PATH);
 
       expect(CreateEngineLogic.actions.fetchEngines).toHaveBeenCalledTimes(1);
     });

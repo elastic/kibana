@@ -23,7 +23,7 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { ENGINES_PATH, EngineViewTabs } from '../../applications/routes';
+import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
 import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
@@ -196,7 +196,7 @@ export const useEnterpriseSearchEngineNav = (
   const enginesItem = applicationsItem.items?.find((item) => item.id === 'searchApplications');
   if (!enginesItem || enginesItem.id !== 'searchApplications') return navItems;
 
-  const enginePath = `${APPLICATIONS_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
+  const enginePath = `${APPLICATIONS_PLUGIN.URL}${SEARCH_APPLICATIONS_PATH}/${engineName}`;
 
   enginesItem.items = !isEmptyState
     ? [
@@ -216,7 +216,7 @@ export const useEnterpriseSearchEngineNav = (
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.PREVIEW}`,
               }),
             },
             {
@@ -232,7 +232,7 @@ export const useEnterpriseSearchEngineNav = (
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 shouldShowActiveForSubroutes: true,
-                to: `${enginePath}/${EngineViewTabs.CONTENT}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.CONTENT}`,
               }),
             },
             {
@@ -246,7 +246,7 @@ export const useEnterpriseSearchEngineNav = (
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 shouldShowActiveForSubroutes: true,
-                to: `${enginePath}/${EngineViewTabs.CONNECT}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.CONNECT}`,
               }),
             },
           ],

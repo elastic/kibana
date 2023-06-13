@@ -13,13 +13,19 @@ import { useActions } from 'kea';
 import { Route } from '@kbn/shared-ux-router';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { ENGINE_PATH, ENGINE_TAB_PATH, EngineViewTabs } from '../../routes';
+import {
+  SEARCH_APPLICATION_PATH,
+  SEARCH_APPLICATION_TAB_PATH,
+  SearchApplicationViewTabs,
+} from '../../routes';
 
 import { EngineNameLogic } from './engine_name_logic';
 import { EngineView } from './engine_view';
 
 export const EngineRouter: React.FC = () => {
-  const engineName = decodeURIComponent(useParams<{ engineName: string }>().engineName);
+  const engineName = decodeURIComponent(
+    useParams<{ searchApplicationName: string }>().searchApplicationName
+  );
   const engineNameLogic = EngineNameLogic({ engineName });
   const { setEngineName } = useActions(engineNameLogic);
 
@@ -37,14 +43,14 @@ export const EngineRouter: React.FC = () => {
   return (
     <Switch>
       <Redirect
-        from={ENGINE_PATH}
-        to={generateEncodedPath(ENGINE_TAB_PATH, {
-          engineName,
-          tabId: EngineViewTabs.PREVIEW,
+        from={SEARCH_APPLICATION_PATH}
+        to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
+          searchApplicationName: engineName,
+          tabId: SearchApplicationViewTabs.PREVIEW,
         })}
         exact
       />
-      <Route path={ENGINE_TAB_PATH}>
+      <Route path={SEARCH_APPLICATION_TAB_PATH}>
         <EngineView />
       </Route>
     </Switch>

@@ -14,7 +14,7 @@ import {
   CreateSearchApplicationApiLogic,
   CreateSearchApplicationApiLogicActions,
 } from '../../api/search_applications/create_search_application_api_logic';
-import { ENGINES_PATH } from '../../routes';
+import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 import { EnginesListLogic } from './engines_list_logic';
 
@@ -74,7 +74,7 @@ export const CreateEngineLogic = kea<
     },
     engineCreated: () => {
       actions.fetchEngines();
-      KibanaLogic.values.navigateToUrl(ENGINES_PATH);
+      KibanaLogic.values.navigateToUrl(SEARCH_APPLICATIONS_PATH);
     },
   }),
   path: ['enterprise_search', 'content', 'create_engine_logic'],

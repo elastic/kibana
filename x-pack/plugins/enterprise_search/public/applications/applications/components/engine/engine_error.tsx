@@ -16,7 +16,7 @@ import { ErrorStatePrompt } from '../../../shared/error_state';
 import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-import { ENGINES_PATH } from '../../routes';
+import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 export const EngineError: React.FC<{ error?: HttpError; notFound?: boolean }> = ({
   error,
@@ -33,7 +33,7 @@ export const EngineError: React.FC<{ error?: HttpError; notFound?: boolean }> = 
               defaultMessage: 'Back to Search Applications',
             }
           )}
-          backToLink={ENGINES_PATH}
+          backToLink={SEARCH_APPLICATIONS_PATH}
           productSupportUrl={APPLICATIONS_PLUGIN.SUPPORT_URL}
         />
       </>

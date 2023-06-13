@@ -10,7 +10,11 @@ import { Switch } from 'react-router-dom';
 
 import { Route } from '@kbn/shared-ux-router';
 
-import { ENGINES_PATH, ENGINE_CREATION_PATH, ENGINE_PATH } from '../../routes';
+import {
+  SEARCH_APPLICATIONS_PATH,
+  SEARCH_APPLICATION_CREATION_PATH,
+  SEARCH_APPLICATION_PATH,
+} from '../../routes';
 
 import { EngineRouter } from '../engine/engine_router';
 import { NotFound } from '../not_found';
@@ -20,13 +24,13 @@ import { EnginesList } from './engines_list';
 export const EnginesRouter: React.FC = () => {
   return (
     <Switch>
-      <Route exact path={ENGINES_PATH}>
+      <Route exact path={SEARCH_APPLICATIONS_PATH}>
         <EnginesList />
       </Route>
-      <Route path={ENGINE_CREATION_PATH}>
+      <Route path={SEARCH_APPLICATION_CREATION_PATH}>
         <EnginesList createEngineFlyoutOpen />
       </Route>
-      <Route path={ENGINE_PATH}>
+      <Route path={SEARCH_APPLICATION_PATH}>
         <EngineRouter />
       </Route>
       <Route>

@@ -52,7 +52,7 @@ import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import {
-  EngineViewTabs,
+  SearchApplicationViewTabs,
   SearchApplicationConnectTabs,
   SearchApplicationContentTabs,
   SEARCH_APPLICATION_CONNECT_PATH,
@@ -230,7 +230,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
                   contentTabId: SearchApplicationContentTabs.INDICES,
-                  engineName,
+                  searchApplicationName: engineName,
                 })
               )
             }
@@ -249,7 +249,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
                   contentTabId: SearchApplicationContentTabs.SCHEMA,
-                  engineName,
+                  searchApplicationName: engineName,
                 })
               )
             }
@@ -290,7 +290,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
                   connectTabId: SearchApplicationConnectTabs.SEARCHAPI,
-                  engineName,
+                  searchApplicationName: engineName,
                 })
               )
             }
@@ -378,7 +378,7 @@ export const EngineSearchPreview: React.FC = () => {
           defaultMessage: 'Search Preview',
         }),
       ]}
-      pageViewTelemetry={EngineViewTabs.PREVIEW}
+      pageViewTelemetry={SearchApplicationViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
       pageHeader={{
         bottomBorder: false,

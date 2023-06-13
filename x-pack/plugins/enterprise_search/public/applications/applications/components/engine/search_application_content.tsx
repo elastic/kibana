@@ -17,9 +17,9 @@ import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
-  ENGINE_PATH,
+  SEARCH_APPLICATION_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
-  EngineViewTabs,
+  SearchApplicationViewTabs,
   SearchApplicationContentTabs,
 } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
@@ -76,7 +76,7 @@ export const SearchApplicationContent = () => {
     return (
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[engineName, pageTitle]}
-        pageViewTelemetry={EngineViewTabs.CONTENT}
+        pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
         isLoading={isLoadingEngine}
         pageHeader={{
           bottomBorder: false,
@@ -96,7 +96,7 @@ export const SearchApplicationContent = () => {
     KibanaLogic.values.navigateToUrl(
       generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
         contentTabId: tab,
-        engineName,
+        searchApplicationName: engineName,
       })
     );
   };
@@ -104,7 +104,7 @@ export const SearchApplicationContent = () => {
   return (
     <EnterpriseSearchEnginesPageTemplate
       pageChrome={[engineName, pageTitle, getTabBreadCrumb(contentTabId)]}
-      pageViewTelemetry={EngineViewTabs.CONTENT}
+      pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
       isLoading={isLoadingEngine}
       pageHeader={{
         bottomBorder: false,
@@ -113,8 +113,8 @@ export const SearchApplicationContent = () => {
             color: 'primary',
             onClick: () =>
               KibanaLogic.values.navigateToUrl(
-                generateEncodedPath(ENGINE_PATH, {
-                  engineName,
+                generateEncodedPath(SEARCH_APPLICATION_PATH, {
+                  searchApplicationName: engineName,
                 })
               ),
             text: (

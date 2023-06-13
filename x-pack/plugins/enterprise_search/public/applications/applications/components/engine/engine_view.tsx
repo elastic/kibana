@@ -16,10 +16,10 @@ import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import {
-  ENGINE_PATH,
+  SEARCH_APPLICATION_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
   SEARCH_APPLICATION_CONNECT_PATH,
-  EngineViewTabs,
+  SearchApplicationViewTabs,
   SearchApplicationConnectTabs,
   SearchApplicationContentTabs,
 } from '../../routes';
@@ -43,7 +43,7 @@ export const EngineView: React.FC = () => {
     hasSchemaConflicts,
     isDeleteModalVisible,
   } = useValues(EngineViewLogic);
-  const { tabId = EngineViewTabs.PREVIEW } = useParams<{
+  const { tabId = SearchApplicationViewTabs.PREVIEW } = useParams<{
     tabId?: string;
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
@@ -86,18 +86,18 @@ export const EngineView: React.FC = () => {
       <Switch>
         <Route
           exact
-          path={`${ENGINE_PATH}/${EngineViewTabs.PREVIEW}`}
+          path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.PREVIEW}`}
           component={EngineSearchPreview}
         />
         <Route path={SEARCH_APPLICATION_CONTENT_PATH} component={SearchApplicationContent} />
         <Redirect
-          from={`${ENGINE_PATH}/${EngineViewTabs.CONTENT}`}
-          to={`${ENGINE_PATH}/${EngineViewTabs.CONTENT}/${SearchApplicationContentTabs.INDICES}`}
+          from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}`}
+          to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}/${SearchApplicationContentTabs.INDICES}`}
         />
         <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={EngineConnect} />
         <Redirect
-          from={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}`}
-          to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
+          from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}`}
+          to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
         />
         <Route>
           <EnterpriseSearchEnginesPageTemplate

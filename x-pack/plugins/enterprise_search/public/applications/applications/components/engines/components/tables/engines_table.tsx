@@ -31,7 +31,7 @@ import { pageToPagination } from '../../../../../shared/pagination/page_to_pagin
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../../shared/telemetry/telemetry_logic';
 
-import { ENGINE_PATH } from '../../../../routes';
+import { SEARCH_APPLICATION_PATH } from '../../../../routes';
 
 interface EnginesListTableProps {
   enginesList: EnterpriseSearchApplication[];
@@ -67,7 +67,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
         <EuiLinkTo
           data-test-subj="engine-link"
           data-telemetry-id="entSearchApplications-table-viewEngine"
-          to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
+          to={generateEncodedPath(SEARCH_APPLICATION_PATH, { searchApplicationName: name })}
         >
           {name}
         </EuiLinkTo>
@@ -124,8 +124,8 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           icon: 'eye',
           onClick: (engine) =>
             navigateToUrl(
-              generateEncodedPath(ENGINE_PATH, {
-                engineName: engine.name,
+              generateEncodedPath(SEARCH_APPLICATION_PATH, {
+                searchApplicationName: engine.name,
               })
             ),
         },

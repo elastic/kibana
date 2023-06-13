@@ -18,7 +18,7 @@ import {
 } from '../../api/search_applications/fetch_search_application_api_logic';
 import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
 
-import { ENGINES_PATH } from '../../routes';
+import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 import { EnginesListLogic, EnginesListActions } from '../engines/engines_list_logic';
 
@@ -77,7 +77,7 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
   listeners: ({ actions }) => ({
     deleteSuccess: () => {
       actions.closeDeleteEngineModal();
-      KibanaLogic.values.navigateToUrl(ENGINES_PATH);
+      KibanaLogic.values.navigateToUrl(SEARCH_APPLICATIONS_PATH);
     },
     fetchEngine: ({ name: engineName }) => {
       actions.fetchEngineSchema({ name: engineName });

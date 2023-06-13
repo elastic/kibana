@@ -36,7 +36,7 @@ import {
   LICENSING_FEATURE,
 } from '../../../shared/licensing_callout/licensing_callout';
 
-import { ENGINES_PATH, ENGINE_CREATION_PATH } from '../../routes';
+import { SEARCH_APPLICATIONS_PATH, SEARCH_APPLICATION_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
@@ -70,7 +70,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
             data-test-subj="enterprise-search-content-engines-creation-button"
             data-telemetry-id="entSearchApplications-list-createEngine"
             isDisabled={disabled}
-            onClick={() => KibanaLogic.values.navigateToUrl(ENGINE_CREATION_PATH)}
+            onClick={() => KibanaLogic.values.navigateToUrl(SEARCH_APPLICATION_CREATION_PATH)}
           >
             {i18n.translate(
               'xpack.enterpriseSearch.content.searchApplications.createEngineButtonLabel',
@@ -162,7 +162,9 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
       ) : null}
 
       <EngineListIndicesFlyout />
-      {createEngineFlyoutOpen && <CreateEngineFlyout onClose={() => navigateToUrl(ENGINES_PATH)} />}
+      {createEngineFlyoutOpen && (
+        <CreateEngineFlyout onClose={() => navigateToUrl(SEARCH_APPLICATIONS_PATH)} />
+      )}
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[]}
         pageHeader={{

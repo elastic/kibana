@@ -12,13 +12,13 @@ import { Route } from '@kbn/shared-ux-router';
 
 import { EnginesRouter } from './components/engines/engines_router';
 import { NotFound } from './components/not_found';
-import { ROOT_PATH, ENGINES_PATH } from './routes';
+import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 
 export const Applications = () => {
   return (
     <Switch>
-      <Redirect exact from={ROOT_PATH} to={ENGINES_PATH} />
-      <Route path={ENGINES_PATH}>
+      <Redirect exact from={ROOT_PATH} to={SEARCH_APPLICATIONS_PATH} />
+      <Route path={SEARCH_APPLICATIONS_PATH}>
         <EnginesRouter />
       </Route>
       <Route>

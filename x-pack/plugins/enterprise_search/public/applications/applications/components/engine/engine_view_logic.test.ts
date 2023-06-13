@@ -11,7 +11,7 @@ import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applications/delete_search_application_api_logic';
-import { ENGINES_PATH } from '../../routes';
+import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 import { EnginesListLogic } from '../engines/engines_list_logic';
 
 import { EngineViewLogic, EngineViewValues } from './engine_view_logic';
@@ -55,7 +55,7 @@ describe('EngineViewLogic', () => {
           .mockImplementationOnce(() => Promise.resolve());
         EnginesListLogic.actions.deleteSuccess({} as DeleteSearchApplicationApiLogicResponse);
 
-        expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(ENGINES_PATH);
+        expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(SEARCH_APPLICATIONS_PATH);
       });
     });
   });

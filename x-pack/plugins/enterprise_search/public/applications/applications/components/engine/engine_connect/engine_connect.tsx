@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
-  EngineViewTabs,
+  SearchApplicationViewTabs,
   SearchApplicationConnectTabs,
   SEARCH_APPLICATION_CONNECT_PATH,
 } from '../../../routes';
@@ -69,7 +69,7 @@ export const EngineConnect: React.FC = () => {
     KibanaLogic.values.navigateToUrl(
       generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
         connectTabId: tab,
-        engineName,
+        searchApplicationName: engineName,
       })
     );
   };
@@ -78,7 +78,7 @@ export const EngineConnect: React.FC = () => {
     return (
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[engineName, pageTitle]}
-        pageViewTelemetry={EngineViewTabs.CONNECT}
+        pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
         isLoading={isLoadingEngine}
         pageHeader={{
           bottomBorder: false,
@@ -97,7 +97,7 @@ export const EngineConnect: React.FC = () => {
   return (
     <EnterpriseSearchEnginesPageTemplate
       pageChrome={[engineName, pageTitle, getTabBreadCrumb(connectTabId)]}
-      pageViewTelemetry={EngineViewTabs.CONNECT}
+      pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
       isLoading={isLoadingEngine}
       pageHeader={{
         bottomBorder: false,
