@@ -16,6 +16,7 @@ import type SuperTest from 'supertest';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
+  CASE_CATEGORIES_URL,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONFIGURE_URL,
@@ -652,6 +653,27 @@ export const getReporters = async ({
 }): Promise<CasesFindResponse> => {
   const { body: res } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_REPORTERS_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .query({ ...query })
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const getCategories = async ({
+  supertest,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CATEGORIES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query({ ...query })
