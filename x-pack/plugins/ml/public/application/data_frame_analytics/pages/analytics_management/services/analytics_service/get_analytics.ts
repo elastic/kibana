@@ -47,7 +47,7 @@ export function getInitialAnalyticsStats(): AnalyticStatsBarStats {
   return {
     total: {
       label: i18n.translate('xpack.ml.overview.statsBar.totalAnalyticsLabel', {
-        defaultMessage: 'Total analytics jobs',
+        defaultMessage: 'Total',
       }),
       value: 0,
       show: true,

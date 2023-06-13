@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { FC, useCallback, useEffect, useState } from 'react';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useStorage } from '@kbn/ml-local-storage';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { type AnalyticStatsBarStats } from '../../../components/stats_bar';
+import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
+import {
+  ML_OVERVIEW_PANELS,
+  MlStorageKey,
+  TMlStorageMapped,
+} from '../../../../../common/types/storage';
 import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useRefresh } from '../../../routing/use_refresh';
 import type { GetDataFrameAnalyticsStatsResponseError } from '../../../services/ml_api_service/data_frame_analytics';
 import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analytics_management/components/empty_prompt';
+import { overviewPanelDefaultState } from '../../overview_page';
+import { CollapsiblePanel } from '../../../components/collapsible_panel';
 
 interface Props {
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
@@ -35,9 +36,9 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   const refresh = useRefresh();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
-  const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
-    undefined
-  );
+  const [analyticsStats, setAnalyticsStats] = useState<
+    Array<{ label: string; value: number }> | undefined
+  >(undefined);
   const [errorMessage, setErrorMessage] = useState<GetDataFrameAnalyticsStatsResponseError>();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -45,9 +46,23 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
     page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
   });
 
+  const [panelsState, setPanelsState] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_OVERVIEW_PANELS>
+  >(ML_OVERVIEW_PANELS, overviewPanelDefaultState);
+
+  const setAnalyticsStatsCustom = useCallback((stats: AnalyticStatsBarStats) => {
+    const result = Object.entries(stats)
+      .filter(([k, v]) => v.show)
+      .map(([k, v]) => v);
+
+    setAnalyticsStats(result);
+  }, []);
+
   const getAnalytics = getAnalyticsFactory(
     setAnalytics,
-    setAnalyticsStats,
+    // @ts-ignore
+    setAnalyticsStatsCustom,
     setErrorMessage,
     setIsInitialized,
     setLazyJobCount,
@@ -78,58 +93,40 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   const noDFAJobs = errorMessage === undefined && isInitialized === true && analytics.length === 0;
 
   return (
-    <>
-      {noDFAJobs ? (
-        <AnalyticsEmptyPrompt />
-      ) : (
-        <EuiPanel
-          css={isInitialized ? {} : { textAlign: 'center', padding: '10%' }}
-          hasShadow={false}
-          hasBorder
-        >
-          {typeof errorMessage !== 'undefined' ? errorDisplay : null}
-          {isInitialized === false && (
-            <EuiLoadingSpinner css={{ display: 'inline-block' }} size="xl" />
-          )}
+    <CollapsiblePanel
+      isOpen={panelsState.dfaJobs}
+      onToggle={(update) => {
+        setPanelsState({ ...panelsState, dfaJobs: update });
+      }}
+      header={
+        <FormattedMessage
+          id="xpack.ml.overview.analyticsList.PanelTitle"
+          defaultMessage="Analytics"
+        />
+      }
+      headerItems={[
+        ...(analyticsStats
+          ? [
+              <OverviewStatsBar
+                inputStats={analyticsStats}
+                dataTestSub={'mlOverviewAnalyticsStatsBar'}
+              />,
+            ]
+          : []),
+        <EuiLink href={manageJobsLink}>
+          {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
+            defaultMessage: 'Manage jobs',
+          })}
+        </EuiLink>,
+      ]}
+    >
+      {noDFAJobs ? <AnalyticsEmptyPrompt /> : null}
 
-          {isInitialized === true && analytics.length > 0 && (
-            <>
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="m">
-                    <h3>
-                      {i18n.translate('xpack.ml.overview.analyticsList.PanelTitle', {
-                        defaultMessage: 'Analytics',
-                      })}
-                    </h3>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize={'s'} alignItems="center">
-                    {analyticsStats !== undefined ? (
-                      <EuiFlexItem grow={false}>
-                        <StatsBar
-                          stats={analyticsStats}
-                          dataTestSub={'mlOverviewAnalyticsStatsBar'}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                    <EuiFlexItem grow={false}>
-                      <EuiButton size="m" fill href={manageJobsLink}>
-                        {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
-                          defaultMessage: 'Manage jobs',
-                        })}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
-              <AnalyticsTable items={analytics} />
-            </>
-          )}
-        </EuiPanel>
-      )}
-    </>
+      {typeof errorMessage !== 'undefined' ? errorDisplay : null}
+
+      {isInitialized === false && <EuiLoadingSpinner css={{ display: 'inline-block' }} size="xl" />}
+
+      {isInitialized === true && analytics.length > 0 ? <AnalyticsTable items={analytics} /> : null}
+    </CollapsiblePanel>
   );
 };
