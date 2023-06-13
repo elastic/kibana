@@ -29,7 +29,10 @@ import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../../spike_analysis_table/spike_analysis_table_row_provider';
 
-import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content';
+import {
+  ExplainLogRateSpikesContent,
+  type ExplainLogRateSpikesAnalysisResults,
+} from './explain_log_rate_spikes_content';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -47,8 +50,12 @@ export interface ExplainLogRateSpikesContentWrapperProps {
   esSearchQuery?: estypes.QueryDslQueryContainer;
   /** Optional additional chart annotations */
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentWrapperProps> = ({
@@ -61,6 +68,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   annotations,
   barColorOverride,
   barHighlightColorOverride,
+  onAnalysisCompleted,
 }) => {
   if (!dataView) return null;
 
@@ -106,6 +114,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   annotations={annotations}
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
+                  onAnalysisCompleted={onAnalysisCompleted}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>
