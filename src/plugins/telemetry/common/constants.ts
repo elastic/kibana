@@ -32,7 +32,7 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 /**
  * Link to Advanced Settings.
  */
-export const PATH_TO_ADVANCED_SETTINGS = 'management/kibana/settings';
+export const PATH_TO_ADVANCED_SETTINGS = '/app/management/kibana/settings';
 
 /**
  * The telemetry payload content encryption encoding
