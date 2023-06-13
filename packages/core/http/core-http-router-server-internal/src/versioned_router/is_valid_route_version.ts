@@ -12,7 +12,7 @@ const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
 
 export function isAllowedPublicVersion(version: string): undefined | string {
   if ('2023-10-31' !== version) {
-    return 'Invalid public version, for now please use "2023-10-31" as the version for all public routes.';
+    return `Invalid public version, for now please use "2023-10-31" as the version for all public routes. Received "${version}".}"`;
   }
 }
 
