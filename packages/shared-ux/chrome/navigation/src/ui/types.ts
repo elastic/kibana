@@ -134,10 +134,6 @@ export interface NavigationTreeDefinition {
  */
 export interface ProjectNavigationDefinition {
   /**
-   * The URL href for the home link
-   */
-  homeRef: string;
-  /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * for a project. Use it if you only need to configure your project navigation and leave
    * all the other navigation items to the default (Recently viewed items, Management, etc.)

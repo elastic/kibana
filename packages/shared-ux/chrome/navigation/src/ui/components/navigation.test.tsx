@@ -293,7 +293,7 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 <Navigation.Item<any> id="item1" link="notRegistered" />
@@ -306,8 +306,8 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
-      expect(await queryByTestId('nav-group-root.group1')).toBeNull();
-      expect(await queryByTestId('nav-item-root.group2.item1')).toBeVisible();
+      expect(queryByTestId('nav-group-root.group1')).toBeNull();
+      expect(queryByTestId('nav-item-root.group2.item1')).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -500,7 +500,7 @@ describe('<Navigation />', () => {
 
       render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="group1">
               <Navigation.Item id="item1" title="Item 1" href="https://example.com" />
             </Navigation.Group>
@@ -546,7 +546,7 @@ describe('<Navigation />', () => {
       const expectToThrow = () => {
         render(
           <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-            <Navigation homeRef="https://elastic.co">
+            <Navigation>
               <Navigation.Group id="group1">
                 <Navigation.Item id="item1" title="Item 1" href="../dashboards" />
               </Navigation.Group>
