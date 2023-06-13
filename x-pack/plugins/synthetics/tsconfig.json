@@ -81,6 +81,7 @@
     "@kbn/ml-error-utils",
     "@kbn/ml-anomaly-utils",
     "@kbn/core-http-server",
+    "@kbn/core-application-browser",
     "@kbn/std",
   ],
   "exclude": [
