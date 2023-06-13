@@ -24,11 +24,11 @@ import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
+import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
 import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../../../dashboard_constants';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
-import { LoadDashboardFromSavedObjectReturn } from '../../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -40,7 +40,7 @@ export const createDashboard = async (
 ): Promise<DashboardContainer> => {
   const {
     data: { dataViews },
-    dashboardSavedObject: { loadDashboardStateFromSavedObject },
+    dashboardContentManagement: { loadDashboardState },
   } = pluginServices.getServices();
 
   // --------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
   const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
-  const dashboardSavedObjectPromise = loadDashboardStateFromSavedObject({ id: savedObjectId });
+  const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
   const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
     reduxEmbeddablePackagePromise,
@@ -107,7 +107,7 @@ export const initializeDashboard = async ({
   creationOptions,
   controlGroup,
 }: {
-  loadDashboardReturn: LoadDashboardFromSavedObjectReturn;
+  loadDashboardReturn: LoadDashboardReturn;
   untilDashboardReady: () => Promise<DashboardContainer>;
   creationOptions?: DashboardCreationOptions;
   controlGroup?: ControlGroupContainer;

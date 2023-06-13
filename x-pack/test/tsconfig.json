@@ -127,6 +127,7 @@
     "@kbn/server-route-repository",
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-common",
-    "@kbn/slo-schema"
+    "@kbn/slo-schema",
+    "@kbn/lens-plugin"
   ]
 }
