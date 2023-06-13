@@ -317,9 +317,14 @@ export class TaskManagerRunner implements TaskRunner {
         id: this.instance.task.id,
         description: 'run task',
       };
-      const result = await this.executionContext.withContext(ctx, () =>
-        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
-      );
+
+      const { skip, hasError } = this.shouldSkip();
+
+      const result = skip
+        ? { state: this.instance.task.state, skip: true, hasError }
+        : await this.executionContext.withContext(ctx, () =>
+            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+          );
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -345,6 +350,27 @@ export class TaskManagerRunner implements TaskRunner {
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
+  }
+
+  private shouldSkip() {
+    let skip = false;
+    let hasError = false;
+
+    if (this.taskConfig.skip.enabled) {
+      try {
+        const def = this.definitions.get(this.instance.task.taskType);
+        if (def.paramsSchema) {
+          def.paramsSchema.validate(this.instance.task.params);
+        }
+      } catch (e) {
+        if ((this.instance.task.skip?.attempts || 0) < this.taskConfig.skip.max_attempts) {
+          skip = true;
+        }
+        hasError = true;
+      }
+    }
+
+    return { skip, hasError };
   }
 
   public async removeTask(): Promise<void> {
@@ -515,7 +541,6 @@ export class TaskManagerRunner implements TaskRunner {
     if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
       const { schedule, attempts } = this.instance.task;
-
       const reschedule = failureResult.runAt
         ? { runAt: failureResult.runAt }
         : failureResult.schedule
@@ -534,6 +559,7 @@ export class TaskManagerRunner implements TaskRunner {
         return asOk({
           state,
           attempts,
+          hasError: true,
           ...reschedule,
         });
       }
@@ -551,26 +577,43 @@ export class TaskManagerRunner implements TaskRunner {
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(
-        ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
+        ({
+          runAt: originalRunAt,
+          schedule: reschedule,
+          state: originalState,
+          attempts = 0,
+          hasError: hasErrorFailedRun,
+        }: SuccessfulRunResult & { attempts: number }) => {
           const { startedAt, schedule, state: taskState, taskType, id } = this.instance.task;
-          let processedRunAt =
-            runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!;
-          let processedState = state;
+          const { skip, hasError: hasErrorResult } = unwrap(result);
+          const interval = reschedule?.interval ?? schedule?.interval;
+          const hasError = hasErrorFailedRun || hasErrorResult;
 
-          if (unwrap(result).skip) {
+          let runAt = originalRunAt || intervalFromDate(startedAt!, interval)!;
+          let state = originalState;
+          let skipAttempts = this.instance.task.skip?.attempts ?? 0;
+
+          if (skip) {
             this.logger.warn(
               `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
             );
-            processedRunAt = moment().add(this.taskConfig.skip.delay, 'millisecond').toDate();
-            processedState = taskState;
+            runAt = moment().add(this.taskConfig.skip.delay, 'millisecond').toDate();
+            state = taskState;
+            skipAttempts = skipAttempts + 1;
+          }
+          if (!skip && !hasError) {
+            skipAttempts = 0;
           }
 
           return asOk({
-            runAt: processedRunAt,
-            state: processedState,
+            runAt,
+            state,
             schedule: reschedule ?? schedule,
             attempts,
             status: TaskStatus.Idle,
+            skip: {
+              attempts: skipAttempts,
+            },
           });
         }
       ),
@@ -611,11 +654,38 @@ export class TaskManagerRunner implements TaskRunner {
       : TaskRunResult.RetryScheduled;
   }
 
-  private async processResultWhenDone(): Promise<TaskRunResult> {
+  private async processResultWhenDone(
+    result: Result<SuccessfulRunResult, FailedRunResult>
+  ): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
+
+    const { skip } = unwrap(result);
+    const { taskType, id } = this.instance.task;
+
     try {
-      this.instance = asRan(this.instance.task);
-      await this.removeTask();
+      if (skip) {
+        const skipAttempts = (this.instance.task.skip?.attempts ?? 0) + 1;
+        this.instance = asRan(
+          await this.bufferedTaskStore.update(
+            defaults(
+              {
+                retryAt: moment().add(this.taskConfig.skip.delay, 'millisecond').toDate(),
+                attempts: 0,
+                skip: {
+                  attempts: skipAttempts,
+                },
+              },
+              taskWithoutEnabled(this.instance.task)
+            )
+          )
+        );
+        this.logger.warn(
+          `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
+        );
+      } else {
+        this.instance = asRan(this.instance.task);
+        await this.removeTask();
+      }
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
@@ -631,6 +701,7 @@ export class TaskManagerRunner implements TaskRunner {
     taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
+
     await eitherAsync(
       result,
       async ({ runAt, schedule }: SuccessfulRunResult) => {
@@ -645,7 +716,7 @@ export class TaskManagerRunner implements TaskRunner {
                   : TaskPersistence.NonRecurring,
               result: await (runAt || schedule || task.schedule
                 ? this.processResultForRecurringTask(result)
-                : this.processResultWhenDone()),
+                : this.processResultWhenDone(result)),
             }),
             taskTiming
           )

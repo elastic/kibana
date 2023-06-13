@@ -37,7 +37,7 @@ import {
   RuleTypeRegistry,
   RawRuleLastRun,
 } from '../types';
-import { asErr, asOk, isOk, map, resolveErr, Result } from '../lib/result_type';
+import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -770,7 +770,11 @@ export class TaskRunner<
   }
 
   private shouldSkipRun(err: Error) {
-    return this.taskConfig.skip.enabled && isValidationError(err);
+    return (
+      this.taskConfig.skip.enabled &&
+      (this.taskInstance.skip?.attempts || 0) < this.taskConfig.skip.max_attempts &&
+      isValidationError(err)
+    );
   }
 
   async run(): Promise<RuleTaskRunResult> {
@@ -910,6 +914,7 @@ export class TaskRunner<
         return { interval: retryInterval };
       }),
       monitoring: this.ruleMonitoring.getMonitoring(),
+      hasError: isErr(schedule),
     };
   }
 

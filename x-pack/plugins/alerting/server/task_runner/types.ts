@@ -31,6 +31,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 export type RuleTaskRunResult = {
   state: RuleTaskState;
   monitoring?: RuleMonitoring | undefined;
+  hasError?: boolean;
 } & (
   | {
       runAt?: Date;

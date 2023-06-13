@@ -106,6 +106,7 @@ describe('Task Runner', () => {
     skip: {
       enabled: false,
       delay: 3000,
+      max_attempts: 20,
     },
   };
 
@@ -1743,7 +1744,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, hasError: true }));
 
     testAlertingEventLogCalls({
       status: 'error',
@@ -1783,7 +1784,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, hasError: true }));
 
     testAlertingEventLogCalls({
       setRuleName: false,
@@ -1817,7 +1818,9 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, interval: '5m' }));
+    expect(runnerResult).toEqual(
+      generateRunnerResult({ successRatio: 0, interval: '5m', hasError: true })
+    );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -2515,7 +2518,9 @@ describe('Task Runner', () => {
       }
     );
     const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, success: false }));
+    expect(runnerResult).toEqual(
+      generateRunnerResult({ successRatio: 0, success: false, hasError: true })
+    );
   });
 
   test('successfully stores the success ratio', async () => {
@@ -2550,7 +2555,11 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     ruleType.executor.mockClear();
     expect(runnerResult).toEqual(
-      generateRunnerResult({ successRatio: 0.75, history: [true, true, true, false] })
+      generateRunnerResult({
+        successRatio: 0.75,
+        history: [true, true, true, false],
+        hasError: true,
+      })
     );
   });
 
@@ -3101,6 +3110,7 @@ describe('Task Runner', () => {
         skip: {
           enabled: true,
           delay: mockedTaskConfig.skip.delay,
+          max_attempts: 20,
         },
       },
       context: taskRunnerFactoryInitializerParams,
@@ -3128,6 +3138,40 @@ describe('Task Runner', () => {
       setRuleName: false,
       executionStatus: 'not-reached',
     });
+  });
+
+  test('does not skips task with invalid params when it reaches the skip.max_attempts limit ', async () => {
+    const mockTask = { ...mockedTaskInstance, skip: { attempts: 20 } };
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockTask,
+      taskConfig: {
+        skip: {
+          enabled: true,
+          delay: mockedTaskConfig.skip.delay,
+          max_attempts: 20,
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+
+    const mockRule = { ...mockedRawRuleSO };
+    // @ts-ignore
+    mockRule.attributes.name = undefined;
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockRule);
+
+    const result = await taskRunner.run();
+    expect(result).toEqual(
+      generateRunnerResult({
+        successRatio: 0,
+        state: false,
+        hasError: true,
+      })
+    );
   });
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 

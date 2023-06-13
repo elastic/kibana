@@ -56,6 +56,7 @@ const getMockRunContext = (runTask: ConcreteTaskInstance) => ({
     skip: {
       enabled: false,
       delay: 3000,
+      max_attempts: 20,
     },
   },
   kbnServer: {},
@@ -169,6 +170,7 @@ describe('addMiddlewareToChain', () => {
               "skip": Object {
                 "delay": 3000,
                 "enabled": false,
+                "max_attempts": 20,
               },
             },
             "taskInstance": Object {

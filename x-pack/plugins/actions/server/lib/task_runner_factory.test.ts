@@ -53,6 +53,7 @@ const mockedTaskConfig = {
   skip: {
     enabled: false,
     delay: 3000,
+    max_attempts: 20,
   },
 };
 
@@ -544,6 +545,7 @@ test('returns the existing state and delayed schedule to retry the task when ret
       skip: {
         enabled: true,
         delay: mockedTaskConfig.skip.delay,
+        max_attempts: 20,
       },
     },
   });
@@ -576,6 +578,47 @@ test('returns the existing state and delayed schedule to retry the task when ret
   const result = await taskRunner.run();
 
   expect(result).toEqual({ skip: true, state: mockTaskInstance.state });
+});
+
+test('throws error after trying to skip a task {config.skip.max_attempts} times', async () => {
+  const mockTaskInstance = { ...mockedTaskInstance, state: { foo: 'bar' }, skip: { attempts: 20 } };
+
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockTaskInstance,
+    taskConfig: {
+      skip: {
+        enabled: true,
+        delay: mockedTaskConfig.skip.delay,
+        max_attempts: 20,
+      },
+    },
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      executionId: '123abc',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockResolvedValueOnce({
+    status: 'error',
+    actionId: '2',
+    message: 'error validating action',
+    data: { foo: true },
+    retry: true,
+  });
+  await expect(taskRunner.run()).rejects.toMatchInlineSnapshot(`[Error: error validating action]`);
 });
 
 test('uses API key when provided', async () => {

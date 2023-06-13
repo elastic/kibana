@@ -26,7 +26,6 @@ import { Observable } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
-import { schema } from '@kbn/config-schema';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -72,12 +71,6 @@ taskDefinitions.registerTaskDefinitions({
 
 const mockApmTrans = {
   end: jest.fn(),
-};
-const mockedTaskConfig = {
-  skip: {
-    enabled: false,
-    delay: 3000,
-  },
 };
 
 describe('TaskClaiming', () => {
@@ -130,7 +123,6 @@ describe('TaskClaiming', () => {
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
       getCapacity: () => 10,
-      taskConfig: mockedTaskConfig,
     });
 
     expect(taskManagerLogger.info).toHaveBeenCalledTimes(1);
@@ -185,7 +177,6 @@ describe('TaskClaiming', () => {
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
-        taskConfig: mockedTaskConfig,
         ...taskClaimingOpts,
       });
 
@@ -998,63 +989,6 @@ if (doc['task.runAt'].size()!=0) {
       ]);
     });
 
-    test('it filters out tasks with unknown params', async () => {
-      const maxAttempts = _.random(2, 43);
-      const definitions = new TaskTypeDictionary(mockLogger());
-      const taskManagerId = uuidv1();
-      definitions.registerTaskDefinitions({
-        unknownParams: {
-          title: 'unknownParams',
-          createTaskRunner: jest.fn(),
-          paramsSchema: schema.object({
-            foo: schema.string(),
-          }),
-        },
-      });
-      const results = await testClaimAvailableTasks({
-        storeOpts: {
-          taskManagerId,
-          definitions,
-        },
-        taskClaimingOpts: {
-          maxAttempts,
-          getCapacity: (type) => {
-            switch (type) {
-              case 'limitedToTwo':
-                return 2;
-              case 'limitedToFive':
-                return 5;
-              default:
-                return 10;
-            }
-          },
-          taskConfig: {
-            skip: {
-              enabled: true,
-              delay: 3000,
-            },
-          },
-        },
-        hits: [
-          [
-            mockInstance({
-              taskType: 'unknownParams',
-              params: {
-                foo: 'bar',
-                bar: 'foo', // unknown
-              },
-            }),
-          ],
-        ],
-        claimingOpts: {
-          claimOwnershipUntil: new Date(),
-        },
-      });
-
-      expect(results.length).toEqual(1);
-      expect(results[0].result.docs.length).toEqual(0);
-    });
-
     test('it returns task objects', async () => {
       const taskManagerId = uuidv1();
       const claimOwnershipUntil = new Date(Date.now());
@@ -1325,7 +1259,6 @@ if (doc['task.runAt'].size()!=0) {
         taskStore,
         maxAttempts: 2,
         getCapacity,
-        taskConfig: mockedTaskConfig,
       });
 
       return { taskManagerId, runAt, taskClaiming };

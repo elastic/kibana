@@ -49,6 +49,7 @@ export type SuccessfulRunResult = {
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
+  hasError?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -286,6 +287,13 @@ export interface TaskInstance {
    * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
    */
   enabled?: boolean;
+
+  /**
+   * Indicates the number of skipped executions.
+   */
+  skip?: {
+    attempts: number;
+  };
 }
 
 /**

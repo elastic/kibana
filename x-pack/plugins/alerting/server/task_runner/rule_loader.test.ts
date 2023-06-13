@@ -54,6 +54,7 @@ describe('rule_loader', () => {
       skip: {
         enabled: false,
         delay: 3000,
+        max_attempts: 20,
       },
     },
   };
@@ -201,6 +202,7 @@ describe('rule_loader', () => {
             skip: {
               enabled: true,
               delay: 3000,
+              max_attempts: 20,
             },
           },
         })
