@@ -874,17 +874,6 @@
       }
     }
   },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
   "tag": {
     "properties": {
       "name": {
@@ -894,6 +883,17 @@
         "type": "text"
       },
       "color": {
+        "type": "text"
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
         "type": "text"
       }
     }
@@ -1341,6 +1341,9 @@
       },
       "total_comments": {
         "type": "integer"
+      },
+      "category": {
+        "type": "keyword"
       }
     }
   },
