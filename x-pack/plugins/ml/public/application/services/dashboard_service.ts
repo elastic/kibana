@@ -14,7 +14,6 @@ export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 
 export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;
 
-const items: DashboardItems = [];
 export function dashboardServiceProvider(dashboard: DashboardStart) {
   return {
     /**

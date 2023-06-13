@@ -91,7 +91,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
-  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useDataSource();
+  const { selectedSavedSearch, selectedDataView: dataView, combinedQuery } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',

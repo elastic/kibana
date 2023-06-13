@@ -76,10 +76,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
         defaultMessage: 'New job from saved search {title}',
         values: { title: mlContext.selectedSavedSearch.title ?? '' },
       });
-    } else if (mlContext.currentDataView.id !== undefined) {
+    } else if (mlContext.selectedDataView.id !== undefined) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleDataView', {
         defaultMessage: 'New job from data view {dataViewName}',
-        values: { dataViewName: mlContext.currentDataView.getName() },
+        values: { dataViewName: mlContext.selectedDataView.getName() },
       });
     }
     return '';
@@ -118,7 +118,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
           <FieldStatsFlyoutProvider
-            dataView={mlContext.currentDataView}
+            dataView={mlContext.selectedDataView}
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
             dslQuery={jobCreator.query}

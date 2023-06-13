@@ -131,7 +131,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
               <FullTimeRangeSelector
                 frozenDataPreference={frozenDataPreference}
                 setFrozenDataPreference={setFrozenDataPreference}
-                dataView={mlContext.currentDataView}
+                dataView={mlContext.selectedDataView}
                 query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}

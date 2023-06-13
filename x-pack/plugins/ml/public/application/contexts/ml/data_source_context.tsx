@@ -20,7 +20,7 @@ import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
 
 export interface DataSourceContextValue {
   combinedQuery: any;
-  currentDataView: DataView; // TODO this should be DataView or null
+  selectedDataView: DataView; // TODO this should be DataView or null
   // @deprecated currentSavedSearch is of SavedSearchSavedObject type, change to selectedSavedSearch
   deprecatedSavedSearchObj: SavedSearchSavedObject | null;
   selectedSavedSearch: SavedSearch | null;
@@ -111,7 +111,7 @@ export const DataSourceContextProvider: FC = ({ children }) => {
 
     return {
       combinedQuery,
-      currentDataView: dataView,
+      selectedDataView: dataView,
       deprecatedSavedSearchObj,
       selectedSavedSearch: savedSearch,
     };
