@@ -141,7 +141,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             cases: pluginsStart.cases,
-            // @TODO: remove
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
             contentManagement: pluginsStart.contentManagement,

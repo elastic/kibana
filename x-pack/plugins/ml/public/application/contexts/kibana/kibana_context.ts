@@ -50,8 +50,6 @@ interface StartPlugins {
   core: CoreStart;
   appName: string;
   lens: LensPublicStart;
-  // @TODO: remove
-  // @deprecated
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   contentManagement: ContentManagementPublicStart;
