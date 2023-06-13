@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { pick } from 'lodash';
 import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -46,6 +46,10 @@ export interface ExplainLogRateSpikesContentWrapperProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
@@ -57,6 +61,8 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
+  barColorOverride,
+  barHighlightColorOverride,
   onAnalysisCompleted,
 }) => {
   if (!dataView) return null;
@@ -100,6 +106,8 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
+                  barColorOverride={barColorOverride}
+                  barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}
                 />
               </DatePickerContextProvider>
