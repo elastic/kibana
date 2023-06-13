@@ -445,9 +445,20 @@ describe('UninstallTokenService', () => {
           mockContext.experimentalFeatures.agentTamperProtectionEnabled = false;
         });
 
-        it('should not generate token if agentTamperProtectionEnabled: false', async () => {
+        it('generateTokensForPolicyIds should not generate token if agentTamperProtectionEnabled: false', async () => {
           const so = getDefaultSO();
           await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
+          expect(soClientMock.bulkCreate).not.toBeCalled();
+        });
+
+        it('generateTokensForAllPolicies should not generate token if agentTamperProtectionEnabled: false', async () => {
+          await uninstallTokenService.generateTokensForAllPolicies();
+          expect(soClientMock.bulkCreate).not.toBeCalled();
+        });
+
+        it('generateTokenForPolicyId should not generate token if agentTamperProtectionEnabled: false', async () => {
+          const so = getDefaultSO();
+          await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
           expect(soClientMock.bulkCreate).not.toBeCalled();
         });
       });
