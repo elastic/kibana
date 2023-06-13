@@ -75,17 +75,8 @@ export const updateCard = ({
     const stepsDone = finishedSteps[cardId] ?? new Set();
     const timeInMins = getCardTimeInMinutes(card, stepsDone);
     const stepsLeft = getCardStepsLeft(card, stepsDone);
-    return {
-      ...activeCards,
-      [sectionId]: {
-        ...activeCards[sectionId],
-        [cardId]: {
-          id: cardId,
-          timeInMins,
-          stepsLeft,
-        },
-      },
-    };
+
+    activeCards[sectionId][cardId] = { id: cardId, timeInMins, stepsLeft };
   }
   return activeCards;
 };
