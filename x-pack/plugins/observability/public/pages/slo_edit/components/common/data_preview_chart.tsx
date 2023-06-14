@@ -15,7 +15,6 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
-
 export function DataPreviewChart() {
   const { watch, getFieldState } = useFormContext<CreateSLOInput>();
   const { charts, uiSettings } = useKibana().services;
@@ -61,6 +60,19 @@ export function DataPreviewChart() {
                 defaultMessage: 'Last hour',
               })}
               position={Position.Bottom}
+              style={{
+                tickLabel: {
+                  visible: true,
+                  padding: 4,
+                  rotation: 0,
+                },
+                tickLine: {
+                  visible: true,
+                  padding: 4,
+                  size: 0.001,
+                },
+              }}
+              gridLine={{ visible: false }}
               tickFormat={(d) => moment(d).format(dateFormat)}
             />
             <Axis
@@ -76,10 +88,10 @@ export function DataPreviewChart() {
               id="SLI"
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
-              xAccessor="key"
+              xAccessor="date"
               yAccessors={['value']}
-              data={previewData.map((datum) => ({
-                key: datum.date,
+              data={previewData.map((datum, i) => ({
+                date: datum.date,
                 value: datum.sliValue >= 0 ? datum.sliValue : null,
               }))}
               yNice
