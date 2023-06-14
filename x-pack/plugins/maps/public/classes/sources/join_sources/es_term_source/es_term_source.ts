@@ -39,7 +39,8 @@ import { isTermSourceComplete } from './is_term_source_complete';
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
-type ESTermSourceSyncMeta = ESAggsSourceSyncMeta & Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
+type ESTermSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
 
 export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
   const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();

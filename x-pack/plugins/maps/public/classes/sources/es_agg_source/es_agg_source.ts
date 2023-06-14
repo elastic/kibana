@@ -156,7 +156,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
   getSyncMeta(): ESAggsSourceSyncMeta {
     return {
       metrics: this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
-    }
+    };
   }
 
   getGeoGridPrecision(zoom: number): number {

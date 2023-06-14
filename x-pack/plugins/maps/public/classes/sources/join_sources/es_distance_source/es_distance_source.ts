@@ -29,7 +29,8 @@ import { isSpatialSourceComplete } from '../is_spatial_source_complete';
 
 export const DEFAULT_WITHIN_DISTANCE = 5;
 
-type ESDistanceSourceSyncMeta = ESAggsSourceSyncMeta & Pick<ESDistanceSourceDescriptor, 'distance' | 'geoField'>;
+type ESDistanceSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<ESDistanceSourceDescriptor, 'distance' | 'geoField'>;
 
 export class ESDistanceSource extends AbstractESAggSource implements IJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_DISTANCE_SOURCE;

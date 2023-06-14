@@ -78,7 +78,7 @@ import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
-  | 'geoField',
+  'geoField',
   | 'filterByMapBounds'
   | 'sortField'
   | 'sortOrder'
@@ -879,16 +879,15 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     // use fields API
     searchSource.setField(
       'fields',
-      requestMeta.fieldNames
-        .map((fieldName) => {
-          const field = dataView.fields.getByName(fieldName);
-          return field && field.type === 'date'
-            ? {
-                field: fieldName,
-                format: 'epoch_millis',
-              }
-            : fieldName;
-        })
+      requestMeta.fieldNames.map((fieldName) => {
+        const field = dataView.fields.getByName(fieldName);
+        return field && field.type === 'date'
+          ? {
+              field: fieldName,
+              format: 'epoch_millis',
+            }
+          : fieldName;
+      })
     );
 
     const mvtUrlServicePath = getHttp().basePath.prepend(`${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`);

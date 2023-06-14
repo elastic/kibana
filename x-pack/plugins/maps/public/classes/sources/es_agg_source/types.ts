@@ -28,4 +28,4 @@ export interface IESAggSource extends IESSource {
 
 export interface ESAggsSourceSyncMeta {
   metrics: string[];
-};
+}

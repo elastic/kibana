@@ -39,7 +39,8 @@ import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
 
-type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta & Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
+type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
 const MAX_TRACKS = 250;
 

@@ -96,7 +96,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return {
       mvtFields: this._descriptor.fields.map((field: MVTFieldDescriptor) => {
         return field.name;
-      })
+      }),
     };
   }
 
