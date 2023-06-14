@@ -34,9 +34,9 @@ export const defaultNavigation: MlNodeDefinition = {
         {
           link: 'ml:overview',
         },
-        // {
-        //   link: 'ml:notifications',
-        // },
+        {
+          link: 'ml:notifications',
+        },
       ],
     },
     {
