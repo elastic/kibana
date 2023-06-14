@@ -26,7 +26,7 @@ import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public'
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
-import { IndexPatternManagementContext } from '../../types';
+import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { SpacesList } from './spaces_list';
@@ -84,7 +84,7 @@ export const IndexPatternTable = ({
     spaces,
     overlays,
     docLinks,
-  } = useKibana<IndexPatternManagementContext>().services;
+  } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
   const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);

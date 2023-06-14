@@ -13,7 +13,7 @@ import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';
 
 describe('ScriptingWarningCallOut', () => {
-  const mockedContext = mockManagementPlugin.createIndexPatternManagementContext();
+  const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
   it('should render normally', async () => {
     const component = mount(<ScriptingWarningCallOut isVisible={true} />, {

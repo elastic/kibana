@@ -11,11 +11,11 @@ import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagementContext } from '../../../../types';
+import { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
   const docLinksScriptedFields =
-    useKibana<IndexPatternManagementContext>().services.docLinks?.links.scriptedFields;
+    useKibana<IndexPatternManagmentContext>().services.docLinks?.links.scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

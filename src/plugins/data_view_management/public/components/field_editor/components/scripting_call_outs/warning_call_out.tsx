@@ -13,14 +13,14 @@ import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagementContext } from '../../../../types';
+import { IndexPatternManagmentContext } from '../../../../types';
 
 export interface ScriptingWarningCallOutProps {
   isVisible: boolean;
 }
 
 export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningCallOutProps) => {
-  const docLinks = useKibana<IndexPatternManagementContext>().services.docLinks?.links;
+  const docLinks = useKibana<IndexPatternManagmentContext>().services.docLinks?.links;
   return isVisible ? (
     <Fragment>
       <EuiText size="s">

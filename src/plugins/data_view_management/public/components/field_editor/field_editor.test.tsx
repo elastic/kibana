@@ -102,7 +102,7 @@ const services = {
 describe('FieldEditor', () => {
   let indexPattern: DataView;
 
-  const mockContext = mockManagementPlugin.createIndexPatternManagementContext();
+  const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
   mockContext.fieldFormats.getDefaultType = jest.fn(
     () => ({} as unknown as FieldFormatInstanceType)
   );

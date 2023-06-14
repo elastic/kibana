@@ -13,12 +13,12 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useParams } from 'react-router-dom-v5-compat';
 import { EditIndexPattern } from '.';
-import { IndexPatternManagementContext } from '../../types';
+import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = (props) => {
   const { dataViews, setBreadcrumbs, notifications } =
-    useKibana<IndexPatternManagementContext>().services;
+    useKibana<IndexPatternManagmentContext>().services;
   const [error, setError] = useState<Error | undefined>();
   const [indexPattern, setIndexPattern] = useState<DataView>();
   const { id: paramsId } = useParams<{ id: string }>();

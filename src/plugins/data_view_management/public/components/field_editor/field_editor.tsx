@@ -59,7 +59,7 @@ import {
 
 import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
-import { IndexPatternManagementContextValue } from '../../types';
+import { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
@@ -130,11 +130,11 @@ export interface FieldEdiorProps {
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
   static contextType = contextType;
 
-  public declare readonly context: IndexPatternManagementContextValue;
+  public declare readonly context: IndexPatternManagmentContextValue;
 
   supportedLangs: estypes.ScriptLanguage[] = [];
   deprecatedLangs: estypes.ScriptLanguage[] = [];
-  constructor(props: FieldEdiorProps, context: IndexPatternManagementContextValue) {
+  constructor(props: FieldEdiorProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
     const { spec, indexPattern } = props;
@@ -163,7 +163,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.init(context);
   }
 
-  async init(context: IndexPatternManagementContextValue) {
+  async init(context: IndexPatternManagmentContextValue) {
     const { http, notifications, fieldFormats } = context.services;
     const { format, spec } = this.state;
     const { indexPattern } = this.props;

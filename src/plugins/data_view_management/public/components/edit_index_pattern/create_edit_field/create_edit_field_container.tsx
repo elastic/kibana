@@ -13,12 +13,12 @@ import { useParams } from 'react-router-dom-v5-compat';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
-import { IndexPatternManagementContext } from '../../../types';
+import { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
 const CreateEditFieldCont: React.FC = () => {
   const params = useParams();
-  const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagementContext>().services;
+  const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<DataView>();
   const fieldName = params.fieldName && decodeURIComponent(params.fieldName);
 
