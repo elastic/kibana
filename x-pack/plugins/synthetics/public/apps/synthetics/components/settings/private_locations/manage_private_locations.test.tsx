@@ -62,8 +62,8 @@ describe('<ManagePrivateLocations />', () => {
       expect(getByText('No agent policies found')).toBeInTheDocument();
 
       if (canSave) {
-        const button = getByRole('link', { name: 'Create agent policy' });
-        expect(button).not.toBeDisabled();
+        const button = getByRole('button', { name: 'Create agent policy' });
+        expect(button).toBeDisabled();
       } else {
         const button = getByRole('button', { name: 'Create agent policy' });
         expect(button).toBeDisabled();
