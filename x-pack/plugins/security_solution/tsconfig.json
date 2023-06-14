@@ -161,6 +161,7 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/field-formats-plugin",
     "@kbn/dev-proc-runner",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/text-based-editor"
   ]
 }
