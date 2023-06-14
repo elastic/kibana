@@ -121,7 +121,6 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
-import { getRequestStore } from './services/request_store';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
