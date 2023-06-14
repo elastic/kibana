@@ -95,9 +95,14 @@ describe('esArchiver: createDeleteIndexStream()', () => {
           createDeleteIndexStream(client, stats, log),
         ]);
 
-        expect(mockCleanSavedObjectIndices).toHaveBeenCalledTimes(1);
+        expect(mockCleanSavedObjectIndices).toHaveBeenCalledTimes(2);
 
-        expect(mockCleanSavedObjectIndices).toHaveBeenCalledWith(
+        expect(mockCleanSavedObjectIndices).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ index: '.kibana_task_manager' })
+        );
+        expect(mockCleanSavedObjectIndices).toHaveBeenNthCalledWith(
+          2,
           expect.not.objectContaining({ index: expect.any(String) })
         );
       });
