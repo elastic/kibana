@@ -138,6 +138,34 @@ export interface CnvmStatistics {
 
 export interface CnvmDashboardData {
   cnvmStatistics: CnvmStatistics;
+  topVulnerableResources: VulnerableResourceStat[];
+  topPatchableVulnerabilities: PatchableVulnerabilityStat[];
+  topVulnerabilities: VulnerabilityStat[];
 }
 
 export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+
+export interface VulnerableResourceStat {
+  resourceCount: number | undefined;
+  resourceName: string | undefined;
+  cloudRegion: string | undefined;
+}
+
+export interface PatchableVulnerabilityStat {
+  vulnerabilityFixCount: number | undefined;
+  packageFixVersion: string | undefined;
+  cve: string | undefined;
+  score: number | undefined;
+  version: string | undefined;
+}
+
+export interface VulnerabilityStat {
+  packageFixVersion: string | undefined;
+  packageName: string | undefined;
+  packageVersion: string | undefined;
+  severity: string | undefined;
+  vulnerabilityCount: number;
+  score: number | undefined;
+  version: string | undefined;
+  cve: string | undefined;
+}
