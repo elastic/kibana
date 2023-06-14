@@ -16,31 +16,37 @@ import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { EnginesListLogic } from './engines_list_logic';
 
-export interface DeleteEngineModalProps {
-  engineName: string;
+export interface DeleteSearchApplicationModalProps {
   onClose: () => void;
+  searchApplicationName: string;
 }
 
-export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName, onClose }) => {
+export const DeleteSearchApplicationModal: React.FC<DeleteSearchApplicationModalProps> = ({
+  searchApplicationName,
+  onClose,
+}) => {
   const { deleteEngine } = useActions(EnginesListLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { isDeleteLoading } = useValues(EnginesListLogic);
   return (
     <EuiConfirmModal
-      title={i18n.translate('xpack.enterpriseSearch.content.engineList.deleteEngineModal.title', {
-        defaultMessage: 'Permanently delete this search application?',
-      })}
+      title={i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.list.deleteSearchApplicationModal.title',
+        {
+          defaultMessage: 'Permanently delete this search application?',
+        }
+      )}
       onCancel={onClose}
       onConfirm={() => {
-        deleteEngine({ searchApplicationName: engineName });
+        deleteEngine({ searchApplicationName });
         sendEnterpriseSearchTelemetry({
           action: 'clicked',
-          metric: 'entSearchApplications-engineView-deleteEngineConfirm',
+          metric: 'entSearchApplications-deleteSearchApplicationConfirm',
         });
       }}
       cancelButtonText={CANCEL_BUTTON_LABEL}
       confirmButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.engineList.deleteEngineModal.confirmButton.title',
+        'xpack.enterpriseSearch.searchApplications.list.deleteSearchApplicationModal.confirmButton.title',
         {
           defaultMessage: 'Yes, delete this search application',
         }
@@ -50,7 +56,7 @@ export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName
     >
       <p>
         {i18n.translate(
-          'xpack.enterpriseSearch.content.engineList.deleteEngineModal.delete.description',
+          'xpack.enterpriseSearch.searchApplications.list.deleteSearchApplicationModal.delete.description',
           {
             defaultMessage:
               'Deleting your search application is not a reversible action. Your indices will not be affected. ',

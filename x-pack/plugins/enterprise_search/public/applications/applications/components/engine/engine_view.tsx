@@ -24,7 +24,7 @@ import {
   SearchApplicationContentTabs,
 } from '../../routes';
 
-import { DeleteEngineModal } from '../engines/delete_engine_modal';
+import { DeleteSearchApplicationModal } from '../engines/delete_search_application_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EngineConnect } from './engine_connect/engine_connect';
@@ -81,7 +81,10 @@ export const EngineView: React.FC = () => {
   return (
     <>
       {isDeleteModalVisible ? (
-        <DeleteEngineModal engineName={engineName} onClose={closeDeleteEngineModal} />
+        <DeleteSearchApplicationModal
+          searchApplicationName={engineName}
+          onClose={closeDeleteEngineModal}
+        />
       ) : null}
       <Switch>
         <Route

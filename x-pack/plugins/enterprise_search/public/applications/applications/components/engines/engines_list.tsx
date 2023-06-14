@@ -42,7 +42,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';
 import { CreateSearchApplication } from './create_search_application_flyout';
-import { DeleteEngineModal } from './delete_engine_modal';
+import { DeleteSearchApplicationModal } from './delete_search_application_modal';
 import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
@@ -158,7 +158,10 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
   return (
     <>
       {isDeleteModalVisible ? (
-        <DeleteEngineModal engineName={deleteModalEngineName} onClose={closeDeleteEngineModal} />
+        <DeleteSearchApplicationModal
+          searchApplicationName={deleteModalEngineName}
+          onClose={closeDeleteEngineModal}
+        />
       ) : null}
 
       <EngineListIndicesFlyout />
