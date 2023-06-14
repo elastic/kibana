@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const browser = getService('browser');
 
-  describe('dashboard time', () => {
+  describe.only('dashboard time', () => {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
@@ -99,6 +99,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
         await browser.get(urlWithGlobalTime, false);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
+      });
+
+      it('should use saved time after time change is undone', async function () {
+        const currentUrl = await browser.getCurrentUrl();
+        const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
+        await browser.get(urlWithGlobalTime, false);
+
+        // set the time to something else
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Jan 1, 2019 @ 00:00:00.000',
+          'Jan 2, 2019 @ 00:00:00.000'
+        );
+        await PageObjects.dashboard.waitForRenderComplete();
+        await browser.goBack();
+
+        // time should have restored to the saved time range.
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
         expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
