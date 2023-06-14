@@ -17,7 +17,7 @@ import {
   toMountPoint,
 } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
