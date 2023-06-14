@@ -73,10 +73,10 @@ import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
 } from '../common/constants/cases';
 
-type SetFeatureEnabled = (features: MlFeatures) => void;
+type SetFeaturesEnabled = (features: MlFeatures) => void;
 
 interface MlSetup {
-  setFeaturesEnabled: SetFeatureEnabled;
+  setFeaturesEnabled: SetFeaturesEnabled;
 }
 
 export type MlPluginSetup = SharedServices & MlSetup;
