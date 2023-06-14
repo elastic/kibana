@@ -165,10 +165,9 @@ export function getStatsBarData(jobsList: any) {
   jobStats.activeNodes.value = Object.keys(mlNodes).length;
 
   if (jobStats.total.value === 0) {
-    for (const statKey in jobStats) {
+    for (const [statKey, val] of Object.entries(jobStats)) {
       if (statKey !== 'total') {
-        // @ts-ignore
-        jobStats[statKey].show = false;
+        val.show = false;
       }
     }
   }
