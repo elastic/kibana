@@ -28,8 +28,9 @@ import {
 import type { HttpStart } from '@kbn/core-http-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
-import React, { createRef, useState } from 'react';
+import React, { createRef, useCallback, useState } from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, debounceTime } from 'rxjs';
@@ -120,12 +121,15 @@ const Logo = (
     fullHref = props.prependBasePath(homeHref);
   }
 
-  const navigateHome = (event: React.MouseEvent) => {
-    if (fullHref) {
-      props.application.navigateToUrl(fullHref);
-    }
-    event.preventDefault();
-  };
+  const navigateHome = useCallback(
+    (event: React.MouseEvent) => {
+      if (fullHref) {
+        props.application.navigateToUrl(fullHref);
+      }
+      event.preventDefault();
+    },
+    [fullHref, props.application]
+  );
 
   return (
     <span css={logo.container}>
@@ -165,36 +169,45 @@ export const ProjectHeader = ({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
 
+  const handleCloseNav = useCallback(() => {
+    setIsOpen(false);
+    if (toggleCollapsibleNavRef.current) {
+      toggleCollapsibleNavRef.current.focus();
+    }
+  }, [setIsOpen, toggleCollapsibleNavRef]);
+
+  const handleToggleNavButtonClick = useCallback(
+    () => setIsOpen((prevIsOpen) => !prevIsOpen),
+    [setIsOpen]
+  );
+
   return (
     <>
       <EuiHeader position="fixed" data-test-subj="kibanaProjectHeader">
         <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
             <Router history={application.history}>
-              <ProjectNavigation
-                isOpen={isOpen!}
-                closeNav={() => {
-                  setIsOpen(false);
-                  if (toggleCollapsibleNavRef.current) {
-                    toggleCollapsibleNavRef.current.focus();
+              <CompatRouter>
+                <ProjectNavigation
+                  isOpen={isOpen!}
+                  closeNav={handleCloseNav}
+                  button={
+                    <EuiHeaderSectionItemButton
+                      data-test-subj="toggleNavButton"
+                      aria-label={headerStrings.nav.closeNavAriaLabel}
+                      onClick={handleToggleNavButtonClick}
+                      aria-expanded={isOpen!}
+                      aria-pressed={isOpen!}
+                      aria-controls={navId}
+                      ref={toggleCollapsibleNavRef}
+                    >
+                      <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
+                    </EuiHeaderSectionItemButton>
                   }
-                }}
-                button={
-                  <EuiHeaderSectionItemButton
-                    data-test-subj="toggleNavButton"
-                    aria-label={headerStrings.nav.closeNavAriaLabel}
-                    onClick={() => setIsOpen(!isOpen)}
-                    aria-expanded={isOpen!}
-                    aria-pressed={isOpen!}
-                    aria-controls={navId}
-                    ref={toggleCollapsibleNavRef}
-                  >
-                    <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
-                  </EuiHeaderSectionItemButton>
-                }
-              >
-                {children}
-              </ProjectNavigation>
+                >
+                  {children}
+                </ProjectNavigation>
+              </CompatRouter>
             </Router>
           </EuiHeaderSectionItem>
 
