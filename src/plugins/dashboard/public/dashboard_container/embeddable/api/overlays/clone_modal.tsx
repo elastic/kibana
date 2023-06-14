@@ -20,7 +20,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiText,
   EuiCallOut,
   EuiFormRow,
 } from '@elastic/eui';
@@ -42,14 +41,18 @@ interface State {
   isLoading: boolean;
 }
 
+const cloneDashboardModalTitle = (
+  <FormattedMessage
+    id="dashboard.topNav.cloneModal.confirmCloneDescription"
+    defaultMessage="Clone dashboard"
+  />
+);
+const cloneDashboardConfirmButtonLabel = (
+  <FormattedMessage id="dashboard.topNav.cloneModal.cloneButtonLabel" defaultMessage="Clone" />
+);
+
 export class DashboardCloneModal extends React.Component<Props, State> {
   private isMounted = false;
-  private cloneDashboardLabel = (
-    <FormattedMessage
-      id="dashboard.topNav.cloneModal.confirmCloneDescription"
-      defaultMessage="Clone dashboard"
-    />
-  );
 
   constructor(props: Props) {
     super(props);
@@ -126,7 +129,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
               id="dashboard.topNav.cloneModal.dashboardExistsDescription"
               defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
               values={{
-                confirmClone: <strong>{this.cloneDashboardLabel}</strong>,
+                confirmClone: <strong>{cloneDashboardConfirmButtonLabel}</strong>,
               }}
             />
           </p>
@@ -143,18 +146,18 @@ export class DashboardCloneModal extends React.Component<Props, State> {
         onClose={this.props.onClose}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{this.cloneDashboardLabel}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{cloneDashboardModalTitle}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
           <EuiFormRow
-            label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleLabel', {
+            label={i18n.translate('dashboard.cloneModal.cloneDashboardModalTitleLabel', {
               defaultMessage: 'Title',
             })}
           >
             <EuiFieldText
               autoFocus
-              aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
+              aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardModalTitleAriaLabel', {
                 defaultMessage: 'Cloned Dashboard Title',
               })}
               data-test-subj="clonedDashboardTitle"
@@ -179,10 +182,9 @@ export class DashboardCloneModal extends React.Component<Props, State> {
             fill
             data-test-subj="cloneConfirmButton"
             onClick={this.cloneDashboard}
-            isDisabled={this.state.hasTitleDuplicate}
             isLoading={this.state.isLoading}
           >
-            {this.cloneDashboardLabel}
+            {cloneDashboardConfirmButtonLabel}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
