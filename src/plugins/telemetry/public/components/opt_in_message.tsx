@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { TelemetryService } from '../services';
 import type { TelemetryConstants } from '..';
+import { PATH_TO_ADVANCED_SETTINGS } from '../../common/constants';
 
 export interface OptInMessageProps {
   telemetryConstants: TelemetryConstants;
@@ -30,18 +31,24 @@ export const OptInMessage: React.FC<OptInMessageProps> = ({
     <React.Fragment>
       <FormattedMessage
         id="telemetry.dataManagementDisclaimerPrivacy"
-        defaultMessage="Usage collection (also known as Telemetry) is {optInStatus}.
+        defaultMessage="{optInStatus}
           This allows us to learn what our users are most interested in, so we can improve our products and services.
           Refer to our {privacyStatementLink}."
         values={{
           optInStatus: (
-            <em>
+            <strong>
               {telemetryService.isOptedIn ? (
-                <FormattedMessage id="telemetry.enabledStatus" defaultMessage="enabled" />
+                <FormattedMessage
+                  id="telemetry.enabledStatus"
+                  defaultMessage="Usage collection is enabled."
+                />
               ) : (
-                <FormattedMessage id="telemetry.disabledStatus" defaultMessage="disabled" />
+                <FormattedMessage
+                  id="telemetry.disabledStatus"
+                  defaultMessage="Usage collection is disabled."
+                />
               )}
-            </em>
+            </strong>
           ),
           privacyStatementLink: (
             /* eslint-disable-next-line @elastic/eui/href-or-on-click */
@@ -88,7 +95,7 @@ function renderTelemetryEnabledOrDisabledText(
 
   return (
     /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-    <EuiLink href={addBasePath('management/kibana/settings')} onClick={onClick}>
+    <EuiLink href={addBasePath(PATH_TO_ADVANCED_SETTINGS)} onClick={onClick}>
       {actionMessage}
     </EuiLink>
   );

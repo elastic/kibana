@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import {
+  AppDeepLinkId,
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
+import { isAbsoluteLink } from '../../utils';
 import {
   ChromeProjectNavigationNodeEnhanced,
   NodeProps,
@@ -20,7 +25,11 @@ import {
 } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
-function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
+function getIdFromNavigationNode<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>({ id: _id, link, title }: NodeProps<LinkId, Id, ChildrenId>): string {
   const id = _id ?? link;
 
   if (!id) {
@@ -35,21 +44,34 @@ function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNav
     // If a link is provided, but no deepLink is found, don't render anything
     return false;
   }
+
+  if (deepLink) {
+    return !deepLink.hidden;
+  }
+
   return true;
 }
 
-function createInternalNavNode(
+function createInternalNavNode<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(
   id: string,
-  _navNode: NodePropsEnhanced,
+  _navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
   deepLinks: Readonly<ChromeNavLink[]>,
   path: string[] | null
 ): ChromeProjectNavigationNodeEnhanced | null {
-  const { children, link, ...navNode } = _navNode;
+  const { children, link, href, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const isVisible = isNodeVisible({ link, deepLink });
 
   const titleFromDeepLinkOrChildren = typeof children === 'string' ? children : deepLink?.title;
   const title = navNode.title ?? titleFromDeepLinkOrChildren;
+
+  if (href && !isAbsoluteLink(href)) {
+    throw new Error(`href must be an absolute URL. Node id [${id}].`);
+  }
 
   if (!isVisible) {
     return null;
@@ -61,10 +83,17 @@ function createInternalNavNode(
     path: path ?? [id],
     title: title ?? '',
     deepLink,
+    href,
   };
 }
 
-export const useInitNavNode = (node: NodePropsEnhanced) => {
+export const useInitNavNode = <
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(
+  node: NodePropsEnhanced<LinkId, Id, ChildrenId>
+) => {
   /**
    * Map of children nodes
    */

@@ -162,17 +162,17 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.references
   );
 
-  const severity =
-    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.severity] ?? CaseSeverity.LOW;
-  const status =
-    STATUS_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.status] ?? CaseStatuses.open;
-
   const { total_alerts, total_comments, ...caseSavedObjectAttributes } =
     caseSavedObject.attributes ??
     ({
       total_alerts: -1,
       total_comments: -1,
     } as CasePersistedAttributes);
+
+  const severity =
+    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
+  const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
+  const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
 
   return {
     ...caseSavedObject,
@@ -182,6 +182,7 @@ export function transformSavedObjectToExternalModel(
       status,
       connector,
       external_service: externalService,
+      category,
     },
   };
 }
