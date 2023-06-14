@@ -129,6 +129,46 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      describe('when there are multiple tokens for a policy', () => {
+        let generatedPolicyIdsArray: string[];
+        let timestampBeforeAddingNewTokens: number;
+
+        before(async () => {
+          generatedPolicyIdsArray = await generatePolicies(20);
+          generatedPolicyIds = new Set(generatedPolicyIdsArray);
+
+          timestampBeforeAddingNewTokens = Date.now();
+
+          const savingAdditionalTokensPromises = generatedPolicyIdsArray.map((id) =>
+            saveAdditionalToken(id, `${id} latest token`)
+          );
+
+          await Promise.all(savingAdditionalTokensPromises);
+        });
+
+        after(async () => {
+          await cleanSavedObjects();
+        });
+
+        it('should return only the latest token for every policy', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .expect(200);
+
+          const body: GetUninstallTokensResponse = response.body;
+          expect(body.total).to.equal(generatedPolicyIds.size);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+
+          body.items.forEach((uninstallToken) => {
+            const createdAt = new Date(uninstallToken.created_at!).getTime();
+            expect(createdAt).to.be.greaterThan(timestampBeforeAddingNewTokens);
+
+            expect(uninstallToken.token).to.contain('latest');
+          });
+        });
+      });
+
       describe('when `policyId` query param is used', () => {
         before(async () => {
           generatedPolicyIds = new Set(await generatePolicies(5));
