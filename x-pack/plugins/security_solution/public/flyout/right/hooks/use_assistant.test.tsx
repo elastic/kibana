@@ -22,7 +22,6 @@ const isAlert = true;
 const renderUseAssistant = () =>
   renderHook((props: UseAssistantParams) => useAssistant(props), {
     initialProps: { dataFormattedForFieldBrowser, isAlert },
-    // wrapper: ProviderComponent,
   });
 
 describe('useAssistant', () => {
