@@ -20,3 +20,10 @@ export const CHOOSE_FROM_THE_LIST = i18n.translate(
     defaultMessage: 'Choose action from the list',
   }
 );
+
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.responseActions.endpoint.commentLearnMore',
+  {
+    defaultMessage: 'Learn more',
+  }
+);

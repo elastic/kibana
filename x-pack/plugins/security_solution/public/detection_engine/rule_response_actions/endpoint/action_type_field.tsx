@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { CHOOSE_FROM_THE_LIST } from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
+import { useKibana } from '../../../common/lib/kibana';
+import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
 import { EndpointActionText } from './utils';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
@@ -31,6 +34,13 @@ const ActionTypeFieldComponent = ({
 }: ActionTypeFieldProps) => {
   const { endpointPrivileges } = useUserPrivileges();
   const [data] = useFormData();
+  const {
+    docLinks: {
+      links: {
+        securitySolution: { responseActions },
+      },
+    },
+  } = useKibana().services;
 
   const fieldOptions = useMemo(
     () =>
@@ -58,7 +68,22 @@ const ActionTypeFieldComponent = ({
       path={`${basePath}.command`}
       readDefaultValueOnForm={readDefaultValueOnForm}
       config={{
-        label: <EndpointActionText name={'command'} />,
+        label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
+          defaultMessage: 'Command',
+        }),
+        helpText: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.commandDescription"
+            defaultMessage="Select an Endpoint response action. The response action only runs on hosts with Elastic Defend installed. {docs}"
+            values={{
+              docs: (
+                <EuiLink href={responseActions} target="_blank">
+                  {LEARN_MORE}
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
         validations: [
           {
             validator: fieldValidators.emptyField(

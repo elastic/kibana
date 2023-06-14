@@ -7,7 +7,8 @@
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { EndpointActionText } from './utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface ActionTypeFieldProps {
   basePath: string;
@@ -16,7 +17,15 @@ interface ActionTypeFieldProps {
 }
 
 const CONFIG = {
-  label: <EndpointActionText name={'comment'} />,
+  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commentLabel', {
+    defaultMessage: 'Command',
+  }),
+  helpText: (
+    <FormattedMessage
+      id="xpack.securitySolution.responseActions.endpoint.commentDescription"
+      defaultMessage="Leave a note that explains or describes the action. You can see your comment in Response action history log."
+    />
+  ),
 };
 
 const CommentFieldComponent = ({

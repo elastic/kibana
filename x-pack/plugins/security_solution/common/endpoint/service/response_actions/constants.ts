@@ -29,6 +29,9 @@ export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS = ['isolate'] as const;
 
+export type EnabledAutomatedResponseActionsCommands =
+  typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS[number];
+
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
  */
