@@ -279,12 +279,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: DataView = await this.getIndexPattern();
 
-    /*const fieldNames = requestMeta.fieldNames.filter(
-      (fieldName) => fieldName !== this._descriptor.geoField
-    );*/
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
-      fieldNames,
+      requestMeta.fieldNames,
       'epoch_millis'
     );
     const topHits: {
@@ -395,7 +392,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
-  // requestMeta.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
   async _getSearchHits(
     layerName: string,
@@ -405,12 +401,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   ) {
     const indexPattern = await this.getIndexPattern();
 
-    const fieldNames = requestMeta.fieldNames.filter(
-      (fieldName) => fieldName !== this._descriptor.geoField
-    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      fieldNames,
+      requestMeta.fieldNames,
       'epoch_millis'
     );
 
@@ -887,9 +880,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField(
       'fields',
       requestMeta.fieldNames
-        .filter((fieldName) => {
-          return fieldName !== this._descriptor.geoField;
-        })
         .map((fieldName) => {
           const field = dataView.fields.getByName(fieldName);
           return field && field.type === 'date'
