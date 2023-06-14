@@ -191,7 +191,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                   }
                   data-test-subj="indexSettingsEditor"
                 >
-                  <CodeEditor
+                  <CodeEditor // TODO theme provided in context by x-pack/plugins/snapshot_restore/public/application/index.tsx
                     languageId="json"
                     value={indexSettings!}
                     height={250}

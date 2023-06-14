@@ -71,7 +71,7 @@ export const SpecViewer = ({ vegaAdapter, ...rest }: SpecViewerProps) => {
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        <CodeEditor
+        <CodeEditor // TODO theme needs to be provided from src/plugins/vis_types/vega/public/vega_inspector/vega_inspector.tsx, need Code Owner help
           languageId={XJsonLang.ID}
           value={spec}
           options={{

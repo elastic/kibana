@@ -493,7 +493,11 @@ export const App = (props: {
 
   return (
     <KibanaContextProvider
-      services={{ uiSettings: props.core.uiSettings, settings: props.core.settings }}
+      services={{
+        uiSettings: props.core.uiSettings,
+        settings: props.core.settings,
+        theme: props.core.theme,
+      }}
     >
       <EuiPageTemplate fullHeight template="empty">
         <EuiFlexGroup
@@ -715,7 +719,7 @@ export const App = (props: {
                   </EuiFlexGroup>
                   <EuiFlexGroup style={{ height: '75vh' }} direction="column">
                     <EuiFlexItem>
-                      <CodeEditor
+                      <CodeEditor // TODO theme is provided above!
                         languageId={HJsonLang}
                         options={{
                           fontSize: 14,

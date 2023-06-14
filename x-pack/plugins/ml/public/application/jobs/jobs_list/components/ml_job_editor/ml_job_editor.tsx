@@ -48,7 +48,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   }
 
   return (
-    <CodeEditor
+    <CodeEditor // TODO theme provided in context by x-pack/plugins/ml/public/application/app.tsx
       languageId={mode}
       options={{
         readOnly,

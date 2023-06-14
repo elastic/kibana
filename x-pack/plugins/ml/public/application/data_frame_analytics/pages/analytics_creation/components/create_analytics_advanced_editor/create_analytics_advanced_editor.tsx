@@ -139,7 +139,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         )}
         style={{ maxWidth: '100%' }}
       >
-        <CodeEditor
+        <CodeEditor // TODO theme provided in context by x-pack/plugins/ml/public/application/app.tsx
           languageId={'json'}
           height={500}
           languageConfiguration={{

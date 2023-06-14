@@ -107,7 +107,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             </EuiCodeBlock>
           ) : (
             <FixedHeightDiv>
-              <CodeEditor
+              <CodeEditor // TODO theme provided in context by x-pack/plugins/fleet/public/applications/fleet/app.tsx
                 languageId="yaml"
                 width="100%"
                 height="300px"

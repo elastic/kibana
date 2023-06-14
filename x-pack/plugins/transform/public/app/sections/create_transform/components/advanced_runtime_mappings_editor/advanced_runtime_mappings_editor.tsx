@@ -26,7 +26,7 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
   }) => {
     return (
       <div data-test-subj="transformAdvancedRuntimeMappingsEditor">
-        <CodeEditor
+        <CodeEditor // TODO theme is provided in context by x-pack/plugins/transform/public/app/app.tsx
           height={250}
           languageId={'json'}
           onChange={(d: string) => {

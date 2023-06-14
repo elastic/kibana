@@ -401,7 +401,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
     return (
       <EuiFormRow fullWidth label={strings.getQueryDslLabel()} helpText={helpText}>
-        <CodeEditor
+        <CodeEditor // TODO CodeOwners will need to help with this
           languageId={XJsonLang.ID}
           width="100%"
           height={'250px'}

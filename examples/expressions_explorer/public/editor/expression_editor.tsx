@@ -16,7 +16,7 @@ interface Props {
 
 export function ExpressionEditor({ value, onChange }: Props) {
   return (
-    <CodeEditor // TODO Cannot determine where theme is provided
+    <CodeEditor // TODO theme needs to be provided from examples/expressions_explorer/public/app.tsx, need CodeOwners help
       languageId="javascript"
       width="100%"
       height="250px"

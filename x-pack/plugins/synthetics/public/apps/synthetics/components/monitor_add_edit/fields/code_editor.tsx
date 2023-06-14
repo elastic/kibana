@@ -57,7 +57,7 @@ export const CodeEditor = ({
           aria-label={ariaLabel}
           data-test-subj="codeEditorContainer"
         >
-          <MonacoCodeEditor
+          <MonacoCodeEditor // TODO theme provided in context by x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx
             languageId={languageId}
             width={containerWidthThrottled ?? '100%'}
             height={height}

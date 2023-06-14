@@ -38,6 +38,7 @@ interface Props {
 }
 
 const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings, settings }: Props) => {
+  // TODO theme needs to be provided here for examples/expressions_explorer/public/editor/expression_editor.tsx, need CodeOwners help
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,

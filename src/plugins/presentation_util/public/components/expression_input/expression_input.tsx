@@ -75,7 +75,7 @@ export const ExpressionInput = (props: ExpressionInputProps) => {
 
   return (
     <div style={{ height, ...style }} {...{ rest }}>
-      <CodeEditor
+      <CodeEditor // TODO CodeOwners will need to help with this one
         languageId={EXPRESSIONS_LANGUAGE_ID}
         languageConfiguration={LANGUAGE_CONFIGURATION}
         value={expression}

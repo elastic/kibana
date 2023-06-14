@@ -779,7 +779,7 @@ export function FormulaEditor({
             </div>
 
             <div className="lnsFormula__editorContent">
-              <CodeEditor
+              <CodeEditor // TODO theme provided in context by x-pack/plugins/lens/public/app_plugin/mounter.tsx
                 {...codeEditorOptions}
                 options={{
                   ...codeEditorOptions.options,

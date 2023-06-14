@@ -43,7 +43,7 @@ MSG message-id=<%{GREEDYDATA}>`;
       <EuiSpacer size="m" />
 
       <EuiFormRow fullWidth data-test-subj="aceCustomPatternsInput">
-        <CodeEditor
+        <CodeEditor // TODO theme provided in context by x-pack/plugins/grokdebugger/public/render_app.js
           languageId="plaintext"
           value={value}
           height={200}
