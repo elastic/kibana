@@ -87,7 +87,7 @@ export function ErrorCountRuleType(props: Props) {
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/error_count/chart_preview',
           {

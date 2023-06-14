@@ -89,7 +89,7 @@ export function TransactionErrorRateRuleType(props: Props) {
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
           {

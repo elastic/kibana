@@ -35,7 +35,7 @@ import {
   getDomain,
   useDateFormatter,
 } from './chart_preview_helper';
-import { INTERVAL_MULTIPLIER } from '../../utils/helper';
+import { BUCKET_SIZE } from '../../utils/helper';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -122,7 +122,7 @@ export function ChartPreview({
 
   const dateFormatter = useDateFormatter(xMin, xMax);
 
-  const lookback = timeSize * INTERVAL_MULTIPLIER;
+  const lookback = timeSize * BUCKET_SIZE;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   const rectDataValues: RectAnnotationDatum[] = [
