@@ -6,26 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { Query, Filter } from '@kbn/es-query';
-import { getToastNotifications, getSavedSearch } from './dependency_cache';
-
-let dataViewsContract: DataViewsContract | null = null;
-
-export async function cacheDataViewsContract(dvc: DataViewsContract) {
-  dataViewsContract = dvc;
-}
-
-export function loadSavedSearches() {
-  return getSavedSearch().getAll();
-}
+import { getToastNotifications, getSavedSearch, getDataViews } from './dependency_cache';
 
 export async function loadSavedSearchById(id: string) {
   return getSavedSearch().get(id);
 }
 
 export async function getDataViewNames() {
+  const dataViewsContract = getDataViews();
   if (dataViewsContract === null) {
     throw new Error('Data views are not initialized!');
   }
@@ -33,6 +24,7 @@ export async function getDataViewNames() {
 }
 
 export async function getDataViewIdFromName(name: string): Promise<string | null> {
+  const dataViewsContract = getDataViews();
   if (dataViewsContract === null) {
     throw new Error('Data views are not initialized!');
   }
@@ -45,6 +37,7 @@ export async function getDataViewIdFromName(name: string): Promise<string | null
 }
 
 export function getDataViewById(id: string): Promise<DataView> {
+  const dataViewsContract = getDataViews();
   if (dataViewsContract === null) {
     throw new Error('Data views are not initialized!');
   }
