@@ -18,7 +18,7 @@ import { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { FlamegraphLocatorDefinition } from './locators/flamegraph_locator';
 import { StacktracesLocatorDefinition } from './locators/stacktraces_locator';
-import { TopNFunctionsLocatorDefinition } from './locators/topN_functions_locator';
+import { TopNFunctionsLocatorDefinition } from './locators/top_n_functions_locator';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 
