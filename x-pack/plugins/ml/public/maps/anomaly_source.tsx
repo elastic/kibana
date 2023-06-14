@@ -186,7 +186,9 @@ export class AnomalySource implements IVectorSource {
   }
 
   async getFields(): Promise<IField[]> {
-    return Object.keys(ANOMALY_SOURCE_FIELDS).map((field) => new AnomalySourceField({ source: this, field }));
+    return Object.keys(ANOMALY_SOURCE_FIELDS).map(
+      (field) => new AnomalySourceField({ source: this, field })
+    );
   }
 
   getGeoGridPrecision(zoom: number): number {
