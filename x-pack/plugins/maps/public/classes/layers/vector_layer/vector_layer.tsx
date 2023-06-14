@@ -359,7 +359,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     isFeatureEditorOpenForLayer: boolean
   ): Promise<VectorSourceRequestMeta> {
     const fieldNames = [
-      ...source.getFieldNames(),
       ...style.getSourceFieldNames(),
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
@@ -555,7 +554,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     const joinRequestMeta = buildVectorRequestMeta(
       joinSource,
-      joinSource.getFieldNames(),
+      [],
       dataFilters,
       joinSource.getWhereQuery(),
       isForceRefresh,

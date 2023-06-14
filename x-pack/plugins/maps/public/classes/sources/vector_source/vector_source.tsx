@@ -109,8 +109,7 @@ export interface IVectorSource extends ISource {
   supportsJoins(): boolean;
 
   /*
-   * Vector layer avoids unnecessarily re-fetching source data.
-   * Use getSyncMeta to expose fields that require source data re-fetch when changed.
+   * Use getSyncMeta to expose source configuration changes that require source data re-fetch when changed.
    */
   getSyncMeta(dataFilters: DataFilters): object | null;
 

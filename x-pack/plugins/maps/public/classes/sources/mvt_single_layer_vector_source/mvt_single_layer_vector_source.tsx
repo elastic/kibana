@@ -92,10 +92,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     );
   }
 
-  getFieldNames(): string[] {
-    return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
-      return field.name;
-    });
+  getSyncMeta() {
+    return {
+      mvtFields: this._descriptor.fields.map((field: MVTFieldDescriptor) => {
+        return field.name;
+      })
+    };
   }
 
   addFeature(geometry: Geometry | Position[]): Promise<void> {

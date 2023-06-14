@@ -100,7 +100,7 @@ export class HeatmapLayer extends AbstractLayer {
       prevDataRequest: this.getSourceDataRequest(),
       requestMeta: buildVectorRequestMeta(
         this.getSource(),
-        this.getSource().getFieldNames(),
+        [],
         syncContext.dataFilters,
         this.getQuery(),
         syncContext.isForceRefresh,

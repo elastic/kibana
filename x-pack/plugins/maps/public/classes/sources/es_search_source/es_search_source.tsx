@@ -78,6 +78,7 @@ import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
+  | 'geoField',
   | 'filterByMapBounds'
   | 'sortField'
   | 'sortOrder'
@@ -211,10 +212,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     }
   }
 
-  getFieldNames(): string[] {
-    return [this._descriptor.geoField];
-  }
-
   isMvt() {
     return this._descriptor.scalingType === SCALING_TYPES.MVT;
   }
@@ -282,9 +279,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: DataView = await this.getIndexPattern();
 
-    const fieldNames = requestMeta.fieldNames.filter(
+    /*const fieldNames = requestMeta.fieldNames.filter(
       (fieldName) => fieldName !== this._descriptor.geoField
-    );
+    );*/
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
       fieldNames,
@@ -535,6 +532,15 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const dataView = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
     return indexSettings.maxResultWindow;
+  }
+
+  /*
+   * Changes in requestMeta.fieldNames requires re-fetch.
+   * requestMeta.fieldNames are used to acheive smallest response possible.
+   * Response only includes fields required for data driving styling or term joins.
+   */
+  isFieldAware(): boolean {
+    return true;
   }
 
   async getGeoJsonWithMeta(
@@ -790,6 +796,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   getSyncMeta(): ESSearchSourceSyncMeta {
     return {
+      geoField: this._descriptor.geoField,
       filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
       sortOrder: this._descriptor.sortOrder,

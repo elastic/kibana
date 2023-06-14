@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties } from 'geojson';
 import { DataView } from '@kbn/data-plugin/common';
-import type { IESAggSource } from './types';
+import type { IESAggSource, ESAggsSourceSyncMeta } from './types';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
@@ -140,6 +140,23 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
 
   isGeoGridPrecisionAware(): boolean {
     return false;
+  }
+
+  /*
+   * Changes in requestMeta.fieldNames does not require re-fetch.
+   * It is not possible to filter metrics from responses so all metrics are always returned in all responses.
+   */
+  isFieldAware(): boolean {
+    return false;
+  }
+
+  /*
+   * Force re-fetch when requested metrics change.
+   */
+  getSyncMeta(): ESAggsSourceSyncMeta {
+    return {
+      metrics: this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
+    }
   }
 
   getGeoGridPrecision(zoom: number): number {
