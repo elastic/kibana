@@ -46,6 +46,23 @@ describe('getUpgradeableConfig', () => {
     expect(result).toEqual(savedConfig);
   });
 
+  it('uses the latest config when multiple are found', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        { id: '7.2.0', attributes: 'foo' },
+        { id: '7.3.0', attributes: 'foo' },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
+    expect(result!.id).toBe('7.3.0');
+  });
+
   it('finds saved config with RC version === Kibana version', async () => {
     const savedConfig = { id: '7.5.0-rc1', attributes: 'foo' };
     const savedObjectsClient = savedObjectsClientMock.create();
