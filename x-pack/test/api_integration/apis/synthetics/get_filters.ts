@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       await supertest
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor)
         .expect(200);
