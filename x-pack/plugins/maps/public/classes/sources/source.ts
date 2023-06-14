@@ -49,9 +49,9 @@ export interface ISource {
   /*
    * Re-fetch flag. When function returns true, source will re-fetch on requestMeta.fieldNames changes.
    * Example uses of fieldNames change requiring re-fetch:
-   * 1) Data drivin styling. Source features styled by field value. Styling is not possible if features do not contain field value.
-   * 2) Term join. Source features joined with metrics via 'term join key'. Join is not possible if source results do not contain 'term join key'.
-   * 3) client-side time masking.
+   * 1) Data drivin styling
+   * 2) Term join
+   * 3) Feature masking.
    */
   isFieldAware(): boolean;
   isFilterByMapBounds(): boolean;

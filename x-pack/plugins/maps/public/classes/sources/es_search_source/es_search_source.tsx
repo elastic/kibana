@@ -530,7 +530,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   /*
    * Changes in requestMeta.fieldNames requires re-fetch.
    * requestMeta.fieldNames are used to acheive smallest response possible.
-   * Response only includes fields required for data driving styling or term joins.
+   * Response only includes fields required for client usage.
    */
   isFieldAware(): boolean {
     return true;

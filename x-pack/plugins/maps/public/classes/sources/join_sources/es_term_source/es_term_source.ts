@@ -186,7 +186,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
 
   getSyncMeta(): ESTermSourceSyncMeta {
     return {
-      ...(super.getSyncMeta() as ESAggsSourceSyncMeta),
+      ...super.getSyncMeta(),
       indexPatternId: this._descriptor.indexPatternId,
       size: this._descriptor.size,
       term: this._descriptor.term,
