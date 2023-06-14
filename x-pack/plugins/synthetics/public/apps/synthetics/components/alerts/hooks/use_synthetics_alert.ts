@@ -38,7 +38,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
       return null;
     }
     return triggersActionsUi.getEditRuleFlyout({
-      onClose: () => dispatch(setAlertFlyoutVisible(false)),
+      onClose: () => dispatch(setAlertFlyoutVisible(null)),
       hideInterval: true,
       initialRule: alert,
     });
