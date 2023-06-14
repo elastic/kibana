@@ -50,3 +50,17 @@ export {
 export { LogEntryFlyout } from './components/logging/log_entry_flyout';
 export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';
 export type { LogStreamProps } from './components/log_stream';
+
+// State machine utils
+export {
+  getLogViewReferenceFromUrl,
+  initializeFromUrl,
+  listenForUrlChanges,
+  updateContextInUrl,
+} from './observability_logs/log_view_state';
+export type {
+  LogViewContextWithError,
+  LogViewContextWithResolvedLogView,
+  LogViewNotificationChannel,
+  LogViewNotificationEvent,
+} from './observability_logs/log_view_state';

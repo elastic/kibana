@@ -6,8 +6,8 @@
  */
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { getLogViewReferenceFromUrl } from '@kbn/logs-shared-plugin/public';
 import type { InfraClientStartExports } from '../types';
-import { getLogViewReferenceFromUrl } from '../observability_logs/log_view_state';
 
 export const renderApp = (
   core: CoreStart,

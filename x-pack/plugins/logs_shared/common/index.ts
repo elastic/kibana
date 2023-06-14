@@ -11,17 +11,11 @@ export {
   defaultPositionStateKey,
   DEFAULT_LOG_VIEW,
   DEFAULT_REFRESH_INTERVAL,
-  getTimeRangeEndFromTime,
-  getTimeRangeStartFromTime,
   logDataViewReferenceRT,
   logIndexNameReferenceRT,
   logViewColumnConfigurationRT,
   logViewReferenceRT,
   persistedLogViewReferenceRT,
-  replaceLogFilterInQueryString,
-  replaceLogPositionInQueryString,
-  replaceLogViewInQueryString,
-  replaceStateKeyInQueryString,
 } from './log_views';
 
 // LogView types

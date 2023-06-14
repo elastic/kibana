@@ -10,6 +10,7 @@ import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugi
 import * as Either from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { InvokeCreator } from 'xstate';
+import { replaceStateKeyInQueryString } from '../../../../common/url_state_storage_service';
 import { minimalTimeKeyRT, pickTimeKey } from '../../../../common/time';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import type { LogStreamPositionContext, LogStreamPositionEvent } from './types';
@@ -97,3 +98,13 @@ export type PositionStateInUrl = rt.TypeOf<typeof positionStateInUrlRT>;
 const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
   return positionStateInUrlRT.decode(queryValueFromUrl);
 };
+
+export const replaceLogPositionInQueryString = (time?: number) =>
+  Number.isNaN(time) || time == null
+    ? (value: string) => value
+    : replaceStateKeyInQueryString<PositionStateInUrl>(defaultPositionStateKey, {
+        position: {
+          time,
+          tiebreaker: 0,
+        },
+      });

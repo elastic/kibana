@@ -5,15 +5,25 @@
  * 2.0.
  */
 
+import { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
 import { useMemo } from 'react';
-import { VisiblePositions } from '../../../observability_logs/log_stream_position_state/src/types';
-import {
-  LogStreamPageActorRef,
-  LogStreamPageCallbacks,
-} from '../../../observability_logs/log_stream_page/state';
-import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
+import { ActorRef } from 'xstate';
 import { TimeKey } from '../../../../common/time';
+import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
+
+type LogStreamPageState = MatchedStateFromActor<
+  ActorRef<any, any>,
+  { hasLogViewIndices: 'initialized' }
+>;
+
+interface VisiblePositions {
+  startKey: TimeKey | null;
+  middleKey: TimeKey | null;
+  endKey: TimeKey | null;
+  pagesAfterEnd: number;
+  pagesBeforeStart: number;
+}
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -46,6 +56,15 @@ export interface LogPositionCallbacks {
   updateDateRange: UpdateDateRangeFn;
 }
 
+export interface LogStreamPageCallbacks {
+  updateTimeRange: (timeRange: Partial<TimeRange>) => void;
+  jumpToTargetPosition: (targetPosition: TimeKey | null) => void;
+  jumpToTargetPositionTime: (time: number) => void;
+  reportVisiblePositions: (visiblePositions: VisiblePositions) => void;
+  startLiveStreaming: () => void;
+  stopLiveStreaming: () => void;
+}
+
 type UpdateDateRangeFn = (
   newDateRange: Partial<Pick<DateRange, 'startDateExpression' | 'endDateExpression'>>
 ) => void;
@@ -54,7 +73,7 @@ export const useLogPositionState = ({
   logStreamPageState,
   logStreamPageCallbacks,
 }: {
-  logStreamPageState: InitializedLogStreamPageState;
+  logStreamPageState: LogStreamPageState;
   logStreamPageCallbacks: LogStreamPageCallbacks;
 }): LogPositionStateParams & LogPositionCallbacks => {
   const dateRange = useMemo(() => getLegacyDateRange(logStreamPageState), [logStreamPageState]);
@@ -119,7 +138,7 @@ export const useLogPositionState = ({
 export const [LogPositionStateProvider, useLogPositionStateContext] =
   createContainer(useLogPositionState);
 
-const getLegacyDateRange = (logStreamPageState: InitializedLogStreamPageState): DateRange => {
+const getLegacyDateRange = (logStreamPageState: LogStreamPageState): DateRange => {
   return {
     startDateExpression: logStreamPageState.context.timeRange.from,
     endDateExpression: logStreamPageState.context.timeRange.to,
@@ -130,8 +149,3 @@ const getLegacyDateRange = (logStreamPageState: InitializedLogStreamPageState): 
     timestampsLastUpdate: logStreamPageState.context.timestamps.lastChangedTimestamp,
   };
 };
-
-type InitializedLogStreamPageState = MatchedStateFromActor<
-  LogStreamPageActorRef,
-  { hasLogViewIndices: 'initialized' }
->;

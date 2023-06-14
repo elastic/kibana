@@ -7,6 +7,11 @@
 
 import { TimeRange } from '@kbn/es-query';
 import type { LogViewStatus } from '@kbn/logs-shared-plugin/common';
+import type {
+  LogViewContextWithError,
+  LogViewContextWithResolvedLogView,
+  LogViewNotificationEvent,
+} from '@kbn/logs-shared-plugin/public';
 import { TimeKey } from '../../../../../common/time';
 import {
   JumpToTargetPositionEvent,
@@ -22,11 +27,6 @@ import {
   UpdateTimeRangeEvent,
 } from '../../../log_stream_query_state';
 import { LogStreamQueryNotificationEvent } from '../../../log_stream_query_state/src/notifications';
-import type {
-  LogViewContextWithError,
-  LogViewContextWithResolvedLogView,
-  LogViewNotificationEvent,
-} from '../../../log_view_state';
 
 export interface ReceivedInitialQueryParametersEvent {
   type: 'RECEIVED_INITIAL_QUERY_PARAMETERS';

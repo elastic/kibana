@@ -11,9 +11,6 @@ import {
   DEFAULT_LOG_VIEW,
   LogViewColumnConfiguration,
   LogViewReference,
-  replaceLogFilterInQueryString,
-  replaceLogPositionInQueryString,
-  replaceLogViewInQueryString,
   ResolvedLogView,
 } from '@kbn/logs-shared-plugin/common';
 import { flowRight } from 'lodash';
@@ -21,6 +18,11 @@ import type { InfraClientCoreSetup } from '../../public/types';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { findInventoryFields } from '../inventory_models';
 import type { TimeRange } from '../time';
+import {
+  replaceLogFilterInQueryString,
+  replaceLogPositionInQueryString,
+  replaceLogViewInQueryString,
+} from '../url_state_storage_service';
 import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
 
