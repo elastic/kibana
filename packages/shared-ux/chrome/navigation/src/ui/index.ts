@@ -13,11 +13,9 @@ export { DefaultNavigation } from './default_navigation';
 export { getPresets, type NodeDefinitionWithChildren } from './nav_tree_presets';
 
 export type {
-  CloudLinkDefinition,
   GroupDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  NodeDefinition,
   ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,

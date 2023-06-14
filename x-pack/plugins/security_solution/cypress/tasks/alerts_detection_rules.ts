@@ -14,7 +14,6 @@ import {
   DELETE_RULE_BULK_BTN,
   RULES_SELECTED_TAG,
   LOAD_PREBUILT_RULES_BTN,
-  LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULE_CHECKBOX,
@@ -72,7 +71,6 @@ import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
-import { waitTillPrebuiltRulesReadyToInstall } from './api_calls/prebuilt_rules';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
@@ -243,30 +241,8 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).click();
 };
 
-export const loadPrebuiltDetectionRules = () => {
-  cy.log('load prebuilt detection rules');
-  waitTillPrebuiltRulesReadyToInstall();
-  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('be.enabled');
-  cy.get(LOAD_PREBUILT_RULES_BTN).click();
-  cy.get(LOAD_PREBUILT_RULES_BTN).should('be.disabled');
-};
-
-/**
- * load prebuilt rules by clicking button on page header
- */
-export const loadPrebuiltDetectionRulesFromHeaderBtn = () => {
-  cy.log('load prebuilt detection rules from header');
-  waitTillPrebuiltRulesReadyToInstall();
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN, { timeout: 300000 }).click();
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN, { timeout: 300000 }).should('not.exist');
-};
-
 export const openIntegrationsPopover = () => {
   cy.get(INTEGRATIONS_POPOVER).click();
-};
-
-export const reloadDeletedRules = () => {
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
 };
 
 /**

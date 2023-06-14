@@ -51,6 +51,7 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     { serverless }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
+    serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless }));
     return {};
   }

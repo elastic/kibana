@@ -17,7 +17,7 @@ import {
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   formatTelemetryDeleteEvent,
@@ -29,7 +29,7 @@ import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framewo
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
-  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),

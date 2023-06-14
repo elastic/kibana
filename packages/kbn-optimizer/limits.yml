@@ -41,7 +41,7 @@ pageLoadAssetSize:
   enterpriseSearch: 35741
   essSecurity: 16573
   esUiShared: 326654
-  eventAnnotation: 22000
+  eventAnnotation: 48565
   exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
@@ -120,7 +120,7 @@ pageLoadAssetSize:
   serverless: 16573
   serverlessObservability: 30000
   serverlessSearch: 45934
-  serverlessSecurity: 66019
+  serverlessSecurity: 70441
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032

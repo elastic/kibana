@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
@@ -89,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return hasIntegrationMonitors false when there are not any zip url policies', async function () {
       const { body } = await supertest
-        .get(`/internal/uptime/fleet/has_integration_monitors`)
+        .get(SYNTHETICS_API_URLS.SYNTHETICS_HAS_INTEGRATION_MONITORS)
         .set('kbn-xsrf', 'xxxx')
         .send()
         .expect(200);
@@ -119,7 +120,7 @@ export default function (providerContext: FtrProviderContext) {
       const policyId = body.item.id;
 
       const { body: response } = await supertest
-        .get(`/internal/uptime/fleet/has_integration_monitors`)
+        .get(SYNTHETICS_API_URLS.SYNTHETICS_HAS_INTEGRATION_MONITORS)
         .set('kbn-xsrf', 'xxxx')
         .send()
         .expect(200);

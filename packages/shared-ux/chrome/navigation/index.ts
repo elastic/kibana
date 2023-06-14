@@ -11,11 +11,9 @@ export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 export { DefaultNavigation, getPresets, Navigation } from './src/ui';
 
 export type {
-  CloudLinkDefinition,
   GroupDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  NodeDefinition,
   NodeDefinitionWithChildren,
   ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
@@ -24,8 +22,8 @@ export type {
 
 export type {
   ChromeNavigation,
-  ChromeNavigationViewModel,
-  NavigationServices,
   ChromeNavigationNode,
   ChromeNavigationNodeViewModel,
+  ChromeNavigationViewModel,
+  NavigationServices,
 } from './types';

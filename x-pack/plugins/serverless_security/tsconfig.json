@@ -30,5 +30,6 @@
     "@kbn/features-plugin",
     "@kbn/ess-security",
     "@kbn/ml-plugin",
+    "@kbn/kibana-utils-plugin"
   ]
 }
