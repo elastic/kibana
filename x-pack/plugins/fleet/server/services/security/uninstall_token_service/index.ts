@@ -26,7 +26,10 @@ import { asyncForEach } from '@kbn/std';
 
 import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { GetUninstallTokensResponse } from '../../../../common/types/rest_spec/uninstall_token';
+import type {
+  GetUninstallTokensForOnePolicyResponse,
+  GetUninstallTokensResponse,
+} from '../../../../common/types/rest_spec/uninstall_token';
 
 import type { UninstallToken } from '../../../../common/types/models/uninstall_token';
 
@@ -50,7 +53,7 @@ interface UninstallTokenSOAggregation {
 }
 
 export interface UninstallTokenServiceInterface {
-  getTokenForPolicyId(policyId: string): Promise<UninstallToken | null>;
+  getTokensForPolicyId(policyId: string): Promise<GetUninstallTokensForOnePolicyResponse>;
 
   getTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]>;
 
@@ -86,9 +89,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * gets uninstall token for given policy id
    *
    * @param policyId agent policy id
-   * @returns uninstall token if found
+   * @returns uninstall tokens for policyID
    */
-  public async getTokenForPolicyId(policyId: string): Promise<UninstallToken | null> {
+  public async getTokensForPolicyId(
+    policyId: string
+  ): Promise<GetUninstallTokensForOnePolicyResponse> {
     const tokensFinder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
         {
@@ -106,16 +111,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }
     tokensFinder.close();
 
-    if (decryptedTokenObjects.length === 0) {
-      return null; // todo: throw
-    }
-
-    const { attributes } = decryptedTokenObjects[0]; // todo: map
-
-    return {
+    const decryptedTokens = decryptedTokenObjects.map(({ created_at: createdAt, attributes }) => ({
       policy_id: attributes.policy_id,
       token: attributes.token || attributes.token_plain,
-      created_at: decryptedTokenObjects[0].created_at,
+      created_at: createdAt,
+    }));
+
+    return {
+      items: decryptedTokens,
+      total: decryptedTokenObjects.length,
     };
   }
 

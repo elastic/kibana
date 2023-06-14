@@ -12,7 +12,10 @@ import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
-import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
+import type {
+  GetUninstallTokensForOnePolicyResponse,
+  GetUninstallTokensResponse,
+} from '../../../common/types/rest_spec/uninstall_token';
 
 import type { FleetRequestHandlerContext } from '../..';
 
@@ -55,7 +58,7 @@ describe('uninstall token handlers', () => {
 
     const uninstallTokenService = appContextService.getUninstallTokenService()!;
     getAllTokensMock = uninstallTokenService.getAllTokens as jest.Mock;
-    getTokensForOnePolicyMock = uninstallTokenService.getTokenForPolicyId as jest.Mock;
+    getTokensForOnePolicyMock = uninstallTokenService.getTokensForPolicyId as jest.Mock;
   });
 
   afterEach(async () => {
@@ -116,17 +119,15 @@ describe('uninstall token handlers', () => {
     });
 
     it('should return uninstall tokens for all policies', async () => {
-      const tokenForOnePolicy = uninstallTokensResponseFixture.items[0];
+      const tokenForOnePolicy: GetUninstallTokensForOnePolicyResponse = {
+        items: [uninstallTokensResponseFixture.items[0]],
+        total: 1,
+      };
       getTokensForOnePolicyMock.mockResolvedValue(tokenForOnePolicy);
 
       await getUninstallTokensForOnePolicyHandler(context, request, response);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          items: [tokenForOnePolicy],
-          total: 1,
-        },
-      });
+      expect(response.ok).toHaveBeenCalledWith({ body: tokenForOnePolicy });
     });
 
     it('should return internal error when uninstallTokenService is unavailable', async () => {

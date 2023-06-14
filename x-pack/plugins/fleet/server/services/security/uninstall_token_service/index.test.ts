@@ -185,9 +185,9 @@ describe('UninstallTokenService', () => {
     });
 
     describe('get uninstall tokens', () => {
-      it('can correctly getTokenForPolicyId', async () => {
+      it('can correctly getTokensForPolicyId', async () => {
         const so = getDefaultSO(canEncrypt);
-        const token = await uninstallTokenService.getTokenForPolicyId(so.attributes.policy_id);
+        const token = await uninstallTokenService.getTokensForPolicyId(so.attributes.policy_id);
         expect(token).toEqual({
           policy_id: so.attributes.policy_id,
           token: getToken(so, canEncrypt),

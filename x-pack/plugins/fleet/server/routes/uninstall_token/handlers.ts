@@ -11,10 +11,7 @@ import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core-http-se
 
 import { appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
-import type {
-  GetUninstallTokensResponse,
-  GetUninstallTokensForOnePolicyResponse,
-} from '../../../common/types/rest_spec/uninstall_token';
+import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
 import type {
   GetUninstallTokensForOnePolicyRequestSchema,
   GetUninstallTokensRequestSchema,
@@ -62,21 +59,15 @@ export const getUninstallTokensForOnePolicyHandler: FleetRequestHandler<
   try {
     const { agentPolicyId } = request.params;
 
-    const uninstallToken = await uninstallTokenService.getTokenForPolicyId(agentPolicyId);
+    const tokensForOnePolicy = await uninstallTokenService.getTokensForPolicyId(agentPolicyId);
 
-    if (!uninstallToken) {
+    if (tokensForOnePolicy.total === 0) {
       return response.notFound({
         body: { message: `Uninstall Token not found for Agent Policy ${agentPolicyId}` },
       });
     }
 
-    // return an array for being prepared for token history
-    const body: GetUninstallTokensForOnePolicyResponse = {
-      items: [uninstallToken],
-      total: 1,
-    };
-
-    return response.ok({ body });
+    return response.ok({ body: tokensForOnePolicy });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
