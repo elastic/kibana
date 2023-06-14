@@ -10,12 +10,14 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { EmptyEnginesPrompt } from './empty_engines_prompt';
+import { EmptySearchApplicationsPrompt } from './empty_search_applications_prompt';
 
-describe('EmptyEnginesPrompt', () => {
+describe('EmptySearchApplicationsPrompt', () => {
   it('should pass children to prompt actions', () => {
     const dummyEl = <div>dummy</div>;
-    const wrapper = shallow(<EmptyEnginesPrompt>{dummyEl}</EmptyEnginesPrompt>);
+    const wrapper = shallow(
+      <EmptySearchApplicationsPrompt>{dummyEl}</EmptySearchApplicationsPrompt>
+    );
     const euiPrompt = wrapper.find(EuiEmptyPrompt);
 
     expect(euiPrompt.prop('actions')).toEqual(dummyEl);

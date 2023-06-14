@@ -16,8 +16,8 @@ import { Status } from '../../../../../common/types/api';
 import { LicensingCallout } from '../../../shared/licensing_callout/licensing_callout';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
-import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
-import { EnginesListTable } from './components/tables/engines_table';
+import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
+import { SearchApplicationsListTable } from './components/tables/search_applications_table';
 import { EnginesList, CreateEngineButton } from './engines_list';
 import { DEFAULT_META } from './types';
 
@@ -71,8 +71,8 @@ describe('EnginesList', () => {
     setMockActions(mockActions);
     const wrapper = shallow(<EnginesList />);
 
-    expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(1);
-    expect(wrapper.find(EnginesListTable)).toHaveLength(0);
+    expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
+    expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(0);
     expect(wrapper.find(CreateEngineButton)).toHaveLength(1);
     expect(wrapper.find(CreateEngineButton).prop('disabled')).toBeFalsy();
   });
@@ -83,8 +83,8 @@ describe('EnginesList', () => {
 
     const wrapper = shallow(<EnginesList />);
 
-    expect(wrapper.find(EnginesListTable)).toHaveLength(1);
-    expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(0);
+    expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(1);
+    expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(0);
     expect(wrapper.find(CreateEngineButton)).toHaveLength(0);
   });
 
@@ -97,8 +97,8 @@ describe('EnginesList', () => {
     setMockActions(mockActions);
     const wrapper = shallow(<EnginesList />);
 
-    expect(wrapper.find(EnginesListTable)).toHaveLength(0);
-    expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(1);
+    expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(0);
+    expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
     expect(wrapper.find(LicensingCallout)).toHaveLength(1);
     expect(wrapper.find(CreateEngineButton)).toHaveLength(1);
     expect(wrapper.find(CreateEngineButton).prop('disabled')).toBeTruthy();

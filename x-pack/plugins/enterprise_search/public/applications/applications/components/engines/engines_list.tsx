@@ -39,8 +39,8 @@ import {
 import { SEARCH_APPLICATIONS_PATH, SEARCH_APPLICATION_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
-import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
-import { EnginesListTable } from './components/tables/engines_table';
+import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
+import { SearchApplicationsListTable } from './components/tables/search_applications_table';
 import { CreateEngineFlyout } from './create_engine_flyout';
 import { DeleteEngineModal } from './delete_engine_modal';
 import { EngineListIndicesFlyout } from './engines_list_flyout';
@@ -264,19 +264,19 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
               />
             </EuiText>
 
-            <EnginesListTable
-              enginesList={results}
+            <SearchApplicationsListTable
+              searchApplications={results}
               meta={meta}
               onChange={onPaginate}
               onDelete={openDeleteEngineModal}
-              viewEngineIndices={openFetchEngineFlyout}
+              viewSearchApplicationIndices={openFetchEngineFlyout}
               loading={false}
             />
           </>
         ) : (
-          <EmptyEnginesPrompt>
+          <EmptySearchApplicationsPrompt>
             <CreateEngineButton disabled={isGated} />
-          </EmptyEnginesPrompt>
+          </EmptySearchApplicationsPrompt>
         )}
 
         <EuiSpacer size="xxl" />

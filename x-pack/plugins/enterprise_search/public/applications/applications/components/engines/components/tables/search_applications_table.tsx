@@ -33,22 +33,22 @@ import { TelemetryLogic } from '../../../../../shared/telemetry/telemetry_logic'
 
 import { SEARCH_APPLICATION_PATH } from '../../../../routes';
 
-interface EnginesListTableProps {
-  enginesList: EnterpriseSearchApplication[];
+interface SearchApplicationsListTableProps {
   isLoading?: boolean;
   loading: boolean;
   meta: Page;
   onChange: (criteria: CriteriaWithPagination<EnterpriseSearchApplication>) => void;
-  onDelete: (engine: EnterpriseSearchApplication) => void;
-  viewEngineIndices: (engineName: string) => void;
+  onDelete: (searchApplication: EnterpriseSearchApplication) => void;
+  searchApplications: EnterpriseSearchApplication[];
+  viewSearchApplicationIndices: (searchApplicationName: string) => void;
 }
-export const EnginesListTable: React.FC<EnginesListTableProps> = ({
-  enginesList,
+export const SearchApplicationsListTable: React.FC<SearchApplicationsListTableProps> = ({
+  searchApplications,
   isLoading,
   meta,
   onChange,
   onDelete,
-  viewEngineIndices,
+  viewSearchApplicationIndices,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
@@ -65,8 +65,8 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       },
       render: (name: string) => (
         <EuiLinkTo
-          data-test-subj="engine-link"
-          data-telemetry-id="entSearchApplications-table-viewEngine"
+          data-test-subj="search-application-link"
+          data-telemetry-id="entSearchApplications-table-viewSearchApplication"
           to={generateEncodedPath(SEARCH_APPLICATION_PATH, { searchApplicationName: name })}
         >
           {name}
@@ -90,13 +90,12 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       }),
       align: 'right',
 
-      render: (indices: string[], engine) => (
+      render: (indices: string[], searchApplication) => (
         <EuiButtonEmpty
           size="s"
-          className="engineListTableFlyoutButton"
-          data-test-subj="engineListTableIndicesFlyoutButton"
-          data-telemetry-id="entSearchApplications-table-viewEngineIndices"
-          onClick={() => viewEngineIndices(engine.name)}
+          data-test-subj="searchApplicationsListTableIndicesFlyoutButton"
+          data-telemetry-id="entSearchApplications-table-viewSearchApplicationIndices"
+          onClick={() => viewSearchApplicationIndices(searchApplication.name)}
         >
           <FormattedMessage
             id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
@@ -122,10 +121,10 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           ),
           type: 'icon',
           icon: 'eye',
-          onClick: (engine) =>
+          onClick: (searchApplication) =>
             navigateToUrl(
               generateEncodedPath(SEARCH_APPLICATION_PATH, {
-                searchApplicationName: engine.name,
+                searchApplicationName: searchApplication.name,
               })
             ),
         },
@@ -147,11 +146,11 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
                 defaultMessage: 'Delete this search application',
               }
             ),
-          onClick: (engine) => {
-            onDelete(engine);
+          onClick: (searchApplication) => {
+            onDelete(searchApplication);
             sendEnterpriseSearchTelemetry({
               action: 'clicked',
-              metric: 'entSearchApplications-table-deleteEngine',
+              metric: 'entSearchApplications-table-deleteSearchApplication',
             });
           },
         },
@@ -161,7 +160,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
 
   return (
     <EuiBasicTable
-      items={enginesList}
+      items={searchApplications}
       columns={columns}
       pagination={{ ...pageToPagination(meta), showPerPageOptions: false }}
       onChange={onChange}
