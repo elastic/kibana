@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo, useState, useEffect, useCallback, useRef } from 'react';
-import React, { memo } from 'react';
+import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -22,6 +22,7 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/pu
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
+import { isEqual } from 'lodash';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './hooks/use_chart_panels';
@@ -114,8 +115,8 @@ export function Chart({
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [EditLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const [suggestion, setSuggestion] = useState(currentSuggestion);
-  const needsToUpdatePanel = useRef<boolean>(true);
+  const prevSuggestion = usePrevious(currentSuggestion);
+  const prevQuery = usePrevious(originalQuery);
   const {
     showChartOptionsPopover,
     chartRef,
@@ -166,7 +167,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
-    currentSuggestion: suggestion,
+    currentSuggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,
@@ -206,26 +207,33 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
-        suggestion,
+        suggestion: currentSuggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, chart?.title, suggestion, dataView, filters, query]
+    [
+      breakdown?.field,
+      chart?.timeInterval,
+      chart?.title,
+      currentSuggestion,
+      dataView,
+      filters,
+      query,
+    ]
   );
 
   const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
       const updatedSuggestion = {
-        ...suggestion,
+        ...currentSuggestion,
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       } as Suggestion;
-      setSuggestion(updatedSuggestion);
+      onSuggestionChange?.(updatedSuggestion);
     },
-    [suggestion]
+    [onSuggestionChange, currentSuggestion]
   );
 
   const onSuggestionSelectorChange = useCallback(
     (s: Suggestion | undefined) => {
-      setSuggestion(s);
       onSuggestionChange?.(s);
     },
     [onSuggestionChange]
@@ -236,13 +244,6 @@ export function Chart({
       setIsFlyoutVisible(false);
     }
   }, [chartVisible, isFlyoutVisible]);
-
-  useEffect(() => {
-    if (isPlainRecord) {
-      setSuggestion(currentSuggestion);
-      needsToUpdatePanel.current = true;
-    }
-  }, [currentSuggestion, isPlainRecord]);
 
   useEffect(() => {
     async function fetchLensConfigComponent() {
@@ -258,18 +259,22 @@ export function Chart({
       );
       setEditLensConfigPanel(panel);
     }
-    if (isPlainRecord && needsToUpdatePanel.current) {
+    const queryHasChanged = !isEqual(originalQuery, prevQuery);
+    const suggestionHasChanged = currentSuggestion?.title !== prevSuggestion?.title;
+    if (isPlainRecord && (suggestionHasChanged || queryHasChanged)) {
       fetchLensConfigComponent();
-      needsToUpdatePanel.current = false;
     }
   }, [
     lensAttributesContext.attributes,
-    suggestion,
     services.lens,
     dataView,
     updateSuggestion,
     isPlainRecord,
     isFlyoutVisible,
+    currentSuggestion,
+    prevSuggestion,
+    originalQuery,
+    prevQuery,
   ]);
 
   const onEditVisualization = useEditVisualization({
@@ -281,7 +286,7 @@ export function Chart({
   });
   const LensSaveModalComponent = services.lens.SaveModalComponent;
   const canSaveVisualization =
-    chartVisible && suggestion && services.capabilities.dashboard?.showWriteControls;
+    chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
 
   const renderEditButton = useMemo(
     () => (
@@ -341,11 +346,11 @@ export function Chart({
                     />
                   </EuiFlexItem>
                 )}
-                {chartVisible && suggestion && allSuggestions && allSuggestions?.length > 1 && (
+                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
                   <EuiFlexItem css={breakdownFieldSelectorItemCss}>
                     <SuggestionSelector
                       suggestions={allSuggestions}
-                      activeSuggestion={suggestion}
+                      activeSuggestion={currentSuggestion}
                       onSuggestionChange={onSuggestionSelectorChange}
                     />
                   </EuiFlexItem>
