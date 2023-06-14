@@ -12,11 +12,11 @@ import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
-import { fieldHasCellActions } from '../../utils';
+import { fieldHasCellActions, isLensSupportedType } from '../../utils';
 import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
@@ -29,7 +29,6 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 const ICON = 'visBarVertical';
-const UNSUPPORTED_ES_FIELD_TYPES = [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.TEXT];
 
 export const createShowTopNCellActionFactory = createCellActionFactory(
   ({
@@ -51,9 +50,8 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
       return (
         data.length === 1 &&
         fieldHasCellActions(field.name) &&
-        (field.esTypes ?? []).every(
-          (esType) => !UNSUPPORTED_ES_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
-        ) &&
+        isLensSupportedType(field.type) &&
+        !isDataViewFieldSubtypeNested(field) &&
         !!field.aggregatable
       );
     },
