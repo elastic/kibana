@@ -21,15 +21,14 @@ class AuditLoggingService {
    */
   public writeCustomAuditLog(args: AuditEvent) {
     const securitySetup = appContextService.getSecuritySetup();
-    let auditLogger: AuditLogger | undefined;
 
-    const request = getRequestStore().getStore();
+    // const request = getRequestStore().getStore();
 
-    if (request) {
-      auditLogger = securitySetup.audit.asScoped(request);
-    } else {
-      auditLogger = securitySetup.audit.withoutRequest;
-    }
+    // if (request) {
+    // auditLogger = securitySetup.audit.asScoped(request);
+    // } else {
+    const auditLogger = securitySetup.audit.withoutRequest;
+    // }
 
     auditLogger.log({ ...args, labels: { ...args.labels, application: 'elastic/fleet' } });
   }
