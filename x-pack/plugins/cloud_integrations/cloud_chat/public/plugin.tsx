@@ -11,7 +11,6 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { CloudChatProviderPluginSetup } from '@kbn/cloud-chat-provider-plugin/public';
 import { ReplaySubject } from 'rxjs';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
@@ -22,7 +21,6 @@ import { Chat } from './components';
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
   security?: SecurityPluginSetup;
-  cloudChatProvider: CloudChatProviderPluginSetup;
 }
 
 interface CloudChatStartDeps {
@@ -38,23 +36,16 @@ interface CloudChatConfig {
   trialBuffer: number;
 }
 
-export interface CloudChatPluginStart {
-  Chat: React.ComponentType;
-}
-
-export class CloudChatPlugin
-  implements Plugin<void, CloudChatPluginStart, CloudChatSetupDeps, CloudChatStartDeps>
-{
+export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, CloudChatStartDeps> {
   private readonly config: CloudChatConfig;
   private chatConfig$ = new ReplaySubject<ChatConfig>(1);
-  private Chat: React.ComponentType | undefined;
 
   constructor(initializerContext: PluginInitializerContext<CloudChatConfig>) {
     this.config = initializerContext.config.get();
   }
 
-  public setup(core: CoreSetup, { cloud, security, cloudChatProvider }: CloudChatSetupDeps) {
-    this.setupChat({ http: core.http, cloud, security, cloudChatProvider }).catch((e) =>
+  public setup(core: CoreSetup, { cloud, security }: CloudChatSetupDeps) {
+    this.setupChat({ http: core.http, cloud, security }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up Chat: ${e.toString()}`)
     );
@@ -65,19 +56,16 @@ export class CloudChatPlugin
       return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
     };
     cloud.registerCloudService(CloudChatContextProvider);
-    cloudChatProvider.registerChatProvider(() => this.Chat);
   }
 
   public start(core: CoreStart, { cloud }: CloudChatStartDeps) {
     const CloudContextProvider = cloud.CloudContextProvider;
-    this.Chat = () => (
+
+    core.chrome.setChatComponent(() => (
       <CloudContextProvider>
         <Chat />
       </CloudContextProvider>
-    );
-    return {
-      Chat: this.Chat,
-    };
+    ));
   }
 
   public stop() {}

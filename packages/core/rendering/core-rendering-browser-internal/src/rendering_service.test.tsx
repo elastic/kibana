@@ -32,6 +32,7 @@ describe('RenderingService#start', () => {
 
     chrome = chromeServiceMock.createStartContract();
     chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
+    chrome.getChatComponent.mockReturnValue(() => <div>Hello chat!</div>);
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
@@ -109,5 +110,10 @@ describe('RenderingService#start', () => {
   it('adds global styles via `CoreContextProvider` `globalStyles` configuration', () => {
     startService();
     expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
+  });
+
+  it('renders the chat UI', () => {
+    startService();
+    expect(targetDomElement.innerHTML).toMatch(/Hello chat!/);
   });
 });

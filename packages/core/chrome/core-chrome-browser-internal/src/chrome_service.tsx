@@ -69,6 +69,9 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
+  private readonly chatComponent$ = new BehaviorSubject<{ Comp: React.ComponentType | null }>({
+    Comp: null,
+  });
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -340,6 +343,11 @@ export class ChromeService {
       );
     };
 
+    const Chat: React.FC = () => {
+      const ChatComponent = useObservable(this.chatComponent$, { Comp: null }).Comp;
+      return ChatComponent ? <ChatComponent /> : <></>;
+    };
+
     return {
       navControls,
       navLinks,
@@ -417,6 +425,11 @@ export class ChromeService {
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
+      },
+
+      getChatComponent: () => Chat,
+      setChatComponent: (ChatComponent: React.ComponentType | null) => {
+        this.chatComponent$.next({ Comp: ChatComponent });
       },
     };
   }

@@ -13,4 +13,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { Chat } from './components';
-export type { CloudChatPluginStart } from './plugin';

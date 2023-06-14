@@ -17,7 +17,6 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -102,7 +101,6 @@ export const IntegrationsAppContext: React.FC<{
                                       <FlyoutContextProvider>
                                         <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
                                         {children}
-                                        <Chat />
                                       </FlyoutContextProvider>
                                     </PackageInstallProvider>
                                   </AgentPolicyContextProvider>
