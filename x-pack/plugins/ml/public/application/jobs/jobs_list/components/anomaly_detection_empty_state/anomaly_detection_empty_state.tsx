@@ -43,7 +43,7 @@ export const AnomalyDetectionEmptyState: FC = () => {
         <h2>
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.createFirstJobMessage"
-            defaultMessage="Spot anomalies faster"
+            defaultMessage="Start detecting anomalies"
           />
         </h2>
       }
