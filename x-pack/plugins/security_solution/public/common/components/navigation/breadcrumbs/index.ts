@@ -103,6 +103,7 @@ const getTrailingBreadcrumbsForRoutes = (
     case SecurityPageName.users:
       return getUsersBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.rules:
+    case SecurityPageName.rulesAdd:
     case SecurityPageName.rulesCreate:
       return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.exceptions:

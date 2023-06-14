@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -33,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('can filter', async () => {
       const a = await supertest
         .put('/api/index_patterns/_fields_for_wildcard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({ pattern: 'helloworld*' })
         .send({ index_filter: { exists: { field: 'bye' } } });
 

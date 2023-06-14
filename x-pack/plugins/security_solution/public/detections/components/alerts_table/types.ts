@@ -9,7 +9,7 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { NoteResult } from '../../../../common/types/timeline/note';
+import type { Note } from '../../../../common/types/timeline/note/api';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import type { inputsModel } from '../../../common/store';
@@ -65,7 +65,7 @@ export interface CreateTimelineProps {
   from: string;
   timeline: TimelineModel;
   to: string;
-  notes: NoteResult[] | null;
+  notes: Note[] | null;
   ruleNote?: string;
   ruleAuthor?: string | string[];
 }
