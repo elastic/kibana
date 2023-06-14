@@ -34,7 +34,6 @@ import {
   UptimeRuleTypeAlertDefinition,
 } from '../../legacy_uptime/lib/alerts/common';
 import { TlsTranslations } from '../../../common/rules/legacy_uptime/translations';
-import { TLS } from '../../../common/constants/uptime_alerts';
 import { getCertSummary } from '../../legacy_uptime/lib/alerts/tls';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
@@ -124,7 +123,7 @@ export const registerSyntheticsTLSCheckRule = (
             ...summary,
           });
 
-          alertInstance.scheduleActions(TLS.id, {
+          alertInstance.scheduleActions(TLS_CERTIFICATE.id, {
             [ALERT_DETAILS_URL]: await getAlertUrl(
               alertUuid,
               spaceId,

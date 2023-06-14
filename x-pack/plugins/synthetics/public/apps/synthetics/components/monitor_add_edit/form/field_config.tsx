@@ -512,7 +512,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
             defaultMessage: 'Disabling will stop tls alerting on this monitor.',
           })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
+        : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
             defaultMessage: 'Enable tls alerts on this monitor.',
           }),
       checked: field?.value || false,
