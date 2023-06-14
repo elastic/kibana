@@ -13,7 +13,7 @@ import type {
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
 
-import type { CloudLinkProps, RecentlyAccessedProps } from './components';
+import type { RecentlyAccessedProps } from './components';
 
 export type NonEmptyArray<T> = [T, ...T[]];
 
@@ -78,15 +78,6 @@ export interface RecentlyAccessedDefinition extends RecentlyAccessedProps {
 /**
  * @public
  *
- * A cloud link root item definition. Use it to add one or more links to the Cloud console
- */
-export interface CloudLinkDefinition extends CloudLinkProps {
-  type: 'cloudLink';
-}
-
-/**
- * @public
- *
  * A group root item definition.
  */
 export interface GroupDefinition<
@@ -109,7 +100,7 @@ export type RootNavigationItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> = RecentlyAccessedDefinition | CloudLinkDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
+> = RecentlyAccessedDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
 
 export type ProjectNavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -142,10 +133,6 @@ export interface NavigationTreeDefinition {
  * or when calling `setNavigation()` on the serverless plugin.
  */
 export interface ProjectNavigationDefinition {
-  /**
-   * The URL href for the home link
-   */
-  homeRef: string;
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * for a project. Use it if you only need to configure your project navigation and leave
