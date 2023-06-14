@@ -25,5 +25,6 @@
     "@kbn/observability-shared-plugin",
     "@kbn/observability-plugin",
     "@kbn/datemath",
+    "@kbn/core-http-browser",
   ]
 }
