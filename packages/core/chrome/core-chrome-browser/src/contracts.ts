@@ -7,7 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ComponentType } from 'React';
+import type { ComponentType } from 'react';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
