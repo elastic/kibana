@@ -94,6 +94,7 @@ export const getCases = async ({
     status: CaseStatuses.open,
     tags: [],
     owner: [],
+    category: [],
   },
   queryParams = {
     page: 1,

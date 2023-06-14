@@ -145,6 +145,7 @@ export interface FilterOptions {
   assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
+  category: string[];
 }
 export type PartialFilterOptions = Partial<FilterOptions>;
 
