@@ -39,6 +39,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
       </MlPageHeader>
       {dataView && (
         <ExplainLogRateSpikes
+          stickyHistogram={true}
           dataView={dataView}
           savedSearch={savedSearch}
           appDependencies={pick(services, [

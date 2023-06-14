@@ -28,8 +28,11 @@ import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_a
 import { PageHeader } from '../page_header';
 
 import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content/explain_log_rate_spikes_content';
+interface Props {
+  stickyHistogram?: boolean;
+}
 
-export const ExplainLogRateSpikesPage: FC = () => {
+export const ExplainLogRateSpikesPage: FC<Props> = ({ stickyHistogram }) => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -87,8 +90,6 @@ export const ExplainLogRateSpikesPage: FC = () => {
     currentSelectedSignificantTerm,
     currentSelectedGroup
   );
-
-  const defaultOptions = { stickyHistogram: true };
 
   useEffect(
     // TODO: Consolidate this hook/function with with Data visualizer's
@@ -149,7 +150,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
             dataView={dataView}
             setGlobalState={setGlobalState}
             esSearchQuery={searchQuery}
-            options={defaultOptions}
+            stickyHistogram={stickyHistogram}
           />
         </EuiFlexGroup>
       </EuiPageSection>

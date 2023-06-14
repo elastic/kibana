@@ -43,10 +43,6 @@ export function getDocumentCountStatsSplitLabel(
   }
 }
 
-export interface ExplainLogRateSpikesContentOptions {
-  stickyHistogram: boolean;
-}
-
 export interface ExplainLogRateSpikesContentProps {
   /** The data view to analyze. */
   dataView: DataView;
@@ -56,8 +52,8 @@ export interface ExplainLogRateSpikesContentProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
-  /** Options for style overrides */
-  options?: ExplainLogRateSpikesContentOptions;
+  /** Option to make the main histogram sticky */
+  stickyHistogram?: boolean;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -72,7 +68,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
   initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
-  options,
+  stickyHistogram,
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
@@ -155,7 +151,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
           earliest={earliest}
           isBrushCleared={isBrushCleared}
           latest={latest}
-          options={options}
+          stickyHistogram={stickyHistogram}
           onReset={clearSelection}
           sampleProbability={sampleProbability}
           searchQuery={esSearchQuery}

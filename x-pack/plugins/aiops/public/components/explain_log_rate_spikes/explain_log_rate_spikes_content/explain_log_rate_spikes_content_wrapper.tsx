@@ -27,10 +27,7 @@ import { DataSourceContext } from '../../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../../spike_analysis_table/spike_analysis_table_row_provider';
-import {
-  type ExplainLogRateSpikesContentOptions,
-  ExplainLogRateSpikesContent,
-} from './explain_log_rate_spikes_content';
+import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content';
 import type { ExplainLogRateSpikesAnalysisResults } from '../explain_log_rate_spikes_analysis';
 
 const localStorage = new Storage(window.localStorage);
@@ -38,8 +35,8 @@ const localStorage = new Storage(window.localStorage);
 export interface ExplainLogRateSpikesContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** Options for style overrides */
-  options?: ExplainLogRateSpikesContentOptions;
+  /** Option to make main histogram sticky */
+  stickyHistogram?: boolean;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
   /** On global timefilter update */
@@ -64,7 +61,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
-  options,
+  stickyHistogram,
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
@@ -110,7 +107,7 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
-                  options={options}
+                  stickyHistogram={stickyHistogram}
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}

@@ -32,7 +32,6 @@ import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
-import type { ExplainLogRateSpikesContentOptions } from './explain_log_rate_spikes_content/explain_log_rate_spikes_content';
 import {
   getGroupTableItems,
   SpikeAnalysisTable,
@@ -86,8 +85,8 @@ interface ExplainLogRateSpikesAnalysisProps {
   /** End timestamp filter */
   latest: number;
   isBrushCleared: boolean;
-  /** Options for style overrides */
-  options?: ExplainLogRateSpikesContentOptions;
+  /** Option to make main histogram sticky */
+  stickyHistogram?: boolean;
   /** Callback for resetting the analysis */
   onReset: () => void;
   /** Window parameters for the analysis */
@@ -109,7 +108,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   earliest,
   isBrushCleared,
   latest,
-  options,
+  stickyHistogram,
   onReset,
   windowParameters,
   searchQuery,
@@ -395,7 +394,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       {/* Using inline style as Eui Table overwrites overflow settings  */}
       <div
         style={
-          options && options.stickyHistogram
+          stickyHistogram
             ? {
                 height: '500px',
                 overflowX: 'hidden',
