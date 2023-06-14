@@ -20,10 +20,14 @@ import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {
   action: LogsEndpointActionWithHosts;
+  ruleName?: string;
 }
 
-export const EndpointResponseActionResults = ({ action }: EndpointResponseActionResultsProps) => {
-  const { rule, agent } = action;
+export const EndpointResponseActionResults = ({
+  action,
+  ruleName,
+}: EndpointResponseActionResultsProps) => {
+  const { agent } = action;
   const { action_id: actionId, expiration } = action.EndpointActions;
   const {
     endpointPrivileges: { canAccessEndpointActionsLogManagement },
@@ -54,7 +58,7 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
 
   return (
     <EuiComment
-      username={rule?.name}
+      username={ruleName}
       timestamp={<FormattedRelative value={action['@timestamp']} />}
       event={eventText}
       data-test-subj={'endpoint-results-comment'}
