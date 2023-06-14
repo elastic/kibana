@@ -214,7 +214,7 @@ export const DiscoverTopNav = ({
       showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
-      customDataViewPicker={
+      dataViewPickerOverride={
         searchBarCustomization?.CustomDataViewPicker ? (
           <searchBarCustomization.CustomDataViewPicker />
         ) : undefined

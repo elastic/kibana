@@ -45,7 +45,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   indexPatterns?: DataView[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
-  customDataViewPicker?: React.ReactNode;
+  dataViewPickerOverride?: React.ReactNode;
   screenTitle?: string;
   dataTestSubj?: string;
   // Togglers
@@ -573,7 +573,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
-          customDataViewPicker={this.props.customDataViewPicker}
+          dataViewPickerOverride={this.props.dataViewPickerOverride}
           showSubmitButton={this.props.showSubmitButton}
           submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}

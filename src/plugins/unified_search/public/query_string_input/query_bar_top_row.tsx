@@ -100,7 +100,7 @@ const SuperDatePicker = React.memo(
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
-  customDataViewPicker?: ReactNode;
+  dataViewPickerOverride?: ReactNode;
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -528,7 +528,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderDataViewsPicker() {
-      if (props.customDataViewPicker) return props.customDataViewPicker;
       if (!props.dataViewPickerComponentProps) return;
       let textBasedLanguage;
       if (Boolean(isQueryLangSelected)) {
@@ -676,7 +675,7 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {renderDataViewsPicker()}
+              {props.dataViewPickerOverride || renderDataViewsPicker()}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

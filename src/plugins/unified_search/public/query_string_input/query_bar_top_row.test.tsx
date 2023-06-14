@@ -347,7 +347,7 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should render custom data view picker', () => {
-    const customDataViewPicker = <div data-test-subj="customDataViewPicker" />;
+    const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
     const { getByTestId } = render(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
@@ -355,11 +355,11 @@ describe('QueryBarTopRowTopRow', () => {
         isDirty: false,
         indexPatterns: [stubIndexPattern],
         timeHistory: mockTimeHistory,
-        customDataViewPicker,
+        dataViewPickerOverride,
       })
     );
 
-    expect(getByTestId('customDataViewPicker')).toBeInTheDocument();
+    expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
   });
 });
 

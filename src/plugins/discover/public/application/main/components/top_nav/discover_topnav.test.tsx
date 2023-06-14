@@ -185,10 +185,10 @@ describe('Discover topnav component', () => {
       );
       const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
-      const customDataViewPicker = mountWithIntl(
-        topNav.prop('customDataViewPicker') as ReactElement
+      const dataViewPickerOverride = mountWithIntl(
+        topNav.prop('dataViewPickerOverride') as ReactElement
       ).find(mockSearchBarCustomization.CustomDataViewPicker!);
-      expect(customDataViewPicker.length).toBe(1);
+      expect(dataViewPickerOverride.length).toBe(1);
     });
   });
 });
