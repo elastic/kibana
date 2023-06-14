@@ -6,7 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import type { ActionResponsesRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
+import type { ActionResponsesRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../../../common/endpoint/constants';
 
 export const buildActionResultsQuery = ({

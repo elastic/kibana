@@ -6,26 +6,27 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
 
+import { inspectStringifyObject } from '@kbn/osquery-plugin/common/utils/build_query';
 import { buildResponseActionsQuery } from './query.all_actions.dsl';
-import type { SecuritySolutionFactory } from '../../types';
+import type { EndpointFactory } from '../../types';
 import type {
   ActionRequestOptions,
   ActionRequestStrategyResponse,
   ResponseActionsQueries,
-} from '../../../../../../common/search_strategy/security_solution/response_actions';
+} from '../../../../../../common/search_strategy/endpoint/response_actions';
 
-export const allActions: SecuritySolutionFactory<ResponseActionsQueries.actions> = {
-  buildDsl: (options: ActionRequestOptions) => {
-    return buildResponseActionsQuery(options);
+export const allActions: EndpointFactory<ResponseActionsQueries.actions> = {
+  buildDsl: (options: ActionRequestOptions, { authz }) => {
+    return buildResponseActionsQuery(options, authz);
   },
   parse: async (
     options: ActionRequestOptions,
-    response: IEsSearchResponse
+    response: IEsSearchResponse,
+    deps
   ): Promise<ActionRequestStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildResponseActionsQuery(options))],
+      dsl: [inspectStringifyObject(buildResponseActionsQuery(options, deps.authz))],
     };
 
     return {

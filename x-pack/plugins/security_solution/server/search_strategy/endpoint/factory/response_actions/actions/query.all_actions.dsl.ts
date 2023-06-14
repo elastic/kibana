@@ -9,19 +9,31 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
-import type { ActionRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
+import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
+import type { ActionRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 
-export const buildResponseActionsQuery = ({
-  alertIds,
-  sort,
-}: ActionRequestOptions): ISearchRequestParams => {
+const EndpointFieldsLimited = [
+  'EndpointActions.action_id',
+  'EndpointActions.input_type',
+  'EndpointActions.expiration',
+  'EndpointActions.data.command',
+];
+
+export const buildResponseActionsQuery = (
+  { alertIds, sort }: ActionRequestOptions,
+  authz: EndpointAuthz | void
+): ISearchRequestParams => {
+  const fields = authz?.canAccessEndpointActionsLogManagement
+    ? [{ field: '*' }, { field: 'EndpointActions.*', include_unmapped: true }]
+    : ['@timestamp', 'action_id', 'input_type', ...EndpointFieldsLimited];
+
   const dslQuery = {
     allow_no_indices: true,
     index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
     ignore_unavailable: true,
     body: {
-      fields: [{ field: '*' }, { field: 'EndpointActions.*', include_unmapped: true }],
+      fields,
       query: {
         bool: {
           minimum_should_match: 2,

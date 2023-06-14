@@ -17,6 +17,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
@@ -88,7 +89,10 @@ import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
-import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  ENDPOINT_SEARCH_STRATEGY,
+} from '../common/endpoint/constants';
 import { AppFeatures } from './lib/app_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -351,6 +355,12 @@ export class Plugin implements ISecuritySolutionPlugin {
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
       );
+      const endpointSearchStrategy = endpointSearchStrategyProvider(
+        depsStart.data,
+        this.endpointContext
+      );
+
+      plugins.data.search.registerSearchStrategy(ENDPOINT_SEARCH_STRATEGY, endpointSearchStrategy);
     });
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
