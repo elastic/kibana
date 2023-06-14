@@ -92,14 +92,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     );
   }
 
-  getSyncMeta() {
-    return {
-      mvtFields: this._descriptor.fields.map((field: MVTFieldDescriptor) => {
-        return field.name;
-      }),
-    };
-  }
-
   addFeature(geometry: Geometry | Position[]): Promise<void> {
     throw new Error('Does not implement addFeature');
   }
@@ -193,8 +185,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return null;
   }
 
-  getSyncMeta(): null {
-    return null;
+  getSyncMeta() {
+    return {
+      mvtFields: this._descriptor.fields.map((field: MVTFieldDescriptor) => {
+        return field.name;
+      }),
+    };
   }
 
   isBoundsAware() {

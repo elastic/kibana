@@ -51,7 +51,7 @@ import {
 import { IVectorSource } from '../../sources/vector_source';
 import { LayerIcon, ILayer } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
-import { isSpatialJoin } from '../classes/joins/is_spatial_join';
+import { isSpatialJoin } from '../../joins/is_spatial_join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';

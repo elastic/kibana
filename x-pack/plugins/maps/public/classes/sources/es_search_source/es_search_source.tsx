@@ -78,7 +78,7 @@ import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
-  'geoField',
+  | 'geoField'
   | 'filterByMapBounds'
   | 'sortField'
   | 'sortOrder'

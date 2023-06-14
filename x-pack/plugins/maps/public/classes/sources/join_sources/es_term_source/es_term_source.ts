@@ -25,6 +25,7 @@ import {
   BucketProperties,
 } from '../../../../../common/elasticsearch_util';
 import {
+  DataFilters,
   ESTermSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
@@ -185,9 +186,9 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     return `es_table ${this.getIndexPatternId()}`;
   }
 
-  getSyncMeta(): ESTermSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESTermSourceSyncMeta {
     return {
-      ...super.getSyncMeta(),
+      ...super.getSyncMeta(dataFilters),
       indexPatternId: this._descriptor.indexPatternId,
       size: this._descriptor.size,
       term: this._descriptor.term,

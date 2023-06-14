@@ -13,7 +13,7 @@ import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
-import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
+import { AbstractESAggSourceDescriptor, AggDescriptor, DataFilters } from '../../../../common/descriptor_types';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getAggDisplayName } from './get_agg_display_name';
@@ -153,7 +153,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
   /*
    * Force re-fetch when requested metrics change.
    */
-  getSyncMeta(): ESAggsSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESAggsSourceSyncMeta {
     return {
       metrics: this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
     };

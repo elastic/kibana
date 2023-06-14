@@ -20,6 +20,7 @@ import {
 } from '../../../../common/constants';
 import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import {
+  DataFilters,
   ESGeoLineSourceDescriptor,
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
@@ -108,9 +109,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
   }
 
-  getSyncMeta(): ESGeoLineSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESGeoLineSourceSyncMeta {
     return {
-      ...super.getSyncMeta(),
+      ...super.getSyncMeta(dataFilters),
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
     };

@@ -15,6 +15,7 @@ import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import { AbstractESAggSource } from '../../es_agg_source';
 import type { BucketProperties } from '../../../../../common/elasticsearch_util';
 import {
+  DataFilters,
   ESDistanceSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
@@ -163,9 +164,9 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     return false;
   }
 
-  getSyncMeta(): ESDistanceSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESDistanceSourceSyncMeta {
     return {
-      ...super.getSyncMeta(),
+      ...super.getSyncMeta(dataFilters),
       distance: this._descriptor.distance,
       geoField: this._descriptor.geoField,
     };
