@@ -262,7 +262,7 @@ The format of the text passed to the lambda is: `<number>; <locales>; <options>`
 The `<number>` parameter is required; the `<locales>` and `<options>` parameters are optional, but the semicolons must be provided - the values may be empty strings.
 The `<locales>` parameter is a list of locales, separated by commas (`,`).
 The `<options>` parameter is a list of key value pairs, separated by commas (`,`).  The key value pairs are strings separated by colons (`:`) where the key is the name of the option and the value is the value of the option.
-The default locale is `en-US` and the default options are `{}`.
+The default locale is `en-US` and no options are set by default.
 
 [source]
 ----

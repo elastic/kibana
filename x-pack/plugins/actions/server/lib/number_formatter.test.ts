@@ -13,4 +13,6 @@ describe('formatNumber()', () => {
 
     expect(formatNumber(format)).toEqual('1');
   });
+
+  // TODO: Add a LOT more tests ...
 });

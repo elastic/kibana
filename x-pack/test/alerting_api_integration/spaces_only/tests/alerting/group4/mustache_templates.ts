@@ -231,7 +231,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         },
       });
       const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
-      expect(body.trim()).to.be('€44.00');
+      expect(body.trim()).to.be('€45.00');
     });
 
     async function createRule(action: any) {
