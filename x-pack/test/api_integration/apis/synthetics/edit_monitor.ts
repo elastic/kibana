@@ -352,7 +352,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
-          .send(toUpdate);
+          .send(toUpdate)
+          .expect(500);
 
         const response = await monitorTestService.getMonitor(monitorId);
 
@@ -409,7 +410,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send(toUpdate)
           .expect(200);
-        //
+
         const updatedResponse = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated
