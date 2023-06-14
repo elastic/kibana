@@ -149,13 +149,11 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'placeholder.esc',
           title: 'Confluent Cloud',
-          description:
-            'Collect data from Confluent Cloud with the Elastic Sink Connector.',
+          description: 'Collect data from Confluent Cloud with the Elastic Sink Connector.',
           type: 'ui_link',
           shipper: 'placeholders',
           uiInternalPath: '',
-          uiExternalLink:
-            'https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch',
+          uiExternalLink: 'https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
           categories: ['message_queue', 'observability', 'security'],
