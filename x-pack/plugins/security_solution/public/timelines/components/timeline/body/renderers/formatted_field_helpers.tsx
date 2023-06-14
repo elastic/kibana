@@ -91,9 +91,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   );
   const id = `event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`;
   const link = useMemo(() => {
-    const content = children ? (
-      children
-    ) : truncate ? (
+    const content = truncate ? (
       <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
     ) : (
       value
@@ -122,6 +120,12 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         >
           {title ?? value}
         </Component>
+      );
+    } else if (children) {
+      return (
+        <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="goToRuleDetails">
+          {children}
+        </LinkAnchor>
       );
     } else {
       return (

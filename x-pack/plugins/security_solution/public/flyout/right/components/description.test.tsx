@@ -7,13 +7,16 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DESCRIPTION_EXPAND_BUTTON_TEST_ID, DESCRIPTION_TITLE_TEST_ID } from './test_ids';
+import {
+  DESCRIPTION_EXPAND_BUTTON_TEST_ID,
+  DESCRIPTION_TITLE_TEST_ID,
+  DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID,
+} from './test_ids';
 import {
   DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON,
   DOCUMENT_DESCRIPTION_EXPAND_BUTTON,
   DOCUMENT_DESCRIPTION_TITLE,
   RULE_DESCRIPTION_TITLE,
-  VIEW_RULE_TEXT,
 } from './translations';
 import { Description } from './description';
 import { RightPanelContext } from '../context';
@@ -65,7 +68,7 @@ describe('<Description />', () => {
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(VIEW_RULE_TEXT);
+    expect(getByTestId(DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
       DOCUMENT_DESCRIPTION_EXPAND_BUTTON
@@ -87,7 +90,7 @@ describe('<Description />', () => {
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(VIEW_RULE_TEXT);
+    expect(getByTestId(DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
       DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON
@@ -131,7 +134,7 @@ describe('<Description />', () => {
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(queryByTestId(DESCRIPTION_TITLE_TEST_ID)).not.toHaveTextContent(VIEW_RULE_TEXT);
+    expect(queryByTestId(DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID)).not.toBeInTheDocument();
   });
   it('should render document title if document is not an alert', () => {
     const panelContextValue = {
