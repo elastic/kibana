@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpResponsePayload } from '@kbn/core/server';
+// import { HttpResponsePayload } from '@kbn/core/server';
 
-import { API_BASE_PATH } from '../../common/constants';
+import { FIELD_PREVIEW_PATH as path } from '../../common/constants';
 import { RouteDependencies } from '../types';
 import { handleEsError } from '../shared_imports';
 
@@ -30,7 +30,7 @@ const bodySchema = schema.object({
 });
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
-  router.versioned.post({ path: `${API_BASE_PATH}/field_preview`, access: 'internal' }).addVersion(
+  router.versioned.post({ path, access: 'internal' }).addVersion(
     {
       version: '1',
       validate: {

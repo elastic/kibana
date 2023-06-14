@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { API_BASE_PATH } from '../../common/constants';
+import {
+  FIELD_PREVIEW_PATH as path,
+  INITIAL_REST_VERSION as version,
+} from '../../common/constants';
 import { sendRequest } from '../shared_imports';
 import { PainlessExecuteContext, FieldPreviewResponse } from '../components/preview';
 
@@ -23,7 +26,7 @@ export const initApi = (httpClient: HttpSetup) => {
     document: Record<string, unknown>;
   }) => {
     return sendRequest<FieldPreviewResponse>(httpClient, {
-      path: `${API_BASE_PATH}/field_preview`,
+      path,
       method: 'post',
       body: {
         index,
@@ -31,6 +34,7 @@ export const initApi = (httpClient: HttpSetup) => {
         script,
         document,
       },
+      version,
     });
   };
 
