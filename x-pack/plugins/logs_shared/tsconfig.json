@@ -13,7 +13,6 @@
     "@kbn/io-ts-utils",
     "@kbn/data-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/rison",
     "@kbn/es-query",
     "@kbn/utility-types",
     "@kbn/core-http-server",
@@ -26,6 +25,5 @@
     "@kbn/observability-shared-plugin",
     "@kbn/observability-plugin",
     "@kbn/datemath",
-    "@kbn/core-notifications-browser",
   ]
 }
