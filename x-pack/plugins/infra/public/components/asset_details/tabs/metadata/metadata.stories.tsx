@@ -22,22 +22,7 @@ const stories: Meta<MetadataProps> = {
       interval: '1m',
     },
     nodeType: 'host',
-    node: {
-      id: 'host-1',
-      name: 'host-1',
-      ip: '192.168.0.1',
-      os: 'iOS',
-      title: {
-        name: 'host-1',
-        cloudProvider: 'gcp',
-      },
-      rx: 0,
-      tx: 0,
-      memory: 0.5445920331099282,
-      cpu: 0.2000718443867342,
-      diskLatency: 0,
-      memoryTotal: 16777216,
-    },
+    nodeName: 'host-1',
     showActionsColumn: false,
   },
 };

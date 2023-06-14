@@ -43,7 +43,7 @@ export function InstallElasticAgent() {
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
-  const [apiKeyId, setApiKeyId] = useState('');
+  const [onboardingId, setOnboardingId] = useState('');
 
   function onInspect() {
     goToStep('inspect');
@@ -98,6 +98,7 @@ export function InstallElasticAgent() {
                 name: wizardState.datasetName,
                 state: {
                   datasetName: wizardState.datasetName,
+                  serviceName: wizardState.serviceName,
                   namespace: wizardState.namespace,
                   customConfigurations: wizardState.customConfigurations,
                   logFilePaths: wizardState.logFilePaths,
@@ -118,11 +119,16 @@ export function InstallElasticAgent() {
           headers: {
             authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
           },
+          params: {
+            query: { id: installShipperSetup?.id ?? '' },
+          },
         };
 
         return callApi(
           'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
-          installShipperSetup?.apiKeyEncoded ? options : {}
+          installShipperSetup?.apiKeyEncoded
+            ? options
+            : { params: options.params }
         );
       }
     },
@@ -130,8 +136,8 @@ export function InstallElasticAgent() {
   );
 
   useEffect(() => {
-    setApiKeyId(installShipperSetup?.apiKeyId ?? '');
-  }, [installShipperSetup?.apiKeyId]);
+    setOnboardingId(installShipperSetup?.id ?? '');
+  }, [installShipperSetup?.id]);
 
   const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
 
@@ -141,16 +147,14 @@ export function InstallElasticAgent() {
     refetch: refetchProgress,
   } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent && apiKeyId) {
+      if (CurrentStep === InstallElasticAgent && onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/progress',
-          {
-            params: { query: { apiKeyId } },
-          }
+          'GET /internal/observability_onboarding/custom_logs/{id}/progress',
+          { params: { path: { id: onboardingId } } }
         );
       }
     },
-    [apiKeyId]
+    [onboardingId]
   );
 
   const progressSucceded = progressStatus === FETCH_STATUS.SUCCESS;
@@ -351,6 +355,7 @@ export function InstallElasticAgent() {
                       scriptDownloadUrl: setup?.scriptDownloadUrl,
                       elasticAgentVersion: setup?.elasticAgentVersion,
                       autoDownloadConfig: wizardState.autoDownloadConfig,
+                      onboardingId,
                     })}
                   </EuiCodeBlock>
                   <EuiSpacer size="m" />
@@ -570,6 +575,7 @@ function getInstallShipperCommand({
   scriptDownloadUrl = '$SCRIPT_DOWNLOAD_URL',
   elasticAgentVersion = '$ELASTIC_AGENT_VERSION',
   autoDownloadConfig = false,
+  onboardingId = '$ONBOARDING_ID',
 }: {
   elasticAgentPlatform: ElasticAgentPlatform;
   apiKeyEncoded: string | undefined;
@@ -577,12 +583,13 @@ function getInstallShipperCommand({
   scriptDownloadUrl: string | undefined;
   elasticAgentVersion: string | undefined;
   autoDownloadConfig: boolean;
+  onboardingId: string | undefined;
 }) {
   const setupScriptFilename = 'standalone_agent_setup.sh';
   const PLATFORM_COMMAND: Record<ElasticAgentPlatform, string> = {
     'linux-tar': oneLine`
       curl ${scriptDownloadUrl} -o ${setupScriptFilename} &&
-      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint} ${elasticAgentVersion} ${
+      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint} ${elasticAgentVersion} ${onboardingId} ${
       autoDownloadConfig ? 'autoDownloadConfig=1' : ''
     }
     `,

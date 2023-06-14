@@ -5,11 +5,8 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  INSUFFICIENT_FLEET_PERMISSIONS,
-  ProjectMonitorFormatter,
-} from './project_monitor_formatter';
+import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { ProjectMonitorFormatter } from './project_monitor_formatter';
 import {
   ConfigKey,
   DataStream,
@@ -123,6 +120,9 @@ describe('ProjectMonitorFormatter', () => {
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
+    coreStart: {
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+    },
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -164,13 +164,14 @@ describe('ProjectMonitorFormatter', () => {
       } as any)
   );
 
-  it('should return errors', async () => {
+  it('should return validation errors errors', async () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
-      spaceId: 'default-space',
+      // @ts-ignore
+      spaceId: 5,
       routeContext,
       encryptedSavedObjectsClient,
-      monitors: testMonitors,
+      monitors: [testMonitors[0]],
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -185,60 +186,9 @@ describe('ProjectMonitorFormatter', () => {
       createdMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'authz')",
+          details: 'spaceId.replace is not a function',
           id: 'check if title is present 10 0',
           payload: testMonitors[0],
-          reason: 'Failed to create or update monitor',
-        },
-        {
-          details: "Cannot read properties of undefined (reading 'authz')",
-          id: 'check if title is present 10 1',
-          payload: testMonitors[1],
-          reason: 'Failed to create or update monitor',
-        },
-      ],
-      updatedMonitors: [],
-    });
-  });
-
-  it('throws fleet permission error', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: false } }),
-      },
-    } as any;
-
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
-      projectId: 'test-project',
-      spaceId: 'default-space',
-      encryptedSavedObjectsClient,
-      routeContext,
-      monitors: testMonitors,
-    });
-
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
-
-    await pushMonitorFormatter.configureAllProjectMonitors();
-
-    expect({
-      createdMonitors: pushMonitorFormatter.createdMonitors,
-      updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      failedMonitors: pushMonitorFormatter.failedMonitors,
-    }).toStrictEqual({
-      createdMonitors: [],
-      failedMonitors: [
-        {
-          details: INSUFFICIENT_FLEET_PERMISSIONS,
-          id: 'check if title is present 10 0',
-          payload: testMonitors[0],
-          reason: 'Failed to create or update monitor',
-        },
-        {
-          details: INSUFFICIENT_FLEET_PERMISSIONS,
-          id: 'check if title is present 10 1',
-          payload: testMonitors[1],
           reason: 'Failed to create or update monitor',
         },
       ],
@@ -247,14 +197,6 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('catches errors from bulk edit method', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-    } as any;
-
     soClient.bulkCreate.mockImplementation(async () => {
       return {
         saved_objects: [],
@@ -282,7 +224,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
+          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -291,14 +233,6 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('configures project monitors when there are errors', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-    } as any;
-
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: [] });
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
@@ -322,7 +256,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
+          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -331,15 +265,6 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('shows errors thrown by fleet api', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-      packagePolicyService: {},
-    } as any;
-
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
@@ -363,8 +288,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details:
-            'this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage is not a function',
+          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },
@@ -373,14 +297,6 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('creates project monitors when no errors', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-    } as any;
-
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
     monitorClient.addMonitors = jest.fn().mockReturnValue([]);
