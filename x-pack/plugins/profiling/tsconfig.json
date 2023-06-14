@@ -46,6 +46,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/licensing-plugin",
     "@kbn/apm-plugin",
+    "@kbn/utility-types",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
