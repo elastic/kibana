@@ -11,6 +11,7 @@ import { omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { useLocalStorage } from 'react-use';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -22,6 +23,13 @@ import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { QuickPrompt } from '../assistant/quick_prompts/types';
+import { Prompt } from '../assistant/types';
+import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
+import {
+  DEFAULT_ASSISTANT_NAMESPACE,
+  QUICK_PROMPT_LOCAL_STORAGE_KEY,
+  SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
+} from './constants';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -39,6 +47,7 @@ interface AssistantProviderProps {
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   basePromptContexts?: PromptContextTemplate[];
   baseQuickPrompts?: QuickPrompt[];
+  baseSystemPrompts?: Prompt[];
   children: React.ReactNode;
   getComments: ({
     currentConversation,
@@ -57,8 +66,11 @@ interface AssistantProviderProps {
 interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
+  allQuickPrompts: QuickPrompt[];
+  allSystemPrompts: Prompt[];
   basePromptContexts: PromptContextTemplate[];
   baseQuickPrompts: QuickPrompt[];
+  baseSystemPrompts: Prompt[];
   conversationIds: string[];
   conversations: Record<string, Conversation>;
   getComments: ({
@@ -72,6 +84,8 @@ interface UseAssistantContext {
   promptContexts: Record<string, PromptContext>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
+  setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
+  setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -86,14 +100,31 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   augmentMessageCodeBlocks,
   basePromptContexts = [],
   baseQuickPrompts = [],
+  baseSystemPrompts = BASE_SYSTEM_PROMPTS,
   children,
   getComments,
   http,
   getInitialConversations,
-  nameSpace = 'elasticAssistantDefault',
+  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setConversations,
   title = DEFAULT_ASSISTANT_TITLE,
 }) => {
+  /**
+   * Local storage for all quick prompts, prefixed by assistant nameSpace
+   */
+  const [localStorageQuickPrompts, setLocalStorageQuickPrompts] = useLocalStorage(
+    `${nameSpace}.${QUICK_PROMPT_LOCAL_STORAGE_KEY}`,
+    baseQuickPrompts
+  );
+
+  /**
+   * Local storage for all system prompts, prefixed by assistant nameSpace
+   */
+  const [localStorageSystemPrompts, setLocalStorageSystemPrompts] = useLocalStorage(
+    `${nameSpace}.${SYSTEM_PROMPT_LOCAL_STORAGE_KEY}`,
+    baseSystemPrompts
+  );
+
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
    */
@@ -169,8 +200,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     () => ({
       actionTypeRegistry,
       augmentMessageCodeBlocks,
+      allQuickPrompts: localStorageQuickPrompts ?? [],
+      allSystemPrompts: localStorageSystemPrompts ?? [],
       basePromptContexts,
       baseQuickPrompts,
+      baseSystemPrompts,
       conversationIds,
       conversations,
       getComments,
@@ -178,6 +212,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       nameSpace,
       registerPromptContext,
+      setAllQuickPrompts: setLocalStorageQuickPrompts,
+      setAllSystemPrompts: setLocalStorageSystemPrompts,
       setConversations: onConversationsUpdated,
       setShowAssistantOverlay,
       showAssistantOverlay,
@@ -189,14 +225,19 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePromptContexts,
       baseQuickPrompts,
+      baseSystemPrompts,
       conversationIds,
       conversations,
       getComments,
       http,
+      localStorageQuickPrompts,
+      localStorageSystemPrompts,
       promptContexts,
       nameSpace,
       registerPromptContext,
       onConversationsUpdated,
+      setLocalStorageQuickPrompts,
+      setLocalStorageSystemPrompts,
       showAssistantOverlay,
       title,
       unRegisterPromptContext,

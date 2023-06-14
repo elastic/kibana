@@ -6,12 +6,7 @@
  */
 
 import type { Message } from '../../assistant_context/types';
-import {
-  getCombinedMessage,
-  getDefaultSystemPrompt,
-  getSuperheroPrompt,
-  getSystemMessages,
-} from './helpers';
+import { getCombinedMessage, getSystemMessages } from './helpers';
 import { mockSystemPrompt } from '../../mock/system_prompt';
 import { mockAlertPromptContext, mockEventPromptContext } from '../../mock/prompt_context';
 
@@ -144,35 +139,6 @@ User prompt text`);
       });
 
       expect(Date.parse(message.timestamp)).not.toBeNaN();
-    });
-  });
-
-  describe('getDefaultSystemPrompt', () => {
-    it('returns the expected prompt', () => {
-      const prompt = getDefaultSystemPrompt();
-
-      expect(prompt).toEqual({
-        content: `You are a helpful, expert assistant who only answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.
-Use the following context to answer questions:`,
-        id: 'default-system-prompt',
-        name: 'default system prompt',
-        promptType: 'system',
-      });
-    });
-  });
-
-  describe('getSuperheroPrompt', () => {
-    it('returns the expected prompt', () => {
-      const prompt = getSuperheroPrompt();
-
-      expect(prompt).toEqual({
-        content: `You are a helpful, expert assistant who only answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.
-Provide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert.
-Use the following context to answer questions:`,
-        id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
-        name: 'Enhanced system prompt',
-        promptType: 'system',
-      });
     });
   });
 });

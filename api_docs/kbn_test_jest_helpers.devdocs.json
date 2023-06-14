@@ -715,7 +715,7 @@
         "signature": [
           "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, {\n    context,\n    childContextTypes,\n    ...props\n  }: { attachTo?: HTMLElement | undefined; context?: any; childContextTypes?: ",
           "ValidationMap",
-          "<any> | undefined; }) => ",
+          "<any> | undefined; wrappingComponent?: React.ComponentType<any> | undefined; wrappingComponentProps?: {} | undefined; }) => ",
           "ReactWrapper",
           "<T & { intl: ReactIntl.InjectedIntl; }, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
@@ -789,6 +789,34 @@
                 "signature": [
                   "ValidationMap",
                   "<any> | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-common.mountWithIntl.$2.wrappingComponent",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "wrappingComponent",
+                "description": [],
+                "signature": [
+                  "React.ComponentType<any> | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-common.mountWithIntl.$2.wrappingComponentProps",
+                "type": "Object",
+                "tags": [],
+                "label": "wrappingComponentProps",
+                "description": [],
+                "signature": [
+                  "{} | undefined"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
