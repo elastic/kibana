@@ -531,7 +531,10 @@ async function loadEndpointDetails({
   try {
     const policyResponse = await coreStart.http.get<GetHostPolicyResponse>(
       BASE_POLICY_RESPONSE_ROUTE,
-      { query: { agentId: selectedEndpoint } }
+      {
+        version: '2023-10-31',
+        query: { agentId: selectedEndpoint },
+      }
     );
     dispatch({
       type: 'serverReturnedEndpointPolicyResponse',
