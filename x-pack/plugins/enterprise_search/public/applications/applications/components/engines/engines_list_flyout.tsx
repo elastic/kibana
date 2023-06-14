@@ -58,7 +58,7 @@ export const EngineListIndicesFlyout: React.FC = () => {
     {
       field: 'name',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.enginesList.indicesFlyout.table.name.columnTitle',
+        'xpack.enterpriseSearch.searchApplications.list.indicesFlyout.table.name.columnTitle',
         {
           defaultMessage: 'Index name',
         }
@@ -82,7 +82,7 @@ export const EngineListIndicesFlyout: React.FC = () => {
     {
       field: 'health',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.enginesList.indicesFlyout.table.health.columnTitle',
+        'xpack.enterpriseSearch.searchApplications.list.indicesFlyout.table.health.columnTitle',
         {
           defaultMessage: 'Index health',
         }
@@ -100,7 +100,7 @@ export const EngineListIndicesFlyout: React.FC = () => {
     {
       field: 'count',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.enginesList.indicesFlyout.table.docsCount.columnTitle',
+        'xpack.enterpriseSearch.searchApplications.list.indicesFlyout.table.docsCount.columnTitle',
         {
           defaultMessage: 'Docs count',
         }
@@ -117,15 +117,18 @@ export const EngineListIndicesFlyout: React.FC = () => {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="engineListFlyout">
-              {i18n.translate('xpack.enterpriseSearch.content.enginesList.indicesFlyout.title', {
-                defaultMessage: 'View Indices',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.searchApplications.list.indicesFlyout.title',
+                {
+                  defaultMessage: 'View Indices',
+                }
+              )}
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.enginesList.indicesFlyout.subTitle"
+              id="xpack.enterpriseSearch.searchApplications.list.indicesFlyout.subTitle"
               defaultMessage="View the indices associated with {engineName}"
               values={{
                 engineName: fetchEngineName,

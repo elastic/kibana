@@ -55,7 +55,7 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchApplication>> = [
     {
       field: 'name',
-      name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {
+      name: i18n.translate('xpack.enterpriseSearch.searchApplications.list.table.column.name', {
         defaultMessage: 'Search Application Name',
       }),
       mobileOptions: {
@@ -77,15 +77,18 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
     },
     {
       field: 'updated_at_millis',
-      name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.lastUpdated', {
-        defaultMessage: 'Last updated',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.list.table.column.lastUpdated',
+        {
+          defaultMessage: 'Last updated',
+        }
+      ),
       dataType: 'number',
       render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
     },
     {
       field: 'indices',
-      name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.indices', {
+      name: i18n.translate('xpack.enterpriseSearch.searchApplications.list.table.column.indices', {
         defaultMessage: 'Indices',
       }),
       align: 'right',
@@ -98,7 +101,7 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
           onClick={() => viewSearchApplicationIndices(searchApplication.name)}
         >
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
+            id="xpack.enterpriseSearch.searchApplications.list.table.column.view.indices"
             defaultMessage="{indicesCount, number} {indicesCount, plural, one {index} other {indices}}"
             values={{ indicesCount: indices.length }}
           />
@@ -107,14 +110,14 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
     },
 
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.actions', {
+      name: i18n.translate('xpack.enterpriseSearch.searchApplications.list.table.column.actions', {
         defaultMessage: 'Actions',
       }),
       actions: [
         {
           name: MANAGE_BUTTON_LABEL,
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.enginesList.table.column.actions.view.buttonDescription',
+            'xpack.enterpriseSearch.searchApplications.list.table.column.actions.view.buttonDescription',
             {
               defaultMessage: 'View this search application',
             }
@@ -131,7 +134,7 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
         {
           color: 'danger',
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.enginesList.table.column.action.delete.buttonDescription',
+            'xpack.enterpriseSearch.searchApplications.list.table.column.action.delete.buttonDescription',
             {
               defaultMessage: 'Delete this search application',
             }
@@ -141,7 +144,7 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
           isPrimary: false,
           name: () =>
             i18n.translate(
-              'xpack.enterpriseSearch.content.engineList.table.column.actions.deleteEngineLabel',
+              'xpack.enterpriseSearch.searchApplications.list.table.column.actions.deleteSearchApplicationLabel',
               {
                 defaultMessage: 'Delete this search application',
               }
