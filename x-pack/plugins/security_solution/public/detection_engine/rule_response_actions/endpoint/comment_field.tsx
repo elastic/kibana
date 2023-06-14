@@ -18,7 +18,7 @@ interface ActionTypeFieldProps {
 
 const CONFIG = {
   label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commentLabel', {
-    defaultMessage: 'Comment (optional),
+    defaultMessage: 'Comment (optional)',
   }),
   helpText: (
     <FormattedMessage
