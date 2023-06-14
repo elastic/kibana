@@ -19,6 +19,7 @@ import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 import {
   ApmRuleType,
+  INTERVAL_MULTIPLIER_FOR_LOOKBACK,
   PreviewChartResponse,
 } from '../../../../../common/rules/apm_rule_types';
 import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
@@ -45,8 +46,10 @@ export async function getTransactionErrorCountChartPreview({
   );
 
   const intervalAsSeconds = getIntervalInSeconds(interval);
-  const intervalAsMs = intervalAsSeconds * 1000;
-  const start = end - intervalAsMs;
+  const lookbackIntervalAsSeconds =
+    intervalAsSeconds * INTERVAL_MULTIPLIER_FOR_LOOKBACK;
+  const lookbackIntervalAsMs = lookbackIntervalAsSeconds * 1000;
+  const start = end - lookbackIntervalAsMs;
 
   const query = {
     bool: {
