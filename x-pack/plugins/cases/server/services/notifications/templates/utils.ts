@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import path, { join, resolve } from 'path';
+import { join, resolve } from 'path';
 
 export const getDataPath = (filePath: string, fileName: string): string => {
   const dir = resolve(join(__dirname, filePath));
 
-  const dataPath = path.join(dir, fileName);
+  const dataPath = join(dir, fileName);
 
-  return dataPath ?? '';
+  if (!dataPath) {
+    throw new Error('Error finding the file!');
+  }
+
+  return dataPath;
 };

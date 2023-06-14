@@ -15,7 +15,7 @@ interface Params {
   severityColor: string;
 }
 
-export const CommonEmailMock = (caseUrl: string, caseData: Params) => {
+export const commonEmailMock = (caseUrl: string, caseData: Params) => {
   const trimmedDesc =
     caseData.description.length > 300
       ? `${caseData.description.slice(0, 300)}...`
@@ -227,7 +227,7 @@ export const CommonEmailMock = (caseUrl: string, caseData: Params) => {
 </html>`;
 };
 
-export const WithoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+export const withoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns=\"http://www.w3.org/1999/xhtml\">
 
 <head>
@@ -425,7 +425,7 @@ export const WithoutCaseUrlEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTM
 
 </html>`;
 
-export const MultiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+export const multiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns=\"http://www.w3.org/1999/xhtml\">
 
 <head>
@@ -635,7 +635,7 @@ export const MultiTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0
 
 </html>`;
 
-export const WithoutTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+export const withoutTagsEmailMock = `<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns=\"http://www.w3.org/1999/xhtml\">
 
 <head>

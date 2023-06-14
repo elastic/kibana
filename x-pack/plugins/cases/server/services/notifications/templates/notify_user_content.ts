@@ -7,11 +7,15 @@
 
 import fs from 'fs';
 import mustache from 'mustache';
+import path from 'path';
 import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import { CaseStatuses, CaseSeverity } from '../../../../common/api';
 import { getDataPath } from './utils';
 
-export const getStatusColor = (status: string): string => {
+const TAG_LIMIT = 3;
+const DESCRIPTION_LIMIT = 300;
+
+export const getStatusColor = (status: string | null | undefined): string => {
   if (!status) {
     return '#000';
   }
@@ -28,7 +32,7 @@ export const getStatusColor = (status: string): string => {
   }
 };
 
-export const getSeverityColor = (severity: string): string => {
+export const getSeverityColor = (severity: string | null | undefined): string => {
   if (!severity) {
     return '#000';
   }
@@ -47,39 +51,34 @@ export const getSeverityColor = (severity: string): string => {
   }
 };
 
-export const getEmailBodyContent = (
+export const getEmailBodyContent = async (
   caseData: CaseSavedObjectTransformed,
   caseUrl: string | null
 ): Promise<string> => {
-  const filePath = '../templates';
+  const templatesDir = path.join('..', 'templates');
   const fileName = 'notify_user_template.html';
 
-  const dataPath = getDataPath(filePath, fileName);
+  const dataPath = getDataPath(templatesDir, fileName);
 
-  return new Promise((resolve, reject) =>
-    fs.readFile(dataPath, 'utf8', (error, data) => {
-      if (error) {
-        reject(error);
-      } else {
-        const tags = caseData.attributes.tags.length ? caseData.attributes.tags : ['-'];
-        const hasMoreTags = caseData.attributes.tags.length > 3;
-        const template = mustache.render(data, {
-          title: caseData.attributes.title,
-          status: caseData.attributes.status,
-          statusColor: getStatusColor(caseData.attributes.status),
-          severity: caseData.attributes.severity,
-          severityColor: getSeverityColor(caseData.attributes.severity),
-          hasMoreTags: hasMoreTags ? caseData.attributes.tags.length - 3 : null,
-          tags: hasMoreTags ? tags.slice(0, 3) : tags,
-          description:
-            caseData.attributes.description.length > 300
-              ? `${caseData.attributes.description.slice(0, 300)}...`
-              : caseData.attributes.description,
-          url: caseUrl,
-        });
+  const content = await fs.promises.readFile(dataPath, 'utf8');
 
-        resolve(template);
-      }
-    })
-  );
+  const tags = caseData.attributes.tags.length ? caseData.attributes.tags : ['-'];
+  const hasMoreTags = caseData.attributes.tags.length > TAG_LIMIT;
+
+  const template = mustache.render(content, {
+    title: caseData.attributes.title,
+    status: caseData.attributes.status,
+    statusColor: getStatusColor(caseData.attributes.status),
+    severity: caseData.attributes.severity,
+    severityColor: getSeverityColor(caseData.attributes.severity),
+    hasMoreTags: hasMoreTags ? caseData.attributes.tags.length - TAG_LIMIT : null,
+    tags: tags.slice(0, TAG_LIMIT),
+    description:
+      caseData.attributes.description.length > DESCRIPTION_LIMIT
+        ? `${caseData.attributes.description.slice(0, DESCRIPTION_LIMIT)}...`
+        : caseData.attributes.description,
+    url: caseUrl,
+  });
+
+  return template;
 };

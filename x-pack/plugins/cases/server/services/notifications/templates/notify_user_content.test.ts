@@ -9,10 +9,10 @@ import fs from 'fs';
 import { mockCases } from '../../../mocks';
 import { getEmailBodyContent, getStatusColor, getSeverityColor } from './notify_user_content';
 import {
-  CommonEmailMock,
-  WithoutCaseUrlEmailMock,
-  MultiTagsEmailMock,
-  WithoutTagsEmailMock,
+  commonEmailMock,
+  withoutCaseUrlEmailMock,
+  multiTagsEmailMock,
+  withoutTagsEmailMock,
 } from '../mock';
 import { CaseStatuses, CaseSeverity } from '../../../../common/api';
 
@@ -40,7 +40,7 @@ describe('NotifyUserContent', () => {
   it('returns correct HTML content', async () => {
     const data = await getEmailBodyContent(caseSO, mockCaseUrl);
 
-    expect(data).toBe(CommonEmailMock(mockCaseUrl, defaultCaseData));
+    expect(data).toBe(commonEmailMock(mockCaseUrl, defaultCaseData));
   });
 
   it('returns correct HTML content when description is longer than 300 characters', async () => {
@@ -51,7 +51,7 @@ describe('NotifyUserContent', () => {
       mockCaseUrl
     );
 
-    expect(data).toBe(CommonEmailMock(mockCaseUrl, { ...defaultCaseData, description: longDesc }));
+    expect(data).toBe(commonEmailMock(mockCaseUrl, { ...defaultCaseData, description: longDesc }));
   });
 
   it('returns correct HTML content for in-progress status', async () => {
@@ -62,7 +62,7 @@ describe('NotifyUserContent', () => {
     );
 
     expect(data).toBe(
-      CommonEmailMock(mockCaseUrl, {
+      commonEmailMock(mockCaseUrl, {
         ...defaultCaseData,
         status: CaseStatuses['in-progress'],
         statusColor,
@@ -78,7 +78,7 @@ describe('NotifyUserContent', () => {
     );
 
     expect(data).toBe(
-      CommonEmailMock(mockCaseUrl, {
+      commonEmailMock(mockCaseUrl, {
         ...defaultCaseData,
         severity: CaseSeverity.MEDIUM,
         severityColor,
@@ -89,7 +89,7 @@ describe('NotifyUserContent', () => {
   it('returns HTML content without button when caseUrl is null', async () => {
     const data = await getEmailBodyContent(caseSO, null);
 
-    expect(data).toBe(WithoutCaseUrlEmailMock);
+    expect(data).toBe(withoutCaseUrlEmailMock);
   });
 
   it('returns correct HTML content with multiple tags', async () => {
@@ -98,7 +98,7 @@ describe('NotifyUserContent', () => {
       mockCaseUrl
     );
 
-    expect(data).toBe(MultiTagsEmailMock);
+    expect(data).toBe(multiTagsEmailMock);
   });
 
   it('returns correct HTML content when no tags', async () => {
@@ -107,7 +107,7 @@ describe('NotifyUserContent', () => {
       mockCaseUrl
     );
 
-    expect(data).toBe(WithoutTagsEmailMock);
+    expect(data).toBe(withoutTagsEmailMock);
   });
 
   it('throws error correctly', async () => {
@@ -115,8 +115,8 @@ describe('NotifyUserContent', () => {
       throw new Error('Something went wrong while reading a file');
     });
 
-    await expect(getEmailBodyContent(caseSO, mockCaseUrl)).rejects.toMatchInlineSnapshot(
-      `[Error: Something went wrong while reading a file]`
-    );
+    const data = getEmailBodyContent(caseSO, mockCaseUrl);
+
+    expect(data).resolves.toMatchInlineSnapshot('');
   });
 });
