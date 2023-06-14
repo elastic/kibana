@@ -353,7 +353,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     } = this.getState();
 
     const [selectedMin, selectedMax] = value ?? ['', ''];
-    const hasData = availableMin !== undefined && availableMax !== undefined;
+    const hasData = !Boolean(availableMin) && !Boolean(availableMax);
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
