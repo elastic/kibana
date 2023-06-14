@@ -11,6 +11,8 @@ import type {
   VersionedRoute,
   VersionedRouteConfig,
   AddVersionOpts,
+  RequestHandler,
+  KibanaResponseFactory,
 } from '@kbn/core-http-server';
 
 export type MockedVersionedRoute = jest.Mocked<VersionedRoute>;
@@ -44,7 +46,12 @@ export const createVersionedRouterMock = (): MockedVersionedRouter => {
 
 export interface RegisteredVersionedRoute {
   config: VersionedRouteConfig<any>;
-  versions: { [version: string]: { config: AddVersionOpts<any, any, any>; handler: any } };
+  versions: {
+    [version: string]: {
+      config: AddVersionOpts<any, any, any>;
+      handler: RequestHandler<any, any, any, any, any, KibanaResponseFactory>;
+    };
+  };
 }
 const getRoute = (
   router: Omit<MockedVersionedRouter, 'getRoute'>,
