@@ -60,7 +60,7 @@ export const defaultExpression = {
 
 export function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
-  const { data, docLinks } = useKibana().services;
+  const { data, dataViews, dataViewEditor, docLinks } = useKibana().services;
   const { source } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
@@ -335,6 +335,7 @@ export function Expressions(props: Props) {
   return (
     <>
       <DataViewSelectPopover
+        dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
         onSelectDataView={onSelectDataView}
         onChangeMetaData={({ adHocDataViewList }) => {
