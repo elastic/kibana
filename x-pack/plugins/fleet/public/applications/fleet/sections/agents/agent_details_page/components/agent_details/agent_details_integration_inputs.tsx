@@ -23,7 +23,7 @@ import { useLink } from '../../../../../hooks';
 
 import { AgentDetailsIntegrationInputStatus } from './agent_details_integration_input_status';
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
-import { getUnitsByPackage, InputStatusFormatter } from './input_status_utils';
+import { getInputUnitsByPackage, InputStatusFormatter } from './input_status_utils';
 
 const StyledEuiLink = styled(EuiLink)`
   font-size: ${(props) => props.theme.eui.euiFontSizeS};
@@ -77,7 +77,7 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
           return new Map<string, InputStatusFormatter>();
         }
         if (current.enabled) {
-          const agentUnit = getUnitsByPackage(agent.components, packagePolicy)?.find((i) =>
+          const agentUnit = getInputUnitsByPackage(agent.components, packagePolicy)?.find((i) =>
             i.id.match(new RegExp(current.type))
           );
           acc.set(

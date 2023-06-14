@@ -44,11 +44,11 @@ export class InputStatusFormatter {
   }
 }
 
-export const getUnitsByPackage = (
+export const getInputUnitsByPackage = (
   agentComponents: FleetServerAgentComponent[],
   packagePolicy: PackagePolicy
 ): FleetServerAgentComponentUnit[] => {
-  const re = new RegExp(`(${packagePolicy.id}|${packagePolicy.package?.name})`);
+  const re = new RegExp(packagePolicy.id);
   return agentComponents
     .map((c) => c.units)
     .flat()
