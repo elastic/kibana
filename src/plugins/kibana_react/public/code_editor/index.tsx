@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 
-import { useKibanaTheme } from '../theme/use_theme';
+import { useKibanaTheme } from '../theme';
 import type { Props } from './code_editor';
 
 export * from './languages/constants';

@@ -8,7 +8,7 @@
 
 import { CoreTheme } from '@kbn/core-theme-browser';
 import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '..';
+import { useKibana } from '../context';
 
 export const useKibanaTheme = (): CoreTheme => {
   const defaultTheme: CoreTheme = { darkMode: false };
