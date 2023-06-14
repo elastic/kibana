@@ -74,7 +74,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
           services={{
             uiSettings: this.props.settingsService.client,
             settings: this.props.settingsService,
-            theme: this.props.theme,
+            theme: { theme$: this.props.theme },
           }}
         >
           <Form
