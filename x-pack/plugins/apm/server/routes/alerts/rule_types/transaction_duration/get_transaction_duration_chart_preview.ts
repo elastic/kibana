@@ -56,7 +56,7 @@ export async function getTransactionDurationChartPreview({
     transactionName,
     interval,
     end,
-    groupBy,
+    groupBy: groupByFields,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -93,7 +93,7 @@ export async function getTransactionDurationChartPreview({
 
   const allGroupByFields = getAllGroupByFields(
     ApmRuleType.TransactionDuration,
-    groupBy
+    groupByFields
   );
 
   const aggs = {

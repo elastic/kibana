@@ -15,19 +15,23 @@ import {
 
 export const getAllGroupByFields = (
   ruleType: string,
-  ruleParamsGroupBy: string[] | undefined = []
+  ruleParamsGroupByFields: string[] | undefined = []
 ) => {
-  let predefinedGroupBy: string[] = [];
+  let predefinedGroupByFields: string[] = [];
 
   switch (ruleType) {
     case ApmRuleType.TransactionDuration:
     case ApmRuleType.TransactionErrorRate:
-      predefinedGroupBy = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE];
+      predefinedGroupByFields = [
+        SERVICE_NAME,
+        SERVICE_ENVIRONMENT,
+        TRANSACTION_TYPE,
+      ];
       break;
     case ApmRuleType.ErrorCount:
-      predefinedGroupBy = [SERVICE_NAME, SERVICE_ENVIRONMENT];
+      predefinedGroupByFields = [SERVICE_NAME, SERVICE_ENVIRONMENT];
       break;
   }
 
-  return union(predefinedGroupBy, ruleParamsGroupBy);
+  return union(predefinedGroupByFields, ruleParamsGroupByFields);
 };
