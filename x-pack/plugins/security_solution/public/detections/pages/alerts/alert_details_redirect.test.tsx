@@ -7,6 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { AlertDetailsRedirect } from './alert_details_redirect';
 import {
   createSecuritySolutionStorageMock,
@@ -58,7 +59,9 @@ describe('AlertDetailsRedirect', () => {
       render(
         <TestProviders store={store}>
           <Router history={historyMock}>
-            <AlertDetailsRedirect />
+            <CompatRouter>
+              <AlertDetailsRedirect />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -87,7 +90,9 @@ describe('AlertDetailsRedirect', () => {
       render(
         <TestProviders store={store}>
           <Router history={historyMock}>
-            <AlertDetailsRedirect />
+            <CompatRouter>
+              <AlertDetailsRedirect />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -115,7 +120,9 @@ describe('AlertDetailsRedirect', () => {
       render(
         <TestProviders store={store}>
           <Router history={historyMock}>
-            <AlertDetailsRedirect />
+            <CompatRouter>
+              <AlertDetailsRedirect />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -149,7 +156,9 @@ describe('AlertDetailsRedirect', () => {
         render(
           <TestProviders store={store}>
             <Router history={historyMock}>
-              <AlertDetailsRedirect />
+              <CompatRouter>
+                <AlertDetailsRedirect />
+              </CompatRouter>
             </Router>
           </TestProviders>
         );

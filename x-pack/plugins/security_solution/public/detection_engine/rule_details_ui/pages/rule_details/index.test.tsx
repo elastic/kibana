@@ -24,6 +24,7 @@ import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_wit
 
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { mockHistory, Router } from '../../../../common/mock/router';
 
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
@@ -294,7 +295,9 @@ describe('RuleDetailsPageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPage />
+          <CompatRouter>
+            <RuleDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -317,7 +320,9 @@ describe('RuleDetailsPageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPage />
+          <CompatRouter>
+            <RuleDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -339,7 +344,9 @@ describe('RuleDetailsPageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPage />
+          <CompatRouter>
+            <RuleDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -370,7 +377,9 @@ describe('RuleDetailsPageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPage />
+          <CompatRouter>
+            <RuleDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -402,7 +411,9 @@ describe('RuleDetailsPageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPage />
+          <CompatRouter>
+            <RuleDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -438,7 +449,9 @@ describe('RuleDetailsPageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPage />
+          <CompatRouter>
+            <RuleDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );

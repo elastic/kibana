@@ -7,6 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { Router, Switch, Redirect } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -22,11 +23,13 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
   return (
     <Router history={history}>
-      <Switch>
-        <Redirect exact from="/" to={ROUTES.list} />
-        <Route exact path={ROUTES.list} component={PolicyList} />
-        <Route path={ROUTES.edit} component={EditPolicy} />
-      </Switch>
+      <CompatRouter>
+        <Switch>
+          <Redirect exact from="/" to={ROUTES.list} />
+          <Route exact path={ROUTES.list} component={PolicyList} />
+          <Route path={ROUTES.edit} component={EditPolicy} />
+        </Switch>
+      </CompatRouter>
     </Router>
   );
 };

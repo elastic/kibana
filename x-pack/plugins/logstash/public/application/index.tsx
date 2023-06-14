@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Redirect } from 'react-router-dom';
-import { useParams } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -50,51 +50,53 @@ export const renderApp = async (
     <core.i18n.Context>
       <KibanaThemeProvider theme$={theme$}>
         <Router history={history}>
-          <Switch>
-            <Route
-              path={['/', '']}
-              exact
-              render={() => {
-                setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());
-                return (
-                  <PipelineList
-                    clusterService={clusterService}
-                    isReadOnly={logstashLicenseService.isReadOnly}
-                    isForbidden={true}
-                    isLoading={false}
-                    licenseService={logstashLicenseService}
-                    monitoringService={monitoringService}
-                    openPipeline={(id: string) => history.push(`/pipeline/${id}/edit`)}
-                    clonePipeline={(id: string) => history.push(`/pipeline/${id}/edit?clone`)}
-                    createPipeline={() => history.push(`pipeline/new-pipeline`)}
-                    pipelinesService={pipelinesService}
-                    toastNotifications={core.notifications.toasts}
-                  />
-                );
-              }}
-            />
-            <Route path="/pipeline/new-pipeline" exact>
-              <PipelineEditView
-                history={history}
-                setBreadcrumbs={setBreadcrumbs}
-                logstashLicenseService={logstashLicenseService}
-                pipelineService={pipelineService}
-                toasts={core.notifications.toasts}
+          <CompatRouter>
+            <Switch>
+              <Route
+                path={['/', '']}
+                exact
+                render={() => {
+                  setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());
+                  return (
+                    <PipelineList
+                      clusterService={clusterService}
+                      isReadOnly={logstashLicenseService.isReadOnly}
+                      isForbidden={true}
+                      isLoading={false}
+                      licenseService={logstashLicenseService}
+                      monitoringService={monitoringService}
+                      openPipeline={(id: string) => history.push(`/pipeline/${id}/edit`)}
+                      clonePipeline={(id: string) => history.push(`/pipeline/${id}/edit?clone`)}
+                      createPipeline={() => history.push(`pipeline/new-pipeline`)}
+                      pipelinesService={pipelinesService}
+                      toastNotifications={core.notifications.toasts}
+                    />
+                  );
+                }}
               />
-            </Route>
-            <Route path="/pipeline/:id" exact>
-              <RedirectToEditRoute />
-            </Route>
-            <Route path="/pipeline/:id/edit" exact>
-              <PipelineEditView
-                history={history}
-                setBreadcrumbs={setBreadcrumbs}
-                logstashLicenseService={logstashLicenseService}
-                pipelineService={pipelineService}
-                toasts={core.notifications.toasts}
-              />
-            </Route>
-          </Switch>
+              <Route path="/pipeline/new-pipeline" exact>
+                <PipelineEditView
+                  history={history}
+                  setBreadcrumbs={setBreadcrumbs}
+                  logstashLicenseService={logstashLicenseService}
+                  pipelineService={pipelineService}
+                  toasts={core.notifications.toasts}
+                />
+              </Route>
+              <Route path="/pipeline/:id" exact>
+                <RedirectToEditRoute />
+              </Route>
+              <Route path="/pipeline/:id/edit" exact>
+                <PipelineEditView
+                  history={history}
+                  setBreadcrumbs={setBreadcrumbs}
+                  logstashLicenseService={logstashLicenseService}
+                  pipelineService={pipelineService}
+                  toasts={core.notifications.toasts}
+                />
+              </Route>
+            </Switch>
+          </CompatRouter>
         </Router>
       </KibanaThemeProvider>
     </core.i18n.Context>,

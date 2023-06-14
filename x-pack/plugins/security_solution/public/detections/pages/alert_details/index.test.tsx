@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Router, useParams } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { render } from '@testing-library/react';
 import { AlertDetailsPage } from '.';
 import { TestProviders } from '../../../common/mock';
@@ -81,7 +82,9 @@ describe('Alert Details Page', () => {
     const { getByTestId } = render(
       <TestProviders>
         <Router history={getMockHistory()}>
-          <AlertDetailsPage />
+          <CompatRouter>
+            <AlertDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -94,7 +97,9 @@ describe('Alert Details Page', () => {
     const { getByTestId } = render(
       <TestProviders>
         <Router history={getMockHistory()}>
-          <AlertDetailsPage />
+          <CompatRouter>
+            <AlertDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -113,7 +118,9 @@ describe('Alert Details Page', () => {
     const { getByTestId } = render(
       <TestProviders>
         <Router history={getMockHistory()}>
-          <AlertDetailsPage />
+          <CompatRouter>
+            <AlertDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -134,7 +141,9 @@ describe('Alert Details Page', () => {
     render(
       <TestProviders>
         <Router history={getMockHistory()}>
-          <AlertDetailsPage />
+          <CompatRouter>
+            <AlertDetailsPage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );

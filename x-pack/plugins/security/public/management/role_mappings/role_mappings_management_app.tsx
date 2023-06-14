@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, useParams } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -95,39 +96,41 @@ export const roleMappingsManagementApp = Object.freeze({
             <core.i18n.Context>
               <KibanaThemeProvider theme$={theme$}>
                 <Router history={history}>
-                  <ReadonlyBadge
-                    data-test-subj="readOnlyBadge"
-                    featureId="role_mappings"
-                    tooltip={i18n.translate(
-                      'xpack.security.management.roleMappings.readonlyTooltip',
-                      {
-                        defaultMessage: 'Unable to create or edit role mappings',
-                      }
-                    )}
-                  />
-                  <BreadcrumbsProvider
-                    onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
-                  >
-                    <Breadcrumb text={title} href="/">
-                      <Route path={['/', '']} exact={true}>
-                        <RoleMappingsGridPage
-                          notifications={core.notifications}
-                          rolesAPIClient={new RolesAPIClient(core.http)}
-                          roleMappingsAPI={roleMappingsAPIClient}
-                          docLinks={core.docLinks}
-                          history={history}
-                          navigateToApp={core.application.navigateToApp}
-                          readOnly={!core.application.capabilities.role_mappings.save}
-                        />
-                      </Route>
-                      <Route path="/edit/:name?">
-                        <EditRoleMappingsPageWithBreadcrumbs action="edit" />
-                      </Route>
-                      <Route path="/clone/:name">
-                        <EditRoleMappingsPageWithBreadcrumbs action="clone" />
-                      </Route>
-                    </Breadcrumb>
-                  </BreadcrumbsProvider>
+                  <CompatRouter>
+                    <ReadonlyBadge
+                      data-test-subj="readOnlyBadge"
+                      featureId="role_mappings"
+                      tooltip={i18n.translate(
+                        'xpack.security.management.roleMappings.readonlyTooltip',
+                        {
+                          defaultMessage: 'Unable to create or edit role mappings',
+                        }
+                      )}
+                    />
+                    <BreadcrumbsProvider
+                      onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
+                    >
+                      <Breadcrumb text={title} href="/">
+                        <Route path={['/', '']} exact={true}>
+                          <RoleMappingsGridPage
+                            notifications={core.notifications}
+                            rolesAPIClient={new RolesAPIClient(core.http)}
+                            roleMappingsAPI={roleMappingsAPIClient}
+                            docLinks={core.docLinks}
+                            history={history}
+                            navigateToApp={core.application.navigateToApp}
+                            readOnly={!core.application.capabilities.role_mappings.save}
+                          />
+                        </Route>
+                        <Route path="/edit/:name?">
+                          <EditRoleMappingsPageWithBreadcrumbs action="edit" />
+                        </Route>
+                        <Route path="/clone/:name">
+                          <EditRoleMappingsPageWithBreadcrumbs action="clone" />
+                        </Route>
+                      </Breadcrumb>
+                    </BreadcrumbsProvider>
+                  </CompatRouter>
                 </Router>
               </KibanaThemeProvider>
             </core.i18n.Context>

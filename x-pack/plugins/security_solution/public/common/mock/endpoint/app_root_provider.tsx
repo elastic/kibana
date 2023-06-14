@@ -10,6 +10,7 @@ import React, { memo, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';
@@ -47,7 +48,9 @@ export const AppRootProvider = memo<{
           <KibanaContextProvider services={services}>
             <EuiThemeProvider darkMode={isDarkMode}>
               <Router history={history}>
-                <RouteCapture>{children}</RouteCapture>
+                <CompatRouter>
+                  <RouteCapture>{children}</RouteCapture>
+                </CompatRouter>
               </Router>
             </EuiThemeProvider>
           </KibanaContextProvider>

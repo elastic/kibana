@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Router, Switch, useHistory } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -88,20 +89,22 @@ export const AgentsApp: React.FunctionComponent = () => {
 
   return (
     <Router history={history}>
-      <Switch>
-        <Route path={FLEET_ROUTING_PATHS.agent_details}>
-          <AgentDetailsPage />
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.agents}>
-          <DefaultLayout section="agents" rightColumn={rightColumn}>
-            {displayInstructions ? (
-              <FleetServerRequirementPage showEnrollmentRecommendation={false} />
-            ) : (
-              <AgentListPage />
-            )}
-          </DefaultLayout>
-        </Route>
-      </Switch>
+      <CompatRouter>
+        <Switch>
+          <Route path={FLEET_ROUTING_PATHS.agent_details}>
+            <AgentDetailsPage />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.agents}>
+            <DefaultLayout section="agents" rightColumn={rightColumn}>
+              {displayInstructions ? (
+                <FleetServerRequirementPage showEnrollmentRecommendation={false} />
+              ) : (
+                <AgentListPage />
+              )}
+            </DefaultLayout>
+          </Route>
+        </Switch>
+      </CompatRouter>
     </Router>
   );
 };

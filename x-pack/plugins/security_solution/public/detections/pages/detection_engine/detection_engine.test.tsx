@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import '../../../common/mock/match_media';
 import {
   createSecuritySolutionStorageMock,
@@ -247,7 +248,9 @@ describe('DetectionEnginePageComponent', () => {
     const { getByTestId } = render(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <DetectionEnginePage />
+          <CompatRouter>
+            <DetectionEnginePage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -260,7 +263,9 @@ describe('DetectionEnginePageComponent', () => {
     const { getByTestId } = render(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <DetectionEnginePage />
+          <CompatRouter>
+            <DetectionEnginePage />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -277,7 +282,9 @@ describe('DetectionEnginePageComponent', () => {
       render(
         <TestProviders store={getStoreWithCustomState(stateWithBuildingBlockAlertsEnabled)}>
           <Router history={mockHistory}>
-            <DetectionEnginePage />
+            <CompatRouter>
+              <DetectionEnginePage />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -315,7 +322,9 @@ describe('DetectionEnginePageComponent', () => {
       render(
         <TestProviders store={getStoreWithCustomState(stateWithThreatIndicatorsAlertEnabled)}>
           <Router history={mockHistory}>
-            <DetectionEnginePage />
+            <CompatRouter>
+              <DetectionEnginePage />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -361,7 +370,9 @@ describe('DetectionEnginePageComponent', () => {
       render(
         <TestProviders store={store}>
           <Router history={mockHistory}>
-            <DetectionEnginePage />
+            <CompatRouter>
+              <DetectionEnginePage />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -404,7 +415,9 @@ describe('DetectionEnginePageComponent', () => {
       render(
         <TestProviders store={store}>
           <Router history={mockHistory}>
-            <DetectionEnginePage />
+            <CompatRouter>
+              <DetectionEnginePage />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -435,7 +448,9 @@ describe('DetectionEnginePageComponent', () => {
       render(
         <TestProviders store={store}>
           <Router history={mockHistory}>
-            <DetectionEnginePage />
+            <CompatRouter>
+              <DetectionEnginePage />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );

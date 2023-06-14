@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { AddTimelineButton } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -174,7 +175,9 @@ describe('AddTimelineButton', () => {
       render(
         <TestProviders>
           <Router history={mockHistory}>
-            <AddTimelineButton {...props} />
+            <CompatRouter>
+              <AddTimelineButton {...props} />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );

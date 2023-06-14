@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { SecurityRoutePageWrapper } from '.';
 import { SecurityPageName } from '../../../../common';
 import { TestProviders } from '../../mock';
@@ -30,7 +31,9 @@ const mockHistory = generateHistoryMock();
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <Router history={mockHistory}>
-    <TestProviders>{children}</TestProviders>
+    <CompatRouter>
+      <TestProviders>{children}</TestProviders>
+    </CompatRouter>
   </Router>
 );
 
@@ -39,9 +42,11 @@ describe('SecurityRoutePageWrapper', () => {
     mockUseLinkAuthorized.mockReturnValue(true);
     const { getByTestId } = render(
       <Router history={mockHistory}>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
-          <TestComponent />
-        </SecurityRoutePageWrapper>
+        <CompatRouter>
+          <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+            <TestComponent />
+          </SecurityRoutePageWrapper>
+        </CompatRouter>
       </Router>,
 
       { wrapper: Wrapper }
@@ -57,9 +62,11 @@ describe('SecurityRoutePageWrapper', () => {
     mockUseUpsellingPage.mockReturnValue(TestUpsellPage);
     const { getByTestId } = render(
       <Router history={mockHistory}>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
-          <TestComponent />
-        </SecurityRoutePageWrapper>
+        <CompatRouter>
+          <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+            <TestComponent />
+          </SecurityRoutePageWrapper>
+        </CompatRouter>
       </Router>,
 
       { wrapper: Wrapper }
@@ -73,9 +80,11 @@ describe('SecurityRoutePageWrapper', () => {
     mockUseUpsellingPage.mockReturnValue(undefined);
     const { getByTestId } = render(
       <Router history={mockHistory}>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
-          <TestComponent />
-        </SecurityRoutePageWrapper>
+        <CompatRouter>
+          <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+            <TestComponent />
+          </SecurityRoutePageWrapper>
+        </CompatRouter>
       </Router>,
 
       { wrapper: Wrapper }

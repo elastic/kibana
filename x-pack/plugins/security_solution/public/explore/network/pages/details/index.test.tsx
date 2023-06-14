@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Router, useParams } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import '../../../../common/mock/match_media';
 
@@ -167,7 +168,9 @@ describe('Network Details', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={getMockHistory(ip)}>
-          <NetworkDetails />
+          <CompatRouter>
+            <NetworkDetails />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -187,7 +190,9 @@ describe('Network Details', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={getMockHistory(ip)}>
-          <NetworkDetails />
+          <CompatRouter>
+            <NetworkDetails />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );

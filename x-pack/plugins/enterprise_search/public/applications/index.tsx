@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
@@ -128,17 +129,19 @@ export const renderApp = (
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
-                <App
-                  access={productAccess}
-                  appSearch={appSearch}
-                  configuredLimits={configuredLimits}
-                  enterpriseSearchVersion={enterpriseSearchVersion}
-                  features={features}
-                  kibanaVersion={kibanaVersion}
-                  readOnlyMode={readOnlyMode}
-                  searchOAuth={searchOAuth}
-                  workplaceSearch={workplaceSearch}
-                />
+                <CompatRouter>
+                  <App
+                    access={productAccess}
+                    appSearch={appSearch}
+                    configuredLimits={configuredLimits}
+                    enterpriseSearchVersion={enterpriseSearchVersion}
+                    features={features}
+                    kibanaVersion={kibanaVersion}
+                    readOnlyMode={readOnlyMode}
+                    searchOAuth={searchOAuth}
+                    workplaceSearch={workplaceSearch}
+                  />
+                </CompatRouter>
                 <Toasts />
               </Router>
             </Provider>

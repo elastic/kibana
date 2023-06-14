@@ -11,6 +11,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -269,12 +270,14 @@ export const FleetAppContext: React.FC<{
                         <UIExtensionsContext.Provider value={extensions}>
                           <FleetStatusProvider defaultFleetStatus={fleetStatus}>
                             <Router history={history}>
-                              <PackageInstallProvider
-                                notifications={startServices.notifications}
-                                theme$={theme$}
-                              >
-                                <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                              </PackageInstallProvider>
+                              <CompatRouter>
+                                <PackageInstallProvider
+                                  notifications={startServices.notifications}
+                                  theme$={theme$}
+                                >
+                                  <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                                </PackageInstallProvider>
+                              </CompatRouter>
                             </Router>
                           </FleetStatusProvider>
                         </UIExtensionsContext.Provider>

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Redirect } from 'react-router-dom';
-import { useParams } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -143,29 +143,31 @@ export async function renderApp(
             }}
           >
             <Router history={history}>
-              <Switch>
-                <Route path={`/map/:savedMapId`}>
-                  <MapAppRoute {...mapAppRouteProps} />
-                </Route>
-                <Route exact path={`/map`}>
-                  <MapAppRoute {...mapAppRouteProps} />
-                </Route>
-                {/* // Redirect other routes to list, or if hash-containing, their non-hash equivalents */}
-                <Route
-                  path={``}
-                  render={({ location: { pathname, hash } }) => {
-                    if (hash) {
-                      // Remove leading hash
-                      const newPath = hash.substr(1);
-                      return <Redirect to={newPath} />;
-                    } else if (pathname === '/' || pathname === '') {
-                      return <ListPage history={history} stateTransfer={stateTransfer} />;
-                    } else {
-                      return <Redirect to="/" />;
-                    }
-                  }}
-                />
-              </Switch>
+              <CompatRouter>
+                <Switch>
+                  <Route path={`/map/:savedMapId`}>
+                    <MapAppRoute {...mapAppRouteProps} />
+                  </Route>
+                  <Route exact path={`/map`}>
+                    <MapAppRoute {...mapAppRouteProps} />
+                  </Route>
+                  {/* // Redirect other routes to list, or if hash-containing, their non-hash equivalents */}
+                  <Route
+                    path={``}
+                    render={({ location: { pathname, hash } }) => {
+                      if (hash) {
+                        // Remove leading hash
+                        const newPath = hash.substr(1);
+                        return <Redirect to={newPath} />;
+                      } else if (pathname === '/' || pathname === '') {
+                        return <ListPage history={history} stateTransfer={stateTransfer} />;
+                      } else {
+                        return <Redirect to="/" />;
+                      }
+                    }}
+                  />
+                </Switch>
+              </CompatRouter>
             </Router>
           </TableListViewKibanaProvider>
         </KibanaThemeProvider>

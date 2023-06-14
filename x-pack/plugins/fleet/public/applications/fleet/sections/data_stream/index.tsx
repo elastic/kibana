@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Router, Switch, useHistory } from 'react-router-dom';
-import { CompatRouter } from 'react-rotuer-dom-v5-compat';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';

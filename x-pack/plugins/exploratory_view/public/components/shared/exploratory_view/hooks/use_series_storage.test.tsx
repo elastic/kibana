@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';
@@ -70,18 +71,20 @@ describe('userSeriesStorage', function () {
 
     render(
       <Router history={getHistoryFromUrl('/app/exploratory-view/configure')}>
-        <Route path={'/app/exploratory-view/:mode'}>
-          <UrlStorageContextProvider
-            storage={{
-              get: jest
-                .fn()
-                .mockImplementation((key: string) => (key === 'sr' ? seriesData : null)),
-              set: jest.fn(),
-            }}
-          >
-            <TestComponent />
-          </UrlStorageContextProvider>
-        </Route>
+        <CompatRouter>
+          <Route path={'/app/exploratory-view/:mode'}>
+            <UrlStorageContextProvider
+              storage={{
+                get: jest
+                  .fn()
+                  .mockImplementation((key: string) => (key === 'sr' ? seriesData : null)),
+                set: jest.fn(),
+              }}
+            >
+              <TestComponent />
+            </UrlStorageContextProvider>
+          </Route>
+        </CompatRouter>
       </Router>
     );
 

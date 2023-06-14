@@ -8,6 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
@@ -96,7 +97,9 @@ describe('Users - rendering', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Users />
+          <CompatRouter>
+            <Users />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );

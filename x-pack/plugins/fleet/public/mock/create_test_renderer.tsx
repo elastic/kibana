@@ -13,6 +13,7 @@ import { render as reactRender, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -72,7 +73,11 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     return (
       <startServices.i18n.Context>
         <Router history={mountHistory}>
-          <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+          <CompatRouter>
+            <KibanaContextProvider services={{ ...startServices }}>
+              {children}
+            </KibanaContextProvider>
+          </CompatRouter>
         </Router>
       </startServices.i18n.Context>
     );

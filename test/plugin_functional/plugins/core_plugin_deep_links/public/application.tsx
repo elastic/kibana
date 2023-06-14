@@ -10,7 +10,7 @@ import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
-import { CompatRoute } from 'react-router-dom-v5-compat';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import {

@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { DashboardView } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
@@ -68,7 +69,9 @@ describe('DashboardView', () => {
   test('render when no error state', () => {
     const { queryByTestId } = render(
       <Router history={mockHistory}>
-        <DashboardView />
+        <CompatRouter>
+          <DashboardView />
+        </CompatRouter>
       </Router>,
       { wrapper: TestProviders }
     );
@@ -83,7 +86,9 @@ describe('DashboardView', () => {
     });
     const { queryByTestId } = render(
       <Router history={mockHistory}>
-        <DashboardView />
+        <CompatRouter>
+          <DashboardView />
+        </CompatRouter>
       </Router>,
       { wrapper: TestProviders }
     );
@@ -95,7 +100,9 @@ describe('DashboardView', () => {
   test('render dashboard view with height', () => {
     const { queryByTestId } = render(
       <Router history={mockHistory}>
-        <DashboardView />
+        <CompatRouter>
+          <DashboardView />
+        </CompatRouter>
       </Router>,
       { wrapper: TestProviders }
     );

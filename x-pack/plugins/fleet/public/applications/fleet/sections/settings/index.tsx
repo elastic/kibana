@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { Router, Switch, useHistory, Redirect } from 'react-router-dom';
-import { useParams } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import {
@@ -171,40 +171,42 @@ export const SettingsApp = withConfirmModalProvider(() => {
   return (
     <DefaultLayout section="settings">
       <Router history={history}>
-        <Switch>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
-            <EditFleetServerHostRoute onCloseCallback={onCloseCallback} />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
-            <EuiPortal>
-              <FleetServerFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
-            <EuiPortal>
-              <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
-            <EuiPortal>
-              <FleetProxyFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
-            <EditFleetProxyRoute onCloseCallback={onCloseCallback} />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
-            <EditSettingsOutputRoute onCloseCallback={onCloseCallback} />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
-            <EuiPortal>
-              <EditDownloadSourceFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
-            <EditDownloadSourceRoute onCloseCallback={onCloseCallback} />
-          </Route>
-        </Switch>
+        <CompatRouter>
+          <Switch>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
+              <EditFleetServerHostRoute onCloseCallback={onCloseCallback} />
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
+              <EuiPortal>
+                <FleetServerFlyout onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
+              <EuiPortal>
+                <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
+              <EuiPortal>
+                <FleetProxyFlyout onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
+              <EditFleetProxyRoute onCloseCallback={onCloseCallback} />
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
+              <EditSettingsOutputRoute onCloseCallback={onCloseCallback} />
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
+              <EuiPortal>
+                <EditDownloadSourceFlyout onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
+              <EditDownloadSourceRoute onCloseCallback={onCloseCallback} />
+            </Route>
+          </Switch>
+        </CompatRouter>
       </Router>
       <SettingsPage
         deleteFleetProxy={deleteFleetProxy}

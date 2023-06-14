@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { render } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 
@@ -30,7 +31,9 @@ describe('AnomalyResultsViewSelector', () => {
     const { getByTestId } = render(
       <I18nProvider>
         <Router history={history}>
-          <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
+          <CompatRouter>
+            <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
+          </CompatRouter>
         </Router>
       </I18nProvider>
     );

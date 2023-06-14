@@ -10,6 +10,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -78,7 +79,9 @@ const AppRootProvider = memo<{
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <EuiThemeProvider darkMode={isDarkMode}>
-          <Router history={history}>{children}</Router>
+          <Router history={history}>
+            <CompatRouter>{children}</CompatRouter>
+          </Router>
         </EuiThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
