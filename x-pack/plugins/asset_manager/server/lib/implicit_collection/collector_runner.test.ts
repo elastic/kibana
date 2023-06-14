@@ -33,10 +33,10 @@ describe(__filename, () => {
     });
 
     const collector1 = jest.fn(async (opts: CollectorOptions) => {
-      return [];
+      return { assets: [] };
     });
     const collector2 = jest.fn(async (opts: CollectorOptions) => {
-      return [];
+      return { assets: [] };
     });
 
     runner.registerCollector('foo', collector1);
@@ -61,7 +61,7 @@ describe(__filename, () => {
       throw new Error('no');
     });
     const collector2 = jest.fn(async (opts: CollectorOptions) => {
-      return [];
+      return { assets: [] };
     });
 
     runner.registerCollector('foo', collector1);
@@ -84,10 +84,12 @@ describe(__filename, () => {
     });
 
     const collector = jest.fn(async (opts: CollectorOptions) => {
-      return [
-        { 'asset.kind': 'container', 'asset.ean': 'foo' },
-        { 'asset.kind': 'pod', 'asset.ean': 'bar' },
-      ] as Asset[];
+      return {
+        assets: [
+          { 'asset.kind': 'container', 'asset.ean': 'foo' },
+          { 'asset.kind': 'pod', 'asset.ean': 'bar' },
+        ] as Asset[],
+      };
     });
 
     runner.registerCollector('foo', collector);
