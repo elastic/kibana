@@ -10,6 +10,7 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AggregationType,
   ApmRuleType,
+  PreviewChartResponse,
 } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
@@ -34,11 +35,6 @@ import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
 
-export type TransactionDurationChartPreviewResponse = Array<{
-  name: string;
-  data: Array<{ x: number; y: number | null }>;
-}>;
-
 export async function getTransactionDurationChartPreview({
   alertParams,
   config,
@@ -47,7 +43,7 @@ export async function getTransactionDurationChartPreview({
   alertParams: AlertParams;
   config: APMConfig;
   apmEventClient: APMEventClient;
-}): Promise<TransactionDurationChartPreviewResponse> {
+}): Promise<PreviewChartResponse> {
   const {
     aggregationType = AggregationType.Avg,
     environment,
