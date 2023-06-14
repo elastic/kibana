@@ -28,6 +28,8 @@ const bodySchema = schema.object({
   document: schema.object({}, { unknowns: 'allow' }),
 });
 
+const valueSchema = schema.oneOf([schema.boolean(), schema.number(), schema.string()]);
+
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
   router.versioned.post({ path, access: 'internal' }).addVersion(
     {
@@ -36,15 +38,18 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         request: {
           body: bodySchema,
         },
-        /* todo this needs to be defined
         response: {
           200: {
             body: schema.object({
-              values:
-            });
-          }
-        }
-        */
+              values: schema.oneOf([
+                // composite field
+                schema.recordOf(schema.string(), valueSchema),
+                // primitive field
+                schema.arrayOf(valueSchema),
+              ]),
+            }),
+          },
+        },
       },
     },
     async (ctx, req, res) => {
@@ -65,7 +70,8 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
         const fieldValue = result;
 
-        // todo this needs to be typed
+        console.log('field preview result', fieldValue);
+
         return res.ok({ body: { values: fieldValue } });
       } catch (error) {
         // Assume invalid painless script was submitted
