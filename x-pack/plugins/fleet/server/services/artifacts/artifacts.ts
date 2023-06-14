@@ -13,7 +13,7 @@ import { createHash } from 'crypto';
 
 import { isEmpty, sortBy } from 'lodash';
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { ListResult } from '../../../common/types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
@@ -23,6 +23,8 @@ import { ArtifactsElasticsearchError } from '../../errors';
 import { isElasticsearchVersionConflictError } from '../../errors/utils';
 
 import { withPackageSpan } from '../epm/packages/utils';
+
+import { appContextService } from '../app_context';
 
 import { isElasticsearchItemNotFoundError } from './utils';
 import type {
@@ -143,13 +145,14 @@ export const bulkCreateArtifacts = async (
   esClient: ElasticsearchClient,
   artifacts: NewArtifact[],
   refresh = false,
-  createArtifactsBulkBatchSize: number = MAX_LENGTH_BYTES,
-  logger: Logger
+  createArtifactsBulkBatchSize: number = MAX_LENGTH_BYTES
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
   const { batches, artifactsEsResponse } = generateArtifactBatches(
     artifacts,
     createArtifactsBulkBatchSize
   );
+
+  const logger = appContextService.getLogger();
   const nonConflictErrors = [];
   logger.debug(`Number of batches generated for fleet artifacts: ${batches.length}`);
   for (let batchN = 0; batchN < batches.length; batchN++) {

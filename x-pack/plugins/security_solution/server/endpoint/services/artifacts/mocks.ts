@@ -43,28 +43,17 @@ export const createEndpointArtifactClientMock = (
   const endpointArtifactClientMocked = new EndpointArtifactClient(fleetArtifactClientMocked);
 
   appContextService.start(createAppContextStartContractMock());
-  const fleetLogger = appContextService.getLogger().get('artifactsTest');
   const fleetConfig = appContextService.getConfig() as FleetConfigType;
   // Return the interface mocked with jest.fn() that fowards calls to the real instance
   return {
     createArtifact: jest.fn(async (...args) => {
-      const fleetArtifactClient = new FleetArtifactsClient(
-        esClient,
-        'endpoint',
-        fleetConfig,
-        fleetLogger
-      );
+      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint', fleetConfig);
       const endpointArtifactClient = new EndpointArtifactClient(fleetArtifactClient);
       const response = await endpointArtifactClient.createArtifact(...args);
       return response;
     }),
     bulkCreateArtifacts: jest.fn(async (...args) => {
-      const fleetArtifactClient = new FleetArtifactsClient(
-        esClient,
-        'endpoint',
-        fleetConfig,
-        fleetLogger
-      );
+      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint', fleetConfig);
       const endpointArtifactClient = new EndpointArtifactClient(fleetArtifactClient);
       const response = await endpointArtifactClient.bulkCreateArtifacts(...args);
       return response;

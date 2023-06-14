@@ -580,8 +580,7 @@ export class FleetPlugin
         return new FleetArtifactsClient(
           core.elasticsearch.client.asInternalUser,
           packageName,
-          config,
-          logger.get('createArtifactsClient', packageName)
+          config
         );
       },
       createFilesClient: Object.freeze(
