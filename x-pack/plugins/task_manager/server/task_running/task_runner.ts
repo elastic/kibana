@@ -364,7 +364,8 @@ export class TaskManagerRunner implements TaskRunner {
         }
       } catch (e) {
         if (
-          (this.instance.task.skip?.attempts || 0) < this.requeueInvalidTasksConfig.max_attempts
+          (this.instance.task.requeueInvalidTask?.attempts || 0) <
+          this.requeueInvalidTasksConfig.max_attempts
         ) {
           skip = true;
         }
@@ -593,7 +594,7 @@ export class TaskManagerRunner implements TaskRunner {
 
           let runAt = originalRunAt || intervalFromDate(startedAt!, interval)!;
           let state = originalState;
-          let skipAttempts = this.instance.task.skip?.attempts ?? 0;
+          let skipAttempts = this.instance.task.requeueInvalidTask?.attempts ?? 0;
 
           if (skip) {
             this.logger.warn(
@@ -613,7 +614,7 @@ export class TaskManagerRunner implements TaskRunner {
             schedule: reschedule ?? schedule,
             attempts,
             status: TaskStatus.Idle,
-            skip: {
+            requeueInvalidTask: {
               attempts: skipAttempts,
             },
           });
@@ -666,14 +667,14 @@ export class TaskManagerRunner implements TaskRunner {
 
     try {
       if (skip) {
-        const skipAttempts = (this.instance.task.skip?.attempts ?? 0) + 1;
+        const skipAttempts = (this.instance.task.requeueInvalidTask?.attempts ?? 0) + 1;
         this.instance = asRan(
           await this.bufferedTaskStore.update(
             defaults(
               {
                 retryAt: moment().add(this.requeueInvalidTasksConfig.delay, 'millisecond').toDate(),
                 attempts: 0,
-                skip: {
+                requeueInvalidTask: {
                   attempts: skipAttempts,
                 },
               },

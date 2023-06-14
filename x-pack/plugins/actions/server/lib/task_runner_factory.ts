@@ -90,7 +90,7 @@ export class TaskRunnerFactory {
     const taskInfo = {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
-      skip: taskInstance.skip,
+      requeueInvalidTask: taskInstance.requeueInvalidTask,
     };
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
@@ -147,7 +147,8 @@ export class TaskRunnerFactory {
         if (
           requeueInvalidTasksConfig.enabled &&
           executorResult.status === 'error' &&
-          (taskInstance.skip?.attempts || 0) < requeueInvalidTasksConfig.max_attempts &&
+          (taskInstance.requeueInvalidTask?.attempts || 0) <
+            requeueInvalidTasksConfig.max_attempts &&
           executorResult.message?.includes(validationErrorPrefix)
         ) {
           return { state: taskInstance.state, skip: true };

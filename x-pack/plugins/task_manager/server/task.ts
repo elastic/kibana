@@ -291,7 +291,7 @@ export interface TaskInstance {
   /**
    * Indicates the number of skipped executions.
    */
-  skip?: {
+  requeueInvalidTask?: {
     attempts: number;
   };
 }

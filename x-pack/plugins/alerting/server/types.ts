@@ -394,15 +394,6 @@ export type PublicRuleMonitoringService = PublicMetricsSetters;
 
 export type PublicRuleResultService = PublicLastRunSetters;
 
-// export type {
-//   RawRule,
-//   RawRuleLastRun,
-//   RawRuleMonitoring,
-//   RawRuleExecutionStatus,
-//   RawRuleAlertsFilter,
-//   RawRuleAction,
-// } from './raw_rule_schema';
-
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
 

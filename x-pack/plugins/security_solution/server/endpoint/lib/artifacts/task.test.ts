@@ -6,7 +6,6 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { createMockEndpointAppContext } from '../../mocks';
@@ -74,7 +73,10 @@ describe('task', () => {
       const createTaskRunner =
         mockTaskManager.registerTaskDefinitions.mock.calls[0][0][ManifestTaskConstants.TYPE]
           .createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance: MOCK_TASK_INSTANCE } as RunContext);
+      const taskRunner = createTaskRunner({
+        taskInstance: MOCK_TASK_INSTANCE,
+        requeueInvalidTasksConfig: { enabled: false, delay: 3000, max_attempts: 20 },
+      });
       await taskRunner.run();
       expect(mockManifestTask.runTask).toHaveBeenCalled();
     });
@@ -97,7 +99,10 @@ describe('task', () => {
       const createTaskRunner =
         mockTaskManager.registerTaskDefinitions.mock.calls[0][0][ManifestTaskConstants.TYPE]
           .createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance: MOCK_TASK_INSTANCE } as RunContext);
+      const taskRunner = createTaskRunner({
+        taskInstance: MOCK_TASK_INSTANCE,
+        requeueInvalidTasksConfig: { enabled: false, delay: 3000, max_attempts: 20 },
+      });
       await taskRunner.run();
     };
 

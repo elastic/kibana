@@ -55,7 +55,7 @@ export interface ActionExecutorContext {
 export interface TaskInfo {
   scheduled: Date;
   attempts: number;
-  skip?: ConcreteTaskInstance['skip'];
+  requeueInvalidTask?: ConcreteTaskInstance['requeueInvalidTask'];
 }
 
 export interface ExecuteOptions<Source = unknown> {
@@ -536,7 +536,7 @@ function validateAction(
       actionId,
       status: 'error',
       message: err.message,
-      retry: (taskInfo?.skip?.attempts || 0) > 0,
+      retry: (taskInfo?.requeueInvalidTask?.attempts || 0) > 0,
     });
   }
 }

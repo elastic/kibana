@@ -579,8 +579,12 @@ test('returns the existing state and delayed schedule to retry the task when ret
   expect(result).toEqual({ skip: true, state: mockTaskInstance.state });
 });
 
-test('throws error after trying to skip a task {config.skip.max_attempts} times', async () => {
-  const mockTaskInstance = { ...mockedTaskInstance, state: { foo: 'bar' }, skip: { attempts: 20 } };
+test('throws error after trying to skip a task {requeueInvalidTasksConfig.max_attempts} times', async () => {
+  const mockTaskInstance = {
+    ...mockedTaskInstance,
+    state: { foo: 'bar' },
+    requeueInvalidTask: { attempts: 20 },
+  };
 
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockTaskInstance,

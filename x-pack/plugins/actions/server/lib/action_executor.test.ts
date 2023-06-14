@@ -928,7 +928,7 @@ test('throws a retryable error when action data is invalid and skipped before', 
   const result = await actionExecutor.execute({
     ...executeParams,
     requeueInvalidTasksConfig: { enabled: true, delay: 3000, max_attempts: 20 },
-    taskInfo: { skip: { attempts: 20 }, attempts: 0, scheduled: new Date() },
+    taskInfo: { requeueInvalidTask: { attempts: 20 }, attempts: 0, scheduled: new Date() },
   });
 
   expect(result).toEqual({
