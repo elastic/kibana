@@ -83,14 +83,14 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
           flattenedOptions.findIndex(
             (option: QuickPromptSelectorOption) =>
               option.label.trim().toLowerCase() === normalizedSearchValue
-          ) === -1;
+          ) !== -1;
 
         const newOption = {
           value: searchValue,
           label: searchValue,
         };
 
-        if (optionExists) {
+        if (!optionExists) {
           setOptions([...options, newOption]);
         }
         handleSelectionChange([newOption]);
