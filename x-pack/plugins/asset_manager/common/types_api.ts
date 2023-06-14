@@ -141,8 +141,8 @@ export interface AssetFilters {
   kindLike?: string;
   eanLike?: string;
   collectionVersion?: number | 'latest' | 'all';
-  from?: string;
-  to?: string;
+  from?: string | number;
+  to?: string | number;
 }
 
 export const relationRT = rt.union([
