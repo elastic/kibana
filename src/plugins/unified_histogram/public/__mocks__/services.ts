@@ -38,6 +38,7 @@ export const unifiedHistogramServicesMock = {
         suggestions: jest.fn(() => allSuggestionsMock),
       };
     }),
+    EditLensConfigPanelApi: jest.fn(() => null),
   },
   storage: {
     get: jest.fn(),
