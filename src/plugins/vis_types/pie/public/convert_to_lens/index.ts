@@ -6,30 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
 import { ConvertPieToLensVisualization } from './types';
-
-export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
-  if ((column as ColumnWithMeta).meta) {
-    return true;
-  }
-  return false;
-};
-
-export const excludeMetaFromColumn = (column: Column) => {
-  if (isColumnWithMeta(column)) {
-    const { meta, ...rest } = column;
-    return rest;
-  }
-  return column;
-};
 
 export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {

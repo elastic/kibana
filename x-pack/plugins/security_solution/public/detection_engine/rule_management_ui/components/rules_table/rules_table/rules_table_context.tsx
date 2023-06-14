@@ -39,7 +39,7 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
-interface RulesSnoozeSettingsState {
+interface RulesSnoozeSettings {
   /**
    * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
    */
@@ -127,7 +127,7 @@ export interface RulesTableState {
   /**
    * Rules snooze settings for the current rules
    */
-  rulesSnoozeSettings: RulesSnoozeSettingsState;
+  rulesSnoozeSettings: RulesSnoozeSettings;
 }
 
 export type LoadingRuleAction =
@@ -346,8 +346,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
-  const providerValue = useMemo(
-    () => ({
+  const providerValue = useMemo(() => {
+    return {
       state: {
         rules,
         rulesSnoozeSettings: {
@@ -382,33 +382,32 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         }),
       },
       actions,
-    }),
-    [
-      rules,
-      rulesSnoozeSettingsMap,
-      isSnoozeSettingsLoading,
-      isSnoozeSettingsFetching,
-      isSnoozeSettingsFetchError,
-      page,
-      perPage,
-      total,
-      filterOptions,
-      isPreflightInProgress,
-      isActionInProgress,
-      isAllSelected,
-      isFetched,
-      isFetching,
-      isLoading,
-      isRefetching,
-      isRefreshOn,
-      dataUpdatedAt,
-      loadingRules.ids,
-      loadingRules.action,
-      selectedRuleIds,
-      sortingOptions,
-      actions,
-    ]
-  );
+    };
+  }, [
+    rules,
+    rulesSnoozeSettingsMap,
+    isSnoozeSettingsLoading,
+    isSnoozeSettingsFetching,
+    isSnoozeSettingsFetchError,
+    page,
+    perPage,
+    total,
+    filterOptions,
+    isPreflightInProgress,
+    isActionInProgress,
+    isAllSelected,
+    isFetched,
+    isFetching,
+    isLoading,
+    isRefetching,
+    isRefreshOn,
+    dataUpdatedAt,
+    loadingRules.ids,
+    loadingRules.action,
+    selectedRuleIds,
+    sortingOptions,
+    actions,
+  ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;
 };
