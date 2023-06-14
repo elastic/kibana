@@ -16,12 +16,12 @@ import {
   SEARCH_APPLICATION_PATH,
 } from '../../routes';
 
-import { EngineRouter } from '../engine/engine_router';
+import { SearchApplicationRouter } from '../engine/search_application_router';
 import { NotFound } from '../not_found';
 
 import { EnginesList } from './engines_list';
 
-export const EnginesRouter: React.FC = () => {
+export const SearchApplicationsRouter: React.FC = () => {
   return (
     <Switch>
       <Route exact path={SEARCH_APPLICATIONS_PATH}>
@@ -31,7 +31,7 @@ export const EnginesRouter: React.FC = () => {
         <EnginesList createEngineFlyoutOpen />
       </Route>
       <Route path={SEARCH_APPLICATION_PATH}>
-        <EngineRouter />
+        <SearchApplicationRouter />
       </Route>
       <Route>
         <NotFound />

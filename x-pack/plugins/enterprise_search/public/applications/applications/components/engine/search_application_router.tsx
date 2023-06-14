@@ -22,7 +22,7 @@ import {
 import { EngineNameLogic } from './engine_name_logic';
 import { EngineView } from './engine_view';
 
-export const EngineRouter: React.FC = () => {
+export const SearchApplicationRouter: React.FC = () => {
   const engineName = decodeURIComponent(
     useParams<{ searchApplicationName: string }>().searchApplicationName
   );
