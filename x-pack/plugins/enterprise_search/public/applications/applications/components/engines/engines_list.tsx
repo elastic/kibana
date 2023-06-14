@@ -41,7 +41,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 
 import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';
-import { CreateEngineFlyout } from './create_engine_flyout';
+import { CreateSearchApplication } from './create_search_application_flyout';
 import { DeleteEngineModal } from './delete_engine_modal';
 import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
@@ -163,7 +163,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
 
       <EngineListIndicesFlyout />
       {createEngineFlyoutOpen && (
-        <CreateEngineFlyout onClose={() => navigateToUrl(SEARCH_APPLICATIONS_PATH)} />
+        <CreateSearchApplication onClose={() => navigateToUrl(SEARCH_APPLICATIONS_PATH)} />
       )}
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[]}
