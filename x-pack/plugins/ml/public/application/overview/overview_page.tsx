@@ -101,6 +101,7 @@ export const OverviewPage: FC = () => {
                       defaultMessage: 'Total',
                     }),
                     value: getMlNodesCount(),
+                    'data-test-subj': 'mlTotalNodesCount',
                   },
                 ]}
                 dataTestSub={'mlOverviewAnalyticsStatsBar'}

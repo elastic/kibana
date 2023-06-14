@@ -96,15 +96,21 @@ export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
   );
 };
 
+export interface StatEntry {
+  label: string;
+  value: number;
+  'data-test-subj'?: string;
+}
+
 export interface OverviewStatsBarProps {
-  inputStats: Array<{ label: string; value: number }>;
+  inputStats: StatEntry[];
   dataTestSub?: string;
 }
 
 export const OverviewStatsBar: FC<OverviewStatsBarProps> = ({ inputStats, dataTestSub }) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'m'}>
-      {inputStats.map(({ value, label }) => {
+      {inputStats.map(({ value, label, 'data-test-subj': dataTestSubjValue }) => {
         return (
           <EuiFlexItem grow={false} key={label}>
             <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
@@ -112,7 +118,7 @@ export const OverviewStatsBar: FC<OverviewStatsBarProps> = ({ inputStats, dataTe
                 <EuiText size={'s'}>{label}:</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge>{value}</EuiBadge>
+                <EuiBadge data-test-subj={dataTestSubjValue}>{value}</EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
