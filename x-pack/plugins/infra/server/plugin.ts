@@ -208,7 +208,6 @@ export class InfraServerPlugin
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
-      getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
       alertsLocator: plugins.share.url.locators.get(alertsLocatorID),

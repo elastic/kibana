@@ -136,7 +136,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, augmentMessageCodeBlocks, basePromptContexts, baseQuickPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, title, }: React.PropsWithChildren<AssistantProviderProps>) => JSX.Element"
+          "({ actionTypeRegistry, augmentMessageCodeBlocks, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, title, }: React.PropsWithChildren<AssistantProviderProps>) => JSX.Element"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/index.tsx",
         "deprecated": false,
@@ -147,7 +147,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  augmentMessageCodeBlocks,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = 'elasticAssistantDefault',\n  setConversations,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
+            "label": "{\n  actionTypeRegistry,\n  augmentMessageCodeBlocks,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AssistantProviderProps>"
@@ -470,7 +470,15 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId?: string | undefined; provider?: ",
+              "{ connectorId?: string | undefined; defaultSystemPrompt?: ",
+              {
+                "pluginId": "@kbn/elastic-assistant",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantPluginApi",
+                "section": "def-public.Prompt",
+                "text": "Prompt"
+              },
+              " | undefined; provider?: ",
               "OpenAiProviderType",
               " | undefined; }"
             ],
@@ -520,6 +528,20 @@
             "signature": [
               "ConversationTheme",
               " | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Conversation.isDefault",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -587,6 +609,95 @@
               " | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.Prompt",
+        "type": "Interface",
+        "tags": [],
+        "label": "Prompt",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.promptType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "promptType",
+            "description": [],
+            "signature": [
+              "\"user\" | \"system\""
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.isDefault",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.isNewConversationDefault",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNewConversationDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -3632,6 +3632,10 @@
                 "path": "x-pack/plugins/rule_registry/server/routes/get_browser_fields_by_feature_id.ts"
               },
               {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/plugins/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
+              },
+              {
                 "plugin": "guidedOnboarding",
                 "path": "src/plugins/guided_onboarding/server/routes/guide_state_routes.ts"
               },
@@ -3770,14 +3774,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -4570,22 +4566,6 @@
               {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/documents.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/plugins/kubernetes_security/server/routes/agent_id.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/plugins/kubernetes_security/server/routes/aggregate.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/plugins/kubernetes_security/server/routes/count.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/plugins/kubernetes_security/server/routes/multi_terms_aggregate.ts"
               },
               {
                 "plugin": "licenseManagement",
@@ -5594,54 +5574,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/resolve.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
               },
               {
                 "plugin": "cloudChat",
@@ -14443,12 +14375,32 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
               },
               {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
+              },
+              {
+                "plugin": "kubernetesSecurity",
+                "path": "x-pack/plugins/kubernetes_security/server/routes/aggregate.ts"
+              },
+              {
+                "plugin": "kubernetesSecurity",
+                "path": "x-pack/plugins/kubernetes_security/server/routes/count.ts"
+              },
+              {
+                "plugin": "kubernetesSecurity",
+                "path": "x-pack/plugins/kubernetes_security/server/routes/multi_terms_aggregate.ts"
               },
               {
                 "plugin": "maps",
@@ -14521,6 +14473,14 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.test.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
               },
               {
                 "plugin": "controls",
