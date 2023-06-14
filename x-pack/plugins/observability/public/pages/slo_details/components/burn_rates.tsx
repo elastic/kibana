@@ -64,7 +64,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
       ...getSliAndBurnRate(CRITICAL_LONG, data?.burnRates ?? []),
     },
     shortWindow: {
-      label: i18n.translate('xpack.observability.slo.burnRate.criticalLongLabel', {
+      label: i18n.translate('xpack.observability.slo.burnRate.criticalShortLabel', {
         defaultMessage: '5 minute',
       }),
       ...getSliAndBurnRate(CRITICAL_SHORT, data?.burnRates ?? []),
@@ -83,7 +83,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
       ...getSliAndBurnRate(HIGH_LONG, data?.burnRates ?? []),
     },
     shortWindow: {
-      label: i18n.translate('xpack.observability.slo.burnRate.highLongLabel', {
+      label: i18n.translate('xpack.observability.slo.burnRate.highShortLabel', {
         defaultMessage: '30 minute',
       }),
       ...getSliAndBurnRate(HIGH_SHORT, data?.burnRates ?? []),
@@ -102,7 +102,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
       ...getSliAndBurnRate(MEDIUM_LONG, data?.burnRates ?? []),
     },
     shortWindow: {
-      label: i18n.translate('xpack.observability.slo.burnRate.highLongLabel', {
+      label: i18n.translate('xpack.observability.slo.burnRate.mediumShortLabel', {
         defaultMessage: '2 hours',
       }),
       ...getSliAndBurnRate(MEDIUM_SHORT, data?.burnRates ?? []),
@@ -121,7 +121,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
       ...getSliAndBurnRate(LOW_LONG, data?.burnRates ?? []),
     },
     shortWindow: {
-      label: i18n.translate('xpack.observability.slo.burnRate.highLongLabel', {
+      label: i18n.translate('xpack.observability.slo.burnRate.lowShortLabel', {
         defaultMessage: '6 hours',
       }),
       ...getSliAndBurnRate(LOW_SHORT, data?.burnRates ?? []),
