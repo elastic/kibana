@@ -184,6 +184,7 @@ const StringArrayCondition = ({
 export const ControlGeneralViewSelector = ({
   selector,
   selectors,
+  usedByResponse,
   index,
   onRemove,
   onDuplicate,
@@ -393,17 +394,28 @@ export const ControlGeneralViewSelector = ({
       css={styles.accordion}
       extraAction={
         <EuiFlexGroup alignItems="center" gutterSize="none">
-          {accordionState === 'closed' && (
-            <div>
-              <EuiText css={styles.conditionsBadge} size="xs">
-                <b>{i18n.conditions}</b>
-              </EuiText>
-              <EuiBadge title={conditionsAdded.join(',')} color="hollow">
-                {conditionsAdded.length}
+          <div>
+            {accordionState === 'closed' && (
+              <>
+                <EuiText css={styles.conditionsBadge} size="xs">
+                  <b>{i18n.conditions}</b>
+                </EuiText>
+                <EuiBadge
+                  title={conditionsAdded.join(',')}
+                  color="hollow"
+                  data-test-subj="cloud-defend-conditions-count"
+                >
+                  {conditionsAdded.length}
+                </EuiBadge>
+              </>
+            )}
+            {!usedByResponse && (
+              <EuiBadge title={i18n.unusedSelectorHelp} color="warning">
+                {i18n.unusedSelector}
               </EuiBadge>
-              <div css={styles.verticalDivider} />
-            </div>
-          )}
+            )}
+            <div css={styles.verticalDivider} />
+          </div>
           <EuiFlexItem>
             <EuiPopover
               id={selector.name}

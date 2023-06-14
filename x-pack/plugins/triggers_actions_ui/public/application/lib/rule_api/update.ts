@@ -26,7 +26,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
       throttle: frequency!.throttle,
       summary: frequency!.summary,
     },
-    alertsFilter,
+    alerts_filter: alertsFilter,
     ...(uuid && { uuid }),
   })),
 });

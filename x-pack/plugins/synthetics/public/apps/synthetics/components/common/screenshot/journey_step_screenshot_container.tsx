@@ -23,17 +23,19 @@ interface Props {
   allStepsLoaded?: boolean;
   retryFetchOnRevisit?: boolean; // Set to `true` for "Run Once" / "Test Now" modes
   size?: ScreenshotImageSize;
+  testNowMode?: boolean;
   unavailableMessage?: string;
   borderRadius?: number | string;
 }
 
 export const JourneyStepScreenshotContainer = ({
+  allStepsLoaded,
   timestamp,
   checkGroup,
   stepStatus,
-  allStepsLoaded,
   initialStepNumber = 1,
   retryFetchOnRevisit = false,
+  testNowMode,
   size = THUMBNAIL_SCREENSHOT_SIZE,
   unavailableMessage,
   borderRadius,
@@ -58,6 +60,7 @@ export const JourneyStepScreenshotContainer = ({
     imgPath,
     retryFetchOnRevisit,
     checkGroup,
+    testNowMode,
     timestamp,
   });
 

@@ -98,11 +98,13 @@ describe('syncEditedMonitor', () => {
       previousMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
-      syntheticsMonitorClient,
-      server: serverMock,
-      request: {} as unknown as KibanaRequest,
-      savedObjectsClient:
-        serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      routeContext: {
+        syntheticsMonitorClient,
+        server: serverMock,
+        request: {} as unknown as KibanaRequest,
+        savedObjectsClient:
+          serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      } as any,
       spaceId: 'test-space',
     });
 

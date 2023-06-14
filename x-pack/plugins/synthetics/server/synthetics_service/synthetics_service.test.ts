@@ -15,6 +15,7 @@ import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
 import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
+import * as apiKeys from './get_api_key';
 
 jest.mock('axios', () => jest.fn());
 
@@ -79,6 +80,7 @@ describe('SyntheticsService', () => {
         password: '12345',
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
+      enabled: true,
     },
     coreStart: mockCoreStart,
     encryptedSavedObjects: mockEncryptedSO(),
@@ -99,7 +101,13 @@ describe('SyntheticsService', () => {
         status: LocationStatus.GA,
       };
     });
-    serverMock.config = { service: { devUrl: 'http://localhost' } };
+    serverMock.config = {
+      service: {
+        devUrl: 'http://localhost',
+        manifestUrl: 'https://test-manifest.com',
+      },
+      enabled: true,
+    };
     if (serverMock.savedObjectsClient) {
       serverMock.savedObjectsClient.find = jest.fn().mockResolvedValue({
         saved_objects: [
@@ -162,6 +170,7 @@ describe('SyntheticsService', () => {
         username: 'dev',
         password: '12345',
       },
+      enabled: true,
     };
     const service = new SyntheticsService(serverMock);
 
@@ -192,13 +201,56 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfig({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
         expect.objectContaining({
           url: locations[0].url + '/monitors',
         })
+      );
+    });
+  });
+
+  describe('apiKey errors', () => {
+    jest.spyOn(apiKeys, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+      isValid: false,
+    });
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('does not call api and does not throw error when monitors.length === 0', async () => {
+      const { service } = getMockedService();
+      jest.spyOn(service, 'getOutput').mockRestore();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO(null) as any;
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      await service.pushConfigs();
+
+      expect(axios).not.toHaveBeenCalled();
+
+      expect(serverMock.logger.error).not.toBeCalledWith(
+        'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
+      );
+    });
+
+    it('throws error when api key is invalid and monitors.length > 0', async () => {
+      const { service, locations } = getMockedService();
+      jest.spyOn(service, 'getOutput').mockRestore();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        attributes: getFakePayload([locations[0]]),
+      }) as any;
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      await service.pushConfigs();
+
+      expect(serverMock.logger.error).toBeCalledWith(
+        'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
     });
   });
@@ -245,7 +297,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.addConfig({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(

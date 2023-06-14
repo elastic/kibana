@@ -20,6 +20,7 @@ export const findMlSignals = async ({
   anomalyThreshold,
   from,
   to,
+  maxSignals,
   exceptionFilter,
 }: {
   ml: MlPluginSetup;
@@ -29,6 +30,7 @@ export const findMlSignals = async ({
   anomalyThreshold: number;
   from: string;
   to: string;
+  maxSignals: number;
   exceptionFilter: Filter | undefined;
 }): Promise<AnomalyResults> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
@@ -37,6 +39,7 @@ export const findMlSignals = async ({
     threshold: anomalyThreshold,
     earliestMs: dateMath.parse(from)?.valueOf() ?? 0,
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
+    maxRecords: maxSignals,
     exceptionFilter,
   };
   return getAnomalies(params, mlAnomalySearch);

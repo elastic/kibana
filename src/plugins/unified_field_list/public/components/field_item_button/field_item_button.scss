@@ -24,12 +24,24 @@
   }
 }
 
-.unifiedFieldItemButton {
-  width: 100%;
+/**
+ * 1. Only visually hide the action, so that it's still accessible to screen readers.
+ * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+ */
+.unifiedFieldListItemButton__action {
+  opacity: 0; /* 1 */
 
-  &:hover:not([class*='isActive']) {
-    cursor: grab;
+  &--always {
+    opacity: 1;
   }
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+}
+
+.unifiedFieldListItemButton {
+  width: 100%;
 
   &.kbnFieldButton {
     &:focus-within,
@@ -39,15 +51,22 @@
   }
 
   .kbnFieldButton__button:focus {
-    @include passDownFocusRing('.kbnFieldButton__name > span');
+    @include passDownFocusRing('.kbnFieldButton__nameInner');
+  }
 
-    .kbnFieldButton__name > span {
-      text-decoration: underline;
+  & button .kbnFieldButton__nameInner:hover {
+    text-decoration: underline;
+  }
+
+  &:hover,
+  &[class*='-isActive'] {
+    .unifiedFieldListItemButton__action {
+      opacity: 1;
     }
   }
 }
 
-.unifiedFieldItemButton--missing {
+.unifiedFieldListItemButton--missing {
   background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
   color: $euiColorDarkShade;
 }

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import type { Query } from '@kbn/es-query';
+
 import { useKibana } from '../../common/lib/kibana';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../common/mock/test_providers';
+import type { EditDashboardButtonComponentProps } from './edit_dashboard_button';
 import { EditDashboardButton } from './edit_dashboard_button';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 jest.mock('../../common/lib/kibana/kibana_react', () => {
   return {
@@ -24,18 +28,54 @@ describe('EditDashboardButton', () => {
     to: '2023-03-24T23:59:59.999Z',
   };
 
-  beforeAll(() => {
+  const props = {
+    filters: [],
+    query: { query: '', language: '' } as Query,
+    savedObjectId: 'mockSavedObjectId',
+    timeRange,
+  };
+  const servicesMock = {
+    dashboard: { locator: { getRedirectUrl: jest.fn() } },
+    application: {
+      navigateToApp: jest.fn(),
+      navigateToUrl: jest.fn(),
+    },
+  };
+
+  const renderButton = (testProps: EditDashboardButtonComponentProps) => {
+    return render(
+      <TestProviders>
+        <EditDashboardButton {...testProps} />
+      </TestProviders>
+    );
+  };
+
+  let renderResult: RenderResult;
+  beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
-      services: createStartServicesMock(),
+      services: servicesMock,
     });
+    renderResult = renderButton(props);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should render', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <EditDashboardButton savedObjectId="mockSavedObjectId" timeRange={timeRange} />
-      </TestProviders>
+    expect(renderResult.queryByTestId('dashboardEditButton')).toBeInTheDocument();
+  });
+
+  it('should render dashboard edit url', () => {
+    fireEvent.click(renderResult.getByTestId('dashboardEditButton'));
+    expect(servicesMock.dashboard?.locator?.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: props.query,
+        filters: props.filters,
+        timeRange: props.timeRange,
+        dashboardId: props.savedObjectId,
+        viewMode: ViewMode.EDIT,
+      })
     );
-    expect(queryByTestId('dashboardEditButton')).toBeInTheDocument();
   });
 });

@@ -41,7 +41,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async getCommentCount(): Promise<number> {
-      const commentsContainer = await testSubjects.find('user-actions');
+      const commentsContainer = await testSubjects.find('user-actions-list');
       const comments = await commentsContainer.findAllByClassName('euiComment');
       return comments.length - 1; // don't count the element for adding a new comment
     },
@@ -58,13 +58,22 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       });
     },
 
-    async addVisualization(visName: string) {
+    async addVisualizationToNewComment(visName: string) {
       // open saved object finder
       const addCommentElement = await testSubjects.find('add-comment');
       const addVisualizationButton = await addCommentElement.findByCssSelector(
         '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
       );
       await addVisualizationButton.click();
+
+      await this.findAndSaveVisualization(visName);
+
+      await testSubjects.existOrFail('cases-app', { timeout: 10 * 1000 });
+
+      await this.submitComment();
+    },
+
+    async findAndSaveVisualization(visName: string) {
       await testSubjects.existOrFail('savedObjectsFinderTable', { timeout: 10 * 1000 });
 
       // select visualization
@@ -78,8 +87,6 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
       // save and return to cases app, add comment
       await lensPage.saveAndReturn();
-      await testSubjects.existOrFail('cases-app', { timeout: 10 * 1000 });
-      await this.submitComment();
     },
 
     async openVisualizationButtonTooltip() {
@@ -101,7 +108,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
     async assertCaseDescription(expectedDescription: string) {
       const desc = await find.byCssSelector(
-        '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]'
+        '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
       );
 
       const actualDescription = await desc.getVisibleText();

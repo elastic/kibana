@@ -48,7 +48,7 @@ describe('createTransform', () => {
     jest.clearAllMocks();
   });
   it('create transform', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/internal/transform/transforms/test`);
   });
 
   it('handles error', () => {
@@ -74,7 +74,7 @@ describe('getTransformState', () => {
     jest.clearAllMocks();
   });
   it('get transform state', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test/_stats`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/internal/transform/transforms/test/_stats`);
   });
 
   it('handles error', () => {
@@ -100,7 +100,7 @@ describe('startTransforms', () => {
     jest.clearAllMocks();
   });
   it('get transform state', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test/_stats`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/internal/transform/transforms/test/_stats`);
   });
 
   it('handles error', () => {
@@ -140,11 +140,11 @@ describe('stopTransforms', () => {
     jest.clearAllMocks();
   });
   it('get transform state', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test/_stats`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/internal/transform/transforms/test/_stats`);
   });
 
   it('stop transform', () => {
-    expect(mockRequest.mock.calls[1][0]).toEqual(`/api/transform/stop_transforms`);
+    expect(mockRequest.mock.calls[1][0]).toEqual(`/internal/transform/stop_transforms`);
   });
 
   it('handles error', () => {
@@ -200,15 +200,15 @@ describe('deleteTransforms', () => {
     jest.clearAllMocks();
   });
   it('get transform state', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test/_stats`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/internal/transform/transforms/test/_stats`);
   });
 
   it('stop transform', () => {
-    expect(mockRequest.mock.calls[1][0]).toEqual(`/api/transform/stop_transforms`);
+    expect(mockRequest.mock.calls[1][0]).toEqual(`/internal/transform/stop_transforms`);
   });
 
   it('delete transform', () => {
-    expect(mockRequest.mock.calls[2][0]).toEqual(`/api/transform/delete_transforms`);
+    expect(mockRequest.mock.calls[2][0]).toEqual(`/internal/transform/delete_transforms`);
   });
 
   it('handles error', () => {

@@ -114,6 +114,8 @@ export class StatusAlertService {
         defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
         defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
         defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+        defaultRecoverySubjectMessage:
+          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
     });
   }

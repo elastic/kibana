@@ -34,6 +34,7 @@ const serviceObjectPaths = [
   'delete.out.result',
   'search.in.options',
   'search.out.result',
+  'mSearch.out.result',
 ];
 
 const validateServiceDefinitions = (definitions: ServiceDefinitionVersioned) => {
@@ -171,6 +172,11 @@ const getDefaultServiceTransforms = (): ServiceTransforms => ({
     in: {
       options: getDefaultTransforms(),
     },
+    out: {
+      result: getDefaultTransforms(),
+    },
+  },
+  mSearch: {
     out: {
       result: getDefaultTransforms(),
     },

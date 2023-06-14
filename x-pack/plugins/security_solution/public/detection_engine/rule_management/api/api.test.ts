@@ -35,6 +35,7 @@ import {
   previewRule,
   findRuleExceptionReferences,
   performBulkAction,
+  fetchRulesSnoozeSettings,
 } from './api';
 
 const abortCtrl = new AbortController();
@@ -784,6 +785,90 @@ describe('Detections Rules API', () => {
       });
 
       expect(result).toBe(fetchMockResult);
+    });
+  });
+
+  describe('fetchRulesSnoozeSettings', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({
+        data: [],
+      });
+    });
+
+    test('requests snooze settings of multiple rules by their IDs', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            filter: 'alert.id:"alert:id1" or alert.id:"alert:id2"',
+          }),
+        })
+      );
+    });
+
+    test('requests the same number of rules as the number of ids provided', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            per_page: 2,
+          }),
+        })
+      );
+    });
+
+    test('requests only snooze settings fields', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            fields: JSON.stringify([
+              'muteAll',
+              'activeSnoozes',
+              'isSnoozedUntil',
+              'snoozeSchedule',
+            ]),
+          }),
+        })
+      );
+    });
+
+    test('returns mapped data', async () => {
+      fetchMock.mockResolvedValue({
+        data: [
+          {
+            id: '1',
+            mute_all: false,
+          },
+          {
+            id: '2',
+            mute_all: false,
+            active_snoozes: [],
+            is_snoozed_until: '2023-04-24T19:31:46.765Z',
+          },
+        ],
+      });
+
+      const result = await fetchRulesSnoozeSettings({ ids: ['1', '2'] });
+
+      expect(result).toEqual({
+        '1': {
+          muteAll: false,
+          activeSnoozes: [],
+        },
+        '2': {
+          muteAll: false,
+          activeSnoozes: [],
+          isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
+        },
+      });
     });
   });
 });

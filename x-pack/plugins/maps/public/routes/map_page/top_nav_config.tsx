@@ -27,8 +27,8 @@ import {
   getSavedObjectsTagging,
   getPresentationUtilContext,
 } from '../../kibana_services';
+import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
-import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 import { checkForDuplicateTitle } from '../../content_management';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -161,6 +161,7 @@ export function getTopNavConfig({
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
             initialSelection={selectedTags}
             onTagsSelected={onTagsSelected}
+            markOptional
           />
         ) : undefined;
 
@@ -179,7 +180,7 @@ export function getTopNavConfig({
                   copyOnSave: props.newCopyOnSave,
                   lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
                   isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-                  getDisplayName: getMapEmbeddableDisplayName,
+                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
                   onTitleDuplicate: props.onTitleDuplicate,
                 },
                 {

@@ -20,8 +20,6 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { getIdError, transform } from '../../../utils/utils';
 
 import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyGetRuleActionsSavedObject } from '../../../../rule_actions_legacy';
 
 export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
@@ -45,7 +43,6 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
 
       try {
         const rulesClient = (await context.alerting).getRulesClient();
-        const savedObjectsClient = (await context.core).savedObjects.client;
 
         const rule = await readRules({
           id,
@@ -53,13 +50,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
           ruleId,
         });
         if (rule != null) {
-          const legacyRuleActions = await legacyGetRuleActionsSavedObject({
-            savedObjectsClient,
-            ruleAlertId: rule.id,
-            logger,
-          });
-
-          const transformed = transform(rule, legacyRuleActions);
+          const transformed = transform(rule);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

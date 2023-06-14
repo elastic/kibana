@@ -24,7 +24,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   finalizeSignalsMigration,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
@@ -45,6 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('Alerts Compatibility', function () {
     describe('CTI', () => {
@@ -69,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -218,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -553,14 +554,15 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: SavedQueryRuleCreateProps = getSavedQueryRuleForSignalTesting([
-          `.siem-signals-*`,
-        ]);
+        const rule: SavedQueryRuleCreateProps = {
+          ...getSavedQueryRuleForSignalTesting([`.siem-signals-*`]),
+          query: 'agent.name: "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
@@ -571,9 +573,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: SavedQueryRuleCreateProps = getSavedQueryRuleForSignalTesting([
-          `.alerts-security.alerts-default`,
-        ]);
+        const rule: SavedQueryRuleCreateProps = {
+          ...getSavedQueryRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          query: 'agent.name: "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
@@ -594,12 +597,15 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['.siem-signals-*']);
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForSignalTesting(['.siem-signals-*']),
+          query: 'any where agent.name == "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
@@ -610,9 +616,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting([
-          `.alerts-security.alerts-default`,
-        ]);
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          query: 'any where agent.name == "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
@@ -633,7 +640,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

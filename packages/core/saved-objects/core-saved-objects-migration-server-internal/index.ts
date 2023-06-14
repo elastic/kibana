@@ -32,7 +32,6 @@ export {
   updateAliases,
   transformDocs,
   setWriteBlock,
-  searchForOutdatedDocuments,
   removeWriteBlock,
   reindex,
   readWithPit,
@@ -45,10 +44,10 @@ export {
 export type {
   OpenPitResponse,
   ReadWithPit,
-  SearchResponse,
   ReindexResponse,
   UpdateByQueryResponse,
   UpdateAndPickupMappingsResponse,
+  EsResponseTooLargeError,
 } from './src/actions';
 export {
   isClusterShardLimitExceeded,

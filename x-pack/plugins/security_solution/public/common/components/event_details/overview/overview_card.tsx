@@ -94,7 +94,7 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
         <SecurityCellActions
           field={{
             name: enrichedFieldInfo.data.field,
-            value: enrichedFieldInfo?.values ? enrichedFieldInfo?.values[0] : '',
+            value: enrichedFieldInfo?.values,
             type: enrichedFieldInfo.data.type,
             aggregatable: enrichedFieldInfo.fieldFromBrowserField?.aggregatable,
           }}

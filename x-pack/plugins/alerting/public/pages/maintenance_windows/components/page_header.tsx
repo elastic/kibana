@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 
@@ -23,6 +23,15 @@ export const styles = {
   `,
 };
 
+export const ExperimentalBadge = React.memo(() => (
+  <EuiBetaBadge
+    label={i18n.EXPERIMENTAL_LABEL}
+    tooltipContent={i18n.EXPERIMENTAL_DESCRIPTION}
+    tooltipPosition="bottom"
+  />
+));
+ExperimentalBadge.displayName = 'ExperimentalBadge';
+
 interface TitleProps {
   title: string;
   description?: string;
@@ -31,9 +40,16 @@ const Title = React.memo<TitleProps>(({ title, description }) => {
   return (
     <EuiFlexGroup direction="column" alignItems="baseline" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="l">
-          <h1>{<TruncatedText text={title} />}</h1>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>{<TruncatedText text={title} />}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ExperimentalBadge />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       {description ? (
         <>

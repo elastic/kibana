@@ -36,10 +36,7 @@ export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">
-    <div>
-      {children}
-      <EuiSpacer />
-    </div>
+    <div>{children}</div>
   </EuiTitle>
 );
 

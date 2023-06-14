@@ -29,6 +29,7 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
+  SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
 } from './types';
@@ -74,7 +75,7 @@ export const plugin = (initContext: PluginInitializerContext) => new AlertingPlu
 
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, deprecate }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
@@ -88,6 +89,10 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
     ),
     renameFromRoot('xpack.alerting.defaultRuleTaskTimeout', 'xpack.alerting.rules.run.timeout', {
       level: 'warning',
+    }),
+    deprecate('maxEphemeralActionsPerAlert', 'a future version', {
+      level: 'warning',
+      message: `Configuring "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and will be removed in a future version. Remove this setting to increase action execution resiliency.`,
     }),
   ],
 };

@@ -24,7 +24,6 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import { useUserDetails } from '../../../explore/users/containers/users/details';
 import * as i18n from '../../../overview/components/user_overview/translations';
 import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
 import {
@@ -33,6 +32,7 @@ import {
   ENTITIES_USER_OVERVIEW_IP_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
 } from './test_ids';
+import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 
 const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeXS};
@@ -66,7 +66,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const [_, { userDetails: data }] = useUserDetails({
+  const [_, { userDetails: data }] = useObservedUserDetails({
     endDate: to,
     userName,
     indexNames: selectedPatterns,

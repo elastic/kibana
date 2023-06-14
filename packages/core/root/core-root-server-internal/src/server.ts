@@ -34,6 +34,7 @@ import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
+import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -98,6 +99,7 @@ export class Server {
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
   private readonly customBranding: CustomBrandingService;
+  private readonly userSettingsService: UserSettingsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -145,6 +147,7 @@ export class Server {
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
     this.customBranding = new CustomBrandingService(core);
+    this.userSettingsService = new UserSettingsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -301,6 +304,7 @@ export class Server {
     });
 
     const customBrandingSetup = this.customBranding.setup();
+    const userSettingsServiceSetup = this.userSettingsService.setup();
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -308,6 +312,7 @@ export class Server {
       status: statusSetup,
       uiPlugins,
       customBranding: customBrandingSetup,
+      userSettings: userSettingsServiceSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -337,6 +342,7 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      userSettings: userSettingsServiceSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);

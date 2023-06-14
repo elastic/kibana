@@ -51,6 +51,7 @@ import { getLensInspectorService } from '../../lens_inspector_service';
 import { toExpression } from '@kbn/interpreter';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -94,6 +95,7 @@ function getDefaultProps() {
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       dataViews: wrapDataViewsContract(),
+      eventAnnotationService: {} as EventAnnotationServiceType,
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),

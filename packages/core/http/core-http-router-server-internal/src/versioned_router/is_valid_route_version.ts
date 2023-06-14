@@ -6,7 +6,23 @@
  * Side Public License, v 1.
  */
 
-export function isValidRouteVersion(version: string): boolean {
-  const float = parseFloat(version);
-  return isFinite(float) && !isNaN(float) && float > 0 && Math.round(float) === float;
+import moment from 'moment';
+
+const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+const INTERNAL_VERSION_REGEX = /^[0-9]+$/;
+
+/**
+ * For public routes we must check that the version is a string that is YYYY-MM-DD.
+ * For internal routes we must check that the version is a number.
+ * @internal
+ */
+export function isValidRouteVersion(isPublicApi: boolean, version: string): undefined | string {
+  if (isPublicApi) {
+    return PUBLIC_VERSION_REGEX.test(version) && moment(version, 'YYYY-MM-DD').isValid()
+      ? undefined
+      : `Invalid version. Received "${version}", expected a valid date string formatted as YYYY-MM-DD.`;
+  }
+  return INTERNAL_VERSION_REGEX.test(version) && version !== '0'
+    ? undefined
+    : `Invalid version number. Received "${version}", expected a string containing _only_ a finite, whole number greater than 0.`;
 }

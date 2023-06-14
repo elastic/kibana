@@ -11,11 +11,7 @@ import { Writable } from 'stream';
 import { ReportingCore } from '../../..';
 import { CancellationToken } from '@kbn/reporting-common';
 import { cryptoFactory } from '../../../lib';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from '.';
@@ -53,7 +49,6 @@ beforeEach(async () => {
   });
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
-  mockReporting.setConfig(createMockConfig(mockReportingConfig));
 });
 
 afterEach(() => (generatePngObservable as jest.Mock).mockReset());
@@ -79,7 +74,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.anything(),
     expect.anything(),
     expect.objectContaining({
-      urls: ['localhost:80undefined/app/kibana#/something'],
+      urls: ['http://localhost:80/mock-server-basepath/app/kibana#/something'],
       browserTimezone: 'UTC',
       headers: {},
     })

@@ -12,6 +12,8 @@ import type {
 
 export const indexEndpointRuleAlerts = (options: {
   endpointAgentId: string;
+  endpointHostname?: string;
+  endpointIsolated?: boolean;
   count?: number;
 }): Cypress.Chainable<
   Pick<IndexedEndpointRuleAlerts, 'alerts'> & {

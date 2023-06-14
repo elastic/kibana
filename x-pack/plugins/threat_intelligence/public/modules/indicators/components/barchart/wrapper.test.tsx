@@ -9,9 +9,15 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { CHART_UPDATE_PROGRESS_TEST_ID, IndicatorsBarChartWrapper } from '.';
+import { TestProvidersComponent } from '../../../../mocks/test_providers';
+import { IndicatorsBarChartWrapper } from './wrapper';
+import {
+  BARCHART_WRAPPER_TEST_ID,
+  CHART_UPDATE_PROGRESS_TEST_ID,
+  LOADING_TEST_ID,
+} from './test_ids';
 import moment from 'moment';
+import { DROPDOWN_TEST_ID } from './test_ids';
 
 jest.mock('../../../query_bar/hooks/use_filters');
 
@@ -29,16 +35,17 @@ const mockIndexPattern: DataView = {
 } as DataView;
 
 const mockTimeRange: TimeRange = { from: '', to: '' };
+const mockField = { label: 'host.name', value: 'string' };
 
 describe('<IndicatorsBarChartWrapper />', () => {
   describe('when not loading or refetching', () => {
     it('should render barchart and field selector dropdown', () => {
-      const component = render(
+      const { getByTestId, getAllByText } = render(
         <TestProvidersComponent>
           <IndicatorsBarChartWrapper
             dateRange={{ max: moment(), min: moment() }}
             series={[]}
-            field=""
+            field={mockField}
             onFieldChange={jest.fn()}
             indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}
@@ -48,18 +55,20 @@ describe('<IndicatorsBarChartWrapper />', () => {
         </TestProvidersComponent>
       );
 
-      expect(component.asFragment()).toMatchSnapshot();
+      expect(getByTestId(BARCHART_WRAPPER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(DROPDOWN_TEST_ID)).toBeInTheDocument();
+      expect(getAllByText('Trend')).toHaveLength(1);
     });
   });
 
   describe('when loading for the first time', () => {
     it('should render progress indicator', () => {
-      const component = render(
+      const { queryByRole, getByTestId } = render(
         <TestProvidersComponent>
           <IndicatorsBarChartWrapper
             dateRange={{ max: moment(), min: moment() }}
             series={[]}
-            field=""
+            field={mockField}
             onFieldChange={jest.fn()}
             indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}
@@ -69,7 +78,8 @@ describe('<IndicatorsBarChartWrapper />', () => {
         </TestProvidersComponent>
       );
 
-      expect(component.queryByRole('progressbar')).toBeInTheDocument();
+      expect(queryByRole('progressbar')).toBeInTheDocument();
+      expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -80,7 +90,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
           <IndicatorsBarChartWrapper
             dateRange={{ max: moment(), min: moment() }}
             series={[]}
-            field=""
+            field={mockField}
             onFieldChange={jest.fn()}
             indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}

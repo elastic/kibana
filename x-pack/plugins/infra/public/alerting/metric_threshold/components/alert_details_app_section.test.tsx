@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -16,6 +18,8 @@ import {
 } from '../mocks/metric_threshold_rule';
 import { AlertDetailsAppSection } from './alert_details_app_section';
 import { ExpressionChart } from './expression_chart';
+
+const mockedChartStartContract = chartPluginMock.createStartContract();
 
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
@@ -32,7 +36,10 @@ jest.mock('./expression_chart', () => ({
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
-    services: mockCoreMock.createStart(),
+    services: {
+      ...mockCoreMock.createStart(),
+      charts: mockedChartStartContract,
+    },
   }),
 }));
 
@@ -46,6 +53,8 @@ jest.mock('../../../containers/metrics_source/source', () => ({
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
+  const mockedSetAlertSummaryFields = jest.fn();
+  const ruleLink = 'ruleLink';
   const renderComponent = () => {
     return render(
       <IntlProvider locale="en">
@@ -53,16 +62,39 @@ describe('AlertDetailsAppSection', () => {
           <AlertDetailsAppSection
             alert={buildMetricThresholdAlert()}
             rule={buildMetricThresholdRule()}
+            ruleLink={ruleLink}
+            setAlertSummaryFields={mockedSetAlertSummaryFields}
           />
         </QueryClientProvider>
       </IntlProvider>
     );
   };
 
-  it('should render rule data', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should render rule and alert data', async () => {
     const result = renderComponent();
 
     expect((await result.findByTestId('metricThresholdAppSection')).children.length).toBe(3);
+    expect(result.getByTestId('threshold-2000-2500')).toBeTruthy();
+  });
+
+  it('should render rule link', async () => {
+    renderComponent();
+
+    expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
+    expect(mockedSetAlertSummaryFields).toBeCalledWith([
+      {
+        label: 'Rule',
+        value: (
+          <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
+            Monitoring hosts
+          </EuiLink>
+        ),
+      },
+    ]);
   });
 
   it('should render annotations', async () => {

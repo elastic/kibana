@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -24,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('GET /internal/security/fields/{query}', () => {
       it('should return a list of available index mapping fields', async () => {
         await supertest
-          .get('/internal/security/fields/.kibana')
+          .get(`/internal/security/fields/${ALL_SAVED_OBJECT_INDICES.join(',')}`)
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)

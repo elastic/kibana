@@ -36,7 +36,7 @@ export const statsContainerCss = css`
 `;
 
 export const groupingContainerCss = css`
-  .euiAccordion__childWrapper .euiAccordion__padding--m {
+  .groupingAccordionForm .euiAccordion__childWrapper .euiAccordion__padding--m {
     margin-left: 8px;
     margin-right: 8px;
     border-left: ${euiThemeVars.euiBorderThin};
@@ -44,7 +44,7 @@ export const groupingContainerCss = css`
     border-bottom: ${euiThemeVars.euiBorderThin};
     border-radius: 0 0 6px 6px;
   }
-  .euiAccordion__triggerWrapper {
+  .groupingAccordionForm .euiAccordion__triggerWrapper {
     border-bottom: ${euiThemeVars.euiBorderThin};
     border-left: ${euiThemeVars.euiBorderThin};
     border-right: ${euiThemeVars.euiBorderThin};
@@ -59,8 +59,37 @@ export const groupingContainerCss = css`
     border-radius: 6px;
     min-width: 1090px;
   }
-  .groupingAccordionForm__button {
-    text-decoration: none !important;
+  .groupingPanelRenderer {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    padding-right: 32px;
+  }
+`;
+
+export const groupingContainerCssLevel = css`
+  .groupingAccordionFormLevel .euiAccordion__childWrapper .euiAccordion__padding--m {
+    margin-left: 8px;
+    margin-right: 8px;
+    border-left: none;
+    border-right: none;
+    border-bottom: ${euiThemeVars.euiBorderThin};
+    border-radius: 0;
+  }
+  .groupingAccordionFormLevel .euiAccordion__triggerWrapper {
+    border-bottom: ${euiThemeVars.euiBorderThin};
+    border-left: none;
+    border-right: none;
+    min-height: 78px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 0;
+  }
+  .groupingAccordionFormLevel {
+    border-top: none;
+    border-bottom: none;
+    border-radius: 0;
+    min-width: 1090px;
   }
   .groupingPanelRenderer {
     display: table;

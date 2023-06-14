@@ -15,24 +15,15 @@ import {
   EuiTitle,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 export const OptionsListPopoverInvalidSelections = () => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { deselectOption },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const fieldName = select((state) => state.explicitInput.fieldName);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -80,7 +71,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          dispatch(deselectOption(changedOption.label));
+          optionsList.dispatch.deselectOption(changedOption.label);
         }}
       >
         {(list) => list}

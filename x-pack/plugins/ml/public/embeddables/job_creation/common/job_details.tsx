@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useState, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,11 +26,16 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Embeddable } from '@kbn/lens-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
-import { extractErrorMessage } from '../../../../common/util/errors';
 import { basicJobValidation } from '../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';

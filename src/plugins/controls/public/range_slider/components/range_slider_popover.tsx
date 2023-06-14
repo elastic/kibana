@@ -19,13 +19,11 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { RangeValue } from '../../../common/range_slider/types';
 import { pluginServices } from '../../services';
-import { rangeSliderReducers } from '../range_slider_reducers';
-import { RangeSliderReduxState } from '../types';
 import { RangeSliderStrings } from './range_slider_strings';
+import { RangeValue } from '../../../common/range_slider/types';
+import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 
 // Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created this annoying/verbose typing
 export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
@@ -37,23 +35,17 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
   const {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setSelectedRange },
-  } = useReduxEmbeddableContext<RangeSliderReduxState, typeof rangeSliderReducers>();
-
-  const dispatch = useEmbeddableDispatch();
+  const rangeSlider = useRangeSlider();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const dataViewId = select((state) => state.output.dataViewId);
-  const fieldSpec = select((state) => state.componentState.field);
-  const id = select((state) => state.explicitInput.id);
-  const isInvalid = select((state) => state.componentState.isInvalid);
-  const max = select((state) => state.componentState.max);
-  const min = select((state) => state.componentState.min);
-  const title = select((state) => state.explicitInput.title);
-  const value = select((state) => state.explicitInput.value) ?? ['', ''];
+  const dataViewId = rangeSlider.select((state) => state.output.dataViewId);
+  const fieldSpec = rangeSlider.select((state) => state.componentState.field);
+  const id = rangeSlider.select((state) => state.explicitInput.id);
+  const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
+  const max = rangeSlider.select((state) => state.componentState.max);
+  const min = rangeSlider.select((state) => state.componentState.min);
+  const title = rangeSlider.select((state) => state.explicitInput.title);
+  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
 
   const hasAvailableRange = min !== '' && max !== '';
   const hasLowerBoundSelection = value[0] !== '';
@@ -154,7 +146,7 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
               const updatedUpperBound =
                 typeof newUpperBound === 'number' ? String(newUpperBound) : value[1];
 
-              dispatch(setSelectedRange([updatedLowerBound, updatedUpperBound]));
+              rangeSlider.dispatch.setSelectedRange([updatedLowerBound, updatedUpperBound]);
             }}
             value={displayedValue}
             ticks={hasAvailableRange ? ticks : undefined}
@@ -179,7 +171,7 @@ export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ ra
               iconType="eraser"
               color="danger"
               onClick={() => {
-                dispatch(setSelectedRange(['', '']));
+                rangeSlider.dispatch.setSelectedRange(['', '']);
               }}
               aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
               data-test-subj="rangeSlider__clearRangeButton"

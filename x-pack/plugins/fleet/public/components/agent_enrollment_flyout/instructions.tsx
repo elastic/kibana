@@ -62,9 +62,6 @@ export const Instructions = (props: InstructionProps) => {
 
   const fleetServers = agents?.items || [];
 
-  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
-    return <Loading size="l" />;
-
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
@@ -82,11 +79,19 @@ export const Instructions = (props: InstructionProps) => {
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
-  if (!isIntegrationFlow && showAgentEnrollment) {
-    setSelectionType('radio');
-  } else {
-    setSelectionType('tabs');
-  }
+  useEffect(() => {
+    // If we have a cloudFormationTemplateUrl, we want to hide the selection type
+    if (props.cloudSecurityIntegration?.cloudformationUrl) {
+      setSelectionType(undefined);
+    } else if (!isIntegrationFlow && showAgentEnrollment) {
+      setSelectionType('radio');
+    } else {
+      setSelectionType('tabs');
+    }
+  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
+
+  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
+    return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;
@@ -112,7 +117,10 @@ export const Instructions = (props: InstructionProps) => {
           {isFleetServerPolicySelected ? (
             <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
-            <ManagedSteps {...props} />
+            <ManagedSteps
+              {...props}
+              cloudFormationTemplateUrl={props.cloudSecurityIntegration?.cloudformationUrl}
+            />
           )}
         </>
       );

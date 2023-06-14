@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { statusColors } from '../common/constants';
 
 interface Props {
   type: 'passed' | 'failed';
@@ -19,8 +20,8 @@ interface Props {
 const BADGE_WIDTH = '46px';
 
 const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
-  if (type === 'passed') return 'success';
-  if (type === 'failed') return 'danger';
+  if (type === 'passed') return statusColors.passed;
+  if (type === 'failed') return statusColors.failed;
   return 'default';
 };
 

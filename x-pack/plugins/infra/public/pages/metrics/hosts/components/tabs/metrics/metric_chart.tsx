@@ -4,57 +4,77 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiI18n } from '@elastic/eui';
-import { InfraClientSetupDeps } from '../../../../../../types';
+import {
+  EuiIcon,
+  EuiPanel,
+  EuiI18n,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { HostLensAttributesTypes } from '../../../../../../common/visualizations';
+import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { createHostsFilter } from '../../../utils';
+import { useHostsTableContext } from '../../../hooks/use_hosts_table';
+import { LensWrapper } from '../../chart/lens_wrapper';
+import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
 export interface MetricChartProps {
   title: string;
-  type: HostLensAttributesTypes;
+  type: HostsLensLineChartFormulas;
   breakdownSize: number;
+  render?: boolean;
 }
 
 const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
+  const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest } = useHostsViewContext();
-  const {
-    services: { lens },
-  } = useKibana<InfraClientSetupDeps>();
+  const { requestTs, loading } = useHostsViewContext();
+  const { currentPage } = useHostsTableContext();
 
-  const EmbeddableComponent = lens.EmbeddableComponent;
+  // prevents updates on requestTs and serchCriteria states from relaoding the chart
+  // we want it to reload only once the table has finished loading
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    lastReloadRequestTime: requestTs,
+    ...searchCriteria,
+  });
 
-  const { injectData, getExtraActions, error } = useLensAttributes({
+  const { attributes, getExtraActions, error } = useLensAttributes({
     type,
     dataView,
     options: {
+      title,
       breakdownSize,
     },
+    visualizationType: 'lineChart',
   });
 
-  const injectedLensAttributes = injectData({
-    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters],
-    query: searchCriteria.query,
-    title,
+  const filters = useMemo(() => {
+    return [
+      createHostsFilter(
+        currentPage.map((p) => p.name),
+        dataView
+      ),
+    ];
+  }, [currentPage, dataView]);
+
+  const extraActionOptions = getExtraActions({
+    timeRange: afterLoadedState.dateRange,
+    filters,
   });
 
-  const extraActionOptions = getExtraActions(injectedLensAttributes, searchCriteria.dateRange);
-  const extraAction: Action[] = [extraActionOptions.openInLens];
+  const extraActions: Action[] = [extraActionOptions.openInLens];
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
     const [min, max] = range;
@@ -73,12 +93,15 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasShadow={false}
       hasBorder
       paddingSize={error ? 'm' : 'none'}
-      style={{ minHeight: MIN_HEIGHT }}
+      css={css`
+        min-height: calc(${MIN_HEIGHT} + ${euiTheme.size.l});
+        position: 'relative';
+      `}
       data-test-subj={`hostsView-metricChart-${type}`}
     >
       {error ? (
         <EuiFlexGroup
-          style={{ minHeight: MIN_HEIGHT, alignContent: 'center' }}
+          style={{ minHeight: '100%', alignContent: 'center' }}
           gutterSize="xs"
           justifyContent="center"
           alignItems="center"
@@ -97,24 +120,18 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        injectedLensAttributes && (
-          <EmbeddableComponent
-            id={`hostsViewsmetricsChart-${type}`}
-            style={{ height: MIN_HEIGHT }}
-            attributes={injectedLensAttributes}
-            viewMode={ViewMode.VIEW}
-            timeRange={searchCriteria.dateRange}
-            query={searchCriteria.query}
-            filters={searchCriteria.filters}
-            extraActions={extraAction}
-            lastReloadRequestTime={baseRequest.requestTs}
-            executionContext={{
-              type: 'infrastructure_observability_hosts_view',
-              name: `Hosts View ${type} Chart`,
-            }}
-            onBrushEnd={handleBrushEnd}
-          />
-        )
+        <LensWrapper
+          id={`hostsViewsmetricsChart-${type}`}
+          attributes={attributes}
+          style={{ height: MIN_HEIGHT }}
+          extraActions={extraActions}
+          lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+          dateRange={afterLoadedState.dateRange}
+          filters={filters}
+          onBrushEnd={handleBrushEnd}
+          loading={loading}
+          hasTitle
+        />
       )}
     </EuiPanel>
   );

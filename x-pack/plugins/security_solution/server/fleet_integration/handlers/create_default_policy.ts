@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -25,12 +26,14 @@ import { disableProtections } from '../../../common/endpoint/models/policy_confi
  */
 export const createDefaultPolicy = (
   licenseService: LicenseService,
-  config: AnyPolicyCreateConfig | undefined
+  config: AnyPolicyCreateConfig | undefined,
+  cloud: CloudSetup
 ): PolicyConfig => {
   const factoryPolicy = policyConfigFactory();
 
-  // Add license information after policy creation
+  // Add license and cloud information after policy creation
   factoryPolicy.meta.license = licenseService.getLicenseType();
+  factoryPolicy.meta.cloud = cloud?.isCloudEnabled;
 
   const defaultPolicyPerType =
     config?.type === 'cloud'
@@ -46,10 +49,11 @@ export const createDefaultPolicy = (
 /**
  * Create a copy of an object with all keys set to false
  */
-const falsyObjectKeys = <T extends Record<string, boolean>>(obj: T): T => {
+const falsyObjectKeys = <T extends Record<string, unknown>>(obj: T): Record<keyof T, boolean> => {
   return Object.keys(obj).reduce((accumulator, key) => {
-    return { ...accumulator, [key]: false };
-  }, {} as T);
+    accumulator[key as keyof T] = false;
+    return accumulator;
+  }, {} as Record<keyof T, boolean>);
 };
 
 const getEndpointPolicyConfigPreset = (config: PolicyCreateEndpointConfig | undefined) => {

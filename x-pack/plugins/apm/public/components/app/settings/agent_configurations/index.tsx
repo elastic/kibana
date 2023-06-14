@@ -30,7 +30,8 @@ export function AgentConfigurations() {
     data = INITIAL_DATA,
     status,
   } = useFetcher(
-    (callApmApi) => callApmApi('GET /api/apm/settings/agent-configuration'),
+    (callApmApi) =>
+      callApmApi('GET /api/apm/settings/agent-configuration 2023-05-22'),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );
@@ -39,14 +40,6 @@ export function AgentConfigurations() {
 
   return (
     <>
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
-          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
-        })}
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -61,6 +54,13 @@ export function AgentConfigurations() {
 
         {hasConfigurations ? <CreateConfigurationButton /> : null}
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
+          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+        })}
+      </EuiText>
 
       <EuiSpacer size="m" />
 

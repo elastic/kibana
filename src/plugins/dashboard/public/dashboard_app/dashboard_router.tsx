@@ -9,19 +9,14 @@
 import './_dashboard_app.scss';
 
 import React from 'react';
-import { History } from 'history';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
-import {
-  TableListViewKibanaDependencies,
-  TableListViewKibanaProvider,
-} from '@kbn/content-management-table-list';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
@@ -32,14 +27,13 @@ import {
   LANDING_PAGE_PATH,
   VIEW_DASHBOARD_URL,
 } from '../dashboard_constants';
-import { DashboardListing } from './listing';
 import { DashboardApp } from './dashboard_app';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardNoMatch } from './listing/dashboard_no_match';
+import { DashboardNoMatch } from './listing_page/dashboard_no_match';
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
-import { DashboardApplicationService } from '../services/application/types';
+import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
 import { DashboardEmbedSettings, DashboardMountContextProps, RedirectToProps } from './types';
 
@@ -57,29 +51,19 @@ export interface DashboardMountProps {
   mountContext: DashboardMountContextProps;
 }
 
-// because the type of `application.capabilities.advancedSettings` is so generic, the provider
-// requiring the `save` key to be part of it is causing type issues - so, creating a custom type
-type TableListViewApplicationService = DashboardApplicationService & {
-  capabilities: { advancedSettings: { save: boolean } };
-};
-
 export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
   const {
-    application,
     chrome: { setBadge, docTitle, setHelpExtension },
     dashboardCapabilities: { showWriteControls },
     documentationLinks: { dashboardDocLink },
+    application: { navigateToApp },
     settings: { uiSettings },
-    savedObjectsTagging,
     data: dataStart,
     notifications,
     embeddable,
-    overlays,
-    http,
   } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
-  let routerHistory: History;
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
@@ -89,17 +73,17 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     });
 
   const redirect = (redirectTo: RedirectToProps) => {
-    if (!routerHistory) return;
-    const historyFunction = redirectTo.useReplace ? routerHistory.replace : routerHistory.push;
-    let destination;
+    let path;
+    let state;
     if (redirectTo.destination === 'dashboard') {
-      destination = redirectTo.id
-        ? createDashboardEditUrl(redirectTo.id, redirectTo.editMode)
-        : CREATE_NEW_DASHBOARD_URL;
+      path = redirectTo.id ? createDashboardEditUrl(redirectTo.id) : CREATE_NEW_DASHBOARD_URL;
+      if (redirectTo.editMode) {
+        state = { viewMode: ViewMode.EDIT };
+      }
     } else {
-      destination = createDashboardListingFilterUrl(redirectTo.filter);
+      path = createDashboardListingFilterUrl(redirectTo.filter);
     }
-    historyFunction(destination);
+    navigateToApp(DASHBOARD_APP_ID, { path: `#/${path}`, state, replace: redirectTo.useReplace });
   };
 
   const getDashboardEmbedSettings = (
@@ -118,9 +102,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     if (routeParams.embed && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
-    if (!routerHistory) {
-      routerHistory = routeProps.history;
-    }
     return (
       <DashboardApp
         history={routeProps.history}
@@ -136,11 +117,8 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
-    if (!routerHistory) {
-      routerHistory = routeProps.history;
-    }
     return (
-      <DashboardListing
+      <DashboardListingPage
         initialFilter={filter}
         title={title}
         kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
@@ -170,37 +148,19 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     <I18nProvider>
       <DashboardMountContext.Provider value={mountContext}>
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <TableListViewKibanaProvider
-            {...{
-              core: {
-                application: application as TableListViewApplicationService,
-                notifications,
-                overlays,
-                http,
-              },
-              toMountPoint,
-              savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-                ? ({
-                    ui: savedObjectsTagging,
-                  } as TableListViewKibanaDependencies['savedObjectsTagging'])
-                : undefined,
-              FormattedRelative,
-            }}
-          >
-            <HashRouter>
-              <Switch>
-                <Route
-                  path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                  render={renderDashboard}
-                />
-                <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-                <Route exact path="/">
-                  <Redirect to={LANDING_PAGE_PATH} />
-                </Route>
-                <Route render={renderNoMatch} />
-              </Switch>
-            </HashRouter>
-          </TableListViewKibanaProvider>
+          <HashRouter>
+            <Switch>
+              <Route
+                path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+                render={renderDashboard}
+              />
+              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+              <Route exact path="/">
+                <Redirect to={LANDING_PAGE_PATH} />
+              </Route>
+              <Route render={renderNoMatch} />
+            </Switch>
+          </HashRouter>
         </KibanaThemeProvider>
       </DashboardMountContext.Provider>
     </I18nProvider>

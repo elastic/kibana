@@ -8,33 +8,45 @@ import {
   DateHistogramIndexPatternColumn,
   PersistedIndexPatternLayer,
   TermsIndexPatternColumn,
-  XYState,
 } from '@kbn/lens-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
 export const DEFAULT_LAYER_ID = 'layer1';
 export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';
+const DEFAULT_BREAKDOWN_SIZE = 10;
 
-export const getHistogramColumn = (columnName: string, sourceField: string) => {
+export const getHistogramColumn = ({
+  columnName,
+  overrides,
+}: {
+  columnName: string;
+  overrides?: Partial<Pick<DateHistogramIndexPatternColumn, 'sourceField' | 'params'>>;
+}) => {
   return {
     [columnName]: {
       dataType: 'date',
       isBucketed: true,
       label: '@timestamp',
       operationType: 'date_histogram',
-      params: { interval: 'auto' },
       scale: 'interval',
-      sourceField,
+      sourceField: '@timestamp',
+      ...overrides,
+      params: { interval: 'auto', ...overrides?.params },
     } as DateHistogramIndexPatternColumn,
   };
 };
 
-export const getBreakdownColumn = (
-  columnName: string,
-  sourceField: string,
-  breakdownSize: number
-): PersistedIndexPatternLayer['columns'] => {
+export const getBreakdownColumn = ({
+  columnName,
+  overrides,
+}: {
+  columnName: string;
+  overrides?: Partial<Pick<TermsIndexPatternColumn, 'sourceField'>> & {
+    breakdownSize?: number;
+  };
+}): PersistedIndexPatternLayer['columns'] => {
+  const { breakdownSize = DEFAULT_BREAKDOWN_SIZE, sourceField } = overrides ?? {};
   return {
     [columnName]: {
       label: `Top ${breakdownSize} values of ${sourceField}`,
@@ -63,47 +75,6 @@ export const getBreakdownColumn = (
     } as TermsIndexPatternColumn,
   };
 };
-
-export const getXYVisualizationState = (
-  custom: Omit<Partial<XYState>, 'layers'> & { layers: XYState['layers'] }
-): XYState => ({
-  legend: {
-    isVisible: false,
-    position: 'right',
-    showSingleSeries: false,
-  },
-  valueLabels: 'show',
-  fittingFunction: 'Zero',
-  curveType: 'LINEAR',
-  yLeftScale: 'linear',
-  axisTitlesVisibilitySettings: {
-    x: false,
-    yLeft: false,
-    yRight: true,
-  },
-  tickLabelsVisibilitySettings: {
-    x: true,
-    yLeft: true,
-    yRight: true,
-  },
-  labelsOrientation: {
-    x: 0,
-    yLeft: 0,
-    yRight: 0,
-  },
-  gridlinesVisibilitySettings: {
-    x: true,
-    yLeft: true,
-    yRight: true,
-  },
-  preferredSeriesType: 'line',
-  valuesInLegend: false,
-  emphasizeFitting: true,
-  yTitle: '',
-  xTitle: '',
-  hideEndzones: true,
-  ...custom,
-});
 
 export const getDefaultReferences = (
   dataView: DataView,

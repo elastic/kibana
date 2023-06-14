@@ -9,15 +9,15 @@ import * as rt from 'io-ts';
 import { MAX_DELETE_FILES } from '../../../constants';
 import { limitedArraySchema, NonEmptyString } from '../../../schema';
 
-export const FileAttachmentMetadataRt = rt.type({
-  files: rt.array(
-    rt.type({
-      name: rt.string,
-      extension: rt.string,
-      mimeType: rt.string,
-      createdAt: rt.string,
-    })
-  ),
+export const SingleFileAttachmentMetadataRt = rt.strict({
+  name: rt.string,
+  extension: rt.string,
+  mimeType: rt.string,
+  created: rt.string,
+});
+
+export const FileAttachmentMetadataRt = rt.strict({
+  files: rt.array(SingleFileAttachmentMetadataRt),
 });
 
 export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
@@ -26,7 +26,7 @@ export const FILE_ATTACHMENT_TYPE = '.files';
 
 const MIN_DELETE_IDS = 1;
 
-export const BulkDeleteFileAttachmentsRequestRt = rt.type({
+export const BulkDeleteFileAttachmentsRequestRt = rt.strict({
   ids: limitedArraySchema(NonEmptyString, MIN_DELETE_IDS, MAX_DELETE_FILES),
 });
 

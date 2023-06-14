@@ -5,31 +5,32 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
-import { dataTableSelectors } from '../../../common/store/data_table';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
   entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   tabType?: TimelineTabs;
   scopeId: string;
   isReadOnly?: boolean;
@@ -52,6 +53,7 @@ export const DetailsPanel = React.memo(
     isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
+    const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
         return timelineSelectors.getTimelineByIdSelector();
@@ -63,6 +65,21 @@ export const DetailsPanel = React.memo(
     const expandedDetail = useDeepEqualSelector(
       (state) => ((getScope && getScope(state, scopeId)) ?? timelineDefaults)?.expandedDetail
     );
+
+    useEffect(() => {
+      /**
+       * Removes the flyout from redux when it is unmounted as it's also stored in localStorage
+       * This only works when navigating within the app, if navigating via the url bar,
+       * the localStorage state will be maintained
+       * */
+      return () => {
+        dispatch(
+          dataTableActions.toggleDetailPanel({
+            id: scopeId,
+          })
+        );
+      };
+    }, [dispatch, scopeId]);
 
     // To be used primarily in the flyout scenario where we don't want to maintain the tabType
     const defaultOnPanelClose = useCallback(() => {
@@ -124,6 +141,9 @@ export const DetailsPanel = React.memo(
 
     if (currentTabDetail?.panelView === 'userDetail' && currentTabDetail?.params?.userName) {
       flyoutUniqueKey = currentTabDetail.params.userName;
+      if (isNewUserDetailsFlyoutEnable) {
+        panelSize = 'm';
+      }
       visiblePanel = (
         <UserDetailsPanel
           contextID={contextID}
@@ -131,6 +151,7 @@ export const DetailsPanel = React.memo(
           handleOnClose={closePanel}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
+          isNewUserDetailsFlyoutEnable={isNewUserDetailsFlyoutEnable}
         />
       );
     }

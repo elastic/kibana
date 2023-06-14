@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCaseViewParams } from '../../common/navigation';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import type { AddCommentRefObject } from '../add_comment';
@@ -28,7 +28,7 @@ export type UseUserActionsHandler = Pick<
   | 'handleSaveComment'
   | 'handleManageQuote'
   | 'handleDeleteComment'
-> & { handleUpdate: (updatedCase: Case) => void };
+> & { handleUpdate: (updatedCase: CaseUI) => void };
 
 const isAddCommentRef = (
   ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
@@ -37,14 +37,22 @@ const isAddCommentRef = (
   return commentRef?.addQuote != null;
 };
 
+const isSetCommentRef = (
+  ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
+): ref is AddCommentRefObject => {
+  const commentRef = ref as UserActionMarkdownRefObject;
+  return commentRef?.setComment != null;
+};
+
 export const useUserActionsHandler = (): UseUserActionsHandler => {
   const { detailName: caseId } = useCaseViewParams();
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
-  const { isLoadingIds, patchComment } = useUpdateComment();
+  const { mutate: patchComment } = useUpdateComment();
   const { mutate: deleteComment } = useDeleteComment();
   const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
+  const [loadingCommentIds, setLoadingCommentIds] = useState<string[]>([]);
   const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const commentRefs = useRef<
@@ -63,14 +71,33 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
     [clearDraftComment]
   );
 
+  const removeCommentIdFromLoadingIds = (commentId: string) => {
+    setLoadingCommentIds((ids) => ids.filter((loadingId) => loadingId !== commentId));
+  };
+
+  const addCommentIdToLoadingIds = (commentId: string) => {
+    setLoadingCommentIds((ids) => [...ids, commentId]);
+  };
+
   const handleSaveComment = useCallback(
     ({ id, version }: { id: string; version: string }, content: string) => {
-      patchComment({
-        caseId,
-        commentId: id,
-        commentUpdate: content,
-        version,
-      });
+      addCommentIdToLoadingIds(id);
+      patchComment(
+        {
+          caseId,
+          commentId: id,
+          commentUpdate: content,
+          version,
+        },
+        {
+          onSuccess: () => {
+            removeCommentIdFromLoadingIds(id);
+          },
+          onError: () => {
+            removeCommentIdFromLoadingIds(id);
+          },
+        }
+      );
     },
     [caseId, patchComment]
   );
@@ -122,7 +149,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   );
 
   useEffect(() => {
-    if (draftComment?.commentId) {
+    if (draftComment?.commentId && draftComment?.commentId !== 'description') {
       setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
         if (
           NEW_COMMENT_ID !== draftComment?.commentId &&
@@ -135,7 +162,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
 
       const ref = commentRefs?.current?.[draftComment.commentId];
 
-      if (isAddCommentRef(ref) && ref.editor?.textarea) {
+      if (isSetCommentRef(ref) && ref.editor?.textarea) {
         ref.setComment(draftComment.comment);
         if (hasIncomingLensState) {
           openLensModal({ editorRef: ref.editor });
@@ -147,7 +174,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   }, [clearDraftComment, draftComment, hasIncomingLensState, openLensModal]);
 
   return {
-    loadingCommentIds: isLoadingIds,
+    loadingCommentIds,
     selectedOutlineCommentId,
     manageMarkdownEditIds,
     commentRefs,

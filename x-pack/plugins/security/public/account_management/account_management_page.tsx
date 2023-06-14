@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { UserProfileAvatarData } from '../../common';
+import type { UserProfileData } from '../../common';
 import { canUserHaveProfile } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
@@ -23,7 +23,7 @@ export const AccountManagementPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
 
   const currentUser = useCurrentUser();
-  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar');
+  const userProfile = useUserProfile<UserProfileData>('avatar,userSettings');
 
   // If we fail to load profile, we treat it as a failure _only_ if user is supposed
   // to have a profile. For example, anonymous and users authenticated via

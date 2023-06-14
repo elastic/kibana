@@ -38,6 +38,13 @@ export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
+export const DUPLICATE_WITH_EXCEPTIONS_OPTION = '[data-test-subj="withExceptions"] label';
+
+export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
+  '[data-test-subj="withExceptionsExcludeExpiredExceptions"] label';
+
+export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExceptions"] label';
+
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
@@ -123,6 +130,8 @@ export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj=
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
+export const TOASTER_CLOSE_ICON = '[data-test-subj="toastCloseButton"]';
+
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="importDataModalCheckboxLabel"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
@@ -139,7 +148,7 @@ export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-butto
 
 export const RULES_TAGS_FILTER_POPOVER = '[data-test-subj="tags-filter-popover"]';
 
-export const RULES_SELECTED_TAG = '.euiSelectableListItem[data-test-selected="true"]';
+export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 

@@ -30,11 +30,19 @@ describe('useCopyToClipboardAction', () => {
   it('renders the action for a single significant term', async () => {
     execCommandMock.mockImplementationOnce(() => true);
     const { result } = renderHook(() => useCopyToClipboardAction());
-    const { getByLabelText } = render((result.current as Action).render(significantTerms[0]));
+    const { findByText, getByTestId } = render(
+      (result.current as Action).render(significantTerms[0])
+    );
 
-    const button = getByLabelText('Copy field/value pair as KQL syntax to clipboard');
+    const button = getByTestId('aiopsTableActionButtonCopyToClipboard enabled');
 
-    expect(button).toBeInTheDocument();
+    userEvent.hover(button);
+
+    // The tooltip from EUI takes 250ms to appear, so we must
+    // use a `find*` query to asynchronously poll for it.
+    expect(
+      await findByText('Copy field/value pair as KQL syntax to clipboard')
+    ).toBeInTheDocument();
 
     await act(async () => {
       await userEvent.click(button);
@@ -50,12 +58,16 @@ describe('useCopyToClipboardAction', () => {
   it('renders the action for a group of items', async () => {
     execCommandMock.mockImplementationOnce(() => true);
     const groupTableItems = getGroupTableItems(finalSignificantTermGroups);
-    const { result } = renderHook(() => useCopyToClipboardAction());
-    const { getByLabelText } = render((result.current as Action).render(groupTableItems[0]));
+    const { result } = renderHook(useCopyToClipboardAction);
+    const { findByText, getByText } = render((result.current as Action).render(groupTableItems[0]));
 
-    const button = getByLabelText('Copy group items as KQL syntax to clipboard');
+    const button = getByText('Copy to clipboard');
 
-    expect(button).toBeInTheDocument();
+    userEvent.hover(button);
+
+    // The tooltip from EUI takes 250ms to appear, so we must
+    // use a `find*` query to asynchronously poll for it.
+    expect(await findByText('Copy group items as KQL syntax to clipboard')).toBeInTheDocument();
 
     await act(async () => {
       await userEvent.click(button);

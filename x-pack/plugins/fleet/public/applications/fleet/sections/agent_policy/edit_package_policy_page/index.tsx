@@ -293,7 +293,7 @@ export const EditPackagePolicyForm = memo<{
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
+              validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
             />
@@ -305,7 +305,7 @@ export const EditPackagePolicyForm = memo<{
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
+              validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
             />

@@ -35,7 +35,7 @@ export async function initPlugin() {
         }
 
         // store a message that was posted to be remembered
-        const match = text.match(/^message (.*)$/);
+        const match = text.match(/^message ([\S\s]*)$/);
         if (match) {
           messages.push(match[1]);
           response.statusCode = 200;

@@ -78,7 +78,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/components/navigation/use_get_url_search');
+jest.mock('../../../../common/components/navigation/use_url_state_query_params');
 
 const defaultUseQueryAlertsReturn = {
   loading: true,
@@ -819,14 +819,14 @@ describe('AlertsHistogramPanel', () => {
       });
     });
 
-    it('renders LensEmbeddable with 100% height', async () => {
+    it('renders LensEmbeddable with provided height', async () => {
       await act(async () => {
         mount(
           <TestProviders>
             <AlertsHistogramPanel {...defaultProps} />
           </TestProviders>
         );
-        expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual('100%');
+        expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(155);
       });
     });
 

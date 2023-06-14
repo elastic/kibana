@@ -16,10 +16,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { Container, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
-import { ControlGroupInput, ControlGroupSettings, CONTROL_GROUP_TYPE } from '../types';
+import {
+  ControlGroupInput,
+  ControlGroupSettings,
+  CONTROL_GROUP_TYPE,
+  FieldFilterPredicate,
+} from '../types';
 import {
   createControlGroupExtract,
   createControlGroupInject,
@@ -52,10 +57,17 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   public create = async (
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings
+    settings?: ControlGroupSettings,
+    fieldFilterPredicate?: FieldFilterPredicate
   ) => {
-    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { ControlGroupContainer } = await import('./control_group_container');
-    return new ControlGroupContainer(reduxEmbeddablePackage, initialInput, parent, settings);
+    return new ControlGroupContainer(
+      reduxEmbeddablePackage,
+      initialInput,
+      parent,
+      settings,
+      fieldFilterPredicate
+    );
   };
 }

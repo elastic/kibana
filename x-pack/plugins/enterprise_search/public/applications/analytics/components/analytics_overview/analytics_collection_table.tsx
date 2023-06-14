@@ -13,15 +13,16 @@ import {
   EuiPanel,
   EuiSuperDatePicker,
   EuiSuperDatePickerCommonRange,
-  EuiSearchBar,
   EuiFlexGroup,
   EuiSpacer,
   EuiButtonGroup,
   useEuiTheme,
   EuiButton,
+  EuiFieldSearch,
 } from '@elastic/eui';
 
 import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
+
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
@@ -30,6 +31,7 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 
 import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
 
+import { AnalyticsCollectionNotFound } from './analytics_collection_not_found';
 import { AnalyticsCollectionTableStyles } from './analytics_collection_table.styles';
 
 const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
@@ -72,10 +74,14 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
 
 interface AnalyticsCollectionTableProps {
   collections: AnalyticsCollection[];
+  isSearching: boolean;
+  onSearch: (query: string) => void;
 }
 
 export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> = ({
   collections,
+  isSearching,
+  onSearch,
 }) => {
   const { euiTheme } = useEuiTheme();
   const analyticsCollectionTableStyles = AnalyticsCollectionTableStyles(euiTheme);
@@ -113,6 +119,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
     [analyticsCollectionTableStyles.button]
   );
   const [filterId, setFilterId] = useState<FilterBy>(filterOptions[0].id);
+  const [query, setQuery] = useState<string>('');
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
     from: defaultQuickRanges[0].start,
     to: defaultQuickRanges[0].end,
@@ -127,12 +134,18 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiSearchBar
-              box={{
-                placeholder: i18n.translate('xpack.enterpriseSearch.analytics.searchPlaceholder', {
-                  defaultMessage: 'Search collection names',
-                }),
+            <EuiFieldSearch
+              placeholder={i18n.translate('xpack.enterpriseSearch.analytics.searchPlaceholder', {
+                defaultMessage: 'Search collection names',
+              })}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
               }}
+              isLoading={isSearching}
+              onSearch={onSearch}
+              incremental
+              fullWidth
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -162,18 +175,22 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <EuiFlexGrid columns={3}>
-        {collections.map((collection) => (
-          <AnalyticsCollectionCardWithLens
-            key={collection.name}
-            id={`collection-card-${collection.name}`}
-            collection={collection}
-            subtitle={selectedFilterLabel}
-            filterBy={filterId}
-            timeRange={timeRange}
-          />
-        ))}
-      </EuiFlexGrid>
+      {collections.length ? (
+        <EuiFlexGrid columns={3}>
+          {collections.map((collection) => (
+            <AnalyticsCollectionCardWithLens
+              key={collection.name}
+              id={`collection-card-${collection.name}`}
+              collection={collection}
+              subtitle={selectedFilterLabel}
+              filterBy={filterId}
+              timeRange={timeRange}
+            />
+          ))}
+        </EuiFlexGrid>
+      ) : (
+        <AnalyticsCollectionNotFound query={query} />
+      )}
       <AddAnalyticsCollection
         render={(onClick) => (
           <EuiButton

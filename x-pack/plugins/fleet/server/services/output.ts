@@ -7,6 +7,7 @@
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
+import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type {
@@ -24,7 +25,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 import { SO_SEARCH_LIMIT, outputType } from '../../common/constants';
-import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents } from '../../common/services';
 import {
   OutputUnauthorizedError,
   OutputInvalidError,
@@ -163,7 +164,7 @@ async function validateTypeChanges(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   id: string,
-  data: Partial<Output>,
+  data: Nullable<Partial<OutputSOAttributes>>,
   originalOutput: Output,
   defaultDataOutputId: string | null,
   fromPreconfiguration: boolean
@@ -193,18 +194,18 @@ async function validateTypeChanges(
 async function updateFleetServerPoliciesDataOutputId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  data: Partial<Output>,
+  data: Nullable<Partial<OutputSOAttributes>>,
   isDefault: boolean,
   defaultDataOutputId: string | null,
   fleetServerPolicies: AgentPolicy[],
   fromPreconfiguration: boolean
 ) {
   // if a logstash output is updated to become default
-  // if fleet server policies are don't have data_output_id or if they are using the new output
+  // if fleet server policies don't have data_output_id
   // update them to use the default output
   if (data?.type === outputType.Logstash && isDefault) {
     for (const policy of fleetServerPolicies) {
-      if (!policy.data_output_id || policy.data_output_id === data?.id) {
+      if (!policy.data_output_id) {
         await agentPolicyService.update(
           soClient,
           esClient,
@@ -288,8 +289,7 @@ class OutputService {
 
   public getDefaultESHosts(): string[] {
     const cloud = appContextService.getCloud();
-    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+    const cloudUrl = cloud?.elasticsearchUrl;
     const cloudHosts = cloudUrl ? [cloudUrl] : undefined;
     const flagHosts =
       appContextService.getConfig()!.agents?.elasticsearch?.hosts &&
@@ -554,11 +554,23 @@ class OutputService {
     }
   ) {
     const originalOutput = await this.get(soClient, id);
+    if (originalOutput.is_preconfigured) {
+      if (!fromPreconfiguration) {
+        const allowEditFields = originalOutput.allow_edit ?? [];
 
-    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
-      throw new OutputUnauthorizedError(
-        `Preconfigured output ${id} cannot be updated outside of kibana config file.`
-      );
+        const allKeys = Array.from(new Set([...Object.keys(data)])) as Array<keyof Output>;
+        for (const key of allKeys) {
+          if (
+            (!!originalOutput[key] || !!data[key]) &&
+            !allowEditFields.includes(key) &&
+            !deepEqual(originalOutput[key], data[key])
+          ) {
+            throw new OutputUnauthorizedError(
+              `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
+            );
+          }
+        }
+      }
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
@@ -569,7 +581,7 @@ class OutputService {
       soClient,
       esClient,
       id,
-      data,
+      updateData,
       originalOutput,
       defaultDataOutputId,
       fromPreconfiguration

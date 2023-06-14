@@ -11,25 +11,40 @@ import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_eng
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_BULK_UPDATE,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
+  NOTIFICATION_DEFAULT_FREQUENCY,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   getSimpleRuleUpdate,
   createRule,
   getSimpleRule,
   createLegacyRuleAction,
+  getLegacyActionSO,
+  removeServerGeneratedPropertiesIncludingRuleId,
+  getSimpleRuleWithoutRuleId,
+  getSimpleRuleOutputWithoutRuleId,
 } from '../../utils';
+import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
+import {
+  getActionsWithFrequencies,
+  getActionsWithoutFrequencies,
+  getSomeActionsWithFrequencies,
+} from '../../utils/get_rule_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('update_rules_bulk', () => {
     describe('deprecations', () => {
@@ -59,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -136,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: connector.body.id,
           action_type_id: connector.body.connector_type_id,
           params: {
-            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
         };
         const [rule1, rule2] = await Promise.all([
@@ -148,15 +163,20 @@ export default ({ getService }: FtrProviderContext) => {
           createLegacyRuleAction(supertest, rule2.id, connector.body.id),
         ]);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(2);
+        expect(
+          sidecarActionsResults.hits.hits.map((hit) => hit?._source?.references[0].id).sort()
+        ).to.eql([rule1.id, rule2.id].sort());
+
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
         updatedRule1.actions = [action1];
-        updatedRule1.throttle = '1d';
 
         const updatedRule2 = getSimpleRuleUpdate('rule-2');
         updatedRule2.name = 'some other name';
         updatedRule2.actions = [action1];
-        updatedRule2.throttle = '1d';
 
         // update both rule names
         const { body }: { body: RuleResponse[] } = await supertest
@@ -165,24 +185,27 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+
         body.forEach((response) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.revision = 2;
+          outputRule.revision = 1;
           outputRule.actions = [
             {
               action_type_id: '.slack',
               group: 'default',
               id: connector.body.id,
               params: {
-                message:
-                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               uuid: bodyToCompare.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ];
-          outputRule.throttle = '1d';
 
           expect(bodyToCompare).to.eql(outputRule);
         });
@@ -232,9 +255,8 @@ export default ({ getService }: FtrProviderContext) => {
         body.forEach((response) => {
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.revision = 2;
+          outputRule.revision = 1;
           outputRule.actions = [];
-          outputRule.throttle = 'no_actions';
           const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
@@ -588,6 +610,178 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-2',
           },
         ]);
+      });
+    });
+
+    describe('bulk per-action frequencies', () => {
+      const bulkUpdateSingleRule = async (
+        ruleId: string,
+        throttle: RuleActionThrottle | undefined,
+        actions: RuleActionArray
+      ) => {
+        // update a simple rule's `throttle` and `actions`
+        const ruleToUpdate = getSimpleRuleUpdate();
+        ruleToUpdate.throttle = throttle;
+        ruleToUpdate.actions = actions;
+        ruleToUpdate.id = ruleId;
+        delete ruleToUpdate.rule_id;
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .send([ruleToUpdate])
+          .expect(200);
+
+        const updatedRule = body[0];
+        updatedRule.actions = removeUUIDFromActions(updatedRule.actions);
+        return removeServerGeneratedPropertiesIncludingRuleId(updatedRule);
+      };
+
+      describe('actions without frequencies', () => {
+        [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
+          (throttle) => {
+            it(`it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+              const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
+
+              // create simple rule
+              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+              // update a simple rule's `throttle` and `actions`
+              const updatedRule = await bulkUpdateSingleRule(
+                createdRule.id,
+                throttle,
+                actionsWithoutFrequencies
+              );
+
+              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              expectedRule.revision = 1;
+              expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
+                ...action,
+                frequency: NOTIFICATION_DEFAULT_FREQUENCY,
+              }));
+
+              expect(updatedRule).to.eql(expectedRule);
+            });
+          }
+        );
+
+        // Action throttle cannot be shorter than the schedule interval which is by default is 5m
+        ['300s', '5m', '3h', '4d'].forEach((throttle) => {
+          it(`it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
+            const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
+
+            // create simple rule
+            const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+            // update a simple rule's `throttle` and `actions`
+            // update a simple rule's `throttle` and `actions`
+            const updatedRule = await bulkUpdateSingleRule(
+              createdRule.id,
+              throttle,
+              actionsWithoutFrequencies
+            );
+
+            const expectedRule = getSimpleRuleOutputWithoutRuleId();
+            expectedRule.revision = 1;
+            expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
+              ...action,
+              frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
+            }));
+
+            expect(updatedRule).to.eql(expectedRule);
+          });
+        });
+      });
+
+      describe('actions with frequencies', () => {
+        [
+          undefined,
+          NOTIFICATION_THROTTLE_NO_ACTIONS,
+          NOTIFICATION_THROTTLE_RULE,
+          '321s',
+          '6m',
+          '10h',
+          '2d',
+        ].forEach((throttle) => {
+          it(`it does not change actions frequency attributes when 'throttle' is '${throttle}'`, async () => {
+            const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
+
+            // create simple rule
+            const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+            // update a simple rule's `throttle` and `actions`
+            const updatedRule = await bulkUpdateSingleRule(
+              createdRule.id,
+              throttle,
+              actionsWithFrequencies
+            );
+
+            const expectedRule = getSimpleRuleOutputWithoutRuleId();
+            expectedRule.revision = 1;
+            expectedRule.actions = actionsWithFrequencies;
+
+            expect(updatedRule).to.eql(expectedRule);
+          });
+        });
+      });
+
+      describe('some actions with frequencies', () => {
+        [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
+          (throttle) => {
+            it(`it overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+              const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
+
+              // create simple rule
+              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+              // update a simple rule's `throttle` and `actions`
+              const updatedRule = await bulkUpdateSingleRule(
+                createdRule.id,
+                throttle,
+                someActionsWithFrequencies
+              );
+
+              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              expectedRule.revision = 1;
+              expectedRule.actions = someActionsWithFrequencies.map((action) => ({
+                ...action,
+                frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
+              }));
+
+              expect(updatedRule).to.eql(expectedRule);
+            });
+          }
+        );
+
+        // Action throttle cannot be shorter than the schedule interval which is by default is 5m
+        ['430s', '7m', '1h', '8d'].forEach((throttle) => {
+          it(`it correctly transforms 'throttle = ${throttle}' and overrides frequency attribute of each action`, async () => {
+            const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
+
+            // create simple rule
+            const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+            // update a simple rule's `throttle` and `actions`
+            const updatedRule = await bulkUpdateSingleRule(
+              createdRule.id,
+              throttle,
+              someActionsWithFrequencies
+            );
+
+            const expectedRule = getSimpleRuleOutputWithoutRuleId();
+            expectedRule.revision = 1;
+            expectedRule.actions = someActionsWithFrequencies.map((action) => ({
+              ...action,
+              frequency: action.frequency ?? {
+                summary: true,
+                throttle,
+                notifyWhen: 'onThrottleInterval',
+              },
+            }));
+
+            expect(updatedRule).to.eql(expectedRule);
+          });
+        });
       });
     });
   });

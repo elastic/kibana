@@ -13,7 +13,7 @@ const createMockVersionedRoute = (): VersionedRoute => {
   return api;
 };
 
-export const createVersionedRouterMock = (): jest.Mocked<VersionedRouter> => ({
+export const createVersionedRouterMock = (): jest.Mocked<VersionedRouter<any>> => ({
   delete: jest.fn((_) => createMockVersionedRoute()),
   get: jest.fn((_) => createMockVersionedRoute()),
   patch: jest.fn((_) => createMockVersionedRoute()),

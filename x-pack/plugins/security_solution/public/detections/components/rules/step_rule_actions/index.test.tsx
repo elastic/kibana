@@ -6,9 +6,19 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { StepRuleActions } from '.';
+import { TestProviders } from '../../../../common/mock';
+
+import { StepRuleActions, stepActionsDefaultValue } from '.';
+import {
+  defaultSchedule,
+  stepAboutDefaultValue,
+  stepDefineDefaultValue,
+} from '../../../pages/detection_engine/rules/utils';
+import { useRuleForms } from '../../../../detection_engine/rule_creation_ui/pages/form';
+import type { FormHook } from '../../../../shared_imports';
+import type { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
@@ -42,15 +52,34 @@ const actionMessageParams = {
 };
 
 describe('StepRuleActions', () => {
-  it('renders correctly', () => {
-    const wrapper = shallow(
+  const TestComp = ({
+    setFormRef,
+  }: {
+    setFormRef: (form: FormHook<ActionsStepRule, ActionsStepRule>) => void;
+  }) => {
+    const { actionsStepForm } = useRuleForms({
+      defineStepDefault: stepDefineDefaultValue,
+      aboutStepDefault: stepAboutDefaultValue,
+      scheduleStepDefault: defaultSchedule,
+      actionsStepDefault: stepActionsDefaultValue,
+    });
+
+    setFormRef(actionsStepForm);
+
+    return (
       <StepRuleActions
         actionMessageParams={actionMessageParams}
-        isReadOnlyView={false}
+        summaryActionMessageParams={actionMessageParams}
         isLoading={false}
+        form={actionsStepForm}
       />
     );
+  };
+  it('renders correctly', () => {
+    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
+      wrappingComponent: TestProviders,
+    });
 
-    expect(wrapper.find('[data-test-subj="stepRuleActions"]')).toHaveLength(1);
+    expect(wrapper.find('Form[data-test-subj="stepRuleActions"]')).toHaveLength(1);
   });
 });

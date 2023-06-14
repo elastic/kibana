@@ -11,11 +11,12 @@
  */
 
 import { get } from 'lodash';
+
+import { ES_AGGREGATION, ML_JOB_AGGREGATION, DOC_COUNT, _DOC_COUNT } from '@kbn/ml-anomaly-utils';
+
 import { SeriesConfig } from '../../../common/types/results';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
 
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
-import { DOC_COUNT, _DOC_COUNT } from '../../../common/constants/field_types';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 
 // Builds the basic configuration to plot a chart of the source data

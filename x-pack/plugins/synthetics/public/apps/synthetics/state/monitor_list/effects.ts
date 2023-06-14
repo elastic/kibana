@@ -6,7 +6,7 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { call, put, takeEvery, select, debounce } from 'redux-saga/effects';
+import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
@@ -25,8 +25,9 @@ import {
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
   quietFetchMonitorListAction,
+  fetchMonitorFiltersAction,
 } from './actions';
-import { fetchMonitorManagementList, fetchUpsertMonitor } from './api';
+import { fetchMonitorManagementList, fetchUpsertMonitor, fetchMonitorFilters } from './api';
 import { toastTitle } from './toast_title';
 import { UpsertMonitorRequest } from './models';
 
@@ -116,4 +117,15 @@ export function* upsertMonitorEffect() {
 
 function hasPageState(value: any): value is { pageState: MonitorOverviewPageState } {
   return Object.keys(value).includes('pageState');
+}
+
+export function* fetchMonitorFiltersEffect() {
+  yield takeLatest(
+    fetchMonitorFiltersAction.get,
+    fetchEffectFactory(
+      fetchMonitorFilters,
+      fetchMonitorFiltersAction.success,
+      fetchMonitorFiltersAction.fail
+    )
+  );
 }

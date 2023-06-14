@@ -43,6 +43,7 @@ export const recoverRuleAlerts = async (
         const event = createAlertEventLogRecordObject({
           ruleId: id,
           ruleName: attributes.name,
+          ruleRevision: attributes.revision,
           ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId),
           consumer: attributes.consumer,
           instanceId: alertId,

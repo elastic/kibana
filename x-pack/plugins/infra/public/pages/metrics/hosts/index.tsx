@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';

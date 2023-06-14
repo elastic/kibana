@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
@@ -30,7 +31,11 @@ import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { VisualizationActions } from '../visualization_actions/actions';
-import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
+import type {
+  GetLensAttributes,
+  LensAttributes,
+  VisualizationResponse,
+} from '../visualization_actions/types';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
@@ -71,7 +76,12 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
   ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
-const CHART_HEIGHT = '150px';
+const CHART_HEIGHT = 150;
+
+const visualizationResponseHasData = (response: VisualizationResponse): boolean =>
+  Object.values<AggregationsTermsAggregateBase<unknown[]>>(response.aggregations ?? {}).some(
+    ({ buckets }) => buckets.length > 0
+  );
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -201,8 +211,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     if (typeof subtitle === 'function') {
       if (isChartEmbeddablesEnabled) {
-        const visualizationCount =
-          visualizationResponse != null ? visualizationResponse[0].hits.total : 0;
+        if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse[0])) {
+          return subtitle(0);
+        }
+        const visualizationCount = visualizationResponse[0].hits.total;
         return visualizationCount >= 0 ? subtitle(visualizationCount) : null;
       } else {
         return totalCount >= 0 ? subtitle(totalCount) : null;
@@ -320,7 +332,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 data-test-subj="embeddable-matrix-histogram"
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
-                height={CHART_HEIGHT}
+                height={chartHeight ?? CHART_HEIGHT}
                 id={visualizationId}
                 inspectTitle={title as string}
                 lensAttributes={lensAttributes}

@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import {
+  IntervalSchedule,
   parseDuration,
   RuleAction,
   RuleNotifyWhenTypeValues,
@@ -25,13 +26,6 @@ export const isActionOnInterval = (action?: RuleAction) => {
     action.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
     typeof action.frequency.throttle === 'string'
   );
-};
-
-export const isSummaryActionPerRuleRun = (action: RuleAction) => {
-  if (!action.frequency) {
-    return false;
-  }
-  return action.frequency.notifyWhen === RuleNotifyWhenTypeValues[1] && action.frequency.summary;
 };
 
 export const isSummaryActionOnInterval = (action: RuleAction) => {
@@ -93,9 +87,38 @@ export const getSummaryActionsFromTaskState = ({
         action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
     if (actionExists) {
-      return { ...newObj, [actionExists.uuid!]: val }; // replace hash with uuid
-    } else {
-      return newObj;
+      // replace hash with uuid
+      newObj[actionExists.uuid!] = val;
     }
-  }, {});
+    return newObj;
+  }, {} as ThrottledActions);
+};
+
+export const getSummaryActionTimeBounds = (
+  action: RuleAction,
+  ruleSchedule: IntervalSchedule,
+  previousStartedAt: Date | null
+): { start?: number; end?: number } => {
+  if (!isSummaryAction(action)) {
+    return { start: undefined, end: undefined };
+  }
+  let startDate: Date;
+  const now = Date.now();
+
+  if (isActionOnInterval(action)) {
+    // If action is throttled, set time bounds using throttle interval
+    const throttleMills = parseDuration(action.frequency!.throttle!);
+    startDate = new Date(now - throttleMills);
+  } else {
+    // If action is not throttled, set time bounds to previousStartedAt - now
+    // If previousStartedAt is null, use the rule schedule interval
+    if (previousStartedAt) {
+      startDate = previousStartedAt;
+    } else {
+      const scheduleMillis = parseDuration(ruleSchedule.interval);
+      startDate = new Date(now - scheduleMillis);
+    }
+  }
+
+  return { start: startDate.valueOf(), end: now.valueOf() };
 };

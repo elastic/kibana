@@ -6,8 +6,11 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
-import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import type {
+  DataFrameAnalyticsConfig,
+  FeatureImportanceBaseline,
+  TotalFeatureImportance,
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -51,7 +54,7 @@ export interface TrainedModelStat {
       }
     >;
   };
-  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  deployment_stats?: TrainedModelDeploymentStatsResponse;
   model_size_stats?: TrainedModelModelSizeStats;
 }
 
@@ -128,6 +131,7 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
+  deployment_id: string;
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
@@ -163,6 +167,8 @@ export interface TrainedModelDeploymentStatsResponse {
 }
 
 export interface AllocatedModel {
+  key: string;
+  deployment_id: string;
   inference_threads: number;
   allocation_status: {
     target_allocation_count: number;

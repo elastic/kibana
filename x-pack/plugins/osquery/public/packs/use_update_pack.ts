@@ -21,7 +21,7 @@ interface UseUpdatePackProps {
   options?: UseMutationOptions<
     { data: PackSavedObject },
     { body: { message: string; error: string } },
-    Partial<PackSavedObject['attributes']> & { id: string }
+    Partial<PackSavedObject> & { id: string }
   >;
 }
 
@@ -37,7 +37,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   return useMutation<
     { data: PackSavedObject },
     { body: { message: string; error: string } },
-    Partial<PackSavedObject['attributes']> & { id: string }
+    Partial<PackSavedObject> & { id: string }
   >(
     ({ id, ...payload }) =>
       http.put(`/api/osquery/packs/${id}`, {
@@ -57,7 +57,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
           i18n.translate('xpack.osquery.updatePack.successToastMessageText', {
             defaultMessage: 'Successfully updated "{packName}" pack',
             values: {
-              packName: response?.data?.attributes?.name ?? '',
+              packName: response?.data?.name ?? '',
             },
           })
         );

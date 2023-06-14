@@ -138,7 +138,7 @@ describe('FetchHistoricalSummary', () => {
   describe('Rolling and Occurrences SLOs', () => {
     it('returns the summary', async () => {
       const slo = createSLO({
-        timeWindow: { isRolling: true, duration: thirtyDays() },
+        timeWindow: { type: 'rolling', duration: thirtyDays() },
         objective: { target: 0.95 },
       });
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30));
@@ -156,7 +156,7 @@ describe('FetchHistoricalSummary', () => {
   describe('Rolling and Timeslices SLOs', () => {
     it('returns the summary', async () => {
       const slo = createSLO({
-        timeWindow: { isRolling: true, duration: thirtyDays() },
+        timeWindow: { type: 'rolling', duration: thirtyDays() },
         budgetingMethod: 'timeslices',
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
       });
@@ -177,7 +177,7 @@ describe('FetchHistoricalSummary', () => {
       const slo = createSLO({
         timeWindow: {
           duration: oneMonth(),
-          calendar: { startTime: new Date('2023-01-01T00:00:00.000Z') },
+          type: 'calendarAligned',
         },
         budgetingMethod: 'timeslices',
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
@@ -200,7 +200,7 @@ describe('FetchHistoricalSummary', () => {
       const slo = createSLO({
         timeWindow: {
           duration: oneMonth(),
-          calendar: { startTime: new Date('2023-01-01T00:00:00.000Z') },
+          type: 'calendarAligned',
         },
         budgetingMethod: 'occurrences',
         objective: { target: 0.95 },

@@ -24,7 +24,7 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
 import { DatafeedStep } from '../components/datafeed_step';
-import { useMlContext } from '../../../../contexts/ml';
+import { useDataSource } from '../../../../contexts/ml';
 
 interface Props {
   currentStep: WIZARD_STEPS;
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
-  const mlContext = useMlContext();
+  const mlContext = useDataSource();
   const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     const { uiSettings, data, fieldFormats, charts } = services;
@@ -63,7 +63,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const timeRangeMs = useMemo(() => {
     // If time range is available via jobCreator, use that
     // else mimic Discover and set timeRange to be now for data view without time field
-    return start && end ? { from: start, to: start } : undefined;
+    return start && end ? { from: start, to: end } : undefined;
   }, [start, end]);
 
   // store whether the advanced and additional sections have been expanded.

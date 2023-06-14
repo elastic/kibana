@@ -16,7 +16,7 @@ import { SettingsTemplate } from './settings_template';
 type Args = ComponentProps<typeof SettingsTemplate>;
 
 const coreMock = {
-  observability: {
+  observabilityShared: {
     navigation: {
       PageTemplate: () => {
         return <>hello world</>;

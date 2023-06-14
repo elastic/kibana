@@ -7,7 +7,7 @@ set -euo pipefail
 source .buildkite/scripts/steps/artifacts/env.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
-KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana:git-$GIT_ABBREV_COMMIT"
+KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:git-$GIT_ABBREV_COMMIT"
 
 echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
@@ -26,17 +26,18 @@ node scripts/build \
   --docker-images \
   --docker-namespace="kibana-ci" \
   --docker-tag="git-$GIT_ABBREV_COMMIT" \
+  --skip-docker-ubuntu \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-$BASE_VERSION-docker-image.tar.gz"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
 
 docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
@@ -44,7 +45,6 @@ docker image push "$KIBANA_IMAGE-arm64"
 docker image push "$KIBANA_IMAGE-amd64"
 
 echo "--- Create manifest"
-docker rmi "$KIBANA_IMAGE"
 docker manifest create \
   "$KIBANA_IMAGE" \
   --amend "$KIBANA_IMAGE-arm64" \
@@ -92,7 +92,7 @@ steps:
         IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana
+        IMAGE_NAME: kibana-serverless
         COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
 EOF
 

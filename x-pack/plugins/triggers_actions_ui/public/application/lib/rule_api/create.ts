@@ -36,7 +36,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
       throttle: frequency!.throttle,
       summary: frequency!.summary,
     },
-    alertsFilter,
+    alerts_filter: alertsFilter,
   })),
 });
 

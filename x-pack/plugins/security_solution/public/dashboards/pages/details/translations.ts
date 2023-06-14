@@ -27,6 +27,13 @@ export const DASHBOARD_INDICES_NOT_FOUND_TITLE = i18n.translate(
   }
 );
 
+export const DASHBOARD_NOT_FOUND_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.notFound.title',
+  {
+    defaultMessage: 'Not found',
+  }
+);
+
 export const EDIT_DASHBOARD_BUTTON_TITLE = i18n.translate(
   'xpack.securitySolution.dashboards.dashboard.editDashboardButtonTitle',
   {

@@ -175,6 +175,7 @@ export function getIndexPatternsIds({
     }
     return currentId;
   }, undefined);
+
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);
@@ -361,3 +362,7 @@ export const getSearchWarningMessages = (
 
   return [...warningsMap.values()].flat();
 };
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}

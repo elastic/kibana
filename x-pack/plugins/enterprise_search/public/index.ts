@@ -12,3 +12,5 @@ import { EnterpriseSearchPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
 };
+
+export type { EnterpriseSearchPublicSetup, EnterpriseSearchPublicStart } from './plugin';

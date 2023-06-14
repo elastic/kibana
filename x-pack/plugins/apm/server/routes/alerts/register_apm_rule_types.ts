@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { Observable } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';
 import {
@@ -17,10 +19,12 @@ import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import {
   AGENT_NAME,
+  ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
@@ -42,6 +46,14 @@ export const apmRuleTypeAlertFieldMap = {
     required: false,
   },
   [TRANSACTION_TYPE]: {
+    type: 'keyword',
+    required: false,
+  },
+  [TRANSACTION_NAME]: {
+    type: 'keyword',
+    required: false,
+  },
+  [ERROR_GROUP_ID]: {
     type: 'keyword',
     required: false,
   },
@@ -79,6 +91,7 @@ export interface RegisterRuleDependencies {
   ml?: MlPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleDataClient: IRuleDataClient;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }
 
 export function registerApmRuleTypes(dependencies: RegisterRuleDependencies) {

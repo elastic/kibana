@@ -84,6 +84,7 @@ export interface SavedObjectsRawDocSource {
   created_at?: string;
   references?: SavedObjectReference[];
   originId?: string;
+  managed?: boolean;
 
   [typeMapping: string]: any;
 }
@@ -106,6 +107,7 @@ interface SavedObjectDoc<T = unknown> {
   updated_at?: string;
   created_at?: string;
   originId?: string;
+  managed?: boolean;
 }
 
 /**

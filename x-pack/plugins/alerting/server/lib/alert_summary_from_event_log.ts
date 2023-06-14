@@ -40,6 +40,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       average: 0,
       valuesWithTimestamp: {},
     },
+    revision: rule.revision,
   };
 
   const alerts = new Map<string, AlertStatus>();
@@ -84,6 +85,10 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
 
     if (event?.kibana?.alert?.flapping) {
       status.flapping = true;
+    }
+
+    if (event?.kibana?.alert?.maintenance_window_ids?.length) {
+      status.maintenanceWindowIds = event.kibana.alert.maintenance_window_ids as string[];
     }
 
     switch (action) {

@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import moment from 'moment';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
-import { ENABLE_SQL } from '../../common/constants';
+import { ENABLE_SQL, LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
@@ -37,7 +37,7 @@ import {
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
 import { LensByReferenceInput } from '../embeddable';
-import { getShareURL } from './share_action';
+import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -578,6 +578,10 @@ export const LensTopNavMenu = ({
               return;
             }
 
+            if (visualization.activeId == null || !visualizationMap[visualization.activeId]) {
+              return;
+            }
+
             const {
               shareableUrl,
               savedObjectURL,
@@ -607,6 +611,12 @@ export const LensTopNavMenu = ({
               locatorParams: {
                 id: LENS_APP_LOCATOR,
                 params: locatorParams,
+              },
+              layout: {
+                dimensions:
+                  visualizationMap[visualization.activeId].getReportingLayout?.(
+                    visualization.state
+                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
               },
             };
 
@@ -660,6 +670,7 @@ export const LensTopNavMenu = ({
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
                   newDescription: contextFromEmbeddable ? initialContext.description : '',
+                  panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
                   saveToLibrary:
@@ -1069,6 +1080,8 @@ export const LensTopNavMenu = ({
       dataViewPickerComponentProps={dataViewPickerProps}
       showDatePicker={
         indexPatterns.some((ip) => ip.isTimeBased()) ||
+        // always show the timepicker for text based languages
+        isOnTextBasedMode ||
         Boolean(
           allLoaded &&
             activeDatasourceId &&
@@ -1083,7 +1096,7 @@ export const LensTopNavMenu = ({
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
-      appName={'lens'}
+      appName={LENS_APP_NAME}
       displayStyle="detached"
       className="hide-for-sharing"
     />

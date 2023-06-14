@@ -17,6 +17,7 @@ import {
   createNewPackagePolicyMock,
   deletePackagePolicyMock,
 } from '@kbn/fleet-plugin/common/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -68,6 +69,7 @@ describe('ingest_integration tests ', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const generator = new EndpointDocGenerator();
+  const cloudService = cloudMock.createSetup();
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -92,13 +94,17 @@ describe('ingest_integration tests ', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    const createNewEndpointPolicyInput = (manifest: ManifestSchema, license = 'platinum') => ({
+    const createNewEndpointPolicyInput = (
+      manifest: ManifestSchema,
+      license = 'platinum',
+      cloud = cloudService.isCloudEnabled
+    ) => ({
       type: 'endpoint',
       enabled: true,
       streams: [],
       config: {
         integration_config: {},
-        policy: { value: disableProtections(policyFactory(license)) },
+        policy: { value: disableProtections(policyFactory(license, cloud)) },
         artifact_manifest: { value: manifest },
       },
     });
@@ -111,7 +117,8 @@ describe('ingest_integration tests ', () => {
         requestContextFactoryMock.create(),
         endpointAppContextMock.alerting,
         licenseService,
-        exceptionListClient
+        exceptionListClient,
+        cloudService
       );
 
       return callback(
@@ -359,7 +366,8 @@ describe('ingest_integration tests ', () => {
         logger,
         licenseService,
         endpointAppContextMock.featureUsageService,
-        endpointAppContextMock.endpointMetadataService
+        endpointAppContextMock.endpointMetadataService,
+        cloudService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -375,7 +383,8 @@ describe('ingest_integration tests ', () => {
         logger,
         licenseService,
         endpointAppContextMock.featureUsageService,
-        endpointAppContextMock.endpointMetadataService
+        endpointAppContextMock.endpointMetadataService,
+        cloudService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -405,10 +414,71 @@ describe('ingest_integration tests ', () => {
         logger,
         licenseService,
         endpointAppContextMock.featureUsageService,
-        endpointAppContextMock.endpointMetadataService
+        endpointAppContextMock.endpointMetadataService,
+        cloudService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
+  });
+
+  describe('package policy update callback when meta fields should be updated', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    beforeEach(() => {
+      licenseEmitter.next(Platinum); // set license level to platinum
+    });
+    it('updates successfully when meta fields differ from services', async () => {
+      const mockPolicy = policyFactory();
+      mockPolicy.meta.cloud = true; // cloud mock will return true
+      mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      // values should be updated
+      policyConfig.inputs[0]!.config!.policy.value.meta.cloud = false;
+      policyConfig.inputs[0]!.config!.policy.value.meta.license = 'gold';
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
+
+    it('meta fields stay the same where there is no difference', async () => {
+      const mockPolicy = policyFactory();
+      mockPolicy.meta.cloud = true; // cloud mock will return true
+      mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      // values should be updated
+      policyConfig.inputs[0]!.config!.policy.value.meta.cloud = true;
+      policyConfig.inputs[0]!.config!.policy.value.meta.license = 'platinum';
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,

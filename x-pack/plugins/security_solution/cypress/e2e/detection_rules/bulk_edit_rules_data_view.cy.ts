@@ -16,6 +16,7 @@ import {
   waitForRulesTableToBeLoaded,
   goToRuleDetails,
   selectNumberOfRules,
+  goToTheRuleDetailsOf,
 } from '../../tasks/alerts_detection_rules';
 
 import {
@@ -54,11 +55,12 @@ const expectedNumberOfCustomRulesToBeEdited = 6;
 describe('Bulk editing index patterns of rules with a data view only', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
     deleteAlertsAndRules();
     esArchiverResetKibana();
+    login();
 
     postDataView(DATA_VIEW_ID);
 
@@ -178,18 +180,22 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
 describe('Bulk editing index patterns of rules with index patterns and rules with a data view', () => {
   const customRulesNumber = 2;
+
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     esArchiverResetKibana();
 
     postDataView(DATA_VIEW_ID);
 
-    createRule(getNewRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '1' }));
-    createRule(getNewRule({ index: ['test-index-1-*'], rule_id: '2' }));
+    createRule(
+      getNewRule({ name: 'with dataview', index: [], data_view_id: DATA_VIEW_ID, rule_id: '1' })
+    );
+    createRule(getNewRule({ name: 'no data view', index: ['test-index-1-*'], rule_id: '2' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -210,7 +216,7 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
     });
 
     // check if rule still has data view and index patterns field does not exist
-    goToRuleDetails();
+    goToTheRuleDetailsOf('with dataview');
     getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
     assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
   });

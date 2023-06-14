@@ -11,7 +11,6 @@ import React from 'react';
 import type { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
 
 import '../../mock/match_media';
-import { TableId, TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
@@ -24,6 +23,8 @@ import {
   getStyle,
 } from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { TimelineId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../lib/kibana');
 

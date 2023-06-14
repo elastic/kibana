@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { GaugePublicConfig } from '../config';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 import { VisTypeGaugePluginSetup } from './types';
 import { gaugeVisType, goalVisType } from './vis_type';
@@ -27,14 +28,29 @@ export interface VisTypeGaugePluginStartDependencies {
 }
 
 export class VisTypeGaugePlugin {
+  private readonly initializerContext: PluginInitializerContext<GaugePublicConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<GaugePublicConfig>) {
+    this.initializerContext = initializerContext;
+  }
+
   public setup(
     core: CoreSetup<VisTypeGaugeSetupDependencies>,
     { visualizations }: VisTypeGaugeSetupDependencies
   ): VisTypeGaugePluginSetup {
     if (!core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
+      const { readOnly } = this.initializerContext.config.get<GaugePublicConfig>();
       const visTypeProps = { showElasticChartsOptions: true };
-      visualizations.createBaseVisualization(gaugeVisType(visTypeProps));
-      visualizations.createBaseVisualization(goalVisType(visTypeProps));
+      visualizations.createBaseVisualization({
+        ...gaugeVisType(visTypeProps),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
+      visualizations.createBaseVisualization({
+        ...goalVisType(visTypeProps),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
 
     return {};

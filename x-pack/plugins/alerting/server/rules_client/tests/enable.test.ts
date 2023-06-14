@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,6 +18,14 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { migrateLegacyActions } from '../lib';
+import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
+
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -122,6 +131,11 @@ describe('enable()', () => {
       apiKeysEnabled: false,
     });
     taskManager.get.mockResolvedValue(mockTask);
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   describe('authorization', () => {
@@ -656,6 +670,60 @@ describe('enable()', () => {
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenNthCalledWith(2, 'alert', '1', {
       scheduledTaskId: '1',
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions', async () => {
+      (migrateLegacyActions as jest.Mock).mockResolvedValueOnce({
+        hasLegacyActions: true,
+        resultedActions: ['fake-action-1'],
+        resultedReferences: ['fake-ref-1'],
+      });
+
+      const existingDecryptedSiemRule = {
+        ...existingRule,
+        attributes: { ...existingRule.attributes, consumer: AlertConsumers.SIEM },
+      };
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
+      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
+
+      await rulesClient.enable({ id: '1' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
+        actions: [
+          {
+            actionRef: '1',
+            actionTypeId: '1',
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        references: [],
+        ruleId: '1',
+      });
+      // to mitigate AAD issues, we call create with overwrite=true and actions related props
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'alert',
+        expect.objectContaining({
+          ...existingDecryptedSiemRule.attributes,
+          actions: ['fake-action-1'],
+          throttle: undefined,
+          notifyWhen: undefined,
+          enabled: true,
+        }),
+        {
+          id: existingDecryptedSiemRule.id,
+          overwrite: true,
+          references: ['fake-ref-1'],
+          version: existingDecryptedSiemRule.version,
+        }
+      );
     });
   });
 });

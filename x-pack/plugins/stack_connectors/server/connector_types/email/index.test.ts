@@ -523,6 +523,10 @@ describe('execute()', () => {
     logger: mockedLogger,
   };
 
+  beforeEach(() => {
+    executorOptions.configurationUtilities = actionsConfigMock.create();
+  });
+
   test('ensure parameters are as expected', async () => {
     sendEmailMock.mockReset();
     const result = await connectorType.executor(executorOptions);
@@ -540,7 +544,7 @@ describe('execute()', () => {
         "content": Object {
           "message": "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic.",
           "subject": "the subject",
@@ -591,7 +595,7 @@ describe('execute()', () => {
         "content": Object {
           "message": "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic.",
           "subject": "the subject",
@@ -642,7 +646,7 @@ describe('execute()', () => {
         "content": Object {
           "message": "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic.",
           "subject": "the subject",
@@ -738,6 +742,28 @@ describe('execute()', () => {
     `);
   });
 
+  test('provides no footer link when enableFooterInEmail is false', async () => {
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      configurationUtilities: {
+        ...configurationUtilities,
+        enableFooterInEmail: jest.fn().mockReturnValue(false),
+      },
+    };
+
+    const connectorTypeWithPublicUrl = getConnectorType({
+      publicBaseUrl: 'https://localhost:1234/foo/bar',
+    });
+
+    await connectorTypeWithPublicUrl.executor(customExecutorOptions);
+
+    expect(customExecutorOptions.configurationUtilities.enableFooterInEmail).toHaveBeenCalledTimes(
+      1
+    );
+    const sendMailCall = sendEmailMock.mock.calls[0][1];
+    expect(sendMailCall.content.message).toMatchInlineSnapshot(`"a message to you"`);
+  });
+
   test('provides a footer link to Elastic when publicBaseUrl is defined', async () => {
     const connectorTypeWithPublicUrl = getConnectorType({
       publicBaseUrl: 'https://localhost:1234/foo/bar',
@@ -750,7 +776,7 @@ describe('execute()', () => {
     expect(sendMailCall.content.message).toMatchInlineSnapshot(`
       "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic. [Go to Elastic](https://localhost:1234/foo/bar)."
     `);
@@ -779,7 +805,7 @@ describe('execute()', () => {
     expect(sendMailCall.content.message).toMatchInlineSnapshot(`
       "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic. [View this in Elastic](https://localhost:1234/foo/bar/my/app)."
     `);

@@ -108,7 +108,8 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingDescription',
                         {
-                          defaultMessage: 'Define the frequency and time for scheduled crawls',
+                          defaultMessage:
+                            'Define the frequency and time for scheduled crawls. The crawler uses UTC as its timezone.',
                         }
                       )}
                     </EuiText>
@@ -121,7 +122,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               >
                 <EnterpriseSearchCronEditor
                   disabled={!crawlAutomatically || !useConnectorSchedule}
-                  scheduling={index.connector.scheduling}
+                  scheduling={index.connector.scheduling.full}
                   onChange={(newScheduling) =>
                     submitConnectorSchedule({
                       ...newScheduling,

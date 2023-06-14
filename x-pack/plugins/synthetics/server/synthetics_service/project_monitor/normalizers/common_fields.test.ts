@@ -132,6 +132,7 @@ describe('getNormalizeCommonFields', () => {
           },
           tags: [],
           timeout: '16',
+          params: '',
         },
       });
     }
@@ -192,6 +193,7 @@ describe('getNormalizeCommonFields', () => {
         },
         tags: [],
         timeout: '16',
+        params: '',
       },
     });
   });

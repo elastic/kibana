@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiSpacer,
+  EuiCallOut,
   EuiBetaBadge,
   EuiCodeBlock,
   EuiModalHeader,
@@ -32,7 +33,7 @@ import {
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -54,6 +55,7 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
+import { useLicense } from '../../../../hooks/use_license';
 import * as i18n from './translations';
 
 interface InsightComponentProps {
@@ -64,7 +66,7 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
-const insightPrefix = '!{investigate';
+export const insightPrefix = '!{investigate';
 
 export const parser: Plugin = function () {
   const Parser = this.Parser;
@@ -132,8 +134,7 @@ export const parser: Plugin = function () {
 
 const resultFormat = '0,0.[000]a';
 
-// receives the configuration from the parser and renders
-const InsightComponent = ({
+const LicensedInsightComponent = ({
   label,
   description,
   providers,
@@ -208,9 +209,8 @@ const InsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeTimerange]);
-
   if (isQueryLoading) {
-    return <EuiLoadingSpinner size="l" />;
+    return <EuiLoadingSpinner />;
   } else {
     return (
       <>
@@ -232,6 +232,43 @@ const InsightComponent = ({
   }
 };
 
+// receives the configuration from the parser and renders
+const InsightComponent = ({
+  label,
+  description,
+  providers,
+  relativeFrom,
+  relativeTo,
+}: InsightComponentProps) => {
+  const isPlatinum = useLicense().isPlatinumPlus();
+
+  if (isPlatinum === false) {
+    return (
+      <>
+        <EuiButton
+          isDisabled={true}
+          iconSide={'left'}
+          iconType={'timeline'}
+          data-test-subj="insight-investigate-in-timeline-button"
+        >
+          {`${label}`}
+        </EuiButton>
+        <div>{description}</div>
+      </>
+    );
+  } else {
+    return (
+      <LicensedInsightComponent
+        label={label}
+        description={description}
+        providers={providers}
+        relativeFrom={relativeFrom}
+        relativeTo={relativeTo}
+      />
+    );
+  }
+};
+
 export { InsightComponent as renderer };
 
 const InsightEditorComponent = ({
@@ -246,7 +283,16 @@ const InsightEditorComponent = ({
       ui: { FiltersBuilderLazy },
     },
     uiSettings,
+    fieldFormats,
   } = useKibana().services;
+  const dataView = useMemo(() => {
+    if (sourcererDataView != null) {
+      return new DataView({ spec: sourcererDataView, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [sourcererDataView, fieldFormats]);
+
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
     const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
@@ -263,12 +309,6 @@ const InsightEditorComponent = ({
       }),
     ];
   }, [uiSettings]);
-  const kibanaDataProvider = useMemo(() => {
-    return {
-      ...sourcererDataView,
-      fields: sourcererDataView?.indexFields,
-    } as DataView;
-  }, [sourcererDataView]);
   const formMethods = useForm<{
     label: string;
     description: string;
@@ -368,6 +408,8 @@ const InsightEditorComponent = ({
       },
     ];
   }, [indexPattern]);
+  const isPlatinum = useLicense().isAtLeast('platinum');
+
   return (
     <>
       <EuiModalHeader
@@ -396,7 +438,12 @@ const InsightEditorComponent = ({
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
+      {isPlatinum === false && (
+        <EuiCallOut
+          title="To add suggested queries to an investigation guide, please upgrade to platinum"
+          iconType="timeline"
+        />
+      )}
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
@@ -426,12 +473,16 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
-              <FiltersBuilderLazy
-                filters={filtersStub}
-                onChange={onChange}
-                dataView={kibanaDataProvider}
-                maxDepth={2}
-              />
+              {dataView ? (
+                <FiltersBuilderLazy
+                  filters={filtersStub}
+                  onChange={onChange}
+                  dataView={dataView}
+                  maxDepth={2}
+                />
+              ) : (
+                <></>
+              )}
             </EuiFormRow>
             <EuiFormRow
               label={i18n.RELATIVE_TIMERANGE}
@@ -469,7 +520,7 @@ const InsightEditorComponent = ({
 };
 
 const InsightEditor = React.memo(InsightEditorComponent);
-const exampleInsight = `${insightPrefix}
+const exampleInsight = `${insightPrefix}{
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [

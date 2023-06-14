@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UserOverview } from '../../../../overview/components/user_overview';
-import { useUserDetails } from '../../../../explore/users/containers/users/details';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -61,7 +61,7 @@ export const ExpandableUserDetails = ({
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
 
-  const [loading, { userDetails }] = useUserDetails({
+  const [loading, { userDetails }] = useObservedUserDetails({
     endDate: to,
     startDate: from,
     userName,

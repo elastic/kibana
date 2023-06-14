@@ -83,7 +83,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       try {
         onLoading(true);
         await snoozeRule(item, snoozeSchedule);
-        onRuleChanged();
+        await onRuleChanged();
         toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
@@ -101,7 +101,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       try {
         onLoading(true);
         await unsnoozeRule(item, scheduleIds);
-        onRuleChanged();
+        await onRuleChanged();
         toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);

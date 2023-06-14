@@ -8,12 +8,16 @@
 import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 
 import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { CloudChatProviderPluginStart } from '@kbn/cloud-chat-provider-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import {
   ManagementSection,
   MANAGEMENT_BREADCRUMB,
@@ -34,12 +38,15 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  isSidebarEnabled$: BehaviorSubject<boolean>;
+  cloudChat?: CloudChatProviderPluginStart;
 }
 
 export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
-  const { setBreadcrumbs } = dependencies;
+  const { setBreadcrumbs, isSidebarEnabled$, cloudChat } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
+  const isSidebarEnabled = useObservable(isSidebarEnabled$);
 
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
@@ -75,18 +82,20 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
     return null;
   }
 
-  const solution: KibanaPageTemplateProps['solutionNav'] = {
-    name: i18n.translate('management.nav.label', {
-      defaultMessage: 'Management',
-    }),
-    icon: 'managementApp',
-    'data-test-subj': 'mgtSideBarNav',
-    items: managementSidebarNav({
-      selectedId,
-      sections,
-      history,
-    }),
-  };
+  const solution: KibanaPageTemplateProps['solutionNav'] | undefined = isSidebarEnabled
+    ? {
+        name: i18n.translate('management.nav.label', {
+          defaultMessage: 'Management',
+        }),
+        icon: 'managementApp',
+        'data-test-subj': 'mgtSideBarNav',
+        items: managementSidebarNav({
+          selectedId,
+          sections,
+          history,
+        }),
+      }
+    : undefined;
 
   return (
     <I18nProvider>
@@ -107,6 +116,7 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
             dependencies={dependencies}
           />
         </KibanaPageTemplate>
+        {cloudChat?.Chat ? <cloudChat.Chat /> : null}
       </KibanaThemeProvider>
     </I18nProvider>
   );

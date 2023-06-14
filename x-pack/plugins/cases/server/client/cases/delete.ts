@@ -28,11 +28,12 @@ import { createFileEntities, deleteFiles } from '../files';
  */
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
-    services: { caseService, attachmentService, userActionService },
+    services: { caseService, attachmentService, userActionService, alertsService },
     logger,
     authorization,
     fileService,
   } = clientArgs;
+
   try {
     const cases = await caseService.getCases({ caseIds: ids });
     const entities = new Map<string, OwnerEntity>();
@@ -75,6 +76,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
         entities: bulkDeleteEntities,
         options: { refresh: 'wait_for' },
       }),
+      alertsService.removeCaseIdsFromAllAlerts({ caseIds: ids }),
     ]);
 
     await userActionService.creator.bulkAuditLogCaseDeletion(

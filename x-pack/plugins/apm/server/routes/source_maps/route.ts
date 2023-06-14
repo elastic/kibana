@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -40,8 +41,16 @@ export const sourceMapRt = t.intersection([
 
 export type SourceMap = t.TypeOf<typeof sourceMapRt>;
 
+function throwNotImplementedIfSourceMapNotAvailable(
+  featureFlags: ApmFeatureFlags
+): void {
+  if (!featureFlags.sourcemapApiAvailable) {
+    throw Boom.notImplemented();
+  }
+}
+
 const listSourceMapRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/sourcemaps',
+  endpoint: 'GET /api/apm/sourcemaps 2023-05-22',
   options: { tags: ['access:apm'] },
   params: t.partial({
     query: t.partial({
@@ -52,7 +61,10 @@ const listSourceMapRoute = createApmServerRoute({
   async handler({
     params,
     plugins,
+    featureFlags,
   }): Promise<ListSourceMapArtifactsResponse | undefined> {
+    throwNotImplementedIfSourceMapNotAvailable(featureFlags);
+
     const { page, perPage } = params.query;
 
     try {
@@ -76,7 +88,7 @@ const listSourceMapRoute = createApmServerRoute({
 });
 
 const uploadSourceMapRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/sourcemaps',
+  endpoint: 'POST /api/apm/sourcemaps 2023-05-22',
   options: {
     tags: ['access:apm', 'access:apm_write'],
     body: { accepts: ['multipart/form-data'] },
@@ -97,7 +109,10 @@ const uploadSourceMapRoute = createApmServerRoute({
     plugins,
     core,
     logger,
+    featureFlags,
   }): Promise<Artifact | undefined> => {
+    throwNotImplementedIfSourceMapNotAvailable(featureFlags);
+
     const {
       service_name: serviceName,
       service_version: serviceVersion,
@@ -155,14 +170,16 @@ const uploadSourceMapRoute = createApmServerRoute({
 });
 
 const deleteSourceMapRoute = createApmServerRoute({
-  endpoint: 'DELETE /api/apm/sourcemaps/{id}',
+  endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-05-22',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     path: t.type({
       id: t.string,
     }),
   }),
-  handler: async ({ params, plugins, core }): Promise<void> => {
+  handler: async ({ params, plugins, core, featureFlags }): Promise<void> => {
+    throwNotImplementedIfSourceMapNotAvailable(featureFlags);
+
     const fleetPluginStart = await plugins.fleet?.start();
     const { id } = params.path;
     const coreStart = await core.start();
@@ -192,7 +209,9 @@ const deleteSourceMapRoute = createApmServerRoute({
 const migrateFleetArtifactsSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/sourcemaps/migrate_fleet_artifacts',
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async ({ plugins, core, logger }): Promise<void> => {
+  handler: async ({ plugins, core, logger, featureFlags }): Promise<void> => {
+    throwNotImplementedIfSourceMapNotAvailable(featureFlags);
+
     const fleet = await plugins.fleet?.start();
     const coreStart = await core.start();
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;

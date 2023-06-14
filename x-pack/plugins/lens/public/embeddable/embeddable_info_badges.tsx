@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { useState } from 'react';
 import type { UserMessage } from '../types';
 import './embeddable_info_badges.scss';
@@ -36,6 +36,20 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
       count: messages.length,
     },
   });
+
+  const messagesWithoutUniqueId = messages.filter(({ uniqueId }) => !uniqueId);
+  // compact messages be grouping longMessage together on matching unique-id
+  const messagesGroupedByUniqueId: Record<string, UserMessage[]> = {};
+  for (const message of messages) {
+    if (message.uniqueId) {
+      if (!messagesGroupedByUniqueId[message.uniqueId]) {
+        messagesGroupedByUniqueId[message.uniqueId] = [];
+      }
+      messagesGroupedByUniqueId[message.uniqueId].push(message);
+    }
+  }
+  const messageCount =
+    messagesWithoutUniqueId.length + Object.keys(messagesGroupedByUniqueId).length;
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -49,7 +63,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             title={iconTitle}
             size="s"
             css={css`
-              color: ${euiTheme.colors.emptyShade};
+              color: transparent;
               font-size: ${xsFontSize};
               height: ${euiTheme.size.l} !important;
               .euiButtonEmpty__content {
@@ -61,29 +75,69 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             `}
             iconType="wrench"
           >
-            {messages.length}
+            {messageCount}
           </EuiButtonEmpty>
         </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <div>
-        {messages.map(({ shortMessage, longMessage }, index) => (
-          <aside
-            key={`${shortMessage}-${index}`}
-            css={css`
-              padding: ${index > 0 ? 0 : euiTheme.size.base} ${euiTheme.size.base}
-                ${index > 0 ? euiTheme.size.s : 0};
-            `}
-          >
-            {index ? <EuiHorizontalRule margin="s" /> : null}
-            <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
-              <h3>{shortMessage}</h3>
-            </EuiTitle>
-            <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
-          </aside>
-        ))}
+      <div
+        css={css`
+          max-width: 280px;
+        `}
+        data-test-subj="lns-feature-badges-panel"
+      >
+        {messagesWithoutUniqueId.map(({ shortMessage, longMessage }, index) => {
+          return (
+            <Fragment key={`${shortMessage}-${index}`}>
+              {index ? (
+                <EuiHorizontalRule
+                  margin="none"
+                  data-test-subj="lns-feature-badges-horizontal-rule"
+                />
+              ) : null}
+              <aside
+                css={css`
+                  padding: ${euiTheme.size.base};
+                `}
+              >
+                <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
+                  <h3>{shortMessage}</h3>
+                </EuiTitle>
+                <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
+              </aside>
+            </Fragment>
+          );
+        })}
+        {Object.entries(messagesGroupedByUniqueId).map(([uniqueId, messagesByUniqueId], index) => {
+          const hasHorizontalRule = messagesWithoutUniqueId.length || index;
+          const [{ shortMessage }] = messagesByUniqueId;
+          return (
+            <Fragment key={uniqueId}>
+              {hasHorizontalRule ? (
+                <EuiHorizontalRule
+                  margin="none"
+                  data-test-subj="lns-feature-badges-horizontal-rule"
+                />
+              ) : null}
+              <aside
+                css={css`
+                  padding: ${euiTheme.size.base};
+                `}
+              >
+                <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
+                  <h3>{shortMessage}</h3>
+                </EuiTitle>
+                <ul className="lnsEmbeddablePanelFeatureList">
+                  {messagesByUniqueId.map(({ longMessage }, i) => (
+                    <Fragment key={`${uniqueId}-${i}`}>{longMessage}</Fragment>
+                  ))}
+                </ul>
+              </aside>
+            </Fragment>
+          );
+        })}
       </div>
     </EuiPopover>
   );

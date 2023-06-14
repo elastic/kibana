@@ -24,7 +24,7 @@ import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
 import type { ActionConnector, CasePostRequest } from '../../../common/api';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
@@ -69,10 +69,10 @@ export interface CreateCaseFormFieldsProps {
 }
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
-  onSuccess: (theCase: Case) => void;
+  onSuccess: (theCase: CaseUI) => void;
   afterCaseCreated?: (
-    theCase: Case,
-    createAttachments: UseCreateAttachments['createAttachments']
+    theCase: CaseUI,
+    createAttachments: UseCreateAttachments['mutate']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
@@ -208,7 +208,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         onConfirmationCallback: handleOnConfirmationCallback,
       });
 
-    const handleOnSuccess = (theCase: Case): void => {
+    const handleOnSuccess = (theCase: CaseUI): void => {
       removeItemFromSessionStorage(draftStorageKey);
       return onSuccess(theCase);
     };

@@ -6,8 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
-
 import type { ConfigType } from '../../../../config';
 import type { SignalSource, SimpleHit } from '../types';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
@@ -28,6 +26,7 @@ export const wrapHitsFactory =
     spaceId,
     indicesToQuery,
     alertTimestampOverride,
+    publicBaseUrl,
     ruleExecutionLogger,
   }: {
     completeRule: CompleteRule<RuleParams>;
@@ -36,6 +35,7 @@ export const wrapHitsFactory =
     spaceId: string | null | undefined;
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
+    publicBaseUrl: string | undefined;
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
   }) =>
   (
@@ -49,23 +49,27 @@ export const wrapHitsFactory =
         String(event._version),
         `${spaceId}:${completeRule.alertId}`
       );
+
+      const baseAlert = buildBulkBody(
+        spaceId,
+        completeRule,
+        event as SimpleHit,
+        mergeStrategy,
+        ignoreFields,
+        true,
+        buildReasonMessage,
+        indicesToQuery,
+        alertTimestampOverride,
+        ruleExecutionLogger,
+        id,
+        publicBaseUrl
+      );
+
       return {
         _id: id,
         _index: '',
         _source: {
-          ...buildBulkBody(
-            spaceId,
-            completeRule,
-            event as SimpleHit,
-            mergeStrategy,
-            ignoreFields,
-            true,
-            buildReasonMessage,
-            indicesToQuery,
-            alertTimestampOverride,
-            ruleExecutionLogger
-          ),
-          [ALERT_UUID]: id,
+          ...baseAlert,
         },
       };
     });

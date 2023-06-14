@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 
+import type { AttachmentAction } from '../../client/attachment_framework/types';
+
+import { AttachmentActionType } from '../../client/attachment_framework/types';
 import * as i18n from './translations';
 
 export interface PropertyActionButtonProps {
@@ -45,7 +55,7 @@ const PropertyActionButton = React.memo<PropertyActionButtonProps>(
 PropertyActionButton.displayName = 'PropertyActionButton';
 
 export interface PropertyActionsProps {
-  propertyActions: PropertyActionButtonProps[];
+  propertyActions: AttachmentAction[];
   customDataTestSubj?: string;
 }
 
@@ -93,14 +103,19 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
           {propertyActions.map((action, key) => (
             <EuiFlexItem grow={false} key={`${action.label}${key}`}>
               <span>
-                <PropertyActionButton
-                  disabled={action.disabled}
-                  iconType={action.iconType}
-                  label={action.label}
-                  color={action.color}
-                  onClick={() => onClosePopover(action.onClick)}
-                  customDataTestSubj={customDataTestSubj}
-                />
+                {(action.type === AttachmentActionType.BUTTON && (
+                  <PropertyActionButton
+                    disabled={action.disabled}
+                    iconType={action.iconType}
+                    label={action.label}
+                    color={action.color}
+                    onClick={() => onClosePopover(action.onClick)}
+                    customDataTestSubj={customDataTestSubj}
+                  />
+                )) ||
+                  (action.type === AttachmentActionType.CUSTOM && (
+                    <Suspense fallback={<EuiLoadingSpinner />}>{action.render()}</Suspense>
+                  ))}
               </span>
             </EuiFlexItem>
           ))}

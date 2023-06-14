@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../lib';
@@ -12,7 +12,7 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../authorizatio
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { updateMeta, createNewAPIKeySet, scheduleTask } from '../lib';
+import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -26,6 +26,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   let existingApiKey: string | null = null;
   let attributes: RawRule;
   let version: string | undefined;
+  let references: SavedObjectReference[];
 
   try {
     const decryptedAlert =
@@ -35,12 +36,14 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     existingApiKey = decryptedAlert.attributes.apiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
+    references = decryptedAlert.references;
   } catch (e) {
     context.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
     const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     attributes = alert.attributes;
     version = alert.version;
+    references = alert.references;
   }
 
   try {
@@ -76,6 +79,13 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: id,
+      actions: attributes.actions,
+      references,
+      attributes,
+    });
+
     const username = await context.getUserName();
     const now = new Date();
 
@@ -107,7 +117,29 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     });
 
     try {
-      await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+      // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
+      // we call create with overwrite=true
+      if (migratedActions.hasLegacyActions) {
+        await context.unsecuredSavedObjectsClient.create<RawRule>(
+          'alert',
+          {
+            ...updateAttributes,
+            actions: migratedActions.resultedActions,
+            throttle: undefined,
+            notifyWhen: undefined,
+          },
+          {
+            id,
+            overwrite: true,
+            version,
+            references: migratedActions.resultedReferences,
+          }
+        );
+      } else {
+        await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
+          version,
+        });
+      }
     } catch (e) {
       throw e;
     }

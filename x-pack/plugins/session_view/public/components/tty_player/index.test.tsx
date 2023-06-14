@@ -7,10 +7,15 @@
 
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
+import {
+  TEST_PROCESS_INDEX,
+  TEST_SESSION_START_TIME,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { TTYPlayerDeps, TTYPlayer } from '.';
 import userEvent from '@testing-library/user-event';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 describe('TTYPlayer component', () => {
   beforeAll(() => {
@@ -30,7 +35,7 @@ describe('TTYPlayer component', () => {
       })),
     });
 
-    global.ResizeObserver = require('resize-observer-polyfill');
+    global.ResizeObserver = ResizeObserver;
   });
 
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -51,7 +56,9 @@ describe('TTYPlayer component', () => {
 
     props = {
       show: true,
+      index: TEST_PROCESS_INDEX,
       sessionEntityId: mockSessionEntityId,
+      sessionStartTime: TEST_SESSION_START_TIME,
       onClose: jest.fn(),
       onJumpToEvent: jest.fn(),
       isFullscreen: false,

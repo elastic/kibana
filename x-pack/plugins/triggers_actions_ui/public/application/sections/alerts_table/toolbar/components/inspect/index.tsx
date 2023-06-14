@@ -34,9 +34,13 @@ interface InspectButtonProps {
   onCloseInspect?: () => void;
   showInspectButton?: boolean;
   getInspectQuery: GetInspectQuery;
+  inspectTitle: string;
 }
 
-const InspectButtonComponent: React.FC<InspectButtonProps> = ({ getInspectQuery }) => {
+const InspectButtonComponent: React.FC<InspectButtonProps> = ({
+  getInspectQuery,
+  inspectTitle,
+}) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
   const onOpenModal = () => {
@@ -63,6 +67,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({ getInspectQuery 
           closeModal={onCloseModal}
           data-test-subj="inspect-modal"
           getInspectQuery={getInspectQuery}
+          title={inspectTitle}
         />
       )}
     </>

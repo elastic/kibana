@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 /**
  * Creates an execution context to be passed on as part of ES queries.
@@ -22,7 +23,7 @@ export function createExecutionContext(
   name: string,
   id?: string,
   type = 'application'
-) {
+): KibanaExecutionContext {
   const labels = coreStart.executionContext.getAsLabels();
   const page = labels.page as string;
   return {

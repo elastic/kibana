@@ -11,6 +11,7 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 
 const context = mockCoreContext.create();
 const httpPreboot = httpServiceMock.createInternalPrebootContract();
@@ -18,6 +19,7 @@ const httpSetup = httpServiceMock.createInternalSetupContract();
 const status = statusServiceMock.createInternalSetupContract();
 const elasticsearch = elasticsearchServiceMock.createInternalSetup();
 const customBranding = customBrandingServiceMock.createSetupContract();
+const userSettings = userSettingsServiceMock.createSetupContract();
 
 function createUiPlugins() {
   return {
@@ -38,4 +40,5 @@ export const mockRenderingSetupDeps = {
   uiPlugins: createUiPlugins(),
   customBranding,
   status,
+  userSettings,
 };

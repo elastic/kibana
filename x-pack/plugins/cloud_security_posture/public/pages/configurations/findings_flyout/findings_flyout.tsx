@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
-import { ResourceTab } from './resource_tab';
+import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
@@ -51,9 +51,9 @@ const tabs = [
     }),
   },
   {
-    id: 'resource',
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.resourceTabTitle', {
-      defaultMessage: 'Resource',
+    id: 'table',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.tableTabTitle', {
+      defaultMessage: 'Table',
     }),
   },
   {
@@ -109,8 +109,8 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
       return <OverviewTab data={findings} />;
     case 'rule':
       return <RuleTab data={findings} />;
-    case 'resource':
-      return <ResourceTab data={findings} />;
+    case 'table':
+      return <TableTab data={findings} />;
     case 'json':
       return <JsonTab data={findings} />;
     default:

@@ -221,7 +221,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           <>
             <EuiSpacer size="s" />
             <EuiAccordion
-              id={'1'}
+              id={`${entry.id}`}
               buttonContent={
                 <>
                   <EuiIcon
@@ -235,6 +235,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                 </>
               }
               arrowDisplay="none"
+              data-test-subj="mappingConflictsAccordion"
             >
               <div data-test-subj="mappingConflictsDescription">
                 {conflictsInfo.map((info) => {
@@ -265,8 +266,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
       const customOptionText =
         entry.nested == null && allowCustomOptions ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined;
+
       const helpText =
-        entry.field?.type !== 'conflict' ? (
+        entry.field?.conflictDescriptions == null ? (
           customOptionText
         ) : (
           <>
@@ -422,7 +424,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           }
           const warning = validateFilePathInput({ os, value: wildcardValue });
           actualWarning =
-            warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
+            warning === FILENAME_WILDCARD_WARNING
+              ? warning && getWildcardWarning(warning)
+              : warning;
         }
 
         return (

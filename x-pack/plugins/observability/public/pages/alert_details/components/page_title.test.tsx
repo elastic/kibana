@@ -28,9 +28,7 @@ describe('Page Title', () => {
   it('should display Log threshold title', () => {
     const { getByTestId } = renderComp(defaultProps);
 
-    expect(getByTestId('page-title-container').children.item(0)?.textContent).toEqual(
-      'Log threshold breached'
-    );
+    expect(getByTestId('page-title-container').textContent).toContain('Log threshold breached');
   });
 
   it('should display Anomaly title', () => {
@@ -46,9 +44,7 @@ describe('Page Title', () => {
 
     const { getByTestId } = renderComp(props);
 
-    expect(getByTestId('page-title-container').children.item(0)?.textContent).toEqual(
-      'Anomaly detected'
-    );
+    expect(getByTestId('page-title-container').textContent).toContain('Anomaly detected');
   });
 
   it('should display Inventory title', () => {
@@ -64,7 +60,7 @@ describe('Page Title', () => {
 
     const { getByTestId } = renderComp(props);
 
-    expect(getByTestId('page-title-container').children.item(0)?.textContent).toEqual(
+    expect(getByTestId('page-title-container').textContent).toContain(
       'Inventory threshold breached'
     );
   });

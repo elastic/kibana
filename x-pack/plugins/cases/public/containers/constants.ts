@@ -23,6 +23,9 @@ export const casesQueriesKeys = {
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
   caseView: () => [...casesQueriesKeys.all, 'case'] as const,
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
+  caseFiles: (id: string, params: unknown) =>
+    [...casesQueriesKeys.case(id), 'files', params] as const,
+  caseFileStats: (id: string) => [...casesQueriesKeys.case(id), 'files', 'stats'] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
@@ -48,6 +51,11 @@ export const casesQueriesKeys = {
 export const casesMutationsKeys = {
   createCase: ['create-case'] as const,
   deleteCases: ['delete-cases'] as const,
+  updateCase: ['update-case'] as const,
   updateCases: ['update-cases'] as const,
+  pushCase: ['push-case'] as const,
+  updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
+  deleteFileAttachment: ['delete-file-attachment'] as const,
+  bulkCreateAttachments: ['bulk-create-attachments'] as const,
 };

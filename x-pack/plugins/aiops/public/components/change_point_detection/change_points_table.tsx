@@ -12,11 +12,14 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiToolTip,
+  type DefaultItemAction,
 } from '@elastic/eui';
 import React, { type FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { useDataSource } from '../../hooks/use_data_source';
 import { useCommonChartProps } from './use_common_chart_props';
 import {
   type ChangePointAnnotation,
@@ -33,13 +36,49 @@ export interface ChangePointsTableProps {
   onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
+function getFilterConfig(
+  index: string,
+  item: Required<ChangePointAnnotation>,
+  negate: boolean
+): Filter {
+  return {
+    meta: {
+      disabled: false,
+      negate,
+      alias: null,
+      index,
+      key: `${item.group.name}_${item.group.value}`,
+      // @ts-ignore FilterMeta type definition misses the field property
+      field: item.group.name,
+      params: {
+        query: item.group.value,
+      },
+      type: 'phrase',
+    },
+    query: {
+      match_phrase: {
+        [item.group.name]: item.group.value,
+      },
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+  };
+}
+
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
   annotations,
   fieldConfig,
   onSelectionChange,
 }) => {
-  const { fieldFormats } = useAiopsAppContext();
+  const {
+    fieldFormats,
+    data: {
+      query: { filterManager },
+    },
+  } = useAiopsAppContext();
+  const { dataView } = useDataSource();
 
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
 
@@ -51,9 +90,13 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     },
   };
 
+  const hasActions = fieldConfig.splitField !== undefined;
+
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
+      id: 'timestamp',
       field: 'timestamp',
+      'data-test-subj': 'aiopsChangePointTimestamp',
       name: i18n.translate('xpack.aiops.changePointDetection.timeColumn', {
         defaultMessage: 'Time',
       }),
@@ -63,6 +106,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       render: (timestamp: ChangePointAnnotation['timestamp']) => dateFormatter.convert(timestamp),
     },
     {
+      id: 'preview',
+      'data-test-subj': 'aiopsChangePointPreview',
       name: i18n.translate('xpack.aiops.changePointDetection.previewColumn', {
         defaultMessage: 'Preview',
       }),
@@ -77,6 +122,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       },
     },
     {
+      id: 'type',
+      'data-test-subj': 'aiopsChangePointType',
       field: 'type',
       name: i18n.translate('xpack.aiops.changePointDetection.typeColumn', {
         defaultMessage: 'Type',
@@ -86,6 +133,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
     },
     {
+      id: 'pValue',
+      'data-test-subj': 'aiopsChangePointPValue',
       field: 'p_value',
       name: (
         <EuiToolTip
@@ -112,6 +161,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     ...(fieldConfig.splitField
       ? [
           {
+            id: 'groupName',
+            'data-test-subj': 'aiopsChangePointGroupName',
             field: 'group.name',
             name: i18n.translate('xpack.aiops.changePointDetection.fieldNameColumn', {
               defaultMessage: 'Field name',
@@ -119,12 +170,69 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             truncateText: false,
           },
           {
+            id: 'groupValue',
+            'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
             name: i18n.translate('xpack.aiops.changePointDetection.fieldValueColumn', {
               defaultMessage: 'Field value',
             }),
             truncateText: false,
             sortable: true,
+          },
+          {
+            name: i18n.translate('xpack.aiops.changePointDetection.actionsColumn', {
+              defaultMessage: 'Actions',
+            }),
+            actions: [
+              {
+                name: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                  {
+                    defaultMessage: 'Filter for value',
+                  }
+                ),
+                description: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                  {
+                    defaultMessage: 'Filter for value',
+                  }
+                ),
+                icon: 'plusInCircle',
+                color: 'primary',
+                type: 'icon',
+                onClick: (item) => {
+                  filterManager.addFilters(
+                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, false)!
+                  );
+                },
+                isPrimary: true,
+                'data-test-subj': 'aiopsChangePointFilterForValue',
+              },
+              {
+                name: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                  {
+                    defaultMessage: 'Filter out value',
+                  }
+                ),
+                description: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                  {
+                    defaultMessage: 'Filter out value',
+                  }
+                ),
+                icon: 'minusInCircle',
+                color: 'primary',
+                type: 'icon',
+                onClick: (item) => {
+                  filterManager.addFilters(
+                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, true)!
+                  );
+                },
+                isPrimary: true,
+                'data-test-subj': 'aiopsChangePointFilterOutValue',
+              },
+            ] as Array<DefaultItemAction<ChangePointAnnotation>>,
           },
         ]
       : []),
@@ -151,10 +259,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       itemId={'id'}
       selection={selectionValue}
       loading={isLoading}
+      data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
       items={annotations}
       columns={columns}
       pagination={{ pageSizeOptions: [5, 10, 15] }}
       sorting={defaultSorting}
+      hasActions={hasActions}
+      rowProps={(item) => ({
+        'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
+      })}
       message={
         isLoading ? (
           <EuiEmptyPrompt
@@ -206,7 +319,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
   });
 
   return (
-    <div>
+    <div data-test-subj={'aiopChangePointPreviewChart'}>
       <EmbeddableComponent
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}

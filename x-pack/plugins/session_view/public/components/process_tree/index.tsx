@@ -9,12 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
+import { collapseProcessTree } from './helpers';
 import { ProcessTreeLoadMoreButton } from '../process_tree_load_more_button';
-import {
-  AlertStatusEventEntityIdMap,
-  Process,
-  ProcessEventsPage,
-} from '../../../common/types/process_tree';
+import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '../../../common';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
@@ -97,6 +94,7 @@ export const ProcessTree = ({
     verboseMode,
     jumpToEntityId,
   });
+  const [forceRerender, setForceRerender] = useState(0);
 
   const eventsRemaining = useMemo(() => {
     const total = data?.[0]?.total || 0;
@@ -125,6 +123,14 @@ export const ProcessTree = ({
     onProcessSelected(null);
     setIsInvestigatedEventVisible(true);
   }, [onProcessSelected]);
+
+  const handleCollapseProcessTree = useCallback(() => {
+    collapseProcessTree(sessionLeader);
+    if (scrollerRef.current) {
+      scrollerRef.current.scrollTop = 0;
+    }
+    setForceRerender(Math.random());
+  }, [sessionLeader]);
 
   useEffect(() => {
     if (setSearchResults) {
@@ -160,6 +166,7 @@ export const ProcessTree = ({
         ref={scrollerRef}
         css={styles.sessionViewProcessTree}
         data-test-subj="sessionView:sessionViewProcessTree"
+        key={forceRerender}
       >
         {sessionLeader && (
           <ProcessTreeNode
@@ -176,6 +183,7 @@ export const ProcessTree = ({
             showTimestamp={showTimestamp}
             verboseMode={verboseMode}
             searchResults={searchResults}
+            handleCollapseProcessTree={handleCollapseProcessTree}
             loadPreviousButton={
               hasPreviousPage ? (
                 <ProcessTreeLoadMoreButton

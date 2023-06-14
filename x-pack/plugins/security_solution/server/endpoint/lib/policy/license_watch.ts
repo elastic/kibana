@@ -101,7 +101,6 @@ export class PolicyWatcher {
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
-        updatePolicy.inputs[0].config.policy.value.meta.license = license.type || '';
 
         try {
           if (!isEndpointPolicyValidForLicense(policyConfig, license)) {

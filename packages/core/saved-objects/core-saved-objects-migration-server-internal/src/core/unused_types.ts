@@ -47,6 +47,8 @@ export const REMOVED_TYPES: string[] = [
   'csp_rule',
   // Removed in 8.8 https://github.com/elastic/kibana/pull/151116
   'upgrade-assistant-telemetry',
+  // Removed in 8.8 https://github.com/elastic/kibana/pull/155204
+  'endpoint:user-artifact',
 ].sort();
 
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {

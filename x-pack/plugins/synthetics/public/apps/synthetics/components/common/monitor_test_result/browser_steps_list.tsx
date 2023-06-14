@@ -155,6 +155,7 @@ export const BrowserStepsList = ({
           allStepsLoaded={!loading}
           retryFetchOnRevisit={true}
           size={screenshotImageSize}
+          testNowMode={testNowMode}
           timestamp={timestamp}
         />
       ),
@@ -200,6 +201,7 @@ export const BrowserStepsList = ({
       name: RESULT_LABEL,
       render: (pingStatus: string, item: JourneyStep) => (
         <ResultDetails
+          testNowMode={testNowMode}
           step={item}
           pingStatus={pingStatus}
           isExpanded={Boolean(itemIdToExpandedRowMap[item._id]) && !testNowMode}
@@ -305,6 +307,7 @@ const StyleForStepStatus = ({
     <EuiText
       css={{
         fontWeight: euiTheme.font.weight.bold,
+        whiteSpace: 'nowrap',
       }}
       size={textSize}
       color={euiTheme.colors[getTextColorForMonitorStatus(status)] as CSSProperties['color']}
@@ -360,6 +363,7 @@ const MobileRowDetails = ({
                 title: RESULT_LABEL,
                 description: (
                   <ResultDetails
+                    testNowMode={isTestNowMode}
                     step={journeyStep}
                     pingStatus={journeyStep?.synthetics?.step?.status ?? 'skipped'}
                     isExpanded={isExpanded && !isTestNowMode}

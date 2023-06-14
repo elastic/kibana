@@ -58,11 +58,11 @@ export const queryExecutor = async ({
       services,
       index: runOpts.inputIndex,
       exceptionFilter: runOpts.exceptionFilter,
+      fields: runOpts.inputIndexFields,
     });
 
     const license = await firstValueFrom(licensing.license$);
     const hasPlatinumLicense = license.hasAtLeast('platinum');
-    const hasEnterpriseLicense = license.hasAtLeast('enterprise');
 
     const result =
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
@@ -74,6 +74,7 @@ export const queryExecutor = async ({
             buildReasonMessage: buildReasonMessageForQueryAlert,
             bucketHistory,
             groupByFields: ruleParams.alertSuppression.groupBy,
+            eventsTelemetry,
           })
         : {
             ...(await searchAfterAndBulkCreate({
@@ -97,7 +98,6 @@ export const queryExecutor = async ({
           };
 
     if (
-      hasPlatinumLicense &&
       completeRule.ruleParams.responseActions?.length &&
       result.createdSignalsCount &&
       scheduleNotificationResponseActionsService
@@ -105,7 +105,6 @@ export const queryExecutor = async ({
       scheduleNotificationResponseActionsService({
         signals: result.createdSignals,
         responseActions: completeRule.ruleParams.responseActions,
-        hasEnterpriseLicense,
       });
     }
 

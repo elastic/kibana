@@ -8,13 +8,13 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IRouter, Logger } from '@kbn/core/server';
+import { ProfilingConfig } from '..';
 import {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
 } from '../types';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
-import { registerCacheExecutablesRoute, registerCacheStackFramesRoute } from './cache';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
 import { registerSetupRoute } from './setup';
@@ -32,6 +32,7 @@ export interface RouteRegisterParameters {
   dependencies: {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
+    config: ProfilingConfig;
   };
   services: {
     createProfilingEsClient: (params: {
@@ -43,8 +44,6 @@ export interface RouteRegisterParameters {
 }
 
 export function registerRoutes(params: RouteRegisterParameters) {
-  registerCacheExecutablesRoute(params);
-  registerCacheStackFramesRoute(params);
   registerFlameChartSearchRoute(params);
   registerTopNFunctionsSearchRoute(params);
   registerTraceEventsTopNContainersSearchRoute(params);

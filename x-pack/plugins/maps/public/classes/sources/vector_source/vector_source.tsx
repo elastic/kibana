@@ -106,8 +106,7 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
-  showJoinEditor(): boolean;
-  getJoinsDisabledReason(): string | null;
+  supportsJoins(): boolean;
 
   /*
    * Vector layer avoids unnecessarily re-fetching source data.
@@ -123,11 +122,7 @@ export interface IVectorSource extends ISource {
   getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
-  getDefaultFields(): Promise<Record<string, Record<string, string>>>;
-  addFeature(
-    geometry: Geometry | Position[],
-    defaultFields: Record<string, Record<string, string>>
-  ): Promise<void>;
+  addFeature(geometry: Geometry | Position[]): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
 
   /*
@@ -189,10 +184,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
-  getJoinsDisabledReason(): string | null {
-    return null;
-  }
-
   async getGeoJsonWithMeta(
     layerName: string,
     requestMeta: VectorSourceRequestMeta,
@@ -227,7 +218,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return false;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return true;
   }
 
@@ -247,10 +238,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return null;
   }
 
-  async addFeature(
-    geometry: Geometry | Position[],
-    defaultFields: Record<string, Record<string, string>>
-  ) {
+  async addFeature(geometry: Geometry | Position[]) {
     throw new Error('Should implement VectorSource#addFeature');
   }
 
@@ -260,10 +248,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async supportsFeatureEditing(): Promise<boolean> {
     return false;
-  }
-
-  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
-    return {};
   }
 
   getFeatureActions({

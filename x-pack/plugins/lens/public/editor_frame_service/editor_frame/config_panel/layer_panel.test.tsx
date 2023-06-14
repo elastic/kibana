@@ -21,6 +21,7 @@ import {
   mountWithProvider,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
+import { DimensionButton } from '@kbn/visualization-ui-components/public';
 
 jest.mock('../../../id_generator');
 
@@ -714,9 +715,7 @@ describe('LayerPanel', () => {
 
       expect(instance.exists('[data-test-subj="lns-fakeDimension"]')).toBeTruthy();
       expect(
-        instance
-          .find('[data-test-subj="lns-fakeDimension"] .lnsLayerPanel__triggerTextLabel')
-          .text()
+        instance.find('[data-test-subj="lns-fakeDimension"] .dimensionTrigger__textLabel').text()
       ).toBe(fakeAccessorLabel);
     });
 
@@ -826,7 +825,8 @@ describe('LayerPanel', () => {
       const dragDropElement = instance
         .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
-        .find('.lnsLayerPanel__dimension');
+        .find(DimensionButton)
+        .first();
 
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
@@ -906,7 +906,7 @@ describe('LayerPanel', () => {
 
       const updatedDragDropElement = instance
         .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
-        .at(2);
+        .last();
 
       updatedDragDropElement.simulate('dragOver');
       updatedDragDropElement.simulate('drop');

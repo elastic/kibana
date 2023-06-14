@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,14 +14,17 @@ import {
   EuiHideFor,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DragContext } from '@kbn/dom-drag-drop';
+import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -30,7 +33,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
-import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
@@ -54,19 +56,12 @@ export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
-export function DiscoverLayout({
-  inspectorAdapters,
-  navigateTo,
-  onChangeDataView,
-  onUpdateQuery,
-  resetSavedSearch,
-  savedSearch,
-  searchSource,
-  stateContainer,
-  persistDataView,
-  updateAdHocDataViewId,
-  updateDataViewList,
-}: DiscoverLayoutProps) {
+export interface DiscoverLayoutProps {
+  navigateTo: (url: string) => void;
+  stateContainer: DiscoverStateContainer;
+}
+
+export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -92,6 +87,7 @@ export function DiscoverLayout({
   });
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const dataState: DataMainMsg = useDataState(main$);
+  const savedSearch = useSavedSearchInitial();
 
   const fetchCounter = useRef<number>(0);
 
@@ -122,8 +118,6 @@ export function DiscoverLayout({
   const onOpenInspector = useInspector({
     inspector,
     stateContainer,
-    inspectorAdapters,
-    savedSearch,
   });
 
   const {
@@ -160,11 +154,11 @@ export function DiscoverLayout({
         onRemoveColumn(removedFieldName);
       }
       if (!dataView.isPersisted()) {
-        await updateAdHocDataViewId(dataView);
+        await stateContainer.actions.updateAdHocDataViewId();
       }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, updateAdHocDataViewId, currentColumns, onRemoveColumn]
+    [dataView, stateContainer, currentColumns, onRemoveColumn]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -180,24 +174,6 @@ export function DiscoverLayout({
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const onDataViewCreated = useCallback(
-    async (nextDataView: DataView) => {
-      if (!nextDataView.isPersisted()) {
-        stateContainer.actions.appendAdHocDataViews(nextDataView);
-      } else {
-        await stateContainer.actions.loadDataViewList();
-      }
-      if (nextDataView.id) {
-        onChangeDataView(nextDataView.id);
-      }
-    },
-    [onChangeDataView, stateContainer]
-  );
-
-  const savedSearchTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    savedSearchTitle.current?.focus();
-  }, []);
 
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
@@ -206,6 +182,17 @@ export function DiscoverLayout({
   }, [dataState.error, isPlainRecord]);
 
   const resizeRef = useRef<HTMLDivElement>(null);
+
+  const dragDropContext = useContext(DragContext);
+  const draggingFieldName = dragDropContext.dragging?.id;
+
+  const onDropFieldToTable = useMemo(() => {
+    if (!draggingFieldName || currentColumns.includes(draggingFieldName)) {
+      return undefined;
+    }
+
+    return () => onAddColumn(draggingFieldName);
+  }, [onAddColumn, draggingFieldName, currentColumns]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'none') {
@@ -223,11 +210,7 @@ export function DiscoverLayout({
     }
 
     if (resultState === 'uninitialized') {
-      return (
-        <DiscoverUninitialized
-          onRefresh={() => stateContainer.dataState.refetch$.next(undefined)}
-        />
-      );
+      return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
     }
 
     return (
@@ -235,16 +218,13 @@ export function DiscoverLayout({
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
-          navigateTo={navigateTo}
-          resetSavedSearch={resetSavedSearch}
-          savedSearch={savedSearch}
           stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
           onAddFilter={onAddFilter as DocViewFilterFn}
           onFieldEdited={onFieldEdited}
           resizeRef={resizeRef}
-          inspectorAdapters={inspectorAdapters}
+          onDropFieldToTable={onDropFieldToTable}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -253,27 +233,23 @@ export function DiscoverLayout({
     currentColumns,
     data,
     dataView,
-    inspectorAdapters,
     isPlainRecord,
     isTimeBased,
-    navigateTo,
     onAddFilter,
     onDisableFilters,
     onFieldEdited,
-    resetSavedSearch,
     resultState,
-    savedSearch,
     stateContainer,
     viewMode,
+    onDropFieldToTable,
   ]);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSavedSearchTitle"
-        tabIndex={-1}
-        ref={savedSearchTitle}
       >
         {savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
@@ -291,19 +267,11 @@ export function DiscoverLayout({
         query={query}
         navigateTo={navigateTo}
         savedQuery={savedQuery}
-        savedSearch={savedSearch}
-        searchSource={searchSource}
         stateContainer={stateContainer}
-        updateQuery={onUpdateQuery}
-        resetSavedSearch={resetSavedSearch}
-        onChangeDataView={onChangeDataView}
-        onDataViewCreated={onDataViewCreated}
+        updateQuery={stateContainer.actions.onUpdateQuery}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
-        persistDataView={persistDataView}
-        updateAdHocDataViewId={updateAdHocDataViewId}
-        updateDataViewList={updateDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -319,14 +287,14 @@ export function DiscoverLayout({
               columns={currentColumns}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
-              onChangeDataView={onChangeDataView}
+              onChangeDataView={stateContainer.actions.onChangeDataView}
               selectedDataView={dataView}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
               viewMode={viewMode}
-              onDataViewCreated={onDataViewCreated}
+              onDataViewCreated={stateContainer.actions.onDataViewCreated}
               availableFields$={stateContainer.dataState.data$.availableFields$}
             />
           </EuiFlexItem>
@@ -359,19 +327,17 @@ export function DiscoverLayout({
                 data-test-subj="discoverNoResultsError"
               />
             ) : (
-              <EuiPageContent
+              <EuiPanel
+                role="main"
                 panelRef={resizeRef}
-                verticalPosition={contentCentered ? 'center' : undefined}
-                horizontalPosition={contentCentered ? 'center' : undefined}
                 paddingSize="none"
                 hasShadow={false}
                 className={classNames('dscPageContent', {
                   'dscPageContent--centered': contentCentered,
-                  'dscPageContent--emptyPrompt': resultState === 'none',
                 })}
               >
                 {mainDisplay}
-              </EuiPageContent>
+              </EuiPanel>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

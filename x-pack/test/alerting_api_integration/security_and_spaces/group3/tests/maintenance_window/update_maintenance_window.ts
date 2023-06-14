@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
@@ -26,7 +27,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         freq: 2, // weekly
       },
     };
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -88,5 +89,106 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    it('should update fields correctly', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window',
+          duration: 60 * 60 * 1000, // 1 hr
+          r_rule: {
+            dtstart: new Date().toISOString(),
+            tzid: 'UTC',
+            freq: 2, // weekly
+            count: 1,
+          },
+        })
+        .expect(200);
+
+      objectRemover.add(
+        'space1',
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      const newRRule = {
+        dtstart: moment.utc().add(1, 'day').toISOString(),
+        tzid: 'CET',
+        freq: 3,
+        count: 5,
+      };
+
+      const { body: updatedMW } = await supertest
+        .post(
+          `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window-new',
+          duration: 60 * 1000,
+          r_rule: newRRule,
+          enabled: false,
+        })
+        .expect(200);
+
+      expect(updatedMW.title).eql('test-maintenance-window-new');
+      expect(updatedMW.duration).eql(60 * 1000);
+      expect(updatedMW.r_rule).eql(newRRule);
+      expect(updatedMW.title).eql('test-maintenance-window-new');
+    });
+
+    it('should update RRule correctly when removing fields', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          r_rule: {
+            ...createParams.r_rule,
+            count: 1,
+            until: moment.utc().add(1, 'week').toISOString(),
+          },
+        })
+        .expect(200);
+
+      objectRemover.add(
+        'space1',
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      const updatedRRule = {
+        ...createParams.r_rule,
+        count: 2,
+      };
+
+      await supertest
+        .post(
+          `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          r_rule: updatedRRule,
+        })
+        .expect(200);
+
+      const response = await supertest
+        .get(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({});
+
+      expect(response.body.data[0].id).to.eql(createdMaintenanceWindow.id);
+      expect(response.body.data[0].r_rule).to.eql(updatedRRule);
+    });
   });
 }

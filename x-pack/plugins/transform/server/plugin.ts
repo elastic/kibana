@@ -58,7 +58,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
       ],
     });
 
-    getStartServices().then(([coreStart, { dataViews }]) => {
+    getStartServices().then(([coreStart, { dataViews, security: securityStart }]) => {
       const license = new License({
         pluginId: PLUGIN.id,
         minimumLicenseType: PLUGIN.minimumLicenseType,
@@ -75,6 +75,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
         license,
         dataViews,
         coreStart,
+        security: securityStart,
       });
     });
 

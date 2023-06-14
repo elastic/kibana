@@ -56,14 +56,16 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    * Function returning the url to use to redirect to this object from the management section.
    * If not defined, redirecting to the object will not be allowed.
    *
-   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   * @returns undefined or an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
    *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
-  getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
-    path: string;
-    uiCapabilitiesPath: string;
-  };
+  getInAppUrl?: (savedObject: SavedObject<Attributes>) =>
+    | {
+        path: string;
+        uiCapabilitiesPath: string;
+      }
+    | undefined;
   /**
    * An optional export transform function that can be used transform the objects of the registered type during
    * the export process.

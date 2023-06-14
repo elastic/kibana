@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -14,7 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiModal,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
@@ -23,6 +23,8 @@ import {
   EuiCallOut,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { needsReauthorization } from '../../common/reauthorization_utils';
 import {
   APP_GET_TRANSFORM_CLUSTER_PRIVILEGES,
   TRANSFORM_STATE,
@@ -32,7 +34,7 @@ import { useRefreshTransformList, TransformListRow } from '../../common';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useDeleteTransforms, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
-import { PrivilegesWrapper } from '../../lib/authorization';
+import { AuthorizationContext, PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
@@ -76,6 +78,49 @@ export const TransformManagement: FC = () => {
   });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
+
+  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+
+  const unauthorizedTransformsWarning = useMemo(() => {
+    const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
+
+    if (!unauthorizedCnt) return null;
+
+    const insufficientPermissionsMsg = i18n.translate(
+      'xpack.transform.transformList.unauthorizedTransformsCallout.insufficientPermissionsMsg',
+      {
+        defaultMessage:
+          '{unauthorizedCnt, plural, one {A transform was created with insufficient permissions.} other {# transforms were created with insufficient permissions.}}',
+        values: { unauthorizedCnt },
+      }
+    );
+    const actionMsg = canStartStopTransform
+      ? i18n.translate(
+          'xpack.transform.transformList.unauthorizedTransformsCallout.reauthorizeMsg',
+          {
+            defaultMessage:
+              'Reauthorize to start {unauthorizedCnt, plural, one {transform} other {# transforms}}.',
+            values: { unauthorizedCnt },
+          }
+        )
+      : i18n.translate(
+          'xpack.transform.transformList.unauthorizedTransformsCallout.contactAdminMsg',
+          {
+            defaultMessage: 'Contact your administrator to request the required permissions.',
+          }
+        );
+    return (
+      <>
+        <EuiCallOut
+          iconType="alert"
+          color="warning"
+          data-test-subj="transformPageReauthorizeCallout"
+          title={`${insufficientPermissionsMsg} ${actionMsg}`}
+        />
+        <EuiSpacer size="s" />
+      </>
+    );
+  }, [transforms, canStartStopTransform]);
 
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
@@ -128,9 +173,11 @@ export const TransformManagement: FC = () => {
       <EuiSpacer size="l" />
 
       <EuiPageContentBody data-test-subj="transformPageTransformList">
-        {!isInitialized && <EuiLoadingContent lines={2} />}
+        {!isInitialized && <EuiSkeletonText lines={2} />}
         {isInitialized && (
           <>
+            {unauthorizedTransformsWarning}
+
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
             {typeof errorMessage !== 'undefined' && (

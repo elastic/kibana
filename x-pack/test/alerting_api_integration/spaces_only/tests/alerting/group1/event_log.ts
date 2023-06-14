@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
@@ -1179,6 +1180,231 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               currentUuid = undefined;
             }
           }
+        });
+
+        it('should generate expected events affected by active maintenance windows', async () => {
+          // Create 2 active maintenance windows
+          const { body: window1 } = await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              title: 'test-maintenance-window-1',
+              duration: 60 * 60 * 1000, // 1 hr
+              r_rule: {
+                dtstart: moment.utc().toISOString(),
+                tzid: 'UTC',
+                freq: 0, // yearly
+                count: 1,
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, window1.id, 'rules/maintenance_window', 'alerting', true);
+
+          const { body: window2 } = await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              title: 'test-maintenance-window-2',
+              duration: 60 * 60 * 1000, // 1 hr
+              r_rule: {
+                dtstart: moment.utc().toISOString(),
+                tzid: 'UTC',
+                freq: 0, // yearly
+                count: 1,
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, window2.id, 'rules/maintenance_window', 'alerting', true);
+
+          // Create 1 inactive maintenance window
+          const { body: window3 } = await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              title: 'test-maintenance-window-3',
+              duration: 60 * 60 * 1000, // 1 hr
+              r_rule: {
+                dtstart: moment.utc().add(1, 'day').toISOString(),
+                tzid: 'UTC',
+                freq: 0, // yearly
+                count: 1,
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, window3.id, 'rules/maintenance_window', 'alerting', true);
+
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const pattern = {
+            instance: [false, true, true],
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 4 }],
+                ['execute', { gte: 4 }],
+                ['new-instance', { equal: 1 }],
+                ['active-instance', { gte: 1 }],
+                ['recovered-instance', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const actionsToCheck = [
+            'new-instance',
+            'active-instance',
+            'recovered-instance',
+            'execute',
+          ];
+
+          events.forEach((event) => {
+            if (actionsToCheck.includes(event?.event?.action || '')) {
+              const alertMaintenanceWindowIds =
+                event?.kibana?.alert?.maintenance_window_ids?.sort();
+              expect(alertMaintenanceWindowIds).eql([window1.id, window2.id].sort());
+            }
+          });
+        });
+
+        it('should not fire summary actions during maintenance window', async () => {
+          const { body: window } = await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              title: 'test-maintenance-window-1',
+              duration: 60 * 60 * 1000, // 1 hr
+              r_rule: {
+                dtstart: moment.utc().toISOString(),
+                tzid: 'UTC',
+                freq: 0, // yearly
+                count: 1,
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, window.id, 'rules/maintenance_window', 'alerting', true);
+
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'Test conn',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+
+          const { body: createdRule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.always-firing-alert-as-data',
+                schedule: { interval: '24h' },
+                throttle: undefined,
+                notify_when: undefined,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference: 'test',
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference: 'test',
+                      message: '',
+                    },
+                    frequency: {
+                      summary: true,
+                      throttle: null,
+                      notify_when: 'onActiveAlert',
+                    },
+                  },
+                ],
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+          // get the events we're expecting
+          await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: createdRule.id,
+              provider: 'alerting',
+              actions: new Map([
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+                ['active-instance', { equal: 2 }],
+              ]),
+            });
+          });
+
+          // Try to get actions, should fail
+          let hasActions = false;
+          try {
+            await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: createdRule.id,
+              provider: 'alerting',
+              actions: new Map([['execute-action', { equal: 1 }]]),
+            });
+            hasActions = true;
+          } catch (e) {
+            hasActions = false;
+          }
+
+          expect(hasActions).eql(false);
         });
       });
     }

@@ -29,11 +29,22 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
   const errorBudgetBurnDownData = formatHistoricalData(historicalSummary, 'error_budget_remaining');
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
+  const errorBudgetRemaining =
+    slo.summary.errorBudget.remaining <= 0
+      ? Math.trunc(slo.summary.errorBudget.remaining * 100) / 100
+      : slo.summary.errorBudget.remaining;
+
   return (
-    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xl">
-      <EuiFlexItem grow={false} style={{ width: 220 }}>
-        <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 140 }}>
+    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
+      <EuiFlexItem grow={false} style={{ width: 200 }}>
+        <EuiFlexGroup
+          direction="row"
+          responsive={false}
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem grow={false}>
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.objective', {
                 defaultMessage: '{objective} target',
@@ -44,6 +55,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
                   ? NOT_AVAILABLE_LABEL
                   : numeral(slo.summary.sliValue).format(percentFormat)
               }
+              textAlign="right"
               titleColor={titleColor}
               titleSize="m"
               reverse
@@ -61,14 +73,21 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 260 }}>
-        <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 180 }}>
+      <EuiFlexItem grow={false} style={{ width: 220 }}>
+        <EuiFlexGroup
+          direction="row"
+          responsive={false}
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem grow={false}>
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',
               })}
-              title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
+              textAlign="right"
+              title={numeral(errorBudgetRemaining).format(percentFormat)}
               titleColor={titleColor}
               titleSize="m"
               reverse

@@ -17,6 +17,7 @@ export interface TransformCapabilities {
   canDeleteTransform: boolean;
   canPreviewTransform: boolean;
   canCreateTransform: boolean;
+  canReauthorizeTransform: boolean;
   canScheduleNowTransform: boolean;
   canStartStopTransform: boolean;
   canCreateTransformAlerts: boolean;
@@ -30,6 +31,7 @@ export const INITIAL_CAPABILITIES = Object.freeze<Capabilities>({
   canDeleteTransform: false,
   canPreviewTransform: false,
   canCreateTransform: false,
+  canReauthorizeTransform: false,
   canScheduleNowTransform: false,
   canStartStopTransform: false,
   canCreateTransformAlerts: false,
@@ -130,6 +132,8 @@ export const getPrivilegesAndCapabilities = (
 
   capabilities.canScheduleNowTransform = capabilities.canStartStopTransform;
 
+  capabilities.canReauthorizeTransform = capabilities.canStartStopTransform;
+
   return { privileges: privilegesResult, capabilities };
 };
 // create the text for button's tooltips if the user
@@ -170,6 +174,16 @@ export function createCapabilityFailureMessage(
         }
       );
       break;
+
+    case 'canReauthorizeTransform':
+      message = i18n.translate(
+        'xpack.transform.capability.noPermission.reauthorizeTransformTooltip',
+        {
+          defaultMessage: 'You do not have permission to reauthorize transforms.',
+        }
+      );
+      break;
+
     case 'canDeleteTransform':
       message = i18n.translate('xpack.transform.capability.noPermission.deleteTransformTooltip', {
         defaultMessage: 'You do not have permission to delete transforms.',

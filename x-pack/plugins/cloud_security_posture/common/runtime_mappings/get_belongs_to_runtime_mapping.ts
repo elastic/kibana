@@ -16,35 +16,31 @@ export const getBelongsToRuntimeMapping = (): MappingRuntimeFields => ({
     type: 'keyword',
     script: {
       source: `
-        if (!doc.containsKey('rule.benchmark.posture_type'))
-          {
-            def belongs_to = doc["cluster_id"].value;
+        def postureTypeAvailable = doc.containsKey("rule.benchmark.posture_type") &&
+          !doc["rule.benchmark.posture_type"].empty;
+        def orchestratorIdAvailable = doc.containsKey("orchestrator.cluster.id") &&
+          !doc["orchestrator.cluster.id"].empty;
+
+        if (!postureTypeAvailable) {
+          def belongs_to = orchestratorIdAvailable ?
+            doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
+          emit(belongs_to);
+        } else {
+          def policy_template_type = doc["rule.benchmark.posture_type"].value;
+
+          if (policy_template_type == "cspm") {
+            def belongs_to = doc["cloud.account.name"].value;
             emit(belongs_to);
-            return
+          } else if (policy_template_type == "kspm") {
+            def belongs_to = orchestratorIdAvailable ?
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
+            emit(belongs_to);
+          } else {
+            // Default behaviour when policy_template_type is unknown
+            def belongs_to = orchestratorIdAvailable ?
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
+            emit(belongs_to);
           }
-        else
-        {
-          if(doc["rule.benchmark.posture_type"].size() > 0)
-            {
-              def policy_template_type = doc["rule.benchmark.posture_type"].value;
-              if (policy_template_type == "cspm")
-              {
-                def belongs_to = doc["cloud.account.name"].value;
-                emit(belongs_to);
-                return
-              }
-
-              if (policy_template_type == "kspm")
-              {
-                def belongs_to = doc["cluster_id"].value;
-                emit(belongs_to);
-                return
-              }
-            }
-
-            def belongs_to = doc["cluster_id"].value;
-            emit(belongs_to);
-            return
         }
       `,
     },

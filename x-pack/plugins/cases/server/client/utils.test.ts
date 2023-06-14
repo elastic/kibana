@@ -12,7 +12,6 @@ import { toElasticsearchQuery } from '@kbn/es-query';
 
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
-import { ESCaseSeverity, ESCaseStatus } from '../services/cases/types';
 import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
@@ -22,6 +21,7 @@ import {
   constructSearch,
   convertSortField,
 } from './utils';
+import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 
 describe('utils', () => {
   describe('convertSortField', () => {
@@ -401,9 +401,9 @@ describe('utils', () => {
     });
 
     it.each([
-      [CaseStatuses.open, ESCaseStatus.OPEN],
-      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
-      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+      [CaseStatuses.open, CasePersistedStatus.OPEN],
+      [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+      [CaseStatuses.closed, CasePersistedStatus.CLOSED],
     ])('creates a filter for status "%s"', (status, expectedStatus) => {
       expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
         Object {
@@ -426,10 +426,10 @@ describe('utils', () => {
     });
 
     it.each([
-      [CaseSeverity.LOW, ESCaseSeverity.LOW],
-      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
-      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
-      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+      [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+      [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+      [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+      [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
     ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
       expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {

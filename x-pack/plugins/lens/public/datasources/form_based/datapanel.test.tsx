@@ -17,7 +17,7 @@ import { InnerFormBasedDataPanel, FormBasedDataPanel } from './datapanel';
 import { FieldListGrouped } from '@kbn/unified-field-list-plugin/public';
 import * as UseExistingFieldsApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
-import { FieldItem } from './field_item';
+import { FieldItem } from '../common/field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { FormBasedPrivateState } from './types';
@@ -37,6 +37,7 @@ import { DataViewsState } from '../../state_management';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ReactWrapper } from 'enzyme';
+import { IndexPatternField } from '../../types';
 
 const fieldsOne = [
   {
@@ -787,7 +788,11 @@ describe('FormBased Data Panel', () => {
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
+      expect(wrapper.find(FieldItem).first().prop('field')).toEqual(
+        expect.objectContaining({
+          displayName: 'Records',
+        })
+      );
       const availableAccordion = wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]');
       expect(
         availableAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
@@ -803,7 +808,9 @@ describe('FormBased Data Panel', () => {
         emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['client', 'source', 'timestamp']);
       expect(
-        emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        emptyAccordion
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['client', 'source', 'timestampLabel']);
       expect(emptyAccordion.find(FieldItem).at(1).prop('exists')).toEqual(false);
     });
@@ -872,7 +879,7 @@ describe('FormBased Data Panel', () => {
         wrapper
           .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
           .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').displayName)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
@@ -974,7 +981,9 @@ describe('FormBased Data Panel', () => {
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['amemory', 'bytes']);
     });
 
@@ -1010,7 +1019,9 @@ describe('FormBased Data Panel', () => {
         .first()
         .simulate('click');
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['Records', 'amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 

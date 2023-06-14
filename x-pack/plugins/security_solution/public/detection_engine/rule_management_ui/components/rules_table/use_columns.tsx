@@ -22,6 +22,7 @@ import type {
 } from '../../../../../common/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -103,6 +104,19 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
       sortable: true,
     }),
     [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobs]
+  );
+};
+
+const useRuleSnoozeColumn = (): TableColumn => {
+  return useMemo(
+    () => ({
+      field: 'snooze',
+      name: i18n.COLUMN_SNOOZE,
+      render: (_, rule: Rule) => <RuleSnoozeBadge ruleId={rule.id} />,
+      width: '100px',
+      sortable: false,
+    }),
+    []
   );
 };
 
@@ -248,6 +262,7 @@ export const useRulesColumns = ({
     isLoadingJobs,
     mlJobs,
   });
+  const snoozeColumn = useRuleSnoozeColumn();
 
   return useMemo(
     () => [
@@ -317,6 +332,7 @@ export const useRulesColumns = ({
         width: '18%',
         truncateText: true,
       },
+      snoozeColumn,
       enabledColumn,
       ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
@@ -324,6 +340,7 @@ export const useRulesColumns = ({
       actionsColumn,
       enabledColumn,
       executionStatusColumn,
+      snoozeColumn,
       hasCRUDPermissions,
       ruleNameColumn,
       showRelatedIntegrations,

@@ -10,17 +10,17 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { DashboardsTable } from '../../../common/components/dashboards/dashboards_table';
-import { LandingImageCards } from '../../../landing_pages/components/landing_links_images';
+import { LandingImageCards } from '../../../common/components/landing_links/landing_links_images';
 import { SecurityPageName } from '../../../../common/constants';
 import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
-import { useAppRootNavLink } from '../../../common/components/navigation/nav_links';
-import { useCreateSecurityDashboardLink } from '../../../common/containers/dashboards/use_create_security_dashboard_link';
+import { useRootNavLink } from '../../../common/links/nav_links';
 import { Title } from '../../../common/components/header_page/title';
 import { LinkButton } from '../../../common/components/links/helpers';
 import * as i18n from './translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
 import { DASHBOARDS_PAGE_TITLE } from '../translations';
+import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
+import { DashboardsTable } from '../../components/dashboards_table';
 
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
@@ -54,7 +54,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboards)?.links ?? [];
+  const dashboardLinks = useRootNavLink(SecurityPageName.dashboards)?.links ?? [];
   const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 

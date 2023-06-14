@@ -10,7 +10,7 @@ import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/ma
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type {
   CaseConnector,
-  CaseResponse,
+  Case,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
@@ -32,6 +32,7 @@ import {
   transformNewCase,
   getApplicationRoute,
   getCaseViewPath,
+  isSOError,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
@@ -105,6 +106,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -158,6 +160,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -215,6 +218,7 @@ describe('common utils', () => {
               "uid": "1",
             },
           ],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -256,7 +260,7 @@ describe('common utils', () => {
 
   describe('transformCases', () => {
     it('transforms correctly', () => {
-      const casesMap = new Map<string, CaseResponse>(
+      const casesMap = new Map<string, Case>(
         mockCases.map((obj) => {
           return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
         })
@@ -275,6 +279,7 @@ describe('common utils', () => {
           "cases": Array [
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -316,6 +321,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -357,6 +363,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -402,6 +409,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -472,6 +480,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -529,6 +538,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -587,6 +597,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -668,6 +679,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -1308,6 +1320,16 @@ describe('common utils', () => {
           owner: SECURITY_SOLUTION_OWNER,
         })
       ).toBe('https://example.com/s/test-space/app/security/cases/my-case-id');
+    });
+  });
+
+  describe('isSOError', () => {
+    it('returns true if the SO is an error', () => {
+      expect(isSOError({ error: { statusCode: '404' } })).toBe(true);
+    });
+
+    it('returns false if the SO is not an error', () => {
+      expect(isSOError({})).toBe(false);
     });
   });
 });

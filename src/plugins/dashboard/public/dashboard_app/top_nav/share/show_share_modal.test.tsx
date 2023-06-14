@@ -7,7 +7,7 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToSavedPanels, DashboardContainerByValueInput } from '../../../../common';
+import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
 
 import { DashboardAppLocatorParams } from '../../..';
 import { pluginServices } from '../../../services/plugin_services';
@@ -68,7 +68,7 @@ describe('ShowShareModal', () => {
   });
 
   const getPropsAndShare = (
-    unsavedState?: Partial<DashboardContainerByValueInput>
+    unsavedState?: Partial<DashboardContainerInput>
   ): ShowShareModalProps => {
     pluginServices.getServices().dashboardSessionStorage.getState = jest
       .fn()
@@ -94,7 +94,7 @@ describe('ShowShareModal', () => {
   });
 
   it('locatorParams unsaved state is properly propagated to locator', () => {
-    const unsavedDashboardState: DashboardContainerByValueInput = {
+    const unsavedDashboardState: DashboardContainerInput = {
       panels: {
         panel_1: {
           type: 'panel_type',
@@ -121,7 +121,7 @@ describe('ShowShareModal', () => {
         },
       ],
       query: { query: 'bye', language: 'kuery' },
-    } as unknown as DashboardContainerByValueInput;
+    } as unknown as DashboardContainerInput;
     const showModalProps = getPropsAndShare(unsavedDashboardState);
     ShowShareModal(showModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);

@@ -8,8 +8,9 @@
 import { isRight } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { HttpFetchQuery, HttpSetup } from '@kbn/core/public';
-import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
 
+type Params = HttpFetchQuery & { version?: string };
 class ApiService {
   private static instance: ApiService;
   private _http!: HttpSetup;
@@ -41,16 +42,13 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get<T>(
-    apiUrl: string,
-    params?: HttpFetchQuery,
-    decodeType?: any,
-    asResponse = false
-  ) {
+  public async get<T>(apiUrl: string, params: Params = {}, decodeType?: any, asResponse = false) {
+    const { version, ...queryParams } = params;
     const response = await this._http!.fetch<T>({
       path: apiUrl,
-      query: params,
+      query: queryParams,
       asResponse,
+      version,
     });
 
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
@@ -73,11 +71,13 @@ class ApiService {
     return response;
   }
 
-  public async post<T>(apiUrl: string, data?: any, decodeType?: any, params?: HttpFetchQuery) {
+  public async post<T>(apiUrl: string, data?: any, decodeType?: any, params: Params = {}) {
+    const { version, ...queryParams } = params;
     const response = await this._http!.post<T>(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
-      query: params,
+      query: queryParams,
+      version,
     });
 
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
@@ -96,11 +96,13 @@ class ApiService {
     return response;
   }
 
-  public async put<T>(apiUrl: string, data?: any, decodeType?: any, params?: HttpFetchQuery) {
+  public async put<T>(apiUrl: string, data?: any, decodeType?: any, params: Params = {}) {
+    const { version, ...queryParams } = params;
     const response = await this._http!.put<T>(apiUrl, {
       method: 'PUT',
       body: JSON.stringify(data),
-      query: params,
+      query: queryParams,
+      version,
     });
 
     if (decodeType) {
@@ -117,8 +119,8 @@ class ApiService {
     return response;
   }
 
-  public async delete<T>(apiUrl: string) {
-    const response = await this._http!.delete<T>(apiUrl);
+  public async delete<T>(apiUrl: string, { version }: { version?: string } = {}) {
+    const response = await this._http!.delete<T>(apiUrl, { version });
     if (response instanceof Error) {
       throw response;
     }

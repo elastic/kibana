@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { TableEntityType } from '../../../../../common/types';
+import { TableEntityType } from '@kbn/securitysolution-data-table';
 
 const ENTITY_TYPE_PLURAL = (entityType: TableEntityType, count: number) => {
   switch (entityType) {

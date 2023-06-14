@@ -137,6 +137,7 @@ export default function (providerContext: FtrProviderContext) {
                 name: 'overridden by user',
               },
               mapping: {
+                ignore_malformed: `true`,
                 total_fields: {
                   limit: '10000',
                 },
@@ -148,6 +149,7 @@ export default function (providerContext: FtrProviderContext) {
             dynamic: 'false',
             properties: {
               '@timestamp': {
+                ignore_malformed: false,
                 type: 'date',
               },
               data_stream: {

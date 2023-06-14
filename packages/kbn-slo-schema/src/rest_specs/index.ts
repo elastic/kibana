@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+export * from './composite_slo';
 export * from './slo';

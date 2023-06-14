@@ -216,7 +216,7 @@ Array [
       class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem eui-yScroll emotion-euiFlexItem-grow-1"
+      class="euiFlexItem kbnCollapsibleNav__solutions emotion-euiFlexItem-grow-1"
     >
       <div
         class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
@@ -863,6 +863,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
+    className="kbnCollapsibleNav"
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}
@@ -1048,6 +1049,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
+    className="kbnCollapsibleNav"
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}

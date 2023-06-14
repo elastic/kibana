@@ -1,0 +1,11 @@
+title: Test Dataset
+
+type: metrics
+
+elasticsearch:
+  index_mode: time_series
+
+  index_template.mappings:
+    dynamic: false
+  index_template.settings:
+    index.lifecycle.name: reference

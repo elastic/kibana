@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import { siemGuideId } from '../../../common/guided_onboarding/siem_guide_config';
 
 const alertsGuideActiveState = {
@@ -21,7 +22,7 @@ const alertsGuideActiveState = {
 export const startAlertsCasesTour = () =>
   cy.request({
     method: 'PUT',
-    url: 'api/guided_onboarding/state',
+    url: `${API_BASE_PATH}/state`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
     body: {
       status: 'in_progress',
@@ -32,7 +33,7 @@ export const startAlertsCasesTour = () =>
 export const quitGlobalTour = () =>
   cy.request({
     method: 'PUT',
-    url: 'api/guided_onboarding/state',
+    url: `${API_BASE_PATH}/state`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
     body: {
       status: 'quit',

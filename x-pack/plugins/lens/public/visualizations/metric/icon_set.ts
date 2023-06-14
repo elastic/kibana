@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AvailableMetricIcon } from '@kbn/expression-metric-vis-plugin/common';
-import { IconSet } from '../../shared_components/icon_select/icon_select';
+import { type IconSet } from '@kbn/visualization-ui-components/public';
 
 export const iconsSet: IconSet<AvailableMetricIcon> = [
   {

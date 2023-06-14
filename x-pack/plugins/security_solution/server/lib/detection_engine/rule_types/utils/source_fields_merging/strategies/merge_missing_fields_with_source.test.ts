@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { cloneDeep } from 'lodash';
 import { performance } from 'perf_hooks';
 import { mergeMissingFieldsWithSource } from './merge_missing_fields_with_source';
 import type { SignalSourceHit } from '../../../types';
@@ -43,7 +44,7 @@ describe('merge_missing_fields_with_source', () => {
 
       test('when source is "undefined", merged doc is "undefined"', () => {
         const _source: SignalSourceHit['_source'] = {};
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -52,7 +53,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: [],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -61,7 +62,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: 'value',
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -70,7 +71,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: ['value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -79,7 +80,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: ['value_1', 'value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -88,7 +89,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: 'some value' },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -97,7 +98,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: [{ bar: 'some value' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -106,7 +107,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: [{ bar: 'some value' }, { foo: 'some other value' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -132,7 +133,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'foo.bar': [],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -141,7 +142,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'foo.bar': 'value',
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -150,7 +151,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'foo.bar': ['value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -159,7 +160,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'foo.bar': ['value_1', 'value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -168,7 +169,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: 'some value' },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -177,7 +178,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: [{ bar: 'some value' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -186,7 +187,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: [{ bar: 'some value' }, { foo: 'some other value' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -216,7 +217,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: [] },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -225,7 +226,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: 'value' },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -234,7 +235,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: ['value'] },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -243,7 +244,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: ['value_1', 'value_2'] },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -252,7 +253,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: { mars: 'some value' } },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -261,7 +262,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: [{ mars: 'some value' }] },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -270,7 +271,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: [{ mars: 'some value' }, { mars: 'some other value' }] },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -308,7 +309,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'bar.foo': [],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -317,7 +318,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'bar.foo': 'value',
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -326,7 +327,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'bar.foo': ['value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -335,7 +336,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'bar.foo': ['value_1', 'value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -344,7 +345,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: { bar: 'some value' },
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -353,7 +354,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: [{ bar: 'some value' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -362,7 +363,7 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           foo: [{ bar: 'some value' }, { foo: 'some other value' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -381,7 +382,11 @@ describe('merge_missing_fields_with_source', () => {
         const _source: SignalSourceHit['_source'] = {
           'bar.foo': [],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields: bigFields };
+        const doc: SignalSourceHit = {
+          ...emptyEsResult(),
+          _source: cloneDeep(_source),
+          fields: bigFields,
+        };
         const start = performance.now();
         // we don't care about the response just determining performance
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -408,7 +413,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         'foo.bar': ['other_value_1'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: {
@@ -421,7 +426,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         'foo.bar': ['other_value_1', 'other_value_2'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: {
@@ -434,7 +439,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         'foo.bar': [{ zed: 'other_value_1' }],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({});
     });
@@ -443,7 +448,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({});
     });
@@ -468,7 +473,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -477,7 +482,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -486,7 +491,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           foo: [{ bar: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -495,7 +500,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           foo: [{ bar: 'other_value_1' }, { bar: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -519,7 +524,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -528,7 +533,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -537,7 +542,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -546,7 +551,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -572,7 +577,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -581,7 +586,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -590,7 +595,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -599,7 +604,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -623,7 +628,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -632,7 +637,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -641,7 +646,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -650,7 +655,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -674,7 +679,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -683,7 +688,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -692,7 +697,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -701,7 +706,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -725,7 +730,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -734,7 +739,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -743,7 +748,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -752,7 +757,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -778,7 +783,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -787,7 +792,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -796,7 +801,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -805,7 +810,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -829,7 +834,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -838,7 +843,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -847,7 +852,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -856,7 +861,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -882,7 +887,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -891,7 +896,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -900,7 +905,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -909,7 +914,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -933,7 +938,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -942,7 +947,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -951,7 +956,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ mars: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -960,7 +965,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ mars: 'other_value_1' }, { mars: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -986,7 +991,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -995,7 +1000,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1004,7 +1009,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1013,7 +1018,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1037,7 +1042,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1046,7 +1051,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1055,7 +1060,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1064,7 +1069,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1088,7 +1093,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1097,7 +1102,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1106,7 +1111,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ mars: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1115,7 +1120,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ mars: 'other_value_1' }, { mars: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1139,7 +1144,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1148,7 +1153,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1157,7 +1162,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ mars: 'other_value_1' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1166,7 +1171,7 @@ describe('merge_missing_fields_with_source', () => {
         const fields: SignalSourceHit['fields'] = {
           'foo.bar': [{ mars: 'other_value_1' }, { mars: 'other_value_2' }],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1192,7 +1197,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         'foo.bar': ['other_value_1'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
     });
@@ -1204,7 +1209,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         'foo.bar': ['value_1', 'value_2'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
     });
@@ -1228,7 +1233,7 @@ describe('merge_missing_fields_with_source', () => {
           bar: ['bar_other_value_1'],
           'bar.keyword': ['bar_other_value_keyword_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1246,7 +1251,7 @@ describe('merge_missing_fields_with_source', () => {
           'host.hostname': ['hostname_other_value_1'],
           'host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1266,7 +1271,7 @@ describe('merge_missing_fields_with_source', () => {
           'foo.host.hostname': ['hostname_other_value_1'],
           'foo.host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1277,7 +1282,7 @@ describe('merge_missing_fields_with_source', () => {
           foo: ['other_value_1'],
           'foo.bar': ['other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: 'other_value_1',
@@ -1295,7 +1300,7 @@ describe('merge_missing_fields_with_source', () => {
           'process.command_line.text': ['string longer than 10 characters'],
           '@timestamp': ['2023-02-10T10:15:50.000Z'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1311,7 +1316,7 @@ describe('merge_missing_fields_with_source', () => {
           'process.command_line.text': ['string longer than 10 characters'],
           '@timestamp': ['2023-02-10T10:15:50.000Z'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1329,7 +1334,7 @@ describe('merge_missing_fields_with_source', () => {
           'host.hostname': ['hostname_other_value_1'],
           'host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1345,7 +1350,7 @@ describe('merge_missing_fields_with_source', () => {
           'foo.host.hostname': ['hostname_other_value_1'],
           'foo.host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1357,7 +1362,7 @@ describe('merge_missing_fields_with_source', () => {
           'foo.bar': ['other_value_2'],
           'foo.bar.zed': ['zed_other_value_2'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: 'other_value_1',
@@ -1374,7 +1379,7 @@ describe('merge_missing_fields_with_source', () => {
           'process.command_line.text': ['string longer than 10 characters'],
           '@timestamp': ['2023-02-10T10:15:50.000Z'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1389,7 +1394,112 @@ describe('merge_missing_fields_with_source', () => {
           'process.command_line.text': ['string longer than 10 characters'],
           '@timestamp': ['2023-02-10T10:15:50.000Z'],
         };
-        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+    });
+
+    describe('mixed flattened and nested keys for the _source', () => {
+      test('merges fields into source if it is empty', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'email.headers': {},
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'email.headers.x-test': ['from fields'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+          email: {
+            headers: {
+              'x-test': 'from fields',
+            },
+          },
+          // preserves conflicting keys if values contain empty objects
+          'email.headers': {},
+        });
+      });
+
+      test('merges fields into source if it is "undefined"', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'email.headers': { 'x-test': undefined },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'email.headers.x-test': ['from fields'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+          'email.headers': {
+            'x-test': 'from fields',
+          },
+        });
+      });
+
+      test('does not merge fields into source', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'email.headers': { 'x-test': 'a' },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'email.headers.x-test': ['from fields'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not merge fields into source if source value is array', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'email.headers': { 'x-test': ['a'] },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'email.headers.x-test': ['from fields'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not merge fields into source if only source has nested fields', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'a.b.c.d': ['1', '2'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not merge nested fields into source if source has nested fields', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'a.b.c': [{ d: '3 ' }, { d: '4' }],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not duplicate fields in result document if field is equal to source mixed property', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'email.headers': { 'x-test': 'a' },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'email.headers.x-test': ['a'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
@@ -1414,7 +1524,7 @@ describe('merge_missing_fields_with_source', () => {
         'foo.bar': ['other_value_1'],
         'foo.mars': ['other_value_2'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
     });
@@ -1434,7 +1544,7 @@ describe('merge_missing_fields_with_source', () => {
         'foo.zed.bar': ['other_value_1'],
         'foo.zed.mars': ['other_value_2'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
     });
@@ -1449,7 +1559,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         foo: [{ bar: ['single_value'], zed: ['single_value'] }],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({});
     });
@@ -1466,7 +1576,7 @@ describe('merge_missing_fields_with_source', () => {
       const fields: SignalSourceHit['fields'] = {
         foo: [{ bar: ['single_value'], zed: ['single_value'] }],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
     });
@@ -1483,7 +1593,7 @@ describe('merge_missing_fields_with_source', () => {
         'value.should.ignore': ['other_value_2'], // string value should ignore this
         '_odd.value': ['other_value_2'], // Regex should ignore this value of: /[_]+/
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({
         doc,
         ignoreFields: ['value.should.ignore', '/[_]+/'],
@@ -1502,7 +1612,7 @@ describe('merge_missing_fields_with_source', () => {
         'value.should.work': ['other_value_2'],
         '_odd.value': ['other_value_2'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({
         doc,
         ignoreFields: ['other.string', '/[z]+/'], // Neither of these two should match anything
@@ -1533,7 +1643,7 @@ describe('merge_missing_fields_with_source', () => {
         'foo.bar': ['other_value_1'],
         _ignored: ['other_value_1'],
       };
-      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeMissingFieldsWithSource({
         doc,
         ignoreFields: [],

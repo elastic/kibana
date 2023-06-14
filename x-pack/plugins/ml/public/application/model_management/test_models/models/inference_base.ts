@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { map } from 'rxjs/operators';
 import { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
-import { MLHttpFetchError } from '../../../../../common/util/errors';
+import type { MLHttpFetchError } from '@kbn/ml-error-utils';
 import { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
 import { getInferenceInfoComponent } from './inference_info';
 
@@ -61,6 +61,8 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceTypeLabel: string;
   protected readonly modelInputField: string;
 
+  protected _deploymentId: string | null = null;
+
   protected inputText$ = new BehaviorSubject<string[]>([]);
   private inputField$ = new BehaviorSubject<string>('');
   private inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
@@ -76,7 +78,8 @@ export abstract class InferenceBase<TInferResponse> {
   constructor(
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
-    protected readonly inputType: INPUT_TYPE
+    protected readonly inputType: INPUT_TYPE,
+    protected readonly deploymentId: string
   ) {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField$.next(this.modelInputField);
@@ -243,7 +246,7 @@ export abstract class InferenceBase<TInferResponse> {
   ): estypes.IngestProcessorContainer[] {
     const processor: estypes.IngestProcessorContainer = {
       inference: {
-        model_id: this.model.model_id,
+        model_id: this.deploymentId ?? this.model.model_id,
         target_field: this.inferenceType,
         field_map: {
           [this.inputField$.getValue()]: this.modelInputField,
@@ -278,6 +281,7 @@ export abstract class InferenceBase<TInferResponse> {
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
+        this.deploymentId,
         {
           docs: this.getInferDocs(),
           ...(inferenceConfig ? { inference_config: inferenceConfig } : {}),
@@ -331,7 +335,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   private getDefaultInferenceConfig(): estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] {
-    return this.model.inference_config[
+    return this.model.inference_config![
       this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer
     ];
   }

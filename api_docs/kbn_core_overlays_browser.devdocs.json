@@ -247,209 +247,6 @@
       },
       {
         "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayFlyoutOpenOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "OverlayFlyoutOpenOptions",
-        "description": [],
-        "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.className",
-            "type": "string",
-            "tags": [],
-            "label": "className",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.closeButtonAriaLabel",
-            "type": "string",
-            "tags": [],
-            "label": "closeButtonAriaLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.ownFocus",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ownFocus",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.datatestsubj",
-            "type": "string",
-            "tags": [],
-            "label": "'data-test-subj'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.arialabel",
-            "type": "string",
-            "tags": [],
-            "label": "'aria-label'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.size",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "\"m\" | \"s\" | \"l\" | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.maxWidth",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "maxWidth",
-            "description": [],
-            "signature": [
-              "string | number | boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.hideCloseButton",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideCloseButton",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.outsideClickCloses",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "outsideClickCloses",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.maskProps",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "maskProps",
-            "description": [],
-            "signature": [
-              "EuiOverlayMaskProps",
-              " | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.onClose",
-            "type": "Function",
-            "tags": [],
-            "label": "onClose",
-            "description": [
-              "\nEuiFlyout onClose handler.\nIf provided the consumer is responsible for calling flyout.close() to close the flyout;"
-            ],
-            "signature": [
-              "((flyout: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
-                "text": "OverlayRef"
-              },
-              ") => void) | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayFlyoutOpenOptions.onClose.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "flyout",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.OverlayRef",
-                    "text": "OverlayRef"
-                  }
-                ],
-                "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-overlays-browser",
         "id": "def-common.OverlayFlyoutStart",
         "type": "Interface",
         "tags": [],
@@ -529,7 +326,7 @@
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
                 "id": "def-common.OverlayFlyoutStart.open.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -1075,7 +872,7 @@
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
                 "id": "def-common.OverlayStart.openFlyout.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -1279,7 +1076,33 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-overlays-browser",
+        "id": "def-common.OverlayFlyoutOpenOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "OverlayFlyoutOpenOptions",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "EuiFlyoutProps",
+          "<\"div\">, \"onClose\"> & { onClose?: ((flyout: ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.OverlayRef",
+            "text": "OverlayRef"
+          },
+          ") => void) | undefined; }"
+        ],
+        "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

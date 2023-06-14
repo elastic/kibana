@@ -68,7 +68,6 @@ function createFakeElasticsearchServer() {
   return server;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/129754
 describe('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;

@@ -16,6 +16,8 @@ import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plug
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -67,6 +69,8 @@ const mockConfig: ConfigSchema = {
     enabled: false,
   },
   latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
 };
 
 const urlService = new UrlService({
@@ -89,12 +93,24 @@ const mockPlugin = {
   },
 };
 
+export const infraLocatorsMock: InfraLocators = {
+  logsLocator: sharePluginMock.createLocator(),
+  nodeLogsLocator: sharePluginMock.createLocator(),
+};
+
 const mockCorePlugins = {
   embeddable: {},
   inspector: {},
   maps: {},
   observability: {},
+  observabilityShared: {},
   data: {},
+};
+
+const mockUnifiedSearch = {
+  ui: {
+    SearchBar: () => <div className="searchBar" />,
+  },
 };
 
 export const mockApmPluginContextValue = {
@@ -104,7 +120,14 @@ export const mockApmPluginContextValue = {
   plugins: mockPlugin,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
+  infra: {
+    locators: infraLocatorsMock,
+  },
   deps: {},
+  unifiedSearch: mockUnifiedSearch,
+  uiActions: {
+    getTriggerCompatibleActions: () => Promise.resolve([]),
+  },
 };
 
 export function MockApmPluginContextWrapper({

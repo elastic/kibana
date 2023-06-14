@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -111,6 +111,7 @@ export function Chart({
   onFilter,
   onBrushEnd,
 }: ChartProps) {
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const {
     showChartOptionsPopover,
     chartRef,
@@ -136,7 +137,7 @@ export function Chart({
     !chart.hidden &&
     dataView.id &&
     dataView.type !== DataViewType.ROLLUP &&
-    dataView.isTimeBased()
+    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
   );
 
   const input$ = useMemo(
@@ -192,7 +193,7 @@ export function Chart({
     chartToolButtonCss,
   } = useChartStyles(chartVisible);
 
-  const lensAttributes = useMemo(
+  const lensAttributesContext = useMemo(
     () =>
       getLensAttributes({
         title: chart?.title,
@@ -218,8 +219,12 @@ export function Chart({
     services,
     dataView,
     relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
-    lensAttributes,
+    lensAttributes: lensAttributesContext.attributes,
+    isPlainRecord,
   });
+  const LensSaveModalComponent = services.lens.SaveModalComponent;
+  const canSaveVisualization =
+    chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
 
   return (
     <EuiFlexGroup
@@ -269,6 +274,27 @@ export function Chart({
                       onSuggestionChange={onSuggestionChange}
                     />
                   </EuiFlexItem>
+                )}
+                {canSaveVisualization && (
+                  <>
+                    <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                      <EuiToolTip
+                        content={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                          defaultMessage: 'Save visualization',
+                        })}
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="save"
+                          onClick={() => setIsSaveModalVisible(true)}
+                          data-test-subj="unifiedHistogramSaveVisualization"
+                          aria-label={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                            defaultMessage: 'Save visualization',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </>
                 )}
                 {onEditVisualization && (
                   <EuiFlexItem grow={false} css={chartToolButtonCss}>
@@ -340,7 +366,7 @@ export function Chart({
               chart={chart}
               getTimeRange={getTimeRange}
               refetch$={refetch$}
-              lensAttributes={lensAttributes}
+              lensAttributesContext={lensAttributesContext}
               isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
@@ -352,6 +378,14 @@ export function Chart({
           </section>
           {appendHistogram}
         </EuiFlexItem>
+      )}
+      {canSaveVisualization && isSaveModalVisible && lensAttributesContext.attributes && (
+        <LensSaveModalComponent
+          initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
+          onSave={() => {}}
+          onClose={() => setIsSaveModalVisible(false)}
+          isSaveable={false}
+        />
       )}
     </EuiFlexGroup>
   );

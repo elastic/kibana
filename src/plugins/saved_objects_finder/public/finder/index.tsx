@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { HttpStart } from '@kbn/core-http-browser';
@@ -19,7 +19,7 @@ const SavedObjectFinder = (props: SavedObjectFinderProps) => (
   <React.Suspense
     fallback={
       <EuiDelayRender delay={300}>
-        <EuiLoadingContent />
+        <EuiSkeletonText />
       </EuiDelayRender>
     }
   >

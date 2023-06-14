@@ -16,10 +16,10 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
@@ -52,7 +52,6 @@ export const MonitorList = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const isXl = useIsWithinMinBreakpoint('xxl');
-  const canEditSynthetics = useCanEditSynthetics();
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] =
     useState<EncryptedSyntheticsSavedMonitor | null>(null);
@@ -68,7 +67,7 @@ export const MonitorList = ({
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: field === 'enabled' ? field : `${field}.keyword`,
+        sortField: (field === 'enabled' ? field : `${field}.keyword`) as MonitorListSortField,
         sortOrder: direction,
       });
     },
@@ -84,7 +83,7 @@ export const MonitorList = ({
 
   const sorting: EuiTableSortingType<EncryptedSyntheticsSavedMonitor> = {
     sort: {
-      field: sortField.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
+      field: sortField?.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
       direction: sortOrder,
     },
   };
@@ -96,7 +95,6 @@ export const MonitorList = ({
   });
 
   const columns = useMonitorListColumns({
-    canEditSynthetics,
     loading,
     overviewStatus,
     setMonitorPendingDeletion,

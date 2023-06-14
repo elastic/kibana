@@ -31,7 +31,7 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
@@ -100,6 +100,8 @@ export interface RunOpts<TParams extends RuleParams> {
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
+  publicBaseUrl: string | undefined;
+  inputIndexFields: DataViewFieldBase[];
 }
 
 export type SecurityAlertType<
@@ -129,6 +131,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
   config: ConfigType;
+  publicBaseUrl: string | undefined;
   ruleDataClient: IRuleDataClient;
   ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
@@ -137,13 +140,9 @@ export interface CreateSecurityRuleTypeWrapperProps {
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
-) => <
-  TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {}
->(
-  type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
+) => <TParams extends RuleParams, TState extends RuleTypeState>(
+  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
@@ -157,7 +156,6 @@ export interface CreateRuleOptions {
 export interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
-  hasEnterpriseLicense?: boolean;
 }
 export interface CreateQueryRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
@@ -372,6 +370,7 @@ export interface SearchAfterAndBulkCreateParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

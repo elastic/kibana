@@ -11,11 +11,11 @@ import http from 'http';
 import type SuperTest from 'supertest';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  CasesConfigureResponse,
+  Configuration,
   CaseConnector,
   ConnectorTypes,
   CasePostRequest,
-  CaseResponse,
+  Case,
   GetCaseConnectorsResponse,
   getCaseConnectorsUrl,
 } from '@kbn/cases-plugin/common/api';
@@ -219,9 +219,9 @@ export const createCaseWithConnector = async ({
   createCaseReq?: CasePostRequest;
   headers?: Record<string, unknown>;
 }): Promise<{
-  postedCase: CaseResponse;
+  postedCase: Case;
   connector: CreateConnectorResponse;
-  configuration: CasesConfigureResponse;
+  configuration: Configuration;
 }> => {
   const connector = await createConnector({
     supertest,

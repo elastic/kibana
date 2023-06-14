@@ -17,6 +17,8 @@ export interface MetricEmbeddableProps {
   inspectTitle?: string;
 }
 
+const CHART_HEIGHT = 36;
+
 const MetricEmbeddableComponent = ({
   fields,
   id,
@@ -49,7 +51,7 @@ const MetricEmbeddableComponent = ({
                 <div data-test-subj="stat-title">
                   <VisualizationEmbeddable
                     data-test-subj="embeddable-metric"
-                    height="36px"
+                    height={CHART_HEIGHT}
                     id={`${id}-${field.key}-metric-embeddable`}
                     lensAttributes={field.lensAttributes}
                     timerange={timerange}

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 export enum AllRulesTabs {
@@ -33,7 +33,7 @@ export const RulesTableToolbar = React.memo(() => {
     []
   );
 
-  return <TabNavigationWithBreadcrumbs navTabs={ruleTabs} />;
+  return <TabNavigation navTabs={ruleTabs} />;
 });
 
 RulesTableToolbar.displayName = 'RulesTableToolbar';

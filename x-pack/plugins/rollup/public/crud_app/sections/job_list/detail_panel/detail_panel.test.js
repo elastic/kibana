@@ -322,9 +322,8 @@ describe('<DetailPanel />', () => {
       const tabContent = find('rollupJobDetailTabContent');
 
       it('should render the "EuiCodeEditor" with the job "json" data', () => {
-        const euiCodeEditor = tabContent.find('EuiCodeEditor');
-        expect(euiCodeEditor.length).toBeTruthy();
-        expect(JSON.parse(euiCodeEditor.props().value)).toEqual(defaultJob.json);
+        const euiCodeEditor = tabContent.find('[data-test-subj="jsonCodeBlock"]').at(0);
+        expect(JSON.parse(euiCodeEditor.text())).toEqual(defaultJob.json);
       });
     });
   });

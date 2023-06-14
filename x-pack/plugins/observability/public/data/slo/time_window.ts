@@ -12,7 +12,7 @@ export const buildRollingTimeWindow = (
 ): SLOWithSummaryResponse['timeWindow'] => {
   return {
     duration: '30d',
-    isRolling: true,
+    type: 'rolling',
     ...params,
   };
 };
@@ -22,7 +22,7 @@ export const buildCalendarAlignedTimeWindow = (
 ): SLOWithSummaryResponse['timeWindow'] => {
   return {
     duration: '1M',
-    calendar: { startTime: '2023-01-01T00:00:00.000Z' },
+    type: 'calendarAligned',
     ...params,
   };
 };

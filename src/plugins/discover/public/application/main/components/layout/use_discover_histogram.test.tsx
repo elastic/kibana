@@ -144,6 +144,7 @@ describe('useDiscoverHistogram', () => {
     beforeEach(() => {
       mockCheckHitCount.mockClear();
     });
+
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
       const api = createMockUnifiedHistogramApi();
@@ -151,7 +152,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.state$.subscribe).toHaveBeenCalledTimes(3);
+      expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
     });
 
     it('should sync Unified Histogram state with the state container', async () => {
@@ -218,6 +219,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
+      stateContainer.appState.update({ hideChart: true, interval: '1m', breakdownField: 'test' });
       expect(api.setTotalHits).toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
@@ -225,15 +227,15 @@ describe('useDiscoverHistogram', () => {
       expect(Object.keys(params ?? {})).toEqual([
         'totalHitsStatus',
         'totalHitsResult',
-        'chartHidden',
-        'timeInterval',
         'breakdownField',
+        'timeInterval',
+        'chartHidden',
       ]);
     });
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates after the first load', async () => {
       const stateContainer = getStateContainer();
-      const { hook, initialProps } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const state = {
         timeInterval: containerState.interval,
@@ -255,13 +257,14 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
+      stateContainer.appState.update({ hideChart: true });
       expect(Object.keys(params ?? {})).toEqual([
         'totalHitsStatus',
         'totalHitsResult',
         'chartHidden',
       ]);
       params = {};
-      hook.rerender({ ...initialProps, hideChart: true });
+      stateContainer.appState.update({ hideChart: false });
       act(() => {
         subject$.next({
           ...state,

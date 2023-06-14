@@ -15,9 +15,14 @@ import { HIGHLIGHTED_FIELDS_TITLE } from './translations';
 import { useRightPanelContext } from '../context';
 import { RightPanelKey, RightPanelTableTabPath } from '..';
 
+/**
+ * Component that displays the highlighted fields in the right panel under the Investigation section.
+ * It leverages the existing {@link AlertSummaryView} component.
+ * // TODO will require improvements https://github.com/elastic/security-team/issues/6428
+ */
 export const HighlightedFields: FC = () => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName, dataFormattedForFieldBrowser, browserFields } =
+  const { eventId, indexName, dataFormattedForFieldBrowser, browserFields, scopeId } =
     useRightPanelContext();
 
   const goToTableTab = useCallback(() => {
@@ -27,12 +32,13 @@ export const HighlightedFields: FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, indexName, openRightPanel]);
+  }, [eventId, indexName, openRightPanel, scopeId]);
 
   if (!dataFormattedForFieldBrowser || !browserFields || !eventId) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -49,7 +55,7 @@ export const HighlightedFields: FC = () => {
             eventId={eventId}
             browserFields={browserFields}
             isDraggable={false}
-            scopeId={'global'}
+            scopeId={scopeId}
             title={''}
             isReadOnly={false} // TODO: set properly
             goToTable={goToTableTab}

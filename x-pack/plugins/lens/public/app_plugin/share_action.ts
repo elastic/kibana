@@ -27,6 +27,14 @@ interface ShareableConfiguration
   adHocDataViews?: DataViewSpec[];
 }
 
+// This approximate Lens workspace dimensions ratio on a typical widescreen
+export const DEFAULT_LENS_LAYOUT_DIMENSIONS = {
+  width: 1793,
+  // this is a magic number from the reporting tool implementation
+  // see: x-pack/plugins/screenshotting/server/browsers/chromium/driver_factory/index.ts#L146
+  height: 1086,
+};
+
 function getShareURLForSavedObject(
   { application, data }: Pick<LensAppServices, 'application' | 'data'>,
   currentDoc: Document | undefined

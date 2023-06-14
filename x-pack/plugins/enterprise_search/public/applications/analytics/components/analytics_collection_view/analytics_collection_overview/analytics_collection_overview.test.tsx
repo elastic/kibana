@@ -18,6 +18,8 @@ import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
+import { AnalyticsCollectionNoEventsCallout } from '../analytics_collection_no_events_callout/analytics_collection_no_events_callout';
+
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 
 import { AnalyticsCollectionViewMetricWithLens } from './analytics_collection_metric';
@@ -36,6 +38,7 @@ const mockValues = {
 };
 
 const mockActions = {
+  analyticsEventsExist: jest.fn(),
   fetchAnalyticsCollection: jest.fn(),
   fetchAnalyticsCollectionDataViewId: jest.fn(),
   setTimeRange: jest.fn(),
@@ -47,6 +50,9 @@ describe('AnalyticsOverView', () => {
   });
 
   it('renders with Data', async () => {
+    setMockValues(mockValues);
+    setMockActions(mockActions);
+
     const wrapper = shallow(
       <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
     );
@@ -86,7 +92,7 @@ describe('AnalyticsOverView', () => {
     );
     expect(wrapper?.find(AnalyticsCollectionChartWithLens)).toHaveLength(1);
     expect(wrapper?.find(AnalyticsCollectionChartWithLens).props()).toEqual({
-      dataViewQuery: 'analytics-events-example',
+      collection: mockValues.analyticsCollection,
       id: 'analytics-collection-chart-Analytics-Collection-1',
       searchSessionId: 'session-id',
       selectedChart: 'Searches',
@@ -120,5 +126,16 @@ describe('AnalyticsOverView', () => {
     expect(wrapper.find(AnalyticsCollectionChartWithLens).props().selectedChart).toEqual(
       FilterBy.NoResults
     );
+  });
+
+  it('renders no events AnalyticsCollectionNoEventsCallout with collection', () => {
+    const wrapper = shallow(
+      <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
+    );
+
+    expect(wrapper.find(AnalyticsCollectionNoEventsCallout)).toHaveLength(1);
+    expect(wrapper?.find(AnalyticsCollectionNoEventsCallout).props()).toEqual({
+      analyticsCollection: mockValues.analyticsCollection,
+    });
   });
 });

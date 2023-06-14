@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { NATIVE_CONNECTOR_DEFINITIONS } from '../../common/connectors/native_connectors';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../common/constants';
+
 import {
   ConnectorDocument,
   ConnectorStatus,
@@ -25,9 +28,31 @@ export function createConnectorDocument({
   isNative: boolean;
   language: string | null;
   pipeline?: IngestPipelineParams | null;
-  serviceType?: string | null;
+  serviceType: string | null;
 }): ConnectorDocument {
   const currentTimestamp = new Date().toISOString();
+  const nativeConnector =
+    isNative && serviceType ? NATIVE_CONNECTOR_DEFINITIONS[serviceType] : undefined;
+
+  if (
+    isNative &&
+    serviceType &&
+    !nativeConnector &&
+    serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  ) {
+    throw new Error(`Could not find connector definition for service type ${serviceType}`);
+  }
+
+  const nativeFields = nativeConnector
+    ? {
+        configuration: nativeConnector.configuration,
+        features: nativeConnector.features,
+        name: nativeConnector.name,
+        service_type: serviceType,
+        status: ConnectorStatus.NEEDS_CONFIGURATION,
+      }
+    : {};
+
   return {
     api_key_id: null,
     configuration: {},
@@ -89,6 +114,10 @@ export function createConnectorDocument({
     index_name: indexName,
     is_native: isNative,
     language,
+    last_access_control_sync_error: null,
+    last_access_control_sync_scheduled_at: null,
+    last_access_control_sync_status: null,
+    last_incremental_sync_scheduled_at: null,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,
@@ -96,9 +125,14 @@ export function createConnectorDocument({
     last_synced: null,
     name: indexName.startsWith('search-') ? indexName.substring(7) : indexName,
     pipeline,
-    scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+    scheduling: {
+      access_control: { enabled: false, interval: '0 0 0 * * ?' },
+      full: { enabled: false, interval: '0 0 0 * * ?' },
+      incremental: { enabled: false, interval: '0 0 0 * * ?' },
+    },
     service_type: serviceType || null,
     status: ConnectorStatus.CREATED,
     sync_now: false,
+    ...nativeFields,
   };
 }

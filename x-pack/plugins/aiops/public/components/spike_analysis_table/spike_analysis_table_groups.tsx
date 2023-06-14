@@ -25,9 +25,12 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { MiniHistogram } from '../mini_histogram';
 
@@ -37,6 +40,7 @@ import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_prov
 import type { GroupTableItem } from './types';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { useViewInDiscoverAction } from './use_view_in_discover_action';
+import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
@@ -51,15 +55,25 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 interface SpikeAnalysisTableProps {
   significantTerms: SignificantTerm[];
   groupTableItems: GroupTableItem[];
-  dataViewId?: string;
   loading: boolean;
+  searchQuery: estypes.QueryDslQueryContainer;
+  timeRangeMs: TimeRangeMs;
+  dataView: DataView;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   significantTerms,
   groupTableItems,
-  dataViewId,
   loading,
+  dataView,
+  timeRangeMs,
+  searchQuery,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -75,6 +89,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
     useSpikeAnalysisTableRowContext();
+  const dataViewId = dataView.id;
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -101,8 +116,12 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             []
           )}
           loading={loading}
-          dataViewId={dataViewId}
           isExpandedRow
+          dataView={dataView}
+          timeRangeMs={timeRangeMs}
+          searchQuery={searchQuery}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       );
     }
@@ -111,6 +130,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   const copyToClipBoardAction = useCopyToClipboardAction();
   const viewInDiscoverAction = useViewInDiscoverAction(dataViewId);
+  const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataViewId);
 
   const columns: Array<EuiBasicTableColumn<GroupTableItem>> = [
     {
@@ -177,12 +197,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           const { fieldName, fieldValue, duplicate } = groupItem;
           if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
-            <>
-              <EuiBadge
-                key={`${fieldName}-id`}
-                data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
-                color="hollow"
-              >
+            <span key={`${fieldName}-id`}>
+              <EuiBadge data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge" color="hollow">
                 <span>
                   {(duplicate ?? 0) <= 1 ? '* ' : ''}
                   {`${fieldName}: `}
@@ -190,7 +206,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 <span style={{ color: visColors[2] }}>{`${fieldValue}`}</span>
               </EuiBadge>
               <EuiSpacer size="xs" />
-            </>
+            </span>
           );
         }
 
@@ -266,6 +282,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               defaultMessage: 'Group',
             }
           )}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       ),
       sortable: false,
@@ -342,10 +360,14 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
-      name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.spikeAnalysisGroupsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions: [viewInDiscoverAction, copyToClipBoardAction],
+      actions: [
+        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+        copyToClipBoardAction,
+      ],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'top',
     },

@@ -110,3 +110,6 @@ export class ArtifactsElasticsearchError extends FleetError {
     }
   }
 }
+
+export class FleetFilesClientError extends FleetError {}
+export class FleetFileNotFound extends FleetFilesClientError {}

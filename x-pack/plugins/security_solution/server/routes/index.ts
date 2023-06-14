@@ -43,7 +43,7 @@ import {
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
 
-import { persistNoteRoute } from '../lib/timeline/routes/notes';
+import { persistNoteRoute, deleteNoteRoute } from '../lib/timeline/routes/notes';
 
 import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
@@ -71,10 +71,8 @@ import {
   readPrebuiltDevToolContentRoute,
 } from '../lib/risk_score/routes';
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
-import {
-  getSecuritySolutionDashboardsRoute,
-  getSecuritySolutionTagsRoute,
-} from '../lib/dashboards/routes';
+import { registerDashboardsRoutes } from '../lib/dashboards/routes';
+import { registerTagsRoutes } from '../lib/tags/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -129,6 +127,7 @@ export const initRoutes = (
   installPrepackedTimelinesRoute(router, config, security);
 
   persistNoteRoute(router, config, security);
+  deleteNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
@@ -163,8 +162,8 @@ export const initRoutes = (
   installRiskScoresRoute(router, logger, security);
 
   // Dashboards
-  getSecuritySolutionDashboardsRoute(router, logger, security);
-  getSecuritySolutionTagsRoute(router, logger, security);
+  registerDashboardsRoutes(router, logger, security);
+  registerTagsRoutes(router, logger, security);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.

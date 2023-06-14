@@ -423,5 +423,47 @@ describe('updateAlertsStatus', () => {
 
       expect(alertsClient.removeCaseIdFromAlerts).not.toHaveBeenCalled();
     });
+
+    it('should not throw an error and log it', async () => {
+      alertsClient.removeCaseIdFromAlerts.mockRejectedValueOnce('An error');
+
+      await expect(
+        alertService.removeCaseIdFromAlerts({ alerts, caseId })
+      ).resolves.not.toThrowError();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed removing case test-case from alerts: An error'
+      );
+    });
+  });
+
+  describe('removeCaseIdsFromAllAlerts', () => {
+    const caseIds = ['test-case-1', 'test-case-2'];
+
+    it('remove all case ids from alerts', async () => {
+      await alertService.removeCaseIdsFromAllAlerts({ caseIds });
+
+      expect(alertsClient.removeCaseIdsFromAllAlerts).toBeCalledWith({ caseIds });
+    });
+
+    it('does not call the alerts client with no case ids', async () => {
+      await alertService.removeCaseIdsFromAllAlerts({
+        caseIds: [],
+      });
+
+      expect(alertsClient.removeCaseIdsFromAllAlerts).not.toHaveBeenCalled();
+    });
+
+    it('should not throw an error and log it', async () => {
+      alertsClient.removeCaseIdsFromAllAlerts.mockRejectedValueOnce('An error');
+
+      await expect(
+        alertService.removeCaseIdsFromAllAlerts({ caseIds })
+      ).resolves.not.toThrowError();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed removing cases test-case-1,test-case-2 for all alerts: An error'
+      );
+    });
   });
 });

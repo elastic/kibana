@@ -6,7 +6,6 @@
  */
 
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
-import { rRuleMappingsField } from './rrule_mappings_field';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
@@ -55,26 +54,27 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         actionTypeId: {
           type: 'keyword',
         },
-        params: {
-          dynamic: false,
-          properties: {},
-        },
-        frequency: {
-          properties: {
-            summary: {
-              index: false,
-              type: 'boolean',
-            },
-            notifyWhen: {
-              index: false,
-              type: 'keyword',
-            },
-            throttle: {
-              index: false,
-              type: 'keyword',
-            },
-          },
-        },
+        // NO NEED TO BE INDEXED
+        // params: {
+        //   dynamic: false,
+        //   properties: {},
+        // },
+        // frequency: {
+        //   properties: {
+        //     summary: {
+        //       index: false,
+        //       type: 'boolean',
+        //     },
+        //     notifyWhen: {
+        //       index: false,
+        //       type: 'keyword',
+        //     },
+        //     throttle: {
+        //       index: false,
+        //       type: 'keyword',
+        //     },
+        //   },
+        // },
       },
     },
     params: {
@@ -106,12 +106,14 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
-    apiKey: {
-      type: 'binary',
-    },
-    apiKeyOwner: {
-      type: 'keyword',
-    },
+    // NEED TO CHECK WITH KIBANA SECURITY
+    // apiKey: {
+    //   type: 'binary',
+    // },
+    // NO NEED TO BE INDEXED
+    // apiKeyOwner: {
+    //   type: 'keyword',
+    // },
     throttle: {
       type: 'keyword',
     },
@@ -124,33 +126,34 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     mutedInstanceIds: {
       type: 'keyword',
     },
-    meta: {
-      properties: {
-        versionApiKeyLastmodified: {
-          type: 'keyword',
-        },
-      },
-    },
+    // NO NEED TO BE INDEXED
+    // meta: {
+    //   properties: {
+    //     versionApiKeyLastmodified: {
+    //       type: 'keyword',
+    //     },
+    //   },
+    // },
     monitoring: {
       properties: {
         run: {
           properties: {
-            history: {
-              properties: {
-                duration: {
-                  type: 'long',
-                },
-                success: {
-                  type: 'boolean',
-                },
-                timestamp: {
-                  type: 'date',
-                },
-                outcome: {
-                  type: 'keyword',
-                },
-              },
-            },
+            // history: {
+            //   properties: {
+            //     duration: {
+            //       type: 'long',
+            //     },
+            //     success: {
+            //       type: 'boolean',
+            //     },
+            //     timestamp: {
+            //       type: 'date',
+            //     },
+            //     outcome: {
+            //       type: 'keyword',
+            //     },
+            //   },
+            // },
             calculated_metrics: {
               properties: {
                 p50: {
@@ -200,8 +203,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    // There is need to query for a rule by a specific revision
     revision: {
-      index: true, // Explicitly setting to `true` as there is need to query for a rule by a specific revision
       type: 'long',
     },
     snoozeSchedule: {
@@ -217,12 +220,14 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           type: 'date',
           format: 'strict_date_time',
         },
-        rRule: rRuleMappingsField,
+        // NO NEED TO BE INDEXED
+        // rRule: rRuleMappingsField,
       },
     },
-    nextRun: {
-      type: 'date',
-    },
+    // NO NEED TO BE INDEXED
+    // nextRun: {
+    //   type: 'date',
+    // },
     // Deprecated, if you need to add new property please do it in `last_run`
     executionStatus: {
       properties: {
@@ -268,12 +273,13 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         outcomeOrder: {
           type: 'float',
         },
-        warning: {
-          type: 'text',
-        },
-        outcomeMsg: {
-          type: 'text',
-        },
+        // NO NEED TO BE INDEXED
+        // warning: {
+        //   type: 'text',
+        // },
+        // outcomeMsg: {
+        //   type: 'text',
+        // },
         alertsCount: {
           properties: {
             active: {

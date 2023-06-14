@@ -20,17 +20,18 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { MlUrlConfig, MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
 import { TIME_RANGE_TYPE } from './constants';
-import { UrlConfig, KibanaUrlConfig } from '../../../../../common/types/custom_urls';
 import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 
-function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
+function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
   if (timeRange === undefined || timeRange.length === 0 || timeRange === TIME_RANGE_TYPE.AUTO) {
     return true;
@@ -42,8 +43,8 @@ function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
 
 export interface CustomUrlListProps {
   job: Job | DataFrameAnalyticsConfig;
-  customUrls: UrlConfig[];
-  onChange: (customUrls: UrlConfig[]) => void;
+  customUrls: MlUrlConfig[];
+  onChange: (customUrls: MlUrlConfig[]) => void;
 }
 
 /*
@@ -91,9 +92,9 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
       const timeRange = e.target.value;
       if (timeRange !== undefined && timeRange.length > 0) {
-        (customUrls[index] as KibanaUrlConfig).time_range = timeRange;
+        (customUrls[index] as MlKibanaUrlConfig).time_range = timeRange;
       } else {
-        delete (customUrls[index] as KibanaUrlConfig).time_range;
+        delete (customUrls[index] as MlKibanaUrlConfig).time_range;
       }
       setCustomUrls([...customUrls]);
     }
@@ -144,7 +145,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       : [];
 
     // Validate the time range.
-    const timeRange = (customUrl as KibanaUrlConfig).time_range;
+    const timeRange = (customUrl as MlKibanaUrlConfig).time_range;
     const isInvalidTimeRange = !isValidTimeRange(timeRange);
     const invalidIntervalError = isInvalidTimeRange
       ? [
@@ -223,7 +224,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                 isInvalid={isInvalidTimeRange}
               >
                 <EuiFieldText
-                  value={(customUrl as KibanaUrlConfig).time_range || ''}
+                  value={(customUrl as MlKibanaUrlConfig).time_range || ''}
                   isInvalid={isInvalidTimeRange}
                   placeholder={TIME_RANGE_TYPE.AUTO}
                   onChange={(e) => onTimeRangeChange(e, index)}

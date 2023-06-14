@@ -27,6 +27,7 @@ export interface BaseFilesClient<M = unknown> {
   find: (
     args: {
       kind?: string | string[];
+      kindToExclude?: string | string[];
       status?: string | string[];
       extension?: string | string[];
       name?: string | string[];

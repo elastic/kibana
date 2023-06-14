@@ -16,13 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { rangeSliderReducers } from '../range_slider_reducers';
-import { RangeSliderReduxState } from '../types';
+import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
 
 import './range_slider.scss';
+import { ControlError } from '../../control_group/component/control_error_component';
 
 const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
 
@@ -30,21 +29,16 @@ export const RangeSliderControl: FC = () => {
   const rangeRef = useRef<EuiDualRangeRef>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  // Controls Services Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setSelectedRange },
-  } = useReduxEmbeddableContext<RangeSliderReduxState, typeof rangeSliderReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const rangeSlider = useRangeSlider();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const min = select((state) => state.componentState.min);
-  const max = select((state) => state.componentState.max);
-  const isInvalid = select((state) => state.componentState.isInvalid);
-  const id = select((state) => state.explicitInput.id);
-  const value = select((state) => state.explicitInput.value) ?? ['', ''];
-  const isLoading = select((state) => state.output.loading);
+  const min = rangeSlider.select((state) => state.componentState.min);
+  const max = rangeSlider.select((state) => state.componentState.max);
+  const error = rangeSlider.select((state) => state.componentState.error);
+  const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
+
+  const id = rangeSlider.select((state) => state.explicitInput.id);
+  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
+  const isLoading = rangeSlider.select((state) => state.output.loading);
 
   const hasAvailableRange = min !== '' && max !== '';
 
@@ -76,12 +70,10 @@ export const RangeSliderControl: FC = () => {
             }`}
             value={hasLowerBoundSelection ? lowerBoundValue : ''}
             onChange={(event) => {
-              dispatch(
-                setSelectedRange([
-                  event.target.value,
-                  isNaN(upperBoundValue) ? '' : String(upperBoundValue),
-                ])
-              );
+              rangeSlider.dispatch.setSelectedRange([
+                event.target.value,
+                isNaN(upperBoundValue) ? '' : String(upperBoundValue),
+              ]);
             }}
             disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMin : ''}`}
@@ -103,12 +95,10 @@ export const RangeSliderControl: FC = () => {
             }`}
             value={hasUpperBoundSelection ? upperBoundValue : ''}
             onChange={(event) => {
-              dispatch(
-                setSelectedRange([
-                  isNaN(lowerBoundValue) ? '' : String(lowerBoundValue),
-                  event.target.value,
-                ])
-              );
+              rangeSlider.dispatch.setSelectedRange([
+                isNaN(lowerBoundValue) ? '' : String(lowerBoundValue),
+                event.target.value,
+              ]);
             }}
             disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMax : ''}`}
@@ -129,7 +119,9 @@ export const RangeSliderControl: FC = () => {
     </button>
   );
 
-  return (
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiInputPopover
       input={button}
       isOpen={isPopoverOpen}

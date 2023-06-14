@@ -9,9 +9,7 @@ import { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
-
-const ASSETS_ENDPOINT = '/api/asset-manager/assets';
-const DIFF_ENDPOINT = ASSETS_ENDPOINT + '/diff';
+import { ASSETS_ENDPOINT } from '../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -179,137 +177,32 @@ export default function ({ getService }: FtrProviderContext) {
         // The order of the expected assets is fixed
         expect(getResponse.body.results).to.eql(targetAssets);
       });
-    });
 
-    describe('GET /assets/diff', () => {
-      it('should reject requests that do not include the two time ranges to compare', async () => {
-        const timestamp = new Date().toISOString();
+      it('should reject requests with negative size parameter', async () => {
+        const getResponse = await supertest.get(ASSETS_ENDPOINT).query({ size: -1 }).expect(400);
 
-        let getResponse = await supertest.get(DIFF_ENDPOINT).expect(400);
         expect(getResponse.body.message).to.equal(
-          '[request query.aFrom]: expected value of type [string] but got [undefined]'
+          '[request query]: Failed to validate: \n  in /size: -1 does not match expected type pipe(ToNumber, InRange)\n  in /size: "-1" does not match expected type pipe(undefined, BooleanFromString)'
         );
-
-        getResponse = await supertest.get(DIFF_ENDPOINT).query({ aFrom: timestamp }).expect(400);
-        expect(getResponse.body.message).to.equal(
-          '[request query.aTo]: expected value of type [string] but got [undefined]'
-        );
-
-        getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({ aFrom: timestamp, aTo: timestamp })
-          .expect(400);
-        expect(getResponse.body.message).to.equal(
-          '[request query.bFrom]: expected value of type [string] but got [undefined]'
-        );
-
-        getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({ aFrom: timestamp, aTo: timestamp, bFrom: timestamp })
-          .expect(400);
-        expect(getResponse.body.message).to.equal(
-          '[request query.bTo]: expected value of type [string] but got [undefined]'
-        );
-
-        await supertest
-          .get(DIFF_ENDPOINT)
-          .query({ aFrom: timestamp, aTo: timestamp, bFrom: timestamp, bTo: timestamp })
-          .expect(200);
       });
 
-      it('should reject requests where either time range is moving backwards in time', async () => {
-        const now = new Date();
-        const isoNow = now.toISOString();
-        const oneHourAgo = new Date(now.getTime() - 1000 * 60 * 60 * 1).toISOString();
+      it('should reject requests with size parameter greater than 100', async () => {
+        const getResponse = await supertest.get(ASSETS_ENDPOINT).query({ size: 101 }).expect(400);
 
-        let getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: isoNow,
-            aTo: oneHourAgo,
-            bFrom: isoNow,
-            bTo: isoNow,
-          })
-          .expect(400);
         expect(getResponse.body.message).to.equal(
-          `Time range cannot move backwards in time. "aTo" (${oneHourAgo}) is before "aFrom" (${isoNow}).`
+          '[request query]: Failed to validate: \n  in /size: 101 does not match expected type pipe(ToNumber, InRange)\n  in /size: "101" does not match expected type pipe(undefined, BooleanFromString)'
         );
-
-        getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: isoNow,
-            aTo: isoNow,
-            bFrom: isoNow,
-            bTo: oneHourAgo,
-          })
-          .expect(400);
-        expect(getResponse.body.message).to.equal(
-          `Time range cannot move backwards in time. "bTo" (${oneHourAgo}) is before "bFrom" (${isoNow}).`
-        );
-
-        await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: oneHourAgo,
-            aTo: isoNow,
-            bFrom: oneHourAgo,
-            bTo: isoNow,
-          })
-          .expect(200);
       });
 
-      it('should return the difference in assets present between two time ranges', async () => {
-        const onlyInA = sampleAssetDocs.slice(0, 2);
-        const onlyInB = sampleAssetDocs.slice(sampleAssetDocs.length - 2);
-        const inBoth = sampleAssetDocs.slice(2, sampleAssetDocs.length - 2);
-        const now = new Date();
-        const oneHourAgo = new Date(now.getTime() - 1000 * 60 * 60 * 1);
-        const twoHoursAgo = new Date(now.getTime() - 1000 * 60 * 60 * 2);
-        await createSampleAssets(supertest, {
-          baseDateTime: twoHoursAgo.toISOString(),
-          excludeEans: inBoth.concat(onlyInB).map((asset) => asset['asset.ean']),
-        });
-        await createSampleAssets(supertest, {
-          baseDateTime: oneHourAgo.toISOString(),
-          excludeEans: onlyInA.concat(onlyInB).map((asset) => asset['asset.ean']),
-        });
-        await createSampleAssets(supertest, {
-          excludeEans: inBoth.concat(onlyInA).map((asset) => asset['asset.ean']),
-        });
-
-        const twoHoursAndTenMinuesAgo = new Date(now.getTime() - 1000 * 60 * 130 * 1);
-        const fiftyMinuesAgo = new Date(now.getTime() - 1000 * 60 * 50 * 1);
-        const seventyMinuesAgo = new Date(now.getTime() - 1000 * 60 * 70 * 1);
-        const tenMinutesAfterNow = new Date(now.getTime() + 1000 * 60 * 10);
-
+      it('should reject requests with invalid from and to parameters', async () => {
         const getResponse = await supertest
-          .get(DIFF_ENDPOINT)
-          .query({
-            aFrom: twoHoursAndTenMinuesAgo,
-            aTo: fiftyMinuesAgo,
-            bFrom: seventyMinuesAgo,
-            bTo: tenMinutesAfterNow,
-          })
-          .expect(200);
+          .get(ASSETS_ENDPOINT)
+          .query({ from: 'now_1p', to: 'now_1p' })
+          .expect(400);
 
-        expect(getResponse.body).to.have.property('onlyInA');
-        expect(getResponse.body).to.have.property('onlyInB');
-        expect(getResponse.body).to.have.property('inBoth');
-
-        getResponse.body.onlyInA.forEach((asset: any) => {
-          delete asset['@timestamp'];
-        });
-        getResponse.body.onlyInB.forEach((asset: any) => {
-          delete asset['@timestamp'];
-        });
-        getResponse.body.inBoth.forEach((asset: any) => {
-          delete asset['@timestamp'];
-        });
-
-        expect(getResponse.body.onlyInA).to.eql(onlyInA);
-        expect(getResponse.body.onlyInB).to.eql(onlyInB);
-        expect(getResponse.body.inBoth).to.eql(inBoth);
+        expect(getResponse.body.message).to.equal(
+          '[request query]: Failed to validate: \n  in /from: "now_1p" does not match expected type Date\n  in /from: "now_1p" does not match expected type datemath\n  in /to: "now_1p" does not match expected type Date\n  in /to: "now_1p" does not match expected type datemath'
+        );
       });
     });
   });

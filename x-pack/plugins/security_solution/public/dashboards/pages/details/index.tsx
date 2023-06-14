@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 
-import { isEmpty, pick } from 'lodash/fp';
+import { pick } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
-import { DashboardRenderer } from '../../../common/components/dashboards/dashboard_renderer';
-import { StatusPropmpt } from '../../components/status_prompt';
+import { DashboardRenderer } from '../../components/dashboard_renderer';
+import { StatusPrompt } from '../../components/status_prompt';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { HeaderPage } from '../../../common/components/header_page';
-import { DASHBOARD_PAGE_TITLE } from '../translations';
+import { DASHBOARD_NOT_FOUND_TITLE } from './translations';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EditDashboardButton } from '../../components/edit_dashboard_button';
 
-type DashboardDetails = Record<string, string | undefined>;
+type DashboardDetails = Record<string, string>;
+
+const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
 const DashboardViewComponent: React.FC = () => {
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
@@ -48,22 +51,24 @@ const DashboardViewComponent: React.FC = () => {
 
   const { show: canReadDashboard, showWriteControls } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
-  const [currentState, setCurrentState] = useState<DashboardViewPromptState | null>(
-    canReadDashboard ? null : DashboardViewPromptState.NoReadPermission
+  const errorState = useMemo(
+    () => (canReadDashboard ? null : DashboardViewPromptState.NoReadPermission),
+    [canReadDashboard]
   );
-  const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails>();
-  const onDashboardContainerLoaded = useCallback((dashboardContainer: DashboardContainer) => {
-    const dashboardTitle = dashboardContainer.getTitle().trim();
-    setDashboardDetails({ dashboardTitle });
-  }, []);
-  const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
-  const dashboardExists = !isEmpty(dashboardDetails?.dashboardTitle);
-
-  useEffect(() => {
-    if (!indicesExist) {
-      setCurrentState(DashboardViewPromptState.IndicesNotFound);
+  const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
+  const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
+    if (dashboard) {
+      const title = dashboard.getTitle().trim();
+      if (title) {
+        setDashboardDetails({ title });
+      } else {
+        setDashboardDetails({ title: DASHBOARD_NOT_FOUND_TITLE });
+      }
     }
-  }, [indicesExist]);
+  }, []);
+
+  const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
+  const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
 
   return (
     <>
@@ -73,31 +78,47 @@ const DashboardViewComponent: React.FC = () => {
         </FiltersGlobal>
       )}
       <SecuritySolutionPageWrapper>
-        <HeaderPage border title={DASHBOARD_PAGE_TITLE}>
-          {showWriteControls && dashboardExists && (
-            <EditDashboardButton
-              filters={filters}
-              query={query}
-              savedObjectId={savedObjectId}
-              timeRange={timeRange}
-            />
+        <EuiFlexGroup
+          direction="column"
+          style={dashboardViewFlexGroupStyle}
+          gutterSize="none"
+          data-test-subj="dashboard-view-wrapper"
+        >
+          <EuiFlexItem grow={false}>
+            <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
+              {showWriteControls && dashboardExists && (
+                <EditDashboardButton
+                  filters={filters}
+                  query={query}
+                  savedObjectId={savedObjectId}
+                  timeRange={timeRange}
+                />
+              )}
+            </HeaderPage>
+          </EuiFlexItem>
+          {!errorState && (
+            <EuiFlexItem grow>
+              <DashboardRenderer
+                query={query}
+                filters={filters}
+                canReadDashboard={canReadDashboard}
+                id={`dashboard-view-${savedObjectId}`}
+                onDashboardContainerLoaded={onDashboardContainerLoaded}
+                savedObjectId={savedObjectId}
+                timeRange={timeRange}
+              />
+            </EuiFlexItem>
           )}
-        </HeaderPage>
-
-        {indicesExist && (
-          <DashboardRenderer
-            query={query}
-            filters={filters}
-            canReadDashboard={canReadDashboard}
-            id={`dashboard-view-${savedObjectId}`}
-            onDashboardContainerLoaded={onDashboardContainerLoaded}
-            savedObjectId={savedObjectId}
-            timeRange={timeRange}
+          {errorState && (
+            <EuiFlexItem data-test-subj="dashboard-view-error-prompt-wrapper" grow>
+              <StatusPrompt currentState={errorState} />
+            </EuiFlexItem>
+          )}
+          <SpyRoute
+            pageName={SecurityPageName.dashboards}
+            state={{ dashboardName: dashboardDetails?.title }}
           />
-        )}
-
-        <StatusPropmpt currentState={currentState} />
-        <SpyRoute pageName={SecurityPageName.dashboards} state={dashboardDetails} />
+        </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
     </>
   );

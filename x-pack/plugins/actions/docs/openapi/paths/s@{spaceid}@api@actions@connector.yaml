@@ -18,7 +18,7 @@ post:
           oneOf:
             - $ref: '../components/schemas/create_connector_request_cases_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_email.yaml'
-            - $ref: '../components/schemas/create_connector_request_index.yaml'  
+            - $ref: '../components/schemas/create_connector_request_index.yaml'
             - $ref: '../components/schemas/create_connector_request_jira.yaml'
             - $ref: '../components/schemas/create_connector_request_opsgenie.yaml'
             - $ref: '../components/schemas/create_connector_request_pagerduty.yaml'
@@ -27,7 +27,8 @@ post:
             - $ref: '../components/schemas/create_connector_request_servicenow.yaml'
             - $ref: '../components/schemas/create_connector_request_servicenow_itom.yaml'
             - $ref: '../components/schemas/create_connector_request_servicenow_sir.yaml'
-            - $ref: '../components/schemas/create_connector_request_slack.yaml'
+            - $ref: '../components/schemas/create_connector_request_slack_api.yaml'
+            - $ref: '../components/schemas/create_connector_request_slack_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_swimlane.yaml'
             - $ref: '../components/schemas/create_connector_request_teams.yaml'
             - $ref: '../components/schemas/create_connector_request_tines.yaml'

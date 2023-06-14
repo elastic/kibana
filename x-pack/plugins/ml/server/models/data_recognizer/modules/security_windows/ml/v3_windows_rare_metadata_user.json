@@ -1,46 +1,29 @@
 {
   "description": "Security: Windows - Looks for anomalous access to the metadata service by an unusual user. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
-  "groups": [
-    "endpoint",
-    "process",
-    "security",
-    "sysmon",
-    "windows",
-    "winlogbeat"
-  ],
+  "groups": ["security", "windows"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare user.name values.",
+        "detector_description": "Detects rare usernames.",
         "function": "rare",
         "by_field_name": "user.name",
         "detector_index": 0
       }
     ],
-    "influencers": [
-      "host.name",
-      "user.name"
-    ]
+    "influencers": ["host.name", "user.name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
-    "model_memory_limit": "32mb",
-    "categorization_examples_limit": 4
+    "model_memory_limit": "32mb"
   },
   "data_description": {
-    "time_field": "@timestamp",
-    "time_format": "epoch_ms"
+    "time_field": "@timestamp"
   },
   "custom_settings": {
-    "job_tags": {
-      "euid": "8012",
-      "maturity": "release",
-      "author": "@randomuserid/Elastic",
-      "version": "3",
-      "updated_date": "5/16/2022"
-    },
     "created_by": "ml-module-security-windows-v3",
-    "security_app_display_name": "Unusual Windows User Calling the Metadata Service"
+    "security_app_display_name": "Unusual Windows User Calling the Metadata Service",
+    "managed": true,
+    "job_revision": 4
   }
 }

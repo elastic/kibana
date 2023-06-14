@@ -51,14 +51,11 @@ async function updateWithOCC(
   const { id, title, enabled, duration, rRule } = params;
 
   try {
-    const {
-      attributes,
-      version,
-      id: fetchedId,
-    } = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
-      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      id
-    );
+    const { attributes, id: fetchedId } =
+      await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
+        MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        id
+      );
 
     if (moment.utc(attributes.expirationDate).isBefore(new Date())) {
       throw Boom.badRequest('Cannot edit archived maintenance windows');
@@ -77,29 +74,33 @@ async function updateWithOCC(
       events = mergeEvents({ oldEvents: attributes.events, newEvents: events });
     }
 
-    const result = await savedObjectsClient.update<MaintenanceWindowSOAttributes>(
+    await savedObjectsClient.delete(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE, fetchedId);
+
+    const updatedAttributes = {
+      ...attributes,
+      ...(title ? { title } : {}),
+      ...(rRule ? { rRule } : {}),
+      ...(typeof duration === 'number' ? { duration } : {}),
+      ...(typeof enabled === 'boolean' ? { enabled } : {}),
+      expirationDate,
+      events,
+      updatedBy: modificationMetadata.updatedBy,
+      updatedAt: modificationMetadata.updatedAt,
+    };
+
+    // We are deleting and then creating rather than updating because SO.update
+    // performs a partial update on the rRule, we would need to null out all of the fields
+    // that are removed from a new rRule if that were the case.
+    const result = await savedObjectsClient.create<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      fetchedId,
+      updatedAttributes,
       {
-        ...attributes,
-        title,
-        enabled: typeof enabled === 'boolean' ? enabled : attributes.enabled,
-        expirationDate,
-        duration,
-        rRule,
-        events,
-        ...modificationMetadata,
-      },
-      {
-        version,
+        id: fetchedId,
       }
     );
 
     return getMaintenanceWindowFromRaw({
-      attributes: {
-        ...attributes,
-        ...result.attributes,
-      },
+      attributes: result.attributes,
       id: result.id,
     });
   } catch (e) {

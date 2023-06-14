@@ -12,8 +12,9 @@ import { jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callGetMlModuleAPI = async (moduleId: string, fetch: HttpHandler) => {
-  const response = await fetch(`/api/ml/modules/get_module/${moduleId}`, {
+  const response = await fetch(`/internal/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
+    version: '1',
   });
 
   return decodeOrThrow(getMlModuleResponsePayloadRT)(response);

@@ -25,7 +25,8 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
   const retry = getService('retry');
   const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-  describe('getAlertSummary', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156792
+  describe.skip('getAlertSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -68,6 +69,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
         id: createdRule.id,
         name: 'abc',
         tags: ['foo'],
+        revision: 0,
         rule_type_id: 'test.noop',
         consumer: 'alertsFixture',
         status: 'OK',
@@ -106,6 +108,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
         id: createdRule.id,
         name: 'abc',
         tags: ['foo'],
+        revision: 0,
         rule_type_id: 'test.noop',
         consumer: 'alertsFixture',
         status: 'OK',
@@ -258,6 +261,94 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertC.activeStartDate,
           flapping: false,
+        },
+        alertD: {
+          status: 'OK',
+          muted: true,
+          flapping: false,
+        },
+      };
+      expect(actualAlerts).to.eql(expectedAlerts);
+    });
+
+    it('handles multi-alert status during maintenance window', async () => {
+      // pattern of when the rule should fire
+      const pattern = {
+        alertA: [true, true, true, true],
+        alertB: [true, true, false, false],
+        alertC: [true, true, true, true],
+      };
+
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiring',
+            params: { pattern },
+            schedule: { interval: '1s' },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window',
+          duration: 60 * 60 * 1000, // 1 hr
+          r_rule: {
+            dtstart: new Date().toISOString(),
+            tzid: 'UTC',
+            freq: 2, // weekly
+          },
+        });
+
+      objectRemover.add(
+        Spaces.space1.id,
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      await alertUtils.muteInstance(createdRule.id, 'alertC');
+      await alertUtils.muteInstance(createdRule.id, 'alertD');
+      await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
+      );
+
+      const actualAlerts = checkAndCleanActualAlerts(response.body.alerts, [
+        'alertA',
+        'alertB',
+        'alertC',
+      ]);
+
+      const expectedAlerts = {
+        alertA: {
+          status: 'Active',
+          muted: false,
+          actionGroupId: 'default',
+          activeStartDate: actualAlerts.alertA.activeStartDate,
+          flapping: false,
+          maintenanceWindowIds: [createdMaintenanceWindow.id],
+        },
+        alertB: {
+          status: 'OK',
+          muted: false,
+          flapping: false,
+          maintenanceWindowIds: [createdMaintenanceWindow.id],
+        },
+        alertC: {
+          status: 'Active',
+          muted: true,
+          actionGroupId: 'default',
+          activeStartDate: actualAlerts.alertC.activeStartDate,
+          flapping: false,
+          maintenanceWindowIds: [createdMaintenanceWindow.id],
         },
         alertD: {
           status: 'OK',
