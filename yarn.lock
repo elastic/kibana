@@ -3180,7 +3180,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-table-list@link:packages/content-management/table_list":
+"@kbn/content-management-tabbed-table-list-view@link:packages/content-management/tabbed_table_list_view":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-table-list-view-table@link:packages/content-management/table_list_view_table":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-table-list-view@link:packages/content-management/table_list_view":
   version "0.0.0"
   uid ""
 
@@ -4053,6 +4061,46 @@
   uid ""
 
 "@kbn/datemath@link:packages/kbn-datemath":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-analytics@link:packages/deeplinks/analytics":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-devtools@link:packages/deeplinks/devtools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-management@link:packages/deeplinks/management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-ml@link:packages/deeplinks/ml":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-observability@link:packages/deeplinks/observability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-search@link:packages/deeplinks/search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/default-nav-analytics@link:packages/default-nav/analytics":
+  version "0.0.0"
+  uid ""
+
+"@kbn/default-nav-devtools@link:packages/default-nav/devtools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/default-nav-management@link:packages/default-nav/management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/default-nav-ml@link:packages/default-nav/ml":
   version "0.0.0"
   uid ""
 
