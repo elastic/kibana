@@ -9,13 +9,13 @@ import type { Ecs } from '@kbn/cases-plugin/common';
 import type { ActionEdges } from '../../../common/search_strategy';
 
 export interface OsqueryActionResultsProps {
-  ruleName?: string[];
+  ruleName?: string;
   ecsData?: Ecs | null;
   actionItems?: ActionEdges;
 }
 
 export interface OsqueryActionResultProps {
-  ruleName?: string[];
+  ruleName?: string;
   ecsData?: Ecs | null;
   actionId: string;
   startDate: string;
