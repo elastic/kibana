@@ -65,7 +65,7 @@ export const ALL = i18n.translate('xpack.synthetics.monitorManagement.priviledge
 export const NEED_PRIVATE_LOCATIONS_PERMISSION = (
   <FormattedMessage
     id="xpack.synthetics.monitorManagement.privateLocations.needFleetPermission"
-    defaultMessage="In order to create private location, you need an agent policy. You are not authorized to create fleet agent policies. It requires the {all} Kibana privilege for Fleet."
+    defaultMessage="In order to create private locations, you need an agent policy. You are not authorized to create Fleet agent policies. It requires the {all} Kibana privilege for Fleet."
     values={{
       all: <EuiCode>{`"${ALL}"`}</EuiCode>,
     }}
