@@ -14,6 +14,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { riskScoreService } from '../risk_score_service';
 import { getRiskInputsIndex } from '../helpers';
+import { DATAVIEW_NOT_FOUND } from './translations';
 
 export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
@@ -46,14 +47,23 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
       } = request.body;
 
       try {
-        const index =
-          (dataViewId &&
-            (await getRiskInputsIndex({
-              dataViewId,
-              logger,
-              soClient,
-            }))) ??
-          siemClient.getAlertsIndex();
+        let index: string;
+        if (dataViewId) {
+          const dataViewIndex = await getRiskInputsIndex({
+            dataViewId,
+            logger,
+            soClient,
+          });
+
+          if (!dataViewIndex) {
+            return siemResponse.error({
+              statusCode: 404,
+              body: DATAVIEW_NOT_FOUND(dataViewId),
+            });
+          }
+          index = dataViewIndex;
+        }
+        index ??= siemClient.getAlertsIndex();
 
         const afterKeys = userAfterKeys ?? {};
         const range = userRange ?? { start: 'now-15d', end: 'now' };

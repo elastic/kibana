@@ -78,15 +78,16 @@ describe('POST risk_engine/preview route', () => {
         );
       });
 
-      it('defaults to the alerts index if dataview is not found', async () => {
+      it('returns a 404 if dataview is not found', async () => {
         const request = buildRequest({ data_view_id: 'custom-dataview-id' });
 
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
-        expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
-          expect.objectContaining({ index: 'default-alerts-index' })
+        expect(response.status).toEqual(404);
+        expect(response.body.message).toEqual(
+          'The specified dataview (custom-dataview-id) was not found. Please use an existing dataview, or omit the parameter to use the default risk inputs.'
         );
+        expect(mockRiskScoreService.getScores).not.toHaveBeenCalled();
       });
     });
 
