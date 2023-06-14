@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent, EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import {
-  EuiContextMenu,
-  EuiContextMenuPanel,
-  EuiSwitch,
-  EuiTextColor,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   UtilityBar,
@@ -25,10 +18,11 @@ import {
 } from '../../../../common/components/utility_bar';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 import type { PaginationOptions } from '../../../rule_management/logic/types';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { AutoRefreshButton } from '../auto_refresh_button/auto_refresh_button';
 
 export const getShowingRulesParams = ({ page, perPage, total: totalRules }: PaginationOptions) => {
   const firstInPage = totalRules === 0 ? 0 : (page - 1) * perPage + 1;
@@ -37,7 +31,7 @@ export const getShowingRulesParams = ({ page, perPage, total: totalRules }: Pagi
   return [firstInPage, lastInPage, totalRules] as const;
 };
 
-interface RulesTableUtilityBarProps {
+export interface RulesTableUtilityBarProps {
   canBulkEdit: boolean;
   onGetBulkItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
   onToggleSelectAll: () => void;
@@ -75,50 +69,6 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
         }
       },
       [onGetBulkItemsPopoverContent]
-    );
-
-    const handleAutoRefreshSwitch = useCallback(
-      (closePopover: () => void) => (e: EuiSwitchEvent) => {
-        const refreshOn = e.target.checked;
-        if (refreshOn) {
-          reFetchRules();
-        }
-        setIsRefreshOn(refreshOn);
-        closePopover();
-      },
-      [reFetchRules, setIsRefreshOn]
-    );
-
-    const handleGetRefreshSettingsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel
-          items={[
-            <EuiSwitch
-              key="allRulesAutoRefreshSwitch"
-              label={i18n.REFRESH_RULE_POPOVER_DESCRIPTION}
-              checked={isRefreshOn ?? false}
-              onChange={handleAutoRefreshSwitch(closePopover)}
-              compressed
-              disabled={isAnyRuleSelected}
-              data-test-subj="refreshSettingsSwitch"
-            />,
-            ...(isAnyRuleSelected
-              ? [
-                  <div key="refreshSettingsSelectionNote">
-                    <EuiSpacer size="s" />
-                    <EuiTextColor color="subdued" data-test-subj="refreshSettingsSelectionNote">
-                      <FormattedMessage
-                        id="xpack.securitySolution.detectionEngine.rules.refreshRulePopoverSelectionHelpText"
-                        defaultMessage="Note: Refresh is disabled while there is an active selection."
-                      />
-                    </EuiTextColor>
-                  </div>,
-                ]
-              : []),
-          ]}
-        />
-      ),
-      [isRefreshOn, handleAutoRefreshSwitch, isAnyRuleSelected]
     );
 
     return (
@@ -170,15 +120,6 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
               >
                 {i18n.REFRESH}
               </UtilityBarAction>
-              <UtilityBarAction
-                disabled={hasDisabledActions}
-                dataTestSubj="refreshSettings"
-                iconSide="right"
-                iconType="arrowDown"
-                popoverContent={handleGetRefreshSettingsPopoverContent}
-              >
-                {i18n.REFRESH_RULE_POPOVER_LABEL}
-              </UtilityBarAction>
               {!rulesTableContext.state.isDefault && (
                 <UtilityBarAction
                   dataTestSubj="clearTableFilters"
@@ -197,6 +138,12 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
             showUpdating: rulesTableContext.state.isFetching,
             updatedAt: rulesTableContext.state.lastUpdated,
           })}
+          <AutoRefreshButton
+            isDisabled={hasDisabledActions || isAnyRuleSelected}
+            isRefreshOn={isRefreshOn}
+            reFetchRules={reFetchRules}
+            setIsRefreshOn={setIsRefreshOn}
+          />
         </UtilityBarSection>
       </UtilityBar>
     );

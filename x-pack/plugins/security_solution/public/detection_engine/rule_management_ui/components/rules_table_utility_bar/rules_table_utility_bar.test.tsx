@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
 
 import { getShowingRulesParams, RulesTableUtilityBar } from './rules_table_utility_bar';
 import { TestProviders } from '../../../../common/mock';
-import { useRulesTableContextMock } from './rules_table/__mocks__/rules_table_context';
-import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useRulesTableContextMock } from '../rules_table/rules_table/__mocks__/rules_table_context';
+import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 
-jest.mock('./rules_table/rules_table_context');
+jest.mock('../rules_table/rules_table/rules_table_context');
 
 describe('RulesTableUtilityBar', () => {
   it('renders RulesTableUtilityBar total rules and selected rules', () => {
@@ -90,51 +89,6 @@ describe('RulesTableUtilityBar', () => {
     wrapper.find('[data-test-subj="refreshRulesAction"] button').at(0).simulate('click');
 
     expect(rulesTableContext.actions.reFetchRules).toHaveBeenCalledTimes(1);
-  });
-
-  it('invokes rule refetch when auto refresh switch is clicked if there are not selected items', async () => {
-    const rulesTableContext = useRulesTableContextMock.create();
-    rulesTableContext.state.isRefreshOn = false;
-    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
-
-    const wrapper = mount(
-      <TestProviders>
-        <RulesTableUtilityBar
-          canBulkEdit
-          onGetBulkItemsPopoverContent={jest.fn()}
-          onToggleSelectAll={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="refreshSettingsSwitch"] button').first().simulate('click');
-      expect(rulesTableContext.actions.reFetchRules).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('does not invokes onRefreshSwitch when auto refresh switch is clicked if there are selected items', async () => {
-    const rulesTableContext = useRulesTableContextMock.create();
-    rulesTableContext.state.isRefreshOn = false;
-    rulesTableContext.state.selectedRuleIds = ['testId'];
-    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
-
-    const wrapper = mount(
-      <TestProviders>
-        <RulesTableUtilityBar
-          canBulkEdit
-          onGetBulkItemsPopoverContent={jest.fn()}
-          onToggleSelectAll={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="refreshSettingsSwitch"] button').first().simulate('click');
-      expect(rulesTableContext.actions.reFetchRules).not.toHaveBeenCalled();
-    });
   });
 
   describe('getShowingRulesParams creates correct label when', () => {

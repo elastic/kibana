@@ -7,21 +7,21 @@
 import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getPrePackagedRulesStatus } from '../api';
-import { DEFAULT_QUERY_OPTIONS } from './constants';
-import type { PrePackagedRulesStatusResponse } from '../../logic';
-import { PREBUILT_RULES_STATUS_URL } from '../../../../../common/detection_engine/prebuilt_rules/api/urls';
+import type { PrebuiltRulesStatusStats } from '../../../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
+import { getPrebuiltRulesStatus } from '../../api';
+import { DEFAULT_QUERY_OPTIONS } from '../constants';
+import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/detection_engine/prebuilt_rules/api/urls';
 
-export const PREBUILT_RULES_STATUS_QUERY_KEY = ['GET', PREBUILT_RULES_STATUS_URL];
+export const PREBUILT_RULES_STATUS_QUERY_KEY = ['GET', GET_PREBUILT_RULES_STATUS_URL];
 
 export const useFetchPrebuiltRulesStatusQuery = (
-  options?: UseQueryOptions<PrePackagedRulesStatusResponse>
+  options?: UseQueryOptions<PrebuiltRulesStatusStats>
 ) => {
-  return useQuery<PrePackagedRulesStatusResponse>(
+  return useQuery<PrebuiltRulesStatusStats>(
     PREBUILT_RULES_STATUS_QUERY_KEY,
     async ({ signal }) => {
-      const response = await getPrePackagedRulesStatus({ signal });
-      return response;
+      const response = await getPrebuiltRulesStatus({ signal });
+      return response.stats;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
@@ -32,8 +32,8 @@ export const useFetchPrebuiltRulesStatusQuery = (
 
 /**
  * We should use this hook to invalidate the prepackaged rules cache. For
- * example, rule mutations that affect rule set size, like creation or deletion,
- * should lead to cache invalidation.
+ * example, rule mutations that affect rule set size, like creation, deletion,
+ * or installing and updating (which affect the stats) should lead to cache invalidation.
  *
  * @returns A rules cache invalidation callback
  */
