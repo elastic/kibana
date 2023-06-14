@@ -54,7 +54,7 @@ const getConfigFormSchemaAfterSecrets = (
     helpText: (
       <FormattedMessage
         id="xpack.stackConnectors.components.slack_api.allowedChannelsText"
-        defaultMessage="It will only fetch channels with a valid Slack Web API token. If it is empty, we will allow all channels."
+        defaultMessage="By default, the connector can access all channels within the scope of the Slack app."
       />
     ),
     type: 'COMBO_BOX',
