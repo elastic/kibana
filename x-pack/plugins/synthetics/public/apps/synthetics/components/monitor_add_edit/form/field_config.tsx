@@ -75,6 +75,7 @@ import {
   FormLocation,
   ResponseBodyIndexPolicy,
   ResponseCheckJSON,
+  RequestBodyCheck,
   ThrottlingConfig,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
@@ -718,12 +719,17 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: (headers) => !validateHeaders(headers),
     }),
+    dependencies: [ConfigKey.REQUEST_BODY_CHECK],
     error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: (): HeaderFieldProps => ({
-      readOnly,
-    }),
+    props: ({ dependencies }): HeaderFieldProps => {
+      const [requestBody] = dependencies;
+      return {
+        readOnly,
+        contentMode: (requestBody as RequestBodyCheck).type,
+      };
+    },
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
     fieldKey: ConfigKey.REQUEST_BODY_CHECK,
