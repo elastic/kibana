@@ -250,6 +250,28 @@ For example, the date format `"YYYY-MM-DD hh:mma"` will render in the following 
 The date value itself should usually be referenced with triple braces since some characters in date strings may contain values that are escaped, which would prevent them from being parsed as dates.
 
 [discrete]
+===== FormatNumber
+
+The FormatNumber lambda provides number formatting capabilities using the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat[`Intl.NumberFormat` object].
+
+Numbers can be formatted with any supported locales and `Intl.NumberFormat` options.
+
+To use it, surround the date and formatting parameters with `{{#FormatNumber}}...{{/FormatNumber}}`.
+
+The format of the text passed to the lambda is: `<number>; <locales>; <options>`, where semicolons (`;`) separate each parameter.
+The `<number>` parameter is required; the `<locales>` and `<options>` parameters are optional, but the semicolons must be provided - the values may be empty strings.
+The `<locales>` parameter is a list of locales, separated by commas (`,`).
+The `<options>` parameter is a list of key value pairs, separated by commas (`,`).  The key value pairs are strings separated by colons (`:`) where the key is the name of the option and the value is the value of the option.
+The default locale is `en-US` and the default options are `{}`.
+
+[source]
+----
+    {{#FormatNumber}} {{{numberProperty}}};; {{/FormatNumber}}
+    {{#FormatNumber}} {{{numberProperty}}} ; en-US ; {{/FormatNumber}}
+    {{#FormatNumber}} {{{numberProperty}}} ; de-DE ; style: currency, currency: EUR  {{/FormatNumber}}
+----
+
+[discrete]
 [[mustache-examples]]
 === Mustache examples
 
