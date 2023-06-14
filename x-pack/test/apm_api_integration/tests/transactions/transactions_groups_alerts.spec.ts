@@ -164,18 +164,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 
-        ['GET /api/failed/request', 'GET /api/request/p95', 'GET /api/request/p99'].map(
-          (txName) => {
-            expect(
-              txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName)
-            ).to.not.have.property('alertsCount');
-          }
-        );
+        const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
+          name,
+          alertsCount,
+        }));
 
-        ['GET /api/request/avg'].map((txName) => {
-          const tx = txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName);
-          expect(tx).to.have.property('alertsCount', 1);
-        });
+        expect(expected).to.eql([
+          { name: 'GET /api/failed/request', alertsCount: 0 },
+          { name: 'GET /api/request/p95', alertsCount: 0 },
+          { name: 'GET /api/request/p99', alertsCount: 0 },
+          { name: 'GET /api/request/avg', alertsCount: 1 },
+        ]);
       });
     });
 
@@ -214,18 +213,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 
-        ['GET /api/failed/request', 'GET /api/request/p95', 'GET /api/request/avg'].map(
-          (txName) => {
-            expect(
-              txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName)
-            ).to.not.have.property('alertsCount');
-          }
-        );
+        const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
+          name,
+          alertsCount,
+        }));
 
-        ['GET /api/request/p99'].map((txName) => {
-          const tx = txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName);
-          expect(tx).to.have.property('alertsCount', 1);
-        });
+        expect(expected).to.eql([
+          { name: 'GET /api/failed/request', alertsCount: 0 },
+          { name: 'GET /api/request/avg', alertsCount: 0 },
+          { name: 'GET /api/request/p95', alertsCount: 0 },
+          { name: 'GET /api/request/p99', alertsCount: 1 },
+        ]);
       });
     });
 
@@ -261,16 +259,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           query: { transactionType: 'request', latencyAggregationType: LatencyAggregationType.p95 },
         });
 
-        ['GET /api/request/avg', 'GET /api/request/p95', 'GET /api/request/p99'].map((txName) => {
-          expect(
-            txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName)
-          ).to.not.have.property('alertsCount');
+        const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
+          name,
+          alertsCount,
+        }));
+
+        expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
+
+        expect(expected).to.eql([
+          { name: 'GET /api/request/avg', alertsCount: 0 },
+          { name: 'GET /api/request/p95', alertsCount: 0 },
+          { name: 'GET /api/request/p99', alertsCount: 0 },
+          { name: 'GET /api/failed/request', alertsCount: 1 },
+        ]);
+      });
+    });
+
+    describe('Transaction groups without alerts', () => {
+      it('returns the correct number of alert counts', async () => {
+        const txGroupsTypeTask = await getTransactionGroups({
+          query: { transactionType: 'task' },
         });
 
-        ['GET /api/failed/request'].map((txName) => {
-          const tx = txGroupsTypeRequest.transactionGroups.find(({ name }) => name === txName);
-          expect(tx).to.have.property('alertsCount', 1);
-        });
+        const expected = txGroupsTypeTask.transactionGroups.map(({ name, alertsCount }) => ({
+          name,
+          alertsCount,
+        }));
+
+        expect(txGroupsTypeTask.hasActiveAlerts).to.be.equal(false);
+
+        expect(expected).to.eql([{ name: 'GET /api/task/avg', alertsCount: 0 }]);
       });
     });
 
