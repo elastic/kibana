@@ -14,7 +14,7 @@ import { CorrelationsDetails } from './correlations_details';
 import { type CasesByAlertId, CaseStatuses } from '@kbn/cases-plugin/common/api';
 import type { SelectedDataView } from '../../../common/store/sourcerer/model';
 import { TestProviders } from '../../../common/mock';
-import { LeftFlyoutContext, type LeftPanelContext } from '../context';
+import { LeftPanelContext } from '../context';
 
 jest.mock('../../../timelines/containers/details');
 jest.mock('../../../common/containers/sourcerer');
@@ -48,18 +48,20 @@ const mockUseCorrelationsResult: UseCorrelationsResult = {
 const contextValue: LeftPanelContext = {
   indexName: 'index',
   eventId: 'event',
-  getFieldsData: () => {},
+  getFieldsData: () => null,
   dataFormattedForFieldBrowser: [],
-  data: undefined,
   dataAsNestedObject: null,
+  scopeId: '',
+  browserFields: null,
+  searchHit: undefined,
 };
 
 const renderCorrelationDetails = () => {
   return render(
     <TestProviders>
-      <LeftFlyoutContext.Provider value={contextValue}>
+      <LeftPanelContext.Provider value={contextValue}>
         <CorrelationsDetails />
-      </LeftFlyoutContext.Provider>
+      </LeftPanelContext.Provider>
     </TestProviders>
   );
 };

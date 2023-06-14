@@ -48,9 +48,7 @@ export const CORRELATIONS_TAB_ID = 'correlations-details';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { indexName, eventId } = useLeftPanelContext();
-
-  const scopeId = 'flyout'; // TODO: update to use context
+  const { indexName, eventId, scopeId } = useLeftPanelContext();
 
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
