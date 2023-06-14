@@ -11,6 +11,7 @@ import {
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
+  getSLOBurnRatesParamsSchema,
   getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
@@ -41,6 +42,7 @@ import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
+import { getBurnRates } from '../../services/slo/get_burn_rates';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -303,6 +305,29 @@ const getSloDiagnosisRoute = createObservabilityServerRoute({
   },
 });
 
+const getSloBurnRates = createObservabilityServerRoute({
+  endpoint: 'POST /internal/observability/slos/{id}/_burn_rates 2023-06-14',
+  options: {
+    tags: [],
+  },
+  params: getSLOBurnRatesParamsSchema,
+  handler: async ({ context, params }) => {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+    const burnRates = await getBurnRates(params.path.id, params.body.windows, {
+      soClient,
+      esClient,
+    });
+    return { burnRates };
+  },
+});
+
 export const sloRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
@@ -314,4 +339,5 @@ export const sloRouteRepository = {
   ...updateSLORoute,
   ...getDiagnosisRoute,
   ...getSloDiagnosisRoute,
+  ...getSloBurnRates,
 };

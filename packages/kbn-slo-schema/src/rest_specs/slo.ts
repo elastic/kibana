@@ -135,6 +135,31 @@ const getSLODiagnosisParamsSchema = t.type({
   path: t.type({ id: t.string }),
 });
 
+const getSLOBurnRatesResponseSchema = t.type({
+  burnRates: t.array(
+    t.type({
+      name: t.string,
+      burnRate: t.number,
+      sli: t.number,
+    })
+  ),
+});
+
+const getSLOBurnRatesParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+  body: t.type({
+    windows: t.array(
+      t.type({
+        name: t.string,
+        duration: t.type({
+          value: t.number,
+          unit: t.string,
+        }),
+      })
+    ),
+  }),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -165,6 +190,7 @@ type APMTransactionErrorRateIndicatorSchema = t.TypeOf<
   typeof apmTransactionErrorRateIndicatorSchema
 >;
 type APMTransactionDurationIndicatorSchema = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
+type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 
 export {
   createSLOParamsSchema,
@@ -181,6 +207,8 @@ export {
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
   updateSLOResponseSchema,
+  getSLOBurnRatesParamsSchema,
+  getSLOBurnRatesResponseSchema,
 };
 export type {
   BudgetingMethod,
@@ -203,4 +231,5 @@ export type {
   KQLCustomIndicatorSchema,
   APMTransactionDurationIndicatorSchema,
   APMTransactionErrorRateIndicatorSchema,
+  GetSLOBurnRatesResponse,
 };
