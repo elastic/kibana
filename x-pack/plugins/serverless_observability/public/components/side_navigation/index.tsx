@@ -15,7 +15,6 @@ import {
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ml } from './ml';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -103,7 +102,7 @@ const navigationTree: NavigationTreeDefinition = {
     },
     {
       type: 'navGroup',
-      ...ml,
+      ...getPresets('ml'),
     },
   ],
   footer: [

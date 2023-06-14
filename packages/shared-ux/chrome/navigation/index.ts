@@ -14,7 +14,6 @@ export type {
   GroupDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  NodeDefinitionWithChildren,
   ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,

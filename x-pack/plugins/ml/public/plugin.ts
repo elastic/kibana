@@ -52,6 +52,7 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import { MlCapabilities } from './shared';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -198,7 +199,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }
 
       if (mlEnabled) {
-        registerSearchLinks(this.appUpdater$, fullLicense);
+        registerSearchLinks(this.appUpdater$, fullLicense, capabilities.ml as MlCapabilities);
 
         if (fullLicense) {
           registerEmbeddables(pluginsSetup.embeddable, core);

@@ -8,203 +8,285 @@
 import { i18n } from '@kbn/i18n';
 import type { LinkId } from '@kbn/deeplinks-ml';
 
-import type { AppDeepLink } from '@kbn/core/public';
+import { AppDeepLink, AppNavLinkStatus } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
+import { MlCapabilities } from '../../shared';
 
-const OVERVIEW_LINK_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'overview',
-  title: i18n.translate('xpack.ml.deepLink.overview', {
-    defaultMessage: 'Overview',
-  }),
-  path: `/${ML_PAGES.OVERVIEW}`,
-};
+function getOverviewLinkDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'overview',
+    title: i18n.translate('xpack.ml.deepLink.overview', {
+      defaultMessage: 'Overview',
+    }),
+    path: `/${ML_PAGES.OVERVIEW}`,
+    navLinkStatus:
+      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
+  };
+}
 
-const ANOMALY_DETECTION_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'anomalyDetection',
-  title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
-    defaultMessage: 'Anomaly Detection',
-  }),
-  path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
-  deepLinks: [
-    {
-      id: 'anomalyExplorer',
-      title: i18n.translate('xpack.ml.deepLink.anomalyExplorer', {
-        defaultMessage: 'Anomaly explorer',
-      }),
-      path: `/${ML_PAGES.ANOMALY_EXPLORER}`,
-    },
-    {
-      id: 'singleMetricViewer',
-      title: i18n.translate('xpack.ml.deepLink.singleMetricViewer', {
-        defaultMessage: 'Single metric viewer',
-      }),
-      path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
-    },
-  ],
-};
+function getAnomalyDetectionDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'anomalyDetection',
+    title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
+      defaultMessage: 'Anomaly Detection',
+    }),
+    path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
+    navLinkStatus: mlCapabilities.isADEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    deepLinks: [
+      {
+        id: 'anomalyExplorer',
+        title: i18n.translate('xpack.ml.deepLink.anomalyExplorer', {
+          defaultMessage: 'Anomaly explorer',
+        }),
+        path: `/${ML_PAGES.ANOMALY_EXPLORER}`,
+        navLinkStatus: mlCapabilities.isADEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+      {
+        id: 'singleMetricViewer',
+        title: i18n.translate('xpack.ml.deepLink.singleMetricViewer', {
+          defaultMessage: 'Single metric viewer',
+        }),
+        path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
+        navLinkStatus: mlCapabilities.isADEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+    ],
+  };
+}
 
-const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'dataFrameAnalytics',
-  title: i18n.translate('xpack.ml.deepLink.dataFrameAnalytics', {
-    defaultMessage: 'Data Frame Analytics',
-  }),
-  path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
-  deepLinks: [
-    {
-      id: 'resultExplorer',
-      title: i18n.translate('xpack.ml.deepLink.resultExplorer', {
-        defaultMessage: 'Results explorer',
-      }),
-      path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`,
-    },
-    {
-      id: 'analyticsMap',
-      title: i18n.translate('xpack.ml.deepLink.analyticsMap', {
-        defaultMessage: 'Analytics map',
-      }),
-      path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`,
-    },
-  ],
-};
+function getDataFrameAnalyticsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'dataFrameAnalytics',
+    title: i18n.translate('xpack.ml.deepLink.dataFrameAnalytics', {
+      defaultMessage: 'Data Frame Analytics',
+    }),
+    path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
+    navLinkStatus: mlCapabilities.isDFAEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    deepLinks: [
+      {
+        id: 'resultExplorer',
+        title: i18n.translate('xpack.ml.deepLink.resultExplorer', {
+          defaultMessage: 'Results explorer',
+        }),
+        path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`,
+        navLinkStatus: mlCapabilities.isDFAEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+      {
+        id: 'analyticsMap',
+        title: i18n.translate('xpack.ml.deepLink.analyticsMap', {
+          defaultMessage: 'Analytics map',
+        }),
+        path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`,
+        navLinkStatus: mlCapabilities.isDFAEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+    ],
+  };
+}
 
-const AIOPS_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'aiOps',
-  title: i18n.translate('xpack.ml.deepLink.aiOps', {
-    defaultMessage: 'AIOps',
-  }),
-  // Default to the index select page for the explain log rate spikes since we don't have an AIops overview page
-  path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
-  deepLinks: [
-    {
-      id: 'explainLogRateSpikes',
-      title: i18n.translate('xpack.ml.deepLink.explainLogRateSpikes', {
-        defaultMessage: 'Explain Log Rate Spikes',
-      }),
-      path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
-    },
-    {
-      id: 'logPatternAnalysis',
-      title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
-        defaultMessage: 'Log Pattern Analysis',
-      }),
-      path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
-    },
-    {
-      id: 'changePointDetections',
-      title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
-        defaultMessage: 'Change Point Detection',
-      }),
-      path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
-    },
-  ],
-};
+function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'aiOps',
+    title: i18n.translate('xpack.ml.deepLink.aiOps', {
+      defaultMessage: 'AIOps',
+    }),
+    // Default to the index select page for the explain log rate spikes since we don't have an AIops overview page
+    path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
+    navLinkStatus: mlCapabilities.canUseAiops ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    deepLinks: [
+      {
+        id: 'explainLogRateSpikes',
+        title: i18n.translate('xpack.ml.deepLink.explainLogRateSpikes', {
+          defaultMessage: 'Explain Log Rate Spikes',
+        }),
+        path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
+        navLinkStatus: mlCapabilities.canUseAiops
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+      {
+        id: 'logPatternAnalysis',
+        title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
+          defaultMessage: 'Log Pattern Analysis',
+        }),
+        path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
+        navLinkStatus: mlCapabilities.canUseAiops
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+      {
+        id: 'changePointDetections',
+        title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
+          defaultMessage: 'Change Point Detection',
+        }),
+        path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
+        navLinkStatus: mlCapabilities.canUseAiops
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+    ],
+  };
+}
 
-const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'modelManagement',
-  title: i18n.translate('xpack.ml.deepLink.modelManagement', {
-    defaultMessage: 'Model Management',
-  }),
-  path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-  deepLinks: [
-    {
-      id: 'nodesOverview',
-      title: i18n.translate('xpack.ml.deepLink.trainedModels', {
-        defaultMessage: 'Trained Models',
-      }),
-      path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-    },
-    {
-      id: 'nodes',
-      title: i18n.translate('xpack.ml.deepLink.nodes', {
-        defaultMessage: 'Nodes',
-      }),
-      path: `/${ML_PAGES.NODES}`,
-    },
-  ],
-};
+function getModelManagementDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'modelManagement',
+    title: i18n.translate('xpack.ml.deepLink.modelManagement', {
+      defaultMessage: 'Model Management',
+    }),
+    path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
+    navLinkStatus: mlCapabilities.isNLPEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    deepLinks: [
+      {
+        id: 'nodesOverview',
+        title: i18n.translate('xpack.ml.deepLink.trainedModels', {
+          defaultMessage: 'Trained Models',
+        }),
+        path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
+        navLinkStatus: mlCapabilities.isNLPEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+      {
+        id: 'nodes',
+        title: i18n.translate('xpack.ml.deepLink.nodes', {
+          defaultMessage: 'Nodes',
+        }),
+        path: `/${ML_PAGES.NODES}`,
+        navLinkStatus: mlCapabilities.isNLPEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+    ],
+  };
+}
 
-const MEMORY_USAGE_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'memoryUsage',
-  title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
-    defaultMessage: 'Memory Usage',
-  }),
-  path: `/${ML_PAGES.MEMORY_USAGE}`,
-};
+function getMemoryUsageDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'memoryUsage',
+    title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
+      defaultMessage: 'Memory Usage',
+    }),
+    path: `/${ML_PAGES.MEMORY_USAGE}`,
+    navLinkStatus:
+      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
+  };
+}
 
-const DATA_VISUALIZER_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'dataVisualizer',
-  title: i18n.translate('xpack.ml.deepLink.dataVisualizer', {
-    defaultMessage: 'Data Visualizer',
-  }),
-  path: `/${ML_PAGES.DATA_VISUALIZER}`,
-};
+function getDataVisualizerDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'dataVisualizer',
+    title: i18n.translate('xpack.ml.deepLink.dataVisualizer', {
+      defaultMessage: 'Data Visualizer',
+    }),
+    path: `/${ML_PAGES.DATA_VISUALIZER}`,
+    navLinkStatus:
+      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
+  };
+}
 
-const FILE_UPLOAD_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'fileUpload',
-  title: i18n.translate('xpack.ml.deepLink.fileUpload', {
-    defaultMessage: 'File Upload',
-  }),
-  keywords: ['CSV', 'JSON'],
-  path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
-};
+function getFileUploadDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'fileUpload',
+    title: i18n.translate('xpack.ml.deepLink.fileUpload', {
+      defaultMessage: 'File Upload',
+    }),
+    keywords: ['CSV', 'JSON'],
+    path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
+    navLinkStatus:
+      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
+  };
+}
 
-const INDEX_DATA_VISUALIZER_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'indexDataVisualizer',
-  title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
-    defaultMessage: 'Index Data Visualizer',
-  }),
-  path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
-};
+function getIndexDataVisualizerDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'indexDataVisualizer',
+    title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
+      defaultMessage: 'Index Data Visualizer',
+    }),
+    path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
+    navLinkStatus:
+      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
+  };
+}
 
-const SETTINGS_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'settings',
-  title: i18n.translate('xpack.ml.deepLink.settings', {
-    defaultMessage: 'Settings',
-  }),
-  path: `/${ML_PAGES.SETTINGS}`,
-  deepLinks: [
-    {
-      id: 'calendarSettings',
-      title: i18n.translate('xpack.ml.deepLink.calendarSettings', {
-        defaultMessage: 'Calendars',
-      }),
-      path: `/${ML_PAGES.CALENDARS_MANAGE}`,
-    },
-    {
-      id: 'filterListsSettings',
-      title: i18n.translate('xpack.ml.deepLink.filterListsSettings', {
-        defaultMessage: 'Filter Lists',
-      }),
-      path: `/${ML_PAGES.SETTINGS}`, // Link to settings page as read only users cannot view filter lists.
-    },
-  ],
-};
+function getSettingsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'settings',
+    title: i18n.translate('xpack.ml.deepLink.settings', {
+      defaultMessage: 'Settings',
+    }),
+    path: `/${ML_PAGES.SETTINGS}`,
+    navLinkStatus: mlCapabilities.isADEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    deepLinks: [
+      {
+        id: 'calendarSettings',
+        title: i18n.translate('xpack.ml.deepLink.calendarSettings', {
+          defaultMessage: 'Calendars',
+        }),
+        path: `/${ML_PAGES.CALENDARS_MANAGE}`,
+        navLinkStatus: mlCapabilities.isADEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+      {
+        id: 'filterListsSettings',
+        title: i18n.translate('xpack.ml.deepLink.filterListsSettings', {
+          defaultMessage: 'Filter Lists',
+        }),
+        path: `/${ML_PAGES.SETTINGS}`, // Link to settings page as read only users cannot view filter lists.
+        navLinkStatus: mlCapabilities.isADEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      },
+    ],
+  };
+}
 
-const NOTIFICATIONS_DEEP_LINK: AppDeepLink<LinkId> = {
-  id: 'notifications',
-  title: i18n.translate('xpack.ml.deepLink.notifications', {
-    defaultMessage: 'Notifications',
-  }),
-  path: `/${ML_PAGES.NOTIFICATIONS}`,
-};
+function getNotificationsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'notifications',
+    title: i18n.translate('xpack.ml.deepLink.notifications', {
+      defaultMessage: 'Notifications',
+    }),
+    path: `/${ML_PAGES.NOTIFICATIONS}`,
+    navLinkStatus: AppNavLinkStatus.visible,
+  };
+}
 
-export function getDeepLinks(isFullLicense: boolean) {
+export function getDeepLinks(isFullLicense: boolean, mlCapabilities: MlCapabilities) {
   const deepLinks: Array<AppDeepLink<LinkId>> = [
-    DATA_VISUALIZER_DEEP_LINK,
-    FILE_UPLOAD_DEEP_LINK,
-    INDEX_DATA_VISUALIZER_DEEP_LINK,
+    getDataVisualizerDeepLink(mlCapabilities),
+    getFileUploadDeepLink(mlCapabilities),
+    getIndexDataVisualizerDeepLink(mlCapabilities),
   ];
 
   if (isFullLicense === true) {
     deepLinks.push(
-      OVERVIEW_LINK_DEEP_LINK,
-      ANOMALY_DETECTION_DEEP_LINK,
-      DATA_FRAME_ANALYTICS_DEEP_LINK,
-      MODEL_MANAGEMENT_DEEP_LINK,
-      MEMORY_USAGE_DEEP_LINK,
-      SETTINGS_DEEP_LINK,
-      AIOPS_DEEP_LINK,
-      NOTIFICATIONS_DEEP_LINK
+      getOverviewLinkDeepLink(mlCapabilities),
+      getAnomalyDetectionDeepLink(mlCapabilities),
+      getDataFrameAnalyticsDeepLink(mlCapabilities),
+      getModelManagementDeepLink(mlCapabilities),
+      getMemoryUsageDeepLink(mlCapabilities),
+      getSettingsDeepLink(mlCapabilities),
+      getAiopsDeepLink(mlCapabilities),
+      getNotificationsDeepLink(mlCapabilities)
     );
   }
 

@@ -10,10 +10,12 @@ import { BehaviorSubject } from 'rxjs';
 
 import { AppUpdater } from '@kbn/core/public';
 import { getDeepLinks } from './search_deep_links';
+import { MlCapabilities } from '../../shared';
 
 export function registerSearchLinks(
   appUpdater: BehaviorSubject<AppUpdater>,
-  isFullLicense: boolean
+  isFullLicense: boolean,
+  mlCapabilities: MlCapabilities
 ) {
   appUpdater.next(() => ({
     keywords: [
@@ -21,6 +23,6 @@ export function registerSearchLinks(
         defaultMessage: 'ML',
       }),
     ],
-    deepLinks: getDeepLinks(isFullLicense),
+    deepLinks: getDeepLinks(isFullLicense, mlCapabilities),
   }));
 }
