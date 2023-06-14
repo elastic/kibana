@@ -251,6 +251,26 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       throw fieldMissingError(fieldName);
     }
 
+    const embeddableInput = this.getInput();
+    const { ignoreParentSettings, timeRange: globalTimeRange, timeslice } = embeddableInput;
+    let { filters = [] } = embeddableInput;
+
+    const timeRange =
+      timeslice !== undefined
+        ? {
+            from: new Date(timeslice[0]).toISOString(),
+            to: new Date(timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : globalTimeRange;
+    if (!ignoreParentSettings?.ignoreTimerange && timeRange) {
+      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
+      if (timeFilter) {
+        filters = filters.concat(timeFilter);
+      }
+    }
+
+    this.filters = filters;
     const { min, max } = await this.fetchMinMax({
       dataView,
       field,
@@ -275,30 +295,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     searchSource.setField('size', 0);
     searchSource.setField('index', dataView);
 
-    const embeddableInput = this.getInput();
-    const { ignoreParentSettings, query, timeRange: globalTimeRange, timeslice } = embeddableInput;
-    let { filters = [] } = embeddableInput;
+    const { ignoreParentSettings, query } = this.getInput();
 
-    const timeRange =
-      timeslice !== undefined
-        ? {
-            from: new Date(timeslice[0]).toISOString(),
-            to: new Date(timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : globalTimeRange;
-    if (!ignoreParentSettings?.ignoreTimerange && timeRange) {
-      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
-      if (timeFilter) {
-        filters = filters.concat(timeFilter);
-      }
+    if (!ignoreParentSettings?.ignoreFilters) {
+      searchSource.setField('filter', this.filters);
     }
-
-    if (ignoreParentSettings?.ignoreFilters) {
-      filters = [];
-    }
-
-    searchSource.setField('filter', filters);
 
     if (query) {
       searchSource.setField('query', query);
@@ -333,7 +334,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const min = get(resp, 'rawResponse.aggregations.minAgg.value');
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value');
 
-    this.filters = filters;
     return { min, max };
   };
 
