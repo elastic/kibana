@@ -54,7 +54,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const { dataViews, logViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
-  const [logSpikeParams, SetLogSpikeParams] = useState<
+  const [logSpikeParams, setLogSpikeParams] = useState<
     { significantFieldValues: FieldValuePair[] } | undefined
   >();
 
