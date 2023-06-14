@@ -10,6 +10,7 @@ import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '@kbn/console-plugin/common/constants';
 import { generateConsoleDefinitions } from './generate_console_definitions';
 
 export function runGenerateConsoleDefinitionsCli() {
@@ -24,11 +25,7 @@ export function runGenerateConsoleDefinitionsCli() {
       }
       let definitionsFolder = Path.resolve(REPO_ROOT, `${dest}`);
       if (!dest) {
-        definitionsFolder = Path.resolve(
-          REPO_ROOT,
-          // replace with the constant from the console plugin
-          'src/plugins/console/server/lib/spec_definitions/json'
-        );
+        definitionsFolder = Path.resolve(AUTOCOMPLETE_DEFINITIONS_FOLDER, 'generated');
       }
       const specsRepo = Path.resolve(`${source}`);
       generateConsoleDefinitions({ specsRepo, definitionsFolder });

@@ -62,7 +62,14 @@ const generateMethods = (endpoint: Endpoint): string[] => {
 };
 
 const generatePatterns = (endpoint: Endpoint): string[] => {
-  return endpoint.urls.map((url) => url.path);
+  return endpoint.urls.map(({ path }) => {
+    let pattern = path;
+    // remove leading / if present
+    if (path.startsWith('/')) {
+      pattern = path.substring(1);
+    }
+    return pattern;
+  });
 };
 
 const generateDocumentation = (endpoint: Endpoint): string => {
@@ -131,7 +138,6 @@ export function generateConsoleDefinitions({
   specsRepo: string;
   definitionsFolder: string;
 }) {
-  console.log({ specsRepo, definitionsFolder });
   const pathToSchemaFile = Path.resolve(specsRepo, 'output/schema/schema.json');
   const schema = JSON.parse(fs.readFileSync(pathToSchemaFile, 'utf8')) as Schema;
 
