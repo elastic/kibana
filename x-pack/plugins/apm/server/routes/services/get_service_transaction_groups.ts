@@ -32,19 +32,20 @@ const txGroupsDroppedBucketName = '_other';
 export const MAX_NUMBER_OF_TX_GROUPS = 1_000;
 
 export interface TransactionGroups {
-  transactionType: string;
+  alertsCount: number;
   name: string;
+  transactionType: string;
   latency: number | null;
   throughput: number;
   errorRate: number;
   impact: number;
-  alertsCount: number;
 }
 
 export interface ServiceTransactionGroupsResponse {
   transactionGroups: TransactionGroups[];
   maxTransactionGroupsExceeded: boolean;
   transactionOverflowCount: number;
+  hasActiveAlerts: boolean;
 }
 
 export async function getServiceTransactionGroups({
@@ -172,5 +173,6 @@ export async function getServiceTransactionGroups({
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
     transactionOverflowCount:
       response.aggregations?.transaction_overflow_count.value ?? 0,
+    hasActiveAlerts: false,
   };
 }

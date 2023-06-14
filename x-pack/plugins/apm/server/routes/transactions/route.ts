@@ -54,6 +54,19 @@ import {
   TransactionTraceSamplesResponse,
 } from './trace_samples';
 
+interface MergedServiceTransactionGroupsResponse
+  extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {
+  transactionGroups: Array<{
+    alertsCount: number;
+    name: string;
+    transactionType?: string;
+    latency?: number | null;
+    throughput?: number;
+    errorRate?: number;
+    impact?: number;
+  }>;
+}
+
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
     'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
@@ -76,11 +89,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<
-    ServiceTransactionGroupsResponse & {
-      hasActiveAlerts: boolean;
-    }
-  > => {
+  ): Promise<MergedServiceTransactionGroupsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const apmAlertsClient = await getApmAlertsClient(resources);
