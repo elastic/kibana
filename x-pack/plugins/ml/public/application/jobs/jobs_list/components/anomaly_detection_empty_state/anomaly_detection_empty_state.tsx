@@ -72,7 +72,7 @@ export const AnomalyDetectionEmptyState: FC = () => {
         <EuiLink href={docLinks.links.ml.anomalyDetection} target="_blank" external>
           <FormattedMessage
             id="xpack.ml.common.readDocumentationLink"
-            defaultMessage="Documentation"
+            defaultMessage="Read documentation"
           />
         </EuiLink>,
       ]}
