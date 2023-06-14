@@ -224,6 +224,7 @@ export const postDataView = (dataSource: string) => {
     url: DATA_VIEW_PATH,
     body: {
       data_view: {
+        id: dataSource,
         name: dataSource,
         fieldAttrs: '{}',
         title: dataSource,
