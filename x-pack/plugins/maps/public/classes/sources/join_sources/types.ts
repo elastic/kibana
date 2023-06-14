@@ -28,8 +28,7 @@ export interface IJoinSource extends ISource {
   ): Promise<PropertiesMap>;
 
   /*
-   * Vector layer avoids unnecessarily re-fetching join data.
-   * Use getSyncMeta to expose fields that require join data re-fetch when changed.
+   * Use getSyncMeta to expose join configurations that require join data re-fetch when changed.
    */
   getSyncMeta(): object | null;
 
