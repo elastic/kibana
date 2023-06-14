@@ -459,6 +459,14 @@ export interface MarkVersionIndexReady extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
+export interface MarkVersionIndexReadySync extends PostInitState {
+  /** Single "client.indices.updateAliases" operation
+   * to update multiple indices' aliases simultaneously
+   * */
+  readonly controlState: 'MARK_VERSION_INDEX_READY_SYNC';
+  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
+}
+
 export interface MarkVersionIndexReadyConflict extends PostInitState {
   /**
    * If the MARK_VERSION_INDEX_READY step fails another instance was
@@ -541,6 +549,7 @@ export type State = Readonly<
   | LegacyReindexWaitForTaskState
   | LegacySetWriteBlockState
   | MarkVersionIndexReady
+  | MarkVersionIndexReadySync
   | MarkVersionIndexReadyConflict
   | OutdatedDocumentsRefresh
   | OutdatedDocumentsSearchClosePit

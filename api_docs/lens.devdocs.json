@@ -2162,6 +2162,20 @@
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedLayer.ignoreGlobalFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4947,7 +4961,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"significant\"; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -10239,7 +10253,7 @@
             "section": "def-public.GenericIndexPatternColumn",
             "text": "GenericIndexPatternColumn"
           },
-          ">; columnOrder: string[]; linkToLayers?: string[] | undefined; incompleteColumns?: Record<string, ",
+          ">; ignoreGlobalFilters?: boolean | undefined; columnOrder: string[]; linkToLayers?: string[] | undefined; incompleteColumns?: Record<string, ",
           {
             "pluginId": "lens",
             "scope": "public",

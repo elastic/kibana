@@ -76,7 +76,6 @@ import type { ExplorerState } from './reducers';
 import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
-import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 
@@ -355,12 +354,13 @@ export const Explorer: FC<ExplorerUIProps> = ({
   }, []);
 
   const {
-    services: { charts: chartsService },
+    services: {
+      charts: chartsService,
+      data: { dataViews: dataViewsService },
+    },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
-  const context = useMlContext();
-  const dataViewsService = context.dataViewsContract;
 
   const {
     annotations,
