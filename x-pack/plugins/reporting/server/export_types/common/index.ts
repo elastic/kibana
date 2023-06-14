@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { CreateJobFn, RunTaskFn } from '../../types';
 
 export { decryptJobHeaders } from './decrypt_job_headers';
@@ -25,8 +25,8 @@ export interface ExportType {
   jobType: any;
   validLicenses: any;
   id: string;
-  setup: (core: CoreSetup<object, unknown>, setupDeps: any) => void;
-  start: (core: CoreStart, startDeps: any) => void;
+  setup: (core: CoreSetup, setupDeps: any) => void;
+  start: ({}, startDeps: any) => void;
   createJob: CreateJobFn;
   runTask: RunTaskFn;
   jobContentEncoding: string;

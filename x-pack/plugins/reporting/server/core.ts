@@ -48,7 +48,7 @@ import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { ExportType } from './export_types/common';
 import { PdfExportType } from './export_types/printable_pdf_v2';
-import { checkLicense, ExportTypesRegistry } from './lib';
+import { checkLicense, ExportTypesRegistry, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -109,7 +109,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private pdfExport: PdfExportType;
-  private exportTypesRegistry: ExportTypesRegistry = new ExportTypesRegistry();
+  private exportTypesRegistry: ExportTypesRegistry = getExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 

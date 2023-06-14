@@ -25,7 +25,6 @@ import {
   KibanaShuttingDownError,
   TaskRunResult,
 } from '@kbn/reporting-common';
-import { url } from 'inspector';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
@@ -248,9 +247,8 @@ export class ExecuteReportTask implements ReportingTask {
     const exportType = this.reporting.getExportTypesRegistry().getById(task.jobtype);
 
     const payload = {
-      forceNow: new Date().toISOString(),
-      locatorParams: [url],
-      layout: task.meta.layout,
+      // forceNow: new Date().toISOString(),
+      // locatorParams: [url],
       ...task.payload,
     } as unknown as TaskPayloadPDFV2;
 
@@ -283,6 +281,7 @@ export class ExecuteReportTask implements ReportingTask {
     docId = `/${report._index}/_doc/${report._id}`;
 
     const resp = await store.setReportCompleted(report, doc);
+
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;

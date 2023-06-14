@@ -29,7 +29,6 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -40,7 +39,7 @@ import {
   REPORTING_TRANSACTION_TYPE,
   PDF_JOB_TYPE_V2,
 } from '../../../common/constants';
-import { JobParamsPDFV2 } from '../../../common/types';
+import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
@@ -216,17 +215,15 @@ export class PdfExportType implements ExportType {
     const jobLogger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
-    const { encryptionKey } = this.config;
-
     let apmGeneratePdf: { end: () => void } | null | undefined;
+    const { encryptionKey } = this.config;
 
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers) => {
-        const fakeRequest = await this.getFakeRequest(headers, payload.spaceId, jobLogger);
+        const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-        const result = await getCustomLogo(uiSettingsClient, headers);
-        return result;
+        return getCustomLogo(uiSettingsClient, headers);
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
@@ -238,7 +235,7 @@ export class PdfExportType implements ExportType {
             payload.forceNow
           ),
           locator,
-        ]) as unknown as UrlOrUrlWithContext[];
+        ]) as UrlOrUrlLocatorTuple[];
 
         const screenshotFn: GetScreenshotsFn = () =>
           this.getScreenshots({
@@ -290,6 +287,6 @@ export class PdfExportType implements ExportType {
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
     apmTrans?.end();
-    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
+    return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
   }
 }
