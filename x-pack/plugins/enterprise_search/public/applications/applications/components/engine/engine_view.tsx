@@ -24,8 +24,8 @@ import {
   SearchApplicationContentTabs,
 } from '../../routes';
 
-import { DeleteSearchApplicationModal } from '../engines/delete_search_application_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
+import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
 import { EngineConnect } from './engine_connect/engine_connect';
 import { EngineError } from './engine_error';

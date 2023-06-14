@@ -10,8 +10,8 @@ import { Redirect, Switch } from 'react-router-dom';
 
 import { Route } from '@kbn/shared-ux-router';
 
-import { SearchApplicationsRouter } from './components/engines/search_applications_router';
 import { NotFound } from './components/not_found';
+import { SearchApplicationsRouter } from './components/search_applications/search_applications_router';
 import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 
 export const Applications = () => {

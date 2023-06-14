@@ -12,7 +12,7 @@ import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 import { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applications/delete_search_application_api_logic';
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
-import { SearchApplicationsListLogic } from '../engines/search_applications_list_logic';
+import { SearchApplicationsListLogic } from '../search_applications/search_applications_list_logic';
 
 import { EngineViewLogic, EngineViewValues } from './engine_view_logic';
 

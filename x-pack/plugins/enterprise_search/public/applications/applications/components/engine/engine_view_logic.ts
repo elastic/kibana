@@ -23,7 +23,7 @@ import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 import {
   SearchApplicationsListLogic,
   SearchApplicationsListActions,
-} from '../engines/search_applications_list_logic';
+} from '../search_applications/search_applications_list_logic';
 
 import { EngineNameLogic } from './engine_name_logic';
 
