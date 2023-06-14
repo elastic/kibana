@@ -49,7 +49,7 @@ export interface ISource {
   /*
    * Re-fetch flag. When function returns true, source will re-fetch on requestMeta.fieldNames changes.
    * Example uses of fieldNames change requiring re-fetch:
-   * 1) Data drivin styling
+   * 1) Data driven styling
    * 2) Term join
    * 3) Feature masking.
    */
