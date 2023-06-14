@@ -46,9 +46,8 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { ExportType } from './export_types/common';
 import { PdfExportType } from './export_types/printable_pdf_v2';
-import { checkLicense, ExportTypesRegistry, getExportTypesRegistry } from './lib';
+import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -109,7 +108,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private pdfExport: PdfExportType;
-  private exportTypesRegistry: ExportTypesRegistry = getExportTypesRegistry();
+  private exportTypesRegistry = getExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -125,7 +124,7 @@ export class ReportingCore {
     this.config = config;
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.pdfExport as unknown as ExportType);
+    this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -150,7 +149,7 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.pdfExport.setup(this.core, setupDeps);
+    this.pdfExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -165,7 +164,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    this.pdfExport.start({}, startDeps);
+    this.pdfExport.start(startDeps);
 
     await this.assertKibanaIsAvailable();
 

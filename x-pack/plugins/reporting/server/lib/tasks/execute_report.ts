@@ -26,7 +26,7 @@ import {
   TaskRunResult,
 } from '@kbn/reporting-common';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { getContentStream } from '..';
+import { getContentStream, getExportTypesRegistry } from '..';
 import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
@@ -81,6 +81,7 @@ export class ExecuteReportTask implements ReportingTask {
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
+  exportTypesRegistry = getExportTypesRegistry();
 
   constructor(
     private reporting: ReportingCore,
@@ -97,6 +98,7 @@ export class ExecuteReportTask implements ReportingTask {
     this.taskManagerStart = taskManager;
 
     const { reporting } = this;
+    this.exportTypesRegistry = this.reporting.getExportTypesRegistry();
 
     const { uuid, name } = reporting.getServerInfo();
     this.kibanaId = uuid;
@@ -244,7 +246,7 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    const exportType = this.reporting.getExportTypesRegistry().getById(task.jobtype);
+    const exportType = this.exportTypesRegistry.get(({ jobType }) => jobType === task.jobtype);
 
     const payload = {
       // forceNow: new Date().toISOString(),

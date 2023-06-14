@@ -29,6 +29,7 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -60,17 +61,20 @@ export interface PdfExportTypeSetupDeps {
   logger: Logger;
 }
 
-export interface PdfExportTypeStartupDeps {
+export interface PdfExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   screenshotting: ScreenshottingStart;
   logger: Logger;
 }
 
-export class PdfExportType implements ExportType {
-  id = 'printable_pdf_v2';
+export class PdfExportType
+  implements
+    ExportType<PdfExportTypeSetupDeps, PdfExportTypeStartDeps, JobParamsPDFV2, TaskPayloadPDFV2>
+{
+  id = 'printablePdfV2';
   name = 'PDF';
-  validLicenses = [
+  validLicenses: LicenseType[] = [
     LICENSE_TYPE_TRIAL,
     LICENSE_TYPE_CLOUD_STANDARD,
     LICENSE_TYPE_GOLD,
@@ -78,10 +82,10 @@ export class PdfExportType implements ExportType {
     LICENSE_TYPE_ENTERPRISE,
   ];
   jobType = PDF_JOB_TYPE_V2;
-  jobContentEncoding = 'base64';
-  jobContentExtension = 'pdf';
+  jobContentEncoding = 'base64' as const;
+  jobContentExtension = 'pdf' as const;
   setupDeps!: PdfExportTypeSetupDeps;
-  startDeps!: PdfExportTypeStartupDeps;
+  startDeps!: PdfExportTypeStartDeps;
 
   constructor(
     private core: CoreSetup,
@@ -92,11 +96,11 @@ export class PdfExportType implements ExportType {
     this.logger = logger.get('pdf-export');
   }
 
-  setup(core: CoreSetup, setupDeps: PdfExportTypeSetupDeps) {
+  setup(setupDeps: PdfExportTypeSetupDeps) {
     this.setupDeps = setupDeps;
   }
 
-  start({}, startDeps: PdfExportTypeStartupDeps) {
+  start(startDeps: PdfExportTypeStartDeps) {
     this.startDeps = startDeps;
   }
 

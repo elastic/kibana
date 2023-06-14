@@ -30,15 +30,9 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import type {
-  BaseParams,
-  BasePayload,
-  JobParamsPDFV2,
-  UrlOrUrlLocatorTuple,
-} from '../common/types';
+import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import { ExportTypesRegistry } from './lib';
-import { TaskPayloadPDFV2 } from './export_types/printable_pdf_v2';
 
 /**
  * Plugin Setup Contract
@@ -63,15 +57,15 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
  * Internal Types
  */
 
-export type CreateJobFn = (
-  jobParams: JobParamsPDFV2,
+export type CreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest
 ) => { isDeprecated: boolean; browserTimezone: any };
 
-export type RunTaskFn = (
+export type RunTaskFn<TaskPayloadType> = (
   jobId: string,
-  payload: TaskPayloadPDFV2,
+  payload: TaskPayloadType,
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;
