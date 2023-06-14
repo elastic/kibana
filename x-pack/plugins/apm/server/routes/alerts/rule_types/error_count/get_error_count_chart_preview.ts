@@ -32,10 +32,19 @@ export async function getTransactionErrorCountChartPreview({
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
 }): Promise<TransactionErrorCountChartPreviewResponse> {
-  const { serviceName, environment, errorGroupingKey, interval, end, groupBy } =
-    alertParams;
+  const {
+    serviceName,
+    environment,
+    errorGroupingKey,
+    interval,
+    end,
+    groupBy: groupByFields,
+  } = alertParams;
 
-  const allGroupByFields = getAllGroupByFields(ApmRuleType.ErrorCount, groupBy);
+  const allGroupByFields = getAllGroupByFields(
+    ApmRuleType.ErrorCount,
+    groupByFields
+  );
 
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMs = intervalAsSeconds * 1000;

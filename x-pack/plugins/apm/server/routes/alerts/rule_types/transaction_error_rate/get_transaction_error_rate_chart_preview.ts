@@ -48,7 +48,7 @@ export async function getTransactionErrorRateChartPreview({
     interval,
     end,
     transactionName,
-    groupBy,
+    groupBy: groupByFields,
   } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -59,7 +59,7 @@ export async function getTransactionErrorRateChartPreview({
 
   const allGroupByFields = getAllGroupByFields(
     ApmRuleType.TransactionErrorRate,
-    groupBy
+    groupByFields
   );
 
   const intervalAsSeconds = getIntervalInSeconds(interval);
