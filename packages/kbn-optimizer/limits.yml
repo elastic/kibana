@@ -41,7 +41,7 @@ pageLoadAssetSize:
   enterpriseSearch: 35741
   essSecurity: 16573
   esUiShared: 326654
-  eventAnnotation: 22000
+  eventAnnotation: 48565
   exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
@@ -95,7 +95,7 @@ pageLoadAssetSize:
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
-  observability: 100000
+  observability: 105500
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
