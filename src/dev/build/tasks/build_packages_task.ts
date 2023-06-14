@@ -43,7 +43,7 @@ function excludeFileByName(name: string) {
 function excludeFileByTags(tags: readonly string[]) {
   return tags.some(
     (t) =>
-      // t === 'mock' ||
+      t === 'mock' ||
       t === 'mocks' ||
       t === 'test' ||
       t === 'tests' ||
