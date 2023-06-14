@@ -198,7 +198,7 @@ This setting can be overridden for specific URLs by using the setting
 Specifies the max number of bytes of the http response for requests to external resources. Default: 1000000 (1MB).
 
 `xpack.actions.responseTimeout` {ess-icon}::
-Specifies the time allowed for requests to external resources. Requests that take longer are aborted.
+Specifies the time allowed for requests to external resources. Requests that take longer are canceled.
 The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`).
 For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
