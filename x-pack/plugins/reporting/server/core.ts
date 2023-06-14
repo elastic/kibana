@@ -47,7 +47,7 @@ import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { PdfExportType } from './export_types/printable_pdf_v2';
-import { checkLicense, getExportTypesRegistry } from './lib';
+import { checkLicense, ExportTypesRegistry, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -64,6 +64,8 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
+  pdfExport: PdfExportType;
+  exportTypesRegistry: ExportTypesRegistry;
 }
 
 export interface ReportingInternalStart {
@@ -313,7 +315,7 @@ export class ReportingCore {
   }
 
   public getExportTypesRegistry() {
-    return this.exportTypesRegistry;
+    return this.getPluginSetupDeps().exportTypesRegistry;
   }
 
   public async scheduleTask(report: ReportTaskParams) {

@@ -37,7 +37,6 @@ import type { ReportFailedFields, ReportProcessingFields } from '../store/store'
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
 import { ExportType } from '../../export_types/common';
-import { TaskPayloadPDFV2 } from '../../export_types/printable_pdf_v2';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -248,17 +247,11 @@ export class ExecuteReportTask implements ReportingTask {
   ): Promise<TaskRunResult> {
     const exportType = this.exportTypesRegistry.get(({ jobType }) => jobType === task.jobtype);
 
-    const payload = {
-      // forceNow: new Date().toISOString(),
-      // locatorParams: [url],
-      ...task.payload,
-    } as unknown as TaskPayloadPDFV2;
-
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(exportType.runTask(task.id, payload, cancellationToken, stream)).pipe(
+      Rx.from(exportType.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
         timeout(queueTimeout)
       ) // throw an error if a value is not emitted before timeout
     );
