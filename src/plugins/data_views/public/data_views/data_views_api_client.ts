@@ -61,7 +61,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       fields,
     } = options;
     return this._request<FieldsForWildcardResponse>(
-      this._getUrl(['_fields_for_wildcard']),
+      '/internal/data_views/_fields_for_wildcard',
       {
         pattern,
         meta_fields: metaFields,
