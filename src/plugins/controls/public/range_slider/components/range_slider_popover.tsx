@@ -75,8 +75,6 @@ export const RangeSliderPopover: FC<{
     );
   });
 
-  console.log(rangeSliderMin, rangeSliderMax);
-
   // derive field formatter from fieldSpec and dataViewId
   useEffect(() => {
     (async () => {
@@ -92,7 +90,6 @@ export const RangeSliderPopover: FC<{
   }, [fieldSpec, dataViewId, getDataViewById]);
 
   const ticks = useMemo(() => {
-    console.log(min, max);
     return [
       { value: min, label: fieldFormatter(String(min)) },
       { value: max, label: fieldFormatter(String(max)) },
