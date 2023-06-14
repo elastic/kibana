@@ -180,7 +180,7 @@ describe('Lens migrations', () => {
       return {
         attributes: {
           filters: [],
-          visualizationType: 'lnsMetric',
+          visualizationType: type,
           title: '',
           expression: '',
           state: {
