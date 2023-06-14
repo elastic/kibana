@@ -40,10 +40,10 @@ interface VulnerabilitiesAggs {
 interface FindingsAggBucket extends AggregationsStringRareTermsBucketKeys {
   name: AggregationsMultiBucketAggregateBase<AggregationsStringTermsBucketKeys>;
   region: AggregationsMultiBucketAggregateBase<AggregationsStringTermsBucketKeys>;
-  vulnerability_severity_critical: AggregationsSingleBucketAggregateBase;
-  vulnerability_severity_high: AggregationsSingleBucketAggregateBase;
-  vulnerability_severity_medium: AggregationsSingleBucketAggregateBase;
-  vulnerability_severity_low: AggregationsSingleBucketAggregateBase;
+  critical: AggregationsSingleBucketAggregateBase;
+  high: AggregationsSingleBucketAggregateBase;
+  medium: AggregationsSingleBucketAggregateBase;
+  low: AggregationsSingleBucketAggregateBase;
 }
 
 interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
@@ -69,29 +69,12 @@ export const getQuery = ({
         size: MAX_FINDINGS_TO_LOAD * 3,
         // in case there are more resources then size, ensuring resources with more vulnerabilities
         // will be included first, and then vulnerabilities with critical and high severity
-        order: [
-          {
-            _count: sortOrder,
-          },
-          {
-            vulnerability_severity_critical: 'desc',
-          },
-          {
-            vulnerability_severity_high: 'desc',
-          },
-          {
-            vulnerability_severity_medium: 'desc',
-          },
-        ],
+        order: [{ _count: sortOrder }, { critical: 'desc' }, { high: 'desc' }, { medium: 'desc' }],
       },
       aggs: {
         vulnerabilitiesCountBucketSort: {
           bucket_sort: {
-            sort: [
-              {
-                _count: { order: sortOrder },
-              },
-            ],
+            sort: [{ _count: { order: sortOrder } }],
             from: pageIndex * pageSize,
             size: pageSize,
           },
@@ -102,82 +85,30 @@ export const getQuery = ({
         region: {
           terms: { field: 'cloud.region', size: 1 },
         },
-        vulnerability_severity_critical: {
+        critical: {
           filter: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
+            term: {
+              'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
             },
           },
         },
-        vulnerability_severity_high: {
+        high: {
           filter: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
+            term: {
+              'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
             },
           },
         },
-        vulnerability_severity_medium: {
+        medium: {
           filter: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
+            term: {
+              'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
             },
           },
         },
-        vulnerability_severity_low: {
+        low: {
           filter: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
+            term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
           },
         },
       },
@@ -196,10 +127,10 @@ const createVulnerabilitiesByResource = (resource: FindingsAggBucket) => ({
   'cloud.region': getFirstKey(resource.region.buckets),
   vulnerabilities_count: resource.doc_count,
   severity_map: {
-    critical: resource.vulnerability_severity_critical.doc_count,
-    high: resource.vulnerability_severity_high.doc_count,
-    medium: resource.vulnerability_severity_medium.doc_count,
-    low: resource.vulnerability_severity_low.doc_count,
+    critical: resource.critical.doc_count,
+    high: resource.high.doc_count,
+    medium: resource.medium.doc_count,
+    low: resource.low.doc_count,
   },
 });
 

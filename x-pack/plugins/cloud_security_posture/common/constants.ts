@@ -60,7 +60,6 @@ export const POSTURE_TYPE_ALL = 'all';
 export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
   showFindingFlyoutEvidence: false,
-  showFindingsGroupBy: true,
 } as const;
 
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';

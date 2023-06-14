@@ -14,8 +14,10 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
+import { ColorStop } from '@elastic/eui/src/components/color_picker/color_stops';
 import { i18n } from '@kbn/i18n';
 import { getSeverityStatusColor } from '../../../common/utils/get_vulnerability_colors';
+import { VulnSeverity } from '../../../../common/types';
 import { SeverityStatusBadge } from '../../../components/vulnerability_badges';
 
 interface Props {
@@ -30,35 +32,33 @@ interface SeverityMap {
   low: number;
 }
 
+interface SeverityMapTooltip {
+  severity: string;
+  count: number;
+  percentage: number;
+}
+
 const formatPercentage = (percentage: number) => {
   if (percentage === 0) {
-    return '0 %';
+    return '0%';
   }
 
   if (percentage === 100) {
-    return '100 %';
+    return '100%';
   }
 
-  return `${percentage.toFixed(1)} %`;
+  return `${percentage.toFixed(1)}%`;
 };
 
 export const SeverityMap = ({ severityMap, total }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const tooltipStyle = css`
-    height: ${euiTheme.size.xl};
-    display: flex;
-    align-items: center;
-  `;
-
-  const paletteStyle = css`
-    width: 100%;
-  `;
-
-  const severityMapPallet: any = [];
-  const severityMapTooltip: any = [];
+  const severityMapPallet: ColorStop[] = [];
+  const severityMapTooltip: SeverityMapTooltip[] = [];
 
   if (total > 0) {
+    // Setting a minimum stop value of 8% the palette bar to avoid the color
+    // palette being too small to be visible
     const minStop = Math.max(0.08 * total, 1);
 
     const severityLevels: Array<keyof SeverityMap> = ['low', 'medium', 'high', 'critical'];
@@ -70,7 +70,7 @@ export const SeverityMap = ({ severityMap, total }: Props) => {
         currentStop += Math.max(severityMap[severity], minStop);
         severityMapPallet.push({
           stop: currentStop,
-          color: getSeverityStatusColor(severity.toUpperCase()),
+          color: getSeverityStatusColor(severity.toUpperCase() as VulnSeverity),
         });
       }
       severityMapTooltip.push({
@@ -86,23 +86,29 @@ export const SeverityMap = ({ severityMap, total }: Props) => {
       className={css`
         width: 256px;
       `}
-      anchorClassName={tooltipStyle}
+      anchorClassName={css`
+        height: ${euiTheme.size.xl};
+        display: flex;
+        align-items: center;
+      `}
       position="left"
       title={i18n.translate('xpack.csp.vulnerabilitiesByResource.severityMap.tooltipTitle', {
         defaultMessage: 'Severity map',
       })}
       content={<TooltipBody severityMapTooltip={severityMapTooltip} />}
     >
-      <EuiColorPaletteDisplay type="fixed" palette={severityMapPallet} className={paletteStyle} />
+      <EuiColorPaletteDisplay
+        type="fixed"
+        palette={severityMapPallet}
+        className={css`
+          width: 100%;
+        `}
+      />
     </EuiToolTip>
   );
 };
 
-const TooltipBody = ({
-  severityMapTooltip,
-}: {
-  severityMapTooltip: Array<{ severity: string; count: number; percentage: number }>;
-}) => {
+const TooltipBody = ({ severityMapTooltip }: { severityMapTooltip: SeverityMapTooltip[] }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -111,7 +117,7 @@ const TooltipBody = ({
         <EuiFlexGroup justifyContent="spaceBetween" key={severity.severity} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <SeverityStatusBadge status={severity.severity.toUpperCase()} />
+              <SeverityStatusBadge severity={severity.severity.toUpperCase() as VulnSeverity} />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

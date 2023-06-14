@@ -9,7 +9,6 @@ import { EuiComboBox, EuiFormLabel, type EuiComboBoxOptionOption } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import type { FindingsGroupByKind } from '../../../common/types';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -52,8 +51,6 @@ export const FindingsGroupBySelector = ({
 }: Props) => {
   const groupByOptions = useMemo(getGroupByOptions, []);
   const history = useHistory();
-
-  if (!INTERNAL_FEATURE_FLAGS.showFindingsGroupBy) return null;
 
   const onChange = (options: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>) =>
     history.push({ pathname: pathnameHandler(options) });
