@@ -40,7 +40,7 @@ export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
 };
 
 export const SearchApplicationAPI = () => {
-  const { engineName } = useValues(EngineViewLogic);
+  const { engineName: searchApplicationName } = useValues(EngineViewLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
   const cloudContext = useCloudDetails();
@@ -72,7 +72,7 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
-                {`GET _application/search_application/${engineName}/`}
+                {`GET _application/search_application/${searchApplicationName}/`}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -188,7 +188,9 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
-                {`${elasticsearchUrl(cloudContext)}/_application/search_application/<name>/_search`}
+                {`${elasticsearchUrl(
+                  cloudContext
+                )}/_application/search_application/${searchApplicationName}/_search`}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -215,7 +217,10 @@ export const SearchApplicationAPI = () => {
   return (
     <>
       {isGenerateModalOpen ? (
-        <GenerateEngineApiKeyModal engineName={engineName} onClose={closeGenerateModal} />
+        <GenerateEngineApiKeyModal
+          engineName={searchApplicationName}
+          onClose={closeGenerateModal}
+        />
       ) : null}
       <EuiCallOut
         iconType="iInCircle"
