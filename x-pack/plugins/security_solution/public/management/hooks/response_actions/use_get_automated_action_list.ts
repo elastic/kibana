@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { compact, filter, map } from 'lodash';
 
+import { ENDPOINT_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
 import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/endpoint/response_actions/types';
@@ -52,7 +53,7 @@ export const useGetAutomatedActionList = (
             factoryQueryType: ResponseActionsQueries.actions,
           },
           {
-            strategy: 'endpointSearchStrategy',
+            strategy: ENDPOINT_SEARCH_STRATEGY,
           }
         )
       );
@@ -115,7 +116,7 @@ export const useGetAutomatedActionResponseList = (
             factoryQueryType: ResponseActionsQueries.results,
           },
           {
-            strategy: 'endpointSearchStrategy',
+            strategy: ENDPOINT_SEARCH_STRATEGY,
           }
         )
       );

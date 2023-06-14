@@ -18,7 +18,7 @@ import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {
   action: LogsEndpointActionWithHosts;
-  ruleName?: string[];
+  ruleName?: string;
 }
 
 export const EndpointResponseActionResults = ({
@@ -56,7 +56,7 @@ export const EndpointResponseActionResults = ({
 
   return (
     <EuiComment
-      username={ruleName && ruleName[0]}
+      username={ruleName}
       timestamp={<FormattedRelative value={action['@timestamp']} />}
       event={eventText}
       data-test-subj={'endpoint-results-comment'}

@@ -89,7 +89,10 @@ import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
-import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  ENDPOINT_SEARCH_STRATEGY,
+} from '../common/endpoint/constants';
 import { AppFeatures } from './lib/app_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -357,7 +360,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.endpointContext
       );
 
-      plugins.data.search.registerSearchStrategy('endpointSearchStrategy', endpointSearchStrategy);
+      plugins.data.search.registerSearchStrategy(ENDPOINT_SEARCH_STRATEGY, endpointSearchStrategy);
     });
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);

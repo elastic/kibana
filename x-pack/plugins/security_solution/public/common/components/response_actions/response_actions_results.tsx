@@ -18,7 +18,7 @@ import { useKibana } from '../../lib/kibana';
 
 interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
-  ruleName?: string[];
+  ruleName?: string;
   ecsData?: Ecs | null;
 }
 

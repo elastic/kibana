@@ -18,14 +18,14 @@ export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
   buildDsl: (
     options: EndpointStrategyRequestType<T>,
     deps: {
-      authz: EndpointAuthz | void;
+      authz: EndpointAuthz | undefined;
     }
   ) => ISearchRequestParams;
   parse: (
     options: EndpointStrategyRequestType<T>,
     response: EndpointStrategyParseResponseType<T>,
     deps: {
-      authz: EndpointAuthz | void;
+      authz: EndpointAuthz | undefined;
     }
   ) => Promise<EndpointStrategyResponseType<T>>;
 }
