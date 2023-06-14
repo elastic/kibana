@@ -9,7 +9,7 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
-import { useMlContext } from '../../../../contexts/ml';
+import { useMlKibana } from '../../../../contexts/kibana';
 
 const WIDTH = '512px';
 
@@ -24,8 +24,11 @@ interface Props {
 }
 
 export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
-  const mlContext = useMlContext();
-  const dateFormat: string = mlContext.kibanaConfig.get('dateFormat');
+  const {
+    services: { uiSettings },
+  } = useMlKibana();
+  // TODO should use fieldFormats instead
+  const dateFormat: string = uiSettings.get('dateFormat');
 
   const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(timeRange.start));
   const [endMoment, setEndMoment] = useState<Moment | undefined>(moment(timeRange.end));

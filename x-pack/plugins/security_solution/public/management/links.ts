@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { hasKibanaPrivilege } from '../../common/endpoint/service/authz/authz';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -23,6 +22,7 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
+  RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -30,6 +30,7 @@ import {
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
+  ADD_RULES,
   BLOCKLIST,
   CREATE_NEW_RULE,
   ENDPOINTS,
@@ -116,6 +117,13 @@ export const links: LinkItem = {
         }),
       ],
       links: [
+        {
+          id: SecurityPageName.rulesAdd,
+          title: ADD_RULES,
+          path: RULES_ADD_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+        },
         {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,
@@ -239,35 +247,10 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-  const linksToExclude: SecurityPageName[] = [];
   const currentUser = await plugins.security.authc.getCurrentUser();
-  const isPlatinumPlus = licenseService.isPlatinumPlus();
-  let hasHostIsolationExceptions: boolean = isPlatinumPlus;
-
-  // If not Platinum+ license and user has read permissions to security solution
-  // then check if Host Isolation Exceptions exist.
-  // *** IT IS IMPORTANT *** that  this HTTP call only be made if the user has access to the
-  // Lists plugin, else non-security solution users, especially when license is not Platinum,
-  // may see failed HTTP requests in the browser console. This is the reason that
-  // `hasKibanaPrivilege()` is used below.
-  if (
-    currentUser &&
-    !isPlatinumPlus &&
-    fleetAuthz &&
-    hasKibanaPrivilege(
-      fleetAuthz,
-      true,
-      currentUser.roles.includes('superuser'),
-      'readHostIsolationExceptions'
-    )
-  ) {
-    hasHostIsolationExceptions = await checkArtifactHasData(
-      HostIsolationExceptionsApiClient.getInstance(core.http)
-    );
-  }
-
   const {
     canReadActionsLogManagement,
+    canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
     canReadTrustedApplications,
@@ -276,14 +259,17 @@ export const getManagementFilteredLinks = async (
     canReadPolicyManagement,
   } =
     fleetAuthz && currentUser
-      ? calculateEndpointAuthz(
-          licenseService,
-          fleetAuthz,
-          currentUser.roles,
-          true,
-          hasHostIsolationExceptions
-        )
+      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
+
+  const showHostIsolationExceptions =
+    canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
+    // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
+    // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
+    (canReadHostIsolationExceptions &&
+      (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
+
+  const linksToExclude: SecurityPageName[] = [];
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);
@@ -297,7 +283,7 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
 
-  if (!canReadHostIsolationExceptions) {
+  if (!showHostIsolationExceptions) {
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 

@@ -19,7 +19,7 @@ import {
   ConfigKey,
 } from '../../../common/runtime_types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
@@ -31,7 +31,7 @@ import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
     params: schema.object({
       monitorId: schema.string(),

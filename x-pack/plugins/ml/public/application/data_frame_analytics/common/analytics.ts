@@ -17,15 +17,15 @@ import {
   type TrackTotalHitsSearchResponse,
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import { SavedSearchQuery } from '../../contexts/ml';
 
 export type IndexPattern = string;
 
 export interface LoadExploreDataArg {
   filterByIsTraining?: boolean;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
 }
 
 export interface ClassificationMetricItem {
@@ -53,7 +53,7 @@ export const getDefaultTrainingFilterQuery = (resultsField: string, isTraining: 
 
 export interface SearchQuery {
   track_total_hits?: boolean;
-  query: SavedSearchQuery;
+  query: estypes.QueryDslQueryContainer;
   sort?: any;
 }
 
@@ -226,7 +226,10 @@ interface QueryStringQuery {
   query_string: Dictionary<any>;
 }
 
-export type ResultsSearchQuery = ResultsSearchBoolQuery | ResultsSearchTermQuery | SavedSearchQuery;
+export type ResultsSearchQuery =
+  | ResultsSearchBoolQuery
+  | ResultsSearchTermQuery
+  | estypes.QueryDslQueryContainer;
 
 export function getEvalQueryBody({
   resultsField,
@@ -369,7 +372,7 @@ export const loadEvalData = async ({
 interface LoadDocsCountConfig {
   ignoreDefaultQuery?: boolean;
   isTraining?: boolean;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
   resultsField: string;
   destIndex: string;
 }
