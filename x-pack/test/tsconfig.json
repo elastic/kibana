@@ -130,5 +130,6 @@
     "@kbn/slo-schema",
     "@kbn/lens-plugin",
     "@kbn/logs-shared-plugin"
+    "@kbn/telemetry-tools"
   ]
 }
