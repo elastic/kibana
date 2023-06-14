@@ -37,6 +37,7 @@ export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
       isDisabled,
+      isCaseSensitive: true,
     }),
     [browserFields, isDisabled]
   );

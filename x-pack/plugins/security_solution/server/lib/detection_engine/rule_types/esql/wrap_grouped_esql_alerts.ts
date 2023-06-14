@@ -58,7 +58,8 @@ export const wrapGroupedEsqlAlerts = ({
       ruleRunId,
       completeRule.ruleParams.query,
       `${spaceId}:${completeRule.alertId}`,
-      i,
+      //  i,
+      suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : i,
     ]);
     console.log('>>>> pickCells', pickCells(results.columns, row, suppressionFields));
     const instanceId = objectHash([

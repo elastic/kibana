@@ -682,7 +682,6 @@ export const schema: FormSchema<DefineStepRule> = {
               }
             });
 
-            console.log('>>>>>>>>>> ', value, errorFields, optionsSet);
             if (errorFields.length) {
               return {
                 code: 'ERR_FIELD_FORMAT',

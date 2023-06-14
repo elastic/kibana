@@ -181,6 +181,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     newTermsFields,
     shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
     groupByFields,
+    esqlOptions,
   } = formData;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
@@ -484,11 +485,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       : undefined
   );
 
-  console.log('INSIDE FORM', JSON.stringify(esqlFieldOptions, null, 4));
-  const isEsqlGrouping =
-    isEsqlRule(ruleType) && typeof queryBar.query.query === 'string'
-      ? /\sstats\s.*\sby\s/.test(queryBar.query.query)
-      : false;
+  const isEsqlGrouping = true;
+  // const isEsqlGrouping =
+  //   isEsqlRule(ruleType) && typeof queryBar.query.query === 'string'
+  //     ? /\sstats\s.*\sby\s/.test(queryBar.query.query)
+  //     : false;
 
   const { getEsqlFields } = useEsqlQuery();
 
@@ -496,6 +497,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlSuppressionMode }) => (
       <EuiRadioGroup
         idSelected={esqlSuppressionMode.value ?? GroupByOptions.PerRuleExecution}
+        disabled={!esqlOptions?.groupByFields?.length}
         options={[
           {
             id: GroupByOptions.PerRuleExecution,
@@ -511,7 +513,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   durationValueField={esqlSuppressionDurationValue}
                   durationUnitField={esqlSuppressionDurationUnit}
                   minimumValue={1}
-                  isDisabled={esqlSuppressionMode.value === GroupByOptions.PerRuleExecution}
+                  isDisabled={
+                    esqlSuppressionMode.value === GroupByOptions.PerRuleExecution ||
+                    !esqlOptions?.groupByFields?.length
+                  }
                 />
               </>
             ),
@@ -523,7 +528,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         data-test-subj="esqlSuppressionOptions"
       />
     ),
-    []
+    [esqlOptions?.groupByFields?.length]
   );
 
   const AlertsSuppressionMissingFields = useCallback(

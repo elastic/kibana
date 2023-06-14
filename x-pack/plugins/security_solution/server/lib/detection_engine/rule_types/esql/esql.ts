@@ -94,58 +94,58 @@ export const esqlExecutor = async ({
     const suppressionDuration = completeRule.ruleParams.esqlParams?.suppressionDuration;
     const suppressionFields = completeRule.ruleParams.esqlParams?.groupByFields ?? [];
 
-    if (isGrouping) {
-      const wrappedAlerts = wrapGroupedEsqlAlerts({
-        results: response,
-        spaceId,
-        completeRule,
-        mergeStrategy,
-        alertTimestampOverride,
-        ruleExecutionLogger,
-        publicBaseUrl,
-        tuple,
-        suppressionFields,
-      });
+    // if (isGrouping) {
+    const wrappedAlerts = wrapGroupedEsqlAlerts({
+      results: response,
+      spaceId,
+      completeRule,
+      mergeStrategy,
+      alertTimestampOverride,
+      ruleExecutionLogger,
+      publicBaseUrl,
+      tuple,
+      suppressionFields,
+    });
 
-      const suppressionWindow = suppressionDuration
-        ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
-        : completeRule.ruleParams.from;
+    const suppressionWindow = suppressionDuration
+      ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
+      : completeRule.ruleParams.from;
 
-      const bulkCreateResult = await bulkCreateWithSuppression({
-        alertWithSuppression,
-        ruleExecutionLogger,
-        wrappedDocs: wrappedAlerts,
-        services,
-        suppressionWindow,
-        alertTimestampOverride,
-      });
-      addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-      ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
-    } else {
-      const wrappedAlerts = wrapEsqlAlerts({
-        results: response,
-        spaceId,
-        completeRule,
-        mergeStrategy,
-        alertTimestampOverride,
-        ruleExecutionLogger,
-        publicBaseUrl,
-        tuple,
-      });
+    const bulkCreateResult = await bulkCreateWithSuppression({
+      alertWithSuppression,
+      ruleExecutionLogger,
+      wrappedDocs: wrappedAlerts,
+      services,
+      suppressionWindow,
+      alertTimestampOverride,
+    });
+    addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+    ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+    // } else {
+    //   const wrappedAlerts = wrapEsqlAlerts({
+    //     results: response,
+    //     spaceId,
+    //     completeRule,
+    //     mergeStrategy,
+    //     alertTimestampOverride,
+    //     ruleExecutionLogger,
+    //     publicBaseUrl,
+    //     tuple,
+    //   });
 
-      if (wrappedAlerts?.length) {
-        const createResult = await bulkCreate(
-          wrappedAlerts,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          })
-        );
+    //   if (wrappedAlerts?.length) {
+    //     const createResult = await bulkCreate(
+    //       wrappedAlerts,
+    //       undefined,
+    //       createEnrichEventsFunction({
+    //         services,
+    //         logger: ruleExecutionLogger,
+    //       })
+    //     );
 
-        addToSearchAfterReturn({ current: result, next: createResult });
-      }
-    }
+    //     addToSearchAfterReturn({ current: result, next: createResult });
+    //   }
+    // }
 
     if (response.values.length > ruleParams.maxSignals) {
       result.warningMessages.push(getMaxSignalsWarning());
