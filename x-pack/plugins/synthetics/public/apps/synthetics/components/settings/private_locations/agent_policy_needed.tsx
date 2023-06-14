@@ -33,7 +33,7 @@ export const AgentPolicyNeeded = () => {
               fill
               href={`${basePath}/app/fleet/policies?create`}
               color="primary"
-              isDisabled={!canSave}
+              isDisabled={!canSave || !canCreateAgentPolicies}
             >
               {CREATE_AGENT_POLICY}
             </EuiButton>
