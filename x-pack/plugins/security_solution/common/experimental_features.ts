@@ -65,7 +65,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the automated endpoint response action in rule + alerts
    */
-  endpointResponseActionsEnabled: true,
+  endpointResponseActionsEnabled: false,
 
   /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
