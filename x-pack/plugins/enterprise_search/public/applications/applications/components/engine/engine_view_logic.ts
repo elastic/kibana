@@ -8,7 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { SchemaField } from '../../../../../common/types/engines';
+import { SchemaField } from '../../../../../common/types/search_applications';
 
 import { KibanaLogic } from '../../../shared/kibana';
 

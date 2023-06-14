@@ -25,7 +25,7 @@ import {
   PrivateLocation,
 } from '../../../common/runtime_types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   DEFAULT_FIELDS,
   DEFAULT_NAMESPACE_STRING,
@@ -39,7 +39,7 @@ import { StatusAlertService } from '../default_alerts/status_alert_service';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
-  path: API_URLS.SYNTHETICS_MONITORS,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
   validate: {
     body: schema.any(),
     query: schema.object({
