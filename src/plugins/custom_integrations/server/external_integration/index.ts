@@ -42,8 +42,7 @@ export const integrations: ExternalIntegration[] = [
     }),
     icon: 'logo_confluent.svg',
     description: i18n.translate('customIntegrations.placeholders.EscDescription', {
-      defaultMessage:
-        'Collect data from Confluent Cloud with the Elastic Sink Connector.',
+      defaultMessage: 'Collect data from Confluent Cloud with the Elastic Sink Connector.',
     }),
     docUrlTemplate: `https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch`,
     categories: ['message_queue', 'observability', 'security'],
