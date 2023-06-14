@@ -50,18 +50,18 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
     }
   }
 
-  async function unloadTSDBDataView(
-    index: string,
-    archivePath: string,
-    archiveDataViewPath: string
-  ) {
-    log.info(`removing ${index} index...`);
-    await esArchiver.unload(archivePath);
-    log.info(`removing the TSDB dataView...`);
-    await kibanaServer.importExport.unload(archiveDataViewPath);
-    log.info(`unsetting the TSDB dataView default...`);
-    await kibanaServer.uiSettings.unset('defaultIndex');
-  }
+  // async function unloadTSDBDataView(
+  //   index: string,
+  //   archivePath: string,
+  //   archiveDataViewPath: string
+  // ) {
+  //   log.info(`removing ${index} index...`);
+  //   await esArchiver.unload(archivePath);
+  //   log.info(`removing the TSDB dataView...`);
+  //   await kibanaServer.importExport.unload(archiveDataViewPath);
+  //   log.info(`unsetting the TSDB dataView default...`);
+  //   await kibanaServer.uiSettings.unset('defaultIndex');
+  // }
 
   async function downsampleTSDBIndex(index: string, customDataView?: string) {
     const downsampled = {

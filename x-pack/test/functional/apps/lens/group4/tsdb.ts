@@ -11,6 +11,8 @@ import moment from 'moment';
 import { createTSDBHelper } from './_tsdb_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const TEST_DOC_COUNT = 100;
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
@@ -20,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const TSDBHelper = createTSDBHelper({ getService });
 
-  const createDocs = async (esIndex: string) => {
+  const createDocs = async (esIndex: string, startTime: string) => {
     type TestDoc = Record<string, string | string[] | number | null | Record<string, unknown>>;
     const testDocTemplate: TestDoc = {
       agent: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
@@ -52,20 +54,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       bytes_gauge: 0,
       bytes_counter: 0,
     };
-    const TEST_DOC_COUNT = 100;
 
-    const docs = Array<TestDoc>(TEST_DOC_COUNT).fill(testDocTemplate);
-    for (const [index, doc] of Object.entries(docs)) {
-      const i = Number(index);
-      const timestamp = moment
-        .utc()
-        .subtract(TEST_DOC_COUNT + i, 'seconds')
-        .format();
-      doc['@timestamp'] = timestamp;
-      doc.utc_time = timestamp;
-      doc.bytes_gauge = Math.floor(Math.random() * 10000 * i);
-      doc.bytes_counter = i * 1000;
-    }
+    const docs = Array<TestDoc>(TEST_DOC_COUNT)
+      .fill(testDocTemplate)
+      .map((templateDoc, i) => {
+        const timestamp = moment
+          .utc(startTime)
+          .add(TEST_DOC_COUNT + i, 'seconds')
+          .format();
+        return {
+          ...templateDoc,
+          '@timestamp': timestamp,
+          utc_time: timestamp,
+          bytes_gauge: Math.floor(Math.random() * 10000 * i),
+          bytes_counter: i * 1000,
+        };
+      });
 
     const res = await es.bulk({
       index: esIndex,
@@ -79,13 +83,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const tsdbIndex = 'kibana_sample_data_logstsdb';
     const tsdbDataView = tsdbIndex;
     const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
+    const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
+    const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
     before(async () => {
       await TSDBHelper.loadIndex(tsdbIndex, tsdbEsArchive);
       await TSDBHelper.configureDataView(tsdbDataView, '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51');
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
-        'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
+        'timepicker:timeDefaults': `{ "from": ${fromTime}, "to": ${toTime} }`,
       });
     });
 
@@ -304,7 +310,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ['request', 'url']
         );
         // add some more data when upgraded
-        await createDocs(streamIndex);
+        await createDocs(streamIndex, toTime);
+        // go to the
+        await PageObjects.lens.goToTimeRange(
+          fromTime,
+          moment
+            .utc(toTime)
+            .add(TEST_DOC_COUNT + 1, 'seconds')
+            .format() // consider also new documents
+        );
       });
 
       after(async () => {
@@ -315,9 +329,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await TSDBHelper.configureDataView(`${streamDataView}-tsdb`);
         });
+
         after(async () => {
           await TSDBHelper.unloadDataView('');
         });
+
+        beforeEach(async () => {
+          await PageObjects.lens.removeLayer();
+        });
+
+        for (const fieldType of ['gauge', 'counter']) {
+          it(`should visualize a date histogram chart for ${fieldType} field`, async () => {
+            await PageObjects.lens.configureDimension({
+              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+              operation: 'date_histogram',
+              field: '@timestamp',
+            });
+
+            await PageObjects.lens.configureDimension({
+              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+              operation: 'min',
+              field: `bytes_${fieldType}`,
+            });
+            await PageObjects.lens.waitForVisualization('xyVisChart');
+          });
+        }
       });
       describe('dataView contains upgraded stream + another tsdb index', () => {
         before(async () => {
