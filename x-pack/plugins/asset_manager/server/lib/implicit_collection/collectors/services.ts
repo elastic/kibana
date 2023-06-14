@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { withSpan } from './helpers';
@@ -18,7 +19,7 @@ export async function collectServices({
   afterKey,
 }: CollectorOptions) {
   const { traces, serviceMetrics, serviceLogs } = sourceIndices;
-  const dsl = {
+  const dsl: estypes.SearchRequest = {
     index: [traces, serviceMetrics, serviceLogs],
     size: 0,
     _source: false,
@@ -83,7 +84,7 @@ export async function collectServices({
   };
 
   if (afterKey) {
-    (dsl.aggs.services.composite as any).after = afterKey;
+    dsl.aggs!.services!.composite!.after = afterKey;
   }
 
   const esResponse = await client.search(dsl);
