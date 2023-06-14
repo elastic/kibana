@@ -407,6 +407,22 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions[0].state).toEqual({
         ...state,
+        fieldList: [
+          {
+            id: 'newid',
+            meta: {
+              type: 'number',
+            },
+            name: 'bytes',
+          },
+          {
+            id: 'newid',
+            meta: {
+              type: 'string',
+            },
+            name: 'dest',
+          },
+        ],
         layers: {
           newid: {
             allColumns: [
