@@ -108,7 +108,7 @@ export function getAnalyticsJobsStats(
 
 export const getAnalyticsFactory = (
   setAnalytics: React.Dispatch<React.SetStateAction<DataFrameAnalyticsListRow[]>>,
-  setAnalyticsStats: React.Dispatch<React.SetStateAction<AnalyticStatsBarStats | undefined>>,
+  setAnalyticsStats: (update: AnalyticStatsBarStats | undefined) => void,
   setErrorMessage: React.Dispatch<
     React.SetStateAction<GetDataFrameAnalyticsStatsResponseError | undefined>
   >,

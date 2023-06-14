@@ -12,7 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { useStorage } from '@kbn/ml-local-storage';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type AnalyticStatsBarStats } from '../../../components/stats_bar';
-import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
+import {
+  OverviewStatsBar,
+  type StatEntry,
+} from '../../../components/collapsible_panel/collapsible_panel';
 import {
   ML_OVERVIEW_PANELS,
   MlStorageKey,
@@ -36,9 +39,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   const refresh = useRefresh();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
-  const [analyticsStats, setAnalyticsStats] = useState<
-    Array<{ label: string; value: number }> | undefined
-  >(undefined);
+  const [analyticsStats, setAnalyticsStats] = useState<StatEntry[] | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<GetDataFrameAnalyticsStatsResponseError>();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -51,7 +52,9 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
     TMlStorageMapped<typeof ML_OVERVIEW_PANELS>
   >(ML_OVERVIEW_PANELS, overviewPanelDefaultState);
 
-  const setAnalyticsStatsCustom = useCallback((stats: AnalyticStatsBarStats) => {
+  const setAnalyticsStatsCustom = useCallback((stats: AnalyticStatsBarStats | undefined) => {
+    if (!stats) return;
+
     const result = Object.entries(stats)
       .filter(([k, v]) => v.show)
       .map(([k, v]) => v);
@@ -61,7 +64,6 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
 
   const getAnalytics = getAnalyticsFactory(
     setAnalytics,
-    // @ts-ignore
     setAnalyticsStatsCustom,
     setErrorMessage,
     setIsInitialized,
