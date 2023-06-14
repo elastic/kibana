@@ -72,7 +72,7 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
-                {'GET _application/search_application/<name>/'}
+                {`GET _application/search_application/${engineName}/`}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -116,7 +116,7 @@ export const SearchApplicationAPI = () => {
                   apiKeyDocumentation: (
                     <EuiLink href={docLinks.apiKeys}>
                       <FormattedMessage
-                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning.APIkeyDocLink"
+                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning.documentationLink"
                         defaultMessage="API key"
                       />
                     </EuiLink>
@@ -132,7 +132,7 @@ export const SearchApplicationAPI = () => {
                 iconSide="left"
                 iconType="plusInCircleFilled"
                 onClick={openGenerateModal}
-                data-telemetry-id="entSearchApplications-searchApplication-safeSearchApi-step2-createApiKeyButton"
+                data-telemetry-id="entSearchApplications-safeSearchApi-step2-createApiKeyButton"
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.createAPIKeyButton',
@@ -146,7 +146,7 @@ export const SearchApplicationAPI = () => {
               <EuiButton
                 iconSide="left"
                 iconType="popout"
-                data-telemetry-id="entSearchApplications-searchApplication-safeSearchApi-step2-viewKeysButton"
+                data-telemetry-id="entSearchApplications-safeSearchApi-step2-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {
                     shouldNotCreateHref: true,
@@ -188,7 +188,7 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
-                {'https://[elasticsearch]/_application/search_application/<name>/_search'}
+                {`${elasticsearchUrl(cloudContext)}/_application/search_application/<name>/_search`}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -197,7 +197,7 @@ export const SearchApplicationAPI = () => {
       title: i18n.translate(
         'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.title',
         {
-          defaultMessage: "Copy your search application's endpoint",
+          defaultMessage: 'Copy your Safe Search endpoint',
         }
       ),
     },
@@ -206,7 +206,7 @@ export const SearchApplicationAPI = () => {
       title: i18n.translate(
         'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.title',
         {
-          defaultMessage: 'Learn how to call your endpoints',
+          defaultMessage: 'Learn how to call your endpoint',
         }
       ),
     },
@@ -234,10 +234,10 @@ export const SearchApplicationAPI = () => {
               <EuiLink
                 data-test-subj="safe-search-documentation-link"
                 href="#"
-                data-telemetry-id="entSearchApplications-searchTemplate-documentation-viewDocumentaion"
+                data-telemetry-id="entSearchApplications-safeSearchApi-documentation-viewDocumentaion"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocumentationLink',
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocLink',
                   {
                     defaultMessage: 'Safe Search API',
                   }
@@ -251,7 +251,7 @@ export const SearchApplicationAPI = () => {
                 data-telemetry-id="entSearchApplications-searchTemplate-documentation-viewDocumentaion"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocumentationLink',
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.searchTemplateDocLink',
                   {
                     defaultMessage: 'search template',
                   }
@@ -270,7 +270,7 @@ export const SearchApplicationAPI = () => {
                 data-test-subj="safe-search-documentation-link"
                 href="#"
                 target="_blank"
-                data-telemetry-id="entSearchApplications-documentation-viewDocumentaion"
+                data-telemetry-id="entSearchApplications-safeSearchApi-learnMoreDocumentation-viewDocumentaion"
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocumentationLink',

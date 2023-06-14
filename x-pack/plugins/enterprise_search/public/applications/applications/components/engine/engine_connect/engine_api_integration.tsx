@@ -13,6 +13,7 @@ import { compressToEncodedURIComponent } from 'lz-string';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiSpacer,
   EuiTab,
@@ -32,14 +33,25 @@ import { EngineApiLogic } from './engine_api_logic';
 
 import { elasticsearchUrl } from './search_application_api';
 
-const SearchUISnippet = (esUrl: string, engineName: string, apiKey: string) => `
-import EnginesAPIConnector from "@elastic/search-ui-engines-connector";
+const clientSnippet = (esUrl: string, searchApplicationName: string, apiKey: string) => `
+import Client from '@elastic/search-application-client'
+// or through CDN
+// const Client = window['SearchApplicationClient']
 
-const connector = new EnginesAPIConnector({
-  host: "${esUrl}",
-  engineName: "${engineName}",
-  apiKey: "${apiKey || '<YOUR_API_KEY>'}"
-});`;
+const request = Client(
+  ${searchApplicationName},
+  ${esUrl},
+  ${apiKey},
+  {
+    // optional configuration
+  }
+)
+
+const results = await request()
+  .query('pizza')
+  .addParameter('myCustomParameter', 'example value')
+  .search()
+`;
 
 const cURLSnippet = (esUrl: string, engineName: string, apiKey: string, params: unknown) => `
 curl --location --request POST '${esUrl}/_application/search_application/${engineName}/_search' \\
@@ -69,7 +81,7 @@ const consoleRequest = (searchApplicationName: string, params: unknown) =>
   `POST /_application/search_application/${searchApplicationName}/_search
 ${JSON.stringify({ params }, null, 2)}`;
 
-type TabId = 'apirequest' | 'curl' | 'searchui';
+type TabId = 'apirequest' | 'client' | 'curl';
 
 interface Tab {
   code: string;
@@ -96,9 +108,20 @@ export const EngineApiIntegrationStage: React.FC = () => {
       copy: false,
       language: 'http',
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplications.safeSearchApi.step1.apirequestTitle',
+        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.tab.apirequestTitle',
         {
           defaultMessage: 'API Request',
+        }
+      ),
+    },
+    client: {
+      code: clientSnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
+      copy: true,
+      language: 'javascript',
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.tab.clientTitle',
+        {
+          defaultMessage: 'Javascript Client',
         }
       ),
     },
@@ -107,20 +130,9 @@ export const EngineApiIntegrationStage: React.FC = () => {
       copy: true,
       language: 'bash',
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplications.safeSearchApi.step2.curlTitle',
+        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.tab.curlTitle',
         {
           defaultMessage: 'cURL',
-        }
-      ),
-    },
-    searchui: {
-      code: SearchUISnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
-      copy: true,
-      language: 'javascript',
-      title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplications.safeSearchApi.step3.searchUITitle',
-        {
-          defaultMessage: 'Search UI',
         }
       ),
     },
@@ -144,13 +156,13 @@ export const EngineApiIntegrationStage: React.FC = () => {
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.engine.api.step3.intro"
-            defaultMessage="Simplify your API calls by integrating one of our {clientsDocumentationLink}."
+            id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.description"
+            defaultMessage="Simplify your API calls by using one of our {clientsDocumentationLink}."
             values={{
               clientsDocumentationLink: (
                 <EuiLink href={docLinks.clientsGuide}>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.safeSearchApi.step3.clientDocumenation',
+                    'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.clientsDocumenation',
                     {
                       defaultMessage: 'programming language clients',
                     }
@@ -168,35 +180,99 @@ export const EngineApiIntegrationStage: React.FC = () => {
             key={tabId}
             isSelected={selectedTab === tabId}
             onClick={() => setSelectedTab(tabId as TabId)}
-            data-telemetry-id={`entSearchApplications-api-integration-tab-${tabId}`}
+            data-telemetry-id={`entSearchApplications-safeSearchApi-integration-tab-${tabId}`}
           >
             {tab.title}
           </EuiTab>
         ))}
       </EuiTabs>
       <EuiSpacer size="l" />
-      {selectedTab === 'apirequest' && (
-        <EuiText color="inherit">
-          <h5>
-            {i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.apiCall', {
-              defaultMessage: 'API Call',
-            })}
-          </h5>
-        </EuiText>
+      {selectedTab === 'client' && (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiText>
+              <h5>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.installationTitle',
+                  {
+                    defaultMessage: 'Installation',
+                  }
+                )}
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="inherit">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.npmInstallDescription',
+                  {
+                    defaultMessage:
+                      'Search application client is accessible from NPM package registry',
+                  }
+                )}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiCodeBlock isCopyable lang="bash">
+              {`npm install @elastic/search-application-client`}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiText color="inherit">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.cdnInstallDescription',
+                  {
+                    defaultMessage: 'or via CDN',
+                  }
+                )}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiCodeBlock isCopyable lang="html">
+              {`<script src="https://cdn.jsdelivr.net/npm/@elastic/search-application-client@latest"></script>`}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiText color="inherit">
+              <h5>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.clientUsageTitle',
+                  {
+                    defaultMessage: 'Usage',
+                  }
+                )}
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.clientUsageDescription"
+                defaultMessage="To get the most out of the client, use the javascript client's example template and follow our {searchapplicationClientDocLink} on building a search experience."
+                values={{
+                  searchapplicationClientDocLink: (
+                    <EuiLink href="#">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.clientDocumenation',
+                        {
+                          defaultMessage: 'how to guide',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
-      <EuiSpacer size="s" />
-      <EuiCodeBlock isCopyable={Tabs[selectedTab].copy} lang={Tabs[selectedTab].language}>
-        {Tabs[selectedTab].code}
-      </EuiCodeBlock>
-      <EuiSpacer size="l" />
-      <EuiText color="inherit">
-        <h5>
-          {i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.apiRequestBody', {
-            defaultMessage: 'API Request Body',
-          })}
-        </h5>
-      </EuiText>
-      <EuiSpacer size="s" />
       <EuiCodeBlock isCopyable={Tabs[selectedTab].copy} language={Tabs[selectedTab].language}>
         {Tabs[selectedTab].code}
       </EuiCodeBlock>
@@ -206,7 +282,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
           <EuiFlexGroup direction="column" alignItems="flexEnd">
             <EuiLink href={consolePreviewLink} target="_blank">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.api.step3.apiRequestConsoleButton"
+                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.apiRequestConsoleButton"
                 defaultMessage="Try in console"
               />
             </EuiLink>
