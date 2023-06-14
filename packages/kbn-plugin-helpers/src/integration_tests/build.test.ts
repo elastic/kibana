@@ -68,6 +68,14 @@ it('builds a generated plugin into a viable archive', async () => {
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
+     info run bazel and build required artifacts for the optimizer
+     │      INFO: Invocation ID: 0a55204d-302f-409d-b104-18c73f7ec8ba
+     │      INFO: Analyzed 3 targets (0 packages loaded, 0 targets configured).
+     │      INFO: Found 3 targets...
+     │      INFO: Elapsed time: <time>, Critical Path: <time>
+     │      INFO: 1 process: 1 internal.
+     │      
+     succ bazel run successfully and artifacts were created
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer
