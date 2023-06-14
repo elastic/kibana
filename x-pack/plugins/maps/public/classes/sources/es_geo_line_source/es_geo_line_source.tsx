@@ -39,7 +39,10 @@ import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
 
-type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'splitField' | 'sortField'>;
+type ESGeoLineSourceSyncMeta = Pick<
+  ESGeoLineSourceDescriptor,
+  'groupByTimeseries' | 'splitField' | 'sortField'
+>;
 
 const MAX_TRACKS = 250;
 
@@ -67,9 +70,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
       throw new Error('Cannot create an ESGeoLineSource without a geoField');
     }
 
-    const groupByTimeseries = typeof normalizedDescriptor.groupByTimeseries === 'boolean'
-      ? normalizedDescriptor.groupByTimeseries
-      : false;
+    const groupByTimeseries =
+      typeof normalizedDescriptor.groupByTimeseries === 'boolean'
+        ? normalizedDescriptor.groupByTimeseries
+        : false;
     if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.splitField)) {
       throw new Error('Cannot create an ESGeoLineSource without a splitField');
     }
