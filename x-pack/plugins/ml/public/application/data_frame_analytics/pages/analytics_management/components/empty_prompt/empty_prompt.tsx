@@ -80,7 +80,7 @@ export const AnalyticsEmptyPrompt: FC = () => {
         <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
           <FormattedMessage
             id="xpack.ml.common.readDocumentationLink"
-            defaultMessage="Documentation"
+            defaultMessage="Read documentation"
           />
         </EuiLink>,
       ]}
