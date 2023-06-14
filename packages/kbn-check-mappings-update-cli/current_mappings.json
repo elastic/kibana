@@ -86,13 +86,6 @@
       },
       "ownerId": {
         "type": "keyword"
-      },
-      "skip": {
-        "properties": {
-          "attempts": {
-            "type": "integer"
-          }
-        }
       }
     }
   },

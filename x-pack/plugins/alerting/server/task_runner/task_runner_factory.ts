@@ -102,7 +102,7 @@ export class TaskRunnerFactory {
       RecoveryActionGroupId,
       AlertData
     >,
-    { taskInstance, taskConfig }: RunContext,
+    { taskInstance, requeueInvalidTasksConfig }: RunContext,
     inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
@@ -118,6 +118,12 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId,
       AlertData
-    >({ ruleType, taskInstance, taskConfig, context: this.taskRunnerContext!, inMemoryMetrics });
+    >({
+      ruleType,
+      taskInstance,
+      requeueInvalidTasksConfig,
+      context: this.taskRunnerContext!,
+      inMemoryMetrics,
+    });
   }
 }
