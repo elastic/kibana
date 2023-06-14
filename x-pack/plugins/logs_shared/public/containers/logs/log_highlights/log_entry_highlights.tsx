@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { LogViewReference } from '../../../../common';
 import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';

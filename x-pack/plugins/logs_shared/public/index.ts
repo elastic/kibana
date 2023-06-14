@@ -27,6 +27,12 @@ export {
   LogPositionStateProvider,
   useLogPositionStateContext,
 } from './containers/logs/log_position';
+export {
+  LogHighlightsStateProvider,
+  useLogHighlightsStateContext,
+} from './containers/logs/log_highlights';
+export type { LogSummaryBuckets, WithSummaryProps } from './containers/logs/log_summary';
+export { useLogSummary, WithSummary } from './containers/logs/log_summary';
 export { useLogEntryFlyout } from './components/logging/log_entry_flyout';
 
 // Shared components

@@ -17,42 +17,11 @@ import {
   LogViewsStaticConfig,
 } from '../../../common/log_views';
 import { createLogViewMock } from '../../../common/log_views/log_view.mock';
-import { LogsSharedSource } from '../../lib/sources';
-import { createLogsSharedSourcesMock } from '../../lib/sources/mocks';
 import {
   extractLogViewSavedObjectReferences,
   logViewSavedObjectName,
 } from '../../saved_objects/log_view';
-import { getAttributesFromSourceConfiguration, LogViewsClient } from './log_views_client';
-
-describe('getAttributesFromSourceConfiguration function', () => {
-  it('converts the index_pattern log indices type to data_view', () => {
-    const logViewAttributes = getAttributesFromSourceConfiguration(basicTestSourceConfiguration);
-
-    expect(logViewAttributes.logIndices).toEqual({
-      type: 'data_view',
-      dataViewId: 'INDEX_PATTERN_ID',
-    });
-  });
-
-  it('preserves the index_name log indices type', () => {
-    const logViewAttributes = getAttributesFromSourceConfiguration({
-      ...basicTestSourceConfiguration,
-      configuration: {
-        ...basicTestSourceConfiguration.configuration,
-        logIndices: {
-          type: 'index_name',
-          indexName: 'INDEX_NAME',
-        },
-      },
-    });
-
-    expect(logViewAttributes.logIndices).toEqual({
-      type: 'index_name',
-      indexName: 'INDEX_NAME',
-    });
-  });
-});
+import { LogViewsClient } from './log_views_client';
 
 describe('LogViewsClient class', () => {
   it('getLogView resolves the default id to a real saved object id if it exists', async () => {
@@ -116,9 +85,9 @@ describe('LogViewsClient class', () => {
   });
 
   it('getLogView preserves the default id for fallback lookups', async () => {
-    const { infraSources, logViewsClient, savedObjectsClient } = createLogViewsClient();
+    const { logViewFallbackHandler, logViewsClient, savedObjectsClient } = createLogViewsClient();
 
-    infraSources.getSourceConfiguration.mockResolvedValue(basicTestSourceConfiguration);
+    logViewFallbackHandler.mockResolvedValue(basicTestSourceConfiguration);
 
     savedObjectsClient.find.mockResolvedValue({
       total: 0,
@@ -129,10 +98,9 @@ describe('LogViewsClient class', () => {
 
     await logViewsClient.getLogView(defaultLogViewId);
 
-    expect(infraSources.getSourceConfiguration).toHaveBeenCalledWith(
-      savedObjectsClient,
-      defaultLogViewId
-    );
+    expect(logViewFallbackHandler).toHaveBeenCalledWith(defaultLogViewId, {
+      soClient: savedObjectsClient,
+    });
   });
 
   it('putLogView resolves the default id to a real saved object id if one exists', async () => {
@@ -364,7 +332,7 @@ const createLogViewsClient = () => {
   const logger = loggerMock.create();
   const dataViews = dataViewsServiceMock;
   const savedObjectsClient = savedObjectsClientMock.create();
-  const infraSources = createLogsSharedSourcesMock();
+  const logViewFallbackHandler = jest.fn();
   const internalLogViews = new Map<string, LogView>();
   const logViewStaticConfig: LogViewsStaticConfig = {
     messageFields: ['message'],
@@ -374,14 +342,14 @@ const createLogViewsClient = () => {
     logger,
     Promise.resolve(dataViews),
     savedObjectsClient,
-    infraSources,
+    logViewFallbackHandler,
     internalLogViews,
     logViewStaticConfig
   );
 
   return {
     dataViews,
-    infraSources,
+    logViewFallbackHandler,
     internalLogViews,
     logViewStaticConfig,
     logViewsClient,
@@ -389,7 +357,7 @@ const createLogViewsClient = () => {
   };
 };
 
-const basicTestSourceConfiguration: LogsSharedSource = {
+const basicTestSourceConfiguration = {
   id: 'ID',
   origin: 'stored',
   configuration: {

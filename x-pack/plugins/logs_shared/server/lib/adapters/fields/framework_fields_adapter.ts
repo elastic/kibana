@@ -6,8 +6,8 @@
  */
 
 import { FieldSpec } from '@kbn/data-plugin/common';
-import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { isNoSuchRemoteClusterMessage, NoSuchRemoteClusterError } from '../../sources/errors';
+import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
+import { isNoSuchRemoteClusterMessage, NoSuchRemoteClusterError } from './errors';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 
@@ -19,7 +19,7 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
   }
 
   public async getIndexFields(
-    requestContext: InfraPluginRequestHandlerContext,
+    requestContext: LogsSharedPluginRequestHandlerContext,
     indices: string
   ): Promise<IndexFieldDescriptor[]> {
     const indexPatternsService = await this.framework.getIndexPatternsServiceWithRequestContext(

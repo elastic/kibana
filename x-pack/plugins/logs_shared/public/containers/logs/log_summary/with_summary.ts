@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-import { useLogPositionStateContext, useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import { useSelector } from '@xstate/react';
-import stringify from 'json-stable-stringify';
 import useThrottle from 'react-use/lib/useThrottle';
-import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state';
+import { useLogPositionStateContext, useLogViewContext } from '../../..';
 import { RendererFunction } from '../../../utils/typed_react';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
 
-export const WithSummary = ({
-  children,
-}: {
+export interface WithSummaryProps {
+  serializedParsedQuery: string | null;
   children: RendererFunction<{
     buckets: LogSummaryBuckets;
     start: number | null;
     end: number | null;
   }>;
-}) => {
+}
+
+export const WithSummary = ({ serializedParsedQuery, children }: WithSummaryProps) => {
   const { logViewReference } = useLogViewContext();
-  const serializedParsedQuery = useSelector(useLogStreamPageStateContext(), (logStreamPageState) =>
-    logStreamPageState.matches({ hasLogViewIndices: 'initialized' })
-      ? stringify(logStreamPageState.context.parsedQuery)
-      : null
-  );
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
 
   // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls

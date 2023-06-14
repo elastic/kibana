@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { exhaustMap, map, Observable } from 'rxjs';
 import { HttpHandler } from '@kbn/core-http-browser';
-import { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { LogViewReference } from '../../../../common';
 import { useObservableState, useReplaySubject } from '../../../utils/use_observable';
 import { fetchLogSummary } from './api/fetch_log_summary';
 import { LogEntriesSummaryRequest, LogEntriesSummaryResponse } from '../../../../common/http_api';

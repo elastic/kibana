@@ -15,7 +15,12 @@ import {
   useLogPositionStateContext,
   useLogStreamContext,
   useLogViewContext,
+  useLogHighlightsStateContext,
+  WithSummary,
+  WithSummaryProps,
 } from '@kbn/logs-shared-plugin/public';
+import { useSelector } from '@xstate/react';
+import stringify from 'json-stable-stringify';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { LogEntry } from '../../../../common/log_entry';
@@ -27,8 +32,6 @@ import {
   useLogEntryFlyoutContext,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
-import { useLogHighlightsStateContext } from '../../../containers/logs/log_highlights';
-import { WithSummary } from '../../../containers/logs/log_summary';
 import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
@@ -36,6 +39,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import {
   LogStreamPageActorRef,
   LogStreamPageCallbacks,
+  useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
 import { type ParsedQuery } from '../../../observability_logs/log_stream_query_state';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
@@ -269,7 +273,7 @@ export const StreamPageLogsContent = React.memo<{
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
             return (
               <LogPageMinimapColumn ref={measureRef}>
-                <WithSummary>
+                <WithSummaryAndQuery>
                   {({ buckets, start, end }) => (
                     <LogMinimap
                       start={start}
@@ -285,7 +289,7 @@ export const StreamPageLogsContent = React.memo<{
                       target={visibleMidpointTime}
                     />
                   )}
-                </WithSummary>
+                </WithSummaryAndQuery>
               </LogPageMinimapColumn>
             );
           }}
@@ -294,6 +298,16 @@ export const StreamPageLogsContent = React.memo<{
     </>
   );
 });
+
+const WithSummaryAndQuery = (props: Omit<WithSummaryProps, 'serializedParsedQuery'>) => {
+  const serializedParsedQuery = useSelector(useLogStreamPageStateContext(), (logStreamPageState) =>
+    logStreamPageState.matches({ hasLogViewIndices: 'initialized' })
+      ? stringify(logStreamPageState.context.parsedQuery)
+      : null
+  );
+
+  return <WithSummary serializedParsedQuery={serializedParsedQuery} {...props} />;
+};
 
 type InitializedLogStreamPageState = MatchedStateFromActor<
   LogStreamPageActorRef,

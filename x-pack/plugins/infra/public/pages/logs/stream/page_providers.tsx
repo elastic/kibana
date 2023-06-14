@@ -8,6 +8,7 @@
 import stringify from 'json-stable-stringify';
 import React, { useMemo } from 'react';
 import {
+  LogHighlightsStateProvider,
   LogPositionStateProvider,
   LogStreamProvider,
   useLogPositionStateContext,
@@ -19,7 +20,6 @@ import {
   LogStreamPageCallbacks,
 } from '../../../observability_logs/log_stream_page/state';
 import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
-import { LogHighlightsStateProvider } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
