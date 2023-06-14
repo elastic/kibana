@@ -40,8 +40,6 @@ export enum AggregationType {
   P99 = '99th',
 }
 
-export const INTERVAL_MULTIPLIER_FOR_LOOKBACK = 5;
-
 export interface PreviewChartResponseItem {
   name: string;
   data: Array<{ x: number; y: number | null }>;

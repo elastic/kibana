@@ -16,7 +16,7 @@ export interface AlertMetadata {
   end?: string;
 }
 
-const BUCKET_SIZE = 20;
+export const BUCKET_SIZE = 5;
 
 export function getIntervalAndTimeRange({
   windowSize,

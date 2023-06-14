@@ -116,7 +116,7 @@ export function TransactionDurationRuleType(props: Props) {
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/transaction_duration/chart_preview',
           {

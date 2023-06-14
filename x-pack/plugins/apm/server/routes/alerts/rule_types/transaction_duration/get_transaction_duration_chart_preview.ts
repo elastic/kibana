@@ -10,7 +10,6 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AggregationType,
   ApmRuleType,
-  INTERVAL_MULTIPLIER_FOR_LOOKBACK,
   PreviewChartResponse,
 } from '../../../../../common/rules/apm_rule_types';
 import {
@@ -34,7 +33,6 @@ import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -52,6 +50,7 @@ export async function getTransactionDurationChartPreview({
     transactionType,
     transactionName,
     interval,
+    start,
     end,
     groupBy: groupByFields,
   } = alertParams;
@@ -60,12 +59,6 @@ export async function getTransactionDurationChartPreview({
     apmEventClient,
     kuery: '',
   });
-
-  const intervalAsSeconds = getIntervalInSeconds(interval);
-  const lookbackIntervalAsSeconds =
-    intervalAsSeconds * INTERVAL_MULTIPLIER_FOR_LOOKBACK;
-  const lookbackIntervalAsMs = lookbackIntervalAsSeconds * 1000;
-  const start = end - lookbackIntervalAsMs;
 
   const query = {
     bool: {
