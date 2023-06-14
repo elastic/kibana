@@ -159,6 +159,38 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('filters by a single category', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        const cases = await findCases({ supertest, query: { category: ['foobar'] } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [foobarCategory],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by multiple categories', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+        const otherCategory = await createCase(supertest, { ...postCaseReq, category: 'other' });
+
+        const cases = await findCases({
+          supertest,
+          query: { category: ['foobar', 'other'] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [foobarCategory, otherCategory],
+          count_open_cases: 2,
+        });
+      });
+
       it('filters by reporters', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const cases = await findCases({ supertest, query: { reporters: 'elastic' } });

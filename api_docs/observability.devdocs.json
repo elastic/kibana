@@ -2652,7 +2652,17 @@
             "signature": [
               "{ navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
-              ") => JSX.Element; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+              ") => JSX.Element; registerSections: (sections$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.NavigationSection",
+                "text": "NavigationSection"
+              },
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "common",
@@ -2660,7 +2670,7 @@
                 "section": "def-common.AppDeepLink",
                 "text": "AppDeepLink"
               },
-              "[]; updater$: ",
+              "<string>[]; updater$: ",
               "Subject",
               "<",
               {
@@ -3729,6 +3739,21 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.enableLegacyUptimeApp",
+        "type": "string",
+        "tags": [],
+        "label": "enableLegacyUptimeApp",
+        "description": [],
+        "signature": [
+          "\"observability:enableLegacyUptimeApp\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -7735,7 +7760,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /api/observability/composite_slos 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "; \"GET /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
           "PartialC",
           "<{ query: ",
           "PartialC",
@@ -7769,7 +7794,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"GET /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -7791,7 +7816,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -7813,7 +7838,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"PUT /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"PUT /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -7935,7 +7960,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"POST /api/observability/composite_slos 2023-05-24\": { endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
+          ") | undefined; \"POST /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -8059,7 +8084,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
+          ") | undefined; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -8884,7 +8909,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly coPilot?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; }"
+          "{ readonly coPilot?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -9051,7 +9076,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /api/observability/composite_slos 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "; \"GET /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
           "PartialC",
           "<{ query: ",
           "PartialC",
@@ -9085,7 +9110,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"GET /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -9107,7 +9132,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -9129,7 +9154,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"PUT /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"PUT /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -9251,7 +9276,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"POST /api/observability/composite_slos 2023-05-24\": { endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
+          ") | undefined; \"POST /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -9375,7 +9400,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
+          ") | undefined; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -12354,6 +12379,110 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.syntheticsThrottlingEnabled.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableLegacyUptimeApp",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableLegacyUptimeApp]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.requiresPageReload",
                 "type": "boolean",
                 "tags": [],
                 "label": "requiresPageReload",
