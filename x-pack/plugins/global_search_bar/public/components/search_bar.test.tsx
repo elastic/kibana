@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, render, screen, fireEvent } from '@testing-library/react';
-import { of, BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
-import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import { SearchBar } from './search_bar';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { TrackUiMetricFn } from '../types';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import type { TrackUiMetricFn } from '../types';
+import { SearchBar } from './search_bar';
 
 jest.mock(
   'react-virtualized-auto-sizer',
@@ -52,6 +53,7 @@ describe('SearchBar', () => {
 
   const basePathUrl = '/plugins/globalSearchBar/assets/';
   const darkMode = false;
+  const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
@@ -104,6 +106,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
+          chromeStyle$={chromeStyle$}
           trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
@@ -136,6 +139,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
+          chromeStyle$={chromeStyle$}
           trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
@@ -172,6 +176,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
+          chromeStyle$={chromeStyle$}
           trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
@@ -203,6 +208,7 @@ describe('SearchBar', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
+          chromeStyle$={chromeStyle$}
           trackUiMetric={trackUiMetric}
         />
       </IntlProvider>
@@ -229,3 +235,5 @@ describe('SearchBar', () => {
     expect(trackUiMetric).toHaveBeenCalledTimes(2);
   });
 });
+
+// FIXME: add tests for chromeStyle === 'project'

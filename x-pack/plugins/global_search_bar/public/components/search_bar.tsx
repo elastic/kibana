@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
@@ -22,7 +23,9 @@ import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-sea
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useMountedState from 'react-use/lib/useMountedState';
+import useObservable from 'react-use/lib/useObservable';
 import { Subscription } from 'rxjs';
 import { blurEvent, CLICK_METRIC, COUNT_METRIC, getClickMetric, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
@@ -46,15 +49,25 @@ const EmptyMessage = () => (
   </EuiFlexGroup>
 );
 
+const GLOBAL_SEARCH_BAR_VISIBLE_KEY = 'GLOBAL_SEARCH_BAR_VISIBLE' as const;
+
 export const SearchBar: FC<SearchBarProps> = ({
   globalSearch,
   taggingApi,
   navigateToUrl,
   trackUiMetric,
+  chromeStyle$,
   ...props
 }) => {
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
+  const chromeStyle = useObservable(chromeStyle$);
+
+  // These hooks are used when on chromeStyle set to 'project'
+  const [isVisible, setIsVisible] = useLocalStorage(GLOBAL_SEARCH_BAR_VISIBLE_KEY, false);
+  const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -178,14 +191,16 @@ export const SearchBar: FC<SearchBarProps> = ({
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
         trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SHORTCUT_USED);
-        if (searchRef) {
+        if (chromeStyle === 'project' && !isVisible) {
+          visibilityButtonRef.current?.click();
+        } else if (searchRef) {
           searchRef.focus();
         } else if (buttonRef) {
           (buttonRef.children[0] as HTMLButtonElement).click();
         }
       }
     },
-    [buttonRef, searchRef, trackUiMetric]
+    [chromeStyle, isVisible, buttonRef, searchRef, trackUiMetric]
   );
 
   const onChange = useCallback(
@@ -244,6 +259,47 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   useEvent('keydown', onKeyDown);
 
+  if (chromeStyle === 'project' && !isVisible) {
+    const onShowSearch = () => {
+      setIsVisible(true);
+    };
+    return (
+      <EuiButtonIcon
+        buttonRef={visibilityButtonRef}
+        aria-label={i18nStrings.showSearchAriaText}
+        iconType="search"
+        color="text"
+        onClick={onShowSearch}
+      />
+    );
+  }
+
+  const getAppendForChromeStyle = () => {
+    if (chromeStyle === 'project') {
+      return (
+        <EuiButtonIcon
+          aria-label={i18nStrings.closeSearchAriaText}
+          iconType="cross"
+          color="text"
+          onClick={() => {
+            setIsVisible(false);
+          }}
+        />
+      );
+    }
+
+    if (showAppend) {
+      return (
+        <EuiFormLabel
+          title={keyboardShortcutTooltip}
+          css={{ fontFamily: euiTheme.font.familyCode }}
+        >
+          {isMac ? '⌘/' : '^/'}
+        </EuiFormLabel>
+      );
+    }
+  };
+
   return (
     <EuiSelectableTemplateSitewide
       isPreFiltered
@@ -257,7 +313,14 @@ export const SearchBar: FC<SearchBarProps> = ({
         value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
-        inputRef: setSearchRef,
+        inputRef: (input) => {
+          setSearchRef(input);
+          if (chromeStyle === 'project' && input) {
+            // while the input ref is in flight, we set focus on it
+            // to autofocus the input when it appears
+            input.focus();
+          }
+        },
         compressed: true,
         'aria-label': i18nStrings.placeholderText,
         placeholder: i18nStrings.placeholderText,
@@ -270,14 +333,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           setShowAppend(!searchValue.length);
         },
         fullWidth: true,
-        append: showAppend ? (
-          <EuiFormLabel
-            title={keyboardShortcutTooltip}
-            css={{ fontFamily: euiTheme.font.familyCode }}
-          >
-            {isMac ? '⌘/' : '^/'}
-          </EuiFormLabel>
-        ) : undefined,
+        append: getAppendForChromeStyle(),
       }}
       emptyMessage={<EmptyMessage />}
       noMatchesMessage={<NoMatchesMessage {...props} />}
