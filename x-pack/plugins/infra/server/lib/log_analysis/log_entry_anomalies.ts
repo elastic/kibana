@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import {
   AnomaliesSort,
   getJobId,
@@ -38,7 +39,6 @@ import {
   createLogEntryExamplesQuery,
   logEntryExamplesResponseRT,
 } from './queries/log_entry_examples';
-import { PersistedLogViewReference, ResolvedLogView } from '.@kbn/logs-shared-plugin/common';
 
 interface MappedAnomalyHit {
   id: string;

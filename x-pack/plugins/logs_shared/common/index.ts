@@ -16,6 +16,7 @@ export {
   logViewColumnConfigurationRT,
   logViewReferenceRT,
   persistedLogViewReferenceRT,
+  defaultLogViewAttributes,
 } from './log_views';
 
 // LogView types

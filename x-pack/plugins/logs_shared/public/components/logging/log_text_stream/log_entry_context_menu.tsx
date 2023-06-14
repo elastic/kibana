@@ -35,7 +35,7 @@ interface LogEntryContextMenuProps {
 }
 
 const DEFAULT_MENU_LABEL = i18n.translate(
-  'xpack.infra.logEntryItemView.logEntryActionsMenuToolTip',
+  'xpack.logsShared.logEntryItemView.logEntryActionsMenuToolTip',
   {
     defaultMessage: 'View actions for line',
   }

@@ -43,7 +43,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
           } else {
             columnHeader = firstVisiblePosition
               ? localizedDate(firstVisiblePosition.time)
-              : i18n.translate('xpack.infra.logs.stream.timestampColumnTitle', {
+              : i18n.translate('xpack.logsShared.logs.stream.timestampColumnTitle', {
                   defaultMessage: 'Timestamp',
                 });
           }
@@ -64,7 +64,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
           } else if (typeof columnConfiguration.messageColumn.header === 'string') {
             columnHeader = columnConfiguration.messageColumn.header;
           } else {
-            columnHeader = i18n.translate('xpack.infra.logs.stream.messageColumnTitle', {
+            columnHeader = i18n.translate('xpack.logsShared.logs.stream.messageColumnTitle', {
               defaultMessage: 'Message',
             });
           }

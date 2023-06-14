@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { InferableComponentEnhancerWithProps, ConnectedComponent } from 'react-redux';
 
 export type RendererResult = React.ReactElement<any> | null;
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;

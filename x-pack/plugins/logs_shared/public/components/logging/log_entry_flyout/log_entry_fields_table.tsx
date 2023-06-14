@@ -47,7 +47,7 @@ export const LogEntryFieldsTable: React.FC<{
     () => [
       {
         field: 'field',
-        name: i18n.translate('xpack.infra.logFlyout.fieldColumnLabel', {
+        name: i18n.translate('xpack.logsShared.logFlyout.fieldColumnLabel', {
           defaultMessage: 'Field',
         }),
         sortable: true,
@@ -66,7 +66,7 @@ export const LogEntryFieldsTable: React.FC<{
       },
       {
         field: 'value',
-        name: i18n.translate('xpack.infra.logFlyout.valueColumnLabel', {
+        name: i18n.translate('xpack.logsShared.logFlyout.valueColumnLabel', {
           defaultMessage: 'Value',
         }),
         render: (_name: string, item: LogEntryField) => (
@@ -107,11 +107,11 @@ const searchOptions = {
   },
 };
 
-const setFilterButtonLabel = i18n.translate('xpack.infra.logFlyout.filterAriaLabel', {
+const setFilterButtonLabel = i18n.translate('xpack.logsShared.logFlyout.filterAriaLabel', {
   defaultMessage: 'Filter',
 });
 
-const setFilterButtonDescription = i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
+const setFilterButtonDescription = i18n.translate('xpack.logsShared.logFlyout.setFilterTooltip', {
   defaultMessage: 'View event with filter',
 });
 

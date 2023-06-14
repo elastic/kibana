@@ -32,16 +32,16 @@ import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { highlightedContentStyle, hoveredContentStyle, monospaceTextStyle } from './text_styles';
 
-const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
+const MENU_LABEL = i18n.translate('xpack.logsShared.logEntryItemView.logEntryActionsMenuToolTip', {
   defaultMessage: 'View actions for line',
 });
 
-const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
+const LOG_DETAILS_LABEL = i18n.translate('xpack.logsShared.logs.logEntryActionsDetailsButton', {
   defaultMessage: 'View details',
 });
 
 const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
-  'xpack.infra.lobs.logEntryActionsViewInContextButton',
+  'xpack.logsShared.lobs.logEntryActionsViewInContextButton',
   {
     defaultMessage: 'View in context',
   }

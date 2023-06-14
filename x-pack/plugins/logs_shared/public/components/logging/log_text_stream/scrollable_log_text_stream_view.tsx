@@ -165,22 +165,25 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
             height="100%"
             text={
               <FormattedMessage
-                id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
+                id="xpack.logsShared.logs.scrollableLogTextStreamView.loadingEntriesLabel"
                 defaultMessage="Loading entries"
               />
             }
           />
         ) : !hasItems ? (
           <NoData
-            titleText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageTitle', {
+            titleText={i18n.translate('xpack.logsShared.logs.emptyView.noLogMessageTitle', {
               defaultMessage: 'There are no log messages to display.',
             })}
-            bodyText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageDescription', {
+            bodyText={i18n.translate('xpack.logsShared.logs.emptyView.noLogMessageDescription', {
               defaultMessage: 'Try adjusting your filter.',
             })}
-            refetchText={i18n.translate('xpack.infra.logs.emptyView.checkForNewDataButtonLabel', {
-              defaultMessage: 'Check for new data',
-            })}
+            refetchText={i18n.translate(
+              'xpack.logsShared.logs.emptyView.checkForNewDataButtonLabel',
+              {
+                defaultMessage: 'Check for new data',
+              }
+            )}
             onRefetch={this.handleReload}
             testString="logsNoDataPrompt"
           />

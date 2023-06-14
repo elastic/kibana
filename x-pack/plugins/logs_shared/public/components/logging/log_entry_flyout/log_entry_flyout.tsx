@@ -146,7 +146,7 @@ export const LogEntryFlyout = ({
               <h3 id="flyoutTitle">
                 <FormattedMessage
                   defaultMessage="Details for log entry {logEntryId}"
-                  id="xpack.infra.logFlyout.flyoutTitle"
+                  id="xpack.logsShared.logFlyout.flyoutTitle"
                   values={{
                     logEntryId: logEntryId ? <code>{logEntryId}</code> : '',
                   }}
@@ -158,7 +158,7 @@ export const LogEntryFlyout = ({
                 <EuiSpacer size="s" />
                 <EuiTextColor color="subdued">
                   <FormattedMessage
-                    id="xpack.infra.logFlyout.flyoutSubTitle"
+                    id="xpack.logsShared.logFlyout.flyoutSubTitle"
                     defaultMessage="From index {indexName}"
                     values={{
                       indexName: <code>{logEntry.index}</code>,
@@ -237,18 +237,24 @@ export const LogEntryFlyout = ({
   );
 };
 
-const explainLogMessageTitle = i18n.translate('xpack.infra.logFlyout.explainLogMessageTitle', {
+const explainLogMessageTitle = i18n.translate('xpack.logsShared.logFlyout.explainLogMessageTitle', {
   defaultMessage: "What's this message?",
 });
 
-const similarLogMessagesTitle = i18n.translate('xpack.infra.logFlyout.similarLogMessagesTitle', {
-  defaultMessage: 'How do I find similar log messages?',
-});
+const similarLogMessagesTitle = i18n.translate(
+  'xpack.logsShared.logFlyout.similarLogMessagesTitle',
+  {
+    defaultMessage: 'How do I find similar log messages?',
+  }
+);
 
-const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMessage', {
+const loadingProgressMessage = i18n.translate('xpack.logsShared.logFlyout.loadingMessage', {
   defaultMessage: 'Searching log entry in shards',
 });
 
-const loadingErrorCalloutTitle = i18n.translate('xpack.infra.logFlyout.loadingErrorCalloutTitle', {
-  defaultMessage: 'Error while searching the log entry',
-});
+const loadingErrorCalloutTitle = i18n.translate(
+  'xpack.logsShared.logFlyout.loadingErrorCalloutTitle',
+  {
+    defaultMessage: 'Error while searching the log entry',
+  }
+);

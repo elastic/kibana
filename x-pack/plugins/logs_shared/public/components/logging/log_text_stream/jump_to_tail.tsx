@@ -24,7 +24,7 @@ export class LogTextStreamJumpToTail extends React.PureComponent<LogTextStreamJu
         <MessageWrapper>
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.infra.logs.streamingNewEntriesText"
+              id="xpack.logsShared.logs.streamingNewEntriesText"
               defaultMessage="Streaming new entries"
             />
           </EuiText>
@@ -36,7 +36,7 @@ export class LogTextStreamJumpToTail extends React.PureComponent<LogTextStreamJu
           iconType="arrowDown"
         >
           <FormattedMessage
-            id="xpack.infra.logs.jumpToTailText"
+            id="xpack.logsShared.logs.jumpToTailText"
             defaultMessage="Jump to most recent entries"
           />
         </EuiButtonEmpty>

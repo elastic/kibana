@@ -44,7 +44,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
         {...uptimeLinkProps}
       >
         <FormattedMessage
-          id="xpack.infra.logEntryActionsMenu.uptimeActionLabel"
+          id="xpack.logsShared.logEntryActionsMenu.uptimeActionLabel"
           defaultMessage="View status in Uptime"
         />
       </EuiContextMenuItem>,
@@ -56,7 +56,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
         {...apmLinkProps}
       >
         <FormattedMessage
-          id="xpack.infra.logEntryActionsMenu.apmActionLabel"
+          id="xpack.logsShared.logEntryActionsMenu.apmActionLabel"
           defaultMessage="View in APM"
         />
       </EuiContextMenuItem>,
@@ -77,7 +77,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
           onClick={toggle}
         >
           <FormattedMessage
-            id="xpack.infra.logEntryActionsMenu.buttonLabel"
+            id="xpack.logsShared.logEntryActionsMenu.buttonLabel"
             defaultMessage="Investigate"
           />
         </EuiButton>

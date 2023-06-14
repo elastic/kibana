@@ -33,7 +33,7 @@ const LogStreamErrorContent: React.FC<{
       <EuiEmptyPrompt
         title={
           <FormattedMessage
-            id="xpack.infra.logStream.kqlErrorTitle"
+            id="xpack.logsShared.logStream.kqlErrorTitle"
             defaultMessage="Invalid KQL expression"
             tagName="h2"
           />
@@ -46,7 +46,7 @@ const LogStreamErrorContent: React.FC<{
       <EuiEmptyPrompt
         title={
           <FormattedMessage
-            id="xpack.infra.logStream.unknownErrorTitle"
+            id="xpack.logsShared.logStream.unknownErrorTitle"
             defaultMessage="An error occurred"
             tagName="h2"
           />

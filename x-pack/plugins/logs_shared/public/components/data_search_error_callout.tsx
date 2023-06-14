@@ -35,7 +35,7 @@ export const DataSearchErrorCallout: React.FC<{
           onClick={onRetry}
         >
           <FormattedMessage
-            id="xpack.infra.dataSearch.loadingErrorRetryButtonLabel"
+            id="xpack.logsShared.dataSearch.loadingErrorRetryButtonLabel"
             defaultMessage="Retry"
           />
         </EuiButton>
@@ -59,7 +59,7 @@ const AbortedRequestErrorMessage: React.FC<{
 }> = ({}) => (
   <FormattedMessage
     tagName="p"
-    id="xpack.infra.dataSearch.abortedRequestErrorMessage"
+    id="xpack.logsShared.dataSearch.abortedRequestErrorMessage"
     defaultMessage="The request was aborted."
   />
 );
@@ -73,7 +73,7 @@ const ShardFailureErrorMessage: React.FC<{ error: ShardFailureSearchStrategyErro
 }) => (
   <FormattedMessage
     tagName="p"
-    id="xpack.infra.dataSearch.shardFailureErrorMessage"
+    id="xpack.logsShared.dataSearch.shardFailureErrorMessage"
     defaultMessage="Index {indexName}: {errorMessage}"
     values={{
       indexName: error.shardInfo.index,
