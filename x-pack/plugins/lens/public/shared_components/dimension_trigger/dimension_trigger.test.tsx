@@ -12,12 +12,12 @@ import { DimensionTrigger } from '.';
 describe('DimensionTrigger', () => {
   it('should fallback to the empty title if the dimension label is made of an empty string', () => {
     render(<DimensionTrigger id="dimensionEmpty" label="" />);
-    expect(screen.queryByText('[No title]')).toBeInTheDocument();
+    expect(screen.queryByText('[Untitled]')).toBeInTheDocument();
   });
 
   it('should fallback to the empty title if the dimension label is made up of whitespaces only', () => {
     render(<DimensionTrigger id="dimensionEmpty" label="     " />);
-    expect(screen.queryByText('[No title]')).toBeInTheDocument();
+    expect(screen.queryByText('[Untitled]')).toBeInTheDocument();
   });
 
   it('should not fallback to the empty title if the dimension label has also valid chars beside whitespaces', () => {

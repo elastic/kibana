@@ -31,7 +31,7 @@ describe('DimensionButton', () => {
         <div />
       </DimensionButton>
     );
-    expect(screen.getByTitle('Edit [No title] configuration')).toBeInTheDocument();
+    expect(screen.getByTitle('Edit [Untitled] configuration')).toBeInTheDocument();
   });
 
   it('should fallback to the empty title if the dimension label is made up of whitespaces only', () => {
@@ -40,7 +40,7 @@ describe('DimensionButton', () => {
         <div />
       </DimensionButton>
     );
-    expect(screen.getByTitle('Edit [No title] configuration')).toBeInTheDocument();
+    expect(screen.getByTitle('Edit [Untitled] configuration')).toBeInTheDocument();
   });
 
   it('should not fallback to the empty title if the dimension label has also valid chars beside whitespaces', () => {

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export const emptyTitleText = i18n.translate('xpack.lens.configure.emptyTitle', {
-  defaultMessage: '[No title]',
+  defaultMessage: '[Untitled]',
 });
 
 export const defaultDimensionTriggerTooltip = (
