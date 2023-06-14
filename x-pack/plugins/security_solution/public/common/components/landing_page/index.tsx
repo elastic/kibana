@@ -6,14 +6,20 @@
  */
 
 import React, { memo } from 'react';
-import { LandingCards } from '../landing_cards';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
+import useObservable from 'react-use/lib/useObservable';
+import { SecurityPageName } from '../../../../common';
+import { useKibana } from '../../lib/kibana';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 export const LandingPageComponent = memo(() => {
+  const { getStartedComponent$ } = useKibana().services;
+  const GetStartedComponent = useObservable(getStartedComponent$);
+
   return (
-    <SecuritySolutionPageWrapper>
-      <LandingCards />
-    </SecuritySolutionPageWrapper>
+    <>
+      {GetStartedComponent}
+      <SpyRoute pageName={SecurityPageName.landing} />
+    </>
   );
 });
 
