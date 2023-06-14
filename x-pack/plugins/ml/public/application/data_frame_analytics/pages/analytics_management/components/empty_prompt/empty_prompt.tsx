@@ -44,7 +44,7 @@ export const AnalyticsEmptyPrompt: FC = () => {
           size="fullWidth"
           src={dfaImage}
           alt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-            defaultMessage: 'Trained analysis of your data',
+            defaultMessage: 'Analyze your data with data frame analytics',
           })}
         />
       }
@@ -52,7 +52,7 @@ export const AnalyticsEmptyPrompt: FC = () => {
         <h2>
           <FormattedMessage
             id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
-            defaultMessage="Trained analysis of your data"
+            defaultMessage="Analyze your data with data frame analytics"
           />
         </h2>
       }
@@ -80,7 +80,7 @@ export const AnalyticsEmptyPrompt: FC = () => {
         <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
           <FormattedMessage
             id="xpack.ml.common.readDocumentationLink"
-            defaultMessage="Documentation"
+            defaultMessage="Read documentation"
           />
         </EuiLink>,
       ]}
