@@ -16,13 +16,11 @@ export const getServicesMock = ({
 }: { navLinks?: ChromeNavLink[] } = {}): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
-  const loadingCount$ = new BehaviorSubject(0);
   const recentlyAccessed$ = new BehaviorSubject([]);
   const navLinks$ = new BehaviorSubject(navLinks);
 
   return {
     basePath,
-    loadingCount$,
     recentlyAccessed$,
     navLinks$,
     navIsOpen: true,

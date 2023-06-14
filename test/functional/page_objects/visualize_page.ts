@@ -69,6 +69,14 @@ export class VisualizePageObject extends FtrService {
     await this.common.navigateToApp('visualize');
   }
 
+  public async selectVisualizationsTab() {
+    await this.listingTable.selectTab(1);
+  }
+
+  public async selectAnnotationsTab() {
+    await this.listingTable.selectTab(2);
+  }
+
   public async clickNewVisualization() {
     await this.listingTable.clickNewButton();
   }
