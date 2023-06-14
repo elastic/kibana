@@ -20,8 +20,6 @@ import {
   buildRangeFilter,
   COMPARE_ALL_OPTIONS,
   RangeFilterParams,
-  Filter,
-  Query,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -173,7 +171,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     // fetch available min/max when input changes
     this.subscriptions.add(
-      dataFetchPipe.subscribe(async () => {
+      dataFetchPipe.subscribe(async (changes) => {
         try {
           await this.runRangeSliderQuery();
           await this.buildFilter();
@@ -241,15 +239,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    const embeddableInput = this.getInput();
-    const {
-      ignoreParentSettings,
-      fieldName,
-      query,
-      timeRange: globalTimeRange,
-      timeslice,
-    } = embeddableInput;
-    let { filters = [] } = embeddableInput;
+    const { fieldName } = this.getInput();
 
     if (!field) {
       batch(() => {
@@ -259,9 +249,33 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       throw fieldMissingError(fieldName);
     }
 
-    if (ignoreParentSettings?.ignoreFilters) {
-      filters = [];
-    }
+    const { min, max } = await this.fetchMinMax({
+      dataView,
+      field,
+    }).catch((e) => {
+      throw e;
+    });
+
+    this.dispatch.setMinMax({
+      min: `${min ?? '-Infinity'}`,
+      max: `${max ?? 'Infinity'}`,
+    });
+  };
+
+  private fetchMinMax = async ({
+    dataView,
+    field,
+  }: {
+    dataView: DataView;
+    field: DataViewField;
+  }): Promise<{ min?: number; max?: number }> => {
+    const searchSource = await this.dataService.searchSource.create();
+    searchSource.setField('size', 0);
+    searchSource.setField('index', dataView);
+
+    const embeddableInput = this.getInput();
+    const { ignoreParentSettings, query, timeRange: globalTimeRange, timeslice } = embeddableInput;
+    let { filters = [] } = embeddableInput;
 
     const timeRange =
       timeslice !== undefined
@@ -278,35 +292,9 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       }
     }
 
-    const { min, max } = await this.fetchMinMax({
-      dataView,
-      field,
-      filters,
-      query,
-    }).catch((e) => {
-      throw e;
-    });
-
-    this.dispatch.setMinMax({
-      min: `${min ?? '-Infinity'}`,
-      max: `${max ?? 'Infinity'}`,
-    });
-  };
-
-  private fetchMinMax = async ({
-    dataView,
-    field,
-    filters,
-    query,
-  }: {
-    dataView: DataView;
-    field: DataViewField;
-    filters: Filter[];
-    query?: Query;
-  }): Promise<{ min?: number; max?: number }> => {
-    const searchSource = await this.dataService.searchSource.create();
-    searchSource.setField('size', 0);
-    searchSource.setField('index', dataView);
+    if (ignoreParentSettings?.ignoreFilters) {
+      filters = [];
+    }
 
     searchSource.setField('filter', filters);
 
@@ -349,15 +337,32 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private buildFilter = async () => {
     const {
       componentState: { min: availableMin, max: availableMax },
-      explicitInput: { query, timeRange, filters = [], ignoreParentSettings, value },
+      explicitInput: { value },
     } = this.getState();
 
+    const embeddableInput = this.getInput();
+    const {
+      ignoreParentSettings,
+      filters = [],
+      query,
+      timeRange: globalTimeRange,
+      timeslice,
+    } = embeddableInput;
+
     const [selectedMin, selectedMax] = value ?? ['', ''];
-    const hasData = !Boolean(availableMin) && !Boolean(availableMax);
+    const hasData = availableMin !== undefined && availableMax !== undefined;
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
 
+    const timeRange =
+      timeslice !== undefined
+        ? {
+            from: new Date(timeslice[0]).toISOString(),
+            to: new Date(timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : globalTimeRange;
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
