@@ -504,9 +504,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { total } = savedObjectsResponse.body;
         expect(total).to.eql(2);
 
-        const {
-          body: { message },
-        } = await supertestWithoutAuth
+        await supertestWithoutAuth
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
