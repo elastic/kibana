@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getClient } from './compat';
 import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
@@ -56,12 +57,18 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
+        const client = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: false,
+        });
         const setupOptions: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
-          spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
+          spaceId:
+            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
           config: dependencies.config,
         };
@@ -82,8 +89,8 @@ export function registerSetupRoute({
           });
         }
 
+        // hasProfilingData,
         const verifyFunctions = [
-          hasProfilingData,
           isApmPackageInstalled,
           validateApmPolicy,
           validateCollectorPackagePolicy,
@@ -92,7 +99,10 @@ export function registerSetupRoute({
           validateSecurityRole,
           validateSymbolizerPackagePolicy,
         ];
-        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+        const partialStates = await Promise.all([
+          hasProfilingData({ ...setupOptions, client }),
+          ...verifyFunctions.map((fn) => fn(setupOptions)),
+        ]);
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         return response.ok({
@@ -126,7 +136,8 @@ export function registerSetupRoute({
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
-          spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
+          spaceId:
+            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
           config: dependencies.config,
         };
