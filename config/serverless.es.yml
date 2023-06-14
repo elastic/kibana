@@ -13,3 +13,6 @@ uiSettings.overrides.defaultRoute: /app/elasticsearch
 
 ## Set the dev project switcher current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: search
