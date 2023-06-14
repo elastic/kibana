@@ -14,12 +14,18 @@ export const FleetPermissionsCallout = () => {
   return (
     <EuiCallOut title={NEED_PERMISSIONS_PRIVATE_LOCATIONS} color="warning" iconType="help">
       <p>{NEED_PRIVATE_LOCATIONS_PERMISSION}</p>
+      <p>
+        <FormattedMessage
+          id="xpack.synthetics.privateLocations.needFleetPermission.description"
+          defaultMessage="Once you have an agent policy created, you can add private location and manage monitors with just Synthetics app permissions."
+        />
+      </p>
     </EuiCallOut>
   );
 };
 
 /**
- * If any of the canEditSynthetics or canUpdatePrivateMonitor is false, then wrap the children with a tooltip
+ * If canEditSynthetics  is false, then wrap the children with a tooltip
  * so that a reason can be conveyed to the user explaining why the action is disabled.
  */
 export const NoPermissionsTooltip = ({
@@ -59,19 +65,11 @@ export const ALL = i18n.translate('xpack.synthetics.monitorManagement.priviledge
 export const NEED_PRIVATE_LOCATIONS_PERMISSION = (
   <FormattedMessage
     id="xpack.synthetics.monitorManagement.privateLocations.needFleetPermission"
-    defaultMessage="You are not authorized to manage private locations. It requires the {all} Kibana privilege for both Fleet and Integrations."
+    defaultMessage="In order to create private location, you need an agent policy. You are not authorized to create fleet agent policies. It requires the {all} Kibana privilege for Fleet."
     values={{
       all: <EuiCode>{`"${ALL}"`}</EuiCode>,
     }}
   />
-);
-
-export const CANNOT_SAVE_INTEGRATION_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.cannotSaveIntegration',
-  {
-    defaultMessage:
-      'You are not authorized to manage private locations. It requires the "All" Kibana privilege for both Fleet and Integrations.',
-  }
 );
 
 export const CANNOT_PERFORM_ACTION_SYNTHETICS = i18n.translate(
