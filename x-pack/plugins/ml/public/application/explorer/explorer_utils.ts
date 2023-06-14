@@ -16,7 +16,7 @@ import { lastValueFrom } from 'rxjs';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getEntityFieldList,
@@ -632,11 +632,12 @@ export function removeFilterFromQueryString(
 }
 
 // Returns an object mapping job ids to source indices which map to geo fields for that index
-export async function getSourceIndicesWithGeoFields(
+export async function getDataViewsAndIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
   dataViewsService: DataViewsContract
-): Promise<SourceIndicesWithGeoFields> {
+): Promise<{ sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields; dataViews: DataView[] }> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
+  const dataViews: DataView[] = [];
   // Go through selected jobs
   if (Array.isArray(selectedJobs)) {
     await asyncForEach(selectedJobs, async (job) => {
@@ -657,6 +658,12 @@ export async function getSourceIndicesWithGeoFields(
 
           if (dataViewId) {
             const dataView = await dataViewsService.get(dataViewId);
+
+            if (!dataView) {
+              return;
+            }
+            dataViews.push(dataView);
+
             const geoFields = [
               ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
               ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
@@ -676,5 +683,5 @@ export async function getSourceIndicesWithGeoFields(
       }
     });
   }
-  return sourceIndicesWithGeoFieldsMap;
+  return { sourceIndicesWithGeoFieldsMap, dataViews };
 }
