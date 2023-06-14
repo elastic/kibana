@@ -6,22 +6,22 @@
  */
 
 import { EuiBetaBadge } from '@elastic/eui';
+import type { IconType, ToolTipPositions } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const BetaBadge: React.FunctionComponent = () => (
+interface Props {
+  iconType?: IconType;
+  tooltipPosition?: ToolTipPositions;
+  tooltipContent?: string;
+}
+export const BetaBadge = ({ iconType, tooltipPosition, tooltipContent }: Props) => (
   <EuiBetaBadge
-    aria-label={betaBadgeLabel}
-    label={betaBadgeLabel}
-    tooltipContent={betaBadgeTooltipContent}
-    className="eui-alignMiddle"
+    label={i18n.translate('xpack.infra.hostsViewPage.betaBadgeLabel', {
+      defaultMessage: 'Beta',
+    })}
+    tooltipContent={tooltipContent ?? undefined}
+    iconType={iconType}
+    tooltipPosition={tooltipPosition}
   />
 );
-const betaBadgeLabel = i18n.translate('xpack.infra.common.tabBetaBadgeLabel', {
-  defaultMessage: 'Beta',
-});
-
-const betaBadgeTooltipContent = i18n.translate('xpack.infra.common.tabBetaBadgeTooltipContent', {
-  defaultMessage:
-    'This feature is under active development. Extra functionality is coming, and some functionality may change.',
-});
