@@ -52,7 +52,7 @@ export const AnalyticsEmptyPrompt: FC = () => {
         <h2>
           <FormattedMessage
             id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
-            defaultMessage="Trained analysis of your data"
+            defaultMessage="Analyze your data with data frame analytics"
           />
         </h2>
       }
