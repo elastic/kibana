@@ -14,7 +14,6 @@ import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -637,10 +636,11 @@ export async function getDataViewsAndIndicesWithGeoFields(
   dataViewsService: DataViewsContract
 ): Promise<{ sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields; dataViews: DataView[] }> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
-  const dataViews: DataView[] = [];
+  // Avoid searching for data view again if previous job already has same source index
+  const dataViewsMap = new Map<string, DataView>();
   // Go through selected jobs
   if (Array.isArray(selectedJobs)) {
-    await asyncForEach(selectedJobs, async (job) => {
+    for (const job of selectedJobs) {
       let sourceIndices;
       let jobId: string;
       if (isExplorerJob(job)) {
@@ -652,17 +652,19 @@ export async function getDataViewsAndIndicesWithGeoFields(
       }
 
       if (Array.isArray(sourceIndices)) {
-        // Check fields for each source index to see if it has geo fields
-        await asyncForEach(sourceIndices, async (sourceIndex) => {
-          const dataViewId = await getDataViewIdFromName(sourceIndex);
+        for (const sourceIndex of sourceIndices) {
+          const cached = dataViewsMap.get(sourceIndex);
+
+          const dataViewId = cached?.id ?? (await getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
-            const dataView = await dataViewsService.get(dataViewId);
+            const dataView =
+              dataViewsMap.get(sourceIndex) ?? (await dataViewsService.get(dataViewId));
 
             if (!dataView) {
-              return;
+              continue;
             }
-            dataViews.push(dataView);
+            dataViewsMap.set(sourceIndex, dataView);
 
             const geoFields = [
               ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
@@ -679,9 +681,9 @@ export async function getDataViewsAndIndicesWithGeoFields(
               );
             }
           }
-        });
+        }
       }
-    });
+    }
   }
-  return { sourceIndicesWithGeoFieldsMap, dataViews };
+  return { sourceIndicesWithGeoFieldsMap, dataViews: [...dataViewsMap.values()] };
 }
