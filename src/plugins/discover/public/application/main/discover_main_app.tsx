@@ -65,7 +65,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   }, [stateContainer]);
 
   /**
-   * SavedSearch dependend initializing
+   * SavedSearch dependent initializing
    */
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
