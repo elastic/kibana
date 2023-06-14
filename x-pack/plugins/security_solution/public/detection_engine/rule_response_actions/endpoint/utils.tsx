@@ -35,13 +35,13 @@ const useGetCommandText = (
       return {
         title: (
           <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.commandLabel"
+            id="xpack.securitySolution.responseActions.endpoint.isolate"
             defaultMessage="Isolate"
           />
         ),
         description: (
           <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.commandDescription"
+            id="xpack.securitySolution.responseActions.endpoint.isolateDescription"
             defaultMessage="Quarantine a host from the network to prevent further spread of threats and limit potential damage"
           />
         ),
