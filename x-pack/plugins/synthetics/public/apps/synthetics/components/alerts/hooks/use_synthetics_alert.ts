@@ -43,7 +43,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
       hideInterval: true,
       initialRule:
-        alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules.statusRule : defaultRules.tlsRule,
+        alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules.tlsRule : defaultRules.statusRule,
     });
   }, [defaultRules, dispatch, triggersActionsUi, alertFlyoutVisible]);
 

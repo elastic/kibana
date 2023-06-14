@@ -14,10 +14,10 @@ import {
   getAlertUrl,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { schema } from '@kbn/config-schema';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { TLSRuleExecutor } from './tls_rule_executor';
-import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
 import {
   SYNTHETICS_ALERT_RULE_TYPES,
   TLS_CERTIFICATE,
@@ -54,7 +54,11 @@ export const registerSyntheticsTLSCheckRule = (
     producer: 'uptime',
     name: TLS_CERTIFICATE.name,
     validate: {
-      params: StatusRulePramsSchema,
+      params: schema.object({
+        search: schema.maybe(schema.string()),
+        certExpirationThreshold: schema.maybe(schema.number()),
+        certAgeThreshold: schema.maybe(schema.number()),
+      }),
     },
     defaultActionGroupId: TLS_CERTIFICATE.id,
     actionGroups: [TLS_CERTIFICATE],
