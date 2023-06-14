@@ -125,7 +125,7 @@ describe('GenAiConnector', () => {
         body: {
           index: [
             {
-              names: ['*.kibana-event-log-*'],
+              names: ['.kibana-event-log-*'],
               allow_restricted_indices: true,
               privileges: ['read'],
             },
@@ -144,7 +144,7 @@ describe('GenAiConnector', () => {
         body: {
           index: [
             {
-              names: ['*.kibana-event-log-*'],
+              names: ['.kibana-event-log-*'],
               allow_restricted_indices: true,
               privileges: ['read'],
             },
@@ -164,7 +164,7 @@ describe('GenAiConnector', () => {
         body: {
           index: [
             {
-              names: ['*.kibana-event-log-*'],
+              names: ['.kibana-event-log-*'],
               allow_restricted_indices: true,
               privileges: ['read'],
             },

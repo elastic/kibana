@@ -12,6 +12,7 @@ import {
   genAiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/gen_ai_simulation';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getUrlPrefix } from '../../../../../common/lib';
 
 const connectorTypeId = '.gen-ai';
 const name = 'A genAi action';
@@ -27,9 +28,9 @@ export default function genAiTest({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
 
-  const createConnector = async (apiUrl: string) => {
+  const createConnector = async (apiUrl: string, spaceId?: string) => {
     const { body } = await supertest
-      .post('/api/actions/connector')
+      .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send({
         name,
@@ -272,47 +273,147 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               data: genAiSuccessResponse,
             });
           });
-
-          it('should create a dashboard when user has correct permissions', async () => {
-            const { body } = await supertest
-              .post(`/api/actions/connector/${genAiActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: {
-                  subAction: 'getDashboard',
-                  subActionParams: {
-                    dashboardId: 'specific-dashboard-id',
+          describe('gen ai dashboard', () => {
+            const dashboardId = 'specific-dashboard-id';
+            beforeEach(async () => {
+              await supertest
+                .delete(`/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo');
+            });
+            it('should not create a dashboard when user does not have kibana event log permissions', async () => {
+              const { body } = await supertestWithoutAuth
+                .post(`/api/actions/connector/${genAiActionId}/_execute`)
+                .auth('global_read', 'global_read-password')
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
                   },
-                },
-              })
-              .expect(200);
+                })
+                .expect(200);
 
-            expect(body).to.eql({
-              status: 'ok',
-              connector_id: genAiActionId,
-              data: { available: true },
+              // check dashboard has not been created
+              await supertest
+                .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo')
+                .expect(404);
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: genAiActionId,
+                data: { available: false },
+              });
+            });
+
+            it('should create a dashboard when user has correct permissions', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${genAiActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has been created
+              await supertest
+                .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo')
+                .expect(200);
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: genAiActionId,
+                data: { available: true },
+              });
+            });
+
+            it('should create a dashboard in non-default space', async () => {
+              const { body } = await supertest
+                .post(`/space1/api/actions/connector/${genAiActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has been created
+              await supertest
+                .get(`/space1/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo')
+                .expect(200);
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: genAiActionId,
+                data: { available: true },
+              });
             });
           });
+        });
+        describe('non-default space simulator', () => {
+          const simulator = new GenAiSimulator({
+            proxy: {
+              config: configService.get('kbnTestServer.serverArgs'),
+            },
+          });
+          let apiUrl: string;
+          let genAiActionId: string;
 
-          it('should not create a dashboard when user does not have kibana event log permissions', async () => {
-            const { body } = await supertestWithoutAuth
-              .post(`/api/actions/connector/${genAiActionId}/_execute`)
-              .auth('global_read', 'global_read-password')
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: {
-                  subAction: 'getDashboard',
-                  subActionParams: {
-                    dashboardId: 'specific-dashboard-id',
+          before(async () => {
+            apiUrl = await simulator.start();
+            genAiActionId = await createConnector(apiUrl, 'space1');
+          });
+
+          after(() => {
+            simulator.close();
+          });
+
+          describe('gen ai dashboard', () => {
+            const dashboardId = 'specific-dashboard-id';
+            beforeEach(async () => {
+              await supertest
+                .delete(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo');
+            });
+
+            it('should create a dashboard in non-default space', async () => {
+              const { body } = await supertest
+                .post(`${getUrlPrefix('space1')}/api/actions/connector/${genAiActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
                   },
-                },
-              })
-              .expect(200);
+                })
+                .expect(200);
 
-            expect(body).to.eql({
-              status: 'ok',
-              connector_id: genAiActionId,
-              data: { available: false },
+              // check dashboard has been created
+              await supertest
+                .get(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo')
+                .expect(200);
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: genAiActionId,
+                data: { available: true },
+              });
             });
           });
         });

@@ -49,6 +49,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                 fontSize: 12,
                 openLinksInNewTab: false,
                 markdown:
+                  // TODO: update with better copy and link to the docs page for the Gen AI connector before 8.9 release!
                   'The data powering this dashboard requires special index permissions. To access the dashboard data, contact a Kibana admin to set up a "read only" role for non-admin users who may want to view this dashboard. ',
               },
               uiState: {},

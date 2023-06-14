@@ -48,7 +48,6 @@ describe('createDashboard', () => {
     };
     const result = await initGenAiDashboard({ logger, savedObjectsClient: soClient, dashboardId });
 
-    expect(logger.error).toHaveBeenCalled();
     expect(soClient.get).toHaveBeenCalledWith('dashboard', dashboardId);
     expect(soClient.create).toHaveBeenCalledWith(
       'dashboard',
@@ -78,9 +77,6 @@ describe('createDashboard', () => {
     expect(result.success).toBe(false);
     expect(result.error?.message).toBe('Internal Server Error: Error happened');
     expect(result.error?.statusCode).toBe(500);
-    expect(logger.error).toHaveBeenCalledWith(
-      'Failed to fetch Gen Ai Dashboard saved object: Error happened'
-    );
     expect(soClient.get).toHaveBeenCalledWith('dashboard', dashboardId);
   });
 });
