@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { AppMountParameters } from '@kbn/core/public';
 import {
@@ -36,22 +37,24 @@ export const renderApp = (
   const app = (
     <KibanaThemeProvider theme$={services.theme.theme$}>
       <Router history={services.history}>
-        <KibanaContextProvider services={services}>
-          <services.presentationUtil.ContextProvider>
-            <services.i18n.Context>
-              <TableListViewKibanaProvider
-                {...{
-                  core: services.core,
-                  toMountPoint,
-                  savedObjectsTagging: services.savedObjectsTagging,
-                  FormattedRelative,
-                }}
-              >
-                <VisualizeApp onAppLeave={onAppLeave} />
-              </TableListViewKibanaProvider>
-            </services.i18n.Context>
-          </services.presentationUtil.ContextProvider>
-        </KibanaContextProvider>
+        <CompatRouter>
+          <KibanaContextProvider services={services}>
+            <services.presentationUtil.ContextProvider>
+              <services.i18n.Context>
+                <TableListViewKibanaProvider
+                  {...{
+                    core: services.core,
+                    toMountPoint,
+                    savedObjectsTagging: services.savedObjectsTagging,
+                    FormattedRelative,
+                  }}
+                >
+                  <VisualizeApp onAppLeave={onAppLeave} />
+                </TableListViewKibanaProvider>
+              </services.i18n.Context>
+            </services.presentationUtil.ContextProvider>
+          </KibanaContextProvider>
+        </CompatRouter>
       </Router>
     </KibanaThemeProvider>
   );

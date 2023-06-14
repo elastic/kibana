@@ -8,6 +8,7 @@
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { ScopedHistory } from '@kbn/core/public';
@@ -47,17 +48,19 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
 
   return (
     <Router history={history}>
-      <Switch>
-        <Route
-          path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-          component={CloneTransformSection}
-        />
-        <Route
-          path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-          component={CreateTransformSection}
-        />
-        <Route path={`/`} component={TransformManagementSection} />
-      </Switch>
+      <CompatRouter>
+        <Switch>
+          <Route
+            path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+            component={CloneTransformSection}
+          />
+          <Route
+            path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+            component={CreateTransformSection}
+          />
+          <Route path={`/`} component={TransformManagementSection} />
+        </Switch>
+      </CompatRouter>
     </Router>
   );
 };

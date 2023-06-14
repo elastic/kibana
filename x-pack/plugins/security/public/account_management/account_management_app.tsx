@@ -10,6 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { Observable } from 'rxjs';
 
 import type {
@@ -96,7 +97,9 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
         <I18nProvider>
           <KibanaThemeProvider theme$={theme$}>
             <Router history={history}>
-              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+              <CompatRouter>
+                <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+              </CompatRouter>
             </Router>
           </KibanaThemeProvider>
         </I18nProvider>

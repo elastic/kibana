@@ -7,6 +7,7 @@
 
 import React, { FC } from 'react';
 import { Router, Switch, RouteComponentProps, Redirect } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
@@ -26,37 +27,39 @@ const mergeQueryStrings = (query: string, queryFromHash: string) => {
 
 export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
   <Router history={history}>
-    <Route
-      path="/"
-      children={(route: RouteComponentProps) => {
-        // If it looks like the hash is a route then we will do a redirect
-        if (isHashPath(route.location.hash) && !route.location.pathname) {
-          const [hashPath, hashQuery] = route.location.hash.split('?');
-          let search = route.location.search || '?';
+    <CompatRouter>
+      <Route
+        path="/"
+        children={(route: RouteComponentProps) => {
+          // If it looks like the hash is a route then we will do a redirect
+          if (isHashPath(route.location.hash) && !route.location.pathname) {
+            const [hashPath, hashQuery] = route.location.hash.split('?');
+            let search = route.location.search || '?';
 
-          if (hashQuery !== undefined) {
-            search = mergeQueryStrings(search, `?${hashQuery}`);
+            if (hashQuery !== undefined) {
+              search = mergeQueryStrings(search, `?${hashQuery}`);
+            }
+
+            return (
+              <Redirect
+                push
+                to={{
+                  pathname: `${hashPath.substring(1)}`,
+                  search,
+                }}
+              />
+            );
           }
 
           return (
-            <Redirect
-              push
-              to={{
-                pathname: `${hashPath.substring(1)}`,
-                search,
-              }}
-            />
+            <Switch>
+              {ExportWorkpadRoute()}
+              {WorkpadRoute()}
+              {HomeRoute()}
+            </Switch>
           );
-        }
-
-        return (
-          <Switch>
-            {ExportWorkpadRoute()}
-            {WorkpadRoute()}
-            {HomeRoute()}
-          </Switch>
-        );
-      }}
-    />
+        }}
+      />
+    </CompatRouter>
   </Router>
 );

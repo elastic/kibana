@@ -32,7 +32,9 @@ const scopedHistory = new CoreScopedHistory(history, `${PREFIX}${INTERNAL_APP}`)
 function ProviderWrapper({ children }: PropsWithChildren<{}>) {
   return (
     <Router history={scopedHistory}>
-      <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
+      <CompatRouter>
+        <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
+      </CompatRouter>
     </Router>
   );
 }

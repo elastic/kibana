@@ -9,6 +9,7 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Link } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { CoreSetup, Plugin } from '@kbn/core/public';
@@ -27,19 +28,21 @@ export class ManagementTestPlugin
         params.setBreadcrumbs([{ text: 'Management Test' }]);
         ReactDOM.render(
           <Router history={params.history}>
-            <h1 data-test-subj="test-management-header">Hello from management test plugin</h1>
-            <Switch>
-              <Route path={'/one'}>
-                <Link to={`${params.basePath}`} data-test-subj="test-management-link-basepath">
-                  Link to basePath
-                </Link>
-              </Route>
-              <Route path={'/'}>
-                <Link to={'/one'} data-test-subj="test-management-link-one">
-                  Link to /one
-                </Link>
-              </Route>
-            </Switch>
+            <CompatRouter>
+              <h1 data-test-subj="test-management-header">Hello from management test plugin</h1>
+              <Switch>
+                <Route path={'/one'}>
+                  <Link to={`${params.basePath}`} data-test-subj="test-management-link-basepath">
+                    Link to basePath
+                  </Link>
+                </Route>
+                <Route path={'/'}>
+                  <Link to={'/one'} data-test-subj="test-management-link-one">
+                    Link to /one
+                  </Link>
+                </Route>
+              </Switch>
+            </CompatRouter>
           </Router>,
           params.element
         );

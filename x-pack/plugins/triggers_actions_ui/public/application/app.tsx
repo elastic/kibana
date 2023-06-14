@@ -8,7 +8,7 @@
 import React, { lazy } from 'react';
 import { Switch, Redirect, Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { useParams } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -90,9 +90,11 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
-              <QueryClientProvider client={queryClient}>
-                <AppWithoutRouter sectionsRegex={sectionsRegex} />
-              </QueryClientProvider>
+              <CompatRouter>
+                <QueryClientProvider client={queryClient}>
+                  <AppWithoutRouter sectionsRegex={sectionsRegex} />
+                </QueryClientProvider>
+              </CompatRouter>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>

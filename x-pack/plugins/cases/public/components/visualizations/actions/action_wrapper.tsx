@@ -8,6 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { useIsDarkTheme } from '../../../common/use_is_dark_theme';
@@ -78,9 +79,11 @@ const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
       }}
     >
       <Router history={history}>
-        <ActionWrapperWithContext caseContextProps={caseContextProps} currentAppId={currentAppId}>
-          {children}
-        </ActionWrapperWithContext>
+        <CompatRouter>
+          <ActionWrapperWithContext caseContextProps={caseContextProps} currentAppId={currentAppId}>
+            {children}
+          </ActionWrapperWithContext>
+        </CompatRouter>
       </Router>
     </KibanaContextProvider>
   );

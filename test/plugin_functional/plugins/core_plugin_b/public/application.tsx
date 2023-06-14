@@ -10,6 +10,7 @@ import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, withRouter, RouteComponentProps } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import {
@@ -115,13 +116,15 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
 
 const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
-    <EuiPage>
-      <EuiPageSideBar>
-        <Nav navigateToApp={coreStart.application.navigateToApp} />
-      </EuiPageSideBar>
-      <Route path="/" exact component={Home} />
-      <Route path="/page-b" component={PageB} />
-    </EuiPage>
+    <CompatRouter>
+      <EuiPage>
+        <EuiPageSideBar>
+          <Nav navigateToApp={coreStart.application.navigateToApp} />
+        </EuiPageSideBar>
+        <Route path="/" exact component={Home} />
+        <Route path="/page-b" component={PageB} />
+      </EuiPage>
+    </CompatRouter>
   </Router>
 );
 

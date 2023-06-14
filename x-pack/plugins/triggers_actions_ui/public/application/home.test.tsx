@@ -8,11 +8,12 @@
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RouteComponentProps, Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import TriggersActionsUIHome, { MatchParams } from './home';
+import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 
@@ -38,7 +39,7 @@ describe('home', () => {
   });
 
   it('renders rule list components', async () => {
-    const props: RouteComponentProps<MatchParams> = {
+    const props: RouteComponentProps = {
       history: createMemoryHistory({
         initialEntries: ['/rules'],
       }),
@@ -56,7 +57,9 @@ describe('home', () => {
     render(
       <IntlProvider locale="en">
         <Router history={props.history}>
-          <TriggersActionsUIHome {...props} />
+          <CompatRouter>
+            <TriggersActionsUIHome {...props} />
+          </CompatRouter>
         </Router>
       </IntlProvider>
     );
@@ -70,7 +73,7 @@ describe('home', () => {
     (hasShowActionsCapability as jest.Mock).mockImplementation(() => {
       return true;
     });
-    const props: RouteComponentProps<MatchParams> = {
+    const props: RouteComponentProps = {
       history: createMemoryHistory(),
       location: createLocation('/'),
       match: {
@@ -85,7 +88,9 @@ describe('home', () => {
 
     let home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <CompatRouter>
+          <TriggersActionsUIHome {...props} />
+        </CompatRouter>
       </Router>
     );
 
@@ -101,7 +106,9 @@ describe('home', () => {
 
     home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <CompatRouter>
+          <TriggersActionsUIHome {...props} />
+        </CompatRouter>
       </Router>
     );
     // alerts now too!

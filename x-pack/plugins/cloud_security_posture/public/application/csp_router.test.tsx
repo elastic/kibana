@@ -8,6 +8,7 @@ import CspRouter from './csp_router';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { CspPage, CspPageNavigationItem } from '../common/navigation/types';
 import { CspSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';
@@ -43,7 +44,9 @@ describe('CspRouter', () => {
   const renderCspRouter = () =>
     render(
       <Router history={history}>
-        <CspRouter securitySolutionContext={securityContext} />
+        <CompatRouter>
+          <CspRouter securitySolutionContext={securityContext} />
+        </CompatRouter>
       </Router>
     );
 

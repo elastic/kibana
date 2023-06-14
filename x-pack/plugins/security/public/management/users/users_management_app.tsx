@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect, Router, Switch } from 'react-router-dom';
-import { useParams } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import type { Observable } from 'rxjs';
 
 import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
@@ -158,7 +158,9 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
       <I18nProvider>
         <KibanaThemeProvider theme$={theme$}>
           <Router history={history}>
-            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+            <CompatRouter>
+              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+            </CompatRouter>
           </Router>
         </KibanaThemeProvider>
       </I18nProvider>

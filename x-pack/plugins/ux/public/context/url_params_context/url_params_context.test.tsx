@@ -110,26 +110,28 @@ describe('UrlParamsContext', () => {
 
     const wrapper = mount(
       <Router history={history}>
-        <UrlParamsProvider>
-          <UrlParamsContext.Consumer>
-            {({ urlParams, refreshTimeRange }) => {
-              calls.push({ urlParams });
-              return (
-                <React.Fragment>
-                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
-                  <button
-                    onClick={() =>
-                      refreshTimeRange({
-                        rangeFrom: '2005-09-20T12:00:00Z',
-                        rangeTo: '2005-10-21T12:00:00Z',
-                      })
-                    }
-                  />
-                </React.Fragment>
-              );
-            }}
-          </UrlParamsContext.Consumer>
-        </UrlParamsProvider>
+        <CompatRouter>
+          <UrlParamsProvider>
+            <UrlParamsContext.Consumer>
+              {({ urlParams, refreshTimeRange }) => {
+                calls.push({ urlParams });
+                return (
+                  <React.Fragment>
+                    <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+                    <button
+                      onClick={() =>
+                        refreshTimeRange({
+                          rangeFrom: '2005-09-20T12:00:00Z',
+                          rangeTo: '2005-10-21T12:00:00Z',
+                        })
+                      }
+                    />
+                  </React.Fragment>
+                );
+              }}
+            </UrlParamsContext.Consumer>
+          </UrlParamsProvider>
+        </CompatRouter>
       </Router>
     );
 

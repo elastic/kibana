@@ -14,6 +14,7 @@ import {
   RenderOptions,
 } from '@testing-library/react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { merge, mergeWith } from 'lodash';
@@ -205,9 +206,11 @@ export function MockRouter<ExtraCore>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
-        <Route path={path}>{children}</Route>
-      </MockKibanaProvider>
+      <CompatRouter>
+        <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
+          <Route path={path}>{children}</Route>
+        </MockKibanaProvider>
+      </CompatRouter>
     </Router>
   );
 }

@@ -9,6 +9,7 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -60,36 +61,38 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     wrapWithTheme(
       <I18nProvider>
         <Router history={history}>
-          <Switch>
-            <Route path={'/:type/:id'} exact={true}>
-              <RedirectToHomeIfUnauthorized>
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <SavedObjectsEditionPage
-                    coreStart={coreStart}
-                    setBreadcrumbs={setBreadcrumbs}
-                    history={history}
-                  />
-                </Suspense>
-              </RedirectToHomeIfUnauthorized>
-            </Route>
-            <Route path={'/'} exact={false}>
-              <RedirectToHomeIfUnauthorized>
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <SavedObjectsTablePage
-                    coreStart={coreStart}
-                    taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
-                    spacesApi={spacesApi}
-                    dataStart={data}
-                    dataViewsApi={dataViews}
-                    actionRegistry={pluginStart.actions}
-                    columnRegistry={pluginStart.columns}
-                    allowedTypes={allowedObjectTypes}
-                    setBreadcrumbs={setBreadcrumbs}
-                  />
-                </Suspense>
-              </RedirectToHomeIfUnauthorized>
-            </Route>
-          </Switch>
+          <CompatRouter>
+            <Switch>
+              <Route path={'/:type/:id'} exact={true}>
+                <RedirectToHomeIfUnauthorized>
+                  <Suspense fallback={<EuiLoadingSpinner />}>
+                    <SavedObjectsEditionPage
+                      coreStart={coreStart}
+                      setBreadcrumbs={setBreadcrumbs}
+                      history={history}
+                    />
+                  </Suspense>
+                </RedirectToHomeIfUnauthorized>
+              </Route>
+              <Route path={'/'} exact={false}>
+                <RedirectToHomeIfUnauthorized>
+                  <Suspense fallback={<EuiLoadingSpinner />}>
+                    <SavedObjectsTablePage
+                      coreStart={coreStart}
+                      taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
+                      spacesApi={spacesApi}
+                      dataStart={data}
+                      dataViewsApi={dataViews}
+                      actionRegistry={pluginStart.actions}
+                      columnRegistry={pluginStart.columns}
+                      allowedTypes={allowedObjectTypes}
+                      setBreadcrumbs={setBreadcrumbs}
+                    />
+                  </Suspense>
+                </RedirectToHomeIfUnauthorized>
+              </Route>
+            </Switch>
+          </CompatRouter>
         </Router>
       </I18nProvider>,
       theme$

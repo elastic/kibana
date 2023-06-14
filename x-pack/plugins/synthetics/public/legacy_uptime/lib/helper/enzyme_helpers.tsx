@@ -7,6 +7,7 @@
 
 import React, { ReactElement } from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory, History } from 'history';
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -31,7 +32,11 @@ const helperWithRouter: <R>(
 
   history.location.key = 'TestKeyForTesting';
 
-  const routerWrapper = <Router history={history}>{component}</Router>;
+  const routerWrapper = (
+    <Router history={history}>
+      <CompatRouter>{component}</CompatRouter>
+    </Router>
+  );
 
   if (wrapReduxStore) {
     return helper(

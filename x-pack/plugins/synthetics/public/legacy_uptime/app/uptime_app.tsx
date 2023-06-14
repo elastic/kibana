@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -130,30 +131,32 @@ const Application = (props: UptimeAppProps) => {
               }}
             >
               <Router history={appMountParameters.history}>
-                <EuiThemeProvider darkMode={darkMode}>
-                  <UptimeRefreshContextProvider>
-                    <UptimeSettingsContextProvider {...props}>
-                      <UptimeThemeContextProvider darkMode={darkMode}>
-                        <UptimeStartupPluginsContextProvider {...startPlugins}>
-                          <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
-                            <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
-                              <RedirectAppLinks
-                                className={APP_WRAPPER_CLASS}
-                                application={core.application}
-                              >
-                                <InspectorContextProvider>
-                                  <UptimeAlertsFlyoutWrapper />
-                                  <PageRouter />
-                                  <ActionMenu appMountParameters={appMountParameters} />
-                                </InspectorContextProvider>
-                              </RedirectAppLinks>
-                            </div>
-                          </UptimeDataViewContextProvider>
-                        </UptimeStartupPluginsContextProvider>
-                      </UptimeThemeContextProvider>
-                    </UptimeSettingsContextProvider>
-                  </UptimeRefreshContextProvider>
-                </EuiThemeProvider>
+                <CompatRouter>
+                  <EuiThemeProvider darkMode={darkMode}>
+                    <UptimeRefreshContextProvider>
+                      <UptimeSettingsContextProvider {...props}>
+                        <UptimeThemeContextProvider darkMode={darkMode}>
+                          <UptimeStartupPluginsContextProvider {...startPlugins}>
+                            <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
+                              <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
+                                <RedirectAppLinks
+                                  className={APP_WRAPPER_CLASS}
+                                  application={core.application}
+                                >
+                                  <InspectorContextProvider>
+                                    <UptimeAlertsFlyoutWrapper />
+                                    <PageRouter />
+                                    <ActionMenu appMountParameters={appMountParameters} />
+                                  </InspectorContextProvider>
+                                </RedirectAppLinks>
+                              </div>
+                            </UptimeDataViewContextProvider>
+                          </UptimeStartupPluginsContextProvider>
+                        </UptimeThemeContextProvider>
+                      </UptimeSettingsContextProvider>
+                    </UptimeRefreshContextProvider>
+                  </EuiThemeProvider>
+                </CompatRouter>
               </Router>
             </KibanaContextProvider>
           </ReduxProvider>

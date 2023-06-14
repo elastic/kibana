@@ -16,6 +16,7 @@ import { setHeaderActionMenuMounter, setUrlTracker } from '../../kibana_services
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { createMemoryHistory } from 'history';
 import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
@@ -46,11 +47,13 @@ describe('DiscoverMainApp', () => {
     await act(async () => {
       const component = await mountWithIntl(
         <Router history={history}>
-          <KibanaContextProvider services={discoverServiceMock}>
-            <DiscoverMainProvider value={stateContainer}>
-              <DiscoverMainApp {...props} />
-            </DiscoverMainProvider>
-          </KibanaContextProvider>
+          <CompatRouter>
+            <KibanaContextProvider services={discoverServiceMock}>
+              <DiscoverMainProvider value={stateContainer}>
+                <DiscoverMainApp {...props} />
+              </DiscoverMainProvider>
+            </KibanaContextProvider>
+          </CompatRouter>
         </Router>
       );
 

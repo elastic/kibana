@@ -8,6 +8,7 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
@@ -94,13 +95,15 @@ export const renderApp = ({
         }}
       >
         <Router history={history}>
-          <EuiThemeProvider darkMode={isDarkMode}>
-            <i18nCore.Context>
-              <QueryClientProvider client={queryClient}>
-                <App />
-              </QueryClientProvider>
-            </i18nCore.Context>
-          </EuiThemeProvider>
+          <CompatRouter>
+            <EuiThemeProvider darkMode={isDarkMode}>
+              <i18nCore.Context>
+                <QueryClientProvider client={queryClient}>
+                  <App />
+                </QueryClientProvider>
+              </i18nCore.Context>
+            </EuiThemeProvider>
+          </CompatRouter>
         </Router>
       </KibanaContextProvider>
     </KibanaThemeProvider>,
