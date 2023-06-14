@@ -9,7 +9,6 @@ import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 
 export default async () => {
