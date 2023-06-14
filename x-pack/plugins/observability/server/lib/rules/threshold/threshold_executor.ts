@@ -16,6 +16,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
+import { extractReferences, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { createFormatter } from '../../../../common/threshold_rule/formatters';
 import { Comparator } from '../../../../common/threshold_rule/types';
@@ -122,7 +123,7 @@ export const createMetricThresholdExecutor = ({
     });
 
     // TODO: check if we need to use "savedObjectsClient"=> https://github.com/elastic/kibana/issues/159340
-    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, dataViews } = services;
+    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, searchSourceClient } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (
       id,
@@ -190,9 +191,16 @@ export const createMetricThresholdExecutor = ({
       alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
         ? state.missingGroups
         : [];
-    // TODO: check the DATA VIEW
-    const defaultDataView = await dataViews.getDefaultDataView();
-    const dataView = defaultDataView?.getIndexPattern();
+
+    // TODO revisit extractReferences types https://github.com/elastic/kibana/issues/159714
+    const [{ searchConfiguration }] = extractReferences<
+      SerializedSearchSourceFields & {
+        indexRefName?: string;
+        searchConfiguration?: SerializedSearchSourceFields;
+      }
+    >(params);
+    const initialSearchSource = await searchSourceClient.create(searchConfiguration!);
+    const dataView = initialSearchSource.getField('index')!.getIndexPattern();
     if (!dataView) {
       throw new Error('No matched data view');
     }
