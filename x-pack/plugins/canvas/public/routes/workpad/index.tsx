@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { RouteComponentProps } from 'react-router-dom';
-
 export { WorkpadRoute, ExportWorkpadRoute } from './workpad_route';
 
 export type { WorkpadRoutingContextType } from './workpad_routing_context';
@@ -21,5 +19,5 @@ export interface WorkpadPageRouteParams extends WorkpadRouteParams {
   pageNumber: string;
 }
 
-export type WorkpadRouteProps = RouteComponentProps<WorkpadRouteParams>;
-export type WorkpadPageRouteProps = RouteComponentProps<WorkpadPageRouteParams>;
+export type WorkpadRouteProps = WorkpadRouteParams;
+export type WorkpadPageRouteProps = WorkpadPageRouteParams;

@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Redirect } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -27,6 +28,11 @@ import { PipelineList } from './components/pipeline_list';
 import { PipelineEditView } from './pipeline_edit_view';
 // @ts-ignore
 import * as Breadcrumbs from './breadcrumbs';
+
+const RedirectToEditRoute = () => {
+  const params = useParams();
+  return <Redirect to={`/pipeline/${params.id}/edit`} />;
+};
 
 export const renderApp = async (
   core: CoreStart,
@@ -67,38 +73,27 @@ export const renderApp = async (
                 );
               }}
             />
-            <Route
-              path="/pipeline/new-pipeline"
-              exact
-              render={() => (
-                <PipelineEditView
-                  history={history}
-                  setBreadcrumbs={setBreadcrumbs}
-                  logstashLicenseService={logstashLicenseService}
-                  pipelineService={pipelineService}
-                  toasts={core.notifications.toasts}
-                />
-              )}
-            />
-            <Route
-              path="/pipeline/:id"
-              exact
-              render={({ match }) => <Redirect to={`/pipeline/${match.params.id}/edit`} />}
-            />
-            <Route
-              path="/pipeline/:id/edit"
-              exact
-              render={({ match }) => (
-                <PipelineEditView
-                  history={history}
-                  setBreadcrumbs={setBreadcrumbs}
-                  logstashLicenseService={logstashLicenseService}
-                  pipelineService={pipelineService}
-                  toasts={core.notifications.toasts}
-                  id={match.params.id}
-                />
-              )}
-            />
+            <Route path="/pipeline/new-pipeline" exact>
+              <PipelineEditView
+                history={history}
+                setBreadcrumbs={setBreadcrumbs}
+                logstashLicenseService={logstashLicenseService}
+                pipelineService={pipelineService}
+                toasts={core.notifications.toasts}
+              />
+            </Route>
+            <Route path="/pipeline/:id" exact>
+              <RedirectToEditRoute />
+            </Route>
+            <Route path="/pipeline/:id/edit" exact>
+              <PipelineEditView
+                history={history}
+                setBreadcrumbs={setBreadcrumbs}
+                logstashLicenseService={logstashLicenseService}
+                pipelineService={pipelineService}
+                toasts={core.notifications.toasts}
+              />
+            </Route>
           </Switch>
         </Router>
       </KibanaThemeProvider>

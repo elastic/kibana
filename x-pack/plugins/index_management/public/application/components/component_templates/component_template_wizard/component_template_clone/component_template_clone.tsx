@@ -6,10 +6,11 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { RouteComponentProps } from 'react-router-dom';
 import { PageLoading, attemptToURIDecode } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { ComponentTemplateCreate } from '../component_template_create';
@@ -18,8 +19,8 @@ export interface Params {
   sourceComponentTemplateName: string;
 }
 
-export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
-  const { sourceComponentTemplateName } = props.match.params;
+export const ComponentTemplateClone: FunctionComponent<RouteComponentProps> = ({ history }) => {
+  const { sourceComponentTemplateName } = useParams();
   const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName)!;
 
   const { toasts, api } = useComponentTemplatesContext();
@@ -59,6 +60,11 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
       ? { ...componentTemplateToClone, name: `${componentTemplateToClone.name}-copy` }
       : undefined;
 
-    return <ComponentTemplateCreate {...props} sourceComponentTemplate={sourceComponentTemplate} />;
+    return (
+      <ComponentTemplateCreate
+        history={history}
+        sourceComponentTemplate={sourceComponentTemplate}
+      />
+    );
   }
 };

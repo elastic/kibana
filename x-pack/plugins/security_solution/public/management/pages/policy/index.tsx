@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { PolicyDetails, PolicyList } from './view';
 import {
@@ -21,6 +22,13 @@ import {
 } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { getPolicyDetailPath } from '../../common/routing';
+
+const RedirectToPolicyDetail = () => {
+  const { id: paramsId } = useParams<{ id: string }>();
+
+  // @ts-expect-error update types
+  return <Redirect to={getPolicyDetailPath(paramsId)} />;
+};
 
 export const PolicyContainer = memo(() => {
   return (
@@ -36,11 +44,9 @@ export const PolicyContainer = memo(() => {
         exact
         component={PolicyDetails}
       />
-      <Route
-        path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD}
-        exact
-        render={(props) => <Redirect to={getPolicyDetailPath(props.match.params.policyId)} />}
-      />
+      <Route path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD} exact>
+        <RedirectToPolicyDetail />
+      </Route>
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
       <Route path="*" component={NotFoundPage} />
     </Switch>

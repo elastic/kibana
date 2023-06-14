@@ -7,7 +7,7 @@
  */
 
 import { Redirect, Router, Switch } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { History } from 'history';
@@ -20,6 +20,12 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 
+const RedirectToSingleDocRoute = () => {
+  const params = useParams();
+
+  return <Redirect to={`/doc/${params.dataView}/${params.index}`} />;
+};
+
 export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
   <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
@@ -29,12 +35,9 @@ export const discoverRouter = (services: DiscoverServices, history: History, isD
             <Route path="/context/:dataViewId/:id">
               <ContextAppRoute />
             </Route>
-            <Route
-              path="/doc/:dataView/:index/:type"
-              render={(props) => (
-                <Redirect to={`/doc/${props.match.params.dataView}/${props.match.params.index}`} />
-              )}
-            />
+            <Route path="/doc/:dataView/:index/:type">
+              <RedirectToSingleDocRoute />
+            </Route>
             <Route path="/doc/:dataViewId/:index">
               <SingleDocRoute />
             </Route>

@@ -22,7 +22,7 @@ import {
   IndexPatternManagementStart,
   IndexPatternManagementPlugin,
 } from './plugin';
-import { IndexPatternManagmentContext } from './types';
+import { IndexPatternManagementContext } from './types';
 
 const createSetupContract = (): IndexPatternManagementSetup => ({});
 
@@ -54,8 +54,8 @@ const docLinks = {
   } as any,
 };
 
-const createIndexPatternManagmentContext = (): {
-  [key in keyof IndexPatternManagmentContext]: any;
+const createIndexPatternManagementContext = (): {
+  [key in keyof IndexPatternManagementContext]: any;
 } => {
   const { application, chrome, uiSettings, notifications, overlays, theme, settings } =
     coreMock.createStart();
@@ -94,5 +94,5 @@ export const mockManagementPlugin = {
   createSetupContract,
   createStartContract,
   createInstance,
-  createIndexPatternManagmentContext,
+  createIndexPatternManagementContext,
 };

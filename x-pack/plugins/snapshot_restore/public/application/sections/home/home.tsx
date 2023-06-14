@@ -20,17 +20,14 @@ import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
 import { RestoreList } from './restore_list';
 import { PolicyList } from './policy_list';
+import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
   section: Section;
 }
 
-export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+  const { section } = useDecodedParams<MatchParams>();
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
 

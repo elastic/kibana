@@ -10,6 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect, Router, Switch } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import type { Observable } from 'rxjs';
 
 import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
@@ -35,6 +36,20 @@ interface CreateParams {
   authc: AuthenticationServiceSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
+
+const EditUserPageRoute: React.FC<{ EditUserPage: React.FC<{ username: string }> }> = ({
+  EditUserPage,
+}) => {
+  const params = useParams();
+  // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
+  // See https://github.com/elastic/kibana/issues/82440
+  const username = tryDecodeURIComponent(params.username as string);
+  return (
+    <Breadcrumb text={username} href={`/edit/${encodeURIComponent(username)}`}>
+      <EditUserPage username={username} />
+    </Breadcrumb>
+  );
+};
 
 export const usersManagementApp = Object.freeze({
   id: 'users',
@@ -102,19 +117,9 @@ export const usersManagementApp = Object.freeze({
                     <CreateUserPage />
                   </Breadcrumb>
                 </Route>
-                <Route
-                  path="/edit/:username"
-                  render={(props) => {
-                    // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
-                    // See https://github.com/elastic/kibana/issues/82440
-                    const username = tryDecodeURIComponent(props.match.params.username);
-                    return (
-                      <Breadcrumb text={username} href={`/edit/${encodeURIComponent(username)}`}>
-                        <EditUserPage username={username} />
-                      </Breadcrumb>
-                    );
-                  }}
-                />
+                <Route path="/edit/:username">
+                  <EditUserPageRoute EditUserPage={EditUserPage} />
+                </Route>
                 <Route path="/edit">
                   <Redirect to="/create" />
                 </Route>

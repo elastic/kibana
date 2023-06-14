@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
@@ -24,10 +25,6 @@ import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_i
 import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
-
-interface MatchParams {
-  name: string;
-}
 
 const ManagedPipelineCallout = () => (
   <EuiCallOut
@@ -48,12 +45,8 @@ const ManagedPipelineCallout = () => (
   </EuiCallOut>
 );
 
-export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  history,
-}) => {
+export const PipelinesEdit: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+  const { name } = useParams();
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

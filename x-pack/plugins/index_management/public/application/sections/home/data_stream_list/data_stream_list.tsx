@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -42,17 +43,12 @@ import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data
 import { FilterListButton, Filters } from '../components';
 
 export type DataStreamFilterName = 'managed' | 'hidden';
-interface MatchParams {
-  dataStreamName?: string;
-}
 
-export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { dataStreamName },
-  },
+export const DataStreamList: React.FunctionComponent<RouteComponentProps> = ({
   location: { search },
   history,
 }) => {
+  const { dataStreamName } = useParams();
   const { isDeepLink, includeHidden } = extractQueryParams(search);
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Router, Switch, Redirect } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -16,6 +17,7 @@ import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/publ
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -60,6 +62,49 @@ function setAppChrome() {
   });
 }
 
+type MapAppRouteProps = Pick<
+  AppMountParameters,
+  'history' | 'onAppLeave' | 'setHeaderActionMenu'
+> & {
+  stateTransfer: EmbeddableStateTransfer;
+};
+
+const MapAppRoute: React.FC<MapAppRouteProps> = ({
+  history,
+  onAppLeave,
+  setHeaderActionMenu,
+  stateTransfer,
+}) => {
+  const params = useParams();
+  const { embeddableId, originatingApp, valueInput, originatingPath } =
+    stateTransfer.getIncomingEditorState(APP_ID) || {};
+
+  let mapEmbeddableInput;
+  if (params.savedMapId) {
+    mapEmbeddableInput = {
+      savedObjectId: params.savedMapId,
+    } as MapByReferenceInput;
+  } else if (valueInput) {
+    mapEmbeddableInput = valueInput as MapByValueInput;
+  }
+
+  return (
+    <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
+      <MapPage
+        mapEmbeddableInput={mapEmbeddableInput}
+        embeddableId={embeddableId}
+        onAppLeave={onAppLeave}
+        setHeaderActionMenu={setHeaderActionMenu}
+        stateTransfer={stateTransfer}
+        originatingApp={originatingApp}
+        originatingPath={originatingPath}
+        history={history}
+        key={params.savedMapId ? params.savedMapId : 'new'}
+      />
+    </ExitFullScreenButtonKibanaProvider>
+  );
+};
+
 export async function renderApp(
   { element, history, onAppLeave, setHeaderActionMenu, theme$ }: AppMountParameters,
   {
@@ -77,35 +122,12 @@ export async function renderApp(
   registerLayerWizards();
   setAppChrome();
 
-  function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput, originatingPath } =
-      stateTransfer.getIncomingEditorState(APP_ID) || {};
-
-    let mapEmbeddableInput;
-    if (routeProps.match.params.savedMapId) {
-      mapEmbeddableInput = {
-        savedObjectId: routeProps.match.params.savedMapId,
-      } as MapByReferenceInput;
-    } else if (valueInput) {
-      mapEmbeddableInput = valueInput as MapByValueInput;
-    }
-
-    return (
-      <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
-        <MapPage
-          mapEmbeddableInput={mapEmbeddableInput}
-          embeddableId={embeddableId}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          stateTransfer={stateTransfer}
-          originatingApp={originatingApp}
-          originatingPath={originatingPath}
-          history={history}
-          key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
-        />
-      </ExitFullScreenButtonKibanaProvider>
-    );
-  }
+  const mapAppRouteProps = {
+    history,
+    onAppLeave,
+    setHeaderActionMenu,
+    stateTransfer,
+  };
 
   const I18nContext = getCoreI18n().Context;
   render(
@@ -122,9 +144,13 @@ export async function renderApp(
           >
             <Router history={history}>
               <Switch>
-                <Route path={`/map/:savedMapId`} render={renderMapApp} />
-                <Route exact path={`/map`} render={renderMapApp} />
-                // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+                <Route path={`/map/:savedMapId`}>
+                  <MapAppRoute {...mapAppRouteProps} />
+                </Route>
+                <Route exact path={`/map`}>
+                  <MapAppRoute {...mapAppRouteProps} />
+                </Route>
+                {/* // Redirect other routes to list, or if hash-containing, their non-hash equivalents */}
                 <Route
                   path={``}
                   render={({ location: { pathname, hash } }) => {

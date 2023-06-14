@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPage, EuiText } from '@elastic/eui';
@@ -18,22 +18,26 @@ export interface AlertingExampleComponentParams {
   basename: string;
 }
 
+const ViewRule = () => {
+  const { id: paramsId } = useParams<{ id: string }>();
+
+  return (
+    <EuiText data-test-subj="noop-title">
+      <h2>View Rule {paramsId}</h2>
+    </EuiText>
+  );
+};
+
 const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
   const { basename } = deps;
+
   return (
     <Router basename={basename}>
       <CompatRouter>
         <EuiPage>
-          <Route
-            path={`/rule/:id`}
-            render={(props) => {
-              return (
-                <EuiText data-test-subj="noop-title">
-                  <h2>View Rule {props.match.params.id}</h2>
-                </EuiText>
-              );
-            }}
-          />
+          <Route path={`/rule/:id`}>
+            <ViewRule />
+          </Route>
         </EuiPage>
       </CompatRouter>
     </Router>

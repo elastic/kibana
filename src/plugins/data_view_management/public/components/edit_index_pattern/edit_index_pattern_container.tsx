@@ -11,19 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { EditIndexPattern } from '.';
-import { IndexPatternManagmentContext } from '../../types';
+import { IndexPatternManagementContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
+const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = (props) => {
   const { dataViews, setBreadcrumbs, notifications } =
-    useKibana<IndexPatternManagmentContext>().services;
+    useKibana<IndexPatternManagementContext>().services;
   const [error, setError] = useState<Error | undefined>();
   const [indexPattern, setIndexPattern] = useState<DataView>();
+  const { id: paramsId } = useParams<{ id: string }>();
 
   useEffect(() => {
     dataViews
-      .get(props.match.params.id)
+      .get(paramsId as string)
       .then((ip: DataView) => {
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));
@@ -31,7 +33,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
       .catch((err) => {
         setError(err);
       });
-  }, [dataViews, props.match.params.id, setBreadcrumbs, setError]);
+  }, [dataViews, paramsId, setBreadcrumbs, setError]);
 
   if (error) {
     const [errorTitle, errorMessage] = [
@@ -41,7 +43,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
       i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoadMessage', {
         defaultMessage:
           'The data view with id:{objectId} could not be loaded. Try creating a new one.',
-        values: { objectId: props.match.params.id },
+        values: { objectId: paramsId },
       }),
     ];
 

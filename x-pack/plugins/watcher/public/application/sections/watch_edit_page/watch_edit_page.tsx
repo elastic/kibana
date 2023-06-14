@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
@@ -83,18 +84,8 @@ const watchReducer = (state: any, action: any) => {
   }
 };
 
-export const WatchEditPage = ({
-  match: {
-    params: { id, type },
-  },
-}: {
-  match: {
-    params: {
-      id: string | undefined;
-      type: string | undefined;
-    };
-  };
-}) => {
+export const WatchEditPage = () => {
+  const { id, type } = useParams();
   // hooks
   const { setBreadcrumbs } = useAppContext();
   const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });

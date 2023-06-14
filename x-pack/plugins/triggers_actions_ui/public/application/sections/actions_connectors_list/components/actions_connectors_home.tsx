@@ -7,6 +7,7 @@
 
 import React, { lazy, useCallback, useEffect } from 'react';
 import { RouteComponentProps, Switch } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,16 +24,10 @@ import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_li
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
-export interface MatchParams {
-  section: Section;
-}
-
-export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
+export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps> = ({
   history,
 }) => {
+  const { section } = useParams();
   const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
 
   const tabs: Array<{

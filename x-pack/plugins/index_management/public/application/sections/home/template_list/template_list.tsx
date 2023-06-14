@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -48,9 +49,6 @@ import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
 
 type FilterName = 'managed' | 'cloudManaged' | 'system';
-interface MatchParams {
-  templateName?: string;
-}
 
 function filterTemplates(templates: TemplateListItem[], types: string[]): TemplateListItem[] {
   return templates.filter((template) => {
@@ -61,13 +59,11 @@ function filterTemplates(templates: TemplateListItem[], types: string[]): Templa
   });
 }
 
-export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { templateName },
-  },
+export const TemplateList: React.FunctionComponent<RouteComponentProps> = ({
   location,
   history,
 }) => {
+  const { templateName } = useParams();
   const { uiMetricService } = useServices();
   const {
     core: { executionContext },

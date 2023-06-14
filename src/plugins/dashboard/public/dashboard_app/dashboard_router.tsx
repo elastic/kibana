@@ -11,15 +11,19 @@ import './_dashboard_app.scss';
 import React from 'react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { Switch, RouteComponentProps, HashRouter, Redirect, useHistory } from 'react-router-dom';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { AppMountParameters, CoreSetup } from '@kbn/core/public';
+import { AppMountParameters, ChromeDocTitle, CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import {
+  createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
+  withNotifyOnErrors,
+} from '@kbn/kibana-utils-plugin/public';
 
 import {
   createDashboardListingFilterUrl,
@@ -51,6 +55,66 @@ export interface DashboardMountProps {
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   mountContext: DashboardMountContextProps;
 }
+
+const getDashboardEmbedSettings = (
+  routeParams: ParsedQuery<string>
+): DashboardEmbedSettings | undefined => {
+  return {
+    forceShowTopNavMenu: Boolean(routeParams[dashboardUrlParams.showTopMenu]),
+    forceShowQueryInput: Boolean(routeParams[dashboardUrlParams.showQueryInput]),
+    forceShowDatePicker: Boolean(routeParams[dashboardUrlParams.showTimeFilter]),
+    forceHideFilterBar: Boolean(routeParams[dashboardUrlParams.hideFilterBar]),
+  };
+};
+
+const RenderDashboard = ({
+  globalEmbedSettings,
+  redirect,
+}: {
+  globalEmbedSettings: DashboardEmbedSettings | undefined;
+  redirect: (redirectTo: RedirectToProps) => void;
+}) => {
+  const params = useParams();
+  const history = useHistory();
+  const routeParams = parse(history.location.search);
+
+  if (routeParams.embed && !globalEmbedSettings) {
+    globalEmbedSettings = getDashboardEmbedSettings(routeParams);
+  }
+  return (
+    <DashboardApp
+      history={history}
+      embedSettings={globalEmbedSettings}
+      savedDashboardId={params.id}
+      redirectTo={redirect}
+    />
+  );
+};
+
+const ListingPageRoute = ({
+  docTitle,
+  getUrlStateStorage,
+  redirect,
+}: {
+  docTitle: ChromeDocTitle;
+  getUrlStateStorage: (history: RouteComponentProps['history']) => IKbnUrlStateStorage;
+  redirect: (redirectTo: RedirectToProps) => void;
+}) => {
+  const history = useHistory();
+
+  docTitle.change(getDashboardPageTitle());
+  const routeParams = parse(history.location.search);
+  const title = (routeParams.title as string) || undefined;
+  const filter = (routeParams.filter as string) || undefined;
+  return (
+    <DashboardListingPage
+      initialFilter={filter}
+      title={title}
+      kbnUrlStateStorage={getUrlStateStorage(history)}
+      redirectTo={redirect}
+    />
+  );
+};
 
 export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
   const {
@@ -87,51 +151,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     navigateToApp(DASHBOARD_APP_ID, { path: `#/${path}`, state, replace: redirectTo.useReplace });
   };
 
-  const getDashboardEmbedSettings = (
-    routeParams: ParsedQuery<string>
-  ): DashboardEmbedSettings | undefined => {
-    return {
-      forceShowTopNavMenu: Boolean(routeParams[dashboardUrlParams.showTopMenu]),
-      forceShowQueryInput: Boolean(routeParams[dashboardUrlParams.showQueryInput]),
-      forceShowDatePicker: Boolean(routeParams[dashboardUrlParams.showTimeFilter]),
-      forceHideFilterBar: Boolean(routeParams[dashboardUrlParams.hideFilterBar]),
-    };
-  };
-
-  const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
-    const routeParams = parse(routeProps.history.location.search);
-    if (routeParams.embed && !globalEmbedSettings) {
-      globalEmbedSettings = getDashboardEmbedSettings(routeParams);
-    }
-    return (
-      <DashboardApp
-        history={routeProps.history}
-        embedSettings={globalEmbedSettings}
-        savedDashboardId={routeProps.match.params.id}
-        redirectTo={redirect}
-      />
-    );
-  };
-
-  const renderListingPage = (routeProps: RouteComponentProps) => {
-    docTitle.change(getDashboardPageTitle());
-    const routeParams = parse(routeProps.history.location.search);
-    const title = (routeParams.title as string) || undefined;
-    const filter = (routeParams.filter as string) || undefined;
-    return (
-      <DashboardListingPage
-        initialFilter={filter}
-        title={title}
-        kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
-        redirectTo={redirect}
-      />
-    );
-  };
-
-  const renderNoMatch = (routeProps: RouteComponentProps) => {
-    return <DashboardNoMatch history={routeProps.history} />;
-  };
-
   const hasEmbeddableIncoming = Boolean(
     embeddable.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
   );
@@ -152,15 +171,20 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
           <HashRouter>
             <CompatRouter>
               <Switch>
-                <Route
-                  path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                  render={renderDashboard}
-                />
-                <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+                <Route path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}>
+                  <RenderDashboard globalEmbedSettings={globalEmbedSettings} redirect={redirect} />
+                </Route>
+                <Route exact path={LANDING_PAGE_PATH}>
+                  <ListingPageRoute
+                    docTitle={docTitle}
+                    getUrlStateStorage={getUrlStateStorage}
+                    redirect={redirect}
+                  />
+                </Route>
                 <Route exact path="/">
                   <Redirect to={LANDING_PAGE_PATH} />
                 </Route>
-                <Route render={renderNoMatch} />
+                <Route component={DashboardNoMatch} />
               </Switch>
             </CompatRouter>
           </HashRouter>

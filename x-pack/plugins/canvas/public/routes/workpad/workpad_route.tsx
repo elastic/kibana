@@ -6,7 +6,8 @@
  */
 
 import React, { FC, useEffect, useCallback } from 'react';
-import { Switch, Redirect, useParams } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 import { WorkpadApp } from '../../components/workpad_app';
@@ -22,7 +23,7 @@ import { useRestoreHistory } from './hooks/use_restore_history';
 import { useWorkpadHistory } from './hooks/use_workpad_history';
 import { usePageSync } from './hooks/use_page_sync';
 import { useWorkpadPersist } from './hooks/use_workpad_persist';
-import { WorkpadRouteProps, WorkpadPageRouteParams } from '.';
+import { WorkpadRouteProps, WorkpadPageRouteProps, WorkpadRouteParams } from '.';
 import { WorkpadRoutingContextComponent } from './workpad_routing_context';
 import { WorkpadPresentationHelper } from './workpad_presentation_helper';
 
@@ -41,17 +42,16 @@ export const WorkpadRoute = () => {
 };
 
 const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
+  const params = useParams<{ id: string; pageNumber: string }>();
   const getRedirectPath = useCallback(
     (workpadId: string) =>
-      `/workpad/${workpadId}${
-        route.match.params.pageNumber ? `/page/${route.match.params.pageNumber}` : ''
-      }`,
-    [route.match.params.pageNumber]
+      `/workpad/${workpadId}${params.pageNumber ? `/page/${params.pageNumber}` : ''}`,
+    [params.pageNumber]
   );
 
   return (
     <WorkpadLoaderComponent
-      params={route.match.params}
+      params={params as WorkpadRouteParams}
       key="workpad-loader"
       getRedirectPath={getRedirectPath}
     >
@@ -70,7 +70,7 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
             )}
           />
           <Route path="/workpad/:id" strict={false} exact={true}>
-            <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
+            <Redirect to={`/workpad/${params.id}/page/${workpad.page + 1}`} />
           </Route>
         </Switch>
       )}
@@ -78,27 +78,23 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
   );
 };
 
-export const ExportWorkpadRoute = () => {
-  return (
-    <Route
-      path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      children={(route: WorkpadRouteProps) => {
-        return <ExportWorkpadRouteComponent route={route} />;
-      }}
-    />
-  );
-};
+export const ExportWorkpadRoute = () => (
+  <Route path={'/export/workpad/pdf/:id/page/:pageNumber'}>
+    <ExportWorkpadRouteComponent />
+  </Route>
+);
 
-const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: { match } }) => {
+const ExportWorkpadRouteComponent: FC = () => {
+  const params = useParams<{ id: string; pageNumber: string }>();
   const getRedirectPath = useCallback(
-    (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${match.params.pageNumber}`,
-    [match.params.pageNumber]
+    (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${params.pageNumber}`,
+    [params.pageNumber]
   );
 
   return (
     <WorkpadLoaderComponent
       loadPages={false}
-      params={match.params}
+      params={params as WorkpadPageRouteProps}
       getRedirectPath={getRedirectPath}
     >
       {() => (
@@ -111,7 +107,7 @@ const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: 
 };
 
 export const ExportRouteManager: FC = ({ children }) => {
-  const params = useParams<WorkpadPageRouteParams>();
+  const params = useParams();
   usePageSync();
 
   const dispatch = useDispatch();
@@ -133,7 +129,7 @@ export const WorkpadHistoryManager: FC = ({ children }) => {
 };
 
 const WorkpadLoaderComponent: FC<{
-  params: WorkpadRouteProps['match']['params'];
+  params: WorkpadRouteProps;
   loadPages?: boolean;
   getRedirectPath: (workpadId: string) => string;
   children: (workpad: CanvasWorkpad) => JSX.Element;

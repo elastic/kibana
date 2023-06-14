@@ -7,6 +7,7 @@
 
 import React, { useState, useLayoutEffect, useCallback } from 'react';
 import usePromise from 'react-use/lib/usePromise';
+import { useParams } from 'react-router-dom-v5-compat';
 import { History } from 'history';
 
 import { i18n } from '@kbn/i18n';
@@ -61,9 +62,6 @@ interface EditProps {
   toasts: ToastsStart;
   history: History;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-
-  // URL params
-  id?: string;
 }
 
 export const PipelineEditView: React.FC<EditProps> = ({
@@ -72,12 +70,18 @@ export const PipelineEditView: React.FC<EditProps> = ({
   toasts,
   history,
   setBreadcrumbs,
-  id,
 }) => {
+  const routeParams = useParams();
   const params = new URLSearchParams(history.location.search);
   const shouldClone = params.get('clone') === '';
 
-  const pipeline = usePipeline(pipelineService, logstashLicenseService, toasts, shouldClone, id);
+  const pipeline = usePipeline(
+    pipelineService,
+    logstashLicenseService,
+    toasts,
+    shouldClone,
+    routeParams.id
+  );
 
   const close = useCallback(() => {
     history.push('/');
@@ -102,7 +106,7 @@ export const PipelineEditView: React.FC<EditProps> = ({
 
   return (
     <PipelineEditor
-      id={id}
+      id={routeParams.id}
       clone={shouldClone}
       close={close}
       open={open}

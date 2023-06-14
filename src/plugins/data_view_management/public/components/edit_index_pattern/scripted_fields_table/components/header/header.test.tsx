@@ -17,7 +17,7 @@ import { mockManagementPlugin } from '../../../../../mocks';
 import { Header } from './header';
 
 describe('Header', () => {
-  const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
+  const mockedContext = mockManagementPlugin.createIndexPatternManagementContext();
   test('should render normally', () => {
     const component = mount(
       <Header.WrappedComponent

@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useParams } from 'react-router-dom-v5-compat';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -22,105 +22,94 @@ import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 
-interface Props {
-  theme: EuiTheme | undefined;
-  match: {
-    params: {
-      type: string;
-      node: string;
-    };
-  };
-}
+export const MetricDetail = withMetricPageProviders(() => {
+  const params = useParams();
+  const nodeId = params.node as string;
+  const nodeType = params.type as InventoryItemType;
+  const inventoryModel = findInventoryModel(nodeType);
+  const { sourceId, metricIndicesExist } = useSourceContext();
 
-export const MetricDetail = withMetricPageProviders(
-  withTheme(({ match }: Props) => {
-    const nodeId = match.params.node;
-    const nodeType = match.params.type as InventoryItemType;
-    const inventoryModel = findInventoryModel(nodeType);
-    const { sourceId, metricIndicesExist } = useSourceContext();
+  const {
+    timeRange,
+    parsedTimeRange,
+    setTimeRange,
+    refreshInterval,
+    setRefreshInterval,
+    isAutoReloading,
+    setAutoReload,
+    triggerRefresh,
+  } = useMetricsTimeContext();
+  const {
+    name,
+    filteredRequiredMetrics,
+    loading: metadataLoading,
+    cloudId,
+    metadata,
+  } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, parsedTimeRange);
 
-    const {
-      timeRange,
-      parsedTimeRange,
-      setTimeRange,
-      refreshInterval,
-      setRefreshInterval,
-      isAutoReloading,
-      setAutoReload,
-      triggerRefresh,
-    } = useMetricsTimeContext();
-    const {
-      name,
-      filteredRequiredMetrics,
-      loading: metadataLoading,
-      cloudId,
-      metadata,
-    } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, parsedTimeRange);
+  const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
-    const [sideNav, setSideNav] = useState<NavItem[]>([]);
+  const addNavItem = React.useCallback(
+    (item: NavItem) => {
+      if (!sideNav.some((n) => n.id === item.id)) {
+        setSideNav([item, ...sideNav]);
+      }
+    },
+    [sideNav]
+  );
 
-    const addNavItem = React.useCallback(
-      (item: NavItem) => {
-        if (!sideNav.some((n) => n.id === item.id)) {
-          setSideNav([item, ...sideNav]);
-        }
-      },
-      [sideNav]
-    );
+  const inventoryLinkProps = useLinkProps({
+    app: 'metrics',
+    pathname: '/inventory',
+  });
 
-    const inventoryLinkProps = useLinkProps({
-      app: 'metrics',
-      pathname: '/inventory',
-    });
+  useMetricsBreadcrumbs([
+    {
+      ...inventoryLinkProps,
+      text: inventoryTitle,
+    },
+    {
+      text: name,
+    },
+  ]);
 
-    useMetricsBreadcrumbs([
-      {
-        ...inventoryLinkProps,
-        text: inventoryTitle,
-      },
-      {
-        text: name,
-      },
-    ]);
-
-    if (metadataLoading && !filteredRequiredMetrics.length) {
-      return (
-        <MetricsPageTemplate hasData={metricIndicesExist}>
-          <InfraLoadingPanel
-            height="100vh"
-            width="100%"
-            text={i18n.translate('xpack.infra.metrics.loadingNodeDataText', {
-              defaultMessage: 'Loading data',
-            })}
-          />
-        </MetricsPageTemplate>
-      );
-    }
-
+  if (metadataLoading && !filteredRequiredMetrics.length) {
     return (
-      <>
-        {metadata ? (
-          <NodeDetailsPage
-            name={name}
-            requiredMetrics={filteredRequiredMetrics}
-            sourceId={sourceId}
-            timeRange={timeRange}
-            nodeType={nodeType}
-            nodeId={nodeId}
-            cloudId={cloudId}
-            metadataLoading={metadataLoading}
-            isAutoReloading={isAutoReloading}
-            refreshInterval={refreshInterval}
-            sideNav={sideNav}
-            metadata={metadata}
-            addNavItem={addNavItem}
-            setRefreshInterval={setRefreshInterval}
-            setAutoReload={setAutoReload}
-            triggerRefresh={triggerRefresh}
-            setTimeRange={setTimeRange}
-          />
-        ) : null}
-      </>
+      <MetricsPageTemplate hasData={metricIndicesExist}>
+        <InfraLoadingPanel
+          height="100vh"
+          width="100%"
+          text={i18n.translate('xpack.infra.metrics.loadingNodeDataText', {
+            defaultMessage: 'Loading data',
+          })}
+        />
+      </MetricsPageTemplate>
     );
-  })
-);
+  }
+
+  return (
+    <>
+      {metadata ? (
+        <NodeDetailsPage
+          name={name}
+          requiredMetrics={filteredRequiredMetrics}
+          sourceId={sourceId}
+          timeRange={timeRange}
+          nodeType={nodeType}
+          nodeId={nodeId}
+          cloudId={cloudId}
+          metadataLoading={metadataLoading}
+          isAutoReloading={isAutoReloading}
+          refreshInterval={refreshInterval}
+          sideNav={sideNav}
+          metadata={metadata}
+          addNavItem={addNavItem}
+          setRefreshInterval={setRefreshInterval}
+          setAutoReload={setAutoReload}
+          triggerRefresh={triggerRefresh}
+          setTimeRange={setTimeRange}
+        />
+      ) : null}
+    </>
+  );
+});

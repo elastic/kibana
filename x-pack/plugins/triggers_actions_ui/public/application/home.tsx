@@ -7,6 +7,7 @@
 
 import React, { useState, lazy, useEffect, useCallback } from 'react';
 import { RouteComponentProps, Switch, Redirect } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,16 +27,10 @@ const RulesList = lazy(() => import('./sections/rules_list/components/rules_list
 const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
-export interface MatchParams {
-  section: Section;
-}
-
-export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
+export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps> = ({
   history,
 }) => {
+  const { section } = useParams();
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const { chrome, setBreadcrumbs } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');

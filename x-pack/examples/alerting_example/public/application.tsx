@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -26,6 +27,30 @@ export interface AlertingExampleComponentParams {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
+const ViewAlertPageRoute = ({ http }: { http: AlertingExampleComponentParams['http'] }) => {
+  const params = useParams();
+
+  return (
+    <Page title={`View Rule`} crumb={`View Rule ${params.id}`}>
+      <ViewAlertPage http={http} id={params.id as string} />
+    </Page>
+  );
+};
+
+const ViewPeopleInSpaceAlertPageRoute = ({
+  http,
+}: {
+  http: AlertingExampleComponentParams['http'];
+}) => {
+  const params = useParams();
+
+  return (
+    <Page title={`View People In Space Rule`} crumb={`Astros ${params.id}`}>
+      <ViewPeopleInSpaceAlertPage http={http} id={params.id as string} />
+    </Page>
+  );
+};
+
 const AlertingExampleApp = ({
   basename,
   http,
@@ -34,35 +59,17 @@ const AlertingExampleApp = ({
   return (
     <Router basename={basename}>
       <EuiPage>
-        <Route
-          path={`/`}
-          exact={true}
-          render={() => (
-            <Page title={`Home`} isHome={true}>
-              <DocumentationPage triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path={`/rule/:id`}
-          render={(props) => {
-            return (
-              <Page title={`View Rule`} crumb={`View Rule ${props.match.params.id}`}>
-                <ViewAlertPage http={http} id={props.match.params.id} />
-              </Page>
-            );
-          }}
-        />
-        <Route
-          path={`/astros/:id`}
-          render={(props) => {
-            return (
-              <Page title={`View People In Space Rule`} crumb={`Astros ${props.match.params.id}`}>
-                <ViewPeopleInSpaceAlertPage http={http} id={props.match.params.id} />
-              </Page>
-            );
-          }}
-        />
+        <Route path={`/`} exact={true}>
+          <Page title={`Home`} isHome={true}>
+            <DocumentationPage triggersActionsUi={triggersActionsUi} />
+          </Page>
+        </Route>
+        <Route path={`/rule/:id`}>
+          <ViewAlertPageRoute http={http} />
+        </Route>
+        <Route path={`/astros/:id`}>
+          <ViewPeopleInSpaceAlertPageRoute http={http} />
+        </Route>
       </EuiPage>
     </Router>
   );
