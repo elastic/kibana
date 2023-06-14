@@ -35,10 +35,7 @@ import {
   getDomain,
   useDateFormatter,
 } from './chart_preview_helper';
-import {
-  INTERVAL_MULTIPLIER_FOR_LOOKBACK,
-  NUMBER_OF_TIME_SERIES_FOR_PREVIEW_CHART,
-} from '../../../../../common/rules/apm_rule_types';
+import { INTERVAL_MULTIPLIER_FOR_LOOKBACK } from '../../../../../common/rules/apm_rule_types';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -70,6 +67,7 @@ export function ChartPreview({
     opacity: thresholdOpacity,
   };
 
+  const NUM_SERIES = 5;
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const tooltipProps: TooltipProps = {
@@ -87,7 +85,7 @@ export function ChartPreview({
       const bMax = Math.max(...b.data.map((point) => point.y as number));
       return bMax - aMax;
     });
-    return sortedSeries.slice(0, NUMBER_OF_TIME_SERIES_FOR_PREVIEW_CHART);
+    return sortedSeries.slice(0, NUM_SERIES);
   }, [series]);
 
   const barSeries = useMemo(() => {
