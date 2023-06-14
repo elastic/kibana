@@ -17,13 +17,11 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import {
+  ApmRuleType,
+  PreviewChartResponse,
+} from '../../../../../common/rules/apm_rule_types';
 import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
-
-export type TransactionErrorCountChartPreviewResponse = Array<{
-  name: string;
-  data: Array<{ x: number; y: number | null }>;
-}>;
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,
@@ -31,7 +29,7 @@ export async function getTransactionErrorCountChartPreview({
 }: {
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
-}): Promise<TransactionErrorCountChartPreviewResponse> {
+}): Promise<PreviewChartResponse> {
   const {
     serviceName,
     environment,

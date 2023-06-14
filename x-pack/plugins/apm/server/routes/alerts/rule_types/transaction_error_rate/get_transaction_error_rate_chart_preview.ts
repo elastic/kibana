@@ -6,7 +6,10 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import {
+  ApmRuleType,
+  PreviewChartResponse,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -27,11 +30,6 @@ import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
 
-export type TransactionErrorRateChartPreviewResponse = Array<{
-  name: string;
-  data: Array<{ x: number; y: number | null }>;
-}>;
-
 export async function getTransactionErrorRateChartPreview({
   config,
   apmEventClient,
@@ -40,7 +38,7 @@ export async function getTransactionErrorRateChartPreview({
   config: APMConfig;
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
-}): Promise<TransactionErrorRateChartPreviewResponse> {
+}): Promise<PreviewChartResponse> {
   const {
     serviceName,
     environment,

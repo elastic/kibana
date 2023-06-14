@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
 } from '@kbn/apm-plugin/common/es_fields/apm';
-import { TransactionErrorCountChartPreviewResponse } from '@kbn/apm-plugin/server/routes/alerts/rule_types/error_count/get_error_count_chart_preview';
+import { PreviewChartResponseItem } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateErrorData } from './generate_data';
@@ -67,9 +67,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.some(
-            (item: TransactionErrorCountChartPreviewResponse) =>
-              item.data.some((coordinate) => coordinate.x && coordinate.y)
+          response.body.errorCountChartPreview.some((item: PreviewChartResponseItem) =>
+            item.data.some((coordinate) => coordinate.x && coordinate.y)
           )
         ).to.equal(true);
       });
@@ -95,12 +94,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.map(
-            (item: TransactionErrorCountChartPreviewResponse) => ({
-              name: item.name,
-              y: item.data[0].y,
-            })
-          )
+          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
         ).to.eql([{ name: 'synth-go_production', y: 250 }]);
       });
 
@@ -114,12 +111,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errorCountChartPreview.length).to.equal(1);
         expect(
-          response.body.errorCountChartPreview.map(
-            (item: TransactionErrorCountChartPreviewResponse) => ({
-              name: item.name,
-              y: item.data[0].y,
-            })
-          )
+          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
         ).to.eql([{ name: 'synth-go_production', y: 375 }]);
       });
 
@@ -141,12 +136,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errorCountChartPreview.length).to.equal(1);
         expect(
-          response.body.errorCountChartPreview.map(
-            (item: TransactionErrorCountChartPreviewResponse) => ({
-              name: item.name,
-              y: item.data[0].y,
-            })
-          )
+          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
         ).to.eql([{ name: 'synth-go_production', y: 375 }]);
       });
 
@@ -168,12 +161,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errorCountChartPreview.length).to.equal(2);
         expect(
-          response.body.errorCountChartPreview.map(
-            (item: TransactionErrorCountChartPreviewResponse) => ({
-              name: item.name,
-              y: item.data[0].y,
-            })
-          )
+          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
         ).to.eql([
           {
             name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
@@ -205,12 +196,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errorCountChartPreview.length).to.equal(1);
         expect(
-          response.body.errorCountChartPreview.map(
-            (item: TransactionErrorCountChartPreviewResponse) => ({
-              name: item.name,
-              y: item.data[0].y,
-            })
-          )
+          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
         ).to.eql([
           {
             name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
@@ -238,12 +227,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.map(
-            (item: TransactionErrorCountChartPreviewResponse) => ({
-              name: item.name,
-              y: item.data[0].y,
-            })
-          )
+          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
         ).to.eql([
           { name: 'synth-go_production', y: 375 },
           { name: 'synth-java_production', y: 375 },
@@ -270,12 +257,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.map(
-            (item: TransactionErrorCountChartPreviewResponse) => ({
-              name: item.name,
-              y: item.data[0].y,
-            })
-          )
+          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
         ).to.eql([
           {
             name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
