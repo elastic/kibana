@@ -8,6 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const emptyTitleText = i18n.translate('xpack.lens.configure.emptyTitle', {
-  defaultMessage: '[Untitled]',
-});
+export const emptyTitleText = i18n.translate(
+  'visualizationUiComponents.emptyTitle'
+  {
+    defaultMessage: '[Untitled]',
+  }
+);
