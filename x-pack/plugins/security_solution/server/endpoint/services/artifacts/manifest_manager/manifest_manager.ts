@@ -15,7 +15,7 @@ import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import type { ListResult } from '@kbn/fleet-plugin/common';
+import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -492,6 +492,56 @@ export class ManifestManager {
     return manifest;
   }
 
+  private async updatePackagePolicyIfNeeded(
+    manifest: Manifest,
+    packagePolicy: PackagePolicy
+  ): Promise<Error | undefined> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
+    if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
+      const oldManifest = newPackagePolicy.inputs[0].config.artifact_manifest ?? {
+        value: {},
+      };
+
+      const newManifestVersion = manifest.getSemanticVersion();
+      if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
+        const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
+
+        if (!manifestDispatchSchema.is(serializedManifest)) {
+          return new EndpointError(
+            `Invalid manifest for policy ${packagePolicy.id}`,
+            serializedManifest
+          );
+        } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
+          newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
+
+          try {
+            await this.packagePolicyService.update(
+              this.savedObjectsClient,
+              // @ts-expect-error TS2345
+              undefined,
+              id,
+              newPackagePolicy
+            );
+            this.logger.debug(
+              `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
+            );
+          } catch (err) {
+            return err;
+          }
+        } else {
+          this.logger.debug(
+            `No change in manifest content for package policy: ${id}. Staying on old version`
+          );
+        }
+      } else {
+        this.logger.debug(`No change in manifest version for package policy: ${id}`);
+      }
+    } else {
+      return new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, newPackagePolicy);
+    }
+  }
+
   /**
    * Dispatches the manifest by writing it to the endpoint package policy, if different
    * from the manifest already in the config.
@@ -502,57 +552,27 @@ export class ManifestManager {
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
     const errors: Error[] = [];
 
+    const allPackagePolicies: PackagePolicy[] = [];
     await iterateAllListItems(
       (page) => this.listEndpointPolicies(page),
+      (packagePolicy) => {
+        allPackagePolicies.push(packagePolicy);
+      }
+    );
+
+    await pMap(
+      allPackagePolicies,
       async (packagePolicy) => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
-        if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
-          const oldManifest = newPackagePolicy.inputs[0].config.artifact_manifest ?? {
-            value: {},
-          };
-
-          const newManifestVersion = manifest.getSemanticVersion();
-          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-            const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
-
-            if (!manifestDispatchSchema.is(serializedManifest)) {
-              errors.push(
-                new EndpointError(
-                  `Invalid manifest for policy ${packagePolicy.id}`,
-                  serializedManifest
-                )
-              );
-            } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
-              newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
-
-              try {
-                await this.packagePolicyService.update(
-                  this.savedObjectsClient,
-                  // @ts-expect-error TS2345
-                  undefined,
-                  id,
-                  newPackagePolicy
-                );
-                this.logger.debug(
-                  `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
-                );
-              } catch (err) {
-                errors.push(err);
-              }
-            } else {
-              this.logger.debug(
-                `No change in manifest content for package policy: ${id}. Staying on old version`
-              );
-            }
-          } else {
-            this.logger.debug(`No change in manifest version for package policy: ${id}`);
-          }
-        } else {
-          errors.push(
-            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, newPackagePolicy)
-          );
+        const error = await this.updatePackagePolicyIfNeeded(manifest, packagePolicy);
+        if (error) {
+          errors.push(error);
         }
+      },
+      {
+        concurrency: 10,
+        /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
+         * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
+        stopOnError: false,
       }
     );
 
@@ -586,7 +606,7 @@ export class ManifestManager {
   private async listEndpointPolicies(page: number) {
     return this.packagePolicyService.list(this.savedObjectsClient, {
       page,
-      perPage: 20,
+      perPage: 100,
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
   }
