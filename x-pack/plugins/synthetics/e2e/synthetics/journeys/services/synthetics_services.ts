@@ -34,7 +34,7 @@ export class SyntheticsServices {
         },
         method: 'GET',
       });
-      return (data as { attributes: SyntheticsMonitor })?.attributes;
+      return data as SyntheticsMonitor;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
