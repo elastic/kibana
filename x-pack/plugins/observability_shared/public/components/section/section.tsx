@@ -44,7 +44,7 @@ export function SectionSubtitle({ children }: { children?: ReactNode }) {
 
 export function SectionLinks({ children, ...props }: { children?: ReactNode } & EuiListGroupProps) {
   return (
-    <EuiListGroup {...props} flush={true} bordered={false}>
+    <EuiListGroup {...props} size={'s'} color={'primary'} flush={true} bordered={false}>
       {children}
     </EuiListGroup>
   );
