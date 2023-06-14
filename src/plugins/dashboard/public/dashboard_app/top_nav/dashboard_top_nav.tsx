@@ -77,9 +77,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
-  // const isEmbeddedExternally = dashboard.select(
-  //   (state) => state.componentState.isEmbeddedExternally
-  // );
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
@@ -110,9 +107,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
    * Manage chrome visibility when dashboard is embedded.
    */
   useEffect(() => {
-    // dashboard.dispatch.setIsEmbeddedExternally(Boolean(embedSettings));
     if (!embedSettings) setChromeVisibility(viewMode !== ViewMode.PRINT);
-    //  }, [embedSettings, setChromeVisibility, viewMode, dashboard.dispatch]);
   }, [embedSettings, setChromeVisibility, viewMode]);
 
   /**
@@ -211,8 +206,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   UseUnmount(() => {
     dashboard.clearOverlays();
   });
-
-  // console.log(embedSettings);
 
   return (
     <div
