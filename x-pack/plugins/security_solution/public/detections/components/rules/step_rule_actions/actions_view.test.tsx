@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FrequencyDescription } from './actions_view';
+import { FrequencyDescription } from './notification_action';
 import { TestProviders } from '../../../../common/mock';
 
 describe('getFrequencyDescription', () => {
