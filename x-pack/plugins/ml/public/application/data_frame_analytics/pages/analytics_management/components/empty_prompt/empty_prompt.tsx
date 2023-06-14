@@ -44,7 +44,7 @@ export const AnalyticsEmptyPrompt: FC = () => {
           size="fullWidth"
           src={dfaImage}
           alt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-            defaultMessage: 'Trained analysis of your data',
+            defaultMessage: 'Analyze your data with data frame analytics',
           })}
         />
       }
