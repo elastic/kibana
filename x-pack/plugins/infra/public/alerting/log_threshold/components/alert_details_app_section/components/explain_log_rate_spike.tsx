@@ -125,7 +125,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       field: term.fieldName,
       value: term.fieldValue,
     }));
-    SetLogSpikeParams(
+    setLogSpikeParams(
       fieldValuePairs ? { significantFieldValues: fieldValuePairs?.slice(0, 2) } : undefined
     );
   };
