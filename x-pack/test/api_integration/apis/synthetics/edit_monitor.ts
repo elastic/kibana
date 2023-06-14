@@ -311,6 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             label: 'Europe West',
             isServiceManaged: true,
           },
+          { id: testPolicyId, label: 'Private location', isServiceManaged: false },
         ],
       };
 
@@ -344,10 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = id;
         const toUpdate = {
           ...savedMonitor,
-          locations: [
-            ...savedMonitor.locations,
-            { id: testPolicyId, label: 'Private location', isServiceManaged: false },
-          ],
+          name: '!@#$%^&*()_++[\\-\\]- wow',
           urls: 'https://google.com',
         };
         await supertestWithoutAuth
@@ -360,6 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not updated
+        expect(response.body.urls).not.eql(toUpdate.urls);
         expect(response.body.urls).eql(newMonitor.urls);
         expect(response.body.locations).eql(newMonitor.locations);
       } finally {
