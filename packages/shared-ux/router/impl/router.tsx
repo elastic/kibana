@@ -44,7 +44,7 @@ export const Route = ({
     return (
       <CompatRoute
         {...rest}
-        render={(props) => (
+        render={(props: any) => (
           <>
             <MatchPropagator />
             {/* @ts-ignore  else condition exists if renderFunction is undefined*/}

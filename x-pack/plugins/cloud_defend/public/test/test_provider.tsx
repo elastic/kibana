@@ -9,6 +9,7 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -57,11 +58,13 @@ export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
-          <I18nProvider>
-            <Switch>
-              <Route path="*" render={() => <>{children}</>} />
-            </Switch>
-          </I18nProvider>
+          <CompatRouter>
+            <I18nProvider>
+              <Switch>
+                <Route path="*" render={() => <>{children}</>} />
+              </Switch>
+            </I18nProvider>
+          </CompatRouter>
         </Router>
       </QueryClientProvider>
     </KibanaContextProvider>

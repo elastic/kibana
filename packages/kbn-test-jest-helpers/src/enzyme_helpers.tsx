@@ -15,6 +15,9 @@
 
 import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
+import { createMemoryHistory } from 'history';
+import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import React, { ComponentType, ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
@@ -74,7 +77,12 @@ export function shallowWithIntl<T>(
 ) {
   const options = getOptions(context, childContextTypes, props);
 
-  return shallow(nodeWithIntlProp(node), options);
+  return shallow(
+    <Router history={createMemoryHistory()}>
+      <CompatRouter>{nodeWithIntlProp(node)}</CompatRouter>
+    </Router>,
+    options
+  );
 }
 
 /**
@@ -100,7 +108,12 @@ export function mountWithIntl<T>(
 ) {
   const options = getOptions(context, childContextTypes, props);
 
-  return mount(nodeWithIntlProp(node), options);
+  return mount(
+    <Router history={createMemoryHistory()}>
+      <CompatRouter>{nodeWithIntlProp(node)}</CompatRouter>
+    </Router>,
+    options
+  );
 }
 
 /**
