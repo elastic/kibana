@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
@@ -31,18 +31,6 @@ describe('JobsTableComponent', () => {
   beforeEach(() => {
     securityJobs = cloneDeep(mockSecurityJobs);
     onJobStateChangeMock = jest.fn();
-  });
-
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <JobsTableComponent
-        isLoading={true}
-        jobs={securityJobs}
-        onJobStateChange={onJobStateChangeMock}
-        mlNodesAvailable={true}
-      />
-    );
-    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render the hyperlink which points specifically to the job id', async () => {
