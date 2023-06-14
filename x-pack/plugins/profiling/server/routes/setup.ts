@@ -46,6 +46,7 @@ export function registerSetupRoute({
   router.get(
     {
       path: paths.HasSetupESResources,
+      options: { tags: ['access:profiling'] },
       validate: false,
     },
     async (context, request, response) => {
@@ -113,6 +114,7 @@ export function registerSetupRoute({
   router.post(
     {
       path: paths.HasSetupESResources,
+      options: { tags: ['access:profiling'] },
       validate: {},
     },
     async (context, request, response) => {
@@ -191,6 +193,7 @@ export function registerSetupRoute({
   router.get(
     {
       path: paths.SetupDataCollectionInstructions,
+      options: { tags: ['access:profiling'] },
       validate: false,
     },
     async (context, request, response) => {

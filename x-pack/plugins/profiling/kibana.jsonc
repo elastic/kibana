@@ -18,11 +18,11 @@
       "licensing",
       "observability",
       "observabilityShared",
+      "unifiedSearch",
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
     ]
   }
 }

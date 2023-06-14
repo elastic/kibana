@@ -34,6 +34,7 @@ export function registerTopNFunctionsSearchRoute({
   router.get(
     {
       path: paths.TopNFunctions,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: querySchema,
       },

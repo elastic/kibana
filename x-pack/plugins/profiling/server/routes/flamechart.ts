@@ -26,6 +26,7 @@ export function registerFlameChartSearchRoute({
   router.get(
     {
       path: paths.Flamechart,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),

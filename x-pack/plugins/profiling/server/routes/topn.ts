@@ -164,6 +164,7 @@ export function queryTopNCommon({
   router.get(
     {
       path: pathName,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),
