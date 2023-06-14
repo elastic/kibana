@@ -17,7 +17,7 @@ interface Props {
 }
 export const BetaBadge = ({ iconType, tooltipPosition, tooltipContent }: Props) => (
   <EuiBetaBadge
-    label={i18n.translate('xpack.infra.hostsViewPage.betaBadgeLabel', {
+    label={i18n.translate('xpack.infra.common.tabBetaBadgeLabel', {
       defaultMessage: 'Beta',
     })}
     tooltipContent={tooltipContent}
