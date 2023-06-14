@@ -6,33 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 
+import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 import { getPresets } from '../nav_tree_presets';
 import { Navigation } from './navigation';
-import type { NavigationGroupPreset, NodeDefinition } from '../types';
+import type { NavigationGroupPreset } from '../types';
 
 const navTreePresets = getPresets('all');
 
-export interface Props {
+export interface Props<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
   preset?: NavigationGroupPreset;
-  nodeDefinition?: NodeDefinition;
+  nodeDefinition?: NodeDefinition<LinkId, Id, ChildrenId>;
   defaultIsCollapsed?: boolean;
 }
 
-export const NavigationBucket: FC<Props> = ({
-  nodeDefinition: _nodeDefinition,
-  defaultIsCollapsed,
-  preset,
-}) => {
-  const nodeDefinition = preset ? navTreePresets[preset] : _nodeDefinition;
+export function NavigationBucket<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>({ nodeDefinition: _nodeDefinition, defaultIsCollapsed, preset }: Props<LinkId, Id, ChildrenId>) {
+  const nodeDefinition = preset
+    ? (navTreePresets[preset] as NodeDefinition<LinkId, Id, ChildrenId>)
+    : _nodeDefinition;
 
   if (!nodeDefinition) {
     throw new Error('Either preset or nodeDefinition must be defined');
   }
 
   const renderItems = useCallback(
-    (items: NodeDefinition[], isRoot = false) => {
+    (items: Array<NodeDefinition<LinkId, Id, ChildrenId>>, isRoot = false) => {
       return items.map((item) => {
         const id = item.id ?? item.link;
 
@@ -64,4 +71,4 @@ export const NavigationBucket: FC<Props> = ({
   );
 
   return <>{renderItems([nodeDefinition], true)}</>;
-};
+}

@@ -770,7 +770,7 @@ describe('Response actions', () => {
       let casesClient: CasesClientMock;
 
       const getCaseIdsFromAttachmentAddService = () => {
-        return casesClient.attachments.add.mock.calls.map(([addArgs]) => addArgs.caseId);
+        return casesClient.attachments.bulkCreate.mock.calls.map(([addArgs]) => addArgs.caseId);
       };
 
       beforeEach(async () => {
@@ -778,7 +778,7 @@ describe('Response actions', () => {
           {} as KibanaRequest
         )) as CasesClientMock;
 
-        casesClient.attachments.add.mockClear();
+        casesClient.attachments.bulkCreate.mockClear();
 
         let counter = 1;
         casesClient.cases.getCasesByAlertID.mockImplementation(async () => {
@@ -803,7 +803,7 @@ describe('Response actions', () => {
           body: { endpoint_ids: ['XYZ'], case_ids: ['one', 'two'] },
         });
 
-        expect(casesClient.attachments.add).toHaveBeenCalledTimes(2);
+        expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
           expect.arrayContaining(['one', 'two'])
         );
@@ -829,7 +829,7 @@ describe('Response actions', () => {
           },
         });
 
-        expect(casesClient.attachments.add).toHaveBeenCalledTimes(4);
+        expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(4);
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
           expect.arrayContaining(['ONE', 'TWO', 'case-1', 'case-2'])
         );
