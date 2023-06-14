@@ -393,8 +393,8 @@ export function TopNFunctionsTable({
       <TotalSamplesStat
         totalSamples={totalCount}
         newSamples={comparisonTopNFunctions?.TotalCount}
-        samplingRateA={topNFunctions?.SamplingRate?? 1.0}
-        samplingRateB={comparisonTopNFunctions?.SamplingRate?? 1.0}
+        samplingRateA={topNFunctions?.SamplingRate ?? 1.0}
+        samplingRateB={comparisonTopNFunctions?.SamplingRate ?? 1.0}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
