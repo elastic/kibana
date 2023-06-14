@@ -233,8 +233,11 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                 <StepAboutRule
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={aboutStepData}
-                  defineRuleData={defineStepData}
+                  ruleType={defineStepData.ruleType}
+                  machineLearningJobId={defineStepData.machineLearningJobId}
+                  index={defineStepData.index}
+                  dataViewId={defineStepData.dataViewId}
+                  timestampOverride={aboutStepData.timestampOverride}
                   form={aboutStepForm}
                   key="aboutStep"
                 />

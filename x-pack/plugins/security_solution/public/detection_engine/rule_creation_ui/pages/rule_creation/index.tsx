@@ -16,7 +16,8 @@ import {
   EuiResizableContainer,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
+import type { EuiResizableContainerActions } from '@elastic/eui/src/components/resizable_container/types';
+import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
@@ -78,6 +79,7 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
+import type { HeaderPageProps } from '../../../../common/components/header_page';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { NextStep } from '../../../../detections/components/rules/next_step';
@@ -237,6 +239,16 @@ const CreateRulePageComponent: React.FC = () => {
     dataViewId: defineStepData.dataViewId,
   });
 
+  const rulesUrl = getRulesUrl();
+  const backOptions = useMemo(
+    () => ({
+      path: rulesUrl,
+      text: i18n.BACK_TO_RULES,
+      pageId: SecurityPageName.rules,
+    }),
+    [rulesUrl]
+  );
+
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
       setOpenSteps((_openSteps) => ({
@@ -244,6 +256,22 @@ const CreateRulePageComponent: React.FC = () => {
         [step]: isOpen,
       })),
     []
+  );
+  const toggleDefineStep = useCallback(
+    (isOpen: boolean) => handleAccordionToggle(RuleStep.defineRule, isOpen),
+    [handleAccordionToggle]
+  );
+  const toggleAboutStep = useCallback(
+    (isOpen: boolean) => handleAccordionToggle(RuleStep.aboutRule, isOpen),
+    [handleAccordionToggle]
+  );
+  const toggleScheduleStep = useCallback(
+    (isOpen: boolean) => handleAccordionToggle(RuleStep.scheduleRule, isOpen),
+    [handleAccordionToggle]
+  );
+  const toggleActionsStep = useCallback(
+    (isOpen: boolean) => handleAccordionToggle(RuleStep.ruleActions, isOpen),
+    [handleAccordionToggle]
   );
   const goToStep = useCallback(
     (step: RuleStep) => {
@@ -293,39 +321,34 @@ const CreateRulePageComponent: React.FC = () => {
     },
     [activeStep, validateStep, goToStep]
   );
-  const submitStep = useCallback(
-    async (step: RuleStep) => {
-      const valid = await validateStep(step);
-
-      if (valid) {
-        const nextStep = getNextStep(step);
-
-        if (nextStep != null) {
-          goToStep(nextStep);
-        }
-      }
-    },
-    [validateStep, goToStep]
-  );
 
   const submitRule = useCallback(
     async (step: RuleStep, enabled: boolean) => {
       const valid = await validateStep(step);
 
       if (valid) {
+        const localDefineStepData = defineStepForm.getFormData();
+        const localAboutStepData = aboutStepForm.getFormData();
+        const localScheduleStepData = scheduleStepForm.getFormData();
+        const localActionsStepData = actionsStepForm.getFormData();
         const startMlJobsIfNeeded = async () => {
           if (!isMlRule(ruleType) || !enabled) {
             return;
           }
-          await startMlJobs(defineStepData.machineLearningJobId);
+          await startMlJobs(localDefineStepData.machineLearningJobId);
         };
         const [, createdRule] = await Promise.all([
           startMlJobsIfNeeded(),
           createRule(
-            formatRule<RuleCreateProps>(defineStepData, aboutStepData, scheduleStepData, {
-              ...actionsStepData,
-              enabled,
-            })
+            formatRule<RuleCreateProps>(
+              localDefineStepData,
+              localAboutStepData,
+              localScheduleStepData,
+              {
+                ...localActionsStepData,
+                enabled,
+              }
+            )
           ),
         ]);
 
@@ -339,11 +362,11 @@ const CreateRulePageComponent: React.FC = () => {
     },
     [
       validateStep,
+      defineStepForm,
+      aboutStepForm,
+      scheduleStepForm,
+      actionsStepForm,
       createRule,
-      defineStepData,
-      aboutStepData,
-      scheduleStepData,
-      actionsStepData,
       addSuccess,
       navigateToApp,
       ruleType,
@@ -353,15 +376,35 @@ const CreateRulePageComponent: React.FC = () => {
 
   const defineRuleButtonType =
     activeStep === RuleStep.defineRule ? 'active' : defineStepForm.isValid ? 'valid' : 'passive';
-  const defineRuleButton = (
-    <AccordionTitle name="1" title={RuleI18n.DEFINE_RULE} type={defineRuleButtonType} />
+  const defineRuleButton = useMemo(
+    () => <AccordionTitle name="1" title={RuleI18n.DEFINE_RULE} type={defineRuleButtonType} />,
+    [defineRuleButtonType]
   );
+  const defineRuleNextStep = useCallback(async () => {
+    const valid = await defineStepForm.validate();
+    if (valid) {
+      const nextStep = getNextStep(RuleStep.defineRule);
+      if (nextStep) {
+        goToStep(nextStep);
+      }
+    }
+  }, [defineStepForm, goToStep]);
 
   const aboutRuleButtonType =
     activeStep === RuleStep.aboutRule ? 'active' : aboutStepForm.isValid ? 'valid' : 'passive';
-  const aboutRuleButton = (
-    <AccordionTitle name="2" title={RuleI18n.ABOUT_RULE} type={aboutRuleButtonType} />
+  const aboutRuleButton = useMemo(
+    () => <AccordionTitle name="2" title={RuleI18n.ABOUT_RULE} type={aboutRuleButtonType} />,
+    [aboutRuleButtonType]
   );
+  const aboutRuleNextStep = useCallback(async () => {
+    const valid = await aboutStepForm.validate();
+    if (valid) {
+      const nextStep = getNextStep(RuleStep.aboutRule);
+      if (nextStep) {
+        goToStep(nextStep);
+      }
+    }
+  }, [aboutStepForm, goToStep]);
 
   const scheduleRuleButtonType =
     activeStep === RuleStep.scheduleRule
@@ -369,14 +412,304 @@ const CreateRulePageComponent: React.FC = () => {
       : scheduleStepForm.isValid
       ? 'valid'
       : 'passive';
-  const scheduleRuleButton = (
-    <AccordionTitle name="3" title={RuleI18n.SCHEDULE_RULE} type={scheduleRuleButtonType} />
+  const scheduleRuleButton = useMemo(
+    () => <AccordionTitle name="3" title={RuleI18n.SCHEDULE_RULE} type={scheduleRuleButtonType} />,
+    [scheduleRuleButtonType]
   );
+  const scheduleRuleNextStep = useCallback(async () => {
+    const valid = await scheduleStepForm.validate();
+    if (valid) {
+      const nextStep = getNextStep(RuleStep.scheduleRule);
+      if (nextStep) {
+        goToStep(nextStep);
+      }
+    }
+  }, [scheduleStepForm, goToStep]);
 
   const actionsRuleButtonType =
     activeStep === RuleStep.ruleActions ? 'active' : actionsStepForm.isValid ? 'valid' : 'passive';
-  const ruleActionsButton = (
-    <AccordionTitle name="4" title={RuleI18n.RULE_ACTIONS} type={actionsRuleButtonType} />
+  const ruleActionsButton = useMemo(
+    () => <AccordionTitle name="4" title={RuleI18n.RULE_ACTIONS} type={actionsRuleButtonType} />,
+    [actionsRuleButtonType]
+  );
+  const submitRuleDisabled = useCallback(() => {
+    submitRule(RuleStep.ruleActions, false);
+  }, [submitRule]);
+  const submitRuleEnabled = useCallback(() => {
+    submitRule(RuleStep.ruleActions, true);
+  }, [submitRule]);
+
+  const memoStepDefineRule = useMemo(
+    () => (
+      <>
+        <EuiHorizontalRule margin="m" />
+        <div
+          style={{
+            display: activeStep === RuleStep.defineRule ? undefined : 'none',
+          }}
+        >
+          <StepDefineRule
+            isLoading={isCreateRuleLoading || loading}
+            kibanaDataViews={dataViewOptions}
+            indicesConfig={indicesConfig}
+            threatIndicesConfig={threatIndicesConfig}
+            onPreviewDisabledStateChange={setIsPreviewDisabled}
+            form={defineStepForm}
+            optionsSelected={eqlOptionsSelected}
+            setOptionsSelected={setEqlOptionsSelected}
+            indexPattern={indexPattern}
+            isIndexPatternLoading={isIndexPatternLoading}
+            browserFields={browserFields}
+          />
+          <NextStep
+            dataTestSubj="define-continue"
+            onClick={defineRuleNextStep}
+            isDisabled={isCreateRuleLoading}
+          />
+        </div>
+        <div
+          style={{
+            display: activeStep === RuleStep.defineRule ? 'none' : undefined,
+          }}
+        >
+          <StepDefineRuleReadOnly
+            addPadding
+            defaultValues={defineStepData}
+            descriptionColumns="singleSplit"
+            indexPattern={indexPattern}
+          />
+        </div>
+      </>
+    ),
+    [
+      activeStep,
+      browserFields,
+      dataViewOptions,
+      defineRuleNextStep,
+      defineStepData,
+      defineStepForm,
+      eqlOptionsSelected,
+      indexPattern,
+      indicesConfig,
+      isCreateRuleLoading,
+      isIndexPatternLoading,
+      loading,
+      setEqlOptionsSelected,
+      threatIndicesConfig,
+    ]
+  );
+  const memoDefineStepExtraAction = useMemo(
+    () =>
+      defineStepForm.isValid && (
+        <EuiButtonEmpty
+          data-test-subj="edit-define-rule"
+          iconType="pencil"
+          size="xs"
+          onClick={() => editStep(RuleStep.defineRule)}
+        >
+          {i18n.EDIT_RULE}
+        </EuiButtonEmpty>
+      ),
+    [defineStepForm.isValid, editStep]
+  );
+
+  const memoStepAboutRule = useMemo(
+    () => (
+      <>
+        <EuiHorizontalRule margin="m" />
+        <div
+          style={{
+            display: activeStep === RuleStep.aboutRule ? undefined : 'none',
+          }}
+        >
+          <StepAboutRule
+            ruleType={defineStepData.ruleType}
+            machineLearningJobId={defineStepData.machineLearningJobId}
+            index={defineStepData.index}
+            dataViewId={defineStepData.dataViewId}
+            timestampOverride={aboutStepData.timestampOverride}
+            isLoading={isCreateRuleLoading || loading}
+            form={aboutStepForm}
+          />
+
+          <NextStep
+            dataTestSubj="about-continue"
+            onClick={aboutRuleNextStep}
+            isDisabled={isCreateRuleLoading}
+          />
+        </div>
+        <div
+          style={{
+            display: activeStep === RuleStep.aboutRule ? 'none' : undefined,
+          }}
+        >
+          <StepAboutRuleReadOnly
+            addPadding
+            defaultValues={aboutStepData}
+            descriptionColumns="singleSplit"
+          />
+        </div>
+      </>
+    ),
+    [
+      aboutRuleNextStep,
+      aboutStepData,
+      aboutStepForm,
+      activeStep,
+      defineStepData.dataViewId,
+      defineStepData.index,
+      defineStepData.machineLearningJobId,
+      defineStepData.ruleType,
+      isCreateRuleLoading,
+      loading,
+    ]
+  );
+  const memoAboutStepExtraAction = useMemo(
+    () =>
+      aboutStepForm.isValid && (
+        <EuiButtonEmpty
+          data-test-subj="edit-about-rule"
+          iconType="pencil"
+          size="xs"
+          onClick={() => editStep(RuleStep.aboutRule)}
+        >
+          {i18n.EDIT_RULE}
+        </EuiButtonEmpty>
+      ),
+    [aboutStepForm.isValid, editStep]
+  );
+
+  const memoStepScheduleRule = useMemo(
+    () => (
+      <>
+        <EuiHorizontalRule margin="m" />
+        <div
+          style={{
+            display: activeStep === RuleStep.scheduleRule ? undefined : 'none',
+          }}
+        >
+          <StepScheduleRule isLoading={isCreateRuleLoading || loading} form={scheduleStepForm} />
+          <NextStep
+            dataTestSubj="schedule-continue"
+            onClick={scheduleRuleNextStep}
+            isDisabled={isCreateRuleLoading}
+          />
+        </div>
+        <div
+          style={{
+            display: activeStep === RuleStep.scheduleRule ? 'none' : undefined,
+          }}
+        >
+          <StepScheduleRuleReadOnly
+            addPadding
+            descriptionColumns="singleSplit"
+            defaultValues={scheduleStepData}
+          />
+        </div>
+      </>
+    ),
+    [
+      activeStep,
+      isCreateRuleLoading,
+      loading,
+      scheduleRuleNextStep,
+      scheduleStepData,
+      scheduleStepForm,
+    ]
+  );
+  const memoScheduleStepExtraAction = useMemo(
+    () =>
+      scheduleStepForm.isValid && (
+        <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.scheduleRule)}>
+          {i18n.EDIT_RULE}
+        </EuiButtonEmpty>
+      ),
+    [editStep, scheduleStepForm.isValid]
+  );
+
+  const memoStepRuleActions = useMemo(
+    () => (
+      <>
+        <EuiHorizontalRule margin="m" />
+        <div
+          style={{
+            display: activeStep === RuleStep.ruleActions ? undefined : 'none',
+          }}
+        >
+          <StepRuleActions
+            isLoading={isCreateRuleLoading || loading || isStartingJobs}
+            actionMessageParams={actionMessageParams}
+            summaryActionMessageParams={actionMessageParams}
+            ruleType={ruleType}
+            form={actionsStepForm}
+          />
+
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={false}
+                isDisabled={isCreateRuleLoading}
+                isLoading={isCreateRuleLoading}
+                onClick={submitRuleDisabled}
+                data-test-subj="create-enabled-false"
+              >
+                {i18n.COMPLETE_WITHOUT_ENABLING}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isDisabled={isCreateRuleLoading}
+                isLoading={isCreateRuleLoading}
+                onClick={submitRuleEnabled}
+                data-test-subj="create-enable"
+              >
+                {i18n.COMPLETE_WITH_ENABLING}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+        <div
+          style={{
+            display: activeStep === RuleStep.ruleActions ? 'none' : undefined,
+          }}
+        >
+          <StepRuleActionsReadOnly addPadding defaultValues={actionsStepData} />
+        </div>
+      </>
+    ),
+    [
+      actionMessageParams,
+      actionsStepData,
+      actionsStepForm,
+      activeStep,
+      isCreateRuleLoading,
+      isStartingJobs,
+      loading,
+      ruleType,
+      submitRuleDisabled,
+      submitRuleEnabled,
+    ]
+  );
+  const memoActionsStepExtraAction = useMemo(
+    () =>
+      actionsStepForm.isValid && (
+        <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.ruleActions)}>
+          {i18n.EDIT_RULE}
+        </EuiButtonEmpty>
+      ),
+    [actionsStepForm.isValid, editStep]
+  );
+
+  const onToggleCollapsedMemo = useCallback(
+    () => setIsRulePreviewVisible((isVisible) => !isVisible),
+    []
   );
 
   if (
@@ -411,266 +744,68 @@ const CreateRulePageComponent: React.FC = () => {
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
-                      <HeaderPage
-                        backOptions={{
-                          path: getRulesUrl(),
-                          text: i18n.BACK_TO_RULES,
-                          pageId: SecurityPageName.rules,
-                        }}
+                      <CustomHeaderPageMemo
+                        backOptions={backOptions}
                         isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
-                      >
-                        <EuiButton
-                          data-test-subj="preview-container"
-                          isSelected={isRulePreviewVisible}
-                          fill={isRulePreviewVisible}
-                          iconType="visBarVerticalStacked"
-                          onClick={() => {
-                            collapseFn.current?.();
-                            setIsRulePreviewVisible((isVisible) => !isVisible);
-                          }}
-                        >
-                          {i18n.RULE_PREVIEW_TITLE}
-                        </EuiButton>
-                      </HeaderPage>
+                        isRulePreviewVisible={isRulePreviewVisible}
+                        setIsRulePreviewVisible={setIsRulePreviewVisible}
+                        togglePanel={togglePanel}
+                      />
                       <MyEuiPanel zindex={4} hasBorder>
-                        <EuiAccordion
+                        <MemoEuiAccordion
                           initialIsOpen={true}
                           id={RuleStep.defineRule}
                           buttonContent={defineRuleButton}
                           paddingSize="xs"
                           ref={defineRuleRef}
-                          onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
-                          extraAction={
-                            defineStepForm.isValid && (
-                              <EuiButtonEmpty
-                                data-test-subj="edit-define-rule"
-                                iconType="pencil"
-                                size="xs"
-                                onClick={() => editStep(RuleStep.defineRule)}
-                              >
-                                {i18n.EDIT_RULE}
-                              </EuiButtonEmpty>
-                            )
-                          }
+                          onToggle={toggleDefineStep}
+                          extraAction={memoDefineStepExtraAction}
                         >
-                          <EuiHorizontalRule margin="m" />
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.defineRule ? undefined : 'none',
-                            }}
-                          >
-                            <StepDefineRule
-                              isLoading={isCreateRuleLoading || loading}
-                              kibanaDataViews={dataViewOptions}
-                              indicesConfig={indicesConfig}
-                              threatIndicesConfig={threatIndicesConfig}
-                              onPreviewDisabledStateChange={setIsPreviewDisabled}
-                              form={defineStepForm}
-                              optionsSelected={eqlOptionsSelected}
-                              setOptionsSelected={setEqlOptionsSelected}
-                              indexPattern={indexPattern}
-                              isIndexPatternLoading={isIndexPatternLoading}
-                              browserFields={browserFields}
-                            />
-                            <NextStep
-                              dataTestSubj="define-continue"
-                              onClick={() => submitStep(RuleStep.defineRule)}
-                              isDisabled={isCreateRuleLoading}
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.defineRule ? 'none' : undefined,
-                            }}
-                          >
-                            <StepDefineRuleReadOnly
-                              addPadding
-                              defaultValues={defineStepData}
-                              descriptionColumns="singleSplit"
-                              indexPattern={indexPattern}
-                            />
-                          </div>
-                        </EuiAccordion>
+                          {memoStepDefineRule}
+                        </MemoEuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={3}>
-                        <EuiAccordion
+                        <MemoEuiAccordion
                           initialIsOpen={false}
                           id={RuleStep.aboutRule}
                           buttonContent={aboutRuleButton}
                           paddingSize="xs"
                           ref={aboutRuleRef}
-                          onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
-                          extraAction={
-                            aboutStepForm.isValid && (
-                              <EuiButtonEmpty
-                                data-test-subj="edit-about-rule"
-                                iconType="pencil"
-                                size="xs"
-                                onClick={() => editStep(RuleStep.aboutRule)}
-                              >
-                                {i18n.EDIT_RULE}
-                              </EuiButtonEmpty>
-                            )
-                          }
+                          onToggle={toggleAboutStep}
+                          extraAction={memoAboutStepExtraAction}
                         >
-                          <EuiHorizontalRule margin="m" />
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.aboutRule ? undefined : 'none',
-                            }}
-                          >
-                            <StepAboutRule
-                              defaultValues={aboutStepData}
-                              defineRuleData={defineStepData}
-                              isLoading={isCreateRuleLoading || loading}
-                              form={aboutStepForm}
-                            />
-
-                            <NextStep
-                              dataTestSubj="about-continue"
-                              onClick={() => submitStep(RuleStep.aboutRule)}
-                              isDisabled={isCreateRuleLoading}
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.aboutRule ? 'none' : undefined,
-                            }}
-                          >
-                            <StepAboutRuleReadOnly
-                              addPadding
-                              defaultValues={aboutStepData}
-                              descriptionColumns="singleSplit"
-                            />
-                          </div>
-                        </EuiAccordion>
+                          {memoStepAboutRule}
+                        </MemoEuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={2}>
-                        <EuiAccordion
+                        <MemoEuiAccordion
                           initialIsOpen={false}
                           id={RuleStep.scheduleRule}
                           buttonContent={scheduleRuleButton}
                           paddingSize="xs"
                           ref={scheduleRuleRef}
-                          onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
-                          extraAction={
-                            scheduleStepForm.isValid && (
-                              <EuiButtonEmpty
-                                iconType="pencil"
-                                size="xs"
-                                onClick={() => editStep(RuleStep.scheduleRule)}
-                              >
-                                {i18n.EDIT_RULE}
-                              </EuiButtonEmpty>
-                            )
-                          }
+                          onToggle={toggleScheduleStep}
+                          extraAction={memoScheduleStepExtraAction}
                         >
-                          <EuiHorizontalRule margin="m" />
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.scheduleRule ? undefined : 'none',
-                            }}
-                          >
-                            <StepScheduleRule
-                              isLoading={isCreateRuleLoading || loading}
-                              form={scheduleStepForm}
-                            />
-                            <NextStep
-                              dataTestSubj="schedule-continue"
-                              onClick={() => submitStep(RuleStep.scheduleRule)}
-                              isDisabled={isCreateRuleLoading}
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.scheduleRule ? 'none' : undefined,
-                            }}
-                          >
-                            <StepScheduleRuleReadOnly
-                              addPadding
-                              descriptionColumns="singleSplit"
-                              defaultValues={scheduleStepData}
-                            />
-                          </div>
-                        </EuiAccordion>
+                          {memoStepScheduleRule}
+                        </MemoEuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={1}>
-                        <EuiAccordion
+                        <MemoEuiAccordion
                           initialIsOpen={false}
                           id={RuleStep.ruleActions}
                           buttonContent={ruleActionsButton}
                           paddingSize="xs"
                           ref={ruleActionsRef}
-                          onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
-                          extraAction={
-                            actionsStepForm.isValid && (
-                              <EuiButtonEmpty
-                                iconType="pencil"
-                                size="xs"
-                                onClick={() => editStep(RuleStep.ruleActions)}
-                              >
-                                {i18n.EDIT_RULE}
-                              </EuiButtonEmpty>
-                            )
-                          }
+                          onToggle={toggleActionsStep}
+                          extraAction={memoActionsStepExtraAction}
                         >
-                          <EuiHorizontalRule margin="m" />
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.ruleActions ? undefined : 'none',
-                            }}
-                          >
-                            <StepRuleActions
-                              isLoading={isCreateRuleLoading || loading || isStartingJobs}
-                              actionMessageParams={actionMessageParams}
-                              summaryActionMessageParams={actionMessageParams}
-                              ruleType={ruleType}
-                              form={actionsStepForm}
-                            />
-
-                            <EuiHorizontalRule margin="m" />
-                            <EuiFlexGroup
-                              alignItems="center"
-                              justifyContent="flexEnd"
-                              gutterSize="xs"
-                              responsive={false}
-                            >
-                              <EuiFlexItem grow={false}>
-                                <EuiButton
-                                  fill={false}
-                                  isDisabled={isCreateRuleLoading}
-                                  isLoading={isCreateRuleLoading}
-                                  onClick={() => submitRule(RuleStep.ruleActions, false)}
-                                  data-test-subj="create-enabled-false"
-                                >
-                                  {i18n.COMPLETE_WITHOUT_ENABLING}
-                                </EuiButton>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiButton
-                                  fill
-                                  isDisabled={isCreateRuleLoading}
-                                  isLoading={isCreateRuleLoading}
-                                  onClick={() => submitRule(RuleStep.ruleActions, true)}
-                                  data-test-subj="create-enable"
-                                >
-                                  {i18n.COMPLETE_WITH_ENABLING}
-                                </EuiButton>
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </div>
-                          <div
-                            style={{
-                              display: activeStep === RuleStep.ruleActions ? 'none' : undefined,
-                            }}
-                          >
-                            <StepRuleActionsReadOnly addPadding defaultValues={actionsStepData} />
-                          </div>
-                        </EuiAccordion>
+                          {memoStepRuleActions}
+                        </MemoEuiAccordion>
                       </MyEuiPanel>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>
@@ -683,7 +818,7 @@ const CreateRulePageComponent: React.FC = () => {
                   mode="collapsible"
                   initialSize={30}
                   minSize={'20%'}
-                  onToggleCollapsed={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
+                  onToggleCollapsed={onToggleCollapsedMemo}
                 >
                   <RulePreview
                     isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
@@ -704,3 +839,37 @@ const CreateRulePageComponent: React.FC = () => {
 };
 
 export const CreateRulePage = React.memo(CreateRulePageComponent);
+
+const MemoEuiAccordion = memo(EuiAccordion);
+
+const CustomHeaderPage: React.FC<
+  HeaderPageProps & {
+    togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
+    isRulePreviewVisible: boolean;
+    setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
+  }
+> = ({
+  backOptions,
+  isLoading,
+  title,
+  togglePanel,
+  isRulePreviewVisible,
+  setIsRulePreviewVisible,
+}) => (
+  <HeaderPage backOptions={backOptions} isLoading={isLoading} title={title}>
+    <EuiButton
+      data-test-subj="preview-container"
+      isSelected={isRulePreviewVisible}
+      fill={isRulePreviewVisible}
+      iconType="visBarVerticalStacked"
+      onClick={() => {
+        togglePanel?.('preview', { direction: 'left' });
+        setIsRulePreviewVisible((isVisible) => !isVisible);
+      }}
+    >
+      {i18n.RULE_PREVIEW_TITLE}
+    </EuiButton>
+  </HeaderPage>
+);
+
+const CustomHeaderPageMemo = memo(CustomHeaderPage);
