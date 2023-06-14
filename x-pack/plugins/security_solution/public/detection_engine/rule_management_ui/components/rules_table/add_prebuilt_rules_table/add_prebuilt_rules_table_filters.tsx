@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { ADD_PREBUILT_RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
-
+import * as i18n from './translations';
 import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';
 import { RuleSearchField } from '../rules_table_filters/rule_search_field';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
@@ -62,7 +62,7 @@ const AddPrebuiltRulesTableFiltersComponent = () => {
       <RuleSearchField
         initialValue={filterOptions.filter}
         onSearch={handleOnSearch}
-        placeholder={'Search by rule name'}
+        placeholder={i18n.SEARCH_PLACEHOLDER}
       />
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
