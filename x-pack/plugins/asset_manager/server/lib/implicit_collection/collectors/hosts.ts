@@ -12,15 +12,17 @@ import { withSpan } from './helpers';
 export async function collectHosts({
   client,
   from,
+  to,
   transaction,
   sourceIndices,
-}: CollectorOptions): Promise<Asset[]> {
+  afterKey,
+}: CollectorOptions) {
   const { metrics, logs, traces } = sourceIndices;
   const dsl = {
     index: [metrics, logs, traces],
     size: QUERY_MAX_SIZE,
     collapse: { field: 'host.hostname' },
-    sort: [{ _score: 'desc' }, { '@timestamp': 'desc' }],
+    sort: [{ 'host.hostname': 'asc' }],
     _source: false,
     fields: [
       '@timestamp',
@@ -37,6 +39,7 @@ export async function collectHosts({
             range: {
               '@timestamp': {
                 gte: from,
+                lte: to,
               },
             },
           },
@@ -51,10 +54,14 @@ export async function collectHosts({
     },
   };
 
+  if (afterKey) {
+    (dsl as any).search_after = afterKey;
+  }
+
   const esResponse = await client.search(dsl);
 
-  const hosts = withSpan({ transaction, name: 'processing_response' }, () => {
-    return esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
+    const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
       const { fields = {} } = hit;
       const hostName = fields['host.hostname'];
       const k8sNode = fields['kubernetes.node.name'];
@@ -98,7 +105,11 @@ export async function collectHosts({
 
       return acc;
     }, []);
+
+    const hitsLen = esResponse.hits.hits.length;
+    const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
+    return { assets, afterKey: next };
   });
 
-  return hosts;
+  return result;
 }

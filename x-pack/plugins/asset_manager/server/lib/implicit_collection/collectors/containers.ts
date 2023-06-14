@@ -12,8 +12,10 @@ import { withSpan } from './helpers';
 export async function collectContainers({
   client,
   from,
+  to,
   transaction,
   sourceIndices,
+  afterKey,
 }: CollectorOptions) {
   const { metrics, logs, traces } = sourceIndices;
   const dsl = {
@@ -22,7 +24,7 @@ export async function collectContainers({
     collapse: {
       field: 'container.id',
     },
-    sort: [{ _score: 'desc' }, { '@timestamp': 'desc' }],
+    sort: [{ 'container.id': 'asc' }],
     _source: false,
     fields: [
       'kubernetes.*',
@@ -38,6 +40,7 @@ export async function collectContainers({
             range: {
               '@timestamp': {
                 gte: from,
+                lte: to,
               },
             },
           },
@@ -52,10 +55,14 @@ export async function collectContainers({
     },
   };
 
+  if (afterKey) {
+    (dsl as any).search_after = afterKey;
+  }
+
   const esResponse = await client.search(dsl);
 
-  const containers = withSpan({ transaction, name: 'processing_response' }, () => {
-    return esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
+    const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
       const { fields = {} } = hit;
       const containerId = fields['container.id'];
       const podUid = fields['kubernetes.pod.uid'];
@@ -79,7 +86,11 @@ export async function collectContainers({
 
       return acc;
     }, []);
+
+    const hitsLen = esResponse.hits.hits.length;
+    const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
+    return { assets, afterKey: next };
   });
 
-  return containers;
+  return result;
 }

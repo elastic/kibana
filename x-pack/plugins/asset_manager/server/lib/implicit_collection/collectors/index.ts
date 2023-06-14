@@ -10,16 +10,25 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { AssetManagerConfig } from '../../../types';
 import { Asset } from '../../../../common/types_api';
 
-export const QUERY_MAX_SIZE = 1000;
+export const QUERY_MAX_SIZE = 10000;
+
+type AfterKey = string[] | { [key: string]: string };
+
+export type Collector = (opts: CollectorOptions) => Promise<CollectorResult>;
 
 export interface CollectorOptions {
   client: ElasticsearchClient;
   from: string | number;
+  to: string | number;
   transaction?: Transaction | null;
   sourceIndices: AssetManagerConfig['sourceIndices'];
+  afterKey?: AfterKey;
 }
 
-export type Collector = (opts: CollectorOptions) => Promise<Asset[]>;
+export interface CollectorResult {
+  assets: Asset[];
+  afterKey?: AfterKey;
+}
 
 export { collectContainers } from './containers';
 export { collectHosts } from './hosts';
