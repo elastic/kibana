@@ -16,11 +16,12 @@ import {
 } from './mock';
 import {
   fetchQueryAlerts,
-  updateAlertStatus,
   getSignalIndex,
   getUserPrivilege,
   createSignalIndex,
   createHostIsolation,
+  updateAlertStatusByQuery,
+  updateAlertStatusByIds,
 } from './api';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -57,14 +58,14 @@ describe('Detections Alerts API', () => {
     });
   });
 
-  describe('updateAlertStatus', () => {
+  describe('updateAlertStatusByQuery', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue({});
     });
 
     test('check parameter url, body when closing an alert', async () => {
-      await updateAlertStatus({
+      await updateAlertStatusByQuery({
         query: mockStatusAlertQuery,
         signal: abortCtrl.signal,
         status: 'closed',
@@ -77,7 +78,7 @@ describe('Detections Alerts API', () => {
     });
 
     test('check parameter url, body when opening an alert', async () => {
-      await updateAlertStatus({
+      await updateAlertStatusByQuery({
         query: mockStatusAlertQuery,
         signal: abortCtrl.signal,
         status: 'open',
@@ -90,8 +91,50 @@ describe('Detections Alerts API', () => {
     });
 
     test('happy path', async () => {
-      const alertsResp = await updateAlertStatus({
+      const alertsResp = await updateAlertStatusByQuery({
         query: mockStatusAlertQuery,
+        signal: abortCtrl.signal,
+        status: 'open',
+      });
+      expect(alertsResp).toEqual({});
+    });
+  });
+
+  describe('updateAlertStatusById', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({});
+    });
+
+    test('check parameter url, body when closing an alert', async () => {
+      await updateAlertStatusByIds({
+        signalIds: ['123'],
+        signal: abortCtrl.signal,
+        status: 'closed',
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
+        body: '{"status":"closed","signal_ids":["123"]}',
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, body when opening an alert', async () => {
+      await updateAlertStatusByIds({
+        signalIds: ['123'],
+        signal: abortCtrl.signal,
+        status: 'open',
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
+        body: '{"status":"open","signal_ids":["123"]}',
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('happy path', async () => {
+      const alertsResp = await updateAlertStatusByIds({
+        signalIds: ['123'],
         signal: abortCtrl.signal,
         status: 'open',
       });

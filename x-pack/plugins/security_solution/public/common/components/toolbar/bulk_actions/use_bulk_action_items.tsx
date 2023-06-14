@@ -14,16 +14,12 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import * as i18n from './translations';
-import { useUpdateAlertsStatus } from './use_update_alerts';
+import { updateAlertStatus } from './update_alerts';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
 import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 import type { AlertWorkflowStatus } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
-
-export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
-  return { bool: { filter: { terms: { _id: eventIds } } } };
-};
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -50,7 +46,6 @@ export const useBulkActionItems = ({
   onUpdateFailure,
   customBulkActions,
 }: BulkActionsProps) => {
-  const { updateAlertStatus } = useUpdateAlertsStatus();
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
 
@@ -116,11 +111,10 @@ export const useBulkActionItems = ({
 
       try {
         setEventsLoading({ eventIds, isLoading: true });
-
         const response = await updateAlertStatus({
-          index: indexName,
           status,
-          query: query ? JSON.parse(query) : getUpdateAlertsQuery(eventIds),
+          query: query && JSON.parse(query),
+          signalIds: eventIds,
         });
 
         // TODO: Only delete those that were successfully updated from updatedRules
@@ -140,8 +134,6 @@ export const useBulkActionItems = ({
     [
       setEventsLoading,
       eventIds,
-      updateAlertStatus,
-      indexName,
       query,
       setEventsDeleted,
       onAlertStatusUpdateSuccess,
