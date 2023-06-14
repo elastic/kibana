@@ -59,7 +59,7 @@ export interface EsqlHit {
   _source: EsqlDocument;
 }
 
-const rowToDocument = (columns: DatatableColumn[], row: DatatableRow): EsqlDocument => {
+export const rowToDocument = (columns: DatatableColumn[], row: DatatableRow): EsqlDocument => {
   return columns.reduce<Record<string, string | null>>((acc, column, i) => {
     acc[column.name] = row[column.name];
 
@@ -67,10 +67,10 @@ const rowToDocument = (columns: DatatableColumn[], row: DatatableRow): EsqlDocum
   }, {});
 };
 
-export const toEsResult = (results: Datatable, alertId?: string) => {
+export const toEsResult = (results: Datatable, alertId?: string[]) => {
   const documentsGrouping = results.rows.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(results.columns, row);
-    const id = alertId ? document[alertId] ?? 'undefined' : 'test';
+    const id = alertId ? alertId.map((a) => document[a] ?? 'undefined').join(':') : 'test';
     const hit = {
       _id: id,
       _index: '',

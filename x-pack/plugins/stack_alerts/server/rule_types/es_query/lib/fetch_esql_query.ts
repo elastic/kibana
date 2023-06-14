@@ -140,39 +140,6 @@ const getEsqlQuery = (
     },
   ];
 
-  if (params.excludeHitsFromPreviousRun) {
-    if (latestTimestamp && latestTimestamp > dateStart) {
-      // add additional filter for documents with a timestamp greater then
-      // the timestamp of the previous run, so that those documents are not counted twice
-      rangeFilter.push({
-        bool: {
-          filter: [
-            {
-              bool: {
-                must_not: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          range: {
-                            [timeFieldName]: {
-                              lte: latestTimestamp,
-                              format: 'strict_date_optional_time',
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-    }
-  }
-
   const query = {
     query: `${params.esqlQuery.esql} | limit ${alertLimit}`,
     filter: {
@@ -191,11 +158,13 @@ const getEsqlQuery = (
 const toEsResult = (
   results: EsqlTable,
   ruleResultService?: PublicLastRunSetters,
-  alertId?: string
+  alertId?: string[]
 ) => {
   const documentsGrouping = results.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(results.columns, row);
-    const id = alertId ? document[alertId] ?? 'undefined' : UngroupedGroupId;
+    const id = alertId
+      ? alertId.map((a) => document[a] ?? 'undefined').join(':')
+      : UngroupedGroupId;
     const hit = {
       _id: id,
       _index: '',
