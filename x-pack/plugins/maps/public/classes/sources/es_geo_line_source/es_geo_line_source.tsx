@@ -39,7 +39,7 @@ import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
 
-type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
+type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'splitField' | 'sortField'>;
 
 const MAX_TRACKS = 250;
 
@@ -62,21 +62,28 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(
       descriptor
     ) as ESGeoLineSourceDescriptor;
+
     if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESGeoLineSource without a geoField');
     }
-    if (!isValidStringConfig(normalizedDescriptor.splitField)) {
+
+    const groupByTimeseries = typeof normalizedDescriptor.groupByTimeseries === 'boolean'
+      ? normalizedDescriptor.groupByTimeseries
+      : false;
+    if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.splitField)) {
       throw new Error('Cannot create an ESGeoLineSource without a splitField');
     }
-    if (!isValidStringConfig(normalizedDescriptor.sortField)) {
+    if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.sortField)) {
       throw new Error('Cannot create an ESGeoLineSource without a sortField');
     }
+
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_LINE,
+      groupByTimeseries,
       geoField: normalizedDescriptor.geoField!,
-      splitField: normalizedDescriptor.splitField!,
-      sortField: normalizedDescriptor.sortField!,
+      splitField: normalizedDescriptor.splitField,
+      sortField: normalizedDescriptor.sortField,
     };
   }
 
@@ -109,6 +116,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   getSyncMeta(): ESGeoLineSourceSyncMeta {
     return {
+      groupByTimeseries: this._descriptor.groupByTimeseries,
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
     };
