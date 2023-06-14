@@ -27,10 +27,3 @@ export const INVESTIGATIONS_TAB = i18n.translate(
     defaultMessage: 'Investigation',
   }
 );
-
-export const HISTORY_TAB = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.historyTab',
-  {
-    defaultMessage: 'History',
-  }
-);
