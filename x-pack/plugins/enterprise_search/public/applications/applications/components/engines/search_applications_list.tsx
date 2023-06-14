@@ -75,7 +75,7 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
             onClick={() => KibanaLogic.values.navigateToUrl(SEARCH_APPLICATION_CREATION_PATH)}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.content.searchApplications.createEngineButtonLabel',
+              'xpack.enterpriseSearch.searchApplications.list.createSearchApplicationButton.label',
               {
                 defaultMessage: 'Create',
               }
@@ -91,7 +91,7 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.title"
+              id="xpack.enterpriseSearch.searchApplications.list.createSearchApplicationTechnicalPreviewPopover.title"
               defaultMessage="Beta"
             />
           </EuiFlexItem>
@@ -104,7 +104,7 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.body"
+              id="xpack.enterpriseSearch.searchApplications.list.createSearchApplicationTechnicalPreviewPopover.body"
               defaultMessage="This functionality may be changed or removed completely in a future release."
             />
           </EuiText>
@@ -180,7 +180,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
         pageHeader={{
           description: (
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.searchApplications.description"
+              id="xpack.enterpriseSearch.searchApplications.list.description"
               defaultMessage="Search Applications help make your Elasticsearch data easily searchable for end users. Create, build, and manage all your search applications here. To learn more, {documentationUrl}."
               values={{
                 documentationUrl: (
@@ -191,7 +191,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
                     data-telemetry-id="entSearchApplications-documentation-viewDocumentaion"
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.searchApplications.documentation',
+                      'xpack.enterpriseSearch.searchApplications.list.documentation',
                       {
                         defaultMessage: 'explore our Search Applications documentation',
                       }
@@ -201,7 +201,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
               }}
             />
           ),
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.searchApplications.title', {
+          pageTitle: i18n.translate('xpack.enterpriseSearch.searchApplications.list.title', {
             defaultMessage: 'Search Applications',
           }),
           rightSideItems: isLoading
@@ -225,13 +225,13 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
               <EuiFieldSearch
                 value={searchQuery}
                 placeholder={i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplications.searchPlaceholder',
+                  'xpack.enterpriseSearch.searchApplications.list.searchBar.placeholder',
                   {
                     defaultMessage: 'Search Applications',
                   }
                 )}
                 aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplications.searchBar.ariaLabel',
+                  'xpack.enterpriseSearch.searchApplications.list.searchBar.ariaLabel',
                   {
                     defaultMessage: 'Search Applications',
                   }
@@ -245,7 +245,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
             <EuiSpacer size="s" />
             <EuiText color="subdued" size="s">
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplications.searchPlaceholder.description',
+                'xpack.enterpriseSearch.searchApplications.list.searchBar.description',
                 {
                   defaultMessage:
                     'Locate a search application via name or by its included indices.',
@@ -256,7 +256,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
             <EuiSpacer />
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.searchApplications.enginesList.description"
+                id="xpack.enterpriseSearch.searchApplications.list.itemRange"
                 defaultMessage="Showing {from}-{to} of {total}"
                 values={{
                   from: (
