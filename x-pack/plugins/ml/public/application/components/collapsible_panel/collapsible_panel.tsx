@@ -36,7 +36,15 @@ export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
   const { euiTheme } = useCurrentThemeVars();
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={isOpen}>
+    <EuiSplitPanel.Outer
+      grow
+      hasShadow={false}
+      css={{
+        border: `${euiTheme.euiBorderWidthThin} solid ${
+          isOpen ? euiTheme.euiBorderColor : 'transparent'
+        }`,
+      }}
+    >
       <EuiSplitPanel.Inner color={isOpen ? 'plain' : 'subdued'}>
         <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
           <EuiFlexItem grow={false}>
