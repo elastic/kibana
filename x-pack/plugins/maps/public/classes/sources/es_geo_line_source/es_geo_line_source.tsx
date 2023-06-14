@@ -109,7 +109,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   getSyncMeta(): ESGeoLineSourceSyncMeta {
     return {
-      ...(super.getSyncMeta() as ESAggsSourceSyncMeta),
+      ...super.getSyncMeta(),
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
     };

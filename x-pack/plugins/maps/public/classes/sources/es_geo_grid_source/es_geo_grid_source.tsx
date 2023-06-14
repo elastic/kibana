@@ -158,7 +158,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   getSyncMeta(dataFilters: DataFilters): ESGeoGridSourceSyncMeta {
     return {
-      ...(super.getSyncMeta() as ESAggsSourceSyncMeta),
+      ...super.getSyncMeta(),
       geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
       requestType: this._descriptor.requestType,
       resolution: this._descriptor.resolution,
