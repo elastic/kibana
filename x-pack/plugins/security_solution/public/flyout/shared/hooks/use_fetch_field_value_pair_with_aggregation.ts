@@ -6,41 +6,34 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
+import type { IEsSearchRequest } from '@kbn/data-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import { createFetchAggregatedData } from '../utils/fetch_aggregated_data';
+import { buildAggregationSearchRequest } from '../utils/build_requests';
+import type { RawAggregatedDataResponse } from '../utils/fetch_data';
+import { AGG_KEY, createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 
-const AGG_KEY = 'hostsWithSameFieldValuePair';
-const QUERY_KEY = 'useFetchUniqueHostsWithFieldPair';
+const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 
-interface RawAggregatedDataResponse {
-  aggregations: {
-    [AGG_KEY]: {
-      buckets: unknown[];
-    };
-  };
-}
-
-export interface UseFetchUniqueHostWithFieldPairParams {
+export interface UseFetchFieldValuePairWithAggregationParams {
   /**
-   * Highlighted field
-   */
-  field: string;
-  /**
-   * Highlighted field value
-   */
-  values: string[];
+   * The highlighted field name and values
+   * */
+  highlightedField: { name: string; values: string[] };
   /**
    *
    */
   isActiveTimelines: boolean;
+  /**
+   * Field to aggregate value by
+   */
+  aggregationField: string;
 }
 
-export interface UseFetchUniqueHostWithFieldPairResult {
+export interface UseFetchFieldValuePairWithAggregationResult {
   /**
    * Returns true if data is being loaded
    */
@@ -56,14 +49,15 @@ export interface UseFetchUniqueHostWithFieldPairResult {
 }
 
 /**
- * Hook to retrieve all the unique hosts in the environment that have the field/value pair, using ReactQuery.
- * The query uses an aggregation by unique hosts.
+ * Hook to retrieve all the unique documents for the aggregationField in the environment that have the field/value pair, using ReactQuery.
+ *
+ * Foe example, passing 'host.name' via the aggregationField props will return the number of unique hosts in the environment that have the field/value pair.
  */
-export const useFetchUniqueHostsWithFieldPair = ({
-  field,
-  values,
+export const useFetchFieldValuePairWithAggregation = ({
+  highlightedField,
   isActiveTimelines,
-}: UseFetchUniqueHostWithFieldPairParams): UseFetchUniqueHostWithFieldPairResult => {
+  aggregationField,
+}: UseFetchFieldValuePairWithAggregationParams): UseFetchFieldValuePairWithAggregationResult => {
   const {
     services: {
       data: { search: searchService },
@@ -76,12 +70,13 @@ export const useFetchUniqueHostsWithFieldPair = ({
   const globalTime = useGlobalTime();
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
 
-  const searchRequest = buildSearchRequest(field, values, from, to);
+  const { name, values } = highlightedField;
+
+  const searchRequest = buildSearchRequest(name, values, from, to, aggregationField);
 
   const { data, isLoading, isError } = useQuery(
-    [QUERY_KEY, field, values],
-    () =>
-      createFetchAggregatedData<RawAggregatedDataResponse>(searchService, searchRequest, AGG_KEY),
+    [QUERY_KEY, name, values, from, to, aggregationField],
+    () => createFetchData<RawAggregatedDataResponse>(searchService, searchRequest),
     {
       select: (res) => res.aggregations[AGG_KEY].buckets.length,
       keepPreviousData: true,
@@ -97,13 +92,14 @@ export const useFetchUniqueHostsWithFieldPair = ({
 
 /**
  * Build the search request for the field/values pair, for a date range from/to.
- * The request contains aggregation by host.name field.
+ * The request contains aggregation by aggregationField.
  */
 const buildSearchRequest = (
   field: string,
   values: string[],
   from: string,
-  to: string
+  to: string,
+  aggregationField: string
 ): IEsSearchRequest => {
   const query = buildEsQuery(
     undefined,
@@ -133,21 +129,5 @@ const buildSearchRequest = (
       },
     ]
   );
-
-  return {
-    params: {
-      body: {
-        query,
-        aggs: {
-          [AGG_KEY]: {
-            terms: {
-              field: 'host.name',
-              size: 1000,
-            },
-          },
-        },
-        size: 0,
-      },
-    },
-  };
+  return buildAggregationSearchRequest(aggregationField, AGG_KEY, query);
 };

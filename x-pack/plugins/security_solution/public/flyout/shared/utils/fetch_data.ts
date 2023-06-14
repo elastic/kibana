@@ -8,13 +8,34 @@
 import type { IEsSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 
+export const AGG_KEY = 'aggregation';
+
+/**
+ * Interface for aggregation responses
+ */
+export interface RawAggregatedDataResponse {
+  aggregations: {
+    [AGG_KEY]: {
+      buckets: unknown[];
+    };
+  };
+}
+
+/**
+ * Interface for non-aggregated responses
+ */
+export interface RawResponse {
+  hits: {
+    total: number;
+  };
+}
+
 /**
  * Reusable method that returns a promise wrapping the search functionality of Kibana search service
  */
-export const createFetchAggregatedData = async <TResponse, T = {}>(
+export const createFetchData = async <TResponse, T = {}>(
   searchService: ISearchStart,
-  req: IEsSearchRequest,
-  aggregationKey: string
+  req: IEsSearchRequest
 ): Promise<TResponse> => {
   return new Promise((resolve, reject) => {
     searchService.search<IEsSearchRequest, IKibanaSearchResponse<TResponse>>(req).subscribe({

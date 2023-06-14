@@ -85,6 +85,55 @@ export const RELATED_USERS_TOOL_TIP = i18n.translate(
   }
 );
 
+export const PREVALENCE_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceErrorMessage',
+  {
+    defaultMessage: 'prevalence',
+  }
+);
+
+export const PREVALENCE_TABLE_TYPE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableTypeColumnTitle',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const PREVALENCE_TABLE_NAME_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableNameColumnTitle',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableAlertCountColumnTitle',
+  {
+    defaultMessage: 'Alert count',
+  }
+);
+
+export const PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitle',
+  {
+    defaultMessage: 'Doc count',
+  }
+);
+
+export const PREVALENCE_TABLE_HOST_PREVALENCE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableHostPrevalenceColumnTitle',
+  {
+    defaultMessage: 'Host prevalence',
+  }
+);
+
+export const PREVALENCE_TABLE_USER_PREVALENCE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableUserPrevalenceColumnTitle',
+  {
+    defaultMessage: 'User prevalence',
+  }
+);
+
 export const RESPONSE_TITLE = i18n.translate('xpack.securitySolution.flyout.response.title', {
   defaultMessage: 'Responses',
 });
