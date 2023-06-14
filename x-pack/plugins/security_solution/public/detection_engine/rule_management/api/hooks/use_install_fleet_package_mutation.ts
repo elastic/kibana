@@ -11,7 +11,7 @@ import { useMutation } from '@tanstack/react-query';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../common/detection_engine/constants';
 import type { InstallFleetPackageProps } from '../api';
 import { installFleetPackage } from '../api';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 
 export const INSTALL_FLEET_PACKAGE_MUTATION_KEY = [
   'POST',
