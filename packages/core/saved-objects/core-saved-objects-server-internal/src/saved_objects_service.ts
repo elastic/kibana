@@ -268,11 +268,11 @@ export class SavedObjectsService
 
       this.logger.info('!!!!!!!About to start migrations!!!!!!!');
       // Pretend to be busy...
-      // await new Promise((res) => {
-      //   setTimeout(res, 1_000 * 60 * 50);
-      // });
+      await new Promise((res) => {
+        setTimeout(res, 1_000 * 60 * 50);
+      });
 
-      // throw new Error('!!!!!FAKE FAILURE!!!!!');
+      throw new Error('!!!!!FAKE FAILURE!!!!!');
 
       // Running migrations only if we got compatible nodes.
       // It may happen that the observable completes due to Kibana shutting down
