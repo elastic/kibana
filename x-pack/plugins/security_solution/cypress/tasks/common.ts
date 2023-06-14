@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import {
   LOADING_INDICATOR,
   LOADING_INDICATOR_HIDDEN,
@@ -219,17 +221,19 @@ export const deleteConnectors = () => {
 export const postDataView = (dataSource: string) => {
   rootRequest({
     method: 'POST',
-    url: `/api/index_patterns/index_pattern`,
+    url: DATA_VIEW_PATH,
     body: {
-      index_pattern: {
-        id: dataSource,
+      data_view: {
+        name: dataSource,
         fieldAttrs: '{}',
         title: dataSource,
         timeFieldName: '@timestamp',
-        fields: '{}',
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds-via-config',
+      [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+    },
     failOnStatusCode: false,
   });
 };
