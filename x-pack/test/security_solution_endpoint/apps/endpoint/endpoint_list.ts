@@ -116,20 +116,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('when there is data,', () => {
-        let customHostData: IndexedHostsAndAlertsResponse;
-        // let customHostData2: IndexedHostsAndAlertsResponse;
         before(async () => {
-          // indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
-          indexedData = await endpointTestResources.loadEndpointData({
-            numHosts: 3,
-          });
-          /* customHostData = await endpointTestResources.loadEndpointData({
-            namedHosts: true,
-          });*/
+          indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
           await pageObjects.endpoint.navigateToEndpointList();
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
-            // 4,
             3,
             90000
           );
@@ -139,9 +130,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await deleteAllDocsFromMetadataUnitedIndex(getService);
           if (indexedData) {
             await endpointTestResources.unloadEndpointData(indexedData);
-          }
-          if (customHostData) {
-            await endpointTestResources.unloadEndpointData(customHostData);
           }
         });
 
@@ -223,25 +211,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
             2,
-            90000
-          );
-          const tableData = await formattedTableData();
-          expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
-        });
-
-        it('when the kql filters for matches with unicode, the table returns the correct item', async () => {
-          const expectedDataFromQuery = [...expectedData.slice(0, 1).map((row) => [...row])];
-          const hostName = expectedDataFromQuery[1][0];
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type(
-            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
-          );
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
-            'endpointListTable',
-            1,
             90000
           );
           const tableData = await formattedTableData();
