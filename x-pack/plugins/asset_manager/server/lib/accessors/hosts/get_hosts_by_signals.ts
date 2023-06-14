@@ -12,13 +12,13 @@ import { collectHosts } from '../../implicit_collection/collectors/hosts';
 export async function getHostsBySignals(
   options: GetHostsOptionsInjected
 ): Promise<{ hosts: Asset[] }> {
-  const hosts = await collectHosts({
+  const { assets } = await collectHosts({
     client: options.esClient,
     from: options.from,
-    // TODO: implement "to" for collectHosts
+    to: options.to,
     sourceIndices: options.sourceIndices,
   });
   return {
-    hosts,
+    hosts: assets,
   };
 }
