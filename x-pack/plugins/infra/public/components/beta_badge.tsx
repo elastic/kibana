@@ -20,8 +20,9 @@ export const BetaBadge = ({ iconType, tooltipPosition, tooltipContent }: Props) 
     label={i18n.translate('xpack.infra.hostsViewPage.betaBadgeLabel', {
       defaultMessage: 'Beta',
     })}
-    tooltipContent={tooltipContent ?? undefined}
+    tooltipContent={tooltipContent}
     iconType={iconType}
     tooltipPosition={tooltipPosition}
+    data-test-id="infra-beta-badge"
   />
 );

@@ -52,6 +52,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-metadata-remove-filter');
     },
 
+    async getBetaBadgeExists() {
+      return testSubjects.exists('infra-beta-badge');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
