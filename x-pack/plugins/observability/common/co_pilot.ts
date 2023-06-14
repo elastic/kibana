@@ -69,7 +69,9 @@ const significantFieldValuesRt = t.type({
   fields: t.array(
     t.type({
       field: t.string,
-      value: t.string,
+      value: t.union([t.string, t.number]),
+      docCount: t.number,
+      pValue: t.number,
     })
   ),
 });
@@ -87,27 +89,27 @@ export const coPilotPrompts = {
           content: `Assuming the function ${functionName} from the library ${library} is consuming significant CPU resources.
         Suggest ways to optimize or improve the system that involve the ${functionName} function from the
         ${library} library. Types of improvements that would be useful to me are improvements that result in:
-        
+
         - Higher performance so that the system runs faster or uses less CPU
         - Better memory efficient so that the system uses less RAM
         - Better storage efficient so that the system stores less data on disk.
         - Better network I/O efficiency so that less data is sent over the network
         - Better disk I/O efficiency so that less data is read and written from disk
-        
+
         Make up to five suggestions. Your suggestions must meet all of the following criteria:
         1. Your suggestions should detailed, technical and include concrete examples.
         2. Your suggestions should be specific to improving performance of a system in which the ${functionName} function from
         the ${library} library is consuming significant CPU.
         2. If you suggest replacing the function or library with a more efficient replacement you must suggest at least
         one concrete replacement.
-        
+
         If you know of fewer than five ways to improve the performance of a system in which the ${functionName} function from the
         ${library} library is consuming significant CPU, then provide fewer than five suggestions. If you do not know of any
         way in which to improve the performance then say "I do not know how to improve the performance of systems where
         this function is consuming a significant amount of CPU".
-        
+
         If you have suggestions, the output format should look as follows:
-        
+
         Here are some suggestions as to how you might optimize your system if ${functionName} in ${library} is consuming
         significant CPU resources:
         1. Insert first suggestion
@@ -129,13 +131,13 @@ export const coPilotPrompts = {
         {
           content: `I am a software engineer. I am trying to understand what a function in a particular
             software library does.
-            
+
             The library is: ${library}
             The function is: ${functionName}
-            
+
             Your task is to desribe what the library is and what its use cases are, and to describe what the function
             does. The output format should look as follows:
-            
+
             Library description: Provide a concise description of the library
             Library use-cases: Provide a concise description of what the library is typically used for.
             Function description: Provide a concise, technical, description of what the function does.
@@ -236,19 +238,27 @@ export const coPilotPrompts = {
       significantFieldValues: significantFieldValuesRt,
     }),
     messages: ({ significantFieldValues }) => {
-      const customMessageForPrompt =
-        significantFieldValues.fields.length === 1
-          ? `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues.fields[0]?.field} with value "${significantFieldValues.fields[0]?.value}".`
-          : significantFieldValues.fields.length > 1
-          ? `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues.fields[0]?.field} with value "${significantFieldValues.fields[0]?.value}" and field ${significantFieldValues.fields[1]?.field} with value "${significantFieldValues.fields[1]?.value}".`
-          : '';
+      const header = 'Field name,Field value,Doc count,p-value';
+      const rows = significantFieldValues.fields
+        .map((item) => Object.values(item).join(','))
+        .join('\n');
+
+      const content = `You are an observability expert being consulted about an alert raised on elastic observability suite.
+
+        There has been a threshold alert on a spike of logs. The AIOps feature "Explain Log Rate Spikes" ran a statistical analysis and returned the following CSV formatted output which lists statistically significant field/value combinations that contribute to the spike:
+
+        ${header}
+        ${rows}
+
+        Please provide a root cause analysis on why this combination of field/value combinations could cause a spike in logs in up to 2 parapraphs. Then suggest remediations for this alert with up to 3 bullet points. Don't mention that the original given format is CSV.
+        `;
+
+      console.log('content', content);
+
       return [
         LOGS_SYSTEM_MESSAGE,
         {
-          content: `You are an observability expert being consulted about an alert raised on elastic observability suite.
-          ${customMessageForPrompt}
-          Please advice on what could be the 3 top causes and remediations for this alert.  Format your response on bullets.
-          `,
+          content,
           role: 'user',
         },
       ];

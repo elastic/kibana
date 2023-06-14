@@ -109,7 +109,19 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   const coPilotService = useCoPilot();
 
-  const explainLogSpikeParams = undefined;
+  const explainLogSpikeParams =
+    analysisResults !== undefined && analysisResults?.significantTerms.length > 0
+      ? {
+          significantFieldValues: {
+            fields: analysisResults.significantTerms.map((item) => ({
+              field: item.fieldName,
+              value: item.fieldValue,
+              docCount: item.doc_count,
+              pValue: item.pValue,
+            })),
+          },
+        }
+      : undefined;
 
   const explainLogSpikeTitle = i18n.translate(
     'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
