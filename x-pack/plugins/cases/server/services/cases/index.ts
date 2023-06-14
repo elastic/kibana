@@ -560,7 +560,7 @@ export class CasesService {
 
   public async getCategories({ filter }: GetCategoryArgs): Promise<string[]> {
     try {
-      this.log.debug(`Attempting to GET all cases`);
+      this.log.debug(`Attempting to GET all categories`);
 
       const results = await this.unsecuredSavedObjectsClient.find<
         unknown,
@@ -583,7 +583,7 @@ export class CasesService {
 
       return results?.aggregations?.categories?.buckets.map(({ key }) => key) ?? [];
     } catch (error) {
-      this.log.error(`Error on GET tags: ${error}`);
+      this.log.error(`Error on GET categories: ${error}`);
       throw error;
     }
   }

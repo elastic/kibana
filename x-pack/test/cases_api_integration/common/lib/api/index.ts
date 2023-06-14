@@ -16,7 +16,6 @@ import type SuperTest from 'supertest';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
-  CASE_CATEGORIES_URL,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONFIGURE_URL,
@@ -25,6 +24,7 @@ import {
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASE_USER_ACTION_SAVED_OBJECT,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import {
   Configuration,
@@ -673,7 +673,7 @@ export const getCategories = async ({
   auth?: { user: User; space: string | null };
 }): Promise<CasesFindResponse> => {
   const { body: res } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CATEGORIES_URL}`)
+    .get(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_GET_CASE_CATEGORIES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query({ ...query })

@@ -7,20 +7,20 @@
 
 import type { AllCategoriesFindRequest } from '../../../../../common/api';
 
-import { CASE_CATEGORIES_URL } from '../../../../../common/constants';
+import { INTERNAL_GET_CASE_CATEGORIES_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
 
 export const getCategoriesRoute = createCasesRoute({
   method: 'get',
-  path: CASE_CATEGORIES_URL,
+  path: INTERNAL_GET_CASE_CATEGORIES_URL,
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       const options = request.query as AllCategoriesFindRequest;
 
-      return response.ok({ body: await client.cases.getCategories({ ...options }) });
+      return response.ok({ body: await client.cases.getCategories(options) });
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve categories in route: ${error}`,
