@@ -43,7 +43,7 @@ export const ACTION_TYPE_TITLE = i18n.translate(
 export const ALLOWED_CHANNELS = i18n.translate(
   'xpack.stackConnectors.components.slack_api.allowedChannelsLabel',
   {
-    defaultMessage: 'Allowed channels',
+    defaultMessage: 'Channels',
   }
 );
 export const SUCCESS_FETCH_CHANNELS = i18n.translate(
