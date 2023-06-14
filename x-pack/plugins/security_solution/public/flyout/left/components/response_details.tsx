@@ -36,23 +36,23 @@ const InlineBlock = styled.div`
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
  */
 export const ResponseDetails: React.FC = () => {
-  const { data, dataAsNestedObject } = useLeftPanelContext();
+  const { searchHit, dataAsNestedObject } = useLeftPanelContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
-  const expandedEventFieldsObject = data
-    ? (expandDottedObject((data as RawEventData).fields) as ExpandedEventFieldsObject)
+  const expandedEventFieldsObject = searchHit
+    ? (expandDottedObject((searchHit as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const responseActionsView = useResponseActionsView({
-    rawEventData: data,
+    rawEventData: searchHit,
     ecsData: dataAsNestedObject,
   });
   const osqueryView = useOsqueryTab({
-    rawEventData: data,
+    rawEventData: searchHit,
     ecsData: dataAsNestedObject,
   });
 
