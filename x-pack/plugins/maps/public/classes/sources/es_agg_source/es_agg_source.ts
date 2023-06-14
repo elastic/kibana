@@ -13,7 +13,11 @@ import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
-import { AbstractESAggSourceDescriptor, AggDescriptor, DataFilters } from '../../../../common/descriptor_types';
+import {
+  AbstractESAggSourceDescriptor,
+  AggDescriptor,
+  DataFilters,
+} from '../../../../common/descriptor_types';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getAggDisplayName } from './get_agg_display_name';
