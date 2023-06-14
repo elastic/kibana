@@ -98,6 +98,7 @@ export function InstallElasticAgent() {
                 name: wizardState.datasetName,
                 state: {
                   datasetName: wizardState.datasetName,
+                  serviceName: wizardState.serviceName,
                   namespace: wizardState.namespace,
                   customConfigurations: wizardState.customConfigurations,
                   logFilePaths: wizardState.logFilePaths,
