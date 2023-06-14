@@ -14,6 +14,7 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -54,6 +55,7 @@ export interface ActionExecutorContext {
 export interface TaskInfo {
   scheduled: Date;
   attempts: number;
+  skip?: ConcreteTaskInstance['skip'];
 }
 
 export interface ExecuteOptions<Source = unknown> {
@@ -164,6 +166,7 @@ export class ActionExecutor {
               rawAction,
               isPreconfigured,
               taskConfig,
+              taskInfo,
             },
             { configurationUtilities }
           );
@@ -492,6 +495,7 @@ interface ValidateActionOpts {
   rawAction: RawAction;
   isPreconfigured?: boolean;
   taskConfig?: TaskConfig;
+  taskInfo?: TaskInfo;
 }
 
 function validateAction(
@@ -504,6 +508,7 @@ function validateAction(
     rawAction,
     isPreconfigured = false,
     taskConfig,
+    taskInfo,
   }: ValidateActionOpts,
   validatorServices: ValidatorServices
 ) {
@@ -531,7 +536,7 @@ function validateAction(
       actionId,
       status: 'error',
       message: err.message,
-      retry: true,
+      retry: (taskInfo?.skip?.attempts || 0) > 0 ? true : false,
     });
   }
 }

@@ -90,6 +90,7 @@ export class TaskRunnerFactory {
     const taskInfo = {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
+      skip: taskInstance.skip,
     };
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
