@@ -11,7 +11,6 @@
     "requiredPlugins": ["data", "dataViews", "usageCollection", "observabilityShared"],
     "optionalPlugins": ["observability"],
     "requiredBundles": [
-      "observability",
       "kibanaUtils",
       "kibanaReact",
     ],
