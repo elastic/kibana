@@ -20,7 +20,6 @@ import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   NO_DATA_ACTIONS,
-  WARNING_ACTIONS,
 } from './threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
@@ -1966,14 +1965,6 @@ expect.extend({
       pass,
     };
   },
-  toBeWarnAction(action?: Action) {
-    const pass = action?.id === WARNING_ACTIONS.id && action?.action.alertState === 'WARNING';
-    const message = () => `expected ${JSON.stringify(action)} to be an WARNING action`;
-    return {
-      message,
-      pass,
-    };
-  },
   toBeNoDataAction(action?: Action) {
     const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.alertState === 'NO DATA';
     const message = () => `expected ${action} to be a NO DATA action`;
@@ -1997,8 +1988,11 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
+
       toBeWarnAction(action?: Action): R;
+
       toBeNoDataAction(action?: Action): R;
+
       toBeErrorAction(action?: Action): R;
     }
   }
