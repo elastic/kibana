@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MappingTimeSeriesMetricType } from '@kbn/es-types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import type { QueryDslQueryContainer } from '../../common/types';
@@ -28,7 +28,7 @@ export interface FieldDescriptor {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetric?: MappingTimeSeriesMetricType;
+  timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
   timeSeriesDimension?: boolean;
 }
 
