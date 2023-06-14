@@ -8,6 +8,7 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -84,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns a flattened version of the fields in es', async () => {
       await supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({ pattern: 'basic_index' })
         .expect(200, {
@@ -96,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns a single field as requested', async () => {
       await supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({ pattern: 'basic_index', fields: JSON.stringify(['bar']) })
         .expect(200, {
@@ -107,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('always returns a field for all passed meta fields', async () => {
       await supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: 'basic_index',
@@ -200,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns fields when one pattern exists and the other does not', async () => {
       await supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({ pattern: 'bad_index,basic_index' })
         .expect(200, {
@@ -211,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns 404 when neither exists', async () => {
       await supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({ pattern: 'bad_index,bad_index_2' })
         .expect(404);
@@ -219,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns 404 when no patterns exist', async () => {
       await supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: 'bad_index',
