@@ -18,8 +18,10 @@ import React, {
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
+import useUnmount from 'react-use/lib/useUnmount';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import {
   DashboardAPI,
@@ -47,6 +49,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+    const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
 
     useImperativeHandle(
       ref,
@@ -65,23 +68,21 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       })();
     }, []);
 
-    useEffect(() => {
-      if (!dashboardContainer) return;
-
-      // When a dashboard already exists, don't rebuild it, just set a new id.
-      dashboardContainer.navigateToDashboard(savedObjectId);
-
-      // Disabling exhaustive deps because this useEffect should only be triggered when the savedObjectId changes.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [savedObjectId]);
-
     const id = useMemo(() => uuidv4(), []);
 
     useEffect(() => {
-      let canceled = false;
-      let destroyContainer: () => void;
+      if (dashboardContainer) {
+        // When a dashboard already exists, don't rebuild it, just set a new id.
+        dashboardContainer.navigateToDashboard(savedObjectId);
 
+        return;
+      }
+
+      let canceled = false;
       (async () => {
+        fatalError?.destroy();
+        setFatalError(undefined);
+
         const creationOptions = await getCreationOptions?.();
 
         // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
@@ -91,15 +92,20 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         const dashboardFactory = embeddable.getEmbeddableFactory(
           DASHBOARD_CONTAINER_TYPE
         ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
-        const container = (await dashboardFactory?.create(
+        const container = await dashboardFactory?.create(
           { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
           undefined,
           creationOptions,
           savedObjectId
-        )) as DashboardContainer;
+        );
 
         if (canceled) {
           container.destroy();
+          return;
+        }
+
+        if (isErrorEmbeddable(container)) {
+          setFatalError(container);
           return;
         }
 
@@ -109,15 +115,18 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         }
 
         setDashboardContainer(container);
-        destroyContainer = () => container.destroy();
       })();
       return () => {
         canceled = true;
-        destroyContainer?.();
       };
       // Disabling exhaustive deps because embeddable should only be created on first render.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [savedObjectId]);
+
+    useUnmount(() => {
+      fatalError?.destroy();
+      dashboardContainer?.destroy();
+    });
 
     const viewportClasses = classNames(
       'dashboardViewport',
@@ -133,7 +142,8 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
     return (
       <div className={viewportClasses}>
-        {loading ? loadingSpinner : <div ref={dashboardRoot} />}
+        {loading && !fatalError ? loadingSpinner : <div ref={dashboardRoot} />}
+        {fatalError ? fatalError.render() : null}
       </div>
     );
   }
