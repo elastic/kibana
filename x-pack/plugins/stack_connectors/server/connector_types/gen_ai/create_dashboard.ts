@@ -33,6 +33,7 @@ export const initGenAiDashboard = async ({
       success: true,
     };
   } catch (error) {
+    console.log('GET err:::', error.output);
     // if 404, does not yet exist. do not error, continue to create
     if (error.output.statusCode !== 404) {
       return {
@@ -59,9 +60,10 @@ export const initGenAiDashboard = async ({
     logger.info(`Successfully created Gen Ai Dashboard ${dashboardId}`);
     return { success: true };
   } catch (error) {
+    console.log('CREATE err:::', error.output);
     return {
       success: false,
-      error: { message: error.message, statusCode: error.statusCode },
+      error: { message: error.message, statusCode: error.output.statusCode },
     };
   }
 };

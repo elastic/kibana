@@ -275,7 +275,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             });
           });
           describe('gen ai dashboard', () => {
-            const dashboardId = 'specific-dashboard-id';
+            const dashboardId = 'specific-dashboard-id-default';
             beforeEach(async () => {
               await supertest
                 .delete(`/api/saved_objects/dashboard/${dashboardId}`)
@@ -352,46 +352,45 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             apiUrl = await simulator.start();
             genAiActionId = await createConnector(apiUrl, 'space1');
           });
+          beforeEach(async () => {
+            await supertest
+              .delete(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
+              .set('kbn-xsrf', 'foo');
+          });
 
           after(() => {
             simulator.close();
           });
 
-          describe('gen ai dashboard', () => {
-            const dashboardId = 'specific-dashboard-id';
-            beforeEach(async () => {
-              await supertest
-                .delete(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
-                .set('kbn-xsrf', 'foo');
-            });
+          const dashboardId = 'specific-dashboard-id-space1';
 
-            it('should create a dashboard in non-default space', async () => {
-              const { body } = await supertest
-                .post(`${getUrlPrefix('space1')}/api/actions/connector/${genAiActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .send({
-                  params: {
-                    subAction: 'getDashboard',
-                    subActionParams: {
-                      dashboardId,
-                    },
+          it('should create a dashboard in non-default space', async () => {
+            const { body } = await supertest
+              .post(`${getUrlPrefix('space1')}/api/actions/connector/${genAiActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getDashboard',
+                  subActionParams: {
+                    dashboardId,
                   },
-                })
-                .expect(200);
+                },
+              })
+              .expect(200);
 
-              // check dashboard has been created
-              await retry.try(async () =>
-                supertest
-                  .get(`/space1/api/saved_objects/dashboard/${dashboardId}`)
+            // check dashboard has been created
+            await retry.try(
+              async () =>
+                await supertest
+                  .get(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
                   .set('kbn-xsrf', 'foo')
                   .expect(200)
-              );
+            );
 
-              expect(body).to.eql({
-                status: 'ok',
-                connector_id: genAiActionId,
-                data: { available: true },
-              });
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: genAiActionId,
+              data: { available: true },
             });
           });
         });
