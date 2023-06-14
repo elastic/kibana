@@ -38,6 +38,7 @@ export interface BaseFlameGraph {
   CountExclusive: number[];
 
   TotalSeconds: number;
+  SamplingRate: number;
 }
 
 // createBaseFlameGraph encapsulates the tree representation into a serialized form.

@@ -90,7 +90,7 @@ function TotalSamplesStat({
           <GetLabel value={percentDelta} prepend=" (" append=")" />
         </EuiText>
       }
-      description={getTotalSamplesLabel(sampleRateB)}
+      description={getTotalSamplesLabel(samplingRateB)}
     />
   );
 }
@@ -168,7 +168,7 @@ export function TopNFunctionsTable({
   isDifferentialView,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
-  const isEstimatedA = (topNFunctions.SamplingRate ?? 1.0) !== 1.0;
+  const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -393,8 +393,8 @@ export function TopNFunctionsTable({
       <TotalSamplesStat
         totalSamples={totalCount}
         newSamples={comparisonTopNFunctions?.TotalCount}
-        samplingRateA={topNFunctions.SamplingRate}
-        samplingRateB={comparisonTopNFunctions?.SamplingRate}
+        samplingRateA={topNFunctions?.SamplingRate?? 1.0}
+        samplingRateB={comparisonTopNFunctions?.SamplingRate?? 1.0}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
@@ -434,6 +434,7 @@ export function TopNFunctionsTable({
           }}
           totalSeconds={totalSeconds ?? 0}
           totalSamples={selectedRow.samples}
+          samplingRate={topNFunctions?.SamplingRate ?? 1.0}
         />
       )}
     </>

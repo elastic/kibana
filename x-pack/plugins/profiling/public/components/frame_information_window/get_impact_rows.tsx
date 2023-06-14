@@ -20,6 +20,7 @@ export function getImpactRows({
   countExclusive,
   totalSamples,
   totalSeconds,
+  isApproximate = false,
 }: {
   countInclusive: number;
   countExclusive: number;
