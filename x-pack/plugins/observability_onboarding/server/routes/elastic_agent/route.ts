@@ -41,6 +41,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
         : '$API_KEY',
       esHost: [elasticsearchUrl],
       logfileId: `custom-logs-${Date.now()}`,
+      serviceName: savedState?.state.serviceName,
     });
 
     return yaml;

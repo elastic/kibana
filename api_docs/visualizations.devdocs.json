@@ -6960,7 +6960,9 @@
         "VisEditorConstructor",
         "<TVisParams>) => void; get: (name: string) => ",
         "VisEditorConstructor",
-        "<any> | undefined; }; }"
+        "<any> | undefined; }; listingViewRegistry: ",
+        "ListingViewRegistry",
+        "; }"
       ],
       "path": "src/plugins/visualizations/public/plugin.ts",
       "deprecated": false,

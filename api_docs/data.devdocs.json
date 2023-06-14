@@ -13329,12 +13329,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13499,6 +13499,14 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -20951,12 +20959,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21121,6 +21129,14 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
