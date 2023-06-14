@@ -83,7 +83,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
       error={error}
       fullWidth
     >
-      <CodeEditor
+      <CodeEditor // TODO theme provided in x-pack/plugins/index_management/public/application/index.tsx
         languageId="json"
         height={500}
         options={{

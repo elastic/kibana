@@ -404,7 +404,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 fullWidth
                 data-test-subj={`queryInput${this.props.formIndex}`}
               >
-                <CodeEditorField
+                <CodeEditorField // TODO theme provided in context by x-pack/plugins/security/public/management/roles/roles_management_app.tsx
                   languageId="xjson"
                   width="100%"
                   fullWidth

@@ -515,7 +515,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {errors.length}
                       </EuiBadge>
                     )}
-                    <CodeEditor
+                    <CodeEditor // TODO theme does not appear to be provided in the associated unit tests, the parent component looks to be used many places
                       languageId={languageId(language)}
                       value={codeOneLiner || code}
                       options={codeEditorOptions}

@@ -97,7 +97,7 @@ export const JSONRuleEditor = (props: Props) => {
       data-test-subj="roleMappingsJSONEditor"
     >
       <Fragment>
-        <CodeEditorField
+        <CodeEditorField // TODO theme provided in context in x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx
           aria-label={''}
           languageId={XJsonLang.ID}
           value={rawRules}

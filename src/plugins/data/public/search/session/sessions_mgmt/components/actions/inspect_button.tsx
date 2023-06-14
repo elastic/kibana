@@ -33,7 +33,7 @@ const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
   const renderInfo = () => {
     return (
       <Fragment>
-        <CodeEditor
+        <CodeEditor // TODO theme provided by src/plugins/data/public/search/search_service.ts
           languageId="json"
           value={JSON.stringify(searchSession, null, 2)}
           options={{

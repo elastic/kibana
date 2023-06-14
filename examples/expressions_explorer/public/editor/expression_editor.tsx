@@ -16,7 +16,7 @@ interface Props {
 
 export function ExpressionEditor({ value, onChange }: Props) {
   return (
-    <CodeEditor
+    <CodeEditor // TODO Cannot determine where theme is provided
       languageId="javascript"
       width="100%"
       height="250px"

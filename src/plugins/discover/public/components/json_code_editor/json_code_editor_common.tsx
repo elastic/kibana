@@ -42,7 +42,7 @@ export const JsonCodeEditorCommon = ({
     return null;
   }
   const codeEditor = (
-    <CodeEditor
+    <CodeEditor // TODO theme needs to be provided in the top level context, in src/plugins/discover/public/build_services.ts, theme is not providing a theme$ observable
       languageId={XJsonLang.ID}
       width={width}
       height={height}
