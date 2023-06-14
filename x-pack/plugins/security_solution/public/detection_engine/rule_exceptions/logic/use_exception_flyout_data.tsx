@@ -8,8 +8,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { DataViewField } from '@kbn/securitysolution-list-utils';
+import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../rule_management/logic/types';
@@ -22,7 +21,7 @@ import * as i18n from '../../../common/containers/source/translations';
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
   indexPatterns: DataViewBase;
-  getExtendedFields: (fields: string[]) => Promise<DataViewField[]>;
+  getExtendedFields: (fields: string[]) => Promise<FieldSpec[]>;
 }
 
 /**
@@ -116,7 +115,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   // Fetch extended fields information
   const getExtendedFields = useCallback(
     async (fields: string[]) => {
-      let extendedFields: DataViewField[] = [];
+      let extendedFields: FieldSpec[] = [];
       const dv = dataViewSpec ?? indexDataViewSpec;
       if (!dv) {
         return extendedFields;
