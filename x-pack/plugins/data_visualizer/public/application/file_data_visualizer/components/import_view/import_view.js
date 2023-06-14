@@ -585,7 +585,7 @@ export class ImportView extends Component {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
                     <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.cancelButtonLabel"
+                      id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
                       defaultMessage="Import a new file"
                     />
                   </EuiButtonEmpty>
