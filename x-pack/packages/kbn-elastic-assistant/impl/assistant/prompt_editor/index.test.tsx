@@ -9,11 +9,11 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import { mockAlertPromptContext, mockEventPromptContext } from '../../mock/prompt_context';
-import { mockSystemPrompt } from '../../mock/system_prompt';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { PromptEditor, Props } from '.';
 
 const defaultProps: Props = {
+  conversation: undefined,
   isNewConversation: true,
   promptContexts: {
     [mockAlertPromptContext.id]: mockAlertPromptContext,
@@ -21,10 +21,7 @@ const defaultProps: Props = {
   },
   promptTextPreview: 'Preview text',
   selectedPromptContextIds: [],
-  selectedSystemPromptId: null,
   setSelectedPromptContextIds: jest.fn(),
-  setSelectedSystemPromptId: jest.fn(),
-  systemPrompts: [mockSystemPrompt],
 };
 
 describe('PromptEditorComponent', () => {
