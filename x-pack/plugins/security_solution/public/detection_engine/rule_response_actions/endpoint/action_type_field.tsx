@@ -69,7 +69,7 @@ const ActionTypeFieldComponent = ({
       readDefaultValueOnForm={readDefaultValueOnForm}
       config={{
         label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
-          defaultMessage: 'Command',
+          defaultMessage: 'Response action',
         }),
         helpText: (
           <FormattedMessage
