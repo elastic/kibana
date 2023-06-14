@@ -1728,9 +1728,7 @@
           "label": "setGetStartedPage",
           "description": [],
           "signature": [
-            "(getStartedComponent: ",
-            "GetStartedComponent",
-            ") => void"
+            "(getStartedComponent: React.ComponentType<{}>) => void"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -1739,12 +1737,12 @@
             {
               "parentPluginId": "securitySolution",
               "id": "def-public.PluginStart.setGetStartedPage.$1",
-              "type": "Function",
+              "type": "CompoundType",
               "tags": [],
               "label": "getStartedComponent",
               "description": [],
               "signature": [
-                "GetStartedComponent"
+                "React.ComponentType<{}>"
               ],
               "path": "x-pack/plugins/security_solution/public/types.ts",
               "deprecated": false,
