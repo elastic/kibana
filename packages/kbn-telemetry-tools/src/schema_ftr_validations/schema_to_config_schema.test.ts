@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-/*
- * It's a JS file because we cannot use Jest types in here because of a clash in the `expect` types
- */
-
 import { assertTelemetryPayload } from './schema_to_config_schema';
 
 describe(`assertTelemetryPayload`, () => {
@@ -158,10 +154,8 @@ describe(`assertTelemetryPayload`, () => {
         {
           root: {
             properties: {
-              im_only_passing_through_data: {
-                type: 'pass_through',
-                properties: {},
-              },
+              // @ts-expect-error: TS doesn't allow pass_through with properties, but it may occur during the tests in runtime, so we want to validate this test case.
+              im_only_passing_through_data: { type: 'pass_through', properties: {} },
             },
           },
           plugins: { properties: {} },
