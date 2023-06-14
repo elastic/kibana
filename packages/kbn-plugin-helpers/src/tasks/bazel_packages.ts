@@ -23,11 +23,13 @@ export async function buildBazelPackages({ log, dist }: TaskContext) {
       ].concat(dist ? [`--define=dist=true`] : []),
       {
         logPrefix: ' │     ',
+        quiet: true
       }
     );
 
     log.success('bazel run successfully and artifacts were created');
   } catch (e) {
     log.error(`bazel run failed: ${e}`);
+    process.exit(1);
   }
 }
