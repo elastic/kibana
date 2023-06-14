@@ -12,11 +12,11 @@ import { getCollectorPolicy, getSymbolizerPolicy } from './fleet_policies';
 export interface SetupDataCollectionInstructions {
   variables: {
     collector: {
-      secretToken: string;
-      host: string;
+      secretToken?: string;
+      host?: string;
     };
     symbolizer: {
-      host: string;
+      host?: string;
     };
   };
 }
@@ -47,11 +47,11 @@ export async function getSetupInstructions({
   return {
     variables: {
       collector: {
-        secretToken: collectorVars!.secret_token.value!,
-        host: collectorVars!.host.value,
+        secretToken: collectorVars?.secret_token?.value,
+        host: collectorVars?.host?.value,
       },
       symbolizer: {
-        host: symbolizerVars!.host.value,
+        host: symbolizerVars?.host?.value,
       },
     },
   };
