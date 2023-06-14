@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-browser';
 import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -40,6 +41,11 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
         id: 'ipid',
         name: 'ipid',
         type: 'index-pattern',
+      },
+      {
+        id: 'some-tag',
+        name: 'some-tag',
+        type: 'tag',
       },
     ],
   } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
@@ -138,6 +144,10 @@ describe('Event Annotation Service', () => {
       const typedId = id as keyof typeof annotationGroupResolveMocks;
       return annotationGroupResolveMocks[typedId];
     });
+    (core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      total: 10,
+      savedObjects: Object.values(annotationGroupResolveMocks),
+    } as Pick<SavedObjectsFindResponse<EventAnnotationGroupAttributes>, 'total' | 'savedObjects'>);
     (core.savedObjects.client.bulkCreate as jest.Mock).mockImplementation(() => {
       return annotationResolveMocks.multiAnnotations;
     });
@@ -474,7 +484,9 @@ describe('Event Annotation Service', () => {
           "description": "",
           "ignoreGlobalFilters": false,
           "indexPatternId": "ipid",
-          "tags": Array [],
+          "tags": Array [
+            "some-tag",
+          ],
           "title": "groupTitle",
         }
       `);
@@ -490,16 +502,53 @@ describe('Event Annotation Service', () => {
       expect(group.indexPatternId).toBe(group.dataViewSpec?.id);
     });
   });
-  // describe.skip('deleteAnnotationGroup', () => {
-  //   it('deletes annotation group along with annotations that reference them', async () => {
-  //     await eventAnnotationService.deleteAnnotationGroup('multiAnnotations');
-  //     expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
-  //       { id: 'multiAnnotations', type: 'event-annotation-group' },
-  //       { id: 'annotation1', type: 'event-annotation' },
-  //       { id: 'annotation2', type: 'event-annotation' },
-  //     ]);
-  //   });
-  // });
+  describe('findAnnotationGroupContent', () => {
+    it('should retrieve saved objects and format them', async () => {
+      const searchTerm = 'my search';
+
+      const content = await eventAnnotationService.findAnnotationGroupContent(searchTerm, 20, [
+        { type: 'mytype', id: '1234' },
+      ]);
+
+      expect(content).toMatchSnapshot();
+
+      expect((core.savedObjects.client.find as jest.Mock).mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "defaultSearchOperator": "AND",
+              "hasNoReference": undefined,
+              "hasReference": Array [
+                Object {
+                  "id": "1234",
+                  "type": "mytype",
+                },
+              ],
+              "page": 1,
+              "perPage": 20,
+              "search": "my search*",
+              "searchFields": Array [
+                "title^3",
+                "description",
+              ],
+              "type": Array [
+                "event-annotation-group",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+  });
+  describe('deleteAnnotationGroups', () => {
+    it('deletes annotation group along with annotations that reference them', async () => {
+      await eventAnnotationService.deleteAnnotationGroups(['id1', 'id2']);
+      expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
+        { id: 'id1', type: 'event-annotation-group' },
+        { id: 'id2', type: 'event-annotation-group' },
+      ]);
+    });
+  });
   describe('createAnnotationGroup', () => {
     it('creates annotation group along with annotations', async () => {
       const annotations = [
@@ -509,7 +558,7 @@ describe('Event Annotation Service', () => {
       await eventAnnotationService.createAnnotationGroup({
         title: 'newGroupTitle',
         description: 'my description',
-        tags: ['my', 'many', 'tags'],
+        tags: ['tag1', 'tag2', 'tag3'],
         indexPatternId: 'ipid',
         ignoreGlobalFilters: false,
         annotations,
@@ -519,7 +568,6 @@ describe('Event Annotation Service', () => {
         {
           title: 'newGroupTitle',
           description: 'my description',
-          tags: ['my', 'many', 'tags'],
           ignoreGlobalFilters: false,
           dataViewSpec: null,
           annotations,
@@ -530,6 +578,21 @@ describe('Event Annotation Service', () => {
               id: 'ipid',
               name: 'event-annotation-group_dataView-ref-ipid',
               type: 'index-pattern',
+            },
+            {
+              id: 'tag1',
+              name: 'tag1',
+              type: 'tag',
+            },
+            {
+              id: 'tag2',
+              name: 'tag2',
+              type: 'tag',
+            },
+            {
+              id: 'tag3',
+              name: 'tag3',
+              type: 'tag',
             },
           ],
         }
@@ -555,11 +618,10 @@ describe('Event Annotation Service', () => {
         {
           title: 'newTitle',
           description: '',
-          tags: [],
           annotations: [],
           dataViewSpec: null,
           ignoreGlobalFilters: false,
-        },
+        } as EventAnnotationGroupAttributes,
         {
           references: [
             {
@@ -572,72 +634,4 @@ describe('Event Annotation Service', () => {
       );
     });
   });
-  // describe.skip('updateAnnotations', () => {
-  //   const upsert = [
-  //     {
-  //       id: 'annotation2',
-  //       label: 'Query based event',
-  //       icon: 'triangle',
-  //       color: 'red',
-  //       type: 'query',
-  //       timeField: 'timestamp',
-  //       key: {
-  //         type: 'point_in_time',
-  //       },
-  //       lineStyle: 'dashed',
-  //       lineWidth: 3,
-  //       filter: { type: 'kibana_query', query: '', language: 'kuery' },
-  //     },
-  //     {
-  //       id: 'annotation4',
-  //       label: 'Query based event',
-  //       type: 'query',
-  //       timeField: 'timestamp',
-  //       key: {
-  //         type: 'point_in_time',
-  //       },
-  //       filter: { type: 'kibana_query', query: '', language: 'kuery' },
-  //     },
-  //   ] as EventAnnotationConfig[];
-  //   it('updates annotations - deletes annotations', async () => {
-  //     await eventAnnotationService.updateAnnotations('multiAnnotations', {
-  //       delete: ['annotation1', 'annotation2'],
-  //     });
-  //     expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
-  //       { id: 'annotation1', type: 'event-annotation' },
-  //       { id: 'annotation2', type: 'event-annotation' },
-  //     ]);
-  //   });
-  //   it('updates annotations - inserts new annotations', async () => {
-  //     await eventAnnotationService.updateAnnotations('multiAnnotations', { upsert });
-  //     expect(core.savedObjects.client.bulkCreate).toHaveBeenCalledWith([
-  //       {
-  //         id: 'annotation2',
-  //         type: 'event-annotation',
-  //         attributes: upsert[0],
-  //         overwrite: true,
-  //         references: [
-  //           {
-  //             id: 'multiAnnotations',
-  //             name: 'event-annotation-group-ref-annotation2',
-  //             type: 'event-annotation-group',
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         id: 'annotation4',
-  //         type: 'event-annotation',
-  //         attributes: upsert[1],
-  //         overwrite: true,
-  //         references: [
-  //           {
-  //             id: 'multiAnnotations',
-  //             name: 'event-annotation-group-ref-annotation4',
-  //             type: 'event-annotation-group',
-  //           },
-  //         ],
-  //       },
-  //     ]);
-  //   });
-  // });
 });
