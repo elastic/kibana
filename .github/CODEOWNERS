@@ -88,7 +88,9 @@ src/plugins/console @elastic/platform-deployment-management
 packages/content-management/content_editor @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
-packages/content-management/table_list @elastic/appex-sharedux
+packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
+packages/content-management/table_list_view @elastic/appex-sharedux
+packages/content-management/table_list_view_table @elastic/appex-sharedux
 packages/kbn-content-management-utils @elastic/kibana-data-discovery
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation
@@ -307,6 +309,16 @@ src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
 packages/kbn-datemath @elastic/kibana-data-discovery
+packages/deeplinks/analytics @elastic/kibana-data-discovery
+packages/deeplinks/devtools @elastic/platform-deployment-management
+packages/deeplinks/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/deeplinks/ml @elastic/ml-ui
+packages/deeplinks/observability @elastic/apm-ui
+packages/deeplinks/search @elastic/enterprise-search-frontend
+packages/default-nav/analytics @elastic/kibana-data-discovery
+packages/default-nav/devtools @elastic/platform-deployment-management
+packages/default-nav/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/default-nav/ml @elastic/ml-ui
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations

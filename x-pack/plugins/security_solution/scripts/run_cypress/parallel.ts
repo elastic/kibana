@@ -282,7 +282,6 @@ export const cli = () => {
 
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
-                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`,
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                   );
                 }
