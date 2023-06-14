@@ -11,6 +11,7 @@ import type {
   CommentAttributes,
   CommentRequestAlertType,
   CommentRequestUserType,
+  ConnectorMappings,
 } from '../common/api';
 import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
@@ -55,6 +56,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T21:54:48.952Z',
@@ -96,6 +98,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T22:32:00.900Z',
@@ -137,6 +140,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -182,6 +186,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -447,6 +452,24 @@ export const multipleAlert: CommentRequestAlertType = {
   alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
   index: ['test-index-3', 'test-index-4', 'test-index-5'],
 };
+
+export const mappings: ConnectorMappings = [
+  {
+    source: 'title',
+    target: 'short_description',
+    action_type: 'overwrite',
+  },
+  {
+    source: 'description',
+    target: 'description',
+    action_type: 'append',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    action_type: 'append',
+  },
+];
 
 const casesClientMock = createCasesClientMock();
 

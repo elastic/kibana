@@ -31,6 +31,7 @@ import {
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
+  GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
@@ -51,6 +52,7 @@ import {
   getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
+  getBulkAssetsHandler,
   installPackageFromRegistryHandler,
   installPackageByUploadHandler,
   deletePackageHandler,
@@ -225,6 +227,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getDataStreamsHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
+      validate: GetBulkAssetsRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getBulkAssetsHandler
   );
 
   // deprecated since 8.0

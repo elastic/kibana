@@ -16,7 +16,7 @@ export async function validateSecurityRole({
   const esClient = client.getEsClient();
   const roles = await esClient.security.getRole();
   return {
-    settings: {
+    permissions: {
       configured: PROFILING_READER_ROLE_NAME in roles,
     },
   };

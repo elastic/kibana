@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,9 +21,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
-import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 
@@ -33,9 +34,8 @@ import { EngineApiLogic } from './engine_api_logic';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
 
 export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
-  const defaultUrl = 'https://localhost:9200';
-  const url =
-    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || defaultUrl;
+  const defaultUrl = 'http://localhost:9200';
+  const url = cloudContext.elasticsearchUrl || defaultUrl;
   return url;
 };
 
@@ -47,9 +47,6 @@ export const SearchApplicationAPI = () => {
 
   const steps = [
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step1.title', {
-        defaultMessage: 'Generate and save API key',
-      }),
       children: (
         <>
           <EuiText>
@@ -115,11 +112,11 @@ export const SearchApplicationAPI = () => {
           </EuiFlexGroup>
         </>
       ),
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step1.title', {
+        defaultMessage: 'Generate and save API key',
+      }),
     },
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step2.title', {
-        defaultMessage: "Copy your search application's endpoint",
-      }),
       children: (
         <>
           <EuiText>
@@ -142,12 +139,15 @@ export const SearchApplicationAPI = () => {
           </EuiFlexGroup>
         </>
       ),
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step2.title', {
+        defaultMessage: "Copy your search application's endpoint",
+      }),
     },
     {
+      children: <EngineApiIntegrationStage />,
       title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step3.title', {
         defaultMessage: 'Learn how to call your endpoints',
       }),
-      children: <EngineApiIntegrationStage />,
     },
   ];
 
@@ -156,6 +156,21 @@ export const SearchApplicationAPI = () => {
       {isGenerateModalOpen ? (
         <GenerateEngineApiKeyModal engineName={engineName} onClose={closeGenerateModal} />
       ) : null}
+      <EuiCallOut
+        iconType="iInCircle"
+        title={
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.searchApplication.api.safeSearchCallout.title"
+            defaultMessage="What is Safe Search API?"
+          />
+        }
+      >
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.searchApplication.api.safeSearchCallout.body"
+          defaultMessage="The safe search API endpoint only allows queries with the parameters defined in the settings JSON, so you can create public-facing search endpoints for your Elasticsearch indices."
+        />
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiSteps headingElement="h2" steps={steps} />
     </>
   );

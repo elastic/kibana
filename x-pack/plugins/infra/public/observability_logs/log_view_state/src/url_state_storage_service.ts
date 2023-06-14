@@ -19,7 +19,6 @@ import {
   PersistedLogViewReference,
 } from '../../../../common/log_views';
 import { LogViewContext, LogViewEvent } from './types';
-import { replaceStateKeyInQueryString } from '../../../utils/url_state';
 
 export const defaultLogViewKey = 'logView';
 const defaultLegacySourceIdKey = 'sourceId';
@@ -138,10 +137,6 @@ const convertSourceIdToReference = (sourceId: string): PersistedLogViewReference
     logViewId: sourceId,
   };
 };
-
-// NOTE: Used by link-to components
-export const replaceLogViewInQueryString = (logViewReference: LogViewReference) =>
-  replaceStateKeyInQueryString(defaultLogViewKey, logViewReference);
 
 export type InitializeFromUrl = ReturnType<typeof initializeFromUrl>;
 export type UpdateContextInUrl = ReturnType<typeof updateContextInUrl>;
