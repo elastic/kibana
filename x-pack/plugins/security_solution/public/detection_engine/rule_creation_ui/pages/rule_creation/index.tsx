@@ -60,6 +60,7 @@ import {
   getActionMessageParams,
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import { formatRule } from './helpers';
 import * as i18n from './translations';
@@ -327,7 +328,10 @@ const CreateRulePageComponent: React.FC = () => {
       const valid = await validateStep(step);
 
       if (valid) {
-        const localDefineStepData = defineStepForm.getFormData();
+        const localDefineStepData: DefineStepRule = {
+          ...defineStepForm.getFormData(),
+          eqlOptions: eqlOptionsSelected,
+        };
         const localAboutStepData = aboutStepForm.getFormData();
         const localScheduleStepData = scheduleStepForm.getFormData();
         const localActionsStepData = actionsStepForm.getFormData();
@@ -363,6 +367,7 @@ const CreateRulePageComponent: React.FC = () => {
     [
       validateStep,
       defineStepForm,
+      eqlOptionsSelected,
       aboutStepForm,
       scheduleStepForm,
       actionsStepForm,
