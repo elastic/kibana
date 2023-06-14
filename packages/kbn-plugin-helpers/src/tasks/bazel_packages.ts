@@ -23,7 +23,7 @@ export async function buildBazelPackages({ log, dist }: TaskContext) {
       ].concat(dist ? [`--define=dist=true`] : []),
       {
         logPrefix: ' │     ',
-        quiet: true
+        quiet: true,
       }
     );
 
