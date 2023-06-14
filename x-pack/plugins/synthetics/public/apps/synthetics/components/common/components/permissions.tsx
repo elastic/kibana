@@ -17,7 +17,7 @@ export const FleetPermissionsCallout = () => {
       <p>
         <FormattedMessage
           id="xpack.synthetics.privateLocations.needFleetPermission.description"
-          defaultMessage="Once there is an agent policy available, you'll be able to add manage private locations and monitors with the regular Synthetics app privileges."
+          defaultMessage="Once there is an agent policy available, you'll be able to manage private locations and monitors with the regular Synthetics app privileges."
         />
       </p>
     </EuiCallOut>
