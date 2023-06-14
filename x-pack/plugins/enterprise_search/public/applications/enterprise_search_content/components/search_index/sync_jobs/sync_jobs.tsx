@@ -5,129 +5,67 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncStatus } from '../../../../../../common/types/connectors';
-
-import { FormattedDateTime } from '../../../../shared/formatted_date_time';
-import { pageToPagination } from '../../../../shared/pagination/page_to_pagination';
-import { durationToText } from '../../../utils/duration_to_text';
-
-import { syncStatusToColor, syncStatusToText } from '../../../utils/sync_status_to_text';
+import { KibanaLogic } from '../../../../shared/kibana';
 
 import { IndexViewLogic } from '../index_view_logic';
 
-import { SyncJobFlyout } from './sync_job_flyout';
-import { SyncJobsViewLogic, SyncJobView } from './sync_jobs_view_logic';
+import { SyncJobsHistoryTable } from './sync_jobs_history_table';
 
 export const SyncJobs: React.FC = () => {
-  const { connectorId } = useValues(IndexViewLogic);
-  const { syncJobs, syncJobsLoading, syncJobsPagination } = useValues(SyncJobsViewLogic);
-  const { fetchSyncJobs } = useActions(SyncJobsViewLogic);
-  const [syncJobFlyout, setSyncJobFlyout] = useState<SyncJobView | undefined>(undefined);
-
-  useEffect(() => {
-    if (connectorId) {
-      fetchSyncJobs({
-        connectorId,
-        from: syncJobsPagination.from ?? 0,
-        size: syncJobsPagination.size ?? 10,
-      });
-    }
-  }, [connectorId]);
-
-  const columns: Array<EuiBasicTableColumn<SyncJobView>> = [
-    {
-      field: 'lastSync',
-      name: i18n.translate('xpack.enterpriseSearch.content.syncJobs.lastSync.columnTitle', {
-        defaultMessage: 'Last sync',
-      }),
-      render: (lastSync: string) => <FormattedDateTime date={new Date(lastSync)} />,
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'duration',
-      name: i18n.translate('xpack.enterpriseSearch.content.syncJobs.syncDuration.columnTitle', {
-        defaultMessage: 'Sync duration',
-      }),
-      render: (duration: moment.Duration) => durationToText(duration),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'indexed_document_count',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.addedDocs.columnTitle', {
-        defaultMessage: 'Docs added',
-      }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'deleted_document_count',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.deletedDocs.columnTitle', {
-        defaultMessage: 'Docs deleted',
-      }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'status',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.syncStatus.columnTitle', {
-        defaultMessage: 'Status',
-      }),
-      render: (syncStatus: SyncStatus) => (
-        <EuiBadge color={syncStatusToColor(syncStatus)}>{syncStatusToText(syncStatus)}</EuiBadge>
-      ),
-      truncateText: true,
-    },
-    {
-      actions: [
-        {
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.index.syncJobs.actions.viewJob.title',
-            {
-              defaultMessage: 'View this sync job',
-            }
-          ),
-          icon: 'eye',
-          isPrimary: false,
-          name: i18n.translate(
-            'xpack.enterpriseSearch.content.index.syncJobs.actions.viewJob.caption',
-            {
-              defaultMessage: 'View this sync job',
-            }
-          ),
-          onClick: (job) => setSyncJobFlyout(job),
-          type: 'icon',
-        },
-      ],
-    },
-  ];
+  const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
+  const { productFeatures } = useValues(KibanaLogic);
+  const [selectedSyncJobCategory, setSelectedSyncJobCategory] = useState<string>('content');
+  const shouldShowAccessSyncs =
+    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
 
   return (
     <>
-      <SyncJobFlyout onClose={() => setSyncJobFlyout(undefined)} syncJob={syncJobFlyout} />
-      <EuiBasicTable
-        data-test-subj="entSearchContent-index-syncJobs-table"
-        items={syncJobs}
-        columns={columns}
-        hasActions
-        onChange={({ page: { index, size } }: { page: { index: number; size: number } }) => {
-          if (connectorId) {
-            fetchSyncJobs({ connectorId, from: index * size, size });
-          }
-        }}
-        pagination={pageToPagination(syncJobsPagination)}
-        tableLayout="fixed"
-        loading={syncJobsLoading}
-      />
+      {shouldShowAccessSyncs && (
+        <EuiButtonGroup
+          legend={i18n.translate(
+            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.legend',
+            { defaultMessage: 'Select sync job type to display.' }
+          )}
+          name={i18n.translate(
+            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.name',
+            { defaultMessage: 'Sync job type' }
+          )}
+          idSelected={selectedSyncJobCategory}
+          onChange={(optionId) => {
+            setSelectedSyncJobCategory(optionId);
+          }}
+          options={[
+            {
+              id: 'content',
+              label: i18n.translate(
+                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.content.label',
+                { defaultMessage: 'Content syncs' }
+              ),
+            },
+
+            {
+              id: 'access_control',
+              label: i18n.translate(
+                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.accessControl.label',
+                { defaultMessage: 'Access control syncs' }
+              ),
+            },
+          ]}
+        />
+      )}
+      {selectedSyncJobCategory === 'content' ? (
+        <SyncJobsHistoryTable type="content" />
+      ) : (
+        <SyncJobsHistoryTable type="access_control" />
+      )}
     </>
   );
 };

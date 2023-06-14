@@ -616,7 +616,7 @@ describe('ManifestManager', () => {
   });
 
   describe('pushArtifacts', () => {
-    test('Successfully invokes artifactClient and stores in the cache', async () => {
+    test('Successfully invokes artifactClient', async () => {
       const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
@@ -637,12 +637,6 @@ describe('ManifestManager', () => {
           ...ARTIFACT_EXCEPTIONS_WINDOWS,
         },
       ]);
-      expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
-      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
-      expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))!.toString())
-      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_WINDOWS));
     });
 
     test('Returns errors for partial failures', async () => {
@@ -684,10 +678,6 @@ describe('ManifestManager', () => {
           ...ARTIFACT_EXCEPTIONS_WINDOWS,
         },
       ]);
-      expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
-      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
-      expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))).toBeUndefined();
     });
   });
 

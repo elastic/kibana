@@ -76,7 +76,11 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
+    thresholdRule: {
+      enabled: boolean;
+    };
   };
+  compositeSlo: { enabled: boolean };
   coPilot?: {
     enabled?: boolean;
   };

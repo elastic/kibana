@@ -43,7 +43,7 @@ ${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.defaultSystemPromptName',
   {
-    defaultMessage: 'default system prompt',
+    defaultMessage: 'Default system prompt',
   }
 );
 

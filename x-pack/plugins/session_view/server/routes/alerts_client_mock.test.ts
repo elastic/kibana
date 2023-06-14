@@ -63,6 +63,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   esClient: esClientMock,
+  getRuleType: jest.fn(),
 };
 
 export function getAlertsClientMockInstance(esClient?: ElasticsearchClient) {
