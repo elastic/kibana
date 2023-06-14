@@ -10,17 +10,27 @@ import { Subject } from 'rxjs';
 import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
 
 import type { Filter, Query } from '@kbn/es-query';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
-import { connectToQueryState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
+import {
+  connectToQueryState,
+  GlobalQueryStateFromUrl,
+  waitUntilNextSessionCompletes$,
+} from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../../../services/plugin_services';
+import { GLOBAL_STATE_STORAGE_KEY } from '../../../../dashboard_constants';
+import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
 
 /**
  * Sets up syncing and subscriptions between the filter state from the Data plugin
  * and the dashboard Redux store.
  */
-export function syncUnifiedSearchState(this: DashboardContainer) {
+export function syncUnifiedSearchState(
+  this: DashboardContainer,
+  kbnUrlStateStorage: IKbnUrlStateStorage
+) {
   const {
     data: { query: queryService, search },
   } = pluginServices.getServices();
@@ -65,9 +75,34 @@ export function syncUnifiedSearchState(this: DashboardContainer) {
     }
   );
 
-  const timeUpdateSubscription = timefilterService
-    .getTimeUpdate$()
-    .subscribe(() => this.dispatch.setTimeRange(timefilterService.getTime()));
+  const timeUpdateSubscription = timefilterService.getTimeUpdate$().subscribe(() => {
+    const newTimeRange = (() => {
+      // if there is an override time range in the URL, dispatch that to the dashboard.
+      const urlOverrideTimeRange =
+        kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time;
+      if (urlOverrideTimeRange) return urlOverrideTimeRange;
+
+      // if there is no url override time range, check if this dashboard uses time restore, and restore to that.
+      const timeRestoreTimeRange =
+        this.getState().explicitInput.timeRestore &&
+        this.getState().componentState.lastSavedInput.timeRange;
+      if (timeRestoreTimeRange) {
+        timefilterService.setTime(timeRestoreTimeRange);
+        return timeRestoreTimeRange;
+      }
+
+      // otherwise fall back to the time range from the time filter service
+      return timefilterService.getTime();
+    })();
+
+    const lastTimeRange = this.getState().explicitInput.timeRange;
+    if (
+      !areTimesEqual(newTimeRange.from, lastTimeRange?.from) ||
+      !areTimesEqual(newTimeRange.to, lastTimeRange?.to)
+    ) {
+      this.dispatch.setTimeRange(newTimeRange);
+    }
+  });
 
   const refreshIntervalSubscription = timefilterService
     .getRefreshIntervalUpdate$()
