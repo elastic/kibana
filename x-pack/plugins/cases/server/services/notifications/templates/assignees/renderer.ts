@@ -7,15 +7,16 @@
 
 import fs from 'fs';
 import mustache from 'mustache';
-import path from 'path';
-import type { CaseSavedObjectTransformed } from '../../../common/types/case';
-import { CaseStatuses, CaseSeverity } from '../../../../common/api';
-import { getDataPath } from './utils';
+import { join } from 'path';
+import { assertNever } from '@elastic/eui';
+import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
+import { CaseStatuses, CaseSeverity } from '../../../../../common/api';
+import { getTemplateFilePath } from '../utils';
 
 const TAG_LIMIT = 3;
 const DESCRIPTION_LIMIT = 300;
 
-export const getStatusColor = (status: string | null | undefined): string => {
+export const getStatusColor = (status: CaseStatuses | null | undefined): string => {
   if (!status) {
     return '#000';
   }
@@ -28,11 +29,11 @@ export const getStatusColor = (status: string | null | undefined): string => {
     case CaseStatuses.closed:
       return '#D3DAE6';
     default:
-      return '#0077CC';
+      return assertNever(status);
   }
 };
 
-export const getSeverityColor = (severity: string | null | undefined): string => {
+export const getSeverityColor = (severity: CaseSeverity | null | undefined): string => {
   if (!severity) {
     return '#000';
   }
@@ -47,23 +48,24 @@ export const getSeverityColor = (severity: string | null | undefined): string =>
     case CaseSeverity.CRITICAL:
       return '#E7664C';
     default:
-      return '#54B399';
+      return assertNever(severity);
   }
 };
 
-export const getEmailBodyContent = async (
+export const assigneesTemplateRenderer = async (
   caseData: CaseSavedObjectTransformed,
   caseUrl: string | null
 ): Promise<string> => {
-  const templatesDir = path.join('..', 'templates');
-  const fileName = 'notify_user_template.html';
+  const fileDir = join('.', 'assignees');
+  const fileName = 'template.html';
 
-  const dataPath = getDataPath(templatesDir, fileName);
+  const dataPath = getTemplateFilePath(fileDir, fileName);
 
   const content = await fs.promises.readFile(dataPath, 'utf8');
 
   const tags = caseData.attributes.tags.length ? caseData.attributes.tags : ['-'];
   const hasMoreTags = caseData.attributes.tags.length > TAG_LIMIT;
+  const numOfExtraTags = Math.max(caseData.attributes.tags.length - TAG_LIMIT, 0);
 
   const template = mustache.render(content, {
     title: caseData.attributes.title,
@@ -71,7 +73,7 @@ export const getEmailBodyContent = async (
     statusColor: getStatusColor(caseData.attributes.status),
     severity: caseData.attributes.severity,
     severityColor: getSeverityColor(caseData.attributes.severity),
-    hasMoreTags: hasMoreTags ? caseData.attributes.tags.length - TAG_LIMIT : null,
+    hasMoreTags: hasMoreTags ? numOfExtraTags : null,
     tags: tags.slice(0, TAG_LIMIT),
     description:
       caseData.attributes.description.length > DESCRIPTION_LIMIT

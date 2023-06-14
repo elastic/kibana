@@ -6,37 +6,33 @@
  */
 
 import path from 'path';
-import { getDataPath } from './utils';
+import { getTemplateFilePath } from './utils';
 
-describe('getDataPath', () => {
+describe('getTemplateFilePath', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  const resolveSpy = jest.spyOn(path, 'resolve').mockReturnValueOnce('../fake_path');
+  it('resolves path correctly', async () => {
+    const resolveSpy = jest.spyOn(path, 'resolve').mockReturnValueOnce('../fake_path');
+    const dataPath = getTemplateFilePath('', 'foo.js');
 
-  afterEach(() => {
+    expect(dataPath).toEqual('../fake_path/foo.js');
     resolveSpy.mockRestore();
   });
 
-  it('resolves path correctly', async () => {
-    const dataPath = getDataPath('', 'foo.js');
-
-    expect(dataPath).toEqual('../fake_path/foo.js');
-  });
-
   it('resolves path correctly with different directory name', async () => {
-    const dataPath = getDataPath('../sample', 'foo.js');
+    const dataPath = getTemplateFilePath('../sample', 'foo.js');
 
     expect(dataPath).not.toEqual('../fake_path/foo.js');
   });
 
   it('throws error correctly', async () => {
-    const getDataPathMock = jest.fn().mockImplementation(() => {
+    const getTemplateFilePathMock = jest.fn().mockImplementation(() => {
       throw new Error('Error finding the file!');
     });
 
-    expect(() => getDataPathMock('../sample', 'foo.js')).toThrowErrorMatchingInlineSnapshot(
+    expect(() => getTemplateFilePathMock('../sample', 'foo.js')).toThrowErrorMatchingInlineSnapshot(
       '"Error finding the file!"'
     );
   });

@@ -14,7 +14,7 @@ import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/cons
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { getCaseViewPath } from '../../common/utils';
 import type { NotificationService, NotifyArgs } from './types';
-import { getEmailBodyContent } from './templates/notify_user_content';
+import { assigneesTemplateRenderer } from './templates/assignees/renderer';
 
 type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
@@ -47,6 +47,21 @@ export class EmailNotificationService implements NotificationService {
     this.publicBaseUrl = publicBaseUrl;
   }
 
+  private static getCaseUrl(
+    theCase: CaseSavedObjectTransformed,
+    spaceId: string,
+    publicBaseUrl?: IBasePath['publicBaseUrl']
+  ) {
+    return publicBaseUrl
+      ? getCaseViewPath({
+          publicBaseUrl,
+          caseId: theCase.id,
+          owner: theCase.attributes.owner,
+          spaceId,
+        })
+      : null;
+  }
+
   private static getTitle(theCase: CaseSavedObjectTransformed) {
     return `[Elastic][Cases] ${theCase.attributes.title}`;
   }
@@ -62,9 +77,13 @@ export class EmailNotificationService implements NotificationService {
       message = `${message}Tags: ${theCase.attributes.tags.join(', ')}${lineBreak}`;
     }
 
-    message = caseUrl ? `${message}View the case details: ${caseUrl}` : message;
+    message = caseUrl ? `${message}${lineBreak}View the case details: ${caseUrl}` : message;
 
     return message;
+  }
+
+  private static async getHTMLMessage(theCase: CaseSavedObjectTransformed, caseUrl: string | null) {
+    return assigneesTemplateRenderer(theCase, caseUrl);
   }
 
   public async notifyAssignees({ assignees, theCase }: NotifyArgs) {
@@ -74,14 +93,11 @@ export class EmailNotificationService implements NotificationService {
         return;
       }
 
-      const caseUrl = this.publicBaseUrl
-        ? getCaseViewPath({
-            publicBaseUrl: this.publicBaseUrl,
-            caseId: theCase.id,
-            owner: theCase.attributes.owner,
-            spaceId: this.spaceId,
-          })
-        : null;
+      const caseUrl = EmailNotificationService.getCaseUrl(
+        theCase,
+        this.spaceId,
+        this.publicBaseUrl
+      );
 
       const uids = new Set(assignees.map((assignee) => assignee.uid));
       const userProfiles = await this.security.userProfiles.bulkGet({ uids });
@@ -94,7 +110,7 @@ export class EmailNotificationService implements NotificationService {
       const subject = EmailNotificationService.getTitle(theCase);
       const message = EmailNotificationService.getPlainTextMessage(theCase, caseUrl);
 
-      const messageHTML = await getEmailBodyContent(theCase, caseUrl);
+      const messageHTML = await EmailNotificationService.getHTMLMessage(theCase, caseUrl);
 
       await this.notifications.getEmailService().sendHTMLEmail({
         to,

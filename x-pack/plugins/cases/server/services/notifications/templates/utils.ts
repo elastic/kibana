@@ -7,8 +7,12 @@
 
 import { join, resolve } from 'path';
 
-export const getDataPath = (filePath: string, fileName: string): string => {
-  const dir = resolve(join(__dirname, filePath));
+export const getTemplateFilePath = (filePath: string, fileName: string): string => {
+  const templatesDir = join('..', 'templates');
+
+  const fileDir = join(templatesDir, filePath);
+
+  const dir = resolve(join(__dirname, fileDir));
 
   const dataPath = join(dir, fileName);
 
