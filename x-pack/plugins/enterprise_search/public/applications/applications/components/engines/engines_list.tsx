@@ -43,9 +43,9 @@ import { EmptySearchApplicationsPrompt } from './components/empty_search_applica
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';
 import { CreateSearchApplication } from './create_search_application_flyout';
 import { DeleteSearchApplicationModal } from './delete_search_application_modal';
-import { EngineListIndicesFlyout } from './engines_list_flyout';
-import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
+import { SearchApplicationIndicesFlyout } from './search_application_indices_flyout';
+import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
 interface CreateEngineButtonProps {
   disabled: boolean;
@@ -121,7 +121,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
     setSearchQuery,
     setIsFirstRequest,
   } = useActions(EnginesListLogic);
-  const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
+  const { openFlyout: openFetchEngineFlyout } = useActions(SearchApplicationIndicesFlyoutLogic);
 
   const { isCloud, navigateToUrl } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
@@ -164,7 +164,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
         />
       ) : null}
 
-      <EngineListIndicesFlyout />
+      <SearchApplicationIndicesFlyout />
       {createEngineFlyoutOpen && (
         <CreateSearchApplication onClose={() => navigateToUrl(SEARCH_APPLICATIONS_PATH)} />
       )}

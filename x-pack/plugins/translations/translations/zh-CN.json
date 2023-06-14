@@ -11711,7 +11711,7 @@
     "xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.option.label": "{value} {value, plural, other {结果}}",
     "xpack.enterpriseSearch.content.engineList.deleteEngine.successToast.title": "{searchApplicationName} 已删除",
     "xpack.enterpriseSearch.searchApplications.createSearchApplication.headerSubTitle": "请浏览我们的 {docsLink} 了解详情！",
-    "xpack.enterpriseSearch.searchApplications.list.indicesFlyout.subTitle": "查看与 {engineName} 关联的索引",
+    "xpack.enterpriseSearch.searchApplications.list.indicesFlyout.subTitle": "查看与 {searchApplicationName} 关联的索引",
     "xpack.enterpriseSearch.searchApplications.list.table.column.view.indices": "{indicesCount, number} {indicesCount, plural, other {索引}}",
     "xpack.enterpriseSearch.content.index.connector.syncRules.description": "添加同步规则以定制要从 {indexName} 同步哪些数据。默认包括所有内容，并根据按所列顺序显示的已配置同步规则集验证文档。",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.errorTitle": "同步{idsLength, plural, other {规则}} {ids}{idsLength, plural, other { }}无效。",
