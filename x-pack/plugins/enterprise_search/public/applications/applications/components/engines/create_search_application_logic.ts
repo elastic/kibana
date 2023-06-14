@@ -16,7 +16,7 @@ import {
 } from '../../api/search_applications/create_search_application_api_logic';
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
-import { EnginesListLogic } from './engines_list_logic';
+import { EnginesListLogic } from './search_applications_list_logic';
 
 export interface CreateSearchApplicationLogicActions {
   createSearchApplication: () => void;

@@ -43,9 +43,9 @@ import { EmptySearchApplicationsPrompt } from './components/empty_search_applica
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';
 import { CreateSearchApplication } from './create_search_application_flyout';
 import { DeleteSearchApplicationModal } from './delete_search_application_modal';
-import { EnginesListLogic } from './engines_list_logic';
 import { SearchApplicationIndicesFlyout } from './search_application_indices_flyout';
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
+import { EnginesListLogic } from './search_applications_list_logic';
 
 interface CreateEngineButtonProps {
   disabled: boolean;

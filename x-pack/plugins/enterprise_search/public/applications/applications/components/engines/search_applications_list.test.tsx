@@ -18,7 +18,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 
 import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';
-import { EnginesList, CreateEngineButton } from './engines_list';
+import { EnginesList, CreateEngineButton } from './search_applications_list';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {

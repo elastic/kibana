@@ -14,7 +14,7 @@ import { EnterpriseSearchApplication } from '../../../../../common/types/search_
 
 import { FetchSearchApplicationsAPILogic } from '../../api/search_applications/fetch_search_applications_api_logic';
 
-import { EnginesListLogic } from './engines_list_logic';
+import { EnginesListLogic } from './search_applications_list_logic';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {

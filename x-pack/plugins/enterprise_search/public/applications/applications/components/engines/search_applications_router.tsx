@@ -19,7 +19,7 @@ import {
 import { SearchApplicationRouter } from '../engine/search_application_router';
 import { NotFound } from '../not_found';
 
-import { EnginesList } from './engines_list';
+import { EnginesList } from './search_applications_list';
 
 export const SearchApplicationsRouter: React.FC = () => {
   return (

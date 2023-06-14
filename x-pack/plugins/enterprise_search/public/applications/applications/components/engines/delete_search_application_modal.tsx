@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
-import { EnginesListLogic } from './engines_list_logic';
+import { EnginesListLogic } from './search_applications_list_logic';
 
 export interface DeleteSearchApplicationModalProps {
   onClose: () => void;

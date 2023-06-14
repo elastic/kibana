@@ -20,7 +20,7 @@ import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../api/searc
 
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
-import { EnginesListLogic, EnginesListActions } from '../engines/engines_list_logic';
+import { EnginesListLogic, EnginesListActions } from '../engines/search_applications_list_logic';
 
 import { EngineNameLogic } from './engine_name_logic';
 
