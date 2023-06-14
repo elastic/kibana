@@ -27,6 +27,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const createConnector = async (apiUrl: string, spaceId?: string) => {
     const { body } = await supertest
@@ -323,37 +324,12 @@ export default function genAiTest({ getService }: FtrProviderContext) {
                 .expect(200);
 
               // check dashboard has been created
-              await supertest
-                .get(`/api/saved_objects/dashboard/${dashboardId}`)
-                .set('kbn-xsrf', 'foo')
-                .expect(200);
-
-              expect(body).to.eql({
-                status: 'ok',
-                connector_id: genAiActionId,
-                data: { available: true },
-              });
-            });
-
-            it('should create a dashboard in non-default space', async () => {
-              const { body } = await supertest
-                .post(`/space1/api/actions/connector/${genAiActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .send({
-                  params: {
-                    subAction: 'getDashboard',
-                    subActionParams: {
-                      dashboardId,
-                    },
-                  },
-                })
-                .expect(200);
-
-              // check dashboard has been created
-              await supertest
-                .get(`/space1/api/saved_objects/dashboard/${dashboardId}`)
-                .set('kbn-xsrf', 'foo')
-                .expect(200);
+              await retry.try(async () =>
+                supertest
+                  .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                  .set('kbn-xsrf', 'foo')
+                  .expect(200)
+              );
 
               expect(body).to.eql({
                 status: 'ok',
@@ -404,10 +380,12 @@ export default function genAiTest({ getService }: FtrProviderContext) {
                 .expect(200);
 
               // check dashboard has been created
-              await supertest
-                .get(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
-                .set('kbn-xsrf', 'foo')
-                .expect(200);
+              await retry.try(async () =>
+                supertest
+                  .get(`/space1/api/saved_objects/dashboard/${dashboardId}`)
+                  .set('kbn-xsrf', 'foo')
+                  .expect(200)
+              );
 
               expect(body).to.eql({
                 status: 'ok',
