@@ -57,11 +57,7 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
-        const client = createProfilingEsClient({
-          esClient,
-          request,
-          useDefaultAuth: false,
-        });
+
         const setupOptions: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
           logger,
@@ -89,8 +85,8 @@ export function registerSetupRoute({
           });
         }
 
-        // hasProfilingData,
         const verifyFunctions = [
+          hasProfilingData,
           isApmPackageInstalled,
           validateApmPolicy,
           validateCollectorPackagePolicy,
@@ -99,10 +95,7 @@ export function registerSetupRoute({
           validateSecurityRole,
           validateSymbolizerPackagePolicy,
         ];
-        const partialStates = await Promise.all([
-          hasProfilingData({ ...setupOptions, client }),
-          ...verifyFunctions.map((fn) => fn(setupOptions)),
-        ]);
+        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         return response.ok({
