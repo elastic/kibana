@@ -947,7 +947,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 
 # Core
-/config/kibana.yml @elastic/kibana-core
+/config/ @elastic/kibana-core
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
