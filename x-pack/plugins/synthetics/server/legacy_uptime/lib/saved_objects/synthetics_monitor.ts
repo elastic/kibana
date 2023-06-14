@@ -167,6 +167,13 @@ export const getSyntheticsMonitorSavedObjectType = (
                 },
               },
             },
+            tls: {
+              properties: {
+                enabled: {
+                  type: 'boolean',
+                },
+              },
+            },
           },
         },
         throttling: {

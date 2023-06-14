@@ -6,12 +6,11 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertTlsComponent } from './alert_tls';
-import { AlertQueryBar } from './query_bar';
 import { getDynamicSettings } from '../../state/settings/api';
 import { selectDynamicSettings } from '../../state/settings';
 import { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
@@ -31,21 +30,8 @@ export const TLSRuleComponent: React.FC<{
     }
   }, [dispatch, settings]);
 
-  const onSearchChange = useCallback(
-    (value: string) => {
-      setRuleParams('search', value === '' ? undefined : value);
-    },
-    [setRuleParams]
-  );
-
   return (
     <>
-      <AlertMonitorCount count={0} loading={false} />
-
-      <EuiSpacer size="s" />
-
-      <AlertQueryBar query={ruleParams.search || ''} onChange={onSearchChange} />
-
       <AlertTlsComponent
         ageThreshold={
           ruleParams.certAgeThreshold ??

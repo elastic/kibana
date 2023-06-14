@@ -31,6 +31,7 @@ function absoluteDate(relativeDate: string) {
 }
 
 export const getCertsRequestBody = ({
+  monitorIds,
   pageIndex,
   search,
   notValidBefore,
@@ -79,6 +80,9 @@ export const getCertsRequestBody = ({
             : {}),
           filter: [
             ...(filters ? [filters] : []),
+            ...(monitorIds && monitorIds.length > 0
+              ? [{ terms: { 'monitor.id': monitorIds } }]
+              : []),
             {
               exists: {
                 field: 'tls.server.hash.sha256',

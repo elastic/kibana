@@ -21,6 +21,7 @@ export const GetCertsParamsType = t.intersection([
     direction: t.string,
     size: t.number,
     filters: t.unknown,
+    monitorIds: t.array(t.string),
   }),
 ]);
 

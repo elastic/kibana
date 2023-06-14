@@ -20,27 +20,12 @@ import {
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
-import {
-  CertResult,
-  EncryptedSyntheticsMonitor,
-  OverviewStatus,
-  OverviewStatusMetaData,
-} from '../../../common/runtime_types';
+import { CertResult, EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { formatFilterString } from '../../legacy_uptime/lib/alerts/status_check';
-
-export interface StaleDownConfig extends OverviewStatusMetaData {
-  isDeleted?: boolean;
-  isLocationRemoved?: boolean;
-}
-
-export interface AlertOverviewStatus
-  extends Omit<OverviewStatus, 'disabledCount' | 'disabledMonitorQueryIds'> {
-  staleDownConfigs: Record<string, StaleDownConfig>;
-}
 
 export class TLSRuleExecutor {
   previousStartedAt: Date | null;
@@ -50,8 +35,6 @@ export class TLSRuleExecutor {
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
-
-  public locationIdNameMap: Record<string, string> = {};
 
   constructor(
     previousStartedAt: Date | null,
@@ -74,7 +57,7 @@ export class TLSRuleExecutor {
   async getMonitors() {
     this.monitors = await getAllMonitors({
       soClient: this.soClient,
-      filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
+      filter: `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true`,
     });
 
     const {
@@ -101,7 +84,9 @@ export class TLSRuleExecutor {
     };
   }
 
-  async getExpiredCertificates(prevDownConfigs: OverviewStatus['downConfigs'] = {}) {
+  async getExpiredCertificates() {
+    const { enabledMonitorQueryIds } = await this.getMonitors();
+
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(this.soClient);
 
     const expiryThreshold =
@@ -113,6 +98,21 @@ export class TLSRuleExecutor {
       this.params.certAgeThreshold ??
       dynamicSettings?.certAgeThreshold ??
       DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
+
+    const absoluteExpirationThreshold = moment().add(expiryThreshold, 'd').valueOf();
+    const absoluteAgeThreshold = moment().subtract(ageThreshold, 'd').valueOf();
+
+    if (enabledMonitorQueryIds.length === 0) {
+      return {
+        expiredCerts: [],
+        total: 0,
+        foundCerts: false,
+        expiryThreshold,
+        ageThreshold,
+        absoluteExpirationThreshold,
+        absoluteAgeThreshold,
+      };
+    }
 
     let filters: QueryDslQueryContainer | undefined;
 
@@ -129,12 +129,10 @@ export class TLSRuleExecutor {
       sortBy: 'common_name',
       direction: 'desc',
       filters,
+      monitorIds: enabledMonitorQueryIds,
     });
 
     const foundCerts = total > 0;
-
-    const absoluteExpirationThreshold = moment().add(expiryThreshold, 'd').valueOf();
-    const absoluteAgeThreshold = moment().subtract(ageThreshold, 'd').valueOf();
 
     return {
       foundCerts,
