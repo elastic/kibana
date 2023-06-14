@@ -137,7 +137,7 @@
         "tags": [],
         "label": "CloudStart",
         "description": [],
-        "path": "x-pack/plugins/cloud/public/plugin.tsx",
+        "path": "x-pack/plugins/cloud/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,7 +153,7 @@
             "signature": [
               "React.FunctionComponent<{}>"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -197,7 +197,7 @@
             "description": [
               "\n`true` when Kibana is running on Elastic Cloud."
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -213,7 +213,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -229,7 +229,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,7 +245,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -261,7 +261,39 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.elasticsearchUrl",
+            "type": "string",
+            "tags": [],
+            "label": "elasticsearchUrl",
+            "description": [
+              "\nThe full URL to the elasticsearch cluster."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.kibanaUrl",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [
+              "\nThe full URL to the Kibana deployment."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -279,7 +311,7 @@
       "tags": [],
       "label": "CloudSetup",
       "description": [],
-      "path": "x-pack/plugins/cloud/public/plugin.tsx",
+      "path": "x-pack/plugins/cloud/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -295,7 +327,23 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.deploymentId",
+          "type": "string",
+          "tags": [],
+          "label": "deploymentId",
+          "description": [
+            "\nThe deployment's ID. Only available when running on Elastic Cloud."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -311,7 +359,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -327,7 +375,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -343,7 +391,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -359,7 +407,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -375,7 +423,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -391,7 +439,71 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.elasticsearchUrl",
+          "type": "string",
+          "tags": [],
+          "label": "elasticsearchUrl",
+          "description": [
+            "\nThe full URL to the elasticsearch cluster."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.kibanaUrl",
+          "type": "string",
+          "tags": [],
+          "label": "kibanaUrl",
+          "description": [
+            "\nThe full URL to the Kibana deployment."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.cloudHost",
+          "type": "string",
+          "tags": [],
+          "label": "cloudHost",
+          "description": [
+            "\n{host} from the deployment url https://<deploymentId>.<application>.<host><?:port>"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.cloudDefaultPort",
+          "type": "string",
+          "tags": [],
+          "label": "cloudDefaultPort",
+          "description": [
+            "\n{port} from the deployment url https://<deploymentId>.<application>.<host><?:port>"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -404,7 +516,7 @@
           "description": [
             "\n`true` when Kibana is running on Elastic Cloud."
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -420,7 +532,7 @@
           "signature": [
             "Date | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -436,7 +548,7 @@
           "signature": [
             "boolean | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -452,7 +564,7 @@
           "signature": [
             "(contextProvider: React.FC<{}>) => void"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -468,7 +580,7 @@
               "signature": [
                 "React.FC<{}>"
               ],
-              "path": "x-pack/plugins/cloud/public/plugin.tsx",
+              "path": "x-pack/plugins/cloud/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -525,6 +637,70 @@
           "label": "deploymentId",
           "description": [
             "\nThe deployment's ID. Only available when running on Elastic Cloud."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.elasticsearchUrl",
+          "type": "string",
+          "tags": [],
+          "label": "elasticsearchUrl",
+          "description": [
+            "\nThe full URL to the elasticsearch cluster."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.kibanaUrl",
+          "type": "string",
+          "tags": [],
+          "label": "kibanaUrl",
+          "description": [
+            "\nThe full URL to the Kibana deployment."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.cloudHost",
+          "type": "string",
+          "tags": [],
+          "label": "cloudHost",
+          "description": [
+            "\n{host} from the deployment url https://<deploymentId>.<application>.<host><?:port>"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.cloudDefaultPort",
+          "type": "string",
+          "tags": [],
+          "label": "cloudDefaultPort",
+          "description": [
+            "\n{port} from the deployment url https://<deploymentId>.<application>.<host><?:port>"
           ],
           "signature": [
             "string | undefined"
