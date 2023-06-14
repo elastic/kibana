@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { MappingTimeSeriesMetricType } from '@kbn/es-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
@@ -437,7 +438,7 @@ export type FieldSpec = DataViewFieldBase & {
   /**
    * set if field is a TSDB metric field
    */
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
+  timeSeriesMetric?: MappingTimeSeriesMetricType;
 
   // not persisted
 

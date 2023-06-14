@@ -129,6 +129,7 @@ export function readFieldCapsResponse(
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'counter') {
         timeSeriesMetricType = 'counter';
       }
+      // @ts-expect-error MappingTimeSeriesMetricType does not contain 'position'
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'position') {
         timeSeriesMetricType = 'position';
       }

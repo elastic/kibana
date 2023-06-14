@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { MappingTimeSeriesMetricType } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import type { QueryDslQueryContainer } from '../../common/types';
@@ -27,7 +28,7 @@ export interface FieldDescriptor {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge' | 'position';
+  timeSeriesMetric?: MappingTimeSeriesMetricType;
   timeSeriesDimension?: boolean;
 }
 

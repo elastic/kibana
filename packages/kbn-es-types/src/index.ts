@@ -16,6 +16,7 @@ import {
 export type ESFilter = estypes.QueryDslQueryContainer;
 export type ESSearchRequest = estypes.SearchRequest;
 export type AggregationOptionsByType = Required<estypes.AggregationsAggregationContainer>;
+export type MappingTimeSeriesMetricType = estypes.MappingTimeSeriesMetricType;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be
 // moved to the Elasticsearch JS client at some point (see #77720.)
