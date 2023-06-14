@@ -9,11 +9,11 @@ import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import { NavigateToPath } from '../../../contexts/kibana';
-
 import { basicResolvers } from '../../resolvers';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { useRouteResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobService } from '../../../services/job_service';
@@ -194,23 +194,23 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
   );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context, results } = useResolver(
-    index,
-    savedSearchId,
-    deps.config,
-    deps.dataViewsContract,
-    {
-      ...basicResolvers(deps),
-      privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
-      jobCaps: () =>
-        loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, ANOMALY_DETECTOR),
-      existingJobsAndGroups: mlJobService.getJobAndGroupIds,
-    }
-  );
+
+  const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
+    ...basicResolvers(),
+    // TODO useRouteResolver should be responsible for the redirect
+    privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
+    jobCaps: () =>
+      loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, ANOMALY_DETECTOR),
+    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+  });
 
   return (
     <PageLoader context={context}>
-      <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
+      <DataSourceContextProvider>
+        {results ? (
+          <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
+        ) : null}
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };
