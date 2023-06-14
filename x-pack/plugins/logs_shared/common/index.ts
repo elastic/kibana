@@ -40,3 +40,9 @@ export {
   FetchLogViewStatusError,
   ResolveLogViewError,
 } from './log_views/errors';
+
+// eslint-disable-next-line @kbn/eslint/no_export_all
+export * from './log_entry';
+
+// Http types
+export type { LogEntriesSummaryBucket, LogEntriesSummaryHighlightsBucket } from './http_api';

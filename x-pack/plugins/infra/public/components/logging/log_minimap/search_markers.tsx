@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { LogEntriesSummaryHighlightsBucket, LogEntryTime } from '@kbn/logs-shared-plugin/common';
 import classNames from 'classnames';
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
-
-import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarker } from './search_marker';
-import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
 
 interface SearchMarkersProps {
   buckets: LogEntriesSummaryHighlightsBucket[];

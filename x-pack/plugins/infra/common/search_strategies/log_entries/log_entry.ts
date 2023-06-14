@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import {
+  logEntryCursorRT,
+  logEntryFieldRT,
+  logViewReferenceRT,
+} from '@kbn/logs-shared-plugin/common';
 import * as rt from 'io-ts';
-import { logViewReferenceRT } from '@kbn/logs-shared-plugin/common';
-import { logEntryCursorRT, logEntryFieldRT } from '../../log_entry';
 import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRY_SEARCH_STRATEGY = 'infra-log-entry';

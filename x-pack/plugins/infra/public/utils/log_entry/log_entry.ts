@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { bisector } from 'd3-array';
-import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
 import {
-  LogEntry,
   LogColumn,
-  LogTimestampColumn,
+  LogEntry,
   LogFieldColumn,
   LogMessageColumn,
-  LogMessagePart,
-  LogMessageFieldPart,
   LogMessageConstantPart,
-} from '../../../common/log_entry';
+  LogMessageFieldPart,
+  LogMessagePart,
+  LogTimestampColumn,
+} from '@kbn/logs-shared-plugin/common';
+import { bisector } from 'd3-array';
+import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
 
 export const getLogEntryKey = (entry: { cursor: TimeKey }) => entry.cursor;
 

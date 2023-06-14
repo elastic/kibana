@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { encode } from '@kbn/rison';
-import moment from 'moment';
-
-import { useUiTracker, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { LogEntry, LogEntryContext } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryColumn,
+  LogEntryContextMenu,
   LogEntryFieldColumn,
   LogEntryMessageColumn,
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
-  LogEntryContextMenu,
 } from '@kbn/logs-shared-plugin/public';
-import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
-import { TimeRange } from '../../../../../../common/time';
+import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { encode } from '@kbn/rison';
+import moment from 'moment';
+import React, { useCallback, useState } from 'react';
 import {
   getFriendlyNameForPartitionId,
   partitionField,
 } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time';
 import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 

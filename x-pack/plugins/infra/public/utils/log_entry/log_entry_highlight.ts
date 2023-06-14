@@ -6,13 +6,13 @@
  */
 
 import {
-  LogEntry,
   LogColumn,
-  LogMessageColumn,
+  LogEntry,
   LogFieldColumn,
-  LogMessagePart,
+  LogMessageColumn,
   LogMessageFieldPart,
-} from '../../../common/log_entry';
+  LogMessagePart,
+} from '@kbn/logs-shared-plugin/common';
 
 export interface LogEntryHighlightsMap {
   [entryId: string]: LogEntry[];

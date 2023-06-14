@@ -43,15 +43,14 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   alert,
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logViews } = services;
+  const { dataViews, logsShared } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
 
   useEffect(() => {
     const getDataView = async () => {
-      const { timestampField, dataViewReference } = await logViews.client.getResolvedLogView(
-        rule.params.logView
-      );
+      const { timestampField, dataViewReference } =
+        await logsShared.logViews.client.getResolvedLogView(rule.params.logView);
 
       if (dataViewReference.id) {
         const logDataView = await dataViews.get(dataViewReference.id);
@@ -81,7 +80,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     ) {
       getDataView();
     }
-  }, [rule, alert, dataViews, logViews]);
+  }, [rule, alert, dataViews, logsShared]);
 
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;

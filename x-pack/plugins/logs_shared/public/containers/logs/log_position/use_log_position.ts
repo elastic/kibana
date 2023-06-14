@@ -8,12 +8,15 @@
 import { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
 import { useMemo } from 'react';
-import { ActorRef } from 'xstate';
+import { ActorRefWithDeprecatedState } from 'xstate';
 import { TimeKey } from '../../../../common/time';
-import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
+import {
+  MatchedStateFromActor,
+  OmitDeprecatedState,
+} from '../../../observability_logs/xstate_helpers';
 
 type LogStreamPageState = MatchedStateFromActor<
-  ActorRef<any, any>,
+  OmitDeprecatedState<ActorRefWithDeprecatedState<any, any, any, any>>,
   { hasLogViewIndices: 'initialized' }
 >;
 

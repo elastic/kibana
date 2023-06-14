@@ -8,14 +8,15 @@
 import { EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { LogEntry } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryFlyout,
   LogEntryStreamItem,
   ScrollableLogTextStreamView,
+  useLogHighlightsStateContext,
   useLogPositionStateContext,
   useLogStreamContext,
   useLogViewContext,
-  useLogHighlightsStateContext,
   WithSummary,
   WithSummaryProps,
 } from '@kbn/logs-shared-plugin/public';
@@ -23,7 +24,6 @@ import { useSelector } from '@xstate/react';
 import stringify from 'json-stable-stringify';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogMinimap } from '../../../components/logging/log_minimap';
