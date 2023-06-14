@@ -11,6 +11,7 @@ import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server'
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
@@ -18,6 +19,7 @@ export interface ProfilingPluginSetupDeps {
   spaces: SpacesPluginSetup;
   cloud: CloudSetup;
   fleet: FleetSetupContract;
+  share: SharePluginSetup;
 }
 
 export interface ProfilingPluginStartDeps {
@@ -26,6 +28,7 @@ export interface ProfilingPluginStartDeps {
   spaces: SpacesPluginStart;
   cloud: CloudStart;
   fleet: FleetStartContract;
+  share: SharePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
