@@ -1572,6 +1572,10 @@
       },
       "is_protected": {
         "type": "boolean"
+      },
+      "overrides": {
+        "type": "flattened",
+        "index": false
       }
     }
   },

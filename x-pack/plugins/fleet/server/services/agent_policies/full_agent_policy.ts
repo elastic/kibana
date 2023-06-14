@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
+import deepMerge from 'deepmerge';
 
 import type {
   FullAgentPolicy,
@@ -214,6 +215,10 @@ export async function getFullAgentPolicy(
       data: signedData.toString('base64'),
       signature,
     };
+  }
+
+  if (agentPolicy.overrides) {
+    return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }
 
   return fullAgentPolicy;

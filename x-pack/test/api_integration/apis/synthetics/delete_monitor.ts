@@ -149,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not deleted
-        expect(response.body.attributes.urls).eql(newMonitor.urls);
+        expect(response.body.urls).eql(newMonitor.urls);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
