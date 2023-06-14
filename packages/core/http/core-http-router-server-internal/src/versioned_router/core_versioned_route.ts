@@ -111,7 +111,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     if (!this.hasVersion(req) && (this.isInternal || this.router.isDev)) {
       return res.badRequest({
-        body: `Please specify a version. Available versions: ${this.versionsToString()}`,
+        body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
       });
     }
 

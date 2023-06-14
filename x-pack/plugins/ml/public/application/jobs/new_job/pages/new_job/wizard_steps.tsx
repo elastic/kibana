@@ -24,7 +24,7 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
 import { DatafeedStep } from '../components/datafeed_step';
-import { useMlContext } from '../../../../contexts/ml';
+import { useDataSource } from '../../../../contexts/ml';
 
 interface Props {
   currentStep: WIZARD_STEPS;
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
-  const mlContext = useMlContext();
+  const mlContext = useDataSource();
   const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     const { uiSettings, data, fieldFormats, charts } = services;

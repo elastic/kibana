@@ -24,6 +24,7 @@
     "@kbn/core",
     "@kbn/ui-theme",
     "@kbn/coloring",
+    "@kbn/field-formats-plugin",
     "@kbn/unified-field-list"
   ],
   "exclude": [
