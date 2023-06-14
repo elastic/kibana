@@ -29,6 +29,7 @@ export const ReactDomServer = require('react-dom/server');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
+export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 export const StyledComponents = require('styled-components');
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
