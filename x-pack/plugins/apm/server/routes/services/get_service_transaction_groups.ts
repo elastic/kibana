@@ -38,7 +38,7 @@ export interface TransactionGroups {
   throughput: number;
   errorRate: number;
   impact: number;
-  alertsCount: number | undefined;
+  alertsCount: number;
 }
 
 export interface ServiceTransactionGroupsResponse {
@@ -159,7 +159,7 @@ export async function getServiceTransactionGroups({
         impact: totalDuration
           ? (transactionGroupTotalDuration * 100) / totalDuration
           : 0,
-        alertsCount: undefined,
+        alertsCount: 0,
       };
     }) ?? [];
 
