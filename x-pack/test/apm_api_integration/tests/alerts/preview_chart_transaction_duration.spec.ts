@@ -11,6 +11,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-plugin/common/es_fields/apm';
+import { TransactionDurationChartPreviewResponse } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_duration/get_transaction_duration_chart_preview';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateLatencyData } from './generate_data';
@@ -67,9 +68,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.latencyChartPreview.some(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) =>
-              item.data.some((coordinate) => coordinate.x && coordinate.y)
+          response.body.latencyChartPreview.some((item: TransactionDurationChartPreviewResponse) =>
+            item.data.some((coordinate) => coordinate.x && coordinate.y)
           )
         ).to.equal(true);
       });
@@ -96,7 +96,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(
           response.body.latencyChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => ({
+            (item: TransactionDurationChartPreviewResponse) => ({
               name: item.name,
               y: item.data[0].y,
             })
@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.latencyChartPreview.length).to.equal(1);
         expect(
           response.body.latencyChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => ({
+            (item: TransactionDurationChartPreviewResponse) => ({
               name: item.name,
               y: item.data[0].y,
             })
@@ -165,7 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.latencyChartPreview.length).to.equal(1);
         expect(
           response.body.latencyChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => ({
+            (item: TransactionDurationChartPreviewResponse) => ({
               name: item.name,
               y: item.data[0].y,
             })
@@ -192,7 +192,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.latencyChartPreview.length).to.equal(2);
         expect(
           response.body.latencyChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => ({
+            (item: TransactionDurationChartPreviewResponse) => ({
               name: item.name,
               y: item.data[0].y,
             })
@@ -223,7 +223,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.latencyChartPreview.length).to.equal(1);
         expect(
           response.body.latencyChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => ({
+            (item: TransactionDurationChartPreviewResponse) => ({
               name: item.name,
               y: item.data[0].y,
             })
@@ -253,7 +253,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(
           response.body.latencyChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => ({
+            (item: TransactionDurationChartPreviewResponse) => ({
               name: item.name,
               y: item.data[0].y,
             })
@@ -288,7 +288,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.latencyChartPreview.length).to.equal(4);
         expect(
           response.body.latencyChartPreview.map(
-            (item: { name: string; data: Array<{ x: number; y: number | null }> }) => ({
+            (item: TransactionDurationChartPreviewResponse) => ({
               name: item.name,
               y: item.data[0].y,
             })
