@@ -328,7 +328,7 @@ export const getRegisteredVersionedRouteMock = (
   routerMock: RouterMock,
   method: RouterMethod,
   path: string,
-  version: number | string
+  version: string
 ): RegisteredVersionedRoute => {
   const route = routerMock.versioned.getRoute(method, path);
   const routeVersion = route.versions[version];
