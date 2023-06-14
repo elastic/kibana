@@ -42,7 +42,7 @@ export const createVersionedRouterMock = (): MockedVersionedRouter & {
   };
 };
 
-interface RegisteredVersionedRoute {
+export interface RegisteredVersionedRoute {
   config: VersionedRouteConfig<any>;
   versions: { [version: string]: { config: AddVersionOpts<any, any, any>; handler: any } };
 }
