@@ -20,6 +20,7 @@ import {
   buildRangeFilter,
   COMPARE_ALL_OPTIONS,
   RangeFilterParams,
+  Filter,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -96,6 +97,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   // Internal data fetching state for this input control.
   private dataView?: DataView;
   private field?: DataViewField;
+  private filters: Filter[] = [];
 
   // state management
   public select: RangeSliderReduxEmbeddableTools['select'];
@@ -331,6 +333,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const min = get(resp, 'rawResponse.aggregations.minAgg.value');
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value');
 
+    this.filters = filters;
     return { min, max };
   };
 
@@ -340,14 +343,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       explicitInput: { value },
     } = this.getState();
 
-    const embeddableInput = this.getInput();
-    const {
-      ignoreParentSettings,
-      filters = [],
-      query,
-      timeRange: globalTimeRange,
-      timeslice,
-    } = embeddableInput;
+    const { ignoreParentSettings, query } = this.getInput();
 
     const [selectedMin, selectedMax] = value ?? ['', ''];
     const hasData = availableMin !== undefined && availableMax !== undefined;
@@ -355,14 +351,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
 
-    const timeRange =
-      timeslice !== undefined
-        ? {
-            from: new Date(timeslice[0]).toISOString(),
-            to: new Date(timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : globalTimeRange;
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
@@ -388,7 +376,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     }
 
     const rangeFilter = buildRangeFilter(field, params, dataView);
-
     rangeFilter.meta.key = field?.name;
     rangeFilter.meta.type = 'range';
     rangeFilter.meta.params = params;
@@ -397,19 +384,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     if (!ignoreParentSettings?.ignoreValidations) {
       const searchSource = await this.dataService.searchSource.create();
 
-      filters.push(rangeFilter);
-
-      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
-
-      if (timeFilter) {
-        filters.push(timeFilter);
-      }
+      const filters = [...this.filters, rangeFilter];
 
       searchSource.setField('size', 0);
       searchSource.setField('index', dataView);
-
       searchSource.setField('filter', filters);
-
       if (query) {
         searchSource.setField('query', query);
       }
