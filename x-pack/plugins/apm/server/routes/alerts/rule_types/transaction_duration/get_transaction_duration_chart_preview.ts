@@ -10,6 +10,7 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AggregationType,
   ApmRuleType,
+  INTERVAL_MULTIPLIER_FOR_LOOKBACK,
   PreviewChartResponse,
 } from '../../../../../common/rules/apm_rule_types';
 import {
@@ -61,8 +62,10 @@ export async function getTransactionDurationChartPreview({
   });
 
   const intervalAsSeconds = getIntervalInSeconds(interval);
-  const intervalAsMs = intervalAsSeconds * 1000;
-  const start = end - intervalAsMs;
+  const lookbackIntervalAsSeconds =
+    intervalAsSeconds * INTERVAL_MULTIPLIER_FOR_LOOKBACK;
+  const lookbackIntervalAsMs = lookbackIntervalAsSeconds * 1000;
+  const start = end - lookbackIntervalAsMs;
 
   const query = {
     bool: {

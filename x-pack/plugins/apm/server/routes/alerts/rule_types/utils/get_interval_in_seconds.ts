@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { INTERVAL_MULTIPLIER_FOR_LOOKBACK } from '../../../../../common/rules/apm_rule_types';
-
 const intervalUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
 const INTERVAL_STRING_RE = new RegExp(
   '^([0-9\\.]*)\\s*(' + intervalUnits.join('|') + ')$'
@@ -30,11 +28,7 @@ const units: UnitsToSeconds = {
 export const getIntervalInSeconds = (interval: string): number => {
   const matches = interval.match(INTERVAL_STRING_RE);
   if (matches) {
-    return (
-      parseFloat(matches[1]) *
-      INTERVAL_MULTIPLIER_FOR_LOOKBACK *
-      units[matches[2]]
-    );
+    return parseFloat(matches[1]) * units[matches[2]];
   }
   throw new Error('Invalid interval string format.');
 };

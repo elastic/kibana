@@ -7,25 +7,25 @@
 
 import { getIntervalInSeconds } from './get_interval_in_seconds';
 
-describe('get lookback period in seconds for preview chart', () => {
-  it('returns lookback period when interval is 5 seconds', () => {
-    const lookback = getIntervalInSeconds('5s');
-    expect(lookback).toEqual(25);
+describe('get interval in seconds', () => {
+  it('when interval is 5 seconds', () => {
+    const intervalInSeconds = getIntervalInSeconds('5s');
+    expect(intervalInSeconds).toEqual(5);
   });
 
-  it('returns lookback period when interval is 5 minutes', () => {
-    const lookback = getIntervalInSeconds('5m');
-    expect(lookback).toEqual(1500);
+  it('when interval is 5 minutes', () => {
+    const intervalInSeconds = getIntervalInSeconds('5m');
+    expect(intervalInSeconds).toEqual(300);
   });
 
-  it('returns lookback period when interval is 5 hours', () => {
-    const lookback = getIntervalInSeconds('5h');
-    expect(lookback).toEqual(90000);
+  it('when interval is 5 hours', () => {
+    const intervalInSeconds = getIntervalInSeconds('5h');
+    expect(intervalInSeconds).toEqual(18000);
   });
 
-  it('returns lookback period when interval is 5 days', () => {
-    const lookback = getIntervalInSeconds('5d');
-    expect(lookback).toEqual(2160000);
+  it('when interval is 5 days', () => {
+    const intervalInSeconds = getIntervalInSeconds('5d');
+    expect(intervalInSeconds).toEqual(432000);
   });
 
   it('throws error when interval string is invalid', () => {
