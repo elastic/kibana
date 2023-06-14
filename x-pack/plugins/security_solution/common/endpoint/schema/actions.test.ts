@@ -44,12 +44,12 @@ describe('actions schemas', () => {
         });
       }).not.toThrow();
     });
-    it('should accept empty types in an array', () => {
+    it('should not accept empty types in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
           types: [],
         });
-      }).not.toThrow();
+      }).toThrow();
     });
 
     it('should require at least 1 agent ID', () => {
