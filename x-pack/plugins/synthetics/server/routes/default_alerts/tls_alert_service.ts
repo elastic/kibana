@@ -11,7 +11,7 @@ import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 import { savedObjectsAdapter } from '../../legacy_uptime/lib/saved_objects';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
-import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synthetics/translations';
+import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 import { UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
@@ -108,15 +108,14 @@ export class TLSAlertService {
     );
 
     return populateAlertActions({
-      groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
+      groupId: ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
       defaultActions,
       defaultEmail: settings?.defaultEmail!,
       translations: {
-        defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
-        defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
-        defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
-        defaultRecoverySubjectMessage:
-          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+        defaultActionMessage: TlsTranslations.defaultActionMessage,
+        defaultRecoveryMessage: TlsTranslations.defaultRecoveryMessage,
+        defaultSubjectMessage: TlsTranslations.defaultSubjectMessage,
+        defaultRecoverySubjectMessage: TlsTranslations.defaultRecoverySubjectMessage,
       },
     });
   }

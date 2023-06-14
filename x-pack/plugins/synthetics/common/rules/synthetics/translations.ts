@@ -96,4 +96,22 @@ export const TlsTranslations = {
   description: i18n.translate('xpack.synthetics.rules.tls.description', {
     defaultMessage: 'Alert when the TLS certificate of a Synthetics monitor is about to expire.',
   }),
+  defaultSubjectMessage: i18n.translate(
+    'xpack.synthetics.alerts.syntheticsMonitorTLS.defaultSubjectMessage',
+    {
+      defaultMessage: 'Alert triggered for certificate {commonName} - Elastic Synthetics',
+      values: {
+        commonName: '{{context.commonName}}',
+      },
+    }
+  ),
+  defaultRecoverySubjectMessage: i18n.translate(
+    'xpack.synthetics.alerts.syntheticsMonitorTLS.defaultRecoverySubjectMessage',
+    {
+      defaultMessage: 'Alert has resolved for certificate {commonName} - Elastic Synthetics',
+      values: {
+        commonName: '{{context.commonName}}',
+      },
+    }
+  ),
 };
