@@ -8,7 +8,6 @@
 
 import { schema } from '@kbn/config-schema';
 // import { HttpResponsePayload } from '@kbn/core/server';
-
 import { FIELD_PREVIEW_PATH as path } from '../../common/constants';
 import { RouteDependencies } from '../types';
 import { handleEsError } from '../shared_imports';
