@@ -205,8 +205,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const alertBDocRun2 = alertDoc!._source!;
       // action group should be set to recovered
       expect(alertBDocRun2.kibana.alert.action_group).to.be('recovered');
-      expect(alertBDocRun2.instancePattern).to.eql(alertBDocRun1.instancePattern);
-      expect(alertBDocRun2.patternIndex).to.be(alertBDocRun1.patternIndex);
+      // rule type AAD payload should be set to recovery values
+      expect(alertBDocRun2.instancePattern).to.eql([]);
+      expect(alertBDocRun2.patternIndex).to.eql(-1);
       // uuid is the same
       expect(alertBDocRun2.kibana.alert.uuid).to.equal(alertBDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
@@ -226,14 +227,15 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         true,
       ]);
 
-      // alertB, run 2
+      // alertC, run 2
       // status is updated to recovered, duration is updated, end time is set
       alertDoc = alertDocsRun2.find((doc) => doc._source!.kibana.alert.instance.id === 'alertC');
       const alertCDocRun2 = alertDoc!._source!;
       // action group should be set to recovered
       expect(alertCDocRun2.kibana.alert.action_group).to.be('recovered');
-      expect(alertCDocRun2.instancePattern).to.eql(alertCDocRun1.instancePattern);
-      expect(alertCDocRun2.patternIndex).to.be(alertCDocRun1.patternIndex);
+      // rule type AAD payload should be set to recovery values
+      expect(alertCDocRun2.instancePattern).to.eql([]);
+      expect(alertCDocRun2.patternIndex).to.eql(-1);
       // uuid is the same
       expect(alertCDocRun2.kibana.alert.uuid).to.equal(alertCDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
