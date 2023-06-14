@@ -80,6 +80,7 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
+  compositeSlo: { enabled: boolean };
   coPilot?: {
     enabled?: boolean;
   };

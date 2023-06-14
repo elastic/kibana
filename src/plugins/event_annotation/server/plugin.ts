@@ -16,7 +16,6 @@ import {
   queryPointEventAnnotation,
 } from '../common';
 import { setupSavedObjects } from './saved_objects';
-// import { getFetchEventAnnotations } from './fetch_event_annotations';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;

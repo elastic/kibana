@@ -11,6 +11,7 @@ import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './consta
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 import { CspRuleTemplate } from './schemas';
 import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
+import { getComplianceDashboardSchema } from './schemas/stats';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
@@ -118,6 +119,8 @@ export interface BenchmarkResponse {
 }
 
 export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+
+export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;
 
 export interface GetCspRuleTemplateResponse {
   items: CspRuleTemplate[];

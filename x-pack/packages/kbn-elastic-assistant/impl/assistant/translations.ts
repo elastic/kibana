@@ -44,6 +44,20 @@ export const SETTINGS_CONNECTOR_TITLE = i18n.translate(
   }
 );
 
+export const SETTINGS_PROMPT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.promptTitle',
+  {
+    defaultMessage: 'System Prompt',
+  }
+);
+
+export const SETTINGS_PROMPT_HELP_TEXT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.promptHelpTextTitle',
+  {
+    defaultMessage: 'Context provided before every conversation',
+  }
+);
+
 export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.submitMessage', {
   defaultMessage: 'Submit message',
 });
