@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -21,12 +21,18 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonIcon,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
 import { DisplayType } from '../../../../../../common/types/connectors';
+import { LicensingLogic } from '../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
+
+import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
 import {
   ConnectorConfigurationLogic,
@@ -64,6 +70,8 @@ export const ConnectorConfigurationFieldType: React.FC<ConnectorConfigurationFie
 }) => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
     key,
@@ -145,10 +153,45 @@ export const ConnectorConfigurationFieldType: React.FC<ConnectorConfigurationFie
       );
 
     case DisplayType.TOGGLE:
-      const toggleSwitch = (
+      const toggleSwitch = !hasPlatinumLicense ? (
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              checked={ensureBooleanType(value)}
+              disabled={status === Status.LOADING || !hasPlatinumLicense}
+              label={
+                <EuiToolTip content={tooltip}>
+                  <p>{label}</p>
+                </EuiToolTip>
+              }
+              onChange={(event) => {
+                setLocalConfigEntry({ ...configEntry, value: event.target.checked });
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <PlatinumLicensePopover
+              button={
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
+                    {
+                      defaultMessage: 'Open licensing popover',
+                    }
+                  )}
+                  iconType="questionInCircle"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                />
+              }
+              closePopover={() => setIsPopoverOpen(false)}
+              isPopoverOpen={isPopoverOpen}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
         <EuiSwitch
           checked={ensureBooleanType(value)}
-          disabled={status === Status.LOADING}
+          disabled={status === Status.LOADING || !hasPlatinumLicense}
           label={
             <EuiToolTip content={tooltip}>
               <p>{label}</p>
