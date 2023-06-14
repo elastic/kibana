@@ -102,7 +102,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         },
       ],
       toolsRight: (
-        <EuiButton iconType="refresh" onClick={refreshData}>
+        <EuiButton data-test-subj="refresh-button" iconType="refresh" onClick={refreshData}>
           {i18n.REFRESH}
         </EuiButton>
       ),
