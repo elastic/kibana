@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { lazy } from 'react';
 import type { LogsLocatorParams } from '../../../common/locators';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -52,6 +51,11 @@ export function createLogThresholdRuleType(
     () => import('./components/expression_editor/editor')
   );
 
+  const alertDetailsAppSection = createLazyComponentWithKibanaContext(
+    core,
+    () => import('./components/alert_details_app_section')
+  );
+
   return {
     id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
@@ -61,7 +65,7 @@ export function createLogThresholdRuleType(
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.logsThreshold}`;
     },
-    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
+    alertDetailsAppSection,
     ruleParamsExpression,
     validate: validateExpression,
     defaultActionMessage: logThresholdDefaultActionMessage,
