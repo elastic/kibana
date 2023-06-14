@@ -113,7 +113,6 @@ export interface IVectorSource extends ISource {
    */
   getSyncMeta(dataFilters: DataFilters): object | null;
 
-  getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
@@ -140,10 +139,6 @@ export interface IVectorSource extends ISource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  getFieldNames(): string[] {
-    return [];
-  }
-
   isMvt() {
     return false;
   }

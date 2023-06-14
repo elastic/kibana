@@ -47,7 +47,7 @@ export type SourceRequestMeta = DataFilters & {
 
 export type VectorSourceRequestMeta = SourceRequestMeta & {
   /*
-   * List of field names used for data driving styling and join keys
+   * List of field names used in client for data driving styling, join keys, and client side masking
    */
   fieldNames: string[];
   timesliceMaskField?: string;
