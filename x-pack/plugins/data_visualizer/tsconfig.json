@@ -14,7 +14,6 @@
   "kbn_references": [
     "@kbn/ace",
     "@kbn/charts-plugin",
-    "@kbn/cloud-chat-plugin",
     "@kbn/cloud-plugin",
     "@kbn/core-execution-context-common",
     "@kbn/core",
