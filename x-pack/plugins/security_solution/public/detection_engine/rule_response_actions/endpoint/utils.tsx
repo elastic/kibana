@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactElement } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,17 +16,14 @@ interface EndpointActionTextProps {
 }
 
 const EndpointActionTextComponent = ({ name }: EndpointActionTextProps) => {
-  const elements = useGetCommandText(name);
-  if (!elements) {
-    return null;
-  }
+  const { title, description } = useGetCommandText(name);
   return (
     <>
       <EuiTitle size={'xxs'}>
-        <EuiText size={'s'}>{elements.title}</EuiText>
+        <EuiText size={'s'}>{title}</EuiText>
       </EuiTitle>
       <EuiSpacer size={'s'} />
-      <EuiText size={'s'}>{elements.description}</EuiText>
+      <EuiText size={'s'}>{description}</EuiText>
       <EuiSpacer size={'s'} />
     </>
   );
@@ -41,7 +38,7 @@ const LEARN_MORE = i18n.translate(
 
 const useGetCommandText = (
   name: EndpointActionTextProps['name']
-): { title: ReactElement; description: ReactElement } | null => {
+): { title: ReactNode; description: ReactNode } => {
   const {
     docLinks: {
       links: {
@@ -104,7 +101,10 @@ const useGetCommandText = (
         ),
       };
     default:
-      return null;
+      return {
+        title: '',
+        description: '',
+      };
   }
 };
 
