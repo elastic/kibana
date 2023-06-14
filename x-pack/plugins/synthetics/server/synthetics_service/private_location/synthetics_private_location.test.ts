@@ -64,11 +64,6 @@ describe('SyntheticsPrivateLocation', () => {
       },
     },
     fleet: {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
         buildPackagePolicyFromPackage: jest.fn(),
@@ -84,16 +79,13 @@ describe('SyntheticsPrivateLocation', () => {
     },
   } as unknown as UptimeServerSetup;
 
-  it.each([[true, 'Unable to create Synthetics package policy template for private location']])(
+  it.each([['Unable to create Synthetics package policy template for private location']])(
     'throws errors for create monitor',
-    async (writeIntegrationPolicies, error) => {
+    async (error) => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {
           ...serverMock.fleet,
-          authz: {
-            fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
-          },
         },
       });
 
@@ -110,16 +102,13 @@ describe('SyntheticsPrivateLocation', () => {
     }
   );
 
-  it.each([[true, 'Unable to create Synthetics package policy template for private location']])(
+  it.each([['Unable to create Synthetics package policy template for private location']])(
     'throws errors for edit monitor',
-    async (writeIntegrationPolicies, error) => {
+    async (error) => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {
           ...serverMock.fleet,
-          authz: {
-            fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
-          },
         },
       });
 
@@ -138,14 +127,12 @@ describe('SyntheticsPrivateLocation', () => {
 
   it.each([
     [
-      true,
       'Unable to delete Synthetics package policy for monitor Test Monitor with private location Test Location',
     ],
     [
-      false,
       'Unable to delete Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
-  ])('throws errors for delete monitor', async (writeIntegrationPolicies, error) => {
+  ])('throws errors for delete monitor', async (error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
       ...serverMock,
       fleet: {

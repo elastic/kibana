@@ -6,7 +6,6 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
-import { INSUFFICIENT_FLEET_PERMISSIONS } from '@kbn/synthetics-plugin/server/synthetics_service/project_monitor/project_monitor_formatter';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -514,8 +513,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .auth(username, password)
           .send({ monitors: monitorsToDelete })
-          .expect(403);
-        expect(message).to.eql(INSUFFICIENT_FLEET_PERMISSIONS);
+          .expect(200);
       } finally {
         await supertest
           .delete(
