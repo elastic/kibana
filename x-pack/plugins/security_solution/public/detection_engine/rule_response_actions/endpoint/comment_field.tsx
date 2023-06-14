@@ -7,7 +7,7 @@
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { i18n } from '@kbn/i18n';
+import { EndpointActionText } from './utils';
 
 interface ActionTypeFieldProps {
   basePath: string;
@@ -15,31 +15,8 @@ interface ActionTypeFieldProps {
   readDefaultValueOnForm: boolean;
 }
 
-// const commandLabel = (
-//   <>
-//     <EuiTitle size={'xxs'}>
-//       <EuiText size={'s'}>
-//         <FormattedMessage
-//           id="xpack.securitySolution.responseActions.endpoint.commentLabel"
-//           defaultMessage="Comment (optional)"
-//         />
-//       </EuiText>
-//     </EuiTitle>
-//     <EuiSpacer size={'s'} />
-//     {/* <EuiText size={'s'}>*/}
-//     {/*  <FormattedMessage*/}
-//     {/*    id="xpack.securitySolution.responseActions.endpoint.commentDescription"*/}
-//     {/*    defaultMessage="Leave a note that explains or describes the action."*/}
-//     {/*  />*/}
-//     {/* </EuiText>*/}
-//     {/* <EuiSpacer size={'s'} />*/}
-//   </>
-// );
-
 const CONFIG = {
-  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commentLabel', {
-    defaultMessage: 'Comment (optional)',
-  }),
+  label: <EndpointActionText name={'comment'} />,
 };
 
 const CommentFieldComponent = ({

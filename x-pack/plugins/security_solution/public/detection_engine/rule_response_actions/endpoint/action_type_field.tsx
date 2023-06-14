@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { CHOOSE_FROM_THE_LIST } from './translations';
+import { EndpointActionText } from './utils';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -29,22 +31,6 @@ const ActionTypeFieldComponent = ({
 }: ActionTypeFieldProps) => {
   const { endpointPrivileges } = useUserPrivileges();
   const [data] = useFormData();
-  // const currentCommand = get(data, `${basePath}.command`);
-  //
-  // const getSuffix = useCallback(
-  //   (name: string) => {
-  //     if (currentCommand === '') {
-  //       return '';
-  //     }
-  //     switch (name) {
-  //       case 'isolate':
-  //         return ' (quarantine a host from the network to prevent further spread of threats and limit potential damage)';
-  //       default:
-  //         return '';
-  //     }
-  //   },
-  //   [currentCommand]
-  // );
 
   const fieldOptions = useMemo(
     () =>
@@ -59,6 +45,7 @@ const ActionTypeFieldComponent = ({
         return {
           value: name,
           inputDisplay: name,
+          dropdownDisplay: <EndpointActionText name={name} />,
           disabled: isDisabled,
           'data-test-subj': `command-type-${name}`,
         };
@@ -66,37 +53,12 @@ const ActionTypeFieldComponent = ({
     [data.responseActions, endpointPrivileges]
   );
 
-  // const commandLabel = useMemo(() => {
-  //   return (
-  //     <>
-  //       <EuiTitle size={'xxs'}>
-  //         <EuiText size={'s'}>
-  //           <FormattedMessage
-  //             id="xpack.securitySolution.responseActions.endpoint.commandLabel"
-  //             defaultMessage="Endpoint response action"
-  //           />
-  //         </EuiText>
-  //       </EuiTitle>
-  //       <EuiSpacer size={'s'} />
-  //       {/* <EuiText size={'s'}>*/}
-  //       {/*  <FormattedMessage*/}
-  //       {/*    id="xpack.securitySolution.responseActions.endpoint.commandDescription"*/}
-  //       {/*    defaultMessage="Select an Endpoint response action. The response action only runs on hosts with Elastic Defend installed."*/}
-  //       {/*  />*/}
-  //       {/* </EuiText>*/}
-  //       {/* <EuiSpacer size={'s'} />*/}
-  //     </>
-  //   );
-  // }, []);
-
   return (
     <UseField
       path={`${basePath}.command`}
       readDefaultValueOnForm={readDefaultValueOnForm}
       config={{
-        label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
-          defaultMessage: 'Endpoint response action',
-        }),
+        label: <EndpointActionText name={'command'} />,
         validations: [
           {
             validator: fieldValidators.emptyField(
@@ -115,6 +77,7 @@ const ActionTypeFieldComponent = ({
       componentProps={{
         euiFieldProps: {
           options: fieldOptions,
+          placeholder: CHOOSE_FROM_THE_LIST,
           'data-test-subj': 'commandTypeField',
         },
       }}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { get } from 'lodash';
@@ -23,13 +23,22 @@ const EndpointActionCalloutComponent = ({ basePath }: EndpointCallOutProps) => {
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiCallOut color="warning" iconType="warning" title="Proceed with caution">
-          <FormattedMessage
-            id="xpack.securitySolution.responseActionsList.endpoint.caution"
-            defaultMessage="Automatic host isolation based on a detection rule execution could result in
-              unintended consequences, such as disrupting legitimate user activities or blocking
-              critical business processes"
-          />
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.cautionTitle"
+              defaultMessage="Proceed with caution"
+            />
+          }
+        >
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.cautionDescription"
+              defaultMessage="Only select this option if you’re certain that you want to automatically block communication with other hosts on your network until you release this host."
+            />
+          </EuiText>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>

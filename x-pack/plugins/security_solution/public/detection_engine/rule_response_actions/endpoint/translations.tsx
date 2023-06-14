@@ -13,3 +13,10 @@ export const PERMISSION_DENIED = i18n.translate(
     defaultMessage: 'Permission denied',
   }
 );
+
+export const CHOOSE_FROM_THE_LIST = i18n.translate(
+  'xpack.securitySolution.endpoint.action.chooseFromTheList',
+  {
+    defaultMessage: 'Choose action from the list',
+  }
+);
