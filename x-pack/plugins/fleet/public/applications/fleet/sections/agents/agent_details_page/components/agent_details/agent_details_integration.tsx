@@ -23,7 +23,6 @@ import styled from 'styled-components';
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
-import type { FleetServerAgentComponentUnit } from '../../../../../../../../common/types/models/agent';
 import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
@@ -124,9 +123,8 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   }, [agent, policyResponseExtensionView]);
 
   const packageErrors = useMemo(() => {
-    const packageErrorUnits: FleetServerAgentComponentUnit[] = [];
     if (!agent.components) {
-      return packageErrorUnits;
+      return [];
     }
     return getInputUnitsByPackage(agent.components, packagePolicy).filter(
       (u) => u.status === 'DEGRADED' || u.status === 'FAILED'
