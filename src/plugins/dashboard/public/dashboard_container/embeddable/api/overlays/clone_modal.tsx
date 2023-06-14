@@ -41,12 +41,6 @@ interface State {
   isLoading: boolean;
 }
 
-const cloneDashboardModalTitle = (
-  <FormattedMessage
-    id="dashboard.topNav.cloneModal.confirmCloneDescription"
-    defaultMessage="Clone dashboard"
-  />
-);
 const cloneDashboardConfirmButtonLabel = (
   <FormattedMessage id="dashboard.topNav.cloneModal.cloneButtonLabel" defaultMessage="Clone" />
 );
@@ -146,7 +140,12 @@ export class DashboardCloneModal extends React.Component<Props, State> {
         onClose={this.props.onClose}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{cloneDashboardModalTitle}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+              defaultMessage="Clone dashboard"
+            />
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
