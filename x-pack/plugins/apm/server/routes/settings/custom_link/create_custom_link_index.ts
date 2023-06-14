@@ -25,6 +25,11 @@ export const createApmCustomLinkIndex = async ({
     client,
     logger,
     mappings,
+    settings: {
+      index: {
+        fast_refresh: true,
+      },
+    },
   });
 };
 

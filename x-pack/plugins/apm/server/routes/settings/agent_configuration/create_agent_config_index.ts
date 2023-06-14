@@ -24,6 +24,7 @@ export async function createApmAgentConfigurationIndex({
     client,
     logger,
     mappings,
+    settings: {},
   });
 }
 
