@@ -36,7 +36,7 @@ export const CorrelationsOverview: React.FC = () => {
         scopeId,
       },
     });
-  }, [eventId, scopeId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   const { loading, error, data } = useCorrelations({
     eventId,

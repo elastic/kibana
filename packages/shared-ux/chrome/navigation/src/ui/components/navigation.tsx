@@ -20,7 +20,6 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { RegisterFunction, UnRegisterFunction } from '../types';
-import { CloudLink } from './cloud_link';
 import { NavigationFooter } from './navigation_footer';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
@@ -45,10 +44,6 @@ const NavigationContext = createContext<Context>({
 interface Props {
   children: ReactNode;
   /**
-   * Href to the home page
-   */
-  homeRef: string;
-  /**
    * Flag to indicate if the Navigation should not be styled with EUI components.
    * If set to true, the children will be rendered as is.
    */
@@ -56,7 +51,7 @@ interface Props {
   dataTestSubj?: string;
 }
 
-export function Navigation({ children, homeRef, unstyled = false, dataTestSubj }: Props) {
+export function Navigation({ children, unstyled = false, dataTestSubj }: Props) {
   const { onProjectNavigationChange } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
@@ -109,23 +104,17 @@ export function Navigation({ children, homeRef, unstyled = false, dataTestSubj }
   useEffect(() => {
     // This will update the navigation tree in the Chrome service (calling the serverless.setNavigation())
     onProjectNavigationChange({
-      homeRef,
       navigationTree: Object.values(navigationItems).sort((a, b) => {
         const aOrder = orderChildrenRef.current[a.id];
         const bOrder = orderChildrenRef.current[b.id];
         return aOrder - bOrder;
       }),
     });
-  }, [navigationItems, onProjectNavigationChange, homeRef]);
+  }, [navigationItems, onProjectNavigationChange]);
 
   return (
     <NavigationContext.Provider value={contextValue}>
-      <NavigationUI
-        homeRef={homeRef}
-        footerChildren={footerChildren}
-        unstyled={unstyled}
-        dataTestSubj={dataTestSubj}
-      >
+      <NavigationUI footerChildren={footerChildren} unstyled={unstyled} dataTestSubj={dataTestSubj}>
         {children}
       </NavigationUI>
     </NavigationContext.Provider>
@@ -143,5 +132,4 @@ export function useNavigation() {
 Navigation.Group = NavigationGroup;
 Navigation.Item = NavigationItem;
 Navigation.Footer = NavigationFooter;
-Navigation.CloudLink = CloudLink;
 Navigation.RecentlyAccessed = RecentlyAccessed;
