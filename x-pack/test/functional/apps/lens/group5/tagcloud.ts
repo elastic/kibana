@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render tagcloud', async () => {
-      const tags = await PageObjects.tagCloud.getTextTag('.lnsExpressionRenderer');
+      const tags = await PageObjects.tagCloud.getTextTag();
       expect(tags).to.eql([
         '97.220.3.248',
         '78.83.247.30',
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should filter results by filter bar', async () => {
-      const tags = await PageObjects.tagCloud.getTextTag('.lnsExpressionRenderer');
+      const tags = await PageObjects.tagCloud.getTextTag();
       expect(tags).to.eql([
         '97.220.3.248',
       ]);
