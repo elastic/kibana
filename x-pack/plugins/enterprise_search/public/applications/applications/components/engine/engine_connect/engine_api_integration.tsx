@@ -41,10 +41,7 @@ import Client from '@elastic/search-application-client'
 const request = Client(
   ${searchApplicationName},
   ${esUrl},
-  ${apiKey},
-  {
-    // optional configuration
-  }
+  ${apiKey || '<YOUR_API_KEY>'},
 )
 
 const results = await request()
@@ -53,26 +50,21 @@ const results = await request()
   .search()
 `;
 
-const cURLSnippet = (esUrl: string, engineName: string, apiKey: string, params: unknown) => `
-curl --location --request POST '${esUrl}/_application/search_application/${engineName}/_search' \\
---header 'Authorization: apiKey ${apiKey || '<YOUR_API_KEY>'}' \\
---header 'Content-Type: application/json' \\
---data-raw '${JSON.stringify({ params }, null, 2)}'`;
-
-const apiRequestSnippet = (
+const cURLSnippet = (
   esUrl: string,
   searchApplicationName: string,
   apiKey: string,
   params: unknown
-) => {
+) => `
+curl --location --request POST '${esUrl}/_application/search_application/${searchApplicationName}/_search' \\
+--header 'Authorization: apiKey ${apiKey || '<YOUR_API_KEY>'}' \\
+--header 'Content-Type: application/json' \\
+--data-raw '${JSON.stringify({ params }, null, 2)}'`;
+
+const apiRequestSnippet = (searchApplicationName: string, params: unknown) => {
   const body = JSON.stringify({ params }, null, 2);
   return `
 POST /_application/search_application/${searchApplicationName}/_search HTTP/1.1
-Accept: application/json
-Authorization: apiKey ${apiKey || '<YOUR_API_KEY>'}
-Content-Length: ${body.length}
-Content-Type: application/json
-Host: ${new URL(esUrl).host}
 ${body}
 `;
 };
@@ -96,15 +88,14 @@ export const EngineApiIntegrationStage: React.FC = () => {
     share: { url },
   } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
-  const { engineName, engineData } = useValues(EngineViewLogic);
+  const { engineName } = useValues(EngineViewLogic);
   const { apiKey } = useValues(EngineApiLogic);
   const cloudContext = useCloudDetails();
 
-  const params = engineData?.template.script.params ?? {};
-
+  const params = { query: 'pizza', myCustomParameter: 'example value' };
   const Tabs: Record<TabId, Tab> = {
     apirequest: {
-      code: apiRequestSnippet(elasticsearchUrl(cloudContext), engineName, apiKey, params),
+      code: apiRequestSnippet(engineName, params),
       copy: false,
       language: 'http',
       title: i18n.translate(
