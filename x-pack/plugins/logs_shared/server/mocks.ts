@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createLogsSharedLogEntriesDomainMock } from './lib/domains/log_entries_domain/log_entries_domain.mock';
 import {
   createLogViewsServiceSetupMock,
   createLogViewsServiceStartMock,
@@ -12,8 +13,9 @@ import {
 import { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
 
 const createLogsSharedSetupMock = () => {
-  const logsSharedSetupMock: jest.Mocked<Pick<LogsSharedPluginSetup, 'logViews'>> = {
+  const logsSharedSetupMock: jest.Mocked<LogsSharedPluginSetup> = {
     logViews: createLogViewsServiceSetupMock(),
+    logEntries: createLogsSharedLogEntriesDomainMock(),
   };
 
   return logsSharedSetupMock;

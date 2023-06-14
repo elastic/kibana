@@ -59,7 +59,47 @@ const FIELDS_FROM_CONTEXT = ['log.file.path', 'host.name', 'container.id'] as co
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
-export class LogsSharedLogEntriesDomain {
+export interface ILogsSharedLogEntriesDomain {
+  getLogEntriesAround(
+    requestContext: LogsSharedPluginRequestHandlerContext,
+    logView: LogViewReference,
+    params: LogEntriesAroundParams,
+    columnOverrides?: LogViewColumnConfiguration[]
+  ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
+  getLogEntries(
+    requestContext: LogsSharedPluginRequestHandlerContext,
+    logView: LogViewReference,
+    params: LogEntriesParams,
+    columnOverrides?: LogViewColumnConfiguration[]
+  ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
+  getLogSummaryBucketsBetween(
+    requestContext: LogsSharedPluginRequestHandlerContext,
+    logView: LogViewReference,
+    start: number,
+    end: number,
+    bucketSize: number,
+    filterQuery?: LogEntryQuery
+  ): Promise<LogEntriesSummaryBucket[]>;
+  getLogSummaryHighlightBucketsBetween(
+    requestContext: LogsSharedPluginRequestHandlerContext,
+    logView: LogViewReference,
+    startTimestamp: number,
+    endTimestamp: number,
+    bucketSize: number,
+    highlightQueries: string[],
+    filterQuery?: LogEntryQuery
+  ): Promise<LogEntriesSummaryHighlightsBucket[][]>;
+  getLogEntryDatasets(
+    requestContext: LogsSharedPluginRequestHandlerContext,
+    timestampField: string,
+    indexName: string,
+    startTime: number,
+    endTime: number,
+    runtimeMappings: estypes.MappingRuntimeFields
+  ): Promise<string[]>;
+}
+
+export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
     private readonly libs: Pick<LogsSharedBackendLibs, 'framework' | 'getStartServices'>

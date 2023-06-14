@@ -11,7 +11,7 @@ import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { LogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
+import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -22,7 +22,7 @@ import { InfraSourceStatus } from './source_status';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
-  logEntries: LogsSharedLogEntriesDomain;
+  logEntries: ILogsSharedLogEntriesDomain;
   metrics: InfraMetricsDomain;
 }
 

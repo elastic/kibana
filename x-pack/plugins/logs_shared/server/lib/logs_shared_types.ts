@@ -9,10 +9,10 @@ import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import type { LogsSharedPluginStartServicesAccessor } from '../types';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-import type { LogsSharedLogEntriesDomain } from './domains/log_entries_domain';
+import type { ILogsSharedLogEntriesDomain } from './domains/log_entries_domain';
 
 export interface LogsSharedDomainLibs {
-  logEntries: LogsSharedLogEntriesDomain;
+  logEntries: ILogsSharedLogEntriesDomain;
 }
 
 export interface LogsSharedBackendLibs extends LogsSharedDomainLibs {

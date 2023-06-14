@@ -9,7 +9,10 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { LogsSharedPlugin } from './plugin';
 
 export type { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
-export type { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
+export type {
+  LogsSharedLogEntriesDomain,
+  ILogsSharedLogEntriesDomain,
+} from './lib/domains/log_entries_domain';
 
 export { logViewSavedObjectName } from './saved_objects';
 
