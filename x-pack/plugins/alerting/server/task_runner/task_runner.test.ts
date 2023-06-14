@@ -102,12 +102,10 @@ const alertingEventLogger = alertingEventLoggerMock.create();
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
   let alertingEventLoggerInitializer: RuleContextOpts;
-  const mockedTaskConfig = {
-    skip: {
-      enabled: false,
-      delay: 3000,
-      max_attempts: 20,
-    },
+  const requeueInvalidTasksConfig = {
+    enabled: false,
+    delay: 3000,
+    max_attempts: 20,
   };
 
   beforeAll(() => {
@@ -253,7 +251,7 @@ describe('Task Runner', () => {
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -356,7 +354,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -440,7 +438,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -567,7 +565,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: taskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -614,7 +612,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -694,7 +692,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -779,7 +777,7 @@ describe('Task Runner', () => {
             },
           },
         },
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: taskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -826,7 +824,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -885,7 +883,7 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -955,7 +953,7 @@ describe('Task Runner', () => {
             },
           },
         },
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -1019,7 +1017,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -1135,7 +1133,7 @@ describe('Task Runner', () => {
             },
           },
         },
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -1266,7 +1264,7 @@ describe('Task Runner', () => {
             },
           },
         },
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -1373,7 +1371,7 @@ describe('Task Runner', () => {
             },
           },
         },
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -1475,7 +1473,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -1553,7 +1551,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
-        taskConfig: mockedTaskConfig,
+        requeueInvalidTasksConfig,
         context: customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics,
       });
@@ -1640,7 +1638,7 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1697,7 +1695,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1733,7 +1731,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1774,7 +1772,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1808,7 +1806,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: legacyTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1849,7 +1847,7 @@ describe('Task Runner', () => {
         ...mockedTaskInstance,
         state: originalAlertSate,
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1880,7 +1878,7 @@ describe('Task Runner', () => {
           spaceId: 'foo',
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1918,7 +1916,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1943,7 +1941,7 @@ describe('Task Runner', () => {
           interval: '1d',
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1970,7 +1968,7 @@ describe('Task Runner', () => {
           spaceId: 'test space',
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2026,7 +2024,7 @@ describe('Task Runner', () => {
           alertInstances: {},
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2135,7 +2133,7 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2212,7 +2210,7 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2284,7 +2282,7 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2361,7 +2359,7 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2411,7 +2409,7 @@ describe('Task Runner', () => {
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: {
         ...taskRunnerFactoryInitializerParams,
         supportsEphemeralTasks: true,
@@ -2480,7 +2478,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2496,7 +2494,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2527,7 +2525,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2567,7 +2565,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2592,7 +2590,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2641,7 +2639,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2726,7 +2724,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: {
         ...taskRunnerFactoryInitializerParams,
         actionsConfigMap,
@@ -2895,7 +2893,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: {
         ...taskRunnerFactoryInitializerParams,
         actionsConfigMap,
@@ -2988,7 +2986,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -3069,7 +3067,7 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskConfig: mockedTaskConfig,
+      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -3106,12 +3104,10 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockTask,
-      taskConfig: {
-        skip: {
-          enabled: true,
-          delay: mockedTaskConfig.skip.delay,
-          max_attempts: 20,
-        },
+      requeueInvalidTasksConfig: {
+        enabled: true,
+        delay: requeueInvalidTasksConfig.delay,
+        max_attempts: 20,
       },
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
@@ -3145,12 +3141,10 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockTask,
-      taskConfig: {
-        skip: {
-          enabled: true,
-          delay: mockedTaskConfig.skip.delay,
-          max_attempts: 20,
-        },
+      requeueInvalidTasksConfig: {
+        enabled: true,
+        delay: requeueInvalidTasksConfig.delay,
+        max_attempts: 20,
       },
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,

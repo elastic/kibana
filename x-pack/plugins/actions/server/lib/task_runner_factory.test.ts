@@ -49,12 +49,10 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
 let mockedTaskInstance: ConcreteTaskInstance;
-const mockedTaskConfig = {
-  skip: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
+const mockedRequeueInvalidTasksConfig = {
+  enabled: false,
+  delay: 3000,
+  max_attempts: 20,
 };
 
 beforeAll(() => {
@@ -115,7 +113,10 @@ test(`throws an error if factory isn't initialized`, () => {
     inMemoryMetrics
   );
   expect(() =>
-    factory.create({ taskInstance: mockedTaskInstance, taskConfig: mockedTaskConfig })
+    factory.create({
+      taskInstance: mockedTaskInstance,
+      requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
+    })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
@@ -133,7 +134,7 @@ test(`throws an error if factory is already initialized`, () => {
 test('executes the task by calling the executor with proper parameters, using given actionId when no actionRef in references', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -188,7 +189,7 @@ test('executes the task by calling the executor with proper parameters, using gi
 test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -249,7 +250,7 @@ test('executes the task by calling the executor with proper parameters, using st
 test('executes the task by calling the executor with proper parameters when consumer is provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -306,7 +307,7 @@ test('executes the task by calling the executor with proper parameters when cons
 test('executes the task by calling the executor with proper parameters when saved_object source is provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -368,7 +369,7 @@ test('executes the task by calling the executor with proper parameters when save
 test('executes the task by calling the executor with proper parameters when notification source is provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -430,7 +431,7 @@ test('executes the task by calling the executor with proper parameters when noti
 test('cleans up action_task_params object through the cleanup runner method', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   await taskRunner.cleanup();
@@ -462,7 +463,7 @@ test('task runner should implement CancellableTask cancel method with logging wa
   });
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   await taskRunner.cancel();
@@ -478,7 +479,7 @@ test('task runner should implement CancellableTask cancel method with logging wa
 test('cleanup runs successfully when action_task_params cleanup fails and logs the error', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   taskRunnerFactoryInitializerParams.savedObjectsRepository.delete.mockRejectedValueOnce(
@@ -500,7 +501,7 @@ test('cleanup runs successfully when action_task_params cleanup fails and logs t
 test('throws an error with suggested retry logic when return status is error', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -541,12 +542,10 @@ test('returns the existing state and delayed schedule to retry the task when ret
 
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockTaskInstance,
-    taskConfig: {
-      skip: {
-        enabled: true,
-        delay: mockedTaskConfig.skip.delay,
-        max_attempts: 20,
-      },
+    requeueInvalidTasksConfig: {
+      enabled: true,
+      delay: mockedRequeueInvalidTasksConfig.delay,
+      max_attempts: 20,
     },
   });
 
@@ -585,12 +584,10 @@ test('throws error after trying to skip a task {config.skip.max_attempts} times'
 
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockTaskInstance,
-    taskConfig: {
-      skip: {
-        enabled: true,
-        delay: mockedTaskConfig.skip.delay,
-        max_attempts: 20,
-      },
+    requeueInvalidTasksConfig: {
+      enabled: true,
+      delay: mockedRequeueInvalidTasksConfig.delay,
+      max_attempts: 20,
     },
   });
 
@@ -624,7 +621,7 @@ test('throws error after trying to skip a task {config.skip.max_attempts} times'
 test('uses API key when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -677,7 +674,7 @@ test('uses API key when provided', async () => {
 test('uses relatedSavedObjects merged with references when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -736,7 +733,7 @@ test('uses relatedSavedObjects merged with references when provided', async () =
 test('uses relatedSavedObjects as is when references are empty', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -791,7 +788,7 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
 test('sanitizes invalid relatedSavedObjects when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -847,7 +844,7 @@ test(`doesn't use API key when not provided`, async () => {
   factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -899,7 +896,7 @@ test(`throws an error when license doesn't support the action type`, async () =>
       ...mockedTaskInstance,
       attempts: 1,
     },
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -937,7 +934,7 @@ test(`will throw an error with retry: false if the task is not retryable`, async
       ...mockedTaskInstance,
       attempts: 0,
     },
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -984,7 +981,7 @@ test('will rethrow the error if the error is thrown instead of returned', async 
       ...mockedTaskInstance,
       attempts: 0,
     },
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -1023,7 +1020,7 @@ test('will rethrow the error if the error is thrown instead of returned', async 
 test('increments monitoring metrics after execution', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -1049,7 +1046,7 @@ test('increments monitoring metrics after execution', async () => {
 test('increments monitoring metrics after a failed execution', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({
@@ -1089,7 +1086,7 @@ test('increments monitoring metrics after a failed execution', async () => {
 test('increments monitoring metrics after a timeout', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
-    taskConfig: mockedTaskConfig,
+    requeueInvalidTasksConfig: mockedRequeueInvalidTasksConfig,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });

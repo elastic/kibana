@@ -50,12 +50,10 @@ describe('rule_loader', () => {
     spaceId,
     ruleTypeRegistry,
     alertingEventLogger,
-    taskConfig: {
-      skip: {
-        enabled: false,
-        delay: 3000,
-        max_attempts: 20,
-      },
+    requeueInvalidTasksConfig: {
+      enabled: false,
+      delay: 3000,
+      max_attempts: 20,
     },
   };
 
@@ -198,12 +196,10 @@ describe('rule_loader', () => {
           ...DefaultLoadRuleParams,
           context,
           paramValidator: undefined,
-          taskConfig: {
-            skip: {
-              enabled: true,
-              delay: 3000,
-              max_attempts: 20,
-            },
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(

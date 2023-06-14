@@ -36,12 +36,10 @@ const executeParams = {
   executionId: '123abc',
   request: {} as KibanaRequest,
   actionExecutionId: '2',
-  taskConfig: {
-    skip: {
-      enabled: false,
-      delay: 3000,
-      max_attempts: 20,
-    },
+  requeueInvalidTasksConfig: {
+    enabled: false,
+    delay: 3000,
+    max_attempts: 20,
   },
 };
 
@@ -886,7 +884,7 @@ test('throws an error when action data is invalid', async () => {
 
   const result = await actionExecutor.execute({
     ...executeParams,
-    taskConfig: { skip: { enabled: true, delay: 3000, max_attempts: 20 } },
+    requeueInvalidTasksConfig: { enabled: true, delay: 3000, max_attempts: 20 },
   });
 
   expect(result).toEqual({
@@ -929,7 +927,7 @@ test('throws a retryable error when action data is invalid and skipped before', 
 
   const result = await actionExecutor.execute({
     ...executeParams,
-    taskConfig: { skip: { enabled: true, delay: 3000, max_attempts: 20 } },
+    requeueInvalidTasksConfig: { enabled: true, delay: 3000, max_attempts: 20 },
     taskInfo: { skip: { attempts: 20 }, attempts: 0, scheduled: new Date() },
   });
 

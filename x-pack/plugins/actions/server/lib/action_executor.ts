@@ -13,7 +13,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
+import { RequeueInvalidTasksConfig } from '@kbn/task-manager-plugin/server/config';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   validateParams,
@@ -69,7 +69,7 @@ export interface ExecuteOptions<Source = unknown> {
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
-  taskConfig?: TaskConfig;
+  requeueInvalidTasksConfig?: RequeueInvalidTasksConfig;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -104,7 +104,7 @@ export class ActionExecutor {
     consumer,
     relatedSavedObjects,
     actionExecutionId,
-    taskConfig,
+    requeueInvalidTasksConfig,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -165,7 +165,7 @@ export class ActionExecutor {
               secrets,
               rawAction,
               isPreconfigured,
-              taskConfig,
+              requeueInvalidTasksConfig,
               taskInfo,
             },
             { configurationUtilities }
@@ -494,7 +494,7 @@ interface ValidateActionOpts {
   secrets: unknown;
   rawAction: RawAction;
   isPreconfigured?: boolean;
-  taskConfig?: TaskConfig;
+  requeueInvalidTasksConfig?: RequeueInvalidTasksConfig;
   taskInfo?: TaskInfo;
 }
 
@@ -507,7 +507,7 @@ function validateAction(
     secrets,
     rawAction,
     isPreconfigured = false,
-    taskConfig,
+    requeueInvalidTasksConfig,
     taskInfo,
   }: ValidateActionOpts,
   validatorServices: ValidatorServices
@@ -526,7 +526,7 @@ function validateAction(
         secrets,
       });
     }
-    if (taskConfig?.skip.enabled) {
+    if (requeueInvalidTasksConfig?.enabled) {
       validateRawAction({ isPreconfigured, rawAction });
     }
 
@@ -536,7 +536,7 @@ function validateAction(
       actionId,
       status: 'error',
       message: err.message,
-      retry: (taskInfo?.skip?.attempts || 0) > 0 ? true : false,
+      retry: (taskInfo?.skip?.attempts || 0) > 0,
     });
   }
 }

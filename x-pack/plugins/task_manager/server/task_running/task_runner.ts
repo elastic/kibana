@@ -53,7 +53,7 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isRetryableError, isUnrecoverableError } from './errors';
-import type { EventLoopDelayConfig, TaskConfig } from '../config';
+import type { EventLoopDelayConfig, RequeueInvalidTasksConfig } from '../config';
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
@@ -104,7 +104,7 @@ type Opts = {
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
-  taskConfig: TaskConfig;
+  requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -153,7 +153,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
-  private readonly taskConfig: TaskConfig;
+  private readonly requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -177,7 +177,7 @@ export class TaskManagerRunner implements TaskRunner {
     executionContext,
     usageCounter,
     eventLoopDelayConfig,
-    taskConfig,
+    requeueInvalidTasksConfig,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -191,7 +191,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
-    this.taskConfig = taskConfig;
+    this.requeueInvalidTasksConfig = requeueInvalidTasksConfig;
   }
 
   /**
@@ -304,7 +304,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance.task,
-      taskConfig: this.taskConfig,
+      requeueInvalidTasksConfig: this.requeueInvalidTasksConfig,
     });
 
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
@@ -356,14 +356,16 @@ export class TaskManagerRunner implements TaskRunner {
     let skip = false;
     let hasError = false;
 
-    if (this.taskConfig.skip.enabled) {
+    if (this.requeueInvalidTasksConfig.enabled) {
       try {
         const def = this.definitions.get(this.instance.task.taskType);
         if (def.paramsSchema) {
           def.paramsSchema.validate(this.instance.task.params);
         }
       } catch (e) {
-        if ((this.instance.task.skip?.attempts || 0) < this.taskConfig.skip.max_attempts) {
+        if (
+          (this.instance.task.skip?.attempts || 0) < this.requeueInvalidTasksConfig.max_attempts
+        ) {
           skip = true;
         }
         hasError = true;
@@ -411,7 +413,7 @@ export class TaskManagerRunner implements TaskRunner {
     try {
       const { taskInstance } = await this.beforeMarkRunning({
         taskInstance: this.instance.task,
-        taskConfig: this.taskConfig,
+        requeueInvalidTasksConfig: this.requeueInvalidTasksConfig,
       });
 
       const attempts = taskInstance.attempts + 1;
@@ -597,7 +599,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.logger.warn(
               `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
             );
-            runAt = moment().add(this.taskConfig.skip.delay, 'millisecond').toDate();
+            runAt = moment().add(this.requeueInvalidTasksConfig.delay, 'millisecond').toDate();
             state = taskState;
             skipAttempts = skipAttempts + 1;
           }
@@ -669,7 +671,7 @@ export class TaskManagerRunner implements TaskRunner {
           await this.bufferedTaskStore.update(
             defaults(
               {
-                retryAt: moment().add(this.taskConfig.skip.delay, 'millisecond').toDate(),
+                retryAt: moment().add(this.requeueInvalidTasksConfig.delay, 'millisecond').toDate(),
                 attempts: 0,
                 skip: {
                   attempts: skipAttempts,

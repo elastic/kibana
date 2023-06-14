@@ -13,7 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
+import { RequeueInvalidTasksConfig } from '@kbn/task-manager-plugin/server/config';
 import { isValidationError } from '../lib/error_with_reason';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -105,7 +105,7 @@ interface TaskRunnerConstructorParams<
     AlertData
   >;
   taskInstance: ConcreteTaskInstance;
-  taskConfig: TaskConfig;
+  requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
   context: TaskRunnerContext;
   inMemoryMetrics: InMemoryMetrics;
 }
@@ -123,7 +123,7 @@ export class TaskRunner<
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: RuleTaskInstance;
-  private readonly taskConfig: TaskConfig;
+  private readonly requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
   private ruleConsumer: string | null;
   private ruleType: NormalizedRuleType<
     Params,
@@ -152,7 +152,7 @@ export class TaskRunner<
   constructor({
     ruleType,
     taskInstance,
-    taskConfig,
+    requeueInvalidTasksConfig,
     context,
     inMemoryMetrics,
   }: TaskRunnerConstructorParams<
@@ -172,7 +172,7 @@ export class TaskRunner<
     this.ruleType = ruleType;
     this.ruleConsumer = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
-    this.taskConfig = taskConfig;
+    this.requeueInvalidTasksConfig = requeueInvalidTasksConfig;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
@@ -654,7 +654,7 @@ export class TaskRunner<
         spaceId,
         context: this.context,
         ruleTypeRegistry: this.ruleTypeRegistry,
-        taskConfig: this.taskConfig,
+        requeueInvalidTasksConfig: this.requeueInvalidTasksConfig,
       });
       this.alertingEventLogger.start(runDate);
       this.alertingEventLogger.setRuleName(ruleData.rule.name);
@@ -771,8 +771,8 @@ export class TaskRunner<
 
   private shouldSkipRun(err: Error) {
     return (
-      this.taskConfig.skip.enabled &&
-      (this.taskInstance.skip?.attempts || 0) < this.taskConfig.skip.max_attempts &&
+      this.requeueInvalidTasksConfig.enabled &&
+      (this.taskInstance.skip?.attempts || 0) < this.requeueInvalidTasksConfig.max_attempts &&
       isValidationError(err)
     );
   }

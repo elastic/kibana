@@ -34,16 +34,14 @@ import {
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 import { schema } from '@kbn/config-schema';
-import { TaskConfig } from '../config';
+import { RequeueInvalidTasksConfig } from '../config';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
-const mockedTaskConfig = {
-  skip: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
+const mockRequeueInvalidTasksConfig = {
+  enabled: false,
+  delay: 3000,
+  max_attempts: 20,
 };
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -1534,12 +1532,10 @@ describe('TaskManagerRunner', () => {
               }),
             },
           },
-          taskConfig: {
-            skip: {
-              enabled: true,
-              delay: 3000,
-              max_attempts: 20,
-            },
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
           },
         });
 
@@ -1549,7 +1545,7 @@ describe('TaskManagerRunner', () => {
         const instance = store.update.mock.calls[0][0];
 
         expect(instance.runAt.getTime()).toBe(
-          new Date(Date.now()).getTime() + mockedTaskConfig.skip.delay
+          new Date(Date.now()).getTime() + mockRequeueInvalidTasksConfig.delay
         );
         expect(instance.state).toEqual(mockTaskInstance.state);
         expect(instance.schedule).toEqual(mockTaskInstance.schedule);
@@ -1599,7 +1595,7 @@ describe('TaskManagerRunner', () => {
         const instance = store.update.mock.calls[0][0];
 
         expect(instance.runAt.getTime()).toBe(
-          new Date(Date.now()).getTime() + mockedTaskConfig.skip.delay
+          new Date(Date.now()).getTime() + mockRequeueInvalidTasksConfig.delay
         );
         expect(instance.state).toEqual(mockTaskInstance.state);
         expect(instance.schedule).toEqual(mockTaskInstance.schedule);
@@ -1860,7 +1856,7 @@ describe('TaskManagerRunner', () => {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
-    taskConfig?: TaskConfig;
+    requeueInvalidTasksConfig?: RequeueInvalidTasksConfig;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -1936,7 +1932,7 @@ describe('TaskManagerRunner', () => {
         monitor: true,
         warn_threshold: 5000,
       },
-      taskConfig: opts.taskConfig || mockedTaskConfig,
+      requeueInvalidTasksConfig: opts.requeueInvalidTasksConfig || mockRequeueInvalidTasksConfig,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

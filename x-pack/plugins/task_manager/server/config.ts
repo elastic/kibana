@@ -51,12 +51,10 @@ const eventLoopDelaySchema = schema.object({
   }),
 });
 
-const taskConfig = schema.object({
-  skip: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    delay: schema.number({ defaultValue: 3000, min: 0 }),
-    max_attempts: schema.number({ defaultValue: 20, min: 1 }),
-  }),
+const requeueInvalidTasksConfig = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  delay: schema.number({ defaultValue: 3000, min: 0 }),
+  max_attempts: schema.number({ defaultValue: 20, min: 1 }),
 });
 
 export const configSchema = schema.object(
@@ -145,7 +143,7 @@ export const configSchema = schema.object(
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
-    task: taskConfig,
+    requeue_invalid_tasks: requeueInvalidTasksConfig,
   },
   {
     validate: (config) => {
@@ -160,7 +158,7 @@ export const configSchema = schema.object(
   }
 );
 
-export type TaskConfig = TypeOf<typeof taskConfig>;
+export type RequeueInvalidTasksConfig = TypeOf<typeof requeueInvalidTasksConfig>;
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

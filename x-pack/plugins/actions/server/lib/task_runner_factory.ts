@@ -73,7 +73,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance, taskConfig }: RunContext) {
+  public create({ taskInstance, requeueInvalidTasksConfig }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -133,7 +133,7 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
             ...getSource(references, source),
-            taskConfig,
+            requeueInvalidTasksConfig,
           });
         } catch (e) {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
@@ -145,9 +145,9 @@ export class TaskRunnerFactory {
         }
 
         if (
-          taskConfig.skip.enabled &&
+          requeueInvalidTasksConfig.enabled &&
           executorResult.status === 'error' &&
-          (taskInstance.skip?.attempts || 0) < taskConfig.skip.max_attempts &&
+          (taskInstance.skip?.attempts || 0) < requeueInvalidTasksConfig.max_attempts &&
           executorResult.message?.includes(validationErrorPrefix)
         ) {
           return { state: taskInstance.state, skip: true };

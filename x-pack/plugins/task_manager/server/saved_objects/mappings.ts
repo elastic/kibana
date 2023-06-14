@@ -62,12 +62,5 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     ownerId: {
       type: 'keyword',
     },
-    skip: {
-      properties: {
-        attempts: {
-          type: 'integer',
-        },
-      },
-    },
   },
 };

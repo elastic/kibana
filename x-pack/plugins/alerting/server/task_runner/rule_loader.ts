@@ -7,7 +7,7 @@
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
-import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
+import { RequeueInvalidTasksConfig } from '@kbn/task-manager-plugin/server/config';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -27,11 +27,12 @@ export interface LoadRuleParams<Params extends RuleTypeParams> {
   spaceId: string;
   context: TaskRunnerContext;
   ruleTypeRegistry: RuleTypeRegistry;
-  taskConfig: TaskConfig;
+  requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
 }
 
 export async function loadRule<Params extends RuleTypeParams>(params: LoadRuleParams<Params>) {
-  const { paramValidator, ruleId, spaceId, context, ruleTypeRegistry, taskConfig } = params;
+  const { paramValidator, ruleId, spaceId, context, ruleTypeRegistry, requeueInvalidTasksConfig } =
+    params;
   let enabled: boolean;
   let apiKey: string | null;
   let rule: SanitizedRule<Params>;
@@ -69,7 +70,7 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
-    if (taskConfig.skip.enabled) {
+    if (requeueInvalidTasksConfig.enabled) {
       rawRuleSchema.validate(rawRule);
     }
   } catch (err) {

@@ -33,7 +33,7 @@ import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
-import { TaskConfig } from '@kbn/task-manager-plugin/server/config';
+import { RequeueInvalidTasksConfig } from '@kbn/task-manager-plugin/server/config';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -68,8 +68,10 @@ let fakeTimer: sinon.SinonFakeTimers;
 
 describe('Task Runner Factory', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
-  const mockedTaskConfig: TaskConfig = {
-    skip: { enabled: false, delay: 3000, max_attempts: 20 },
+  const requeueInvalidTasksConfig: RequeueInvalidTasksConfig = {
+    enabled: false,
+    delay: 3000,
+    max_attempts: 20,
   };
 
   beforeAll(() => {
@@ -145,7 +147,7 @@ describe('Task Runner Factory', () => {
         ruleType,
         {
           taskInstance: mockedTaskInstance,
-          taskConfig: mockedTaskConfig,
+          requeueInvalidTasksConfig,
         },
         inMemoryMetrics
       )

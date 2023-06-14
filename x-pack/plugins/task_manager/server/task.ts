@@ -6,7 +6,7 @@
  */
 
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
-import { TaskConfig } from './config';
+import { RequeueInvalidTasksConfig } from './config';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
 
@@ -36,7 +36,7 @@ export interface RunContext {
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
-  taskConfig: TaskConfig;
+  requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
 }
 
 /**
