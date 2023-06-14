@@ -214,6 +214,9 @@ export default function (providerContext: FtrProviderContext) {
 
       before(async () => {
         generatedPolicyId = (await generatePolicies(1))[0];
+
+        await saveAdditionalToken(generatedPolicyId, 'second latest');
+        await saveAdditionalToken(generatedPolicyId, 'latest');
       });
 
       after(async () => {
@@ -227,10 +230,23 @@ export default function (providerContext: FtrProviderContext) {
 
         const body: GetUninstallTokensForOnePolicyResponse = response.body;
 
-        expect(body.items.length).to.equal(1);
+        expect(body.items.length).to.equal(body.total);
         expect(body.items[0]).to.have.property('policy_id', generatedPolicyId);
         expect(body.items[0]).to.have.keys('created_at', 'token');
-        expect(body.total).to.be(1);
+      });
+
+      it('should return all tokens with the latest on top', async () => {
+        const response = await supertest
+          .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
+          .expect(200);
+
+        const body: GetUninstallTokensForOnePolicyResponse = response.body;
+
+        expect(body.total).to.equal(3);
+        expect(body.items.length).to.equal(3);
+
+        expect(body.items[0].token).to.equal('latest');
+        expect(body.items[1].token).to.equal('second latest');
       });
 
       it('should return 404 if no uninstall token found', async () => {
@@ -290,4 +306,14 @@ export default function (providerContext: FtrProviderContext) {
     await kibanaServer.savedObjects.cleanStandardList();
     await kibanaServer.savedObjects.clean({ types: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE] });
   };
+
+  const saveAdditionalToken = async (policyId: string, token: string) =>
+    kibanaServer.savedObjects.create({
+      type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+      attributes: {
+        policy_id: policyId,
+        token,
+      },
+      overwrite: false,
+    });
 }
