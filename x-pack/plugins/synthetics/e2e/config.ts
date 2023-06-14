@@ -64,6 +64,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         }`,
         `--xpack.uptime.service.password=${servicePassword}`,
         `--xpack.uptime.service.showExperimentalLocations=${true}`,
+        '--uiSettings.overrides.observability:enableLegacyUptimeApp=true',
       ],
     },
   };

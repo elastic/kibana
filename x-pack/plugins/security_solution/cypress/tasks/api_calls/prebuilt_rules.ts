@@ -15,6 +15,17 @@ export const getPrebuiltRulesStatus = () => {
   });
 };
 
+export const installAllPrebuiltRulesRequest = () => {
+  return cy.request({
+    method: 'POST',
+    url: 'internal/detection_engine/prebuilt_rules/installation/_perform',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    body: {
+      mode: 'ALL_RULES',
+    },
+  });
+};
+
 export const getAvailablePrebuiltRulesCount = () => {
   cy.log('Get prebuilt rules count');
   return getPrebuiltRulesStatus().then(({ body }) => {
@@ -33,4 +44,17 @@ export const waitTillPrebuiltRulesReadyToInstall = () => {
     },
     { interval: 2000, timeout: 60000 }
   );
+};
+
+/**
+ * Install all prebuilt rules.
+ *
+ * This is a heavy request and should be used with caution. Most likely you
+ * don't need all prebuilt rules to be installed, crating just a few prebuilt
+ * rules should be enough for most cases.
+ */
+export const excessivelyInstallAllPrebuiltRules = () => {
+  cy.log('Install prebuilt rules (heavy request)');
+  waitTillPrebuiltRulesReadyToInstall();
+  installAllPrebuiltRulesRequest();
 };

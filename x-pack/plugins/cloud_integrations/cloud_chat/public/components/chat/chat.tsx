@@ -83,7 +83,9 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
         title={i18n.translate('xpack.cloudChat.chatFrameTitle', {
           defaultMessage: 'Chat',
         })}
-        {...config}
+        src={config.src}
+        ref={config.ref}
+        style={config.style}
       />
     </div>
   );

@@ -50,6 +50,9 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   coPilot: schema.maybe(observabilityCoPilotConfig),
+  compositeSlo: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export const config: PluginConfigDescriptor = {
