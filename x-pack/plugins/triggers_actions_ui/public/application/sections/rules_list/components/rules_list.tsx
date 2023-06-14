@@ -126,6 +126,7 @@ export interface RulesListProps {
   onSearchFilterChange?: (search: string) => void;
   onStatusFilterChange?: (status: RuleStatus[]) => void;
   onTypeFilterChange?: (type: string[]) => void;
+  onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
 }
 
@@ -164,6 +165,7 @@ export const RulesList = ({
   onSearchFilterChange,
   onStatusFilterChange,
   onTypeFilterChange,
+  onRefresh,
   setHeaderActions,
 }: RulesListProps) => {
   const history = useHistory();
@@ -302,13 +304,16 @@ export const RulesList = ({
     if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
       return;
     }
-    setLocalRefresh(new Date());
+    const now = new Date();
+    setLocalRefresh(now);
+    onRefresh?.(now);
     await loadRules();
     await loadRuleAggregations();
   }, [
     loadRules,
     loadRuleAggregations,
     setLocalRefresh,
+    onRefresh,
     isRuleStatusFilterEnabled,
     hasAnyAuthorizedRuleType,
     ruleTypesState,
