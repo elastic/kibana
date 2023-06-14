@@ -93,7 +93,7 @@ export const ProgressControls: FC<ProgressControlProps> = ({
           </EuiButton>
         )}
       </EuiFlexItem>
-      {progress === 1 && !isBrushCleared ? (
+      {(progress === 1 || isRunning === false) && !isBrushCleared ? (
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="aiopsClearSelectionBadge"
