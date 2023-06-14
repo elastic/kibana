@@ -17,7 +17,6 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
 
 /**
  * Accepts one of the following:
@@ -39,6 +38,7 @@ export const parseFields = (fields: string | string[]): string[] => {
   }
 };
 
+const path = '/api/index_patterns/_fields_for_wildcard';
 const access = 'internal';
 
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
