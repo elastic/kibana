@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
-    { type: 'cloudLink', preset: 'projects' },
     { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
@@ -119,11 +118,7 @@ export const getObservabilitySideNavComponent =
   () => {
     return (
       <NavigationKibanaProvider core={core} serverless={serverless}>
-        <DefaultNavigation
-          homeRef="/app/enterprise_search/content/setup_guide"
-          navigationTree={navigationTree}
-          dataTestSubj="svlObservabilitySideNav"
-        />
+        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlObservabilitySideNav" />
       </NavigationKibanaProvider>
     );
   };
