@@ -16,7 +16,6 @@ import {
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { OverviewStatus } from '../../../common/runtime_types';
 import { TLSRuleExecutor } from './tls_rule_executor';
 import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
 import {
@@ -89,9 +88,7 @@ export const registerSyntheticsTLSCheckRule = (
       );
 
       const { foundCerts, certs, absoluteExpirationThreshold, absoluteAgeThreshold } =
-        await tlsRule.getExpiredCertificates(
-          ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
-        );
+        await tlsRule.getExpiredCertificates();
 
       if (foundCerts) {
         await asyncForEach(certs, async (cert) => {

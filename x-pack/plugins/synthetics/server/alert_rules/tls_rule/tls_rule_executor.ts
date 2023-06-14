@@ -104,7 +104,7 @@ export class TLSRuleExecutor {
 
     if (enabledMonitorQueryIds.length === 0) {
       return {
-        expiredCerts: [],
+        certs: [],
         total: 0,
         foundCerts: false,
         expiryThreshold,
