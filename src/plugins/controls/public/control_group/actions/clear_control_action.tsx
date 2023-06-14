@@ -46,15 +46,10 @@ export class ClearControlAction implements Action<ClearControlActionContext> {
   };
 
   public getDisplayName({ embeddable }: ClearControlActionContext) {
-    const clearStrings = ControlGroupStrings.floatingActions.clearAction;
-    if (
-      !embeddable.parent ||
-      !isControlGroup(embeddable.parent) ||
-      !Object.keys(clearStrings).includes(embeddable.type)
-    ) {
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return clearStrings[embeddable.type as keyof typeof clearStrings].getClearButtonTitle();
+    return ControlGroupStrings.floatingActions.getClearButtonTitle();
   }
 
   public getIconType({ embeddable }: ClearControlActionContext) {

@@ -288,32 +288,17 @@ export const ControlGroupStrings = {
   floatingActions: {
     getEditButtonTitle: () =>
       i18n.translate('controls.controlGroup.floatingActions.editTitle', {
-        defaultMessage: 'Edit control',
+        defaultMessage: 'Edit',
       }),
     getRemoveButtonTitle: () =>
       i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
-        defaultMessage: 'Delete control',
+        defaultMessage: 'Delete',
       }),
-    clearAction: {
-      [OPTIONS_LIST_CONTROL]: {
-        getClearButtonTitle: () =>
-          i18n.translate('controls.controlGroup.floatingActions.optionsList.clearTitle', {
-            defaultMessage: 'Clear selections',
-          }),
-      },
-      [RANGE_SLIDER_CONTROL]: {
-        getClearButtonTitle: () =>
-          i18n.translate('controls.controlGroup.floatingActions.rangeSlider.clearTitle', {
-            defaultMessage: 'Clear range selection',
-          }),
-      },
-      [TIME_SLIDER_CONTROL]: {
-        getClearButtonTitle: () =>
-          i18n.translate('controls.controlGroup.floatingActions.timeSlider.clearTitle', {
-            defaultMessage: 'Clear time selection',
-          }),
-      },
-    },
+
+    getClearButtonTitle: () =>
+      i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
+        defaultMessage: 'Clear',
+      }),
   },
   ariaActions: {
     getMoveControlButtonAction: (controlTitle?: string) =>
