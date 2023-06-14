@@ -72,3 +72,28 @@ export const SyntheticsMonitorStatusTranslations = {
     defaultMessage: 'Alert when a monitor is down.',
   }),
 };
+
+export const TlsTranslations = {
+  defaultActionMessage: i18n.translate('xpack.synthetics.rules.tls.defaultActionMessage', {
+    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}`,
+    values: {
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
+      summary: '{{context.summary}}',
+      status: '{{context.status}}',
+    },
+  }),
+  defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
+    defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered`,
+    values: {
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
+    },
+  }),
+  name: i18n.translate('xpack.synthetics.rules.tls.clientName', {
+    defaultMessage: 'Synthetics TLS',
+  }),
+  description: i18n.translate('xpack.synthetics.rules.tls.description', {
+    defaultMessage: 'Alert when the TLS certificate of a Synthetics monitor is about to expire.',
+  }),
+};
