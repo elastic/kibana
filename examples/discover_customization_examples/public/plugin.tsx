@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiContextMenu, EuiPopover, EuiWrappingPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiFlexItem,
+  EuiPopover,
+  EuiWrappingPopover,
+} from '@elastic/eui';
 import {
   AppNavLinkStatus,
   CoreSetup,
@@ -178,41 +184,45 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           );
 
           return (
-            <EuiPopover
-              button={
-                <EuiButton
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={togglePopover}
-                  data-test-subj="logsViewSelectorButton"
-                >
-                  {currentSavedSearch.title ?? 'None selected'}
-                </EuiButton>
-              }
-              isOpen={isPopoverOpen}
-              panelPaddingSize="none"
-              closePopover={closePopover}
-            >
-              <EuiContextMenu
-                size="s"
-                initialPanelId={0}
-                panels={[
-                  {
-                    id: 0,
-                    title: 'Saved logs views',
-                    items: savedSearches.map((savedSearch) => ({
-                      name: savedSearch.get('title'),
-                      onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
-                      icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
-                      'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
-                        /[^a-zA-Z0-9]/g,
-                        ''
-                      )}`,
-                    })),
-                  },
-                ]}
-              />
-            </EuiPopover>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButton
+                    iconType="arrowDown"
+                    iconSide="right"
+                    fullWidth
+                    onClick={togglePopover}
+                    data-test-subj="logsViewSelectorButton"
+                  >
+                    {currentSavedSearch.title ?? 'None selected'}
+                  </EuiButton>
+                }
+                anchorClassName="eui-fullWidth"
+                isOpen={isPopoverOpen}
+                panelPaddingSize="none"
+                closePopover={closePopover}
+              >
+                <EuiContextMenu
+                  size="s"
+                  initialPanelId={0}
+                  panels={[
+                    {
+                      id: 0,
+                      title: 'Saved logs views',
+                      items: savedSearches.map((savedSearch) => ({
+                        name: savedSearch.get('title'),
+                        onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
+                        icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                        'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
+                          /[^a-zA-Z0-9]/g,
+                          ''
+                        )}`,
+                      })),
+                    },
+                  ]}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
           );
         },
       });
