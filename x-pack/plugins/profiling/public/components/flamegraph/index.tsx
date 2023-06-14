@@ -9,16 +9,17 @@ import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@e
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
+import { ElasticFlameGraph } from '../../../common/flamegraph';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FlameGraphTooltip } from './flamegraph_tooltip';
+import { ComparisonMode } from '../normalization_menu';
 
 interface Props {
   id: string;
-  comparisonMode: FlameGraphComparisonMode;
+  comparisonMode: ComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
   baseline?: number;

@@ -17,7 +17,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
   TableListViewKibanaProvider,
   TableListViewKibanaDependencies,
-} from '@kbn/content-management-table-list';
+} from '@kbn/content-management-table-list-view-table';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { StartDependencies } from './types';
 import { App } from './app';
