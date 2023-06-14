@@ -6,10 +6,6 @@
  */
 
 import {
-  AggregationsCardinalityAggregate,
-  AggregationsFilterAggregate,
-} from '@elastic/elasticsearch/lib/api/types';
-import {
   kqlQuery,
   termQuery,
   rangeQuery,
@@ -19,7 +15,6 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_RULE_PARAMETERS,
-  ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import {
   SERVICE_NAME,
@@ -31,15 +26,6 @@ import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { MAX_NUMBER_OF_TX_GROUPS } from './get_service_transaction_groups';
-
-interface ServiceTransactionGroupAlertsAggResponse {
-  buckets: Array<
-    AggregationsFilterAggregate & {
-      key: string;
-      alerts_count: AggregationsCardinalityAggregate;
-    }
-  >;
-}
 
 export type ServiceTransactionGroupAlertsResponse = Array<{
   name: string;
@@ -118,26 +104,17 @@ export async function getServiceTranactionGroupsAlerts({
           size: MAX_NUMBER_OF_TX_GROUPS,
           order: { _count: 'desc' },
         },
-        aggs: {
-          alerts_count: {
-            cardinality: {
-              field: ALERT_UUID,
-            },
-          },
-        },
       },
     },
   };
 
   const response = await apmAlertsClient.search(params);
-  const { buckets } = (response.aggregations?.transaction_groups ?? {
-    buckets: [],
-  }) as ServiceTransactionGroupAlertsAggResponse;
 
-  const servicesTransactionGroupsAlertsCount = buckets.map((bucket) => ({
-    name: bucket.key as string,
-    alertsCount: bucket.alerts_count.value,
-  }));
+  const servicesTransactionGroupsAlertsCount =
+    response.aggregations?.transaction_groups?.buckets.map((bucket) => ({
+      name: bucket.key as string,
+      alertsCount: bucket.doc_count,
+    })) ?? [];
 
   return servicesTransactionGroupsAlertsCount;
 }
