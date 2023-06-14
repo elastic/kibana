@@ -17,7 +17,7 @@ export const EmptySearchApplicationsPrompt: React.FC = ({ children }) => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.engines.enginesList.empty.title"
+            id="xpack.enterpriseSearch.searchApplications.list.empty.title"
             defaultMessage="Create your first Search Application"
           />
         </h2>
@@ -25,7 +25,7 @@ export const EmptySearchApplicationsPrompt: React.FC = ({ children }) => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.engines.enginesList.empty.description"
+            id="xpack.enterpriseSearch.searchApplications.list.empty.description"
             defaultMessage="Let's walk you through creating your first Search Application."
           />
         </p>

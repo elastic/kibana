@@ -64,7 +64,7 @@ export const IndicesSelectComboBox = ({ ignoredOptions, ...props }: IndicesSelec
       <EuiFlexItem grow={false}>
         <span>
           <strong>
-            {i18n.translate('xpack.enterpriseSearch.content.engine.indicesSelect.docsLabel', {
+            {i18n.translate('xpack.enterpriseSearch.searchApplications.indicesSelect.docsLabel', {
               defaultMessage: 'Docs:',
             })}
           </strong>
