@@ -9628,6 +9628,12 @@
         },
         "last_reported": {
           "type": "long"
+        },
+        "labels": {
+          "type": "pass_through",
+          "_meta": {
+            "description": "Custom labels added to the telemetry.labels config in the kibana.yml"
+          }
         }
       }
     },
