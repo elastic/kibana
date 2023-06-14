@@ -13,14 +13,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ExplainLogRateSpikesContent } from '@kbn/aiops-plugin/public';
-
+import {
+  ExplainLogRateSpikesContent,
+  type ExplainLogRateSpikesAnalysisResults,
+} from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { ALERT_END } from '@kbn/rule-data-utils';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -38,6 +41,11 @@ export interface AlertDetailsExplainLogRateSpikesSectionProps {
   alert: TopAlert<Record<string, any>>;
 }
 
+interface FieldValuePair {
+  field: string;
+  value: string | number;
+}
+
 export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionProps> = ({
   rule,
   alert,
@@ -46,6 +54,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const { dataViews, logViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
+  const [logSpikeParams, SetLogSpikeParams] = useState<
+    { significantFieldValues: FieldValuePair[] } | undefined
+  >();
 
   useEffect(() => {
     const getDataView = async () => {
@@ -100,16 +111,27 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       : alertStart.clone().add(10, 'minutes').valueOf(),
   };
 
-  const coPilotService = useCoPilot();
-
-  const explainLogSpikeParams = undefined;
-
   const explainLogSpikeTitle = i18n.translate(
     'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
     {
       defaultMessage: 'Possible causes and remediations',
     }
   );
+
+  const onAnalysisCompleted = (
+    analysisResults: ExplainLogRateSpikesAnalysisResults | undefined
+  ) => {
+    const fieldValuePairs = analysisResults?.significantTerms?.map((term) => ({
+      field: term.fieldName,
+      value: term.fieldValue,
+    }));
+    SetLogSpikeParams(
+      fieldValuePairs ? { significantFieldValues: fieldValuePairs?.slice(0, 2) } : undefined
+    );
+  };
+
+  const coPilotService = useCoPilot();
+  const hasLogSpikeParams = logSpikeParams && logSpikeParams.significantFieldValues?.length > 0;
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -132,6 +154,8 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
             initialAnalysisStart={initialAnalysisStart}
+            barColorOverride={colorTransformer(Color.color0)}
+            onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
               'application',
               'data',
@@ -151,12 +175,12 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {coPilotService?.isEnabled() && explainLogSpikeParams ? (
+        {coPilotService?.isEnabled() && hasLogSpikeParams ? (
           <EuiFlexItem grow={false}>
             <CoPilotPrompt
               coPilot={coPilotService}
               title={explainLogSpikeTitle}
-              params={explainLogSpikeParams}
+              params={logSpikeParams}
               promptId={CoPilotPromptId.ExplainLogSpike}
             />
           </EuiFlexItem>
