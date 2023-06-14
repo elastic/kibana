@@ -11,9 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { LogStream } from '../../../log_stream';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 
 export interface LogsProps {

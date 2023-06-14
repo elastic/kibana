@@ -87,8 +87,8 @@ pageLoadAssetSize:
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
+  logsShared: 281060
   logstash: 53548
-  logsShared: 184320
   management: 46112
   maps: 90000
   mapsEms: 26072
@@ -121,7 +121,7 @@ pageLoadAssetSize:
   serverless: 16573
   serverlessObservability: 30000
   serverlessSearch: 45934
-  serverlessSecurity: 70441
+  serverlessSecurity: 86642
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032
