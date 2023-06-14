@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { bulkGetCases } from './api';
+import { bulkGetCases } from './bulk_get_cases';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('Alerts table APIs', () => {
