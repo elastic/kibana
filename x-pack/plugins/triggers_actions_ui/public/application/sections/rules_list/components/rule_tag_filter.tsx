@@ -193,7 +193,7 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
   }, []);
 
   const allTags = useMemo(() => {
-    return [...new Set([...selectedTags.sort(), ...tags])];
+    return [...new Set(selectedTags.sort().concat(tags))];
   }, [selectedTags, tags]);
 
   // Attaches an intersection observer to the last element

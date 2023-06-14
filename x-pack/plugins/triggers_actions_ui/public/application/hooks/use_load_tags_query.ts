@@ -90,7 +90,7 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
   const tags = useMemo(() => {
     return (
       data?.pages.reduce<string[]>((result, current) => {
-        return [...result, ...current.data];
+        return result.concat(current.data);
       }, []) || EMPTY_TAGS
     );
   }, [data]);
