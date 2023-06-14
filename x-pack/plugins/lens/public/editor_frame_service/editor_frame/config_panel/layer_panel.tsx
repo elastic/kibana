@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
-import { DimensionButton } from '@kbn/visualization-ui-components/public';
+import { DimensionButton, DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
@@ -572,7 +572,6 @@ export function LayerPanel(
                             indexPatterns={dataViews.indexPatterns}
                           >
                             <DimensionButton
-                              className="lnsLayerPanel__dimension"
                               accessorConfig={accessorConfig}
                               label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
                               groupLabel={group.groupLabel}
@@ -621,25 +620,24 @@ export function LayerPanel(
 
                   {group.fakeFinalAccessor && (
                     <div
-                      className="lnsLayerPanel__dimension domDragDrop-isDraggable"
+                      className="domDragDrop-isDraggable"
                       css={css`
+                        display: flex;
+                        align-items: center;
+                        border-radius: ${euiThemeVars.euiBorderRadius};
+                        min-height: ${euiThemeVars.euiSizeXL};
+
                         cursor: default !important;
-                        border-color: transparent !important;
-                        margin-top: ${group.accessors.length ? 8 : 0}px !important;
                         background-color: ${euiThemeVars.euiColorLightShade} !important;
+                        border-color: transparent !important;
                         box-shadow: none !important;
                       `}
                     >
-                      <EuiText
-                        size="s"
-                        className="lnsLayerPanel__triggerText"
+                      <DimensionTrigger
+                        label={group.fakeFinalAccessor.label}
+                        id="lns-fakeDimension"
                         data-test-subj="lns-fakeDimension"
-                        color={'subdued'}
-                      >
-                        <span className="lnsLayerPanel__triggerTextLabel">
-                          {group.fakeFinalAccessor.label}
-                        </span>
-                      </EuiText>
+                      />
                     </div>
                   )}
 
