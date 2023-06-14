@@ -24,10 +24,7 @@ import {
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
-import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useSyncFlyoutStateWithUrl } from '../../../flyout/url/use_sync_flyout_state_with_url';
-
-const NO_DATA_PAGE_MAX_WIDTH = 950;
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -55,6 +52,10 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 `;
 
+const CONTENT_PROPS = {
+  style: { display: 'flex', flexGrow: 1, flexDirection: 'column' as const },
+};
+
 export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
   React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
@@ -67,8 +68,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { colorMode: globalColorMode } = useEuiTheme();
-
-    const showEmptyState = useShowPagesWithEmptyView() || rest.isEmptyState;
 
     const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
 
@@ -88,7 +87,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
           paddingSize="none"
           solutionNav={solutionNavProps}
-          restrictWidth={showEmptyState ? NO_DATA_PAGE_MAX_WIDTH : false}
+          restrictWidth={false}
           {...rest}
         >
           <GlobalKQLHeader />
@@ -96,8 +95,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             className="securityPageWrapper"
             data-test-subj="pageContainer"
             paddingSize={rest.paddingSize ?? 'l'}
-            alignment={showEmptyState ? 'center' : 'top'}
+            alignment="top"
             component="div"
+            grow={true}
+            contentProps={CONTENT_PROPS}
           >
             {children}
           </KibanaPageTemplate.Section>

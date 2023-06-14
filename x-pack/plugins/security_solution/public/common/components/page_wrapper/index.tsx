@@ -28,13 +28,15 @@ const Wrapper = styled.div`
     flex-direction: column;
     flex: 1 1 auto;
   }
+  &.securitySolutionWrapper--padding-l {
+    padding: ${({ theme }) => `${theme.eui.euiSizeL}`};
+  }
 `;
 
 Wrapper.displayName = 'Wrapper';
 
 interface SecuritySolutionPageWrapperProps {
   children: React.ReactNode;
-  restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
   noPadding?: boolean;
   noTimeline?: boolean;
@@ -54,6 +56,7 @@ const SecuritySolutionPageWrapperComponent: React.FC<
     'securitySolutionWrapper--noPadding': noPadding,
     'securitySolutionWrapper--withTimeline': !noTimeline,
     'securitySolutionWrapper--fullHeight': globalFullScreen,
+    'securitySolutionWrapper--padding-l': !noPadding,
   });
 
   return (

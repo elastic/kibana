@@ -26,7 +26,7 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 import { LandingPage } from './pages/landing';
 
 const OverviewRoutes = () => (
-  <PluginTemplateWrapper>
+  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
     <TrackApplicationView viewId={SecurityPageName.overview}>
       <StatefulOverview />
     </TrackApplicationView>
@@ -34,7 +34,7 @@ const OverviewRoutes = () => (
 );
 
 const DetectionResponseRoutes = () => (
-  <PluginTemplateWrapper>
+  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
     <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
       <DetectionResponse />
     </TrackApplicationView>
@@ -42,7 +42,7 @@ const DetectionResponseRoutes = () => (
 );
 
 const LandingRoutes = () => (
-  <PluginTemplateWrapper paddingSize="none">
+  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
     <TrackApplicationView viewId={SecurityPageName.landing}>
       <LandingPage />
     </TrackApplicationView>
@@ -50,7 +50,7 @@ const LandingRoutes = () => (
 );
 
 const EntityAnalyticsRoutes = () => (
-  <PluginTemplateWrapper>
+  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
     <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
       <EntityAnalyticsPage />
     </SecurityRoutePageWrapper>
@@ -58,7 +58,7 @@ const EntityAnalyticsRoutes = () => (
 );
 
 const DataQualityRoutes = () => (
-  <PluginTemplateWrapper>
+  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
     <TrackApplicationView viewId={SecurityPageName.dataQuality}>
       <DataQuality />
     </TrackApplicationView>
