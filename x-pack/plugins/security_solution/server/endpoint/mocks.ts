@@ -39,11 +39,11 @@ import {
   createFleetToHostFilesClientMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
-import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
+import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import type { VersionedRoute, VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
+import type { VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
 import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -230,7 +230,7 @@ export function createRouteHandlerContext(
 type RouterMethod = Extract<keyof IRouter, RouteMethod>;
 
 export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
-  routerMock: ReturnType<typeof httpServiceMock.createRouter>;
+  routerMock: RouterMock;
   scopedEsClusterClientMock: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   savedObjectClientMock: ReturnType<typeof savedObjectsClientMock.create>;
   endpointAppContextMock: EndpointAppContext;
@@ -325,43 +325,21 @@ interface RegisteredVersionedRoute {
 }
 
 export const getRegisteredVersionedRouteMock = (
-  routerMock: jest.Mocked<IRouter<any>>,
+  routerMock: RouterMock,
   method: RouterMethod,
   path: string,
   version: number | string
 ): RegisteredVersionedRoute => {
-  const methodMock = (routerMock.versioned[method] as jest.Mock).mock;
-  const methodCalls = methodMock.calls as Array<[config: VersionedRouteConfig<RouterMethod>]>;
+  const route = routerMock.versioned.getRoute(method, path);
+  const routeVersion = route.versions[version];
 
-  let index = -1;
-  const registeredRoute = methodCalls.find(([routeConfig], i) => {
-    if (routeConfig.path.startsWith(path)) {
-      index = i;
-      return true;
-    }
-
-    return false;
-  });
-
-  if (!registeredRoute) {
-    throw new Error(`No Route registered for [${method}][${path}] with versioned router`);
-  }
-
-  // now get the actual handler from `addVersion`
-  const versions = (methodMock.results[index].value as jest.Mocked<VersionedRoute>).addVersion.mock
-    .calls;
-
-  const registeredVersion = versions.find(([versionConfig, versionHandler]) => {
-    return versionConfig.version === version;
-  });
-
-  if (!registeredVersion) {
+  if (!routeVersion) {
     throw new Error(`Handler for [${method}][${path}] with version [${version}] no found!`);
   }
 
   return {
-    routeConfig: registeredRoute[0],
-    versionConfig: registeredVersion[0],
-    routeHandler: registeredVersion[1],
+    routeConfig: route.config,
+    versionConfig: routeVersion.config,
+    routeHandler: routeVersion.handler,
   };
 };
