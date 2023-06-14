@@ -70,8 +70,6 @@ export function registerSetupRoute({
           config: dependencies.config,
         };
 
-        logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
-
         const state = createDefaultSetupState();
         state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
@@ -136,8 +134,6 @@ export function registerSetupRoute({
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
           config: dependencies.config,
         };
-
-        logger.info('Setting up Elasticsearch and Fleet for Universal Profiling');
 
         const state = createDefaultSetupState();
         state.cloud.available = dependencies.setup.cloud.isCloudEnabled;

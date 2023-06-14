@@ -90,6 +90,5 @@ export async function findDownsampledIndex({
     logger.info(e.message);
   }
 
-  logger.info('sampleCountFromPow6 ' + sampleCountFromInitialExp);
   return getSampledTraceEventsIndex(index, sampleSize, sampleCountFromInitialExp, initialExp);
 }

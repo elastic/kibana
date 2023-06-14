@@ -52,7 +52,6 @@ export function registerTopNFunctionsSearchRoute({
           kuery,
         });
 
-        const t0 = Date.now();
         const { stackTraceEvents, stackTraces, executables, stackFrames } = await searchStackTraces(
           {
             client: profilingElasticsearchClient,
@@ -60,9 +59,7 @@ export function registerTopNFunctionsSearchRoute({
             sampleSize: targetSampleSize,
           }
         );
-        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
 
-        const t1 = Date.now();
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
             stackTraceEvents,
@@ -73,9 +70,6 @@ export function registerTopNFunctionsSearchRoute({
             endIndex
           );
         });
-        logger.info(`creating topN functions took ${Date.now() - t1} ms`);
-
-        logger.info('returning payload response to client');
 
         return response.ok({
           body: topNFunctions,

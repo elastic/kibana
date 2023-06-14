@@ -100,7 +100,6 @@ export async function topNElasticSearchQuery({
   }
 
   let totalSampledStackTraces = aggregations.total_count.value ?? 0;
-  logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
   totalSampledStackTraces = Math.floor(totalSampledStackTraces / eventsIndex.sampleRate);
 
   if (searchField !== ProfilingESField.StacktraceID) {
@@ -138,8 +137,6 @@ export async function topNElasticSearchQuery({
   const metadata = await withProfilingSpan('collect_stackframe_metadata', async () => {
     return groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables);
   });
-
-  logger.info('returning payload response to client');
 
   return {
     TotalCount: totalSampledStackTraces,
