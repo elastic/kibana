@@ -12,7 +12,7 @@ import {
   genAiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/gen_ai_simulation';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getUrlPrefix } from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.gen-ai';
 const name = 'A genAi action';
@@ -45,6 +45,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
   };
 
   describe('GenAi', () => {
+    const objectRemover = new ObjectRemover(supertest);
     describe('action creation', () => {
       const simulator = new GenAiSimulator({
         returnError: false,
@@ -276,11 +277,10 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           });
           describe('gen ai dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
-            beforeEach(async () => {
-              await supertest
-                .delete(`/api/saved_objects/dashboard/${dashboardId}`)
-                .set('kbn-xsrf', 'foo');
+            after(() => {
+              objectRemover.removeAll();
             });
+
             it('should not create a dashboard when user does not have kibana event log permissions', async () => {
               const { body } = await supertestWithoutAuth
                 .post(`/api/actions/connector/${genAiActionId}/_execute`)
@@ -331,6 +331,8 @@ export default function genAiTest({ getService }: FtrProviderContext) {
                   .expect(200)
               );
 
+              objectRemover.add('default', dashboardId, 'dashboard', 'saved_objects');
+
               expect(body).to.eql({
                 status: 'ok',
                 connector_id: genAiActionId,
@@ -352,13 +354,8 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             apiUrl = await simulator.start();
             genAiActionId = await createConnector(apiUrl, 'space1');
           });
-          beforeEach(async () => {
-            await supertest
-              .delete(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
-              .set('kbn-xsrf', 'foo');
-          });
-
           after(() => {
+            objectRemover.removeAll();
             simulator.close();
           });
 
@@ -386,6 +383,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
                   .set('kbn-xsrf', 'foo')
                   .expect(200)
             );
+            objectRemover.add('space1', dashboardId, 'dashboard', 'saved_objects');
 
             expect(body).to.eql({
               status: 'ok',
