@@ -3392,6 +3392,21 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"grok\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/grok/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-public.NO_DATA_PAGE_MAX_WIDTH",
         "type": "number",
         "tags": [],

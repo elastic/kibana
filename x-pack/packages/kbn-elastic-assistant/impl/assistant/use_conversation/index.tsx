@@ -56,6 +56,7 @@ interface UseConversation {
     conversationId,
     messages,
   }: CreateConversationProps) => Conversation | undefined;
+  deleteConversation: (conversationId: string) => void;
   setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
   setConversation: ({ conversation }: SetConversationProps) => void;
 }
@@ -148,6 +149,25 @@ export const useConversation = (): UseConversation => {
   );
 
   /**
+   * Delete the conversation with the given conversationId
+   */
+  const deleteConversation = useCallback(
+    (conversationId: string): Conversation | undefined => {
+      let deletedConversation: Conversation | undefined;
+      setConversations((prev: Record<string, Conversation>) => {
+        const { [conversationId]: prevConversation, ...updatedConversations } = prev;
+        deletedConversation = prevConversation;
+        if (prevConversation != null) {
+          return updatedConversations;
+        }
+        return prev;
+      });
+      return deletedConversation;
+    },
+    [setConversations]
+  );
+
+  /**
    * Update the apiConfig for a given conversationId
    */
   const setApiConfig = useCallback(
@@ -188,5 +208,12 @@ export const useConversation = (): UseConversation => {
     [setConversations]
   );
 
-  return { appendMessage, clearConversation, createConversation, setApiConfig, setConversation };
+  return {
+    appendMessage,
+    clearConversation,
+    createConversation,
+    deleteConversation,
+    setApiConfig,
+    setConversation,
+  };
 };
