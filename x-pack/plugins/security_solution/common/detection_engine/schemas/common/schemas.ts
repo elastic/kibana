@@ -45,7 +45,7 @@ export type SignalIds = t.TypeOf<typeof signal_ids>;
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
 
-export const alert_tag_query = t.object; // TODO: i agree with the above TODO
+export const alert_tag_query = t.record(t.string, t.unknown);
 
 export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
