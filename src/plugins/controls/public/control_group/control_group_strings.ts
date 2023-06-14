@@ -7,9 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TIME_SLIDER_CONTROL } from '../time_slider';
-import { OPTIONS_LIST_CONTROL } from '../options_list';
-import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
   emptyState: {
