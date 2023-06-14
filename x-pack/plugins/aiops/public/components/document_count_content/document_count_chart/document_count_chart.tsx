@@ -457,8 +457,8 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
                   domainType={AnnotationDomainType.XDomain}
                   dataValues={[
                     {
-                      dataValue: annotations.start,
-                      header: annotations.start,
+                      dataValue: annotations?.start,
+                      header: annotations?.start,
                       details: 'Alert started',
                     },
                   ]}
