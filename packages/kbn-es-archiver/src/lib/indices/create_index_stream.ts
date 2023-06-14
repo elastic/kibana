@@ -64,22 +64,18 @@ export function createCreateIndexStream({
       return;
     }
 
-    if (
-      index.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX) &&
-      !kibanaTaskManagerIndexAlreadyDeleted &&
-      !kibanaTaskManagerIndexAlreadyCleaned
-    ) {
-      await cleanSavedObjectIndices({ client, stats, log, index });
-      kibanaTaskManagerIndexAlreadyCleaned = true;
-      log.debug(`Cleaned saved object index [${index}]`);
-    } else if (
-      index.startsWith(MAIN_SAVED_OBJECT_INDEX) &&
-      !kibanaIndicesAlreadyDeleted &&
-      !kibanaIndicesAlreadyCleaned
-    ) {
-      await cleanSavedObjectIndices({ client, stats, log });
-      kibanaIndicesAlreadyCleaned = kibanaTaskManagerIndexAlreadyCleaned = true;
-      log.debug(`Cleaned all saved object indices`);
+    if (index.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX)) {
+      if (!kibanaTaskManagerIndexAlreadyDeleted && !kibanaTaskManagerIndexAlreadyCleaned) {
+        await cleanSavedObjectIndices({ client, stats, log, index });
+        kibanaTaskManagerIndexAlreadyCleaned = true;
+        log.debug(`Cleaned saved object index [${index}]`);
+      }
+    } else if (index.startsWith(MAIN_SAVED_OBJECT_INDEX)) {
+      if (!kibanaIndicesAlreadyDeleted && !kibanaIndicesAlreadyCleaned) {
+        await cleanSavedObjectIndices({ client, stats, log });
+        kibanaIndicesAlreadyCleaned = kibanaTaskManagerIndexAlreadyCleaned = true;
+        log.debug(`Cleaned all saved object indices`);
+      }
     }
     stream.push(record);
   }
