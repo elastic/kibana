@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { startCase } from 'lodash';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -24,7 +23,7 @@ import {
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
-import { UX_MESSAGES } from '../translations';
+import { FILTER_TYPE_OPTIONS, UX_MESSAGES } from '../translations';
 import { StatusBadge } from './status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
@@ -233,7 +232,7 @@ export const useActionsLogFilter = ({
     isTypeFilter
       ? RESPONSE_ACTION_TYPE.map((type) => ({
           key: type,
-          label: startCase(type),
+          label: getTypeDisplayName(type),
           checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
@@ -311,4 +310,11 @@ export const useActionsLogFilter = ({
     setUrlStatusesFilters,
     setUrlTypeFilters,
   };
+};
+
+const getTypeDisplayName = (type: 'manual' | 'automated') => {
+  if (type === 'automated') {
+    return FILTER_TYPE_OPTIONS.automated;
+  }
+  return FILTER_TYPE_OPTIONS.manual;
 };

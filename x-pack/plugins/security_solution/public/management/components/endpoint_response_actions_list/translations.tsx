@@ -215,3 +215,12 @@ export const EXECUTE_FILE_LINK_TITLE = i18n.translate(
   'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
   { defaultMessage: 'Click here to download full output' }
 );
+
+export const FILTER_TYPE_OPTIONS = Object.freeze({
+  manual: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.manual', {
+    defaultMessage: 'Triggered manually',
+  }),
+  automated: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.automated', {
+    defaultMessage: 'Triggered by rule',
+  }),
+});
