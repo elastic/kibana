@@ -107,7 +107,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
               {
                 <FormattedMessage
                   id="xpack.synthetics.monitorManagement.agentMissingCallout.content"
-                  defaultMessage="You have selected an agent policy that has no agent attached. Make sure that you have at least one agent enrolled in this policy. You can add agent before or after creating a location. For more information, {link}."
+                  defaultMessage="You have selected an agent policy that has no agent attached. Make sure that you have at least one agent enrolled in this policy. You can add an agent before or after creating a location. For more information, {link}."
                   values={{
                     link: (
                       <EuiLink
