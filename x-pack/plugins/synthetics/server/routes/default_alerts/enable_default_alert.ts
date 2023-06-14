@@ -19,9 +19,14 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
     const tlsAlertService = new TLSAlertService(context, server, savedObjectsClient);
 
-    return Promise.allSettled([
+    const [statusRule, tlsRule] = await Promise.allSettled([
       statusAlertService.createDefaultAlertIfNotExist(),
       tlsAlertService.createDefaultAlertIfNotExist(),
     ]);
+
+    return {
+      statusRule: statusRule.status === 'fulfilled' ? statusRule.value : null,
+      tlsRule: tlsRule.status === 'fulfilled' ? tlsRule.value : null,
+    };
   },
 });
