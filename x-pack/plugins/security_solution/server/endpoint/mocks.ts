@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { AwaitedProperties } from '@kbn/utility-types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -47,7 +46,6 @@ import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { VersionedRoute, VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
 import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
-import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import type {
   EndpointAppContextService,
@@ -57,13 +55,13 @@ import type {
 import type { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import type { EndpointAppContext } from './types';
-import type { SecuritySolutionRequestHandlerContext } from '../types';
 import {
   allowedExperimentalValues,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
+import type { SecuritySolutionRequestHandlerContextMock } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
 
@@ -216,24 +214,16 @@ export const createFleetAuthzServiceMock = (): jest.Mocked<FleetStartContract['a
   };
 };
 
-export const createMockMetadataRequestContext = () => {
-  return {
-    endpointAppContextService: createMockEndpointAppContextService(),
-    logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    requestHandlerContext: xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<
-      AwaitedProperties<SecuritySolutionRequestHandlerContext>
-    >,
-  };
-};
-
 export function createRouteHandlerContext(
   dataClient: ScopedClusterClientMock,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
-) {
+): SecuritySolutionRequestHandlerContextMock {
   const context = requestContextMock.create(createMockClients(), overrides);
+
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
+
   return context;
 }
 
@@ -333,7 +323,7 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 interface RegisteredVersionedRoute {
   routeConfig: VersionedRouteConfig<RouterMethod>;
   versionConfig: AddVersionOpts<any, any, any>;
-  routeHandler: RequestHandler;
+  routeHandler: RequestHandler<any, any, any, any, any>;
 }
 
 export const getRegisteredVersionedRouteMock = (
