@@ -26,5 +26,6 @@
     "@kbn/observability-plugin",
     "@kbn/datemath",
     "@kbn/core-http-browser",
+    "@kbn/ui-actions-plugin",
   ]
 }
