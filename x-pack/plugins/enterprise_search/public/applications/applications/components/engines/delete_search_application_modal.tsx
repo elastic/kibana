@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
-import { EnginesListLogic } from './search_applications_list_logic';
+import { SearchApplicationsListLogic } from './search_applications_list_logic';
 
 export interface DeleteSearchApplicationModalProps {
   onClose: () => void;
@@ -25,9 +25,9 @@ export const DeleteSearchApplicationModal: React.FC<DeleteSearchApplicationModal
   searchApplicationName,
   onClose,
 }) => {
-  const { deleteEngine } = useActions(EnginesListLogic);
+  const { deleteSearchApplication: deleteEngine } = useActions(SearchApplicationsListLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
-  const { isDeleteLoading } = useValues(EnginesListLogic);
+  const { isDeleteLoading } = useValues(SearchApplicationsListLogic);
   return (
     <EuiConfirmModal
       title={i18n.translate(

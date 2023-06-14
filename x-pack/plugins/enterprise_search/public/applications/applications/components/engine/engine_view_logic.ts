@@ -20,13 +20,16 @@ import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../api/searc
 
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
-import { EnginesListLogic, EnginesListActions } from '../engines/search_applications_list_logic';
+import {
+  SearchApplicationsListLogic,
+  SearchApplicationsListActions,
+} from '../engines/search_applications_list_logic';
 
 import { EngineNameLogic } from './engine_name_logic';
 
 export interface EngineViewActions {
   closeDeleteEngineModal(): void;
-  deleteSuccess: EnginesListActions['deleteSuccess'];
+  deleteSuccess: SearchApplicationsListActions['deleteSuccess'];
   fetchEngine: FetchSearchApplicationApiLogicActions['makeRequest'];
   fetchEngineSchema: FetchSearchApplicationApiLogicActions['makeRequest'];
   openDeleteEngineModal(): void;
@@ -58,7 +61,7 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       ['makeRequest as fetchEngine'],
       FetchSearchApplicationFieldCapabilitiesApiLogic,
       ['makeRequest as fetchEngineSchema'],
-      EnginesListLogic,
+      SearchApplicationsListLogic,
       ['deleteSuccess'],
     ],
     values: [

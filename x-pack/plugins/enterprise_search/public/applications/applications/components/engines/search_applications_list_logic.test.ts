@@ -14,21 +14,21 @@ import { EnterpriseSearchApplication } from '../../../../../common/types/search_
 
 import { FetchSearchApplicationsAPILogic } from '../../api/search_applications/fetch_search_applications_api_logic';
 
-import { EnginesListLogic } from './search_applications_list_logic';
+import { SearchApplicationsListLogic } from './search_applications_list_logic';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
   data: undefined,
-  deleteModalEngine: null,
-  deleteModalEngineName: '',
+  deleteModalSearchApplication: null,
+  deleteModalSearchApplicationName: '',
   deleteStatus: Status.IDLE,
-  hasNoEngines: false,
+  hasNoSearchApplications: false,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
   isFirstRequest: true,
   isLoading: true,
   meta: DEFAULT_META,
-  parameters: { meta: DEFAULT_META, count: 0 },
+  parameters: { count: 0, meta: DEFAULT_META },
   results: [],
   searchQuery: '',
   status: Status.IDLE,
@@ -37,17 +37,17 @@ const DEFAULT_VALUES = {
 const results: EnterpriseSearchApplication[] = [
   {
     indices: ['index-18', 'index-23'],
-    name: 'engine-name-1',
+    name: 'search-application-1',
     updated_at_millis: 1679337823167,
   },
   {
     indices: ['index-180', 'index-230', 'index-8', 'index-2'],
-    name: 'engine-name-2',
+    name: 'search-application-2',
     updated_at_millis: 1679337823167,
   },
   {
     indices: ['index-2', 'index-3'],
-    name: 'engine-name-3',
+    name: 'search-application-3',
     updated_at_millis: 1679337823167,
   },
 ];
@@ -59,7 +59,7 @@ const mockData = {
 
 describe('EnginesListLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(FetchSearchApplicationsAPILogic);
-  const { mount } = new LogicMounter(EnginesListLogic);
+  const { mount } = new LogicMounter(SearchApplicationsListLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,89 +68,89 @@ describe('EnginesListLogic', () => {
     mount();
   });
   it('has expected default values', () => {
-    expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+    expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
   });
   describe('actions', () => {
     describe('onPaginate - change page', () => {
       beforeEach(() => {
-        EnginesListLogic.actions.apiSuccess({
+        SearchApplicationsListLogic.actions.apiSuccess({
           ...mockData,
           count: 11, // update count to simulate next page
         });
       });
 
       it('has engine data', () => {
-        expect(EnginesListLogic.values.data).toEqual({ ...mockData, count: 11 });
+        expect(SearchApplicationsListLogic.values.data).toEqual({ ...mockData, count: 11 });
       });
       it('updates meta with newPageIndex', () => {
-        jest.spyOn(EnginesListLogic.actions, 'fetchEngines');
-        jest.spyOn(EnginesListLogic.actions, 'onPaginate');
+        jest.spyOn(SearchApplicationsListLogic.actions, 'fetchSearchApplications');
+        jest.spyOn(SearchApplicationsListLogic.actions, 'onPaginate');
 
-        expect(EnginesListLogic.values).toEqual({
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: { ...mockData, count: 11 },
-          results: mockData.results,
           isFirstRequest: false,
           isLoading: false,
           meta: { ...DEFAULT_META, total: 11 },
-          status: Status.SUCCESS,
           parameters: { count: 11, meta: { ...DEFAULT_META, total: 11 } },
+          results: mockData.results,
+          status: Status.SUCCESS,
         });
 
         // move to next page
-        EnginesListLogic.actions.onPaginate({ page: { index: 1 } });
+        SearchApplicationsListLogic.actions.onPaginate({ page: { index: 1 } });
 
-        expect(EnginesListLogic.values).toEqual({
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: { ...mockData, count: 11 },
-          results: mockData.results,
           isFirstRequest: false,
           isLoading: false,
           meta: { ...DEFAULT_META, from: 10, total: 11 },
-          status: Status.SUCCESS,
           parameters: { count: 11, meta: { ...DEFAULT_META, from: 10, total: 11 } },
+          results: mockData.results,
+          status: Status.SUCCESS,
         });
         // move back to previous page
-        EnginesListLogic.actions.onPaginate({ page: { index: 0 } });
-        expect(EnginesListLogic.values).toEqual({
+        SearchApplicationsListLogic.actions.onPaginate({ page: { index: 0 } });
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: { ...mockData, count: 11 },
-          results: mockData.results,
           isFirstRequest: false,
           isLoading: false,
           meta: { ...DEFAULT_META, total: 11 },
-          status: Status.SUCCESS,
           parameters: { count: 11, meta: { ...DEFAULT_META, total: 11 } },
+          results: mockData.results,
+          status: Status.SUCCESS,
         });
 
-        EnginesListLogic.actions.onPaginate({ page: { index: 3 } });
-        expect(EnginesListLogic.values).toEqual({
+        SearchApplicationsListLogic.actions.onPaginate({ page: { index: 3 } });
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: { ...mockData, count: 11 },
-          results: mockData.results,
           isFirstRequest: false,
           isLoading: false,
-          meta: { ...DEFAULT_META, total: 11, from: 30 },
+          meta: { ...DEFAULT_META, from: 30, total: 11 },
+          parameters: { count: 11, meta: { ...DEFAULT_META, from: 30, total: 11 } },
+          results: mockData.results,
           status: Status.SUCCESS,
-          parameters: { count: 11, meta: { ...DEFAULT_META, total: 11, from: 30 } },
         });
       });
     });
 
-    describe('closeDeleteEngineModal', () => {
-      it('set isDeleteModalVisible to false and engineName to empty string', () => {
-        EnginesListLogic.actions.openDeleteEngineModal(results[0]);
-        EnginesListLogic.actions.closeDeleteEngineModal();
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+    describe('closeDeleteSearchApplicationModal', () => {
+      it('set isDeleteModalVisible to false and deleteModalSearchApplicationName to empty string', () => {
+        SearchApplicationsListLogic.actions.openDeleteSearchApplicationModal(results[0]);
+        SearchApplicationsListLogic.actions.closeDeleteSearchApplicationModal();
+        expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
       });
     });
-    describe('openDeleteEngineModal', () => {
-      it('set deleteModalEngineName and set isDeleteModalVisible to true', () => {
-        EnginesListLogic.actions.openDeleteEngineModal(results[0]);
-        expect(EnginesListLogic.values).toEqual({
+    describe('openDeleteSearchApplicationModal', () => {
+      it('set deleteModalSearchApplicationName and set isDeleteModalVisible to true', () => {
+        SearchApplicationsListLogic.actions.openDeleteSearchApplicationModal(results[0]);
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          deleteModalEngine: results[0],
-          deleteModalEngineName: 'engine-name-1',
+          deleteModalSearchApplication: results[0],
+          deleteModalSearchApplicationName: 'search-application-1',
           isDeleteModalVisible: true,
         });
       });
@@ -158,8 +158,8 @@ describe('EnginesListLogic', () => {
 
     describe('setSearchQuery', () => {
       it('set setSearchQuery to search value', () => {
-        EnginesListLogic.actions.setSearchQuery('my-search-query');
-        expect(EnginesListLogic.values).toEqual({
+        SearchApplicationsListLogic.actions.setSearchQuery('my-search-query');
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           parameters: {
             count: 0,
@@ -183,13 +183,13 @@ describe('EnginesListLogic', () => {
         });
       });
       it('has engine data', () => {
-        expect(EnginesListLogic.values.data).toEqual({
+        expect(SearchApplicationsListLogic.values.data).toEqual({
           ...mockData,
           params: { from: 10, size: 20 },
         });
       });
       it('updates meta with new state when apiSuccess', () => {
-        jest.spyOn(EnginesListLogic.actions, 'fetchEngines');
+        jest.spyOn(SearchApplicationsListLogic.actions, 'fetchSearchApplications');
         const newCount = 20;
         const newPageMeta = {
           from: 10,
@@ -202,14 +202,14 @@ describe('EnginesListLogic', () => {
           params: { from: newPageMeta.from, size: newPageMeta.size },
         });
 
-        expect(EnginesListLogic.values).toEqual({
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
             ...mockData,
             count: newCount,
             params: { from: newPageMeta.from, size: newPageMeta.size },
           },
-          hasNoEngines: false,
+          hasNoSearchApplications: false,
           isFirstRequest: false,
           isLoading: false,
           meta: {
@@ -217,11 +217,11 @@ describe('EnginesListLogic', () => {
             total: newCount,
           },
           parameters: {
+            count: newPageMeta.total,
             meta: {
               ...DEFAULT_META,
               total: newCount,
             },
-            count: newPageMeta.total,
           },
           results,
           status: Status.SUCCESS,
@@ -230,27 +230,35 @@ describe('EnginesListLogic', () => {
     });
     describe('request to delete Engine', () => {
       it('should set isDeleteLoading to true on delete engine request', () => {
-        EnginesListLogic.actions.deleteEngine({ searchApplicationName: results[0].name });
-        EnginesListLogic.actions.deleteError({} as HttpError);
-        expect(EnginesListLogic.values).toEqual({
+        SearchApplicationsListLogic.actions.deleteSearchApplication({
+          searchApplicationName: results[0].name,
+        });
+        SearchApplicationsListLogic.actions.deleteError({} as HttpError);
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           deleteStatus: Status.ERROR,
           isDeleteLoading: false,
         });
       });
       it('should set isDeleteLoading to false on delete apiError', () => {
-        EnginesListLogic.actions.deleteEngine({ searchApplicationName: results[0].name });
-        EnginesListLogic.actions.deleteError({} as HttpError);
-        expect(EnginesListLogic.values).toEqual({
+        SearchApplicationsListLogic.actions.deleteSearchApplication({
+          searchApplicationName: results[0].name,
+        });
+        SearchApplicationsListLogic.actions.deleteError({} as HttpError);
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           deleteStatus: Status.ERROR,
           isDeleteLoading: false,
         });
       });
       it('should set isDeleteLoading to false on delete apiSuccess', () => {
-        EnginesListLogic.actions.deleteEngine({ searchApplicationName: results[0].name });
-        EnginesListLogic.actions.deleteSuccess({ searchApplicationName: results[0].name });
-        expect(EnginesListLogic.values).toEqual({
+        SearchApplicationsListLogic.actions.deleteSearchApplication({
+          searchApplicationName: results[0].name,
+        });
+        SearchApplicationsListLogic.actions.deleteSuccess({
+          searchApplicationName: results[0].name,
+        });
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           deleteStatus: Status.SUCCESS,
           isDeleteLoading: false,
@@ -261,15 +269,18 @@ describe('EnginesListLogic', () => {
     });
     describe('isFirstRequest', () => {
       it('should update to true on setIsFirstRequest', () => {
-        EnginesListLogic.actions.setIsFirstRequest();
-        expect(EnginesListLogic.values).toEqual({ ...DEFAULT_VALUES, isFirstRequest: true });
+        SearchApplicationsListLogic.actions.setIsFirstRequest();
+        expect(SearchApplicationsListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isFirstRequest: true,
+        });
       });
     });
     it('should update to false on apiError', () => {
-      EnginesListLogic.actions.setIsFirstRequest();
-      EnginesListLogic.actions.apiError({} as HttpError);
+      SearchApplicationsListLogic.actions.setIsFirstRequest();
+      SearchApplicationsListLogic.actions.apiError({} as HttpError);
 
-      expect(EnginesListLogic.values).toEqual({
+      expect(SearchApplicationsListLogic.values).toEqual({
         ...DEFAULT_VALUES,
         isFirstRequest: false,
         isLoading: false,
@@ -277,56 +288,58 @@ describe('EnginesListLogic', () => {
       });
     });
     it('should update to false on apiSuccess', () => {
-      EnginesListLogic.actions.setIsFirstRequest();
-      EnginesListLogic.actions.apiSuccess({
+      SearchApplicationsListLogic.actions.setIsFirstRequest();
+      SearchApplicationsListLogic.actions.apiSuccess({
         count: 0,
-        results: [],
         params: {
-          q: undefined,
           from: DEFAULT_VALUES.meta.from,
+          q: undefined,
           size: DEFAULT_VALUES.meta.size,
         },
+        results: [],
       });
 
-      expect(EnginesListLogic.values).toEqual({
+      expect(SearchApplicationsListLogic.values).toEqual({
         ...DEFAULT_VALUES,
 
-        meta: DEFAULT_VALUES.meta,
         data: {
           ...mockData,
           count: 0,
-          results: [],
           params: {
-            q: undefined,
             from: DEFAULT_VALUES.meta.from,
+            q: undefined,
             size: DEFAULT_VALUES.meta.size,
           },
+          results: [],
         },
-        hasNoEngines: true,
+        hasNoSearchApplications: true,
         isFirstRequest: false,
         isLoading: false,
+        meta: DEFAULT_VALUES.meta,
         status: Status.SUCCESS,
       });
     });
   });
   describe('listeners', () => {
-    it('calls flashSuccessToast, closeDeleteEngineModal and fetchEngines on deleteSuccess', () => {
-      EnginesListLogic.actions.fetchEngines = jest.fn();
-      EnginesListLogic.actions.closeDeleteEngineModal = jest.fn();
-      EnginesListLogic.actions.deleteSuccess({ searchApplicationName: results[0].name });
+    it('calls flashSuccessToast, closeDeleteEngineModal and fetchSearchApplications on deleteSuccess', () => {
+      SearchApplicationsListLogic.actions.fetchSearchApplications = jest.fn();
+      SearchApplicationsListLogic.actions.closeDeleteSearchApplicationModal = jest.fn();
+      SearchApplicationsListLogic.actions.deleteSuccess({ searchApplicationName: results[0].name });
 
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
-      expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith();
-      expect(EnginesListLogic.actions.closeDeleteEngineModal).toHaveBeenCalled();
+      expect(SearchApplicationsListLogic.actions.fetchSearchApplications).toHaveBeenCalledWith();
+      expect(
+        SearchApplicationsListLogic.actions.closeDeleteSearchApplicationModal
+      ).toHaveBeenCalled();
     });
-    it('call makeRequest on fetchEngines', async () => {
+    it('call makeRequest on fetchSearchApplications', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
-      EnginesListLogic.actions.makeRequest = jest.fn();
-      EnginesListLogic.actions.fetchEngines();
+      SearchApplicationsListLogic.actions.makeRequest = jest.fn();
+      SearchApplicationsListLogic.actions.fetchSearchApplications();
       await nextTick();
-      expect(EnginesListLogic.actions.makeRequest).toHaveBeenCalledWith({
-        meta: DEFAULT_META,
+      expect(SearchApplicationsListLogic.actions.makeRequest).toHaveBeenCalledWith({
         count: 0,
+        meta: DEFAULT_META,
       });
     });
   });
@@ -334,33 +347,33 @@ describe('EnginesListLogic', () => {
     describe('enginesList', () => {
       // response without search query parameter
       it('updates when apiSuccess with no search query', () => {
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        EnginesListLogic.actions.apiSuccess({
+        expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
+        SearchApplicationsListLogic.actions.apiSuccess({
           count: 0,
-          results,
           params: {
-            q: undefined,
             from: DEFAULT_META.from,
+            q: undefined,
             size: DEFAULT_META.size,
           },
+          results,
         });
-        expect(EnginesListLogic.values).toEqual({
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
             count: 0,
-            results,
             params: {
-              q: undefined,
               from: DEFAULT_META.from,
+              q: undefined,
               size: DEFAULT_META.size,
             },
+            results,
           },
           isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           parameters: {
-            meta: DEFAULT_META,
             count: 0,
+            meta: DEFAULT_META,
           },
           results,
           status: Status.SUCCESS,
@@ -368,26 +381,26 @@ describe('EnginesListLogic', () => {
       });
       // response with search query parameter and matching result
       it('updates when apiSuccess with search query', () => {
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        EnginesListLogic.actions.apiSuccess({
-          results,
+        expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
+        SearchApplicationsListLogic.actions.apiSuccess({
+          count: 0,
           params: {
-            q: 'engine',
             from: DEFAULT_META.from,
+            q: 'engine',
             size: DEFAULT_META.size,
           },
-          count: 0,
+          results,
         });
-        expect(EnginesListLogic.values).toEqual({
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
             count: 0,
-            results,
             params: {
-              q: 'engine',
               from: DEFAULT_META.from,
+              q: 'engine',
               size: DEFAULT_META.size,
             },
+            results,
           },
           isFirstRequest: false,
           isLoading: false,
@@ -402,26 +415,26 @@ describe('EnginesListLogic', () => {
       });
       // response with search query parameter and no matching result
       it('updates when apiSuccess with search query with no matching results ', () => {
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        EnginesListLogic.actions.apiSuccess({
-          results: [],
+        expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
+        SearchApplicationsListLogic.actions.apiSuccess({
+          count: 0,
           params: {
-            q: 'zzz',
             from: DEFAULT_META.from,
+            q: 'zzz',
             size: DEFAULT_META.size,
           },
-          count: 0,
+          results: [],
         });
-        expect(EnginesListLogic.values).toEqual({
+        expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
             count: 0,
-            results: [],
             params: {
-              q: 'zzz',
               from: DEFAULT_META.from,
+              q: 'zzz',
               size: DEFAULT_META.size,
             },
+            results: [],
           },
           isFirstRequest: false,
           isLoading: false,
@@ -435,26 +448,27 @@ describe('EnginesListLogic', () => {
         });
       });
     });
-    describe('hasNoEngines', () => {
+    describe('hasNoSearchApplications', () => {
       describe('no engines to list ', () => {
         // when all engines are deleted from list page, redirect to empty engine prompt
         it('updates to true when all engines are deleted  ', () => {
-          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-          EnginesListLogic.actions.apiSuccess({
-            results: [],
+          expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
+          SearchApplicationsListLogic.actions.apiSuccess({
+            count: 0,
             params: {
               from: DEFAULT_META.from,
               size: DEFAULT_META.size,
             },
-            count: 0,
+            results: [],
           });
-          expect(EnginesListLogic.values).toEqual({
+          expect(SearchApplicationsListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
               ...mockData,
               count: 0,
               results: [],
             },
+            hasNoSearchApplications: true,
             isFirstRequest: false,
             isLoading: false,
             meta: DEFAULT_META,
@@ -462,29 +476,29 @@ describe('EnginesListLogic', () => {
               count: 0,
               meta: DEFAULT_META,
             },
-            hasNoEngines: true,
             results: [],
             status: Status.SUCCESS,
           });
         });
         // when no engines to list, redirect to empty engine prompt
         it('updates to true when isFirstRequest is true  ', () => {
-          EnginesListLogic.actions.apiSuccess({
-            results: [],
+          SearchApplicationsListLogic.actions.apiSuccess({
+            count: 0,
             params: {
               from: DEFAULT_META.from,
               size: DEFAULT_META.size,
             },
-            count: 0,
+            results: [],
           });
-          EnginesListLogic.actions.setIsFirstRequest();
-          expect(EnginesListLogic.values).toEqual({
+          SearchApplicationsListLogic.actions.setIsFirstRequest();
+          expect(SearchApplicationsListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
               ...mockData,
               count: 0,
               results: [],
             },
+            hasNoSearchApplications: true,
             isFirstRequest: true,
             isLoading: false,
             meta: DEFAULT_META,
@@ -492,7 +506,6 @@ describe('EnginesListLogic', () => {
               count: 0,
               meta: DEFAULT_META,
             },
-            hasNoEngines: true,
             results: [],
             status: Status.SUCCESS,
           });
@@ -500,26 +513,26 @@ describe('EnginesListLogic', () => {
 
         // when search query returns no engines, show engine list table
         it('updates to false for a search query ', () => {
-          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-          EnginesListLogic.actions.apiSuccess({
-            results: [],
+          expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
+          SearchApplicationsListLogic.actions.apiSuccess({
             count: 0,
             params: {
-              q: 'zzz',
               from: DEFAULT_META.from,
+              q: 'zzz',
               size: DEFAULT_META.size,
             },
+            results: [],
           });
-          expect(EnginesListLogic.values).toEqual({
+          expect(SearchApplicationsListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
               count: 0,
-              results: [],
               params: {
-                q: 'zzz',
                 from: DEFAULT_META.from,
+                q: 'zzz',
                 size: DEFAULT_META.size,
               },
+              results: [],
             },
             isFirstRequest: false,
             isLoading: false,
@@ -536,22 +549,23 @@ describe('EnginesListLogic', () => {
       describe('with engines to list', () => {
         // when no search query, show table with list of engines
         it('updates to false without search query ', () => {
-          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-          EnginesListLogic.actions.apiSuccess({
-            results,
+          expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
+          SearchApplicationsListLogic.actions.apiSuccess({
+            count: 0,
             params: {
-              q: undefined,
               from: DEFAULT_META.from,
+              q: undefined,
               size: DEFAULT_META.size,
             },
-            count: 0,
+            results,
           });
-          expect(EnginesListLogic.values).toEqual({
+          expect(SearchApplicationsListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
               ...mockData,
               count: 0,
             },
+            hasNoSearchApplications: false,
             isFirstRequest: false,
             isLoading: false,
             meta: DEFAULT_META,
@@ -559,34 +573,34 @@ describe('EnginesListLogic', () => {
               count: 0,
               meta: DEFAULT_META,
             },
-            hasNoEngines: false,
             results,
             status: Status.SUCCESS,
           });
         });
         // with search query, show table with list of engines
         it('updates to false with search query ', () => {
-          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-          EnginesListLogic.actions.apiSuccess({
-            results,
+          expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
+          SearchApplicationsListLogic.actions.apiSuccess({
+            count: 0,
             params: {
-              q: 'en',
               from: DEFAULT_META.from,
+              q: 'en',
               size: DEFAULT_META.size,
             },
-            count: 0,
+            results,
           });
-          expect(EnginesListLogic.values).toEqual({
+          expect(SearchApplicationsListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
-              results,
               count: 0,
               params: {
-                q: 'en',
                 from: DEFAULT_META.from,
+                q: 'en',
                 size: DEFAULT_META.size,
               },
+              results,
             },
+            hasNoSearchApplications: false,
             isFirstRequest: false,
             isLoading: false,
             meta: DEFAULT_META,
@@ -594,7 +608,6 @@ describe('EnginesListLogic', () => {
               count: 0,
               meta: DEFAULT_META,
             },
-            hasNoEngines: false,
             results,
             status: Status.SUCCESS,
           });

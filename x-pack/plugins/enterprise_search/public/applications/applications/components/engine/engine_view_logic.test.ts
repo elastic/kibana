@@ -12,7 +12,7 @@ import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 import { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applications/delete_search_application_api_logic';
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
-import { EnginesListLogic } from '../engines/search_applications_list_logic';
+import { SearchApplicationsListLogic } from '../engines/search_applications_list_logic';
 
 import { EngineViewLogic, EngineViewValues } from './engine_view_logic';
 
@@ -33,7 +33,7 @@ const DEFAULT_VALUES: EngineViewValues = {
 
 describe('EngineViewLogic', () => {
   const { mount } = new LogicMounter(EngineViewLogic);
-  const { mount: mountEnginesListLogic } = new LogicMounter(EnginesListLogic);
+  const { mount: mountEnginesListLogic } = new LogicMounter(SearchApplicationsListLogic);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
@@ -53,7 +53,9 @@ describe('EngineViewLogic', () => {
         jest
           .spyOn(KibanaLogic.values, 'navigateToUrl')
           .mockImplementationOnce(() => Promise.resolve());
-        EnginesListLogic.actions.deleteSuccess({} as DeleteSearchApplicationApiLogicResponse);
+        SearchApplicationsListLogic.actions.deleteSuccess(
+          {} as DeleteSearchApplicationApiLogicResponse
+        );
 
         expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(SEARCH_APPLICATIONS_PATH);
       });

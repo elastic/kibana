@@ -34,51 +34,53 @@ interface EuiBasicTableOnChange {
   page: { index: number };
 }
 
-export type EnginesListActions = Pick<
+export type SearchApplicationsListActions = Pick<
   Actions<SearchApplicationsListAPIArguments, EnterpriseSearchApplicationsResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  closeDeleteEngineModal(): void;
+  closeDeleteSearchApplicationModal(): void;
 
-  deleteEngine: DeleteSearchApplicationApiLogicActions['makeRequest'];
   deleteError: DeleteSearchApplicationApiLogicActions['apiError'];
+  deleteSearchApplication: DeleteSearchApplicationApiLogicActions['makeRequest'];
   deleteSuccess: DeleteSearchApplicationApiLogicActions['apiSuccess'];
 
-  fetchEngines(): void;
+  fetchSearchApplications(): void;
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
-  openDeleteEngineModal: (
-    engine: EnterpriseSearchApplication | EnterpriseSearchApplicationDetails
+  openDeleteSearchApplicationModal: (
+    searchApplication: EnterpriseSearchApplication | EnterpriseSearchApplicationDetails
   ) => {
-    engine: EnterpriseSearchApplication;
+    searchApplication: EnterpriseSearchApplication;
   };
   setIsFirstRequest(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
 
-interface EngineListValues {
+interface SearchApplicationsListValues {
   data: typeof FetchSearchApplicationsAPILogic.values.data;
-  deleteModalEngine: EnterpriseSearchApplication | null;
-  deleteModalEngineName: string;
+  deleteModalSearchApplication: EnterpriseSearchApplication | null;
+  deleteModalSearchApplicationName: string;
   deleteStatus: typeof DeleteSearchApplicationAPILogic.values.status;
-  hasNoEngines: boolean;
+  hasNoSearchApplications: boolean;
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
   isFirstRequest: boolean;
   isLoading: boolean;
   meta: Page;
   parameters: { count: number; meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
-  results: EnterpriseSearchApplication[]; // stores engine list value from data
+  results: EnterpriseSearchApplication[]; // stores search applications list value from data
   searchQuery: string;
   status: typeof FetchSearchApplicationsAPILogic.values.status;
 }
 
-export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
+export const SearchApplicationsListLogic = kea<
+  MakeLogicType<SearchApplicationsListValues, SearchApplicationsListActions>
+>({
   actions: {
-    closeDeleteEngineModal: true,
-    fetchEngines: true,
+    closeDeleteSearchApplicationModal: true,
+    fetchSearchApplications: true,
     onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
-    openDeleteEngineModal: (engine) => ({ engine }),
+    openDeleteSearchApplicationModal: (searchApplication) => ({ searchApplication }),
     setIsFirstRequest: true,
     setSearchQuery: (searchQuery: string) => ({ searchQuery }),
   },
@@ -87,7 +89,11 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       FetchSearchApplicationsAPILogic,
       ['makeRequest', 'apiSuccess', 'apiError'],
       DeleteSearchApplicationAPILogic,
-      ['apiSuccess as deleteSuccess', 'makeRequest as deleteEngine', 'apiError as deleteError'],
+      [
+        'apiSuccess as deleteSuccess',
+        'makeRequest as deleteSearchApplication',
+        'apiError as deleteError',
+      ],
     ],
     values: [
       FetchSearchApplicationsAPILogic,
@@ -98,30 +104,30 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   },
   listeners: ({ actions, values }) => ({
     deleteSuccess: () => {
-      actions.closeDeleteEngineModal();
-      actions.fetchEngines();
+      actions.closeDeleteSearchApplicationModal();
+      actions.fetchSearchApplications();
     },
-    fetchEngines: async () => {
+    fetchSearchApplications: async () => {
       actions.makeRequest(values.parameters);
     },
   }),
 
-  path: ['enterprise_search', 'content', 'engine_list_logic'],
+  path: ['enterprise_search', 'search_applications', 'search_applications_list_logic'],
 
   reducers: ({}) => ({
-    deleteModalEngine: [
+    deleteModalSearchApplication: [
       null,
       {
-        closeDeleteEngineModal: () => null,
-        openDeleteEngineModal: (_, { engine }) => engine,
+        closeDeleteSearchApplicationModal: () => null,
+        openDeleteSearchApplicationModal: (_, { searchApplication }) => searchApplication,
       },
     ],
 
     isDeleteModalVisible: [
       false,
       {
-        closeDeleteEngineModal: () => false,
-        openDeleteEngineModal: () => true,
+        closeDeleteSearchApplicationModal: () => false,
+        openDeleteSearchApplicationModal: () => true,
       },
     ],
     isFirstRequest: [
@@ -159,21 +165,28 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     ],
   }),
   selectors: ({ selectors }) => ({
-    deleteModalEngineName: [() => [selectors.deleteModalEngine], (engine) => engine?.name ?? ''],
-    hasNoEngines: [
+    deleteModalSearchApplicationName: [
+      () => [selectors.deleteModalSearchApplication],
+      (searchApplication) => searchApplication?.name ?? '',
+    ],
+    hasNoSearchApplications: [
       () => [selectors.data, selectors.results],
-      (data: EngineListValues['data'], results: EngineListValues['results']) =>
-        (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+      (
+        data: SearchApplicationsListValues['data'],
+        results: SearchApplicationsListValues['results']
+      ) => (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
     ],
 
     isDeleteLoading: [
       () => [selectors.deleteStatus],
-      (status: EngineListValues['deleteStatus']) => [Status.LOADING].includes(status),
+      (status: SearchApplicationsListValues['deleteStatus']) => [Status.LOADING].includes(status),
     ],
     isLoading: [
       () => [selectors.status, selectors.isFirstRequest],
-      (status: EngineListValues['status'], isFirstRequest: EngineListValues['isFirstRequest']) =>
-        [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
+      (
+        status: SearchApplicationsListValues['status'],
+        isFirstRequest: SearchApplicationsListValues['isFirstRequest']
+      ) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
     results: [() => [selectors.data], (data) => data?.results ?? []],

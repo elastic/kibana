@@ -18,7 +18,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 
 import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';
-import { EnginesList, CreateEngineButton } from './search_applications_list';
+import { SearchApplicationsList, CreateSearchApplicationButton } from './search_applications_list';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
@@ -40,7 +40,7 @@ const mockValues = {
     {
       created: '1999-12-31T23:59:59Z',
       indices: ['index-18', 'index-23'],
-      name: 'engine-name-1',
+      name: 'search-application-1',
       updated: '1999-12-31T23:59:59Z',
     },
   ],
@@ -48,11 +48,11 @@ const mockValues = {
 };
 
 const mockActions = {
-  fetchEngines: jest.fn(),
+  fetchSearchApplications: jest.fn(),
   onPaginate: jest.fn(),
 };
 
-describe('EnginesList', () => {
+describe('SearchApplicationsList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     global.localStorage.clear();
@@ -61,31 +61,31 @@ describe('EnginesList', () => {
     setMockValues(DEFAULT_VALUES);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<EnginesList />);
+    const wrapper = shallow(<SearchApplicationsList />);
     const pageTemplate = wrapper.find(EnterpriseSearchEnginesPageTemplate);
 
     expect(pageTemplate.prop('isLoading')).toEqual(true);
   });
   it('renders empty prompt when no data is available', () => {
-    setMockValues({ ...DEFAULT_VALUES, hasNoEngines: true, isFirstRequest: false });
+    setMockValues({ ...DEFAULT_VALUES, hasNoSearchApplications: true, isFirstRequest: false });
     setMockActions(mockActions);
-    const wrapper = shallow(<EnginesList />);
+    const wrapper = shallow(<SearchApplicationsList />);
 
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
     expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(0);
-    expect(wrapper.find(CreateEngineButton)).toHaveLength(1);
-    expect(wrapper.find(CreateEngineButton).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(CreateSearchApplicationButton)).toHaveLength(1);
+    expect(wrapper.find(CreateSearchApplicationButton).prop('disabled')).toBeFalsy();
   });
 
-  it('renders with Engines data ', async () => {
+  it('renders with Search Applications data ', async () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<EnginesList />);
+    const wrapper = shallow(<SearchApplicationsList />);
 
     expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(1);
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(0);
-    expect(wrapper.find(CreateEngineButton)).toHaveLength(0);
+    expect(wrapper.find(CreateSearchApplicationButton)).toHaveLength(0);
   });
 
   it('renders Platinum license callout when not Cloud or Platinum', async () => {
@@ -95,13 +95,13 @@ describe('EnginesList', () => {
       isCloud: false,
     });
     setMockActions(mockActions);
-    const wrapper = shallow(<EnginesList />);
+    const wrapper = shallow(<SearchApplicationsList />);
 
     expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(0);
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
     expect(wrapper.find(LicensingCallout)).toHaveLength(1);
-    expect(wrapper.find(CreateEngineButton)).toHaveLength(1);
-    expect(wrapper.find(CreateEngineButton).prop('disabled')).toBeTruthy();
+    expect(wrapper.find(CreateSearchApplicationButton)).toHaveLength(1);
+    expect(wrapper.find(CreateSearchApplicationButton).prop('disabled')).toBeTruthy();
   });
 
   it('Does not render Platinum license callout when Cloud', async () => {
@@ -111,29 +111,33 @@ describe('EnginesList', () => {
       isCloud: true,
     });
     setMockActions(mockActions);
-    const wrapper = shallow(<EnginesList />);
+    const wrapper = shallow(<SearchApplicationsList />);
 
     expect(wrapper.find(LicensingCallout)).toHaveLength(0);
   });
 });
 
-describe('CreateEngineButton', () => {
+describe('CreateSearchApplicationButton', () => {
   describe('disabled={true}', () => {
     it('renders a disabled button that shows a popover when hovered', () => {
-      const wrapper = mount(<CreateEngineButton disabled />);
+      const wrapper = mount(<CreateSearchApplicationButton disabled />);
 
       const button = wrapper.find(
-        'button[data-test-subj="enterprise-search-content-engines-creation-button"]'
+        'button[data-test-subj="enterprise-search-search-applications-creation-button"]'
       );
 
       expect(button).toHaveLength(1);
       expect(button.prop('disabled')).toBeTruthy();
 
-      let popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
+      let popover = wrapper.find(
+        'div[data-test-subj="create-search-application-button-popover-content"]'
+      );
 
       expect(popover).toHaveLength(0);
 
-      const hoverTarget = wrapper.find('div[data-test-subj="create-engine-button-hover-target"]');
+      const hoverTarget = wrapper.find(
+        'div[data-test-subj="create-search-application-button-hover-target"]'
+      );
 
       expect(hoverTarget).toHaveLength(1);
 
@@ -141,7 +145,9 @@ describe('CreateEngineButton', () => {
 
       wrapper.update();
 
-      popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
+      popover = wrapper.find(
+        'div[data-test-subj="create-search-application-button-popover-content"]'
+      );
 
       expect(popover).toHaveLength(1);
       expect(popover.text()).toMatch(
@@ -151,20 +157,24 @@ describe('CreateEngineButton', () => {
   });
   describe('disabled={false}', () => {
     it('renders a button and shows a popover when hovered', () => {
-      const wrapper = mount(<CreateEngineButton disabled={false} />);
+      const wrapper = mount(<CreateSearchApplicationButton disabled={false} />);
 
       const button = wrapper.find(
-        'button[data-test-subj="enterprise-search-content-engines-creation-button"]'
+        'button[data-test-subj="enterprise-search-search-applications-creation-button"]'
       );
 
       expect(button).toHaveLength(1);
       expect(button.prop('disabled')).toBeFalsy();
 
-      let popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
+      let popover = wrapper.find(
+        'div[data-test-subj="create-search-application-button-popover-content"]'
+      );
 
       expect(popover).toHaveLength(0);
 
-      const hoverTarget = wrapper.find('div[data-test-subj="create-engine-button-hover-target"]');
+      const hoverTarget = wrapper.find(
+        'div[data-test-subj="create-search-application-button-hover-target"]'
+      );
 
       expect(hoverTarget).toHaveLength(1);
 
@@ -172,7 +182,9 @@ describe('CreateEngineButton', () => {
 
       wrapper.update();
 
-      popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
+      popover = wrapper.find(
+        'div[data-test-subj="create-search-application-button-popover-content"]'
+      );
 
       expect(popover).toHaveLength(1);
       expect(popover.text()).toMatch(

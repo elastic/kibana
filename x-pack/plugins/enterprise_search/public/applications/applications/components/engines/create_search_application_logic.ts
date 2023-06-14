@@ -16,7 +16,7 @@ import {
 } from '../../api/search_applications/create_search_application_api_logic';
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
-import { EnginesListLogic } from './search_applications_list_logic';
+import { SearchApplicationsListLogic } from './search_applications_list_logic';
 
 export interface CreateSearchApplicationLogicActions {
   createSearchApplication: () => void;
@@ -51,8 +51,8 @@ export const CreateSearchApplicationLogic = kea<
   },
   connect: {
     actions: [
-      EnginesListLogic,
-      ['fetchEngines as fetchSearchApplications'],
+      SearchApplicationsListLogic,
+      ['fetchSearchApplications'],
       CreateSearchApplicationApiLogic,
       [
         'makeRequest as createSearchApplicationRequest',

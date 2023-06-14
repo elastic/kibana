@@ -45,12 +45,14 @@ import { CreateSearchApplication } from './create_search_application_flyout';
 import { DeleteSearchApplicationModal } from './delete_search_application_modal';
 import { SearchApplicationIndicesFlyout } from './search_application_indices_flyout';
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
-import { EnginesListLogic } from './search_applications_list_logic';
+import { SearchApplicationsListLogic } from './search_applications_list_logic';
 
-interface CreateEngineButtonProps {
+interface CreateSearchApplicationButtonProps {
   disabled: boolean;
 }
-export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled }) => {
+export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButtonProps> = ({
+  disabled,
+}) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   return (
@@ -59,7 +61,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
       closePopover={() => setShowPopover(false)}
       button={
         <div
-          data-test-subj="create-engine-button-hover-target"
+          data-test-subj="create-search-application-button-hover-target"
           onMouseEnter={() => setShowPopover(true)}
           onMouseLeave={() => setShowPopover(false)}
           tabIndex={0}
@@ -67,8 +69,8 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
           <EuiButton
             fill
             iconType="plusInCircle"
-            data-test-subj="enterprise-search-content-engines-creation-button"
-            data-telemetry-id="entSearchApplications-list-createEngine"
+            data-test-subj="enterprise-search-search-applications-creation-button"
+            data-telemetry-id="entSearchApplications-list-createSearchApplication"
             isDisabled={disabled}
             onClick={() => KibanaLogic.values.navigateToUrl(SEARCH_APPLICATION_CREATION_PATH)}
           >
@@ -95,7 +97,10 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
-      <div style={{ width: '300px' }} data-test-subj="create-engine-button-popover-content">
+      <div
+        style={{ width: '300px' }}
+        data-test-subj="create-search-application-button-popover-content"
+      >
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
             <FormattedMessage
@@ -109,19 +114,21 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
   );
 };
 interface ListProps {
-  createEngineFlyoutOpen?: boolean;
+  createSearchApplicationFlyoutOpen?: boolean;
 }
 
-export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => {
+export const SearchApplicationsList: React.FC<ListProps> = ({
+  createSearchApplicationFlyoutOpen,
+}) => {
   const {
-    closeDeleteEngineModal,
-    fetchEngines,
+    closeDeleteSearchApplicationModal,
+    fetchSearchApplications,
     onPaginate,
-    openDeleteEngineModal,
+    openDeleteSearchApplicationModal,
     setSearchQuery,
     setIsFirstRequest,
-  } = useActions(EnginesListLogic);
-  const { openFlyout: openFetchEngineFlyout } = useActions(SearchApplicationIndicesFlyoutLogic);
+  } = useActions(SearchApplicationsListLogic);
+  const { openFlyout: openViewIndicesFlyout } = useActions(SearchApplicationIndicesFlyoutLogic);
 
   const { isCloud, navigateToUrl } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
@@ -129,21 +136,21 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
   const isGated = !isCloud && !hasPlatinumLicense;
 
   const {
-    deleteModalEngineName,
-    hasNoEngines,
+    deleteModalSearchApplicationName,
+    hasNoSearchApplications,
     isDeleteModalVisible,
     isLoading,
     meta,
     results,
     searchQuery,
-  } = useValues(EnginesListLogic);
+  } = useValues(SearchApplicationsListLogic);
 
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
     // Don't fetch search applications if we don't have a valid license
     if (!isGated) {
-      fetchEngines();
+      fetchSearchApplications();
     }
   }, [meta.from, meta.size, throttledSearchQuery]);
 
@@ -159,13 +166,13 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
     <>
       {isDeleteModalVisible ? (
         <DeleteSearchApplicationModal
-          searchApplicationName={deleteModalEngineName}
-          onClose={closeDeleteEngineModal}
+          searchApplicationName={deleteModalSearchApplicationName}
+          onClose={closeDeleteSearchApplicationModal}
         />
       ) : null}
 
       <SearchApplicationIndicesFlyout />
-      {createEngineFlyoutOpen && (
+      {createSearchApplicationFlyoutOpen && (
         <CreateSearchApplication onClose={() => navigateToUrl(SEARCH_APPLICATIONS_PATH)} />
       )}
       <EnterpriseSearchEnginesPageTemplate
@@ -178,7 +185,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
               values={{
                 documentationUrl: (
                   <EuiLink
-                    data-test-subj="engines-documentation-link"
+                    data-test-subj="search-applications-documentation-link"
                     href={docLinks.searchApplications}
                     target="_blank"
                     data-telemetry-id="entSearchApplications-documentation-viewDocumentaion"
@@ -199,8 +206,8 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
           }),
           rightSideItems: isLoading
             ? []
-            : !hasNoEngines
-            ? [<CreateEngineButton disabled={isGated} />]
+            : !hasNoSearchApplications
+            ? [<CreateSearchApplicationButton disabled={isGated} />]
             : [],
         }}
         pageViewTelemetry="Search Applications"
@@ -212,7 +219,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
           </EuiFlexItem>
         )}
 
-        {!hasNoEngines && !isGated ? (
+        {!hasNoSearchApplications && !isGated ? (
           <>
             <div>
               <EuiFieldSearch
@@ -271,14 +278,14 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
               searchApplications={results}
               meta={meta}
               onChange={onPaginate}
-              onDelete={openDeleteEngineModal}
-              viewSearchApplicationIndices={openFetchEngineFlyout}
+              onDelete={openDeleteSearchApplicationModal}
+              viewSearchApplicationIndices={openViewIndicesFlyout}
               loading={false}
             />
           </>
         ) : (
           <EmptySearchApplicationsPrompt>
-            <CreateEngineButton disabled={isGated} />
+            <CreateSearchApplicationButton disabled={isGated} />
           </EmptySearchApplicationsPrompt>
         )}
 
