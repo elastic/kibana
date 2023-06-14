@@ -14,11 +14,9 @@ import type {
 
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
-import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapGroupedEsqlAlerts } from './wrap_grouped_esql_alerts';
 import { bulkCreateWithSuppression } from '../query/alert_suppression/bulk_create_with_suppression';
 
-import { createEnrichEventsFunction } from '../utils/enrichments';
 import type { RunOpts } from '../types';
 
 import {
