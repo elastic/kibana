@@ -42,6 +42,7 @@ import {
   LogsSharedClientSetupExports,
   LogsSharedClientStartExports,
 } from '@kbn/logs-shared-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -85,6 +86,7 @@ export interface InfraClientSetupDeps {
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
   lens: LensPublicStart;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -108,6 +110,7 @@ export interface InfraClientStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   telemetry: ITelemetryClient;
+  fieldFormats: FieldFormatsStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;
