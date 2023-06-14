@@ -21,14 +21,14 @@ const createMockVersionedRoute = (): MockedVersionedRoute => {
   return api;
 };
 
-export type MockedVersionedRouter = jest.Mocked<VersionedRouter<any>>;
+export type MockedVersionedRouter = jest.Mocked<VersionedRouter<any>> & {
+  getRoute: (method: keyof VersionedRouter, path: string) => RegisteredVersionedRoute;
+};
 
 const createMethodHandler = () => jest.fn((_) => createMockVersionedRoute());
 
-export const createVersionedRouterMock = (): MockedVersionedRouter & {
-  getRoute: (method: keyof VersionedRouter, path: string) => RegisteredVersionedRoute;
-} => {
-  const router: MockedVersionedRouter = {
+export const createVersionedRouterMock = (): MockedVersionedRouter => {
+  const router: Omit<MockedVersionedRouter, 'getRoute'> = {
     delete: createMethodHandler(),
     get: createMethodHandler(),
     patch: createMethodHandler(),
@@ -47,7 +47,7 @@ export interface RegisteredVersionedRoute {
   versions: { [version: string]: { config: AddVersionOpts<any, any, any>; handler: any } };
 }
 const getRoute = (
-  router: MockedVersionedRouter,
+  router: Omit<MockedVersionedRouter, 'getRoute'>,
   method: keyof VersionedRouter,
   path: string
 ): RegisteredVersionedRoute => {
