@@ -89,7 +89,34 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * @returns uninstall token if found
    */
   public async getTokenForPolicyId(policyId: string): Promise<UninstallToken | null> {
-    return (await this.getTokensByIncludeFilter({ include: policyId })).items[0] ?? null;
+    const tokensFinder =
+      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
+        {
+          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"`,
+          sortField: 'created_at',
+          sortOrder: 'desc',
+        }
+      );
+    let decryptedTokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+
+    for await (const result of tokensFinder.find()) {
+      decryptedTokenObjects = result.saved_objects;
+      break;
+    }
+    tokensFinder.close();
+
+    if (decryptedTokenObjects.length === 0) {
+      return null; // todo: throw
+    }
+
+    const { attributes } = decryptedTokenObjects[0]; // todo: map
+
+    return {
+      policy_id: attributes.policy_id,
+      token: attributes.token || attributes.token_plain,
+      created_at: decryptedTokenObjects[0].created_at,
+    };
   }
 
   /**
