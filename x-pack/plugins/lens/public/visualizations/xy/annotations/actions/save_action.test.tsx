@@ -153,7 +153,7 @@ describe('annotation group save action', () => {
           toExpression: jest.fn(),
           toFetchExpression: jest.fn(),
           renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
-        } as EventAnnotationServiceType,
+        } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType,
         toasts: toastsServiceMock.createStartContract(),
         modalOnSaveProps: {
           newTitle: 'my title',
@@ -165,6 +165,7 @@ describe('annotation group save action', () => {
           onTitleDuplicate: () => {},
         },
         dataViews,
+        goToAnnotationLibrary: () => Promise.resolve(),
       };
     };
 

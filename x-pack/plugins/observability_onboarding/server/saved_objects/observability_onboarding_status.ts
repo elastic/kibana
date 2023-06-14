@@ -13,7 +13,8 @@ export const OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE =
 export interface ObservabilityOnboardingState {
   state: {
     datasetName: string;
-    customConfigurations: string;
+    serviceName?: string;
+    customConfigurations?: string;
     logFilePaths: string[];
     namespace: string;
   };
