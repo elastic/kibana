@@ -17,7 +17,7 @@ import {
   isRareJobCreator,
 } from '../../../../../common/job_creator';
 import { ml } from '../../../../../../../services/ml_api_service';
-import { useMlContext } from '../../../../../../../contexts/ml';
+import { useDataSource } from '../../../../../../../contexts/ml';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export enum ESTIMATE_STATUS {
@@ -27,7 +27,7 @@ export enum ESTIMATE_STATUS {
 
 export function useEstimateBucketSpan() {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const mlContext = useMlContext();
+  const mlContext = useDataSource();
 
   const [status, setStatus] = useState(ESTIMATE_STATUS.NOT_RUNNING);
 

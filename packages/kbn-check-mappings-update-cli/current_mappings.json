@@ -2137,36 +2137,6 @@
       }
     }
   },
-  "composite-slo": {
-    "dynamic": false,
-    "properties": {
-      "id": {
-        "type": "keyword"
-      },
-      "name": {
-        "type": "text"
-      },
-      "budgetingMethod": {
-        "type": "keyword"
-      },
-      "compositeMethod": {
-        "type": "keyword"
-      },
-      "sources": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "revision": {
-            "type": "integer"
-          }
-        }
-      },
-      "tags": {
-        "type": "keyword"
-      }
-    }
-  },
   "threshold-explorer-view": {
     "dynamic": false,
     "properties": {}

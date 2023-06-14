@@ -6,6 +6,7 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { recordVideo } from '../../helpers/record_video';
 
 journey('ProjectAPIKeys', async ({ page }) => {
@@ -17,7 +18,10 @@ journey('ProjectAPIKeys', async ({ page }) => {
 
   before(async () => {
     page.on('request', (evt) => {
-      if (evt.resourceType() === 'fetch' && evt.url().includes('uptime/service/api_key')) {
+      if (
+        evt.resourceType() === 'fetch' &&
+        evt.url().includes(SYNTHETICS_API_URLS.SYNTHETICS_APIKEY)
+      ) {
         evt
           .response()
           ?.then((res) => res?.json())

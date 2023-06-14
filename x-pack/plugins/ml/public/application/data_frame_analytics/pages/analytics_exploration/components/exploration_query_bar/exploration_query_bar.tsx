@@ -24,14 +24,13 @@ import {
   SearchQueryLanguage,
 } from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 export interface ExplorationQueryBarProps {
   indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
-    query?: SavedSearchQuery;
+    query?: estypes.QueryDslQueryContainer;
     language: SearchQueryLanguage;
   }) => void;
   includeQueryString?: boolean;
