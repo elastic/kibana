@@ -6,7 +6,7 @@
  */
 
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { InfraAssetMetricType } from '../../../common/http_api';
+import { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
@@ -24,8 +24,14 @@ export type HostNodeRow = HostMetadata &
   };
 
 export enum FlyoutTabIds {
+  METRICS = 'metrics',
   METADATA = 'metadata',
   PROCESSES = 'processes',
+  ANOMALIES = 'anomalies',
+  OSQUERY = 'osquery',
+  LOGS = 'logs',
+  LINK_TO_APM = 'linkToApm',
+  LINK_TO_UPTIME = 'linkToUptime',
 }
 
 export type TabIds = `${FlyoutTabIds}`;
@@ -37,6 +43,17 @@ export interface TabState {
   };
   processes?: {
     query?: string;
+  };
+  anomalies?: {
+    onClose?: () => void;
+  };
+  metrics?: {
+    accountId?: string;
+    region?: string;
+    customMetrics?: SnapshotCustomMetricInput[];
+  };
+  alertRule?: {
+    onCreateRuleClick?: () => void;
   };
 }
 
@@ -57,6 +74,8 @@ export interface Tab {
   'data-test-subj': string;
 }
 
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
+
 export interface AssetDetailsProps {
   node: HostNodeRow;
   nodeType: InventoryItemType;
@@ -70,7 +89,7 @@ export interface AssetDetailsProps {
   overrides?: TabState;
   renderMode?: RenderMode;
   onTabsStateChange?: TabsStateChangeFn;
-  links?: Array<'uptime' | 'apmServices'>;
+  links?: LinkOptions[];
 }
 
 export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
