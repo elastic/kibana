@@ -11,7 +11,6 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { AutomatedActionsFilter } from './actions_log_automated_actions_filter';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -31,7 +30,7 @@ export const ActionsLogFilters = memo(
     onChangeCommandsFilter,
     onChangeStatusesFilter,
     onChangeUsersFilter,
-    onChangeWithAutomatedActionsFilter,
+    onChangeTypeFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -45,7 +44,7 @@ export const ActionsLogFilters = memo(
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
     onChangeUsersFilter: (selectedUsers: string[]) => void;
-    onChangeWithAutomatedActionsFilter: () => void;
+    onChangeTypeFilter: (selectedTypes: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
@@ -81,10 +80,11 @@ export const ActionsLogFilters = memo(
             data-test-subj={dataTestSubj}
           />
           {responseActionsEnabled && (
-            <AutomatedActionsFilter
-              dataTestSubj={dataTestSubj}
-              onChangeWithAutomatedActionsFilter={onChangeWithAutomatedActionsFilter}
+            <ActionsLogFilter
+              filterName={'type'}
               isFlyout={isFlyout}
+              onChangeFilterOptions={onChangeTypeFilter}
+              data-test-subj={dataTestSubj}
             />
           )}
         </>
@@ -94,7 +94,7 @@ export const ActionsLogFilters = memo(
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
-      onChangeWithAutomatedActionsFilter,
+      onChangeTypeFilter,
       onChangeStatusesFilter,
       responseActionsEnabled,
       showHostsFilter,
