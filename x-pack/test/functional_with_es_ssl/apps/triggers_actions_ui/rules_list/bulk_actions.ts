@@ -67,7 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
+      await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
     });
 
     it('should allow rules to be unsnoozed', async () => {
@@ -106,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
+      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
     });
 
     it('should allow rules to be scheduled', async () => {
@@ -137,7 +137,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
+      await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
     });
 
     it('should allow rules to be unscheduled', async () => {
@@ -176,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
+      await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
     });
 
     it('can bulk update API key', async () => {
