@@ -41,6 +41,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   clickCorrelationsViewAllButton,
@@ -329,6 +330,13 @@ describe(
         toggleOverviewTabVisualizationsSection();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
+      });
+
+      it('should display session preview', () => {
+        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabVisualizationsSection();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).should('be.visible');
       });
     });
   }

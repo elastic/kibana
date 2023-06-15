@@ -38,7 +38,7 @@ describe('SessionPreview', () => {
     expect(screen.getByText('started')).toBeInTheDocument();
     expect(screen.getByText('process1')).toBeInTheDocument();
     expect(screen.getByText('at')).toBeInTheDocument();
-    expect(screen.getByText('2022-01-01T00:00:00.000Z')).toBeInTheDocument();
+    expect(screen.getByText('Jan 1, 2022 @ 00:00:00.000')).toBeInTheDocument();
     expect(screen.getByText('with alert')).toBeInTheDocument();
     expect(screen.getByText('rule1')).toBeInTheDocument();
     expect(screen.getByText('by')).toBeInTheDocument();

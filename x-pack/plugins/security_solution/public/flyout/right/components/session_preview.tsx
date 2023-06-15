@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiIcon, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCode, EuiIcon, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { useMemo, type FC } from 'react';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
 import { useProcessData } from '../hooks/use_process_data';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
-import { SESSION_PREVIEW_TITLE } from './translations';
+import {
+  SESSION_PREVIEW_COMMAND_TEXT,
+  SESSION_PREVIEW_PROCESS_TEXT,
+  SESSION_PREVIEW_RULE_TEXT,
+  SESSION_PREVIEW_TIME_TEXT,
+  SESSION_PREVIEW_TITLE,
+} from './translations';
 
 /**
  * One-off helper to make sure that inline values are rendered consistently
@@ -23,7 +30,7 @@ const ValueContainer: FC<{ text?: string }> = ({ text, children }) => (
         <span>{text}</span>
         &nbsp;
       </>
-    )}{' '}
+    )}
     {children}
   </>
 );
@@ -43,7 +50,7 @@ export const SessionPreview: FC = () => {
   const processNameFragment = useMemo(() => {
     return (
       processName && (
-        <ValueContainer text={'started'}>
+        <ValueContainer text={SESSION_PREVIEW_PROCESS_TEXT}>
           <span style={emphasisStyles}>{processName}</span>
         </ValueContainer>
       )
@@ -53,8 +60,8 @@ export const SessionPreview: FC = () => {
   const timeFragment = useMemo(() => {
     return (
       startAt && (
-        <ValueContainer text="at">
-          <span>{startAt}</span>
+        <ValueContainer text={SESSION_PREVIEW_TIME_TEXT}>
+          <PreferenceFormattedDate value={new Date(startAt)} />
         </ValueContainer>
       )
     );
@@ -63,7 +70,7 @@ export const SessionPreview: FC = () => {
   const ruleFragment = useMemo(() => {
     return (
       rule && (
-        <ValueContainer text={'with alert'}>
+        <ValueContainer text={SESSION_PREVIEW_RULE_TEXT}>
           <EuiLink>{rule}</EuiLink>
         </ValueContainer>
       )
@@ -73,14 +80,14 @@ export const SessionPreview: FC = () => {
   const commandFragment = useMemo(() => {
     return (
       command && (
-        <ValueContainer text="by">
-          <span style={emphasisStyles}>
+        <ValueContainer text={SESSION_PREVIEW_COMMAND_TEXT}>
+          <EuiCode>
             {workdir} {command}
-          </span>
+          </EuiCode>
         </ValueContainer>
       )
     );
-  }, [command, emphasisStyles, workdir]);
+  }, [command, workdir]);
 
   return (
     <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={SESSION_PREVIEW_TEST_ID}>
