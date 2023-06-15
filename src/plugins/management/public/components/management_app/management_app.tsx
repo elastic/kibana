@@ -13,6 +13,8 @@ import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { CoreStart } from '@kbn/core/public';
 
 import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -36,11 +38,12 @@ interface ManagementAppProps {
 export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
+  coreStart: CoreStart;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
-export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
+export const ManagementApp = ({ dependencies, appBasePath, history, theme$ }: ManagementAppProps) => {
   const { setBreadcrumbs, isSidebarEnabled$ } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
@@ -96,25 +99,28 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
     : undefined;
 
   return (
-    <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaPageTemplate
-          restrictWidth={false}
-          solutionNav={solution}
-          // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-          // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-          mainProps={{ paddingSize: 'l' }}
-        >
-          <ManagementRouter
-            history={history}
-            theme$={theme$}
-            setBreadcrumbs={setBreadcrumbsScoped}
-            onAppMounted={onAppMounted}
-            sections={sections}
-            dependencies={dependencies}
-          />
-        </KibanaPageTemplate>
-      </KibanaThemeProvider>
-    </I18nProvider>
+    <RedirectAppLinks coreStart={dependencies.coreStart}>
+      <I18nProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaPageTemplate
+            restrictWidth={false}
+            solutionNav={solution}
+            // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+            // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+            mainProps={{ paddingSize: 'l' }}
+          >
+            <ManagementRouter
+              history={history}
+              theme$={theme$}
+              setBreadcrumbs={setBreadcrumbsScoped}
+              onAppMounted={onAppMounted}
+              sections={sections}
+              appBasePath={appBasePath}
+              dependencies={dependencies}
+            />
+          </KibanaPageTemplate>
+        </KibanaThemeProvider>
+      </I18nProvider>
+    </RedirectAppLinks>
   );
 };

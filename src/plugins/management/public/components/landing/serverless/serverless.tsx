@@ -25,6 +25,7 @@ import { ManagementSection, ManagementApp } from '../../../utils';
 
 interface ManagementLandingPageProps {
   sections: ManagementSection[];
+  appBasePath: string;
 }
 
 const getDataFromManagementApp = (section: ManagementApp) => {
@@ -126,7 +127,7 @@ const getEnabledAppsByCategory = (sections: ManagementSection[]) => {
   ];
 };
 
-export const ServerlessLandingPage = ({ sections }: ManagementLandingPageProps) => {
+export const ServerlessLandingPage = ({ sections, appBasePath }: ManagementLandingPageProps) => {
   const appsByCategory = getEnabledAppsByCategory(sections);
 
   return (
@@ -165,7 +166,7 @@ export const ServerlessLandingPage = ({ sections }: ManagementLandingPageProps) 
                     titleSize="xs"
                     title={app.title}
                     description={app.description}
-                    href={`/app/management${app.href}`}
+                    href={appBasePath + app.href}
                   />
                 </EuiFlexItem>
               ))}

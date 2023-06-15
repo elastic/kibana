@@ -113,6 +113,7 @@ export class ManagementPlugin
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
+          coreStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
         });

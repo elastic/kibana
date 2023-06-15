@@ -13,6 +13,7 @@ import { ManagementSection } from '../../utils';
 
 interface ManagementLandingPageProps {
   version: string;
+  appBasePath: string;
   onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
   sections: ManagementSection[];
@@ -22,6 +23,7 @@ export const ManagementLandingPage = ({
   version,
   sections,
   setBreadcrumbs,
+  appBasePath,
   onAppMounted,
 }: ManagementLandingPageProps) => {
   const isServerless = true;
@@ -32,7 +34,7 @@ export const ManagementLandingPage = ({
   }, [onAppMounted]);
 
   if (isServerless) {
-    return <ServerlessLandingPage sections={sections} />;
+    return <ServerlessLandingPage appBasePath={appBasePath} sections={sections} />;
   }
 
   return <DefaultLandingPage version={version} />;

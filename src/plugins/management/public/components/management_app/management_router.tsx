@@ -19,6 +19,7 @@ interface ManagementRouterProps {
   history: AppMountParameters['history'];
   theme$: AppMountParameters['theme$'];
   dependencies: ManagementAppDependencies;
+  appBasePath: string;
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
@@ -27,6 +28,7 @@ interface ManagementRouterProps {
 export const ManagementRouter = memo(
   ({
     dependencies,
+    appBasePath,
     history,
     setBreadcrumbs,
     onAppMounted,
@@ -65,6 +67,7 @@ export const ManagementRouter = memo(
             <ManagementLandingPage
               version={dependencies.kibanaVersion}
               sections={sections}
+              appBasePath={appBasePath}
               setBreadcrumbs={setBreadcrumbs}
               onAppMounted={onAppMounted}
             />
