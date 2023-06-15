@@ -3250,7 +3250,6 @@
         "settings": {
           "index": {
             "auto_expand_replicas": "0-1",
-            "final_pipeline": "ES_cgroup_v2",
             "lifecycle": {
               "name": ".monitoring-8-ilm-policy"
             },
