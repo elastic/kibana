@@ -12,10 +12,10 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { SerializedSearchSourceFields } from './types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../..';
 
-export function extractReferences<T extends SerializedSearchSourceFields>(
-  state: T
-): [T, SavedObjectReference[]] {
-  let searchSourceFields: T = { ...state };
+export const extractReferences = (
+  state: SerializedSearchSourceFields
+): [SerializedSearchSourceFields, SavedObjectReference[]] => {
+  let searchSourceFields: SerializedSearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
     if (typeof searchSourceFields.index === 'string') {
@@ -65,4 +65,4 @@ export function extractReferences<T extends SerializedSearchSourceFields>(
   }
 
   return [searchSourceFields, references];
-}
+};

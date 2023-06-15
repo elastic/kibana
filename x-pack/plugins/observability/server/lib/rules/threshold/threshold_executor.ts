@@ -16,7 +16,6 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
-import { extractReferences, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { createFormatter } from '../../../../common/threshold_rule/formatters';
 import { Comparator } from '../../../../common/threshold_rule/types';
@@ -192,14 +191,7 @@ export const createMetricThresholdExecutor = ({
         ? state.missingGroups
         : [];
 
-    // TODO revisit extractReferences types https://github.com/elastic/kibana/issues/159714
-    const [{ searchConfiguration }] = extractReferences<
-      SerializedSearchSourceFields & {
-        indexRefName?: string;
-        searchConfiguration?: SerializedSearchSourceFields;
-      }
-    >(params);
-    const initialSearchSource = await searchSourceClient.create(searchConfiguration!);
+    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
     const dataView = initialSearchSource.getField('index')!.getIndexPattern();
     if (!dataView) {
       throw new Error('No matched data view');

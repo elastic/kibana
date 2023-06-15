@@ -220,6 +220,7 @@ export function thresholdRuleType(
       ],
     },
     useSavedObjectReferences: {
+      // TODO revisit types https://github.com/elastic/kibana/issues/159714
       extractReferences: (params: any) => {
         const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
         const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
