@@ -74,7 +74,9 @@ export const HeaderField = ({
   );
 };
 
-// We apply default `Content-Type` headers automatically, and hide these from the user when they apply custom values
+// We apply default `Content-Type` headers automatically depending on the request body mime type
+// We hide the default Content-Type headers from the user as an implementation detail
+// However, If the user applies a custom `Content-Type` header, it should be shown
 export const filterContentType =
   (
     defaultValue: Record<string, string>,

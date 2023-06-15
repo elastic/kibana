@@ -75,8 +75,8 @@ import {
   FormLocation,
   ResponseBodyIndexPolicy,
   ResponseCheckJSON,
-  RequestBodyCheck,
   ThrottlingConfig,
+  RequestBodyCheck,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -723,7 +723,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: ({ dependencies }): HeaderFieldProps => {
+    // contentMode is optional for other implementations, but required for this implemention of this field
+    props: ({
+      dependencies,
+    }): HeaderFieldProps & { contentMode: HeaderFieldProps['contentMode'] } => {
       const [requestBody] = dependencies;
       return {
         readOnly,
