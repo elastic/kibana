@@ -158,6 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
             status: CaseStatuses.open,
             severity: CaseSeverity.LOW,
             assignees: [],
+            category: null,
           },
         });
       });
