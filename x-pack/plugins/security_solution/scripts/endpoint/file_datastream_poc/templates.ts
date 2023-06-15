@@ -14,20 +14,21 @@ interface IndexTemplateDefinition {
 
 export const getFileMetaDataStreamIndexTemplate = (): IndexTemplateDefinition => {
   return {
-    name: 'paul-filedelivery-meta',
+    name: '.fleet-paul.filedelivery-meta',
     template: {
-      index_patterns: ['paul-filedelivery-meta-*-*'],
+      index_patterns: ['.fleet-paul.filedelivery-meta-*'],
       priority: 200,
       composed_of: [],
       _meta: {
         description: 'fleet file delivery index template',
         managed: true,
       },
+      data_stream: {},
       template: {
         settings: {
-          'index.auto_expand_replicas': '0-1',
+          // 'index.auto_expand_replicas': '0-1',
           // 'index.lifecycle.name': '.fleet-filedelivery-meta-ilm-policy',
-          'index.hidden': true,
+          // 'index.hidden': true,
         },
         mappings: {
           _meta: {
@@ -80,9 +81,9 @@ export const getFileMetaDataStreamIndexTemplate = (): IndexTemplateDefinition =>
 
 export const getFileDataChunkDataStreamIndexTemplate = (): IndexTemplateDefinition => {
   return {
-    name: 'paul-filedelivery-data',
+    name: '.fleet-paul.filedelivery-data',
     template: {
-      index_patterns: ['paul-filedelivery-data-*-*'],
+      index_patterns: ['.fleet-paul.filedelivery-data-*'],
       priority: 200,
       composed_of: [],
       _meta: {

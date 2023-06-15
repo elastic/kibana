@@ -28,7 +28,7 @@ export const cli = () => {
         log: logger,
       });
 
-      await installDataStreams(esClient, log);
+      await installDataStreams(esClient, log, (cliCtx.flags.create as boolean) ?? false);
     },
 
     // Options
@@ -36,13 +36,14 @@ export const cli = () => {
       description: `Endpoint agent emulator.`,
       flags: {
         string: ['kibana', 'elastic', 'username', 'password'],
-        boolean: ['asSuperuser'],
+        boolean: ['asSuperuser', 'create'],
         default: {
           kibana: 'http://127.0.0.1:5601',
           elasticsearch: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
           asSuperuser: false,
+          create: false,
         },
         help: `
         --username          User name to be used for auth against elasticsearch and
@@ -55,6 +56,8 @@ export const cli = () => {
                             new user will then be used to run this utility.
         --kibana            The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticsearch     The url to Elasticsearch (Default: http://127.0.0.1:9200)
+        --create            If defined, then the indexes will actually be created for endpoint.
+                            Default: false
       `,
       },
     }
