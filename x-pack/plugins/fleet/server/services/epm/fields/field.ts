@@ -267,8 +267,12 @@ export function processFieldsWithWildcard(fields: Fields): Fields {
   return newFields;
 }
 
-export function addTimeSeriesFields(fields: Fields): Fields {
+export function addTimeSeriesFields(
+  fields: Fields,
+  isIndexModeTimeSeries: boolean | undefined
+): Fields {
   const newFields: Fields = [];
+  if (!isIndexModeTimeSeries) return fields;
 
   for (const field of fields) {
     if ('metric_type' in field) {
@@ -278,10 +282,10 @@ export function addTimeSeriesFields(fields: Fields): Fields {
   return newFields;
 }
 
-export function processFields(fields: Fields): Fields {
+export function processFields(fields: Fields, isIndexModeTimeSeries?: boolean): Fields {
   const processedFields = processFieldsWithWildcard(fields);
   const expandedFields = expandFields(processedFields);
-  const addedFields = addTimeSeriesFields(expandedFields);
+  const addedFields = addTimeSeriesFields(expandedFields, isIndexModeTimeSeries);
   const dedupedFields = dedupFields(addedFields);
 
   return validateFields(dedupedFields, dedupedFields);
