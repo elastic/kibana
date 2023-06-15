@@ -48,6 +48,8 @@ export const createEventSignal = async ({
   unprocessedExceptions,
   allowedFieldsForTermsQuery,
   threatMatchedFields,
+  inputIndexFields,
+  threatIndexFields,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
@@ -80,6 +82,7 @@ export const createEventSignal = async ({
       runtimeMappings,
       listClient,
       exceptionFilter,
+      indexFields: threatIndexFields,
     };
 
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
@@ -109,6 +112,7 @@ export const createEventSignal = async ({
       services,
       index: inputIndex,
       exceptionFilter,
+      fields: inputIndexFields,
     });
 
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);

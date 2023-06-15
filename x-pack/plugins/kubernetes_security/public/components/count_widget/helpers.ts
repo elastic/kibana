@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DEFAULT_QUERY } from '../../../common/constants';
+import { DEFAULT_FILTER_QUERY } from '../../../common/constants';
 import { QueryDslQueryContainerBool } from '../../types';
 
 export const addResourceTypeToFilterQuery = (
   filterQuery: string | undefined,
   resourceType: 'node' | 'pod'
 ) => {
-  let validFilterQuery = DEFAULT_QUERY;
+  let validFilterQuery = DEFAULT_FILTER_QUERY;
 
   try {
     const parsedFilterQuery: QueryDslQueryContainerBool = JSON.parse(filterQuery || '{}');
@@ -32,7 +32,7 @@ export const addResourceTypeToFilterQuery = (
     });
     validFilterQuery = JSON.stringify(parsedFilterQuery);
   } catch {
-    // no-op since validFilterQuery is initialized to be DEFAULT_QUERY
+    // no-op since validFilterQuery is initialized to be DEFAULT_FILTER_QUERY
   }
 
   return validFilterQuery;

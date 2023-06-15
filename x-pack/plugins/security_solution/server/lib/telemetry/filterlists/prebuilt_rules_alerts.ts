@@ -92,9 +92,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       hash: true,
     },
   },
-  destination: {
-    port: true,
-  },
+  destination: true,
   dll: {
     Ext: {
       relative_file_creation_time: true,
@@ -115,11 +113,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       sha256: true,
     },
   },
-  dns: {
-    question: {
-      name: true,
-    },
-  },
+  dns: true,
   event: true,
   group: {
     name: true,
@@ -139,13 +133,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   message: true,
-  network: {
-    bytes: true,
-    direction: true,
-    protocol: true,
-    transport: true,
-    type: true,
-  },
+  network: true,
   orchestrator: {
     namespace: true,
     resource: {
@@ -216,20 +204,14 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   rule: {
     name: true,
   },
-  source: {
-    port: true,
-  },
+  source: true,
   tls: {
     server: {
       hash: true,
     },
   },
   type: true,
-  url: {
-    extension: true,
-    full: true,
-    path: true,
-  },
+  url: true,
   user_agent: {
     original: true,
   },

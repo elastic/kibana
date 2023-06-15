@@ -26,7 +26,7 @@ describe('dashboard renderer', () => {
     mockDashboardContainer = {
       destroy: jest.fn(),
       render: jest.fn(),
-      isExpectingIdChange: jest.fn().mockReturnValue(false),
+      navigateToDashboard: jest.fn(),
     } as unknown as DashboardContainer;
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockDashboardContainer),
@@ -77,26 +77,17 @@ describe('dashboard renderer', () => {
     expect(mockDashboardContainer.destroy).toHaveBeenCalledTimes(1);
   });
 
-  test('destroys dashboard container on unexpected ID change', async () => {
+  test('calls navigate and does not destroy dashboard container on ID change', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
     });
-    await act(async () => {
-      await wrapper.setProps({ savedObjectId: 'saved_object_kibanakiwi' });
-    });
-    expect(mockDashboardContainer.destroy).toHaveBeenCalledTimes(1);
-  });
-
-  test('does not destroy dashboard container on expected ID change', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
-    });
-    mockDashboardContainer.isExpectingIdChange = jest.fn().mockReturnValue(true);
     await act(async () => {
       await wrapper.setProps({ savedObjectId: 'saved_object_kibanakiwi' });
     });
     expect(mockDashboardContainer.destroy).not.toHaveBeenCalled();
+    expect(mockDashboardContainer.navigateToDashboard).toHaveBeenCalledWith(
+      'saved_object_kibanakiwi'
+    );
   });
 });

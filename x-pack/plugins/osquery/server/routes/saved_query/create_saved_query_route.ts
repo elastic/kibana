@@ -84,7 +84,8 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         body: {
           data: pickBy(
             {
-              ...savedQuerySO,
+              ...savedQuerySO.attributes,
+              saved_object_id: savedQuerySO.id,
               ecs_mapping,
             },
             (value) => !isEmpty(value)

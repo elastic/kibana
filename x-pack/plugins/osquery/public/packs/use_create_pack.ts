@@ -51,7 +51,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
           i18n.translate('xpack.osquery.newPack.successToastMessageText', {
             defaultMessage: 'Successfully created "{packName}" pack',
             values: {
-              packName: payload.data.attributes?.name ?? '',
+              packName: payload.data?.name ?? '',
             },
           })
         );

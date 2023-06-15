@@ -13,9 +13,52 @@ import {
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
-import { StackTraceResponse } from '../../common/stack_traces';
+import { StackTraceResponse, ProfilingStackTrace } from '../../common/stack_traces';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { ProjectTimeQuery } from './query';
+
+export const makeFrameID = (frameID: string, n: number): string => {
+  return n === 0 ? frameID : frameID + ';' + n.toString();
+};
+
+// createInlineTrace builds a new StackTrace with inline frames.
+const createInlineTrace = (
+  trace: ProfilingStackTrace,
+  frames: Map<StackFrameID, StackFrame>
+): StackTrace => {
+  // The arrays need to be extended with the inline frame information.
+  const frameIDs: string[] = [];
+  const fileIDs: string[] = [];
+  const addressOrLines: number[] = [];
+  const typeIDs: number[] = [];
+
+  for (let i = 0; i < trace.frame_ids.length; i++) {
+    const frameID = trace.frame_ids[i];
+    frameIDs.push(frameID);
+    fileIDs.push(trace.file_ids[i]);
+    addressOrLines.push(trace.address_or_lines[i]);
+    typeIDs.push(trace.type_ids[i]);
+
+    for (let j = 1; ; j++) {
+      const inlineID = makeFrameID(frameID, j);
+      const frame = frames.get(inlineID);
+      if (!frame) {
+        break;
+      }
+      frameIDs.push(inlineID);
+      fileIDs.push(trace.file_ids[i]);
+      addressOrLines.push(trace.address_or_lines[i]);
+      typeIDs.push(trace.type_ids[i]);
+    }
+  }
+
+  return {
+    FrameIDs: frameIDs,
+    FileIDs: fileIDs,
+    AddressOrLines: addressOrLines,
+    Types: typeIDs,
+  } as StackTrace;
+};
 
 export function decodeStackTraceResponse(response: StackTraceResponse) {
   const stackTraceEvents: Map<StackTraceID, number> = new Map();
@@ -23,29 +66,27 @@ export function decodeStackTraceResponse(response: StackTraceResponse) {
     stackTraceEvents.set(key, value);
   }
 
-  const stackTraces: Map<StackTraceID, StackTrace> = new Map();
-  for (const [key, value] of Object.entries(response.stack_traces ?? {})) {
-    stackTraces.set(key, {
-      FrameIDs: value.frame_ids,
-      FileIDs: value.file_ids,
-      AddressOrLines: value.address_or_lines,
-      Types: value.type_ids,
-    } as StackTrace);
-  }
-
   const stackFrames: Map<StackFrameID, StackFrame> = new Map();
-  for (const [key, value] of Object.entries(response.stack_frames ?? {})) {
+  for (const [frameID, frame] of Object.entries(response.stack_frames ?? {})) {
     // Each field in a stackframe is represented by an array. This is
     // necessary to support inline frames.
     //
-    // We only take the first available inline stackframe until the UI
-    // can support all of them.
-    stackFrames.set(key, {
-      FileName: value.file_name[0],
-      FunctionName: value.function_name[0],
-      FunctionOffset: value.function_offset[0],
-      LineNumber: value.line_number[0],
-    } as StackFrame);
+    // We store the inlined frames with a modified (and unique) ID.
+    // We can do so since we don't display the frame IDs.
+    for (let i = 0; i < frame.function_name.length; i++) {
+      stackFrames.set(makeFrameID(frameID, i), {
+        FileName: frame.file_name[i],
+        FunctionName: frame.function_name[i],
+        FunctionOffset: frame.function_offset[i],
+        LineNumber: frame.line_number[i],
+        Inline: i > 0,
+      } as StackFrame);
+    }
+  }
+
+  const stackTraces: Map<StackTraceID, StackTrace> = new Map();
+  for (const [traceID, trace] of Object.entries(response.stack_traces ?? {})) {
+    stackTraces.set(traceID, createInlineTrace(trace, stackFrames));
   }
 
   const executables: Map<FileID, Executable> = new Map();

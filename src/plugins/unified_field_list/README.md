@@ -141,9 +141,9 @@ const hasData = hasFieldData(currentDataViewId, fieldName) // returns a boolean
 
 ## Server APIs
 
-* `/api/unified_field_list/field_stats` - returns the loaded field stats (except for Ad-hoc data views)
+* `/internal/unified_field_list/field_stats` - returns the loaded field stats (except for Ad-hoc data views)
 
-* `/api/unified_field_list/existing_fields/{dataViewId}` - returns the loaded existing fields (except for Ad-hoc data views)
+* `/internal/unified_field_list/existing_fields/{dataViewId}` - returns the loaded existing fields (except for Ad-hoc data views)
 
 ## Development
 

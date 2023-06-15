@@ -130,6 +130,7 @@ export interface DocLinks {
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
     readonly connectorsSharepoint: string;
+    readonly connectorsSharepointOnline: string;
     readonly connectorsWorkplaceSearch: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -535,5 +536,8 @@ export interface DocLinks {
   };
   readonly synthetics: {
     readonly featureRoles: string;
+  };
+  readonly telemetry: {
+    readonly settings: string;
   };
 }

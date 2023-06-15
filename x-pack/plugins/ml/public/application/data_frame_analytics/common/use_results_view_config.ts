@@ -11,27 +11,30 @@ import { i18n } from '@kbn/i18n';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-
-import { getDataViewIdFromName } from '../../util/index_utils';
-import { ml } from '../../services/ml_api_service';
-import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlContext } from '../../contexts/ml';
-
-import { DataFrameAnalyticsConfig } from '.';
-
-import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
-import { DataFrameTaskStateType } from '../pages/analytics_management/components/analytics_list/common';
-import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
-import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
-import { getToastNotificationService } from '../../services/toast_notification_service';
 import {
   isClassificationAnalysis,
   isRegressionAnalysis,
-} from '../../../../common/util/analytics_utils';
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  type TotalFeatureImportance,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { useMlKibana } from '../../contexts/kibana';
+import { getDataViewIdFromName } from '../../util/index_utils';
+import { ml } from '../../services/ml_api_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
+import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
+import { getToastNotificationService } from '../../services/toast_notification_service';
 import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {
-  const mlContext = useMlContext();
+  const {
+    services: {
+      data: { dataViews },
+    },
+  } = useMlKibana();
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);
@@ -100,13 +103,13 @@ export const useResultsViewConfig = (jobId: string) => {
             let dataView: DataView | undefined;
 
             try {
-              dataView = await mlContext.dataViewsContract.get(destDataViewId);
+              dataView = await dataViews.get(destDataViewId);
 
               // Force refreshing the fields list here because a user directly coming
               // from the job creation wizard might land on the page without the
               // data view being fully initialized because it was created
               // before the analytics job populated the destination index.
-              await mlContext.dataViewsContract.refreshFields(dataView);
+              await dataViews.refreshFields(dataView);
             } catch (e) {
               dataView = undefined;
             }
@@ -116,7 +119,7 @@ export const useResultsViewConfig = (jobId: string) => {
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
-                dataView = await mlContext.dataViewsContract.get(sourceDataViewId);
+                dataView = await dataViews.get(sourceDataViewId);
               } catch (e) {
                 dataView = undefined;
               }

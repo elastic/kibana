@@ -18,6 +18,9 @@ import {
   EuiSwitch,
   EuiTextArea,
   EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { Status } from '../../../../../../common/types/api';
@@ -27,16 +30,36 @@ import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_co
 
 import {
   ConnectorConfigurationLogic,
-  ConfigEntry,
+  ConfigEntryView,
   ensureStringType,
   ensureBooleanType,
 } from './connector_configuration_logic';
+import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
 
 interface ConnectorConfigurationFieldProps {
-  configEntry: ConfigEntry;
+  configEntry: ConfigEntryView;
 }
 
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
+  configEntry,
+}) => {
+  return configEntry.tooltip ? (
+    <EuiToolTip content={configEntry.tooltip}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem>
+          <ConnectorConfigurationFieldType configEntry={configEntry} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIcon type="questionInCircle" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  ) : (
+    <ConnectorConfigurationFieldType configEntry={configEntry} />
+  );
+};
+
+export const ConnectorConfigurationFieldType: React.FC<ConnectorConfigurationFieldProps> = ({
   configEntry,
 }) => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
@@ -49,6 +72,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     label,
     options,
     required,
+    placeholder,
     sensitive,
     tooltip,
     value,
@@ -88,6 +112,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}
+          placeholder={placeholder}
         />
       );
 
@@ -95,6 +120,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       const textarea = (
         <EuiTextArea
           disabled={status === Status.LOADING}
+          placeholder={placeholder}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
@@ -119,21 +145,25 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
     case DisplayType.TOGGLE:
-      const toggleLabel = (
-        <EuiToolTip content={tooltip}>
-          <p>{label}</p>
-        </EuiToolTip>
-      );
-
-      return (
+      const toggleSwitch = (
         <EuiSwitch
           checked={ensureBooleanType(value)}
           disabled={status === Status.LOADING}
-          label={toggleLabel}
+          label={
+            <EuiToolTip content={tooltip}>
+              <p>{label}</p>
+            </EuiToolTip>
+          }
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.checked });
           }}
         />
+      );
+
+      return key !== 'document_level_security' ? (
+        toggleSwitch
+      ) : (
+        <DocumentLevelSecurityPanel toggleSwitch={toggleSwitch} />
       );
 
     default:
@@ -150,6 +180,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       ) : (
         <EuiFieldText
           disabled={status === Status.LOADING}
+          placeholder={placeholder}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {

@@ -6,24 +6,24 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connectors';
+import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connectors/connector';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.type({
+export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.strict({
   connector: CaseUserActionConnectorRt,
 });
 
-export const ConnectorUserActionPayloadRt = rt.type({
+export const ConnectorUserActionPayloadRt = rt.strict({
   connector: CaseConnectorRt,
 });
 
-export const ConnectorUserActionWithoutConnectorIdRt = rt.type({
+export const ConnectorUserActionWithoutConnectorIdRt = rt.strict({
   type: rt.literal(ActionTypes.connector),
   payload: ConnectorUserActionPayloadWithoutConnectorIdRt,
 });
 
-export const ConnectorUserActionRt = rt.type({
+export const ConnectorUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.connector),
   payload: ConnectorUserActionPayloadRt,
 });

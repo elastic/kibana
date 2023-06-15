@@ -6,6 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
@@ -31,7 +32,6 @@ import {
   type TransformConfigQuery,
 } from './request';
 import type { LatestFunctionConfigUI } from '../../../common/types/transform';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const simpleQuery: TransformConfigQuery = { query_string: { query: 'airline:AAL' } };
 
@@ -303,13 +303,13 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformRequestBody() with runtime fields and custom values', () => {
-    const runtimeMappings = {
+    const runtimeMappings: RuntimeMappings = {
       rt_bytes_bigger: {
         type: 'double',
         script: {
           source: "emit(doc['bytes'].value * 2.0)",
         },
-      } as RuntimeField,
+      },
     };
 
     const pivotState: StepDefineExposedState = {

@@ -15,6 +15,7 @@ import {
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { DataViewsService } from '../common';
 
 /**
@@ -72,6 +73,10 @@ export interface DataViewsServerPluginSetupDependencies {
    * Usage collection
    */
   usageCollection?: UsageCollectionSetup;
+  /**
+   * Content management
+   */
+  contentManagement: ContentManagementServerSetup;
 }
 
 /**

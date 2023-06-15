@@ -32,6 +32,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         searchDescription={renderProps.searchDescription}
         sharedItemTitle={renderProps.sharedItemTitle}
         isLoading={renderProps.isLoading}
+        isPlainRecord={renderProps.isPlainRecord}
         dataTestSubj="embeddedSavedSearchDocTable"
         DocViewer={DocViewer}
       />

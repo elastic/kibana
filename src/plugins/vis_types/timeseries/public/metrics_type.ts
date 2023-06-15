@@ -23,12 +23,11 @@ import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
 } from '../common/index_patterns_utils';
-import { TSVB_DEFAULT_COLOR, UI_SETTINGS } from '../common/constants';
+import { TSVB_DEFAULT_COLOR, UI_SETTINGS, VIS_TYPE } from '../common/constants';
 import { toExpressionAst } from './to_ast';
 import { getDataViewsStart, getUISettings } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
-import { convertTSVBtoLensConfiguration } from './convert_to_lens';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -99,7 +98,7 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
 export const metricsVisDefinition: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
 > = {
-  name: 'metrics',
+  name: VIS_TYPE,
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
     defaultMessage: 'Perform advanced analysis of your time series data.',
@@ -168,6 +167,7 @@ export const metricsVisDefinition: VisTypeDefinition<
     return [];
   },
   getExpressionVariables: async (vis, timeFilter) => {
+    const { convertTSVBtoLensConfiguration } = await import('./convert_to_lens');
     return {
       canNavigateToLens: Boolean(
         vis?.params
@@ -176,9 +176,12 @@ export const metricsVisDefinition: VisTypeDefinition<
       ),
     };
   },
-  navigateToLens: async (vis, timeFilter) =>
-    vis?.params ? await convertTSVBtoLensConfiguration(vis, timeFilter?.getAbsoluteTime()) : null,
-
+  navigateToLens: async (vis, timeFilter) => {
+    const { convertTSVBtoLensConfiguration } = await import('./convert_to_lens');
+    return vis?.params
+      ? await convertTSVBtoLensConfiguration(vis, timeFilter?.getAbsoluteTime())
+      : null;
+  },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),
   }),

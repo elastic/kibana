@@ -167,6 +167,14 @@ const configSchema = schema.object(
       }
     ),
     restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
+    versioned: schema.object({
+      // Which handler resolution algo to use: "newest" or "oldest"
+      versionResolution: schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
+        defaultValue: 'oldest',
+      }),
+      // Whether we enforce version checks on client requests
+      strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+    }),
   },
   {
     validate: (rawConfig) => {
@@ -239,6 +247,7 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
+  public versioned: { versionResolution: 'newest' | 'oldest'; strictClientVersionCheck: boolean };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
 
@@ -262,12 +271,12 @@ export class HttpConfig implements IHttpConfig {
     this.securityResponseHeaders = securityResponseHeaders;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
       (headers, [key, value]) => {
-        return {
-          ...headers,
-          [key]: Array.isArray(value) ? value.map((e) => convertHeader(e)) : convertHeader(value),
-        };
+        headers[key] = Array.isArray(value)
+          ? value.map((e) => convertHeader(e))
+          : convertHeader(value);
+        return headers;
       },
-      {}
+      {} as Record<string, string | string[]>
     );
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
@@ -286,6 +295,7 @@ export class HttpConfig implements IHttpConfig {
 
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
     this.eluMonitor = rawHttpConfig.eluMonitor;
+    this.versioned = rawHttpConfig.versioned;
   }
 }
 

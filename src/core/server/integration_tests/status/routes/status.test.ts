@@ -78,6 +78,7 @@ describe('GET /api/status', () => {
           buildSha: 'xsha',
           dist: true,
           version: '9.9.9-SNAPSHOT',
+          buildDate: new Date('2023-05-15T23:12:09.000Z'),
         },
         serverName: 'xkibana',
         uuid: 'xxxx-xxxxx',
@@ -142,6 +143,7 @@ describe('GET /api/status', () => {
       build_hash: 'xsha',
       build_number: 1234,
       build_snapshot: true,
+      build_date: new Date('2023-05-15T23:12:09.000Z').toISOString(),
     });
     const metricsMockValue = await firstValueFrom(metrics.getOpsMetrics$());
     expect(result.body.metrics).toEqual({

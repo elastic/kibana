@@ -59,6 +59,10 @@ interface SpikeAnalysisTableProps {
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
   dataView: DataView;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -68,6 +72,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   dataView,
   timeRangeMs,
   searchQuery,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -114,6 +120,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       );
     }
@@ -274,6 +282,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               defaultMessage: 'Group',
             }
           )}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       ),
       sortable: false,
@@ -350,10 +360,14 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
-      name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.spikeAnalysisGroupsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions: [viewInDiscoverAction, viewInLogPatternAnalysisAction, copyToClipBoardAction],
+      actions: [
+        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+        copyToClipBoardAction,
+      ],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'top',
     },

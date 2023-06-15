@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
 
@@ -15,9 +16,12 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
     e2e: {
       ...options?.e2e,
       setupNodeEvents(on, config) {
-        on(
-          'file:preprocessor',
-          wp({
+        on('file:preprocessor', (file) => {
+          const id = uuid();
+          // Fix an issue with running Cypress parallel
+          file.outputPath = file.outputPath.replace(/^(.*\/)(.*?)(\..*)$/, `$1$2.${id}$3`);
+
+          return wp({
             webpackOptions: {
               resolve: {
                 extensions: ['.ts', '.tsx', '.js'],
@@ -39,8 +43,8 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                 ],
               },
             },
-          })
-        );
+          })(file);
+        });
 
         const external = options?.e2e?.setupNodeEvents;
         if (external) {

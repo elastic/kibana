@@ -71,6 +71,7 @@ export const dataLoaders = (
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
     username: config.env.ELASTICSEARCH_USERNAME,
     password: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
@@ -114,7 +115,14 @@ export const dataLoaders = (
 
     indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
       const { kbnClient, esClient } = await stackServicesPromise;
-      const { count: numHosts, version, os, isolation, withResponseActions } = options;
+      const {
+        count: numHosts,
+        version,
+        os,
+        isolation,
+        withResponseActions,
+        numResponseActions,
+      } = options;
 
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
         numHosts,
@@ -122,6 +130,7 @@ export const dataLoaders = (
         os,
         isolation,
         withResponseActions,
+        numResponseActions,
       });
     },
 
@@ -196,6 +205,7 @@ export const dataLoadersForRealEndpoints = (
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
     username: config.env.ELASTICSEARCH_USERNAME,
     password: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,

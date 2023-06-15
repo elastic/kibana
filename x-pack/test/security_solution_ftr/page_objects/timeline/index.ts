@@ -31,6 +31,7 @@ export class TimelinePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly defaultTimeoutMs = this.ctx.getService('config').get('timeouts.waitFor');
+  private readonly logger = this.ctx.getService('log');
 
   async navigateToTimelineList(): Promise<void> {
     await this.pageObjects.common.navigateToUrlWithBrowserHistory('securitySolutionTimelines');
@@ -90,17 +91,30 @@ export class TimelinePageObject extends FtrService {
    */
   async clickRefresh(): Promise<void> {
     await this.ensureTimelineIsOpen();
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+    await (
+      await this.testSubjects.findService.byCssSelector(TIMELINE_CSS_SELECTOR.refreshButton)
+    ).isEnabled();
     await this.testSubjects.findService.clickByCssSelector(TIMELINE_CSS_SELECTOR.refreshButton);
-
     await this.retry.waitFor(
       'Timeline refresh button to be enabled',
       async (): Promise<boolean> => {
-        const refreshButton = await this.testSubjects.findService.byCssSelector(
-          TIMELINE_CSS_SELECTOR.refreshButton
-        );
-        return (await refreshButton.isDisplayed()) && (await refreshButton.isEnabled());
+        return (
+          await this.testSubjects.findService.byCssSelector(TIMELINE_CSS_SELECTOR.refreshButton)
+        ).isEnabled();
       }
     );
+  }
+
+  /**
+   * Check to see if the timeline has events in the list
+   */
+  async hasEvents(): Promise<boolean> {
+    const eventRows = await this.testSubjects.findService.allByCssSelector(
+      `${testSubjSelector(TIMELINE_MODAL_PAGE_TEST_SUBJ)} ${testSubjSelector('event')}`
+    );
+
+    return eventRows.length > 0;
   }
 
   /**
@@ -108,17 +122,18 @@ export class TimelinePageObject extends FtrService {
    * @param timeoutMs
    */
   async waitForEvents(timeoutMs?: number): Promise<void> {
+    if (await this.hasEvents()) {
+      this.logger.info(`Timeline already has events displayed`);
+      return;
+    }
+
     await this.retry.waitForWithTimeout(
       'waiting for events to show up on timeline',
       timeoutMs ?? this.defaultTimeoutMs,
       async (): Promise<boolean> => {
         await this.clickRefresh();
 
-        const allEventRows = await this.testSubjects.findService.allByCssSelector(
-          `${testSubjSelector(TIMELINE_MODAL_PAGE_TEST_SUBJ)} ${testSubjSelector('event')}`
-        );
-
-        return Boolean(allEventRows.length);
+        return this.hasEvents();
       }
     );
   }

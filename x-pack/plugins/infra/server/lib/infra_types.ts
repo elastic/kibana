@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
-import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { ObservabilityConfig } from '@kbn/observability-plugin/server';
+import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -32,8 +33,8 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   metricsRules: RulesServiceSetup;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
-  getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];
   getStartServices: InfraPluginStartServicesAccessor;
   handleEsError: typeof handleEsError;
   logger: Logger;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }

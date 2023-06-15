@@ -18,13 +18,8 @@ import { VisGroups } from './vis_groups_enum';
  */
 export class TypesService {
   private types: Record<string, BaseVisType<any>> = {};
-  private unregisteredHiddenTypes: string[] = [];
 
   private registerVisualization<TVisParam>(visDefinition: BaseVisType<TVisParam>) {
-    if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
-      visDefinition.hidden = true;
-    }
-
     if (this.types[visDefinition.name]) {
       throw new Error('type already exists!');
     }
@@ -47,19 +42,6 @@ export class TypesService {
        * @param {VisTypeAlias} config - visualization alias definition
        */
       registerAlias: visTypeAliasRegistry.add,
-      /**
-       * allows to hide specific visualization types from create visualization dialog
-       * @param {string[]} typeNames - list of type ids to hide
-       */
-      hideTypes: (typeNames: string[]): void => {
-        typeNames.forEach((name: string) => {
-          if (this.types[name]) {
-            this.types[name].hidden = true;
-          } else {
-            this.unregisteredHiddenTypes.push(name);
-          }
-        });
-      },
     };
   }
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, GrokLang } from '@kbn/kibana-react-plugin/public';
 
 export function PatternInput({ value, onChange }) {
   return (
@@ -21,7 +21,7 @@ export function PatternInput({ value, onChange }) {
       data-test-subj="patternInput"
     >
       <CodeEditor
-        languageId="plaintext"
+        languageId={GrokLang}
         value={value}
         height={200}
         options={{

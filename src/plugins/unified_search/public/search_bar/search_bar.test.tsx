@@ -93,6 +93,7 @@ function wrapSearchBarInContext(testProps: any) {
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
+    theme: startMock.theme,
     storage: createMockStorage(),
     data: {
       query: {

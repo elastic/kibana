@@ -53,6 +53,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     showInsecureClusterWarning: true,
     sameSiteCookies: true,
     showNavLinks: true,
+    ui: true,
   },
 };
 export const plugin: PluginInitializer<

@@ -57,11 +57,10 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export interface DiscoverLayoutProps {
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
 }
 
-export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutProps) {
+export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -175,11 +174,6 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
 
-  const savedSearchTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    savedSearchTitle.current?.focus();
-  }, []);
-
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
       return dataState.error;
@@ -255,8 +249,6 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSavedSearchTitle"
-        tabIndex={-1}
-        ref={savedSearchTitle}
       >
         {savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
@@ -272,7 +264,6 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
       <TopNavMemoized
         onOpenInspector={onOpenInspector}
         query={query}
-        navigateTo={navigateTo}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}

@@ -43,9 +43,15 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
         },
       };
-
+      const screenshotFn = () =>
+        reporting.getScreenshots({
+          layout,
+          request: req,
+          browserTimezone: 'America/Los_Angeles',
+          urls: [hashUrl],
+        });
       return lastValueFrom(
-        generatePngObservable(reporting, logger, {
+        generatePngObservable(screenshotFn, logger, {
           layout,
           request: req,
           browserTimezone: 'America/Los_Angeles',

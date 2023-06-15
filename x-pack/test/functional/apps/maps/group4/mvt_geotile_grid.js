@@ -37,7 +37,9 @@ export default function ({ getPageObjects, getService }) {
       );
       const searchParams = Object.fromEntries(tileUrl.searchParams);
 
-      expect(tileUrl.pathname).to.equal('/api/maps/mvt/getGridTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
+      expect(tileUrl.pathname).to.equal(
+        '/internal/maps/mvt/getGridTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf'
+      );
 
       // token is an unique id that changes between runs
       expect(typeof searchParams.token).to.equal('string');

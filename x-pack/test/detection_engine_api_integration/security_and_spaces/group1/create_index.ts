@@ -14,7 +14,7 @@ import {
 import { SIGNALS_FIELD_ALIASES_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteSignalsIndex } from '../../utils';
+import { deleteAllAlerts } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('create_index', () => {
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     describe('elastic admin', () => {

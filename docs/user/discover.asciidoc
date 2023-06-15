@@ -344,4 +344,6 @@ include::{kib-repo-dir}/discover/save-search.asciidoc[]
 
 include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
 
+include::{kib-repo-dir}/discover/log-pattern-analysis.asciidoc[]
+
 include::{kib-repo-dir}/discover/search-sessions.asciidoc[]

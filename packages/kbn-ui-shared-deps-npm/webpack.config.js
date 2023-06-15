@@ -99,6 +99,7 @@ module.exports = (_, argv) => {
         'react-dom',
         'react-dom/server',
         'react-router-dom',
+        'react-router-dom-v5-compat',
         'react-router',
         'react',
         'rxjs',

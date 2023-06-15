@@ -8,6 +8,9 @@
 import { ServerlessPluginStart } from './types';
 
 const startMock = (): ServerlessPluginStart => ({
+  setNavigation: jest.fn(),
+  setBreadcrumbs: jest.fn(),
+  setProjectHome: jest.fn(),
   setSideNavComponent: jest.fn(),
 });
 

@@ -116,7 +116,7 @@ async function enhanceEdges(
     : edges;
 }
 
-async function getUserRiskData(
+export async function getUserRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
   userNames: string[]

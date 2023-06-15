@@ -15,12 +15,13 @@ type Arguments = ChromeNavigationViewModel & NavigationServices;
 export type Params = Pick<
   Arguments,
   | 'activeNavItemId'
-  | 'loadingCount$'
   | 'navIsOpen'
   | 'navigationTree'
   | 'platformConfig'
   | 'recentlyAccessed$'
+  | 'navLinks$'
   | 'recentlyAccessedFilter'
+  | 'onProjectNavigationChange'
 >;
 
 export class StorybookMock extends AbstractStorybookMock<
@@ -49,16 +50,15 @@ export class StorybookMock extends AbstractStorybookMock<
       ...params,
       basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
       navigateToUrl,
-      loadingCount$: params.loadingCount$ ?? new BehaviorSubject(0),
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
+      navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
+      onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
     };
   }
 
   getProps(params: Params): ChromeNavigationViewModel {
     return {
       ...params,
-      homeHref: '#',
-      linkToCloud: 'projects',
       recentlyAccessedFilter: params.recentlyAccessedFilter,
     };
   }
