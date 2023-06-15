@@ -63,6 +63,7 @@ export interface ChromeProjectNavigationNode {
    * and force deeplink id to be passed
    */
   href?: string;
+  isActive?: boolean;
 }
 
 /** @public */
@@ -74,10 +75,8 @@ export interface ChromeProjectNavigation {
 }
 
 /** @public */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SideNavCompProps {
-  // TODO: provide the Chrome state to the component through props
-  // e.g. "navTree", "activeRoute", "recentItems"...
+  activeNodes: ChromeProjectNavigationNode[][];
 }
 
 /** @public */

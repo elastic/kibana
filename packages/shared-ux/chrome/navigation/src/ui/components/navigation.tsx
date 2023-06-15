@@ -17,6 +17,7 @@ import React, {
   useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { RegisterFunction, UnRegisterFunction } from '../types';
@@ -30,6 +31,7 @@ interface Context {
   register: RegisterFunction;
   updateFooterChildren: (children: ReactNode) => void;
   unstyled: boolean;
+  activeNodes: ChromeProjectNavigationNode[][];
 }
 
 const NavigationContext = createContext<Context>({
@@ -39,6 +41,7 @@ const NavigationContext = createContext<Context>({
   }),
   updateFooterChildren: () => {},
   unstyled: false,
+  activeNodes: [],
 });
 
 interface Props {
@@ -52,7 +55,7 @@ interface Props {
 }
 
 export function Navigation({ children, unstyled = false, dataTestSubj }: Props) {
-  const { onProjectNavigationChange } = useNavigationServices();
+  const { onProjectNavigationChange, getActiveNodes$ } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
   // This guarantees that the navTree items sent to the Chrome service has the same order
@@ -60,6 +63,7 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
   const orderChildrenRef = useRef<Record<string, number>>({});
   const idx = useRef(0);
 
+  const activeNodes = useObservable(getActiveNodes$(), []);
   const [navigationItems, setNavigationItems] = useState<
     Record<string, ChromeProjectNavigationNode>
   >({});
@@ -97,8 +101,9 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
       register,
       updateFooterChildren: setFooterChildren,
       unstyled,
+      activeNodes,
     }),
-    [register, unstyled]
+    [register, unstyled, activeNodes]
   );
 
   useEffect(() => {
