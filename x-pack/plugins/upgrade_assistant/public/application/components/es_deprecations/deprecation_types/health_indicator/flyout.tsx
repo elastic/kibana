@@ -20,7 +20,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type { EnrichedDeprecationInfo, HealthIndicatorAction } from '../../../../../../common/types';
+import type {
+  EnrichedDeprecationInfo,
+  HealthIndicatorAction,
+} from '../../../../../../common/types';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 
 export interface HealthIndicatorFlyoutProps {
@@ -49,10 +52,7 @@ const i18nTexts = {
   ),
 };
 
-export const HealthIndicatorFlyout = ({
-  deprecation,
-  closeFlyout,
-}: HealthIndicatorFlyoutProps) => {
+export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndicatorFlyoutProps) => {
   const { message, url, details, correctiveAction } = deprecation;
   const { action, cause, impacts } = correctiveAction as HealthIndicatorAction;
 
@@ -66,8 +66,6 @@ export const HealthIndicatorFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-
-        
         <EuiText>
           <p className="eui-textBreakWord">{details}</p>
         </EuiText>
@@ -93,12 +91,12 @@ export const HealthIndicatorFlyout = ({
           <EuiTitle size="s" data-test-subj="flyoutTitle">
             <h3>{i18nTexts.healthIndicatorImpactHeader}</h3>
           </EuiTitle>
-          <EuiCodeBlock language='json' isCopyable>
+          <EuiCodeBlock language="json" isCopyable>
             {JSON.stringify(impacts, null, 2)}
           </EuiCodeBlock>
         </EuiText>
         <EuiSpacer size="s" />
-        
+
         <EuiText>
           <p>
             <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
