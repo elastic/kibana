@@ -7,8 +7,6 @@
 
 import type { AuditEvent } from '@kbn/security-plugin/server';
 
-import { appContextService } from './app_context';
-
 class AuditLoggingService {
   /**
    * Write a custom audit log record. If a current request is available, the log will include
