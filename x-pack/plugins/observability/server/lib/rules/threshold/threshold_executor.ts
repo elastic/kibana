@@ -59,12 +59,10 @@ export type MetricThresholdAlertState = AlertState; // no specific instance stat
 export type MetricThresholdAlertContext = AlertContext; // no specific instance state used
 
 export const FIRED_ACTIONS_ID = 'metrics.threshold.fired';
-export const WARNING_ACTIONS_ID = 'metrics.threshold.warning';
 export const NO_DATA_ACTIONS_ID = 'metrics.threshold.nodata';
 
 type MetricThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
-  | typeof WARNING_ACTIONS_ID
   | typeof NO_DATA_ACTIONS_ID
   | typeof RecoveredActionGroup.id;
 
@@ -245,7 +243,7 @@ export const createMetricThresholdExecutor = ({
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
-              ...formatAlertResult(result[group], false),
+              ...formatAlertResult(result[group]),
               group,
             })
           )
@@ -440,21 +438,15 @@ const formatAlertResult = <AlertResult>(
     currentValue: number | null;
     threshold: number[];
     comparator: Comparator;
-    warningThreshold?: number[];
-    warningComparator?: Comparator;
     timeSize: number;
     timeUnit: TimeUnitChar;
-  } & AlertResult,
-  useWarningThreshold?: boolean
+  } & AlertResult
 ) => {
-  const { metric, currentValue, threshold, comparator, warningThreshold, warningComparator } =
-    alertResult;
+  const { metric, currentValue, threshold, comparator, warningComparator } = alertResult;
   const noDataValue = i18n.translate(
     'xpack.observability.threshold.rule.alerting.threshold.noDataFormattedValue',
     { defaultMessage: '[NO DATA]' }
   );
-  const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
-  const comparatorToUse = useWarningThreshold ? warningComparator! : comparator;
 
   if (metric.endsWith('.pct')) {
     const formatter = createFormatter('percent');
@@ -462,10 +454,10 @@ const formatAlertResult = <AlertResult>(
       ...alertResult,
       currentValue:
         currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-      threshold: Array.isArray(thresholdToFormat)
-        ? thresholdToFormat.map((v: number) => formatter(v))
-        : formatter(thresholdToFormat),
-      comparator: comparatorToUse,
+      threshold: Array.isArray(threshold)
+        ? threshold.map((v: number) => formatter(v))
+        : formatter(threshold),
+      comparator,
     };
   }
 
@@ -474,9 +466,9 @@ const formatAlertResult = <AlertResult>(
     ...alertResult,
     currentValue:
       currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-    threshold: Array.isArray(thresholdToFormat)
-      ? thresholdToFormat.map((v: number) => formatter(v))
-      : formatter(thresholdToFormat),
-    comparator: comparatorToUse,
+    threshold: Array.isArray(threshold)
+      ? threshold.map((v: number) => formatter(v))
+      : formatter(threshold),
+    comparator,
   };
 };
