@@ -60,7 +60,7 @@ export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<Sy
     SyntheticsMonitorCodec
   );
 
-export const fetchServiceAPIKey = async (): Promise<{
+export const fetchProjectAPIKey = async (): Promise<{
   apiKey: { encoded: string };
 }> => {
   return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_APIKEY);
