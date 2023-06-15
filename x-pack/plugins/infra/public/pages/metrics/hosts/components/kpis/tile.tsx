@@ -35,6 +35,7 @@ export interface KPIChartProps {
   trendLine?: boolean;
   backgroundColor: string;
   type: HostsLensMetricChartFormulas;
+  decimals?: number;
   toolTip: string;
 }
 
@@ -45,6 +46,7 @@ export const Tile = ({
   type,
   backgroundColor,
   toolTip,
+  decimals = 1,
   trendLine = false,
 }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
@@ -69,11 +71,12 @@ export const Tile = ({
     type,
     dataView,
     options: {
-      title,
-      subtitle: getSubtitle(),
       backgroundColor,
+      decimals,
+      subtitle: getSubtitle(),
       showTrendLine: trendLine,
       showTitle: false,
+      title,
     },
     visualizationType: 'metricChart',
   });

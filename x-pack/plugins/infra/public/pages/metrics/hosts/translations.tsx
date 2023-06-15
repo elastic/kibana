@@ -15,6 +15,9 @@ export const TOOLTIP = {
   diskLatency: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.diskLatency', {
     defaultMessage: 'Time spent to service disk requests.',
   }),
+  memoryFree: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.memoryFree', {
+    defaultMessage: 'Total available memory including page cache.',
+  }),
   memoryTotal: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.memoryTotal', {
     defaultMessage: 'Total memory capacity.',
   }),
@@ -30,6 +33,6 @@ export const TOOLTIP = {
   }),
   tx: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.tx', {
     defaultMessage:
-      'Number of bytes which have been received per second on the public interfaces of the hosts.',
+      'Number of bytes which have been sent per second on the public interfaces of the hosts.',
   }),
 };

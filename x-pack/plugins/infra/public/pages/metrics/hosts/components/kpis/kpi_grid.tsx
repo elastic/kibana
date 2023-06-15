@@ -15,38 +15,40 @@ import { TOOLTIP } from '../../translations';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {
-    type: 'cpu',
+    type: 'cpuUsage',
     trendLine: true,
     backgroundColor: '#F1D86F',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.title', {
-      defaultMessage: 'CPU usage',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpuUsage.title', {
+      defaultMessage: 'CPU Usage',
     }),
     toolTip: TOOLTIP.cpuUsage,
   },
   {
-    type: 'memory',
-    trendLine: true,
-    backgroundColor: '#A987D1',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.title', {
-      defaultMessage: 'Memory usage',
-    }),
-    toolTip: TOOLTIP.memoryUsage,
-  },
-  {
-    type: 'rx',
+    type: 'normalizedLoad1m',
     trendLine: true,
     backgroundColor: '#79AAD9',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.title', {
-      defaultMessage: 'Network inbound (RX)',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
+      defaultMessage: 'Normalized Load',
     }),
     toolTip: TOOLTIP.rx,
   },
   {
-    type: 'tx',
+    type: 'memoryUsage',
+    trendLine: true,
+    backgroundColor: '#A987D1',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.title', {
+      defaultMessage: 'Memory Usage',
+    }),
+    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.tooltip', {
+      defaultMessage: 'Main memory usage excluding page cache.',
+    }),
+  },
+  {
+    type: 'diskSpaceUsage',
     trendLine: true,
     backgroundColor: '#F5A35C',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.title', {
-      defaultMessage: 'Network outbound (TX)',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.title', {
+      defaultMessage: 'Disk Space Usage',
     }),
     toolTip: TOOLTIP.tx,
   },
