@@ -6,14 +6,6 @@
  */
 
 const DEFAULT_LOCALES = ['en-US'];
-const NUMERIC_OPTIONS = new Set([
-  'roundingIncrement',
-  'minimumIntegerDigits',
-  'minimumFractionDigits',
-  'maximumFractionDigits',
-  'minimumSignificantDigits',
-  'maximumSignificantDigits',
-]);
 
 /**
  * Takes a string which contains a number and formatting options,
@@ -69,7 +61,7 @@ function getLocales(localesString: string): string[] {
   return DEFAULT_LOCALES;
 }
 
-type IntlNumberOptions = Record<string, string | number>;
+type IntlNumberOptions = Record<string, string | number | boolean>;
 
 function getOptions(optionsString: string): [IntlNumberOptions, string?] {
   const options: IntlNumberOptions = {};
@@ -81,20 +73,26 @@ function getOptions(optionsString: string): [IntlNumberOptions, string?] {
 
     const [key, valString] = splitKeyVal(keyVal);
     if (valString === undefined) {
-      return [{}, `missing comma in option: '${keyVal}'`];
+      return [{}, `missing colon in option: '${keyVal}'`];
     }
 
-    const val = NUMERIC_OPTIONS.has(key) ? parseInt(valString, 10) : valString;
-    if (typeof val === 'number') {
-      if (isNaN(val)) {
-        return [{}, `numeric value expected for option '${key}' in '${optionsString}'`];
-      }
-    }
-
-    options[key] = val;
+    options[key] = getVal(valString);
   }
 
   return [options];
+}
+
+// Intl.NumberFormat options can be a string, number, or boolean
+// There don't seem to be cases of needing to send a string version
+// of a boolean or number.
+function getVal(valString: string): string | number | boolean {
+  const valAsNum = parseFloat(valString);
+  if (!isNaN(valAsNum)) return valAsNum;
+
+  if (valString === 'true') return true;
+  if (valString === 'false') return false;
+
+  return valString;
 }
 
 function splitCommas(str: string): string[] {
