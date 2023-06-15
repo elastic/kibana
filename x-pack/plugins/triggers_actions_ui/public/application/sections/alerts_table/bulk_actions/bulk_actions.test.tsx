@@ -382,7 +382,7 @@ describe('AlertsTable.BulkActions', () => {
               value: ['test-case'],
             },
             {
-              field: 'tags',
+              field: 'kibana.alert.workflow_tags',
               value: [],
             },
           ],
@@ -629,7 +629,7 @@ describe('AlertsTable.BulkActions', () => {
                   value: [],
                 },
                 {
-                  field: 'tags',
+                  field: 'kibana.alert.workflow_tags',
                   value: [],
                 },
               ],
@@ -857,7 +857,7 @@ describe('AlertsTable.BulkActions', () => {
                     value: [],
                   },
                   {
-                    field: 'tags',
+                    field: 'kibana.alert.workflow_tags',
                     value: [],
                   },
                 ],
@@ -883,7 +883,7 @@ describe('AlertsTable.BulkActions', () => {
                     value: [],
                   },
                   {
-                    field: 'tags',
+                    field: 'kibana.alert.workflow_tags',
                     value: [],
                   },
                 ],

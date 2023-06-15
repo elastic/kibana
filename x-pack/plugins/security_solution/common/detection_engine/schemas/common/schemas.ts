@@ -46,6 +46,7 @@ export type SignalIds = t.TypeOf<typeof signal_ids>;
 export const signal_status_query = t.object;
 
 export const alert_tag_query = t.record(t.string, t.unknown);
+export type AlertTagQuery = t.TypeOf<typeof alert_tag_query>;
 
 export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
