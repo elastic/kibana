@@ -10,7 +10,7 @@ import React from 'react';
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { SetEnterpriseSearchEnginesChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
-import { useEnterpriseSearchEngineNav } from '../../../shared/layout';
+import { useEnterpriseSearchApplicationNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 export type EnterpriseSearchApplicationsPageTemplateProps = PageTemplateProps & {
@@ -28,7 +28,7 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   hasSchemaConflicts,
   ...pageTemplateProps
 }) => {
-  const navItems = useEnterpriseSearchEngineNav(
+  const navItems = useEnterpriseSearchApplicationNav(
     searchApplicationName,
     pageTemplateProps.isEmptyState,
     hasSchemaConflicts
