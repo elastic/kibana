@@ -4652,7 +4652,7 @@
               "\nList agents"
             ],
             "signature": [
-              "(options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }) => Promise<{ agents: ",
+              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }) => Promise<{ agents: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4674,7 +4674,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }"
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
                 "deprecated": false,
@@ -4791,7 +4791,15 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ", options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }) => Promise<{ items: ",
+              ", options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              " | undefined; withAgentCount?: boolean | undefined; }) => Promise<{ items: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4834,7 +4842,15 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }"
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-common.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  },
+                  " | undefined; withAgentCount?: boolean | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -9807,7 +9823,7 @@
         "label": "ListArtifactsProps",
         "description": [],
         "signature": [
-          "Pick<Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"kuery\" | \"perPage\" | \"sortOrder\"> & { sortField?: string | undefined; }"
+          "Pick<Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"perPage\" | \"kuery\" | \"sortOrder\"> & { sortField?: string | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
         "deprecated": false,
@@ -17018,39 +17034,6 @@
     "functions": [
       {
         "parentPluginId": "fleet",
-        "id": "def-common.decodeCloudId",
-        "type": "Function",
-        "tags": [],
-        "label": "decodeCloudId",
-        "description": [],
-        "signature": [
-          "(cid: string) => { host: string; defaultPort: string; elasticsearchUrl: string; kibanaUrl: string; } | undefined"
-        ],
-        "path": "x-pack/plugins/fleet/common/services/decode_cloud_id.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.decodeCloudId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "cid",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/fleet/common/services/decode_cloud_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.getFileDataIndexName",
         "type": "Function",
         "tags": [],
@@ -17059,7 +17042,7 @@
           "\nReturns the index name for File data (chunks) storage for a given integration"
         ],
         "signature": [
-          "(integrationName: string) => string"
+          "(integrationName: string, forHostDelivery?: boolean) => string"
         ],
         "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
         "deprecated": false,
@@ -17074,6 +17057,21 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getFileDataIndexName.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "forHostDelivery",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
             "deprecated": false,
@@ -17094,7 +17092,7 @@
           "\nReturns the index name for File Metadata storage for a given integration"
         ],
         "signature": [
-          "(integrationName: string) => string"
+          "(integrationName: string, forHostDelivery?: boolean) => string"
         ],
         "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
         "deprecated": false,
@@ -17109,6 +17107,21 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getFileMetadataIndexName.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "forHostDelivery",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
             "deprecated": false,
@@ -20217,9 +20230,8 @@
             "label": "experimental_data_stream_features",
             "description": [],
             "signature": [
-              "{ data_stream: string; features: Partial<Record<",
-              "ExperimentalIndexingFeature",
-              ", boolean>>; }[] | undefined"
+              "ExperimentalDataStreamFeature",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -20833,6 +20845,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.overrides",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -24484,6 +24510,8 @@
         "signature": [
           "T & { status: \"installed\"; savedObject?: ",
           "InstallableSavedObject",
+          " | undefined; installationInfo?: ",
+          "InstallationInfo",
           " | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
@@ -24516,6 +24544,8 @@
         "signature": [
           "T & { status: \"installing\"; savedObject?: ",
           "InstallableSavedObject",
+          " | undefined; installationInfo?: ",
+          "InstallationInfo",
           " | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
@@ -24895,7 +24925,9 @@
             "section": "def-common.RegistrySearchResult",
             "text": "RegistrySearchResult"
           },
-          "> & { id: string; integration?: string | undefined; savedObject?: ",
+          "> & { id: string; integration?: string | undefined; installationInfo?: ",
+          "InstallationInfo",
+          " | undefined; savedObject?: ",
           "InstallableSavedObject",
           " | undefined; }"
         ],

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { LinkDescriptor, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
 import { EuiLinkColor } from '@elastic/eui';
-import { ExperimentalBadge } from './experimental_badge';
+import { BetaBadge } from './beta_badge';
 
 type OnClickEvent = React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>;
 interface Props {
@@ -71,7 +71,7 @@ export const TryItButton = ({
           <EuiFlexGroup wrap={false} responsive={false} gutterSize="m" alignItems="center">
             {experimental && (
               <EuiFlexItem grow={false}>
-                <ExperimentalBadge iconType="beaker" tooltipPosition="top" />
+                <BetaBadge iconType="beta" tooltipPosition="top" />
               </EuiFlexItem>
             )}
             <EuiFlexItem>{label}</EuiFlexItem>
