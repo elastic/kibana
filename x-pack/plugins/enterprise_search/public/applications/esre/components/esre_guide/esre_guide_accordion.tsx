@@ -18,6 +18,15 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
+export interface EsreGuideAccordionProps {
+  id: string;
+  icon: IconType;
+  title: string;
+  description: string;
+  initialIsOpen?: boolean;
+  children?: React.ReactNode;
+}
+
 export const EsreGuideAccordion = ({
   id,
   icon,
@@ -25,14 +34,7 @@ export const EsreGuideAccordion = ({
   description,
   initialIsOpen = false,
   children,
-}: {
-  id: string;
-  icon: IconType;
-  title: string;
-  description: string;
-  initialIsOpen?: boolean;
-  children?: React.ReactNode;
-}) => {
+}: EsreGuideAccordionProps) => {
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiAccordion
