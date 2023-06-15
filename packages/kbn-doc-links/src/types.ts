@@ -139,9 +139,15 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly elser: string;
     readonly engines: string;
+    readonly esre: string;
+    readonly esreFaq: string;
+    readonly esreHelp: string;
+    readonly esreLearn: string;
     readonly indexApi: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
+    readonly knnSearch: string;
+    readonly knnSearchCombine: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
@@ -151,7 +157,9 @@ export interface DocLinks {
     readonly searchApplications: string;
     readonly searchTemplates: string;
     readonly start: string;
+    readonly supportedNlpModels: string;
     readonly syncRules: string;
+    readonly trainedModels: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
