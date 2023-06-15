@@ -56,10 +56,7 @@ export function filterArgsToKuery({
       const andExpressions = values
         .filter(Boolean)
         .map((value) =>
-          nodeTypes.function.buildNode(
-            'not',
-            nodeBuilder.is(`${attrPrefix}.${fieldName}`, value)
-          )
+          nodeTypes.function.buildNode('not', nodeBuilder.is(`${attrPrefix}.${fieldName}`, value))
         );
       kueryExpressions.push(nodeBuilder.and(andExpressions));
     }

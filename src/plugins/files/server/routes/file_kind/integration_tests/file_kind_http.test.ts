@@ -138,27 +138,36 @@ describe('File kind HTTP API', () => {
 
     const {
       body: { files },
-    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({
-      mimeType: 'image/png',
-    }).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'image/png',
+      })
+      .expect(200);
 
     expect(files.length).toBe(1);
     expect(files[0]).toMatchObject({ name: 'test' });
 
     const {
       body: { files: files2 },
-    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({
-      mimeType: 'text/html',
-    }).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'text/html',
+      })
+      .expect(200);
 
     expect(files2.length).toBe(1);
     expect(files2[0]).toMatchObject({ name: 'test 2' });
 
     const {
       body: { files: files3 },
-    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({
-      mimeType: ['text/html', 'image/png'],
-    }).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: ['text/html', 'image/png'],
+      })
+      .expect(200);
 
     expect(files3.length).toBe(2);
   });
@@ -169,9 +178,12 @@ describe('File kind HTTP API', () => {
 
     const {
       body: { files },
-    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({
-      mimeType: 'image/x:123',
-    }).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'image/x:123',
+      })
+      .expect(200);
 
     expect(files.length).toBe(1);
     expect(files[0]).toMatchObject({ name: 'test' });
@@ -183,27 +195,36 @@ describe('File kind HTTP API', () => {
 
     const {
       body: { files },
-    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({
-      extension: 'png',
-    }).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: 'png',
+      })
+      .expect(200);
 
     expect(files.length).toBe(1);
     expect(files[0]).toMatchObject({ name: 'test' });
 
     const {
       body: { files: files2 },
-    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({
-      extension: 'html',
-    }).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: 'html',
+      })
+      .expect(200);
 
     expect(files2.length).toBe(1);
     expect(files2[0]).toMatchObject({ name: 'test 2' });
 
     const {
       body: { files: files3 },
-    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({
-      extension: ['html', 'png'],
-    }).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: ['html', 'png'],
+      })
+      .expect(200);
 
     expect(files3.length).toBe(2);
   });
