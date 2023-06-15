@@ -112,21 +112,6 @@ export function WorkspacePanelWrapper({
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
-  // const setVisualizationState = useCallback(
-  //   (newState: unknown) => {
-  //     if (!activeVisualization) {
-  //       return;
-  //     }
-  //     dispatchLens(
-  //       updateVisualizationState({
-  //         visualizationId: activeVisualization.id,
-  //         newState,
-  //       })
-  //     );
-  //   },
-  //   [dispatchLens, activeVisualization]
-  // );
-
   const userMessages = getUserMessages('toolbar');
 
   return (
@@ -163,19 +148,6 @@ export function WorkspacePanelWrapper({
                       framePublicAPI={framePublicAPI}
                     />
                   </EuiFlexItem>
-                  {/* 
-                  {activeVisualization && activeVisualization.renderToolbar && (
-                    <EuiFlexItem grow={false}>
-                      <NativeRenderer
-                        render={activeVisualization.renderToolbar}
-                        nativeProps={{
-                          frame: framePublicAPI,
-                          state: visualizationState,
-                          setState: setVisualizationState,
-                        }}
-                      />
-                    </EuiFlexItem>
-                  )} */}
                   <VisualizationToolbar
                     activeVisualization={activeVisualization}
                     framePublicAPI={framePublicAPI}
