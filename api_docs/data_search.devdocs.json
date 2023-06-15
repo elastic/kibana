@@ -3209,7 +3209,7 @@
                 "signature": [
                   "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
+                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3217,7 +3217,7 @@
                     "section": "def-common.SavedObjectsPitParams",
                     "text": "SavedObjectsPitParams"
                   },
-                  " | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
+                  " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchAfter?: ",
                   "SortResults",

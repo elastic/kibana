@@ -7,7 +7,10 @@
 
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
+import {
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_SEVERITY,
+} from '../../../common/constants';
 
 export interface VulnerabilitiesStatisticsQueryResult {
   critical: {
@@ -35,13 +38,13 @@ export const getVulnerabilitiesStatisticsQuery = (
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   aggs: {
     critical: {
-      filter: { term: { 'vulnerability.severity': 'CRITICAL' } },
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
     },
     high: {
-      filter: { term: { 'vulnerability.severity': 'HIGH' } },
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.HIGH } },
     },
     medium: {
-      filter: { term: { 'vulnerability.severity': 'MEDIUM' } },
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.MEDIUM } },
     },
     resources_scanned: {
       cardinality: {

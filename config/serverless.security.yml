@@ -19,3 +19,6 @@ uiSettings.overrides.defaultRoute: /app/security/get_started
 
 ## Set the dev project switcher current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: security

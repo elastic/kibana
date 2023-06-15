@@ -11,6 +11,7 @@ import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
+
 import type { ServerlessSecurityPluginStartDependencies } from './types';
 
 export type Services = CoreStart & ServerlessSecurityPluginStartDependencies;

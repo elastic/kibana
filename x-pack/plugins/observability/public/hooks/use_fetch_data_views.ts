@@ -21,20 +21,25 @@ export interface UseFetchDataViewsResponse {
   dataViews: DataView[] | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<Index[], unknown>>;
-}
-export interface Index {
-  name: string;
+  ) => Promise<QueryObserverResult<DataView[], unknown>>;
 }
 
-export function useFetchDataViews(): UseFetchDataViewsResponse {
+interface FetchDataViewParams {
+  name?: string;
+  size?: number;
+}
+
+export function useFetchDataViews({
+  name = '',
+  size = 10,
+}: FetchDataViewParams): UseFetchDataViewsResponse {
   const { dataViews } = useKibana().services;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: ['fetchDataViews'],
+    queryKey: ['fetchDataViews', name],
     queryFn: async () => {
       try {
-        const response = await dataViews.find('');
+        const response = await dataViews.find(`${name}*`, size);
         return response;
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);

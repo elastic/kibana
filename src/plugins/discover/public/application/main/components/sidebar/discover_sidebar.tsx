@@ -35,6 +35,7 @@ import {
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../services/discover_data_state_container';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -256,6 +257,8 @@ export function DiscoverSidebarComponent({
     ]
   );
 
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
+
   if (!selectedDataView) {
     return null;
   }
@@ -276,20 +279,23 @@ export function DiscoverSidebarComponent({
         gutterSize="s"
         responsive={false}
       >
-        {Boolean(showDataViewPicker) && (
-          <DataViewPicker
-            currentDataViewId={selectedDataView.id}
-            onChangeDataView={onChangeDataView}
-            onAddField={editField}
-            onDataViewCreated={createNewDataView}
-            trigger={{
-              label: selectedDataView?.getName() || '',
-              'data-test-subj': 'dataView-switch-link',
-              title: selectedDataView?.getIndexPattern() || '',
-              fullWidth: true,
-            }}
-          />
-        )}
+        {Boolean(showDataViewPicker) &&
+          (searchBarCustomization?.CustomDataViewPicker ? (
+            <searchBarCustomization.CustomDataViewPicker />
+          ) : (
+            <DataViewPicker
+              currentDataViewId={selectedDataView.id}
+              onChangeDataView={onChangeDataView}
+              onAddField={editField}
+              onDataViewCreated={createNewDataView}
+              trigger={{
+                label: selectedDataView?.getName() || '',
+                'data-test-subj': 'dataView-switch-link',
+                title: selectedDataView?.getIndexPattern() || '',
+                fullWidth: true,
+              }}
+            />
+          ))}
         <EuiFlexItem>
           <FieldList
             isProcessing={isProcessing}
