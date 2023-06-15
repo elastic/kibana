@@ -5,25 +5,80 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton, EuiCard } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import { EuiButton } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { i18n } from '@kbn/i18n';
-import { DecorateWithKibanaContext } from './asset_details.story_decorators';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
-import { FlyoutTabIds, type AssetDetailsProps } from './types';
+import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
+import { DecorateWithKibanaContext } from './__stories__/decorator';
 
-export default {
-  title: 'infra/Asset Details View/Asset Details Embeddable',
-  decorators: [
-    (wrappedStory) => <EuiCard title="Asset Details">{wrappedStory()}</EuiCard>,
-    (wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>,
-    decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
-  ],
+const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices', 'uptime'];
+const tabs: Tab[] = [
+  {
+    id: FlyoutTabIds.METRICS,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.metrics', {
+      defaultMessage: 'Metrics',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-metrics',
+  },
+  {
+    id: FlyoutTabIds.LOGS,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
+      defaultMessage: 'Logs',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-logs',
+  },
+  {
+    id: FlyoutTabIds.METADATA,
+    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
+      defaultMessage: 'Metadata',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-metadata',
+  },
+  {
+    id: FlyoutTabIds.PROCESSES,
+    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
+      defaultMessage: 'Processes',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-processes',
+  },
+  {
+    id: FlyoutTabIds.ANOMALIES,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
+      defaultMessage: 'Anomalies',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-anomalies',
+  },
+  {
+    id: FlyoutTabIds.LINK_TO_APM,
+    name: i18n.translate('xpack.infra.infra.nodeDetails.apmTabLabel', {
+      defaultMessage: 'APM',
+    }),
+    'data-test-subj': 'hostsView-flyout-apm-link',
+  },
+  {
+    id: FlyoutTabIds.LINK_TO_UPTIME,
+    name: i18n.translate('xpack.infra.infra.nodeDetails.updtimeTabLabel', {
+      defaultMessage: 'Uptime',
+    }),
+    'data-test-subj': 'hostsView-flyout-uptime-link',
+  },
+];
+
+const stories: Meta<AssetDetailsProps> = {
+  title: 'infra/Asset Details View',
+  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: AssetDetails,
+  argTypes: {
+    links: {
+      options: links,
+      control: {
+        type: 'inline-check',
+      },
+    },
+  },
   args: {
     node: {
       name: 'host1',
@@ -41,39 +96,28 @@ export default {
       diskLatency: 0.15291777273162221,
       memoryTotal: 34359738368,
     },
+    overrides: {
+      metadata: {
+        showActionsColumn: true,
+      },
+    },
     nodeType: 'host',
     currentTimeRange: {
       interval: '1s',
-      from: 1683630468,
-      to: 1683630469,
+      from: 168363046800,
+      to: 168363046900,
     },
-    selectedTabId: 'metadata',
-    tabs: [
-      {
-        id: FlyoutTabIds.METADATA,
-        name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
-          defaultMessage: 'Metadata',
-        }),
-        'data-test-subj': 'hostsView-flyout-tabs-metadata',
-      },
-      {
-        id: FlyoutTabIds.PROCESSES,
-        name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
-          defaultMessage: 'Processes',
-        }),
-        'data-test-subj': 'hostsView-flyout-tabs-processes',
-      },
-    ],
-    links: ['apmServices', 'uptime'],
-  } as AssetDetailsProps,
-} as Meta;
+    tabs,
+    links,
+  },
+};
 
-const Template: Story<AssetDetailsProps> = (args) => {
+const PageTemplate: Story<AssetDetailsProps> = (args) => {
   return <AssetDetails {...args} />;
 };
 
 const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
   return (
     <div>
@@ -90,60 +134,14 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
   );
 };
 
-export const DefaultAssetDetailsWithMetadataTabSelected = Template.bind({});
-DefaultAssetDetailsWithMetadataTabSelected.args = {
-  overrides: {
-    metadata: {
-      showActionsColumn: true,
-    },
-  },
-};
+export const Page = PageTemplate.bind({});
 
-export const AssetDetailsWithMetadataTabSelectedWithPersistedSearch = Template.bind({});
-AssetDetailsWithMetadataTabSelectedWithPersistedSearch.args = {
-  overrides: {
-    metadata: {
-      showActionsColumn: true,
-      query: 'ip',
-    },
-  },
-  activeTabId: 'metadata',
-  onTabsStateChange: () => {},
-};
-
-export const AssetDetailsWithMetadataWithoutActions = Template.bind({});
-AssetDetailsWithMetadataWithoutActions.args = {};
-
-export const AssetDetailsWithMetadataWithoutLinks = Template.bind({});
-AssetDetailsWithMetadataWithoutLinks.args = { links: [] };
-
-export const AssetDetailsAsFlyout = FlyoutTemplate.bind({});
-AssetDetailsAsFlyout.args = {
+export const Flyout = FlyoutTemplate.bind({});
+Flyout.args = {
   renderMode: {
     showInFlyout: true,
     closeFlyout: () => {},
   },
 };
 
-export const AssetDetailsWithProcessesTabSelected = Template.bind({});
-AssetDetailsWithProcessesTabSelected.args = {
-  activeTabId: 'processes',
-  currentTimeRange: {
-    interval: '1s',
-    from: 1683630468,
-    to: 1683630469,
-  },
-};
-
-export const AssetDetailsWithMetadataTabOnly = Template.bind({});
-AssetDetailsWithMetadataTabOnly.args = {
-  tabs: [
-    {
-      id: FlyoutTabIds.METADATA,
-      name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
-        defaultMessage: 'Metadata',
-      }),
-      'data-test-subj': 'hostsView-flyout-tabs-metadata',
-    },
-  ],
-};
+export default stories;

@@ -10,7 +10,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'visualize', 'discover', 'visChart', 'visEditor']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'discover',
+    'visChart',
+    'visEditor',
+    'unifiedFieldList',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
@@ -28,12 +35,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('appears correctly in discover', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.clickFieldListItemAdd('histogram-content');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('histogram-content');
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.contain('"values":[0.3,1,3,4.2,4.8]');
     });
 
-    describe('works in visualizations', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/159615
+    describe.skip('works in visualizations', () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();

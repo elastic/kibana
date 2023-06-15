@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import {
   ReauthorizeTransformsRequestSchema,
@@ -61,9 +62,6 @@ import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline'
 import { useAppDependencies } from '../app_dependencies';
 
 import type { SavedSearchQuery } from './use_search_items';
-
-// Default sampler shard size used for field histograms
-export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
 
 export interface FieldHistogramRequestConfig {
   fieldName: string;

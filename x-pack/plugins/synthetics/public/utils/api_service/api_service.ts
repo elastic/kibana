@@ -73,10 +73,11 @@ class ApiService {
     return response;
   }
 
-  public async post<T>(apiUrl: string, data?: any, decodeType?: any) {
+  public async post<T>(apiUrl: string, data?: any, decodeType?: any, params?: HttpFetchQuery) {
     const response = await this._http!.post<T>(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
+      query: params,
     });
 
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });

@@ -50,7 +50,7 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const fleetFiles = await endpointContext.service.getFleetFilesClient('from-host');
+    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const { action_id: actionId, file_id: fileId } = req.params;
 

@@ -40,5 +40,64 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
-  servers:
-    - url: https://localhost:5601
+
+get:
+  summary: Retrieves a paginated list of composite SLOs with summary
+  operationId: findCompositeSlo
+  description: >
+    You must have the `read` privileges for the **SLOs** feature in the
+    **Observability** section of the Kibana feature privileges.
+  tags:
+    - composite slo
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+    - name: page
+      in: query
+      description: The page number to return
+      schema:
+        type: integer
+        default: 1
+      example: 1
+    - name: perPage
+      in: query
+      description: The number of SLOs to return per page
+      schema:
+        type: integer
+        default: 25
+      example: 20
+    - name: sortBy
+      in: query
+      description: Sort by field
+      schema:
+        type: string
+        enum: [creationTime]
+        default: creationTime
+      example: creationTime
+    - name: sortDirection
+      in: query
+      description: Sort order
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+      example: asc
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/find_composite_slo_response.yaml'
+    '400':
+      description: Bad request
+      content: 
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
+    '401':
+      description: Unauthorized response
+      content: 
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'

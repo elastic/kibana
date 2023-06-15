@@ -1891,7 +1891,10 @@ describe('registerRouterAfterListening', () => {
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
-    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
+      isDev: false,
+      versionedRouteResolution: 'oldest',
+    });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
     });
@@ -1923,7 +1926,10 @@ describe('registerRouterAfterListening', () => {
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
-    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
+      isDev: false,
+      versionedRouteResolution: 'oldest',
+    });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
     });

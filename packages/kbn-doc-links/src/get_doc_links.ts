@@ -145,6 +145,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsPostgreSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-postgresql.html`,
       connectorsS3: `${ENTERPRISE_SEARCH_DOCS}connectors-s3.html`,
       connectorsSharepoint: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint.html`,
+      connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
       connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-workplace-search`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
@@ -766,6 +767,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
+    },
+    telemetry: {
+      settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
     },
   });
 };

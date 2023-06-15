@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
 import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -88,7 +88,6 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -258,6 +257,39 @@ describe('terms', () => {
           arguments: expect.objectContaining({
             field: ['source'],
             max_doc_count: [3],
+          }),
+        })
+      );
+    });
+
+    it('should return significant terms expression when ordered by significance', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: {
+            ...termsColumn.params,
+            accuracyMode: true,
+            include: ['C.'],
+            exclude: ['U.'],
+            orderBy: { type: 'significant' },
+          },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggSignificantTerms',
+          arguments: expect.objectContaining({
+            field: ['source'],
+            size: [3],
+            shardSize: [1000],
+            include: ['C.'],
+            exclude: ['U.'],
           }),
         })
       );
@@ -1974,6 +2006,37 @@ describe('terms', () => {
       expect(select2.prop('disabled')).toEqual(true);
     });
 
+    it('should disable missing bucket and other bucket setting when ordered by significance', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={{
+            ...(layer.columns.col1 as TermsIndexPatternColumn),
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              orderBy: { type: 'significant' },
+            },
+          }}
+        />
+      );
+
+      const select1 = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select1.prop('disabled')).toEqual(true);
+
+      const select2 = instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select2.prop('disabled')).toEqual(true);
+    });
+
     describe('accuracy mode', () => {
       const renderWithAccuracy = (accuracy: boolean, rareTerms: boolean) =>
         shallow(
@@ -2181,6 +2244,7 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
         'rare',
+        'significant',
         'custom',
       ]);
     });
