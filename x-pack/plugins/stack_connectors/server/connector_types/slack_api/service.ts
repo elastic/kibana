@@ -38,7 +38,7 @@ const buildSlackExecutorErrorResponse = ({
 }: {
   slackApiError: {
     message: string;
-    response: {
+    response?: {
       status: number;
       statusText: string;
       headers: Record<string, string>;
@@ -152,6 +152,19 @@ export const createExternalService = (
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
+      if (
+        allowedChannels &&
+        allowedChannels.length > 0 &&
+        !channels.every((c) => allowedChannels?.includes(c))
+      ) {
+        return buildSlackExecutorErrorResponse({
+          slackApiError: {
+            message: `One of these channels "${channels.join()}" is/are not valid with the allowed channels list "${allowedChannels.join()}" `,
+          },
+          logger,
+        });
+      }
+
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
         method: 'post',
