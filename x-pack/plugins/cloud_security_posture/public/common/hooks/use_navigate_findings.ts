@@ -71,3 +71,6 @@ export const useNavigateFindingsByResource = () =>
 
 export const useNavigateVulnerabilities = () =>
   useNavigate(findingsNavigation.vulnerabilities.path);
+
+export const useNavigateVulnerabilitiesByResource = () =>
+  useNavigate(findingsNavigation.vulnerabilities_by_resource.path);
