@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -15,15 +14,15 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
-
+import React from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import {
   Field,
   useFetchIndexPatternFields,
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { IndexSelection } from '../custom_common/index_selection';
 import { QueryBuilder } from '../common/query_builder';
+import { IndexSelection } from '../custom_common/index_selection';
 
 interface Option {
   label: string;
@@ -91,7 +90,6 @@ export function CustomKqlIndicatorTypeForm() {
                           {
                             value: field.value,
                             label: field.value,
-                            'data-test-subj': `customKqlIndicatorFormTimestampFieldSelectedValue`,
                           },
                         ]
                       : []
@@ -106,7 +104,6 @@ export function CustomKqlIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customKqlIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.queryFilter', {
@@ -134,7 +131,6 @@ export function CustomKqlIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customKqlIndicatorFormGoodQueryInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.goodQuery', {
@@ -165,7 +161,6 @@ export function CustomKqlIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customKqlIndicatorFormTotalQueryInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.totalQuery', {
