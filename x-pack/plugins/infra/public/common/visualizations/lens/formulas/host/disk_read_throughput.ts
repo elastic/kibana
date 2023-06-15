@@ -8,10 +8,10 @@
 import type { LensChartConfig } from '../../../types';
 import { getFilters } from './utils';
 
-export const memoryAvailable: LensChartConfig = {
-  title: 'Memory Available',
+export const diskReadThroughput: LensChartConfig = {
+  title: 'Disk Read Throughput',
   formula: {
-    formula: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
+    formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
     format: {
       id: 'bytes',
       params: {
