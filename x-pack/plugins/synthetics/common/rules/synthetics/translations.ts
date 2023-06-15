@@ -75,12 +75,16 @@ export const SyntheticsMonitorStatusTranslations = {
 
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.synthetics.rules.tls.defaultActionMessage', {
-    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}`,
+    defaultMessage: `Detected TLS certificate {commonName} is {status} - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
     values: {
       commonName: '{{context.commonName}}',
       issuer: '{{context.issuer}}',
       summary: '{{context.summary}}',
       status: '{{context.status}}',
+      monitorName: '{{context.monitorName}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+      monitorType: '{{context.monitorType}}',
+      locationName: '{{context.locationName}}',
     },
   }),
   defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
