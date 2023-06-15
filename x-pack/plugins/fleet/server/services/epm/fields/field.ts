@@ -47,6 +47,7 @@ export interface Field {
   // Meta fields
   metric_type?: string;
   unit?: string;
+  time_series_metric?: string;
 
   // Kibana specific
   analyzed?: boolean;
@@ -266,10 +267,23 @@ export function processFieldsWithWildcard(fields: Fields): Fields {
   return newFields;
 }
 
+export function addTimeSeriesFields(fields: Fields): Fields {
+  const newFields: Fields = [];
+
+  for (const field of fields) {
+    if ('metric_type' in field) {
+      newFields.push({ ...field, time_series_metric: field.metric_type });
+    }
+  }
+  return newFields;
+}
+
 export function processFields(fields: Fields): Fields {
   const processedFields = processFieldsWithWildcard(fields);
   const expandedFields = expandFields(processedFields);
-  const dedupedFields = dedupFields(expandedFields);
+  const addedFields = addTimeSeriesFields(expandedFields);
+  const dedupedFields = dedupFields(addedFields);
+
   return validateFields(dedupedFields, dedupedFields);
 }
 
