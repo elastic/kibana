@@ -16,9 +16,13 @@ import {
 import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
 import {
   anomalyMessage,
+  anomalyRecoveryMessage,
   errorCountMessage,
+  errorCountRecoveryMessage,
   transactionDurationMessage,
+  transactionDurationRecoveryMessage,
   transactionErrorRateMessage,
+  transactionErrorRateRecoveryMessage,
 } from '../../../../common/rules/default_action_message';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
@@ -55,6 +59,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
+    defaultRecoveryMessage: errorCountRecoveryMessage,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -92,6 +97,7 @@ export function registerApmRuleTypes(
     ),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
+    defaultRecoveryMessage: transactionDurationRecoveryMessage,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -124,6 +130,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
+    defaultRecoveryMessage: transactionErrorRateRecoveryMessage,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -153,5 +160,6 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
+    defaultRecoveryMessage: anomalyRecoveryMessage,
   });
 }

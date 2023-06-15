@@ -7,10 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CnvmDashboardData } from '../../../common/types';
-import {
-  VULNERABILITIES_DASHBOARD_ROUTE_PATH,
-  getSafeVulnerabilitiesQueryFilter,
-} from '../../../common/constants';
+import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants';
+import { getSafeVulnerabilitiesQueryFilter } from '../../../common/utils/get_safe_vulnerabilities_query_filter';
 import { CspRouter } from '../../types';
 import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
 import { getTopVulnerableResources } from './get_top_vulnerable_resources';
