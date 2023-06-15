@@ -153,7 +153,7 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const projectNavigation = this.projectNavigation.start({ application, navLinks });
+    const projectNavigation = this.projectNavigation.start({ application, navLinks, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
     const { customBranding$ } = customBranding;
@@ -251,18 +251,12 @@ export class ChromeService {
 
     const getHeaderComponent = () => {
       if (chromeStyle$.getValue() === 'project') {
-        // const projectNavigationConfig = projectNavigation.getProjectNavigation$();
-        // TODO: Uncommented when we support the project navigation config
-        // if (!projectNavigationConfig) {
-        //   throw new Erorr(`Project navigation config must be provided for project.`);
-        // }
-
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-        // const projectNavigation$ = projectNavigation.getProjectNavigation$();
+        const activeNodes$ = projectNavigation.getActiveNodes$();
 
         const ProjectHeaderWithNavigation = () => {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
-          // const projectNavigationConfig = useObservable(projectNavigation$, undefined);
+          const activeNodes = useObservable(activeNodes$, []);
 
           let SideNavComponent: ISideNavComponent = () => null;
 
@@ -300,8 +294,7 @@ export class ChromeService {
               kibanaVersion={injectedMetadata.getKibanaVersion()}
               prependBasePath={http.basePath.prepend}
             >
-              {/* TODO: pass down the SideNavCompProps once they are defined  */}
-              <SideNavComponent />
+              <SideNavComponent activeNodes={activeNodes} />
             </ProjectHeader>
           );
         };
@@ -417,12 +410,14 @@ export class ChromeService {
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
+        getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
       },
     };
   }
 
   public stop() {
     this.navLinks.stop();
+    this.projectNavigation.stop();
     this.stop$.next();
   }
 }

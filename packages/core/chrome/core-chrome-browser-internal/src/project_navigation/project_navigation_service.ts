@@ -13,13 +13,18 @@ import {
   SideNavComponent,
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
+  ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
+import type { Location } from 'history';
 import { createHomeBreadcrumb } from './home_breadcrumbs';
+import { findActiveNodes, flattenNav, stripQueryParams } from './utils';
 
 interface StartDeps {
   application: InternalApplicationStart;
   navLinks: ChromeNavLinks;
+  http: HttpStart;
 }
 
 export class ProjectNavigationService {
@@ -28,17 +33,23 @@ export class ProjectNavigationService {
   }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
+  private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+  private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
     breadcrumbs: ChromeProjectBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   }>({ breadcrumbs: [], params: { absolute: false } });
 
-  public start({ application, navLinks }: StartDeps) {
-    // TODO: use application, navLink and projectNavigation$ to:
-    // 1. validate projectNavigation$ against navLinks,
-    // 2. filter disabled/missing links from projectNavigation
-    // 3. keep track of currently active link / path (path will be used to highlight the link in the sidenav and display part of the breadcrumbs)
+  private application?: InternalApplicationStart;
+  private http?: HttpStart;
+  private unlistenHistory?: () => void;
+
+  public start({ application, navLinks, http }: StartDeps) {
+    this.application = application;
+    this.http = http;
+    this.onHistoryLocationChange(application.history.location);
+    this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
     return {
       setProjectHome: (homeHref: string) => {
@@ -49,9 +60,14 @@ export class ProjectNavigationService {
       },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);
+        this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
+        this.setActiveProjectNavigationNodes();
       },
       getProjectNavigation$: () => {
         return this.projectNavigation$.asObservable();
+      },
+      getActiveNodes$: () => {
+        return this.activeNodes$.asObservable();
       },
       setProjectSideNavComponent: (component: SideNavComponent | null) => {
         this.customProjectSideNavComponent$.next({ current: component });
@@ -87,5 +103,27 @@ export class ProjectNavigationService {
         );
       },
     };
+  }
+
+  private setActiveProjectNavigationNodes(_location?: Location) {
+    if (!this.application) return;
+    if (!Object.keys(this.projectNavigationNavTreeFlattened).length) return;
+
+    const location = _location ?? this.application.history.location;
+    let currentPathname = this.http?.basePath.prepend(location.pathname) ?? location.pathname;
+
+    // We add possible hash to the current pathname
+    // e.g. /app/kibana#/management
+    currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
+    const activeNodes = findActiveNodes(currentPathname, this.projectNavigationNavTreeFlattened);
+    this.activeNodes$.next(activeNodes);
+  }
+
+  private onHistoryLocationChange(location: Location) {
+    this.setActiveProjectNavigationNodes(location);
+  }
+
+  public stop() {
+    this.unlistenHistory?.();
   }
 }
