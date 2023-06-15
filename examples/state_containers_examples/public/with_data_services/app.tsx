@@ -9,6 +9,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { History } from 'history';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import {
   EuiFieldText,
@@ -79,7 +80,7 @@ export const App = ({
   return (
     <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
       <Router history={history}>
-        <>
+        <CompatRouter>
           <EuiPageBody>
             <EuiPageHeader>
               <EuiTitle size="l">
@@ -114,7 +115,7 @@ export const App = ({
               />
             </EuiPageContent>
           </EuiPageBody>
-        </>
+        </CompatRouter>
       </Router>
     </StateContainersExamplesPage>
   );
