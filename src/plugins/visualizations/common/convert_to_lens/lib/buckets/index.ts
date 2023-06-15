@@ -21,6 +21,7 @@ import { getFieldNameFromField, getLabel, isSchemaConfig } from '../utils';
 
 export type BucketAggs =
   | BUCKET_TYPES.TERMS
+  | BUCKET_TYPES.SIGNIFICANT_TERMS
   | BUCKET_TYPES.DATE_HISTOGRAM
   | BUCKET_TYPES.FILTERS
   | BUCKET_TYPES.RANGE
@@ -28,6 +29,7 @@ export type BucketAggs =
 
 const SUPPORTED_BUCKETS: string[] = [
   BUCKET_TYPES.TERMS,
+  BUCKET_TYPES.SIGNIFICANT_TERMS,
   BUCKET_TYPES.DATE_HISTOGRAM,
   BUCKET_TYPES.FILTERS,
   BUCKET_TYPES.RANGE,
@@ -64,6 +66,7 @@ export const getBucketColumns = (
     case BUCKET_TYPES.HISTOGRAM:
       return convertToRangeColumn(agg.aggId ?? '', agg.aggParams, label, dataView, isSplit);
     case BUCKET_TYPES.TERMS:
+    case BUCKET_TYPES.SIGNIFICANT_TERMS:
       const fieldName = getFieldNameFromField(agg.aggParams.field);
       if (!fieldName) {
         return null;

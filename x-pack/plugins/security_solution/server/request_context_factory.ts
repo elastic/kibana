@@ -12,7 +12,7 @@ import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/ser
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
-import type { IRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
+import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -39,7 +39,7 @@ interface ConstructorOptions {
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
   endpointAppContextService: EndpointAppContextService;
-  ruleExecutionLogService: IRuleExecutionLogService;
+  ruleMonitoringService: IRuleMonitoringService;
   kibanaVersion: string;
   kibanaBranch: string;
 }
@@ -56,12 +56,15 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, core, plugins, endpointAppContextService, ruleExecutionLogService } = options;
+    const { config, core, plugins, endpointAppContextService, ruleMonitoringService } = options;
     const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
     const coreContext = await context.core;
+
+    const getSpaceId = (): string =>
+      startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
 
     appClientFactory.setup({
       getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
@@ -94,14 +97,23 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAppClient: () => appClientFactory.create(request),
 
-      getSpaceId: () => startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
+      getSpaceId,
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
       getRacClient: startPlugins.ruleRegistry.getRacClientWithRequest,
 
+      getDetectionEngineHealthClient: memoize(() =>
+        ruleMonitoringService.createDetectionEngineHealthClient({
+          savedObjectsClient: coreContext.savedObjects.client,
+          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          eventLogClient: startPlugins.eventLog.getClient(request),
+          currentSpaceId: getSpaceId(),
+        })
+      ),
+
       getRuleExecutionLog: memoize(() =>
-        ruleExecutionLogService.createClientForRoutes({
+        ruleMonitoringService.createRuleExecutionLogClientForRoutes({
           savedObjectsClient: coreContext.savedObjects.client,
           eventLogClient: startPlugins.eventLog.getClient(request),
         })

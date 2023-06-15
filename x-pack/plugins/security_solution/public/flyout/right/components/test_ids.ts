@@ -23,6 +23,7 @@ export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
 export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderShareButton';
+export const FLYOUT_HEADER_CHAT_BUTTON_TEST_ID = 'newChatById';
 
 /* Description section */
 
