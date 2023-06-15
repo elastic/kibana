@@ -187,11 +187,23 @@ describe('UninstallTokenService', () => {
     describe('get uninstall tokens', () => {
       it('can correctly getTokensForPolicyId', async () => {
         const so = getDefaultSO(canEncrypt);
-        const token = await uninstallTokenService.getTokensForPolicyId(so.attributes.policy_id);
-        expect(token).toEqual({
-          policy_id: so.attributes.policy_id,
-          token: getToken(so, canEncrypt),
-        } as UninstallToken);
+        mockCreatePointInTimeFinderAsInternalUser([so]);
+
+        const tokens = await uninstallTokenService.getTokensForPolicyId(so.attributes.policy_id);
+
+        expect(tokens.items).toEqual([
+          {
+            policy_id: so.attributes.policy_id,
+            token: getToken(so, canEncrypt),
+          },
+        ] as UninstallToken[]);
+
+        expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith({
+          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: "${so.attributes.policy_id}"`,
+          sortField: 'created_at',
+          sortOrder: 'desc',
+        });
       });
 
       it('can correctly getTokensForPolicyIds', async () => {
