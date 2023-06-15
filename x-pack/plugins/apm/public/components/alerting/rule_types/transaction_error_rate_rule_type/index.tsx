@@ -180,9 +180,11 @@ export function TransactionErrorRateRuleType(props: Props) {
     />,
   ];
 
-  const errorRateChartPreview = data?.errorRateChartPreview ?? [];
-
-  const hasData = errorRateChartPreview.length > 0;
+  const errorRateChartPreview = data?.errorRateChartPreview;
+  const series = errorRateChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const displayedGroups = errorRateChartPreview?.displayedGroups ?? 0;
+  const totalGroups = errorRateChartPreview?.totalGroups ?? 0;
 
   const chartPreview = isPending(status) ? (
     <LoadingState />
@@ -190,12 +192,14 @@ export function TransactionErrorRateRuleType(props: Props) {
     <NoDataState />
   ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={errorRateChartPreview}
+      series={series}
       yTickFormat={(d: number | null) => asPercent(d, 100)}
       threshold={params.threshold}
       uiSettings={services.uiSettings}
       timeSize={params.windowSize}
       timeUnit={params.windowUnit}
+      displayedGroups={displayedGroups}
+      totalGroups={totalGroups}
     />
   ) : (
     <ErrorState />

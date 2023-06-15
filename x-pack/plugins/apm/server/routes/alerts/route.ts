@@ -16,7 +16,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
 import {
   AggregationType,
-  PreviewChartResponseItem,
+  BarSeriesData,
 } from '../../../common/rules/apm_rule_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
@@ -42,7 +42,12 @@ const alertParamsRt = t.intersection([
   }),
 ]);
 
-export type PreviewChartResponse = PreviewChartResponseItem[];
+export interface PreviewChartResponse {
+  series: BarSeriesData[];
+  displayedGroups: number;
+  totalGroups: number;
+}
+
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({

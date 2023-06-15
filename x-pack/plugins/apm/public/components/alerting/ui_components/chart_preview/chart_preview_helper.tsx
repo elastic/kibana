@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { niceTimeFormatter } from '@elastic/charts';
 import { min as getMin, max as getMax } from 'lodash';
-import { Coordinate } from '../../../../../typings/timeseries';
+import { BarSeriesData } from '../../../../../common/rules/apm_rule_types';
 
 export const TIME_LABELS = {
   s: i18n.translate('xpack.apm.alerts.timeLabels.seconds', {
@@ -40,17 +40,13 @@ export const useDateFormatter = (xMin?: number, xMax?: number) => {
   return dateFormatter;
 };
 
-export const getDomain = (
-  series: Array<{ name?: string; data: Coordinate[] }>
-) => {
+export const getDomain = (series: BarSeriesData[]) => {
   let min: number | null = null;
   let max: number | null = null;
   const valuesByTimestamp = series.reduce<{ [timestamp: number]: number[] }>(
     (acc, serie) => {
-      serie.data.forEach((point) => {
-        const valuesForTimestamp = acc[point.x] || [];
-        acc[point.x] = [...valuesForTimestamp, point.y ?? 0];
-      });
+      const valuesForTimestamp = acc[serie.x] || [];
+      acc[serie.x] = [...valuesForTimestamp, serie.y ?? 0];
       return acc;
     },
     {}

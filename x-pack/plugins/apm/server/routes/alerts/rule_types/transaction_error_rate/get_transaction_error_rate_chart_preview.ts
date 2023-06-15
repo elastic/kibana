@@ -25,6 +25,10 @@ import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import {
+  BarSeriesDataMap,
+  getFilteredBarSeries,
+} from '../utils/get_series_for_preview_chart';
 
 export async function getTransactionErrorRateChartPreview({
   config,
@@ -126,7 +130,7 @@ export async function getTransactionErrorRateChartPreview({
   );
 
   if (!resp.aggregations) {
-    return [];
+    return { series: [], displayedGroups: 0, totalGroups: 0 };
   }
 
   const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
@@ -145,13 +149,15 @@ export async function getTransactionErrorRateChartPreview({
 
       return acc;
     },
-    {} as Record<string, Array<{ x: number; y: number | null }>>
+    {} as BarSeriesDataMap
   );
 
-  return Object.keys(seriesDataMap).map((key) => ({
+  const series = Object.keys(seriesDataMap).map((key) => ({
     name: key,
     data: seriesDataMap[key],
   }));
+
+  return getFilteredBarSeries(series);
 }
 
 const calculateErrorRate = (

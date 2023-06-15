@@ -20,13 +20,11 @@ import {
   TooltipProps,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import { Maybe } from '../../../../../typings/common';
-import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 import {
@@ -36,14 +34,17 @@ import {
   useDateFormatter,
 } from './chart_preview_helper';
 import { BUCKET_SIZE } from '../../utils/helper';
+import { BarSeriesData } from '../../../../../common/rules/apm_rule_types';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
   threshold: number;
   uiSettings?: IUiSettingsClient;
-  series: Array<{ name?: string; data: Coordinate[] }>;
+  series: BarSeriesData[];
   timeSize?: number;
   timeUnit?: TimeUnitChar;
+  displayedGroups: number;
+  totalGroups: number;
 }
 
 export function ChartPreview({
@@ -53,6 +54,8 @@ export function ChartPreview({
   series,
   timeSize = 5,
   timeUnit = 'm',
+  displayedGroups,
+  totalGroups,
 }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
@@ -67,7 +70,6 @@ export function ChartPreview({
     opacity: thresholdOpacity,
   };
 
-  const NUM_SERIES = 5;
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const tooltipProps: TooltipProps = {
@@ -79,46 +81,20 @@ export function ChartPreview({
     },
   };
 
-  const filteredSeries = useMemo(() => {
-    const sortedSeries = series.sort((a, b) => {
-      const aMax = Math.max(...a.data.map((point) => point.y as number));
-      const bMax = Math.max(...b.data.map((point) => point.y as number));
-      return bMax - aMax;
-    });
-    return sortedSeries.slice(0, NUM_SERIES);
-  }, [series]);
-
-  const barSeries = useMemo(() => {
-    return filteredSeries.reduce<
-      Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
-    >((acc, serie) => {
-      const barPoints = serie.data.reduce<
-        Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
-      >((pointAcc, point) => {
-        return [...pointAcc, { ...point, groupBy: serie.name }];
-      }, []);
-      return [...acc, ...barPoints];
-    }, []);
-  }, [filteredSeries]);
-
   const timeZone = getTimeZone(uiSettings);
 
   const legendSize =
-    filteredSeries.length > 1
-      ? Math.ceil(filteredSeries.length / 2) * 30
-      : filteredSeries.length * 35;
+    displayedGroups > 1
+      ? Math.ceil(displayedGroups / 2) * 30
+      : displayedGroups * 35;
 
   const chartSize = 150;
 
-  const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries);
+  const { yMin, yMax, xMin, xMax } = getDomain(series);
   const chartDomain = {
     max: Math.max(yMax, threshold) * 1.1, // Add 10% headroom.
-    min: Math.min(yMin, threshold),
+    min: Math.min(yMin, threshold) * 0.9, // Allow some padding so the threshold annotation has better visibility
   };
-
-  if (chartDomain.min === threshold) {
-    chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
-  }
 
   const dateFormatter = useDateFormatter(xMin, xMax);
 
@@ -183,8 +159,8 @@ export function ChartPreview({
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          splitSeriesAccessors={['groupBy']}
-          data={barSeries}
+          splitSeriesAccessors={['group']}
+          data={series}
           barSeriesStyle={{
             rectBorder: {
               strokeWidth: 1,
@@ -197,12 +173,12 @@ export function ChartPreview({
           timeZone={timeZone}
         />
       </Chart>
-      {filteredSeries.length > 0 && (
+      {series.length > 0 && (
         <TimeLabelForData
           lookback={lookback}
           timeLabel={timeLabel}
-          displayedGroups={filteredSeries.length}
-          totalGroups={series.length}
+          displayedGroups={displayedGroups}
+          totalGroups={totalGroups}
         />
       )}
     </>

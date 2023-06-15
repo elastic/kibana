@@ -47,6 +47,12 @@ export interface PreviewChartResponseItem {
   data: Array<{ x: number; y: number | null }>;
 }
 
+export interface BarSeriesData {
+  x: number;
+  y: number | null;
+  group: string | undefined;
+}
+
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
 export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
 const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {

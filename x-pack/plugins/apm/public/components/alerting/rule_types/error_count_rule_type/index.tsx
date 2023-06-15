@@ -173,9 +173,11 @@ export function ErrorCountRuleType(props: Props) {
     />,
   ];
 
-  const errorCountChartPreview = data?.errorCountChartPreview ?? [];
-
-  const hasData = errorCountChartPreview.length > 0;
+  const errorCountChartPreview = data?.errorCountChartPreview;
+  const series = errorCountChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const displayedGroups = errorCountChartPreview?.displayedGroups ?? 0;
+  const totalGroups = errorCountChartPreview?.totalGroups ?? 0;
 
   const chartPreview = isPending(status) ? (
     <LoadingState />
@@ -183,12 +185,14 @@ export function ErrorCountRuleType(props: Props) {
     <NoDataState />
   ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={errorCountChartPreview}
+      series={series}
       threshold={params.threshold}
       yTickFormat={asInteger}
       uiSettings={services.uiSettings}
       timeSize={params.windowSize}
       timeUnit={params.windowUnit}
+      displayedGroups={displayedGroups}
+      totalGroups={totalGroups}
     />
   ) : (
     <ErrorState />
