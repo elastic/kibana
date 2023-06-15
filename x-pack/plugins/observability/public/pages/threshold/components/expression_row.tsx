@@ -49,13 +49,9 @@ interface ExpressionRowProps {
   expression: MetricExpression;
   errors: IErrorObject;
   canDelete: boolean;
-
   addExpression(): void;
-
   remove(id: number): void;
-
   setRuleParams(id: number, params: MetricExpression): void;
-
   dataView: DataViewBase;
 }
 
