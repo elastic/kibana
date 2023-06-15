@@ -68,17 +68,17 @@ describe('Execute Report Task', () => {
 
   it('throws during reporting if Kibana starts shutting down', async () => {
     mockReporting.getExportTypesRegistry().register({
-  id: 'noop',
-  name: 'Noop',
-  jobContentExtension: 'pdf' as const,
-  jobType: 'noop',
-  validLicenses: [],
-  setup: jest.fn(),
-  start: jest.fn(),
-  createJob: jest.fn(),
-  runTask: jest.fn(),
-  getSpaceId: jest.fn(),
-});
+      id: 'noop',
+      name: 'Noop',
+      jobContentExtension: 'pdf' as const,
+      jobType: 'noop',
+      validLicenses: [],
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: jest.fn(),
+      runTask: jest.fn(),
+      getSpaceId: jest.fn(),
+    });
     const store = await mockReporting.getStore();
     store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
