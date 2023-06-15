@@ -9,6 +9,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
@@ -21,10 +22,44 @@ import { GettingStarted } from './guided_onboarding';
 
 const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 
+const TutorialDirectoryRoute = () => {
+  const { application, addBasePath, environmentService } = getServices();
+  const environment = environmentService.getEnvironment();
+  const isCloudEnabled = environment.cloud;
+  const params = useParams();
+
+  // Redirect to integrations app unless a specific tab that is still supported was specified.
+  const tabId = params.tab;
+  if (!tabId || REDIRECT_TO_INTEGRATIONS_TAB_IDS.includes(tabId)) {
+    application.navigateToApp('integrations', { replace: true });
+    return null;
+  }
+
+  return (
+    <TutorialDirectory addBasePath={addBasePath} openTab={tabId} isCloudEnabled={isCloudEnabled} />
+  );
+};
+
+const TutorialRoute = () => {
+  const { savedObjectsClient, addBasePath, environmentService } = getServices();
+  const environment = environmentService.getEnvironment();
+  const isCloudEnabled = environment.cloud;
+  const params = useParams();
+
+  return (
+    <Tutorial
+      addBasePath={addBasePath}
+      isCloudEnabled={isCloudEnabled}
+      getTutorial={getTutorial}
+      replaceTemplateStrings={replaceTemplateStrings}
+      tutorialId={params.id}
+      bulkCreate={savedObjectsClient.bulkCreate}
+    />
+  );
+};
+
 export function HomeApp({ directories, solutions }) {
   const {
-    application,
-    savedObjectsClient,
     getBasePath,
     addBasePath,
     environmentService,
@@ -34,42 +69,16 @@ export function HomeApp({ directories, solutions }) {
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
-  const renderTutorialDirectory = (props) => {
-    // Redirect to integrations app unless a specific tab that is still supported was specified.
-    const tabId = props.match.params.tab;
-    if (!tabId || REDIRECT_TO_INTEGRATIONS_TAB_IDS.includes(tabId)) {
-      application.navigateToApp('integrations', { replace: true });
-      return null;
-    }
-
-    return (
-      <TutorialDirectory
-        addBasePath={addBasePath}
-        openTab={tabId}
-        isCloudEnabled={isCloudEnabled}
-      />
-    );
-  };
-
-  const renderTutorial = (props) => {
-    return (
-      <Tutorial
-        addBasePath={addBasePath}
-        isCloudEnabled={isCloudEnabled}
-        getTutorial={getTutorial}
-        replaceTemplateStrings={replaceTemplateStrings}
-        tutorialId={props.match.params.id}
-        bulkCreate={savedObjectsClient.bulkCreate}
-      />
-    );
-  };
-
   return (
     <I18nProvider>
       <Router>
         <Switch>
-          <Route path="/tutorial/:id" render={renderTutorial} />
-          <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+          <Route path="/tutorial/:id">
+            <TutorialRoute />
+          </Route>
+          <Route path="/tutorial_directory/:tab?">
+            <TutorialDirectoryRoute />
+          </Route>
           {guidedOnboardingService.isEnabled && (
             <Route path="/getting_started">
               <GettingStarted />

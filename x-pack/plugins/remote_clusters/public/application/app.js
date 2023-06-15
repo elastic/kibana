@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 // eslint-disable-next-line no-restricted-imports
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
@@ -49,12 +50,14 @@ class AppComponent extends Component {
   render() {
     return (
       <Router history={this.props.history}>
-        <Switch>
-          <Route exact path={[`/list`, '/', '']} component={RemoteClusterList} />
-          <Route path={[`/add`]} component={RemoteClusterAdd} />
-          <Route path={`/edit/:name`} component={RemoteClusterEdit} />
-          <Redirect from={`/:anything`} to="/list" />
-        </Switch>
+        <CompatRouter>
+          <Switch>
+            <Route exact path={[`/list`, '/', '']} component={RemoteClusterList} />
+            <Route path={[`/add`]} component={RemoteClusterAdd} />
+            <Route path={`/edit/:name`} component={RemoteClusterEdit} />
+            <Redirect from={`/:anything`} to="/list" />
+          </Switch>
+        </CompatRouter>
       </Router>
     );
   }

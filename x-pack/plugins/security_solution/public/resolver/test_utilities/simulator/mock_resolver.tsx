@@ -9,6 +9,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import type { Store } from 'redux';
@@ -93,20 +94,22 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
   return (
     <I18nProvider>
       <Router history={props.history}>
-        <KibanaContextProvider services={props.coreStart}>
-          <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
-            <Provider store={props.store}>
-              <ResolverWithoutProviders
-                ref={resolverRef}
-                databaseDocumentID={props.databaseDocumentID}
-                resolverComponentInstanceID={props.resolverComponentInstanceID}
-                indices={props.indices}
-                shouldUpdate={props.shouldUpdate}
-                filters={props.filters}
-              />
-            </Provider>
-          </SideEffectContext.Provider>
-        </KibanaContextProvider>
+        <CompatRouter>
+          <KibanaContextProvider services={props.coreStart}>
+            <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
+              <Provider store={props.store}>
+                <ResolverWithoutProviders
+                  ref={resolverRef}
+                  databaseDocumentID={props.databaseDocumentID}
+                  resolverComponentInstanceID={props.resolverComponentInstanceID}
+                  indices={props.indices}
+                  shouldUpdate={props.shouldUpdate}
+                  filters={props.filters}
+                />
+              </Provider>
+            </SideEffectContext.Provider>
+          </KibanaContextProvider>
+        </CompatRouter>
       </Router>
     </I18nProvider>
   );

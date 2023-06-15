@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router, useLocation } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import qs from 'query-string';
 import { DatePicker } from './date_picker';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -65,31 +66,33 @@ function mountDatePicker(initialParams: {
 
   const wrapper = mount(
     <Router history={history}>
-      <KibanaContextProvider
-        services={{
-          data: {
-            query: {
-              timefilter: {
+      <CompatRouter>
+        <KibanaContextProvider
+          services={{
+            data: {
+              query: {
                 timefilter: {
-                  setTime: setTimeSpy,
-                  getTime: getTimeSpy,
-                  getTimeDefaults: jest.fn().mockReturnValue({}),
-                  getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
-                  getRefreshInterval: jest.fn().mockReturnValue({}),
+                  timefilter: {
+                    setTime: setTimeSpy,
+                    getTime: getTimeSpy,
+                    getTimeDefaults: jest.fn().mockReturnValue({}),
+                    getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+                    getRefreshInterval: jest.fn().mockReturnValue({}),
+                  },
                 },
               },
             },
-          },
-          uiSettings: {
-            get: (key: string) => [],
-            get$: (key: string) => of(true),
-          },
-        }}
-      >
-        <DatePickerContextProvider>
-          <DatePickerWrapper />
-        </DatePickerContextProvider>
-      </KibanaContextProvider>
+            uiSettings: {
+              get: (key: string) => [],
+              get$: (key: string) => of(true),
+            },
+          }}
+        >
+          <DatePickerContextProvider>
+            <DatePickerWrapper />
+          </DatePickerContextProvider>
+        </KibanaContextProvider>
+      </CompatRouter>
     </Router>
   );
 

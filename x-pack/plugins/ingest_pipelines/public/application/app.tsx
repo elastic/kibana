@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { Router, Switch } from 'react-router-dom';
-
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../shared_imports';
@@ -113,7 +113,9 @@ export const App: FunctionComponent = () => {
 
         return (
           <Router history={history}>
-            <AppWithoutRouter />
+            <CompatRouter>
+              <AppWithoutRouter />
+            </CompatRouter>
           </Router>
         );
       }}

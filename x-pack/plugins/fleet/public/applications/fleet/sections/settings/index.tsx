@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { Router, Switch, useHistory, Redirect } from 'react-router-dom';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import {
@@ -41,6 +42,80 @@ function useSettingsAppData() {
 
   return { outputs, fleetServerHosts, downloadSources, proxies };
 }
+
+interface EditRouteProps {
+  onCloseCallback: () => void;
+}
+
+const EditSettingsOutputRoute: React.FC<EditRouteProps> = ({ onCloseCallback }) => {
+  const { proxies, outputs } = useSettingsAppData();
+  const params = useParams();
+  const output = outputs.data?.items.find((o) => params.outputId === o.id);
+  if (!output) {
+    return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+  }
+
+  return (
+    <EuiPortal>
+      <EditOutputFlyout
+        proxies={proxies.data?.items ?? []}
+        onClose={onCloseCallback}
+        output={output}
+      />
+    </EuiPortal>
+  );
+};
+
+const EditFleetProxyRoute: React.FC<EditRouteProps> = ({ onCloseCallback }) => {
+  const { proxies } = useSettingsAppData();
+  const params = useParams();
+
+  const fleetProxy = proxies.data?.items.find((item) => params.itemId === item.id);
+  if (!fleetProxy) {
+    return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+  }
+  return (
+    <EuiPortal>
+      <FleetProxyFlyout onClose={onCloseCallback} fleetProxy={fleetProxy} />
+    </EuiPortal>
+  );
+};
+
+const EditDownloadSourceRoute: React.FC<EditRouteProps> = ({ onCloseCallback }) => {
+  const { downloadSources } = useSettingsAppData();
+
+  const params = useParams();
+  const downloadSource = downloadSources.data?.items.find((o) => params.downloadSourceId === o.id);
+  if (!downloadSource) {
+    return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+  }
+
+  return (
+    <EuiPortal>
+      <EditDownloadSourceFlyout onClose={onCloseCallback} downloadSource={downloadSource} />
+    </EuiPortal>
+  );
+};
+
+const EditFleetServerHostRoute: React.FC<EditRouteProps> = ({ onCloseCallback }) => {
+  const { fleetServerHosts, proxies } = useSettingsAppData();
+
+  const params = useParams();
+  const fleetServerHost = fleetServerHosts.data?.items.find((o) => params.itemId === o.id);
+  if (!fleetServerHost) {
+    return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+  }
+
+  return (
+    <EuiPortal>
+      <FleetServerHostsFlyout
+        proxies={proxies.data?.items ?? []}
+        onClose={onCloseCallback}
+        fleetServerHost={fleetServerHost}
+      />
+    </EuiPortal>
+  );
+};
 
 export const SettingsApp = withConfirmModalProvider(() => {
   useBreadcrumbs('settings');
@@ -96,100 +171,42 @@ export const SettingsApp = withConfirmModalProvider(() => {
   return (
     <DefaultLayout section="settings">
       <Router history={history}>
-        <Switch>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
-            {(route: { match: { params: { itemId: string } } }) => {
-              const fleetServerHost = fleetServerHosts.data?.items.find(
-                (o) => route.match.params.itemId === o.id
-              );
-              if (!fleetServerHost) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
-
-              return (
-                <EuiPortal>
-                  <FleetServerHostsFlyout
-                    proxies={proxies.data?.items ?? []}
-                    onClose={onCloseCallback}
-                    fleetServerHost={fleetServerHost}
-                  />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
-            <EuiPortal>
-              <FleetServerFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
-            <EuiPortal>
-              <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
-            <EuiPortal>
-              <FleetProxyFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
-            {(route: { match: { params: { itemId: string } } }) => {
-              const fleetProxy = proxies.data?.items.find(
-                (item) => route.match.params.itemId === item.id
-              );
-              if (!fleetProxy) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
-              return (
-                <EuiPortal>
-                  <FleetProxyFlyout onClose={onCloseCallback} fleetProxy={fleetProxy} />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
-            {(route: { match: { params: { outputId: string } } }) => {
-              const output = outputs.data?.items.find((o) => route.match.params.outputId === o.id);
-              if (!output) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
-
-              return (
-                <EuiPortal>
-                  <EditOutputFlyout
-                    proxies={proxies.data?.items ?? []}
-                    onClose={onCloseCallback}
-                    output={output}
-                  />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
-            <EuiPortal>
-              <EditDownloadSourceFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
-            {(route: { match: { params: { downloadSourceId: string } } }) => {
-              const downloadSource = downloadSources.data?.items.find(
-                (o) => route.match.params.downloadSourceId === o.id
-              );
-              if (!downloadSource) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
-
-              return (
-                <EuiPortal>
-                  <EditDownloadSourceFlyout
-                    onClose={onCloseCallback}
-                    downloadSource={downloadSource}
-                  />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-        </Switch>
+        <CompatRouter>
+          <Switch>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
+              <EditFleetServerHostRoute onCloseCallback={onCloseCallback} />
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
+              <EuiPortal>
+                <FleetServerFlyout onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
+              <EuiPortal>
+                <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
+              <EuiPortal>
+                <FleetProxyFlyout onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
+              <EditFleetProxyRoute onCloseCallback={onCloseCallback} />
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
+              <EditSettingsOutputRoute onCloseCallback={onCloseCallback} />
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
+              <EuiPortal>
+                <EditDownloadSourceFlyout onClose={onCloseCallback} />
+              </EuiPortal>
+            </Route>
+            <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
+              <EditDownloadSourceRoute onCloseCallback={onCloseCallback} />
+            </Route>
+          </Switch>
+        </CompatRouter>
       </Router>
       <SettingsPage
         deleteFleetProxy={deleteFleetProxy}

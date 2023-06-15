@@ -7,6 +7,7 @@
 
 import React, { FC } from 'react';
 import { Router, type RouteProps } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { type Location } from 'history';
 
 import type {
@@ -90,11 +91,13 @@ export const MlRouter: FC<{
   pageDeps: PageDependencies;
 }> = ({ pageDeps }) => (
   <Router history={pageDeps.history}>
-    <UrlStateProvider>
-      <MlNotificationsContextProvider>
-        <MlPage pageDeps={pageDeps} />
-      </MlNotificationsContextProvider>
-    </UrlStateProvider>
+    <CompatRouter>
+      <UrlStateProvider>
+        <MlNotificationsContextProvider>
+          <MlPage pageDeps={pageDeps} />
+        </MlNotificationsContextProvider>
+      </UrlStateProvider>
+    </CompatRouter>
   </Router>
 );
 

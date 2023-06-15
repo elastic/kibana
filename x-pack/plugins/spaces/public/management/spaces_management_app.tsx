@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, useParams } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -118,17 +119,19 @@ export const spacesManagementApp = Object.freeze({
               <KibanaThemeProvider theme$={theme$}>
                 <RedirectAppLinks coreStart={coreStart}>
                   <Router history={history}>
-                    <Switch>
-                      <Route path={['', '/']} exact>
-                        <SpacesGridPageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/create">
-                        <CreateSpacePageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/edit/:spaceId">
-                        <EditSpacePageWithBreadcrumbs />
-                      </Route>
-                    </Switch>
+                    <CompatRouter>
+                      <Switch>
+                        <Route path={['', '/']} exact>
+                          <SpacesGridPageWithBreadcrumbs />
+                        </Route>
+                        <Route path="/create">
+                          <CreateSpacePageWithBreadcrumbs />
+                        </Route>
+                        <Route path="/edit/:spaceId">
+                          <EditSpacePageWithBreadcrumbs />
+                        </Route>
+                      </Switch>
+                    </CompatRouter>
                   </Router>
                 </RedirectAppLinks>
               </KibanaThemeProvider>

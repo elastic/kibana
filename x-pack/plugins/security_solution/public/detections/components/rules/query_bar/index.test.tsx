@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { QueryBarDefineRule } from '.';
 import {
   TestProviders,
@@ -72,16 +72,18 @@ describe('QueryBarDefineRule', () => {
     const { getByTestId } = render(
       <TestProviders>
         <Router history={mockHistory}>
-          <QueryBarDefineRule
-            browserFields={{}}
-            isLoading={false}
-            indexPattern={{ fields: [], title: 'title' }}
-            onCloseTimelineSearch={jest.fn()}
-            openTimelineSearch={true}
-            dataTestSubj="query-bar-define-rule"
-            idAria="idAria"
-            field={field}
-          />
+          <CompatRouter>
+            <QueryBarDefineRule
+              browserFields={{}}
+              isLoading={false}
+              indexPattern={{ fields: [], title: 'title' }}
+              onCloseTimelineSearch={jest.fn()}
+              openTimelineSearch={true}
+              dataTestSubj="query-bar-define-rule"
+              idAria="idAria"
+              field={field}
+            />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -95,16 +97,18 @@ describe('QueryBarDefineRule', () => {
       const { queryByTestId } = render(
         <TestProviders>
           <Router history={mockHistory}>
-            <QueryBarDefineRule
-              browserFields={{}}
-              isLoading={false}
-              indexPattern={{ fields: [], title: 'title' }}
-              onCloseTimelineSearch={jest.fn()}
-              openTimelineSearch={true}
-              dataTestSubj="query-bar-define-rule"
-              idAria="idAria"
-              field={field}
-            />
+            <CompatRouter>
+              <QueryBarDefineRule
+                browserFields={{}}
+                isLoading={false}
+                indexPattern={{ fields: [], title: 'title' }}
+                onCloseTimelineSearch={jest.fn()}
+                openTimelineSearch={true}
+                dataTestSubj="query-bar-define-rule"
+                idAria="idAria"
+                field={field}
+              />
+            </CompatRouter>
           </Router>
         </TestProviders>
       );
@@ -121,17 +125,19 @@ describe('QueryBarDefineRule', () => {
     const { getByTestId } = render(
       <TestProviders>
         <Router history={mockHistory}>
-          <QueryBarDefineRule
-            browserFields={{}}
-            isLoading={false}
-            indexPattern={{ fields: [], title: 'title' }}
-            onCloseTimelineSearch={jest.fn()}
-            openTimelineSearch={true}
-            dataTestSubj="query-bar-define-rule"
-            idAria="idAria"
-            field={field}
-            onOpenTimeline={onOpenTimeline}
-          />
+          <CompatRouter>
+            <QueryBarDefineRule
+              browserFields={{}}
+              isLoading={false}
+              indexPattern={{ fields: [], title: 'title' }}
+              onCloseTimelineSearch={jest.fn()}
+              openTimelineSearch={true}
+              dataTestSubj="query-bar-define-rule"
+              idAria="idAria"
+              field={field}
+              onOpenTimeline={onOpenTimeline}
+            />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );

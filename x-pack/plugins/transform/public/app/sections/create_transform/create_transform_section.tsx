@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, FC } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -27,8 +27,9 @@ import { PrivilegesWrapper } from '../../lib/authorization';
 
 import { Wizard } from './components/wizard';
 
-type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const CreateTransformSection: FC<Props> = ({ match }) => {
+export const CreateTransformSection: FC = () => {
+  const { savedObjectId } = useParams<{ savedObjectId: string }>();
+
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);
@@ -37,7 +38,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
 
   const { esTransform } = useDocumentationLinks();
 
-  const { error: searchItemsError, searchItems } = useSearchItems(match.params.savedObjectId);
+  const { error: searchItemsError, searchItems } = useSearchItems(savedObjectId as string);
 
   const docsLink = (
     <EuiButtonEmpty

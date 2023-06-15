@@ -9,6 +9,7 @@ import { shallowWithIntl, renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import moment from 'moment';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { MostRecentError } from './most_recent_error';
 import { MonitorDetails, PingError } from '../../../../../../common/runtime_types';
 
@@ -35,11 +36,13 @@ describe('MostRecentError component', () => {
   it('validates props with shallow render', () => {
     const component = shallowWithIntl(
       <Router>
-        <MostRecentError
-          monitorId={monitorDetails.monitorId}
-          error={monitorDetails.error}
-          timestamp={monitorDetails.timestamp}
-        />
+        <CompatRouter>
+          <MostRecentError
+            monitorId={monitorDetails.monitorId}
+            error={monitorDetails.error}
+            timestamp={monitorDetails.timestamp}
+          />
+        </CompatRouter>
       </Router>
     );
     expect(component).toMatchSnapshot();
@@ -48,11 +51,13 @@ describe('MostRecentError component', () => {
   it('renders properly with mock data', () => {
     const component = renderWithIntl(
       <Router>
-        <MostRecentError
-          monitorId={monitorDetails.monitorId}
-          error={monitorDetails.error}
-          timestamp={monitorDetails.timestamp}
-        />
+        <CompatRouter>
+          <MostRecentError
+            monitorId={monitorDetails.monitorId}
+            error={monitorDetails.error}
+            timestamp={monitorDetails.timestamp}
+          />
+        </CompatRouter>
       </Router>
     );
     expect(component).toMatchSnapshot();

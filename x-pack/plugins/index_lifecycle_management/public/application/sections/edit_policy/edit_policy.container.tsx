@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -25,15 +25,8 @@ import { defaultPolicy } from '../../constants';
 import { EditPolicy as PresentationComponent } from './edit_policy';
 import { EditPolicyContextProvider } from './edit_policy_context';
 
-interface RouterProps {
-  policyName: string;
-}
-
-export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps>> = ({
-  match: {
-    params: { policyName },
-  },
-}) => {
+export const EditPolicy: React.FunctionComponent = () => {
+  const { policyName } = useParams();
   const {
     services: { breadcrumbService, license },
   } = useKibana();

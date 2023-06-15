@@ -9,6 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
@@ -89,13 +90,18 @@ export const renderApp = ({
               }}
             >
               <Router history={history}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <i18nCore.Context>
-                    <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                      <App />
-                    </RedirectAppLinks>
-                  </i18nCore.Context>
-                </EuiThemeProvider>
+                <CompatRouter>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <i18nCore.Context>
+                      <RedirectAppLinks
+                        application={core.application}
+                        className={APP_WRAPPER_CLASS}
+                      >
+                        <App />
+                      </RedirectAppLinks>
+                    </i18nCore.Context>
+                  </EuiThemeProvider>
+                </CompatRouter>
               </Router>
             </PluginContext.Provider>
           </KibanaContextProvider>

@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -20,7 +20,8 @@ import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 let bannerId: string | undefined;
 
-export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
+export const DashboardNoMatch = () => {
+  const history = useHistory();
   const { restorePreviousUrl } = useDashboardMountContext();
   const {
     settings: {

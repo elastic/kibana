@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
@@ -30,10 +31,6 @@ import { useRedirectPath } from '../../../../hooks/redirect_path';
 import { MANAGED_BY_FLEET } from '../../constants';
 
 import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
-
-interface MatchParams {
-  name: string;
-}
 
 export function useStepFromQueryString(history: History) {
   const activeStep = useMemo(() => {
@@ -59,12 +56,10 @@ export function useStepFromQueryString(history: History) {
   return { activeStep, updateStep };
 }
 
-export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
+export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps> = ({
   history,
 }) => {
+  const { name } = useParams();
   const { api, breadcrumbs, overlays } = useComponentTemplatesContext();
   const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);

@@ -9,6 +9,7 @@ import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import type * as H from 'history';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -69,7 +70,9 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
           <EuiThemeProvider darkMode={services.uiSettings.get(DEFAULT_DARK_MODE)}>
             <Provider store={store}>
               <Router history={history}>
-                <TopNAction onClose={onClose} context={context} casesService={services.cases} />
+                <CompatRouter>
+                  <TopNAction onClose={onClose} context={context} casesService={services.cases} />
+                </CompatRouter>
               </Router>
             </Provider>
           </EuiThemeProvider>

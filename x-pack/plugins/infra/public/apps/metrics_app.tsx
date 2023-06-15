@@ -10,6 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -76,21 +77,23 @@ const MetricsApp: React.FC<{
       >
         <SourceProvider sourceId="default">
           <Router history={history}>
-            <Switch>
-              <Route path="/link-to" component={LinkToMetricsPage} />
-              {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
-              )}
-              {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
-              )}
-              {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-              )}
-              {uiCapabilities?.infrastructure?.show && (
-                <Route path="/" component={InfrastructurePage} />
-              )}
-            </Switch>
+            <CompatRouter>
+              <Switch>
+                <Route path="/link-to" component={LinkToMetricsPage} />
+                {uiCapabilities?.infrastructure?.show && (
+                  <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
+                )}
+                {uiCapabilities?.infrastructure?.show && (
+                  <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
+                )}
+                {uiCapabilities?.infrastructure?.show && (
+                  <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
+                )}
+                {uiCapabilities?.infrastructure?.show && (
+                  <Route path="/" component={InfrastructurePage} />
+                )}
+              </Switch>
+            </CompatRouter>
           </Router>
         </SourceProvider>
       </CommonInfraProviders>

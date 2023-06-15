@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Router, Switch, Redirect } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -33,7 +34,9 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
   return (
     <Router history={history}>
-      <AppWithoutRouter />
+      <CompatRouter>
+        <AppWithoutRouter />
+      </CompatRouter>
     </Router>
   );
 };

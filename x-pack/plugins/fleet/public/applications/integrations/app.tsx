@@ -10,6 +10,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -94,18 +95,22 @@ export const IntegrationsAppContext: React.FC<{
                             <startServices.customIntegrations.ContextProvider>
                               <CloudContext>
                                 <Router history={history}>
-                                  <AgentPolicyContextProvider>
-                                    <PackageInstallProvider
-                                      notifications={startServices.notifications}
-                                      theme$={theme$}
-                                    >
-                                      <FlyoutContextProvider>
-                                        <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                        {children}
-                                        <Chat />
-                                      </FlyoutContextProvider>
-                                    </PackageInstallProvider>
-                                  </AgentPolicyContextProvider>
+                                  <CompatRouter>
+                                    <AgentPolicyContextProvider>
+                                      <PackageInstallProvider
+                                        notifications={startServices.notifications}
+                                        theme$={theme$}
+                                      >
+                                        <FlyoutContextProvider>
+                                          <IntegrationsHeader
+                                            {...{ setHeaderActionMenu, theme$ }}
+                                          />
+                                          {children}
+                                          <Chat />
+                                        </FlyoutContextProvider>
+                                      </PackageInstallProvider>
+                                    </AgentPolicyContextProvider>
+                                  </CompatRouter>
                                 </Router>
                               </CloudContext>
                             </startServices.customIntegrations.ContextProvider>

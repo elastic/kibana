@@ -10,6 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { Observable } from 'rxjs';
 
 import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
@@ -104,13 +105,15 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
       <I18nProvider>
         <KibanaThemeProvider theme$={theme$}>
           <Router history={history}>
-            <ReadonlyBadge
-              featureId="api_keys"
-              tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
-                defaultMessage: 'Unable to create or edit API keys',
-              })}
-            />
-            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+            <CompatRouter>
+              <ReadonlyBadge
+                featureId="api_keys"
+                tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
+                  defaultMessage: 'Unable to create or edit API keys',
+                })}
+              />
+              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+            </CompatRouter>
           </Router>
         </KibanaThemeProvider>
       </I18nProvider>

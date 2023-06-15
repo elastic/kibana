@@ -39,7 +39,9 @@ describe('CloudDefendRouter', () => {
   const renderCloudDefendRouter = () =>
     render(
       <Router history={history}>
+        {/* <CompatRouter> */}
         <CloudDefendRouter securitySolutionContext={securityContext} />
+        {/* </CompatRouter> */}
       </Router>
     );
 

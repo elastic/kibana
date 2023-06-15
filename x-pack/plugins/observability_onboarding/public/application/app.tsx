@@ -30,6 +30,7 @@ import {
   Router,
   Switch,
 } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -135,15 +136,17 @@ export function ObservabilityOnboardingAppRoot({
         >
           <i18nCore.Context>
             <Router history={history}>
-              <EuiErrorBoundary>
-                <HeaderMenuPortal
-                  setHeaderActionMenu={setHeaderActionMenu}
-                  theme$={theme$}
-                >
-                  <ObservabilityOnboardingHeaderActionMenu />
-                </HeaderMenuPortal>
-                <ObservabilityOnboardingApp />
-              </EuiErrorBoundary>
+              <CompatRouter>
+                <EuiErrorBoundary>
+                  <HeaderMenuPortal
+                    setHeaderActionMenu={setHeaderActionMenu}
+                    theme$={theme$}
+                  >
+                    <ObservabilityOnboardingHeaderActionMenu />
+                  </HeaderMenuPortal>
+                  <ObservabilityOnboardingApp />
+                </EuiErrorBoundary>
+              </CompatRouter>
             </Router>
           </i18nCore.Context>
         </KibanaThemeProvider>

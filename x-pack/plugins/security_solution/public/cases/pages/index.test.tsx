@@ -8,6 +8,7 @@
 import React from 'react';
 import { Cases } from '.';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
@@ -54,7 +55,9 @@ describe('cases page in security', () => {
   it('calls endTour on cases details page when SecurityStepId.alertsCases tour is active and step is AlertsCasesTourSteps.viewCase', () => {
     render(
       <Router history={mockHistory}>
-        <Cases />
+        <CompatRouter>
+          <Cases />
+        </CompatRouter>
       </Router>,
       { wrapper: TestProviders }
     );
@@ -69,7 +72,9 @@ describe('cases page in security', () => {
     });
     render(
       <Router history={mockHistory}>
-        <Cases />
+        <CompatRouter>
+          <Cases />
+        </CompatRouter>
       </Router>,
       { wrapper: TestProviders }
     );
@@ -84,7 +89,9 @@ describe('cases page in security', () => {
     });
     render(
       <Router history={mockHistory}>
-        <Cases />
+        <CompatRouter>
+          <Cases />
+        </CompatRouter>
       </Router>,
       { wrapper: TestProviders }
     );

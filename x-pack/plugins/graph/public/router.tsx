@@ -8,6 +8,7 @@
 import React from 'react';
 import { createHashHistory } from 'history';
 import { Redirect, Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { ListingRoute } from './apps/listing_route';
@@ -19,17 +20,19 @@ export const graphRouter = (deps: GraphServices) => {
 
   return (
     <Router history={history}>
-      <Switch>
-        <Route exact path="/home">
-          <ListingRoute deps={deps} />
-        </Route>
-        <Route path="/workspace/:id?">
-          <WorkspaceRoute deps={deps} />
-        </Route>
-        <Route>
-          <Redirect exact to="/home" />
-        </Route>
-      </Switch>
+      <CompatRouter>
+        <Switch>
+          <Route exact path="/home">
+            <ListingRoute deps={deps} />
+          </Route>
+          <Route path="/workspace/:id?">
+            <WorkspaceRoute deps={deps} />
+          </Route>
+          <Route>
+            <Redirect exact to="/home" />
+          </Route>
+        </Switch>
+      </CompatRouter>
     </Router>
   );
 };

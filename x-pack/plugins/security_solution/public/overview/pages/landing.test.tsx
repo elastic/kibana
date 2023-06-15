@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { LandingPage } from './landing';
 import { useKibana } from '../../common/lib/kibana';
 import { Router } from 'react-router-dom';
@@ -34,7 +35,9 @@ describe('LandingPage', () => {
   const renderPage = () =>
     render(
       <Router history={history}>
-        <LandingPage />
+        <CompatRouter>
+          <LandingPage />
+        </CompatRouter>
       </Router>,
       { wrapper: TestProviders }
     );

@@ -10,6 +10,7 @@ import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -62,12 +63,14 @@ export const renderApp = (
       >
         <EuiErrorBoundary>
           <Router history={history}>
-            <I18nProvider>
-              <QueryClientProvider client={queryClient}>
-                <OsqueryAppContext />
-                <ReactQueryDevtools initialIsOpen={false} />
-              </QueryClientProvider>
-            </I18nProvider>
+            <CompatRouter>
+              <I18nProvider>
+                <QueryClientProvider client={queryClient}>
+                  <OsqueryAppContext />
+                  <ReactQueryDevtools initialIsOpen={false} />
+                </QueryClientProvider>
+              </I18nProvider>
+            </CompatRouter>
           </Router>
         </EuiErrorBoundary>
       </KibanaContextProvider>

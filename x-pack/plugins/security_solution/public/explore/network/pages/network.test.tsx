@@ -8,6 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import type { Filter } from '@kbn/es-query';
@@ -146,7 +147,9 @@ describe('Network page - rendering', () => {
     mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Network {...mockProps} />
+          <CompatRouter>
+            <Network {...mockProps} />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -165,7 +168,9 @@ describe('Network page - rendering', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Network {...mockProps} />
+          <CompatRouter>
+            <Network {...mockProps} />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -233,7 +238,9 @@ describe('Network page - rendering', () => {
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
-          <Network {...mockProps} />
+          <CompatRouter>
+            <Network {...mockProps} />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );

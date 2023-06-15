@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -78,13 +79,17 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             }}
           >
             <Router history={history}>
-              <CasesAppWithContext
-                externalReferenceAttachmentTypeRegistry={
-                  deps.externalReferenceAttachmentTypeRegistry
-                }
-                persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
-                getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
-              />
+              <CompatRouter>
+                <CasesAppWithContext
+                  externalReferenceAttachmentTypeRegistry={
+                    deps.externalReferenceAttachmentTypeRegistry
+                  }
+                  persistableStateAttachmentTypeRegistry={
+                    deps.persistableStateAttachmentTypeRegistry
+                  }
+                  getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
+                />
+              </CompatRouter>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>

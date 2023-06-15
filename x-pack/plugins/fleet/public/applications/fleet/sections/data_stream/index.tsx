@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Router, Switch, useHistory } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
@@ -19,13 +20,15 @@ export const DataStreamApp: React.FunctionComponent = () => {
 
   return (
     <Router history={history}>
-      <Switch>
-        <Route path={FLEET_ROUTING_PATHS.data_streams}>
-          <DefaultLayout section="data_streams">
-            <DataStreamListPage />
-          </DefaultLayout>
-        </Route>
-      </Switch>
+      <CompatRouter>
+        <Switch>
+          <Route path={FLEET_ROUTING_PATHS.data_streams}>
+            <DefaultLayout section="data_streams">
+              <DataStreamListPage />
+            </DefaultLayout>
+          </Route>
+        </Switch>
+      </CompatRouter>
     </Router>
   );
 };

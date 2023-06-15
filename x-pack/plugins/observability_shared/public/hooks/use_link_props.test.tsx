@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React, { PropsWithChildren } from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { encode } from '@kbn/rison';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -32,7 +33,9 @@ const scopedHistory = new CoreScopedHistory(history, `${PREFIX}${INTERNAL_APP}`)
 function ProviderWrapper({ children }: PropsWithChildren<{}>) {
   return (
     <Router history={scopedHistory}>
-      <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
+      <CompatRouter>
+        <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
+      </CompatRouter>
     </Router>
   );
 }

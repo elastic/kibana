@@ -31,6 +31,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
@@ -177,11 +178,13 @@ export function MockRouter<ExtraCore extends Partial<CoreStart>>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <Route path={'/app/exploratory-view/'}>
-        <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
-          {children}
-        </MockKibanaProvider>
-      </Route>
+      <CompatRouter>
+        <Route path={'/app/exploratory-view/'}>
+          <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
+            {children}
+          </MockKibanaProvider>
+        </Route>
+      </CompatRouter>
     </Router>
   );
 }

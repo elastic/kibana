@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { AppDependencies } from './app_context';
 import { AppProviders } from './app_providers';
@@ -16,7 +17,9 @@ import { App } from './app.container';
 
 const AppWithRouter = (props: { [key: string]: any }) => (
   <Router history={props.history}>
-    <App {...props} />
+    <CompatRouter>
+      <App {...props} />
+    </CompatRouter>
   </Router>
 );
 

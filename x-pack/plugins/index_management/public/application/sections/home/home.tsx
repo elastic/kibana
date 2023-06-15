@@ -7,6 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { RouteComponentProps, Switch } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
@@ -31,16 +32,8 @@ export const homeSections = [
   Section.ComponentTemplates,
 ];
 
-interface MatchParams {
-  section: Section;
-}
-
-export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const IndexManagementHome: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+  const { section } = useParams<{ section: Section }>();
   const tabs = [
     {
       id: Section.Indices,

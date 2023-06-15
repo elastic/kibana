@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { listBreadcrumb, statusBreadcrumb } from '../../lib/breadcrumbs';
 import { useLoadWatchDetail, deactivateWatch, activateWatch } from '../../lib/api';
@@ -46,23 +47,14 @@ const TABS: WatchStatusTab[] = [
   },
 ];
 
-export const WatchStatusPage = ({
-  match: {
-    params: { id },
-  },
-}: {
-  match: {
-    params: {
-      id: string;
-    };
-  };
-}) => {
+export const WatchStatusPage = () => {
+  const { id } = useParams();
   const { setBreadcrumbs, toasts } = useAppContext();
   const {
     error: watchDetailError,
     data: watchDetail,
     isLoading: isWatchDetailLoading,
-  } = useLoadWatchDetail(id);
+  } = useLoadWatchDetail(id as string);
 
   const [selectedTab, setSelectedTab] = useState<WatchStatusTab['id']>('executionHistoryTab');
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);

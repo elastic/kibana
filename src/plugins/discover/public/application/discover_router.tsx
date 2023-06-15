@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, Router, Switch, useParams } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { Redirect, Router, Switch } from 'react-router-dom';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
@@ -73,14 +73,14 @@ interface CustomDiscoverRoutesProps {
 export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
   const { profile } = useParams<{ profile: string }>();
   const customizationCallbacks = useMemo(
-    () => profileRegistry.get(profile)?.customizationCallbacks,
+    () => profileRegistry.get(profile as string)?.customizationCallbacks,
     [profile, profileRegistry]
   );
 
   if (customizationCallbacks) {
     return (
       <DiscoverRoutes
-        prefix={addProfile('', profile)}
+        prefix={addProfile('', profile as string)}
         customizationCallbacks={customizationCallbacks}
         {...props}
       />

@@ -8,6 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import type { Filter } from '@kbn/es-query';
 import '../../../common/mock/match_media';
@@ -118,7 +119,9 @@ describe('Hosts - rendering', () => {
     mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
-          <Hosts />
+          <CompatRouter>
+            <Hosts />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -134,7 +137,9 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
-          <Hosts />
+          <CompatRouter>
+            <Hosts />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );
@@ -180,7 +185,9 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
-          <Hosts />
+          <CompatRouter>
+            <Hosts />
+          </CompatRouter>
         </Router>
       </TestProviders>
     );

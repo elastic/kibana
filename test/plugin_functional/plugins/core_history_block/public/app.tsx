@@ -10,6 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 // eslint-disable-next-line no-restricted-imports
 import { Router, Switch, Route, Prompt } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
@@ -69,14 +70,16 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <Router history={history}>
-      <Switch>
-        <Route path="/" exact={true}>
-          <HomePage basePath={basePath} application={application} />
-        </Route>
-        <Route path="/foo" exact={true}>
-          <FooPage basePath={basePath} application={application} />
-        </Route>
-      </Switch>
+      <CompatRouter>
+        <Switch>
+          <Route path="/" exact={true}>
+            <HomePage basePath={basePath} application={application} />
+          </Route>
+          <Route path="/foo" exact={true}>
+            <FooPage basePath={basePath} application={application} />
+          </Route>
+        </Switch>
+      </CompatRouter>
     </Router>,
     element
   );

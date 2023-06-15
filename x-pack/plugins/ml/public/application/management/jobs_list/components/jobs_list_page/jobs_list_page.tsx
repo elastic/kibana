@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState, FC, useCallback, useMemo } from 'react';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
@@ -127,58 +128,60 @@ export const JobsListPage: FC<{
           >
             <ContextWrapper feature={PLUGIN_ID}>
               <Router history={history}>
-                <EuiPageHeader
-                  pageTitle={
-                    <FormattedMessage
-                      id="xpack.ml.management.jobsList.jobsListTitle"
-                      defaultMessage="Machine Learning"
-                    />
-                  }
-                  description={
-                    <FormattedMessage
-                      id="xpack.ml.management.jobsList.jobsListTagline"
-                      defaultMessage="View, export, and import machine learning analytics and anomaly detection items."
-                    />
-                  }
-                  rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
-                  bottomBorder
-                />
-
-                <EuiSpacer size="l" />
-
-                <EuiPageContentBody
-                  id="kibanaManagementMLSection"
-                  data-test-subj="mlPageStackManagementJobsList"
-                >
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <>
-                        <EuiButtonEmpty
-                          onClick={() => setShowSyncFlyout(true)}
-                          data-test-subj="mlStackMgmtSyncButton"
-                        >
-                          {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                            defaultMessage: 'Synchronize saved objects',
-                          })}
-                        </EuiButtonEmpty>
-                        {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                        <EuiSpacer size="s" />
-                      </>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ExportJobsFlyout
-                        isDisabled={false}
-                        currentTab={
-                          currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
-                        }
+                <CompatRouter>
+                  <EuiPageHeader
+                    pageTitle={
+                      <FormattedMessage
+                        id="xpack.ml.management.jobsList.jobsListTitle"
+                        defaultMessage="Machine Learning"
                       />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ImportJobsFlyout isDisabled={false} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
-                </EuiPageContentBody>
+                    }
+                    description={
+                      <FormattedMessage
+                        id="xpack.ml.management.jobsList.jobsListTagline"
+                        defaultMessage="View, export, and import machine learning analytics and anomaly detection items."
+                      />
+                    }
+                    rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
+                    bottomBorder
+                  />
+
+                  <EuiSpacer size="l" />
+
+                  <EuiPageContentBody
+                    id="kibanaManagementMLSection"
+                    data-test-subj="mlPageStackManagementJobsList"
+                  >
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <>
+                          <EuiButtonEmpty
+                            onClick={() => setShowSyncFlyout(true)}
+                            data-test-subj="mlStackMgmtSyncButton"
+                          >
+                            {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                              defaultMessage: 'Synchronize saved objects',
+                            })}
+                          </EuiButtonEmpty>
+                          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                          <EuiSpacer size="s" />
+                        </>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ExportJobsFlyout
+                          isDisabled={false}
+                          currentTab={
+                            currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
+                          }
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ImportJobsFlyout isDisabled={false} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
+                  </EuiPageContentBody>
+                </CompatRouter>
               </Router>
             </ContextWrapper>
           </KibanaContextProvider>

@@ -10,6 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -71,15 +72,17 @@ const LogsApp: React.FC<{
         observabilityCopilot={plugins.observability.getCoPilotService()}
       >
         <Router history={history}>
-          <KbnUrlStateStorageFromRouterProvider
-            history={history}
-            toastsService={core.notifications.toasts}
-          >
-            <Switch>
-              <Route path="/link-to" component={LinkToLogsPage} />
-              {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
-            </Switch>
-          </KbnUrlStateStorageFromRouterProvider>
+          <CompatRouter>
+            <KbnUrlStateStorageFromRouterProvider
+              history={history}
+              toastsService={core.notifications.toasts}
+            >
+              <Switch>
+                <Route path="/link-to" component={LinkToLogsPage} />
+                {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
+              </Switch>
+            </KbnUrlStateStorageFromRouterProvider>
+          </CompatRouter>
         </Router>
       </CommonInfraProviders>
     </CoreProviders>

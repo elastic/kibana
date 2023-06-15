@@ -8,6 +8,7 @@
 import React, { lazy } from 'react';
 import { Switch, Redirect, Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -89,15 +90,23 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
-              <QueryClientProvider client={queryClient}>
-                <AppWithoutRouter sectionsRegex={sectionsRegex} />
-              </QueryClientProvider>
+              <CompatRouter>
+                <QueryClientProvider client={queryClient}>
+                  <AppWithoutRouter sectionsRegex={sectionsRegex} />
+                </QueryClientProvider>
+              </CompatRouter>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </EuiThemeProvider>
     </I18nProvider>
   );
+};
+
+const RedirectToAlertDetails = () => {
+  const params = useParams();
+
+  return <Redirect to={`/rule/${params.alertId}`} />;
 };
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
@@ -117,11 +126,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
         />
-        <Route
-          exact
-          path={legacyRouteToRuleDetails}
-          render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
-        />
+        <Route exact path={legacyRouteToRuleDetails} component={RedirectToAlertDetails} />
         <Route
           exact
           path={routeToConnectors}

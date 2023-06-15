@@ -8,6 +8,7 @@
 
 import React, { memo } from 'react';
 import { Router, Switch, Redirect } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
@@ -34,42 +35,44 @@ export const ManagementRouter = memo(
     theme$,
   }: ManagementRouterProps) => (
     <Router history={history}>
-      <Switch>
-        {sections.map((section) =>
-          section
-            .getAppsEnabled()
-            .map((app) => (
-              <Route
-                path={`${app.basePath}`}
-                component={() => (
-                  <ManagementAppWrapper
-                    app={app}
-                    setBreadcrumbs={setBreadcrumbs}
-                    onAppMounted={onAppMounted}
-                    history={history}
-                    theme$={theme$}
-                  />
-                )}
-              />
-            ))
-        )}
-        {sections.map((section) =>
-          section
-            .getAppsEnabled()
-            .filter((app) => app.redirectFrom)
-            .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
-        )}
-        <Route
-          path={'/'}
-          component={() => (
-            <ManagementLandingPage
-              version={dependencies.kibanaVersion}
-              setBreadcrumbs={setBreadcrumbs}
-              onAppMounted={onAppMounted}
-            />
+      <CompatRouter>
+        <Switch>
+          {sections.map((section) =>
+            section
+              .getAppsEnabled()
+              .map((app) => (
+                <Route
+                  path={`${app.basePath}`}
+                  component={() => (
+                    <ManagementAppWrapper
+                      app={app}
+                      setBreadcrumbs={setBreadcrumbs}
+                      onAppMounted={onAppMounted}
+                      history={history}
+                      theme$={theme$}
+                    />
+                  )}
+                />
+              ))
           )}
-        />
-      </Switch>
+          {sections.map((section) =>
+            section
+              .getAppsEnabled()
+              .filter((app) => app.redirectFrom)
+              .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+          )}
+          <Route
+            path={'/'}
+            component={() => (
+              <ManagementLandingPage
+                version={dependencies.kibanaVersion}
+                setBreadcrumbs={setBreadcrumbs}
+                onAppMounted={onAppMounted}
+              />
+            )}
+          />
+        </Switch>
+      </CompatRouter>
     </Router>
   )
 );

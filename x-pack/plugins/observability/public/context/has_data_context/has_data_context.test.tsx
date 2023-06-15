@@ -14,6 +14,7 @@ import { useHasData } from '../../hooks/use_has_data';
 import { HasData, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import { HasDataContextProvider } from './has_data_context';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../../common/typings';
 import { act } from '@testing-library/react';
@@ -27,7 +28,9 @@ function wrapper({ children }: { children: React.ReactElement }) {
   return (
     <KibanaContextProvider services={{ ...core }}>
       <Router history={history}>
-        <HasDataContextProvider>{children}</HasDataContextProvider>
+        <CompatRouter>
+          <HasDataContextProvider>{children}</HasDataContextProvider>
+        </CompatRouter>
       </Router>
     </KibanaContextProvider>
   );

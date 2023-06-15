@@ -9,6 +9,7 @@ import type * as H from 'history';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import type { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import deepEqual from 'fast-deep-equal';
 
 import { omit } from 'lodash';
@@ -17,27 +18,19 @@ import type { FlowTarget } from '../../../../common/search_strategy';
 import { useRouteSpy } from './use_route_spy';
 import type { RouteSpyState } from './types';
 
-type SpyRouteProps = RouteComponentProps<{
-  detailName: string | undefined;
-  tabName?: string;
-  search: string;
-  flowTarget: FlowTarget | undefined;
-}> & {
+type SpyRouteProps = RouteComponentProps & {
   location: H.Location;
   state?: Record<string, string | boolean | undefined>;
   pageName?: SecurityPageName;
 };
 
 export const SpyRouteComponent = memo<SpyRouteProps>(
-  ({
-    location: { pathname, search },
-    history,
-    match: {
-      params: { detailName, tabName, flowTarget },
-    },
-    pageName,
-    state,
-  }) => {
+  ({ location: { pathname, search }, history, pageName, state }) => {
+    const { detailName, tabName, flowTarget } = useParams<{
+      detailName: string;
+      tabName: string;
+      flowTarget: FlowTarget;
+    }>();
     const [isInitializing, setIsInitializing] = useState(true);
     const [route, dispatch] = useRouteSpy();
 

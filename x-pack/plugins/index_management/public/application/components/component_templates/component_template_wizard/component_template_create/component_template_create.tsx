@@ -25,10 +25,9 @@ interface Props {
   sourceComponentTemplate?: any;
 }
 
-export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
-  history,
-  sourceComponentTemplate,
-}) => {
+export const ComponentTemplateCreate: React.FunctionComponent<
+  { history: RouteComponentProps['history'] } & Props
+> = ({ history, sourceComponentTemplate }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 

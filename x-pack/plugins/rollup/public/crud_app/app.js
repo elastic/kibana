@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 // eslint-disable-next-line no-restricted-imports
 import { Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { UIM_APP_LOAD } from '../../common';
 import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
@@ -55,13 +56,15 @@ export class App extends Component {
   render() {
     return (
       <Router history={this.props.history}>
-        <ShareRouter>
-          <Switch>
-            <Redirect exact from="/" to="/job_list" />
-            <Route exact path="/job_list" component={JobList} />
-            <Route exact path="/create" component={JobCreate} />
-          </Switch>
-        </ShareRouter>
+        <CompatRouter>
+          <ShareRouter>
+            <Switch>
+              <Redirect exact from="/" to="/job_list" />
+              <Route exact path="/job_list" component={JobList} />
+              <Route exact path="/create" component={JobCreate} />
+            </Switch>
+          </ShareRouter>
+        </CompatRouter>
       </Router>
     );
   }

@@ -9,7 +9,8 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { HashRouter, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, Switch, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -384,15 +385,12 @@ export async function mountApp(
     }
   );
 
-  const EditorRoute = (
-    routeProps: RouteComponentProps<{ id?: string }> & { editByValue?: boolean }
-  ) => {
+  const EditorRoute = (routeProps: { editByValue?: boolean }) => {
+    const routeParams = useParams();
+    const history = useHistory();
+
     return (
-      <EditorRenderer
-        id={routeProps.match.params.id}
-        history={routeProps.history}
-        editByValue={routeProps.editByValue}
-      />
+      <EditorRenderer id={routeParams.id} history={history} editByValue={routeProps.editByValue} />
     );
   };
 
@@ -417,11 +415,9 @@ export async function mountApp(
             <HashRouter>
               <Switch>
                 <Route exact path="/edit/:id" component={EditorRoute} />
-                <Route
-                  exact
-                  path={`/${LENS_EDIT_BY_VALUE}`}
-                  render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-                />
+                <Route exact path={`/${LENS_EDIT_BY_VALUE}`}>
+                  <EditorRoute editByValue />
+                </Route>
                 <Route exact path="/" component={EditorRoute} />
                 <Route path="/" component={NotFound} />
               </Switch>

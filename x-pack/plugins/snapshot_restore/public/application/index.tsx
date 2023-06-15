@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -21,7 +22,9 @@ interface AppWithRouterProps {
 
 const AppWithRouter = ({ history }: AppWithRouterProps) => (
   <Router history={history}>
-    <App />
+    <CompatRouter>
+      <App />
+    </CompatRouter>
   </Router>
 );
 
