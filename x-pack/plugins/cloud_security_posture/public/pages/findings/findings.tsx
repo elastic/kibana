@@ -32,6 +32,15 @@ export const Findings = () => {
   const navigateToConfigurationsTab = () => {
     history.push({ pathname: findingsNavigation.findings_default.path });
   };
+
+  const isVulnerabilitiesTabSelected = (pathname: string) => {
+    return (
+      pathname === findingsNavigation.vulnerabilities.path ||
+      pathname === findingsNavigation.vulnerabilities_by_resource.path ||
+      pathname === findingsNavigation.resource_vulnerabilities.path
+    );
+  };
+
   return (
     <>
       <EuiTitle size="l">
@@ -44,7 +53,7 @@ export const Findings = () => {
         <EuiTab
           key="vuln_mgmt"
           onClick={navigateToVulnerabilitiesTab}
-          isSelected={location.pathname === findingsNavigation.vulnerabilities.path}
+          isSelected={isVulnerabilitiesTabSelected(location.pathname)}
         >
           <EuiFlexGroup responsive={false} alignItems="center" direction="row" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -73,7 +82,7 @@ export const Findings = () => {
         <EuiTab
           key="configurations"
           onClick={navigateToConfigurationsTab}
-          isSelected={location.pathname !== findingsNavigation.vulnerabilities.path}
+          isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
         >
           <FormattedMessage
             id="xpack.csp.findings.tabs.misconfigurations"
@@ -94,10 +103,14 @@ export const Findings = () => {
             />
           )}
         />
-
         <Route path={findingsNavigation.findings_default.path} component={Configurations} />
-        <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
         <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
+        <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
+        <Route
+          path={findingsNavigation.vulnerabilities_by_resource.path}
+          component={Vulnerabilities}
+        />
+        {/* Redirect to default findings page if no match */}
         <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
       </Switch>
     </>

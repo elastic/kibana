@@ -59,7 +59,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the automated endpoint response action in rule + alerts
    */
-  endpointResponseActionsEnabled: false,
+  endpointResponseActionsEnabled: true,
 
   /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
@@ -116,6 +116,11 @@ export const allowedExperimentalValues = Object.freeze({
    * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
    */
   detectionsCoverageOverview: false,
+
+  /**
+   * Enables experimental Entity Analytics HTTP endpoints
+   */
+  riskScoringRoutesEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -391,12 +391,7 @@ export const isLoadingPreviewLayers = createSelector(
   getMapZoom,
   (layerList, zoom) => {
     return layerList.some((layer) => {
-      return (
-        layer.isPreviewLayer() &&
-        layer.isVisible() &&
-        layer.showAtZoomLevel(zoom) &&
-        layer.isLayerLoading()
-      );
+      return layer.isPreviewLayer() && layer.isLayerLoading(zoom);
     });
   }
 );
@@ -496,12 +491,7 @@ export const isMapLoading = createSelector(
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (
-        layer.isVisible() &&
-        layer.showAtZoomLevel(zoom) &&
-        !layer.hasErrors() &&
-        layer.isLayerLoading()
-      ) {
+      if (!layer.hasErrors() && layer.isLayerLoading(zoom)) {
         return true;
       }
     }
