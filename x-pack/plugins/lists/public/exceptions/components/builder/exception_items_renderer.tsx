@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
@@ -33,6 +33,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import deepEqual from 'fast-deep-equal';
 
 import { AndOrBadge } from '../and_or_badge';
 
@@ -128,6 +129,9 @@ export const ExceptionBuilderComponent = ({
     disableNested: isNestedDisabled,
     disableOr: isOrDisabled,
   });
+  const [currentExceptionListItems, setCurrentExceptionListItems] = useState<
+    typeof exceptionListItems
+  >([]);
 
   const {
     addNested,
@@ -392,11 +396,14 @@ export const ExceptionBuilderComponent = ({
   }, [exceptions, handleAddNewExceptionItem]);
 
   useEffect(() => {
-    if (exceptionListItems.length > 0) {
+    if (
+      exceptionListItems.length > 0 &&
+      !deepEqual(exceptionListItems, currentExceptionListItems)
+    ) {
+      setCurrentExceptionListItems(exceptionListItems);
       setUpdateExceptions(exceptionListItems);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentExceptionListItems, exceptionListItems, setUpdateExceptions]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
