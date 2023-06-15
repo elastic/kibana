@@ -177,9 +177,12 @@ export class AlertsService implements IAlertsService {
       );
 
       if (!retryResult.result) {
+        const errorLogPrefix = `There was an error in the framework installing namespace-level resources and creating concrete indices for context "${opts.ruleType.alerts.context}" - `;
         // Retry also failed
         this.options.logger.warn(
-          `There was an error in the framework installing namespace-level resources and creating concrete indices for context "${opts.ruleType.alerts.context}" - Original error: ${error}; Error after retry: ${retryResult.error}`
+          retryResult.error === error
+            ? `${errorLogPrefix}Retry failed with error: ${error}`
+            : `${errorLogPrefix}Original error: ${error}; Error after retry: ${retryResult.error}`
         );
         return null;
       } else {

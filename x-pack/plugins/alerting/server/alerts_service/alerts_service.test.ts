@@ -1431,6 +1431,65 @@ describe('Alerts Service', () => {
       );
     });
 
+    test('should return null if retrying common resources initialization fails again with same error', async () => {
+      clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
+      clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
+
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+        kibanaVersion: '8.8.0',
+      });
+      alertsService.register(TestRegistrationContext);
+
+      await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+      expect(alertsService.isInitialized()).toEqual(false);
+
+      // Installing ILM policy failed so no calls to install context-specific resources
+      // should be made
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
+      expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+      expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+      expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+      const result = await alertsService.createAlertsClient({
+        logger,
+        ruleType: ruleTypeWithAlertDefinition,
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+      expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+      expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+      expect(result).toBe(null);
+      expect(AlertsClient).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(
+        `Retrying resource initialization for context "test"`
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Retry failed with error: Failure during installation. fail`
+      );
+    });
+
     test('should return null if retrying context specific initialization fails again', async () => {
       clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
