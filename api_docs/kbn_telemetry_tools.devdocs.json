@@ -21,6 +21,88 @@
     "functions": [
       {
         "parentPluginId": "@kbn/telemetry-tools",
+        "id": "def-common.assertTelemetryPayload",
+        "type": "Function",
+        "tags": [],
+        "label": "assertTelemetryPayload",
+        "description": [
+          "\nMerges the telemetrySchema, generates a @kbn/config-schema version from it, and uses it to validate stats."
+        ],
+        "signature": [
+          "(telemetrySchema: { root: ",
+          "TelemetrySchemaObject",
+          "; plugins: ",
+          "TelemetrySchemaObject",
+          "; }, stats: unknown) => void"
+        ],
+        "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry-tools",
+            "id": "def-common.assertTelemetryPayload.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetrySchema",
+            "description": [],
+            "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/telemetry-tools",
+                "id": "def-common.assertTelemetryPayload.$1.root",
+                "type": "Object",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  "TelemetrySchemaObject"
+                ],
+                "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/telemetry-tools",
+                "id": "def-common.assertTelemetryPayload.$1.plugins",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TelemetrySchemaObject"
+                ],
+                "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/telemetry-tools",
+            "id": "def-common.assertTelemetryPayload.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "stats",
+            "description": [
+              "The full output of the telemetry plugin"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/telemetry-tools",
         "id": "def-common.runTelemetryCheck",
         "type": "Function",
         "tags": [],

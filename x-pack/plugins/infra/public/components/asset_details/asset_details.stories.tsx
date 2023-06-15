@@ -93,8 +93,9 @@ const stories: Meta<AssetDetailsProps> = {
       tx: 123030.54555555557,
       memory: 0.9044444444444445,
       cpu: 0.3979674157303371,
-      diskLatency: 0.15291777273162221,
-      memoryTotal: 34359738368,
+      diskSpaceUsage: 0.3979674157303371,
+      normalizedLoad1m: 0.15291777273162221,
+      memoryFree: 34359738368,
     },
     overrides: {
       metadata: {

@@ -34,7 +34,7 @@ import { EngineApiLogic } from './engine_api_logic';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
 
 export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
-  const defaultUrl = 'https://localhost:9200';
+  const defaultUrl = 'http://localhost:9200';
   const url = cloudContext.elasticsearchUrl || defaultUrl;
   return url;
 };
@@ -47,9 +47,6 @@ export const SearchApplicationAPI = () => {
 
   const steps = [
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step1.title', {
-        defaultMessage: 'Generate and save API key',
-      }),
       children: (
         <>
           <EuiText>
@@ -115,11 +112,11 @@ export const SearchApplicationAPI = () => {
           </EuiFlexGroup>
         </>
       ),
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step1.title', {
+        defaultMessage: 'Generate and save API key',
+      }),
     },
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step2.title', {
-        defaultMessage: "Copy your search application's endpoint",
-      }),
       children: (
         <>
           <EuiText>
@@ -142,12 +139,15 @@ export const SearchApplicationAPI = () => {
           </EuiFlexGroup>
         </>
       ),
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step2.title', {
+        defaultMessage: "Copy your search application's endpoint",
+      }),
     },
     {
+      children: <EngineApiIntegrationStage />,
       title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step3.title', {
         defaultMessage: 'Learn how to call your endpoints',
       }),
-      children: <EngineApiIntegrationStage />,
     },
   ];
 
