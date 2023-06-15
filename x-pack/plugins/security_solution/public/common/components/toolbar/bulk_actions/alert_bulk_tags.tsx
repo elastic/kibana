@@ -9,7 +9,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopoverTitle, EuiSelectable, EuiButton } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { TAGS } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { getUpdateAlertsQuery } from '../../../../detections/components/alerts_table/actions';
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
@@ -40,7 +40,10 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
 
   const { setAlertTags } = useSetAlertTags();
   const existingTags = useMemo(
-    () => alertItems.map((item) => item.data.find((data) => data.field === TAGS)?.value ?? []),
+    () =>
+      alertItems.map(
+        (item) => item.data.find((data) => data.field === ALERT_WORKFLOW_TAGS)?.value ?? []
+      ),
     [alertItems]
   );
   const initalTagsState = useMemo(

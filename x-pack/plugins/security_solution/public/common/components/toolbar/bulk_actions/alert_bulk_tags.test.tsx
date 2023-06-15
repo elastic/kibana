@@ -11,7 +11,7 @@ import { TestProviders } from '../../../mock';
 import { useUiSetting$ } from '../../../lib/kibana';
 
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
-import { TAGS } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useSetAlertTags } from './use_set_alert_tags';
 
@@ -20,7 +20,11 @@ jest.mock('../../../hooks/use_app_toasts');
 jest.mock('./use_set_alert_tags');
 
 const mockTagItems = [
-  { _id: 'test-id', data: [{ field: TAGS, value: ['tag-1', 'tag-2'] }], ecs: { _id: 'test-id' } },
+  {
+    _id: 'test-id',
+    data: [{ field: ALERT_WORKFLOW_TAGS, value: ['tag-1', 'tag-2'] }],
+    ecs: { _id: 'test-id' },
+  },
 ];
 
 (useUiSetting$ as jest.Mock).mockReturnValue(['default-test-tag']);

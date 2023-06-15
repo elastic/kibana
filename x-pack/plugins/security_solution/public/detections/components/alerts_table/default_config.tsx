@@ -175,8 +175,8 @@ export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDa
 
 export const requiredFieldsForActions = [
   '@timestamp',
-  'tags',
   'kibana.alert.workflow_status',
+  'kibana.alert.workflow_tags',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',

@@ -10,7 +10,7 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TAGS } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { useBulkAlertTagsItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { getScopedActions } from '../../../../helpers';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -32,14 +32,16 @@ export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch
       {
         _id: alertId,
         _index: ecsRowData._index ?? '',
-        data: [{ field: TAGS, value: ecsRowData.tags ?? [] }],
+        data: [
+          { field: ALERT_WORKFLOW_TAGS, value: ecsRowData['kibana.alert.workflow_tags'] ?? [] },
+        ],
         ecs: {
           _id: alertId,
           _index: ecsRowData._index ?? '',
         },
       },
     ],
-    [alertId, ecsRowData._index, ecsRowData.tags]
+    [alertId, ecsRowData]
   );
 
   const scopedActions = getScopedActions(scopeId);

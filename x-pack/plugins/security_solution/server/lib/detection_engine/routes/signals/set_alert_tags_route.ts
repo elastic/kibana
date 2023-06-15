@@ -67,8 +67,8 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
             script: {
               params: { tagsToAdd, tagsToRemove },
               source: `List newTagsArray = []; 
-              if (ctx._source.tags != null) {
-                for (tag in ctx._source.tags) {
+              if (ctx._source["kibana.alert.workflow_tags"] != null) {
+                for (tag in ctx._source["kibana.alert.workflow_tags"]) {
                   if (!params.tagsToRemove.contains(tag)) {
                     newTagsArray.add(tag);
                   } 
@@ -78,9 +78,9 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
                     newTagsArray.add(tag)
                   }
                 }
-                ctx._source.tags = newTagsArray;
+                ctx._source["kibana.alert.workflow_tags"] = newTagsArray;
               } else {
-                ctx._source.tags = params.tagsToAdd;
+                ctx._source["kibana.alert.workflow_tags"] = params.tagsToAdd;
               }
               `,
               lang: 'painless',
