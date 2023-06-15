@@ -53,14 +53,14 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
   async function createConfiguration(configuration: any) {
     return apmApiClient.writeUser({
-      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: configuration },
     });
   }
 
   async function deleteConfiguration(configuration: any) {
     return apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: { service: configuration.service } },
     });
   }
@@ -77,7 +77,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     sourcemap: SourceMap;
   }) {
     const response = await apmApiClient.writeUser({
-      endpoint: 'POST /api/apm/sourcemaps 2023-05-22',
+      endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
       type: 'form-data',
       params: {
         body: {
@@ -202,11 +202,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       describe('Source maps', () => {
-        let resp: APIReturnType<'POST /api/apm/sourcemaps 2023-05-22'>;
+        let resp: APIReturnType<'POST /api/apm/sourcemaps 2023-10-31'>;
 
         after(async () => {
           await apmApiClient.writeUser({
-            endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-05-22',
+            endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
             params: { path: { id: resp.id } },
           });
         });
