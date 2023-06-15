@@ -6,10 +6,7 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import {
-  ApmRuleType,
-  PreviewChartResponse,
-} from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -17,7 +14,7 @@ import {
   EVENT_OUTCOME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { AlertParams } from '../../route';
+import { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
   getDocumentTypeFilterForTransactions,

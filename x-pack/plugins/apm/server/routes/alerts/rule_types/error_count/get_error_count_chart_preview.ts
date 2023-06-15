@@ -12,15 +12,12 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
-import { AlertParams } from '../../route';
+import { AlertParams, PreviewChartResponse } from '../../route';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import {
-  ApmRuleType,
-  PreviewChartResponse,
-} from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,
