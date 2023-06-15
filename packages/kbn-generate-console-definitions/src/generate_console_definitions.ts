@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import Path, { join } from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
 
 interface EndpointRequest {
   name: string;
@@ -134,16 +135,21 @@ const generateDefinition = (endpoint: Endpoint, schema: Schema): Definition => {
 export function generateConsoleDefinitions({
   specsRepo,
   definitionsFolder,
+  log,
 }: {
   specsRepo: string;
   definitionsFolder: string;
+  log: ToolingLog;
 }) {
   const pathToSchemaFile = Path.resolve(specsRepo, 'output/schema/schema.json');
+  log.info('loading the ES specification schema file');
   const schema = JSON.parse(fs.readFileSync(pathToSchemaFile, 'utf8')) as Schema;
 
   const { endpoints } = schema;
+  log.info(`iterating over endpoints array: ${endpoints.length} endpoints`);
   endpoints.forEach((endpoint) => {
     const { name } = endpoint;
+    log.info(name);
     const definition = generateDefinition(endpoint, schema);
     const fileContent: { [name: string]: Definition } = {
       [name]: definition,
