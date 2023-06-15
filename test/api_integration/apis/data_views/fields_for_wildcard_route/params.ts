@@ -8,6 +8,7 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,14 +26,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('requires a pattern query param', () =>
       supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({})
         .expect(400));
 
     it('accepts include_unmapped param', () =>
       supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: '*',
@@ -42,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('rejects unexpected query params', () =>
       supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: randomness.word(),
@@ -53,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('fields', () => {
       it('accepts a JSON formatted fields query param', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -63,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('accepts meta_fields query param in string array', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -73,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('accepts single array fields query param', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -83,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('accepts single fields query param', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -93,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('rejects a comma-separated list of fields', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -105,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('meta_fields', () => {
       it('accepts a JSON formatted meta_fields query param', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -115,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('accepts meta_fields query param in string array', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -125,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('accepts single meta_fields query param', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
@@ -135,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('rejects a comma-separated list of meta_fields', () =>
         supertest
-          .get('/api/index_patterns/_fields_for_wildcard')
+          .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',

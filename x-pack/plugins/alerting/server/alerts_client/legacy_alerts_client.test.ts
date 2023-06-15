@@ -21,10 +21,12 @@ import { schema } from '@kbn/config-schema';
 const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
 const mockCreateAlert = jest.fn(() => ({ replaceState, scheduleActions }));
+const mockGetAlert = jest.fn();
 const mockGetRecoveredAlerts = jest.fn().mockReturnValue([]);
 const mockSetLimitReached = jest.fn();
 const mockCreateAlertFactory = {
   create: mockCreateAlert,
+  get: mockGetAlert,
   hasReachedAlertLimit: jest.fn().mockReturnValue(false),
   alertLimit: {
     getValue: jest.fn().mockReturnValue(1000),
@@ -168,6 +170,27 @@ describe('Legacy Alerts Client', () => {
 
     alertsClient.factory();
     expect(getPublicAlertFactory).toHaveBeenCalledWith(mockCreateAlertFactory);
+  });
+
+  test('getAlert() should pass through to alert factory function', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      logger,
+      ruleType,
+    });
+
+    await alertsClient.initializeExecution({
+      maxAlerts: 1000,
+      ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      activeAlertsFromState: {
+        '1': testAlert1,
+        '2': testAlert2,
+      },
+      recoveredAlertsFromState: {},
+    });
+
+    alertsClient.getAlert('1');
+    expect(mockCreateAlertFactory.get).toHaveBeenCalledWith('1');
   });
 
   test('checkLimitUsage() should pass through to alert factory function', async () => {
