@@ -65,7 +65,7 @@ import { EngineViewLogic } from '../engine_view_logic';
 
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
-import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
+import { EngineSearchPreviewLogic } from './search_preview_logic';
 
 import {
   InputView,
