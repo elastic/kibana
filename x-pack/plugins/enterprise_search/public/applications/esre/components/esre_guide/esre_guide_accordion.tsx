@@ -24,7 +24,6 @@ export interface EsreGuideAccordionProps {
   title: string;
   description: string;
   initialIsOpen?: boolean;
-  children?: React.ReactNode;
 }
 
 export const EsreGuideAccordion: React.FC<EsreGuideAccordionProps> = ({
