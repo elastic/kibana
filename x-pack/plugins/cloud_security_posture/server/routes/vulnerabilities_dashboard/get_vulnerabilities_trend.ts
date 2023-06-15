@@ -6,25 +6,73 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import { VulnScoreTrend } from '../../../common/types';
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  VULN_MGMT_POLICY_TEMPLATE,
-} from '../../../common/constants';
+
+interface LastDocBucket {
+  key_as_string: string;
+  last_doc: {
+    hits: {
+      hits: Array<{
+        _source: VulnScoreTrend;
+      }>;
+    };
+  };
+}
+
+interface VulnScoreTrendResponse {
+  aggregations?: {
+    vuln_severity_per_day: {
+      buckets: LastDocBucket[];
+    };
+  };
+}
 
 export const getVulnTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  // large number that should be sufficient for 30 days considering we write to the score index every 5 minutes
-  size: 9999,
-  sort: '@timestamp:asc',
-  query: {
-    bool: {
-      filter: [{ term: { policy_template: VULN_MGMT_POLICY_TEMPLATE } }],
-      must: {
-        range: {
-          '@timestamp': {
-            gte: 'now-7d',
-            lte: 'now',
+  size: 0,
+  body: {
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              policy_template: 'vuln_mgmt',
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-30d/d',
+                lte: 'now/d',
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      vuln_severity_per_day: {
+        date_histogram: {
+          field: '@timestamp',
+          calendar_interval: '1d',
+          order: {
+            _key: 'desc',
+          },
+        },
+        aggs: {
+          last_doc: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
           },
         },
       },
@@ -35,13 +83,14 @@ export const getVulnTrendsQuery = () => ({
 export const getVulnerabilitiesTrends = async (
   esClient: ElasticsearchClient
 ): Promise<VulnScoreTrend[]> => {
-  const vulnTrendsQueryResult = await esClient.search<VulnScoreTrend>(getVulnTrendsQuery());
-  if (!vulnTrendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
+  const vulnTrendsQueryResult = await esClient.search<VulnScoreTrendResponse>(getVulnTrendsQuery());
+  if (!vulnTrendsQueryResult.hits.hits) {
+    throw new Error('Missing trend results from score index');
+  }
 
-  const vulnScoreTrendDocs = vulnTrendsQueryResult.hits.hits.map((hit) => {
-    if (!hit._source) throw new Error('missing _source data for one or more of trend results');
-    return hit._source;
-  });
+  const vulnScoreTrendDocs = vulnTrendsQueryResult.aggregations?.vuln_severity_per_day.buckets?.map(
+    (bucket) => bucket.last_doc.hits.hits[0]._source
+  );
 
-  return vulnScoreTrendDocs;
+  return vulnScoreTrendDocs || [];
 };
