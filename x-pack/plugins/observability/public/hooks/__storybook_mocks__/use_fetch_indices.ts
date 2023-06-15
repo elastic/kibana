@@ -12,7 +12,7 @@ export const useFetchIndices = (): UseFetchIndicesResponse => {
     isLoading: false,
     isError: false,
     isSuccess: true,
-    indices: [
+    data: [
       ...Array(10)
         .fill(0)
         .map((_, i) => ({
