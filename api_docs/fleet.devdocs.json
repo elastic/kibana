@@ -4652,7 +4652,7 @@
               "\nList agents"
             ],
             "signature": [
-              "(options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }) => Promise<{ agents: ",
+              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }) => Promise<{ agents: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4674,7 +4674,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }"
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
                 "deprecated": false,
@@ -4791,7 +4791,15 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ", options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }) => Promise<{ items: ",
+              ", options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              " | undefined; withAgentCount?: boolean | undefined; }) => Promise<{ items: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4834,7 +4842,15 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }"
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-common.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  },
+                  " | undefined; withAgentCount?: boolean | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -9807,7 +9823,7 @@
         "label": "ListArtifactsProps",
         "description": [],
         "signature": [
-          "Pick<Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"kuery\" | \"perPage\" | \"sortOrder\"> & { sortField?: string | undefined; }"
+          "Pick<Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"perPage\" | \"kuery\" | \"sortOrder\"> & { sortField?: string | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
         "deprecated": false,
@@ -20829,6 +20845,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.overrides",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
