@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('does not show the banner if opted-in', async () => {
         await supertest
-          .post('/api/telemetry/v2/optIn')
+          .post('/internal/telemetry/optIn')
           .set('kbn-xsrf', 'xxx')
           .send({ enabled: true })
           .expect(200);
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('does not show the banner if opted-out in this version', async () => {
         await supertest
-          .post('/api/telemetry/v2/optIn')
+          .post('/internal/telemetry/optIn')
           .set('kbn-xsrf', 'xxx')
           .send({ enabled: false })
           .expect(200);

@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('propagates context for Telemetry collection', async () => {
       await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
+        .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'true')
         .send({ unencrypted: false })
         .expect(200);

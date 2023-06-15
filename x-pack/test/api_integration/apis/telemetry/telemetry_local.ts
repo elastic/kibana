@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
+  describe('/internal/telemetry/clusters/_stats with monitoring disabled', () => {
     let stats: Record<string, any>;
 
     before('disable monitoring and pull local stats', async () => {
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       await new Promise((r) => setTimeout(r, 1000));
 
       const { body } = await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
+        .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
         .send({ unencrypted: true, refreshCache: true })
         .expect(200);

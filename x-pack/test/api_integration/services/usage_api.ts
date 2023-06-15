@@ -29,7 +29,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
     refreshCache?: boolean;
   }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
     const { body } = await supertest
-      .post('/api/telemetry/v2/clusters/_stats')
+      .post('/internal/telemetry/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
       .send({ refreshCache: true, ...payload })
       .expect(200);

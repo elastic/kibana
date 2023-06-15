@@ -8,4 +8,4 @@
 /**
  * Cluster stats URL. Replace this with any from kibana core if there is ever a constant there for this.
  */
-export const getStatsUrl = (): string => '/api/telemetry/v2/clusters/_stats';
+export const getStatsUrl = (): string => '/internal/telemetry/clusters/_stats';

@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
       const {
         body: [{ stats: apiResponse }],
       } = await supertest
-        .post(`/api/telemetry/v2/clusters/_stats`)
+        .post(`/internal/telemetry/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           unencrypted: true,

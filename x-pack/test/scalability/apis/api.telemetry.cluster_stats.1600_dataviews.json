@@ -1,5 +1,5 @@
 {
-  "journeyName": "POST /api/telemetry/v2/clusters/_stats - 1600 dataviews",
+  "journeyName": "POST /internal/telemetry/clusters/_stats - 1600 dataviews",
   "scalabilitySetup": {
     "warmup": [
       {
@@ -30,7 +30,7 @@
         {
           "http": {
             "method": "POST",
-            "path": "/api/telemetry/v2/clusters/_stats",
+            "path": "/internal/telemetry/clusters/_stats",
             "body": "{}",
             "headers": {
               "Cookie": "",

@@ -45,7 +45,7 @@ describe('Files usage telemetry', () => {
     ]);
 
     const { body } = await request
-      .post(root, '/api/telemetry/v2/clusters/_stats')
+      .post(root, '/internal/telemetry/clusters/_stats')
       .send({ unencrypted: true });
 
     expect(body[0].stats.stack_stats.kibana.plugins.files).toMatchInlineSnapshot(`

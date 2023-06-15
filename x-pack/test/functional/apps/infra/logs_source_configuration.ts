@@ -133,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await logsUi.logStreamPage.getStreamEntries();
 
         const [{ stats }] = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
+          .post(`/internal/telemetry/clusters/_stats`)
           .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
           .send({

@@ -1,5 +1,5 @@
 {
-  "journeyName": "POST /api/telemetry/v2/clusters/_stats - no cache",
+  "journeyName": "POST /internal/telemetry/clusters/_stats - no cache",
   "scalabilitySetup": {
     "responseTimeThreshold": {
       "threshold1": 1000,
@@ -33,7 +33,7 @@
         {
           "http": {
             "method": "POST",
-            "path": "/api/telemetry/v2/clusters/_stats",
+            "path": "/internal/telemetry/clusters/_stats",
             "body": "{ \"refreshCache\": true }",
             "headers": {
               "Cookie": "",
