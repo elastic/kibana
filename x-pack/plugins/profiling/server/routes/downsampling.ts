@@ -87,7 +87,7 @@ export async function findDownsampledIndex({
     });
     sampleCountFromInitialExp = resp.hits.total.value;
   } catch (e) {
-    logger.info(e.message);
+    logger.error(e.message);
   }
 
   return getSampledTraceEventsIndex(index, sampleSize, sampleCountFromInitialExp, initialExp);
