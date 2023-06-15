@@ -350,12 +350,12 @@ export const SearchApplicationSearchPreview: React.FC = () => {
   // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
   // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
-  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { searchApplicationName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { resultFields, sortableFields } = useValues(SearchApplicationSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
-    const transporter = new InternalSearchApplicationTransporter(http, engineName);
+    const transporter = new InternalSearchApplicationTransporter(http, searchApplicationName);
     const connector = new EnginesAPIConnector(transporter);
 
     return {
@@ -366,14 +366,14 @@ export const SearchApplicationSearchPreview: React.FC = () => {
         result_fields: resultFields,
       },
     };
-  }, [http, engineName, resultFields]);
+  }, [http, searchApplicationName, resultFields]);
 
   if (!engineData) return null;
 
   return (
     <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[
-        engineName,
+        searchApplicationName,
         i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageChrome', {
           defaultMessage: 'Search Preview',
         }),
@@ -383,11 +383,11 @@ export const SearchApplicationSearchPreview: React.FC = () => {
       pageHeader={{
         bottomBorder: false,
         className: 'searchApplicationHeaderBackgroundColor',
-        pageTitle: engineName,
+        pageTitle: searchApplicationName,
         rightSideItems: [
           <>
             <ConfigurationPopover
-              searchApplicationName={engineName}
+              searchApplicationName={searchApplicationName}
               hasSchemaConflicts={hasSchemaConflicts}
               showConfiguration={showConfigurationPopover}
               setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
@@ -395,7 +395,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
           </>,
         ],
       }}
-      searchApplicationName={engineName}
+      searchApplicationName={searchApplicationName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
       <DocumentProvider>
@@ -434,7 +434,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
           <APICallFlyout
             onClose={() => setShowAPICallFlyout(false)}
             lastAPICall={lastAPICall}
-            engineName={engineName}
+            searchApplicationName={searchApplicationName}
           />
         )}
         */}

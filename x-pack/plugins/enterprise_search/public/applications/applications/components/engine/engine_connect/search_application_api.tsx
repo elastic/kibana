@@ -40,7 +40,7 @@ export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
 };
 
 export const SearchApplicationAPI = () => {
-  const { engineName: searchApplicationName } = useValues(EngineViewLogic);
+  const { searchApplicationName } = useValues(EngineViewLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
   const cloudContext = useCloudDetails();
@@ -218,8 +218,8 @@ export const SearchApplicationAPI = () => {
     <>
       {isGenerateModalOpen ? (
         <GenerateEngineApiKeyModal
-          engineName={searchApplicationName}
           onClose={closeGenerateModal}
+          searchApplicationName={searchApplicationName}
         />
       ) : null}
       <EuiCallOut

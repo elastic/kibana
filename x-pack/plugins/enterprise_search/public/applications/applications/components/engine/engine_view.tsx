@@ -37,7 +37,7 @@ import { SearchApplicationSearchPreview } from './search_preview/search_preview'
 export const EngineView: React.FC = () => {
   const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
   const {
-    engineName,
+    searchApplicationName,
     fetchEngineApiError,
     fetchEngineApiStatus,
     hasSchemaConflicts,
@@ -57,21 +57,21 @@ export const EngineView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchEngine({ name: engineName });
-  }, [engineName]);
+    fetchEngine({ name: searchApplicationName });
+  }, [searchApplicationName]);
 
   if (fetchEngineApiStatus === Status.ERROR) {
     return (
       <EnterpriseSearchApplicationsPageTemplate
         isEmptyState
-        pageChrome={[engineName]}
+        pageChrome={[searchApplicationName]}
         pageViewTelemetry={tabId}
         pageHeader={{
           bottomBorder: false,
-          pageTitle: engineName,
+          pageTitle: searchApplicationName,
           rightSideItems: [],
         }}
-        searchApplicationName={engineName}
+        searchApplicationName={searchApplicationName}
         emptyState={<EngineError error={fetchEngineApiError} />}
         hasSchemaConflicts={hasSchemaConflicts}
       />
@@ -82,7 +82,7 @@ export const EngineView: React.FC = () => {
     <>
       {isDeleteModalVisible ? (
         <DeleteSearchApplicationModal
-          searchApplicationName={engineName}
+          searchApplicationName={searchApplicationName}
           onClose={closeDeleteEngineModal}
         />
       ) : null}
@@ -105,14 +105,14 @@ export const EngineView: React.FC = () => {
         <Route>
           <EnterpriseSearchApplicationsPageTemplate
             isEmptyState
-            pageChrome={[engineName]}
+            pageChrome={[searchApplicationName]}
             pageViewTelemetry={tabId}
             pageHeader={{
               bottomBorder: false,
-              pageTitle: engineName,
+              pageTitle: searchApplicationName,
               rightSideItems: [],
             }}
-            searchApplicationName={engineName}
+            searchApplicationName={searchApplicationName}
             hasSchemaConflicts={hasSchemaConflicts}
           >
             <EngineError notFound />

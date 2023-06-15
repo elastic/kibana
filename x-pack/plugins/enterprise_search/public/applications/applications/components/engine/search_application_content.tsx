@@ -65,7 +65,7 @@ const getTabBreadCrumb = (tabId: string) => {
 const ContentTabs: string[] = Object.values(SearchApplicationContentTabs);
 
 export const SearchApplicationContent = () => {
-  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { searchApplicationName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { addIndicesFlyoutOpen } = useValues(EngineIndicesLogic);
   const { closeAddIndicesFlyout, openAddIndicesFlyout } = useActions(EngineIndicesLogic);
   const { contentTabId = SearchApplicationContentTabs.INDICES } = useParams<{
@@ -75,7 +75,7 @@ export const SearchApplicationContent = () => {
   if (!ContentTabs.includes(contentTabId)) {
     return (
       <EnterpriseSearchApplicationsPageTemplate
-        pageChrome={[engineName, pageTitle]}
+        pageChrome={[searchApplicationName, pageTitle]}
         pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
         isLoading={isLoadingEngine}
         pageHeader={{
@@ -84,7 +84,7 @@ export const SearchApplicationContent = () => {
           pageTitle,
           rightSideItems: [],
         }}
-        searchApplicationName={engineName}
+        searchApplicationName={searchApplicationName}
         hasSchemaConflicts={hasSchemaConflicts}
       >
         <EngineError notFound />
@@ -96,14 +96,14 @@ export const SearchApplicationContent = () => {
     KibanaLogic.values.navigateToUrl(
       generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
         contentTabId: tab,
-        searchApplicationName: engineName,
+        searchApplicationName,
       })
     );
   };
 
   return (
     <EnterpriseSearchApplicationsPageTemplate
-      pageChrome={[engineName, pageTitle, getTabBreadCrumb(contentTabId)]}
+      pageChrome={[searchApplicationName, pageTitle, getTabBreadCrumb(contentTabId)]}
       pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
       isLoading={isLoadingEngine}
       pageHeader={{
@@ -114,12 +114,12 @@ export const SearchApplicationContent = () => {
             onClick: () =>
               KibanaLogic.values.navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_PATH, {
-                  searchApplicationName: engineName,
+                  searchApplicationName,
                 })
               ),
             text: (
               <>
-                <EuiIcon size="s" type="arrowLeft" /> {engineName}
+                <EuiIcon size="s" type="arrowLeft" /> {searchApplicationName}
               </>
             ),
           },
@@ -157,7 +157,7 @@ export const SearchApplicationContent = () => {
           },
         ],
       }}
-      searchApplicationName={engineName}
+      searchApplicationName={searchApplicationName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
       {contentTabId === SearchApplicationContentTabs.INDICES && <EngineIndices />}

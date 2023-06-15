@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { FieldConfiguration } from '@elastic/search-ui';
 
 import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
-import { EngineNameLogic } from '../search_application_name_logic';
+import { SearchApplicationNameLogic } from '../search_application_name_logic';
 
 interface SearchApplicationSearchPreviewActions {
   fetchSearchApplicationFieldCapabilities: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.actions.makeRequest;
@@ -20,7 +20,7 @@ export interface SearchApplicationPreviewValues {
   fieldTypesByIndex: Record<string, Record<string, string>>;
   resultFields: Record<string, FieldConfiguration>;
   searchApplicationFieldCapabilitiesData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
-  searchApplicationName: typeof EngineNameLogic.values.engineName;
+  searchApplicationName: typeof SearchApplicationNameLogic.values.searchApplicationName;
   sortableFields: string[];
 }
 
@@ -33,8 +33,8 @@ export const SearchApplicationSearchPreviewLogic = kea<
       ['makeRequest as fetchSearchApplicationFieldCapabilities'],
     ],
     values: [
-      EngineNameLogic,
-      ['engineName as searchApplicationName'],
+      SearchApplicationNameLogic,
+      ['searchApplicationName'],
       FetchSearchApplicationFieldCapabilitiesApiLogic,
       ['data as searchApplicationFieldCapabilitiesData'],
     ],

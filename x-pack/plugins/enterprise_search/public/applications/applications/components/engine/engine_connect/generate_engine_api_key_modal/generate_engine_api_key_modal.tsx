@@ -36,21 +36,21 @@ import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_cont
 import { GenerateApiKeyModalLogic } from './generate_engine_api_key_modal.logic';
 
 interface GenerateEngineApiKeyModalProps {
-  engineName: string;
   onClose(): void;
+  searchApplicationName: string;
 }
 
 export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps> = ({
-  engineName,
   onClose,
+  searchApplicationName,
 }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(GenerateEngineApiKeyLogic);
 
   useEffect(() => {
-    setKeyName(`${engineName} read-only API key`);
-  }, [engineName]);
+    setKeyName(`${searchApplicationName} read-only API key`);
+  }, [searchApplicationName]);
 
   return (
     <EuiModal onClose={onClose}>
@@ -94,7 +94,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
                           fill
                           onClick={() => {
                             makeRequest({
-                              engineName,
+                              engineName: searchApplicationName,
                               keyName: keyName.trim(),
                             });
                           }}

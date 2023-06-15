@@ -25,7 +25,7 @@ import {
   SearchApplicationsListActions,
 } from '../search_applications/search_applications_list_logic';
 
-import { EngineNameLogic } from './search_application_name_logic';
+import { SearchApplicationNameLogic } from './search_application_name_logic';
 
 export interface EngineViewActions {
   closeDeleteEngineModal(): void;
@@ -37,7 +37,6 @@ export interface EngineViewActions {
 
 export interface EngineViewValues {
   engineData: typeof FetchSearchApplicationApiLogic.values.data;
-  engineName: typeof EngineNameLogic.values.engineName;
   engineSchemaData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
   fetchEngineApiError?: typeof FetchSearchApplicationApiLogic.values.error;
   fetchEngineApiStatus: typeof FetchSearchApplicationApiLogic.values.status;
@@ -48,6 +47,7 @@ export interface EngineViewValues {
   isLoadingEngine: boolean;
   isLoadingEngineSchema: boolean;
   schemaFields: SchemaField[];
+  searchApplicationName: typeof SearchApplicationNameLogic.values.searchApplicationName;
 }
 
 export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewActions>>({
@@ -65,8 +65,8 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       ['deleteSuccess'],
     ],
     values: [
-      EngineNameLogic,
-      ['engineName'],
+      SearchApplicationNameLogic,
+      ['searchApplicationName'],
       FetchSearchApplicationApiLogic,
       ['data as engineData', 'status as fetchEngineApiStatus', 'error as fetchEngineApiError'],
       FetchSearchApplicationFieldCapabilitiesApiLogic,
@@ -82,8 +82,8 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       actions.closeDeleteEngineModal();
       KibanaLogic.values.navigateToUrl(SEARCH_APPLICATIONS_PATH);
     },
-    fetchEngine: ({ name: engineName }) => {
-      actions.fetchEngineSchema({ name: engineName });
+    fetchEngine: ({ name }) => {
+      actions.fetchEngineSchema({ name });
     },
   }),
   path: ['enterprise_search', 'content', 'engine_view_logic'],

@@ -60,7 +60,7 @@ const getTabBreadCrumb = (tabId: string) => {
 };
 
 export const EngineConnect: React.FC = () => {
-  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { searchApplicationName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { connectTabId = SearchApplicationConnectTabs.SEARCHAPI } = useParams<{
     connectTabId?: string;
   }>();
@@ -69,7 +69,7 @@ export const EngineConnect: React.FC = () => {
     KibanaLogic.values.navigateToUrl(
       generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
         connectTabId: tab,
-        searchApplicationName: engineName,
+        searchApplicationName,
       })
     );
   };
@@ -77,7 +77,7 @@ export const EngineConnect: React.FC = () => {
   if (!ConnectTabs.includes(connectTabId)) {
     return (
       <EnterpriseSearchApplicationsPageTemplate
-        pageChrome={[engineName, pageTitle]}
+        pageChrome={[searchApplicationName, pageTitle]}
         pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
         isLoading={isLoadingEngine}
         pageHeader={{
@@ -86,7 +86,7 @@ export const EngineConnect: React.FC = () => {
           pageTitle,
           rightSideItems: [],
         }}
-        searchApplicationName={engineName}
+        searchApplicationName={searchApplicationName}
         hasSchemaConflicts={hasSchemaConflicts}
       >
         <EngineError notFound />
@@ -96,7 +96,7 @@ export const EngineConnect: React.FC = () => {
 
   return (
     <EnterpriseSearchApplicationsPageTemplate
-      pageChrome={[engineName, pageTitle, getTabBreadCrumb(connectTabId)]}
+      pageChrome={[searchApplicationName, pageTitle, getTabBreadCrumb(connectTabId)]}
       pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
       isLoading={isLoadingEngine}
       pageHeader={{
@@ -117,7 +117,7 @@ export const EngineConnect: React.FC = () => {
           },
         ],
       }}
-      searchApplicationName={engineName}
+      searchApplicationName={searchApplicationName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
       {connectTabId === SearchApplicationConnectTabs.SEARCHAPI && <SearchApplicationAPI />}

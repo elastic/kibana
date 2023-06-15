@@ -18,7 +18,6 @@ import { EngineViewLogic, EngineViewValues } from './engine_view_logic';
 
 const DEFAULT_VALUES: EngineViewValues = {
   engineData: undefined,
-  engineName: 'my-test-engine',
   engineSchemaData: undefined,
   fetchEngineApiError: undefined,
   fetchEngineApiStatus: Status.IDLE,
@@ -29,6 +28,7 @@ const DEFAULT_VALUES: EngineViewValues = {
   isLoadingEngine: true,
   isLoadingEngineSchema: true,
   schemaFields: [],
+  searchApplicationName: 'my-test-search-application',
 };
 
 describe('EngineViewLogic', () => {
@@ -39,7 +39,10 @@ describe('EngineViewLogic', () => {
     jest.useRealTimers();
 
     mountEnginesListLogic();
-    mount({ engineName: DEFAULT_VALUES.engineName }, { engineName: DEFAULT_VALUES.engineName });
+    mount(
+      { searchApplicationName: DEFAULT_VALUES.searchApplicationName },
+      { searchApplicationName: DEFAULT_VALUES.searchApplicationName }
+    );
   });
 
   it('has expected default values', () => {

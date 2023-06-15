@@ -7,29 +7,33 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-export interface EngineNameProps {
-  engineName: string;
+export interface SearchApplicationNameProps {
+  searchApplicationName: string;
 }
 
-export type EngineNameValues = EngineNameProps;
+export type SearchApplicationNameValues = SearchApplicationNameProps;
 
-export interface EngineNameActions {
-  setEngineName: (engineName: string) => { engineName: string };
+export interface SearchApplicationNameActions {
+  setSearchApplicationName: (name: string) => { name: string };
 }
 
-export const EngineNameLogic = kea<
-  MakeLogicType<EngineNameValues, EngineNameActions, EngineNameProps>
+export const SearchApplicationNameLogic = kea<
+  MakeLogicType<
+    SearchApplicationNameValues,
+    SearchApplicationNameActions,
+    SearchApplicationNameProps
+  >
 >({
   actions: {
-    setEngineName: (engineName) => ({ engineName }),
+    setSearchApplicationName: (name) => ({ name }),
   },
-  path: ['enterprise_search', 'content', 'engine_name'],
+  path: ['enterprise_search', 'search_applications', 'search_application_name'],
   reducers: ({ props }) => ({
-    engineName: [
+    searchApplicationName: [
       // Short-circuiting this to empty string is necessary to enable testing logics relying on this
-      props.engineName ?? '',
+      props.searchApplicationName ?? '',
       {
-        setEngineName: (_, { engineName }) => engineName,
+        setSearchApplicationName: (_, { name }) => name,
       },
     ],
   }),

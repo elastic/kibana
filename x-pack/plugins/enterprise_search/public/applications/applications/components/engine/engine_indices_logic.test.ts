@@ -15,7 +15,7 @@ import { EngineIndicesLogic, EngineIndicesLogicValues } from './engine_indices_l
 const DEFAULT_VALUES: EngineIndicesLogicValues = {
   addIndicesFlyoutOpen: false,
   engineData: undefined,
-  engineName: 'my-test-engine',
+  searchApplicationName: 'my-test-engine',
   isLoadingEngine: true,
 };
 
@@ -32,7 +32,7 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
       name: 'search-002',
     },
   ],
-  name: DEFAULT_VALUES.engineName,
+  name: DEFAULT_VALUES.searchApplicationName,
   template: {
     script: {
       lang: 'mustache',
@@ -56,10 +56,10 @@ describe('EngineViewLogic', () => {
     mountFetchSearchApplicationApiLogic();
     mount(
       {
-        engineName: DEFAULT_VALUES.engineName,
+        searchApplicationName: DEFAULT_VALUES.searchApplicationName,
       },
       {
-        engineName: DEFAULT_VALUES.engineName,
+        searchApplicationName: DEFAULT_VALUES.searchApplicationName,
       }
     );
   });
@@ -87,7 +87,7 @@ describe('EngineViewLogic', () => {
 
         expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledTimes(1);
         expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledWith({
-          name: DEFAULT_VALUES.engineName,
+          name: DEFAULT_VALUES.searchApplicationName,
         });
       });
     });
@@ -99,7 +99,7 @@ describe('EngineViewLogic', () => {
 
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledTimes(1);
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledWith({
-          name: DEFAULT_VALUES.engineName,
+          name: DEFAULT_VALUES.searchApplicationName,
           indices: ['search-002'],
         });
       });
@@ -112,7 +112,7 @@ describe('EngineViewLogic', () => {
 
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledTimes(1);
         expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledWith({
-          name: DEFAULT_VALUES.engineName,
+          name: DEFAULT_VALUES.searchApplicationName,
           indices: ['search-001', 'search-002', 'search-003'],
         });
       });

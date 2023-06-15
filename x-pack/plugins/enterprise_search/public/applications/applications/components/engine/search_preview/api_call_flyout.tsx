@@ -31,15 +31,15 @@ export interface APICallData {
 }
 
 export interface APICallFlyoutProps {
-  engineName: string;
   lastAPICall: APICallData;
   onClose: () => void;
+  searchApplicationName: string;
 }
 
 export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
-  engineName,
   onClose,
   lastAPICall,
+  searchApplicationName,
 }) => {
   const [tab, setTab] = useState<'request' | 'response'>('request');
 
@@ -78,7 +78,7 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
           </EuiTabs>
           <EuiLinkTo
             to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
-              searchApplicationName: engineName,
+              searchApplicationName,
               tabId: SearchApplicationViewTabs.CONNECT,
             })}
             color="primary"

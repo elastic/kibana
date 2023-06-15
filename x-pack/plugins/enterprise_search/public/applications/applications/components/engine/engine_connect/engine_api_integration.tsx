@@ -88,7 +88,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
     share: { url },
   } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
-  const { engineName } = useValues(EngineViewLogic);
+  const { searchApplicationName: engineName } = useValues(EngineViewLogic);
   const { apiKey } = useValues(EngineApiLogic);
   const cloudContext = useCloudDetails();
 

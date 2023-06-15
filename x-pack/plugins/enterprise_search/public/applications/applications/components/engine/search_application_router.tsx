@@ -20,32 +20,32 @@ import {
 } from '../../routes';
 
 import { EngineView } from './engine_view';
-import { EngineNameLogic } from './search_application_name_logic';
+import { SearchApplicationNameLogic } from './search_application_name_logic';
 
 export const SearchApplicationRouter: React.FC = () => {
-  const engineName = decodeURIComponent(
+  const searchApplicationName = decodeURIComponent(
     useParams<{ searchApplicationName: string }>().searchApplicationName
   );
-  const engineNameLogic = EngineNameLogic({ engineName });
-  const { setEngineName } = useActions(engineNameLogic);
+  const searchApplicationNameLogic = SearchApplicationNameLogic({ searchApplicationName });
+  const { setSearchApplicationName } = useActions(searchApplicationNameLogic);
 
   useEffect(() => {
-    const unmountName = engineNameLogic.mount();
+    const unmountName = searchApplicationNameLogic.mount();
 
     return () => {
       unmountName();
     };
   }, []);
   useEffect(() => {
-    setEngineName(engineName);
-  }, [engineName]);
+    setSearchApplicationName(searchApplicationName);
+  }, [searchApplicationName]);
 
   return (
     <Switch>
       <Redirect
         from={SEARCH_APPLICATION_PATH}
         to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
-          searchApplicationName: engineName,
+          searchApplicationName,
           tabId: SearchApplicationViewTabs.PREVIEW,
         })}
         exact
