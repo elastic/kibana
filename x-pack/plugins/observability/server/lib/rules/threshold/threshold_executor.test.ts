@@ -1988,11 +1988,8 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
-
       toBeWarnAction(action?: Action): R;
-
       toBeNoDataAction(action?: Action): R;
-
       toBeErrorAction(action?: Action): R;
     }
   }
