@@ -25,7 +25,7 @@ import {
   SearchApplicationsListActions,
 } from '../search_applications/search_applications_list_logic';
 
-import { EngineNameLogic } from './engine_name_logic';
+import { EngineNameLogic } from './search_application_name_logic';
 
 export interface EngineViewActions {
   closeDeleteEngineModal(): void;

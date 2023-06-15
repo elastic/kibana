@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { FieldConfiguration } from '@elastic/search-ui';
 
 import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
-import { EngineNameLogic } from '../engine_name_logic';
+import { EngineNameLogic } from '../search_application_name_logic';
 
 interface SearchApplicationSearchPreviewActions {
   fetchSearchApplicationFieldCapabilities: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.actions.makeRequest;
