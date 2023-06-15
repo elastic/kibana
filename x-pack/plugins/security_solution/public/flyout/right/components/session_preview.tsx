@@ -6,11 +6,13 @@
  */
 
 import { EuiButtonEmpty, EuiCode, EuiIcon, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
-import React, { useMemo, type FC } from 'react';
+import React, { useMemo, type FC, useCallback } from 'react';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
 import { useProcessData } from '../hooks/use_process_data';
-import { SESSION_PREVIEW_TEST_ID } from './test_ids';
+import { SESSION_PREVIEW_TEST_ID, SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID } from './test_ids';
 import {
   SESSION_PREVIEW_COMMAND_TEXT,
   SESSION_PREVIEW_PROCESS_TEXT,
@@ -18,6 +20,7 @@ import {
   SESSION_PREVIEW_TIME_TEXT,
   SESSION_PREVIEW_TITLE,
 } from './translations';
+import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
 
 /**
  * One-off helper to make sure that inline values are rendered consistently
@@ -39,6 +42,21 @@ const ValueContainer: FC<{ text?: string }> = ({ text, children }) => (
  * Renders session preview under visualistions section in the flyout right EuiPanel
  */
 export const SessionPreview: FC = () => {
+  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { openLeftPanel } = useExpandableFlyoutContext();
+
+  const goToSessionViewTab = useCallback(() => {
+    openLeftPanel({
+      id: LeftPanelKey,
+      path: LeftPanelVisualizeTabPath,
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+      },
+    });
+  }, [eventId, openLeftPanel, indexName, scopeId]);
+
   const { processName, userName, startAt, rule, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
 
@@ -92,7 +110,12 @@ export const SessionPreview: FC = () => {
   return (
     <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={SESSION_PREVIEW_TEST_ID}>
       <EuiPanel color="subdued" paddingSize="s">
-        <EuiButtonEmpty color="primary" iconType="sessionViewer">
+        <EuiButtonEmpty
+          color="primary"
+          iconType="sessionViewer"
+          onClick={goToSessionViewTab}
+          data-test-subj={SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID}
+        >
           {SESSION_PREVIEW_TITLE}
         </EuiButtonEmpty>
 
