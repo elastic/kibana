@@ -22,6 +22,7 @@ import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/serve
 import { observabilityFeatureId } from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
+import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
   alertDetailUrlActionVariableDescription,
@@ -57,7 +58,7 @@ import { ObservabilityConfig } from '../../..';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/threshold_rule/constants';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
-  context: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: false,

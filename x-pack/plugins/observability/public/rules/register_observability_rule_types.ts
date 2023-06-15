@@ -20,6 +20,39 @@ import { validateBurnRateRule } from '../components/burn_rate_rule_editor/valida
 import { validateMetricThreshold } from '../components/threshold/components/validation';
 import { formatReason } from '../components/threshold/rule_data_formatters';
 
+const sloBurnRateDefaultActionMessage = i18n.translate(
+  'xpack.observability.slo.rules.burnRate.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active with the following conditions:
+
+- SLO: \\{\\{context.sloName\\}\\}'
+- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
+- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
+- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const sloBurnRateDefaultRecoveryMessage = i18n.translate(
+  'xpack.observability.slo.rules.burnRate.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} has recovered.
+
+- SLO: \\{\\{context.sloName\\}\\}'
+- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
+- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
+- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
@@ -42,17 +75,8 @@ export const registerObservabilityRuleTypes = (
     ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
     validate: validateBurnRateRule,
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.observability.slo.rules.burnRate.defaultActionMessage',
-      {
-        defaultMessage: `The rule \\{\\{rule.name\\}\\} for the SLO '\\{\\{context.sloName\\}\\}' is firing:
-- Reason: \\{\\{context.reason\\}\\}
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- The burn rate threshold is set to \\{\\{context.burnRateThreshold\\}\\}
-- View in the SLO details page: \\{\\{context.viewInAppUrl\\}\\}`,
-      }
-    ),
+    defaultActionMessage: sloBurnRateDefaultActionMessage,
+    defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
   });
   if (config.unsafe.thresholdRule.enabled) {
     observabilityRuleTypeRegistry.register({
