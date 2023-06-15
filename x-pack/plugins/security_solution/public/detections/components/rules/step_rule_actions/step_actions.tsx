@@ -19,15 +19,11 @@ import { NotificationAction } from './notification_action';
 import { ResponseAction } from './response_action';
 import * as i18n from './translations';
 
-interface StepActionsRuleProps {
+interface StepRuleActionsProps {
   ruleActionsData: ActionsStepRule;
-  isRuleLoading: boolean;
 }
 
-export const StepActionsRule: React.FC<StepActionsRuleProps> = ({
-  ruleActionsData,
-  isRuleLoading,
-}) => {
+export const StepActions: React.FC<StepRuleActionsProps> = ({ ruleActionsData }) => {
   const {
     services: { triggersActionsUi },
   } = useKibana();
@@ -50,48 +46,65 @@ export const StepActionsRule: React.FC<StepActionsRuleProps> = ({
     notificationActions.length > 0 && responseActions.length > 0;
 
   return (
-    <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
-      <StepPanel loading={isRuleLoading} title={i18n.ACTIONS}>
-        {notificationActions.length > 0 && (
-          <>
-            <EuiText size="m">{i18n.NOTIFICATION_ACTIONS}</EuiText>
-            <EuiSpacer size="s" />
-          </>
-        )}
-        {notificationActions.map((action, index) => {
-          const isLastItem = index === responseActions.length - 1;
-          return (
-            <>
-              <NotificationAction
-                action={action}
-                connectorTypes={connectorTypes}
-                connectors={connectors}
-                actionTypeRegistry={actionTypeRegistry}
-                key={action.id}
-              />
-              {!isLastItem && <EuiSpacer size="s" />}
-            </>
-          );
-        })}
+    <>
+      {notificationActions.length > 0 && (
+        <>
+          <EuiText size="m">{i18n.NOTIFICATION_ACTIONS}</EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
 
-        {hasBothNotificationAndResponseActions && <EuiSpacer size="m" />}
-
-        {responseActions.length > 0 && (
+      {notificationActions.map((action, index) => {
+        const isLastItem = index === notificationActions.length - 1;
+        return (
           <>
-            <EuiText size="m">{i18n.RESPONSE_ACTIONS}</EuiText>
-            <EuiSpacer size="s" />
+            <NotificationAction
+              action={action}
+              connectorTypes={connectorTypes}
+              connectors={connectors}
+              actionTypeRegistry={actionTypeRegistry}
+              key={action.id}
+            />
+            {!isLastItem && <EuiSpacer size="s" />}
           </>
-        )}
-        {responseActions.map((action, index) => {
-          const isLastItem = index === responseActions.length - 1;
-          return (
-            <>
-              <ResponseAction action={action} key={`${action.actionTypeId}-${index}`} />
-              {!isLastItem && <EuiSpacer size="s" />}
-            </>
-          );
-        })}
-      </StepPanel>
-    </EuiFlexItem>
+        );
+      })}
+
+      {hasBothNotificationAndResponseActions && <EuiSpacer size="m" />}
+
+      {responseActions.length > 0 && (
+        <>
+          <EuiText size="m">{i18n.RESPONSE_ACTIONS}</EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      {responseActions.map((action, index) => {
+        const isLastItem = index === responseActions.length - 1;
+        return (
+          <>
+            <ResponseAction action={action} key={`${action.actionTypeId}-${index}`} />
+            {!isLastItem && <EuiSpacer size="s" />}
+          </>
+        );
+      })}
+    </>
   );
 };
+
+interface StepActionsRuleProps {
+  ruleActionsData: ActionsStepRule;
+  isRuleLoading: boolean;
+}
+
+export const StepActionsRule: React.FC<StepActionsRuleProps> = ({
+  ruleActionsData,
+  isRuleLoading,
+}) => (
+  <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+    <StepPanel loading={isRuleLoading} title={i18n.ACTIONS}>
+      <StepActions ruleActionsData={ruleActionsData} />
+    </StepPanel>
+  </EuiFlexItem>
+);
+

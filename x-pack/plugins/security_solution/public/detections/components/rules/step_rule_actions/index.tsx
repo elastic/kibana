@@ -18,15 +18,14 @@ import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../../../detection_engine/rule_response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
-import { StepRuleDescription } from '../description_step';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { RuleSnoozeSection } from './rule_snooze_section';
+import { StepActions } from './step_actions';
 
 interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
@@ -144,17 +143,10 @@ export const StepRuleActions = memo(StepRuleActionsComponent);
 const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
   addPadding,
   defaultValues: data,
-}) => {
-  const {
-    services: {
-      triggersActionsUi: { actionTypeRegistry },
-    },
-  } = useKibana();
-  const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
-  return (
-    <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription schema={schema} data={data} columns="single" />
-    </StepContentWrapper>
-  );
-};
+}) => (
+  <StepContentWrapper addPadding={addPadding}>
+    <StepActions ruleActionsData={data} />
+  </StepContentWrapper>
+);
+
 export const StepRuleActionsReadOnly = memo(StepRuleActionsReadOnlyComponent);

@@ -67,7 +67,7 @@ import { AlertsHistogramPanel } from '../../../../detections/components/alerts_k
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
 import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
-import { StepActionsRule } from '../../../../detections/components/rules/step_rule_actions/actions_view';
+import { StepActionsRule } from '../../../../detections/components/rules/step_rule_actions/step_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
