@@ -154,6 +154,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.testBuildId (string)',
         'telemetry.labels.testJobId (string)',
         'telemetry.labels.ciBuildName (string)',
+        'telemetry.labels.serverless (any)',
         'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (boolean)',
         'telemetry.sendUsageFrom (alternatives)',
@@ -259,6 +260,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
+        'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large

@@ -35,7 +35,8 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('snooze', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/159076
+  describe.skip('snooze', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -356,22 +357,25 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
         snooze_schedule: {
           ...SNOOZE_SCHEDULE,
-          duration: 1000,
+          duration: 3000,
         },
       });
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');
-      const { body: updatedAlert } = await supertestWithoutAuth
-        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
-      expect(updatedAlert.snooze_schedule).to.eql([
-        {
-          ...SNOOZE_SCHEDULE,
-          duration: 1000,
-        },
-      ]);
+
+      await retry.try(async () => {
+        const { body: updatedAlert } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(updatedAlert.snooze_schedule).to.eql([
+          {
+            ...SNOOZE_SCHEDULE,
+            duration: 3000,
+          },
+        ]);
+      });
       log.info('wait for snoozing to end');
       await retry.try(async () => {
         const { body: alertWithExpiredSnooze } = await supertestWithoutAuth

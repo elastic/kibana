@@ -209,6 +209,92 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.CoPilotContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "CoPilotContextProvider",
+        "description": [],
+        "signature": [
+          "React.ProviderExoticComponent<React.ProviderProps<",
+          "CoPilotService",
+          " | undefined>>"
+        ],
+        "path": "x-pack/plugins/observability/public/context/co_pilot_context/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.CoPilotContextProvider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.CoPilotPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "CoPilotPrompt",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "CoPilotPromptProps",
+          "<",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.CoPilotPromptId",
+            "text": "CoPilotPromptId"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/co_pilot_prompt/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.CoPilotPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "CoPilotPromptProps",
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "common",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-common.CoPilotPromptId",
+                "text": "CoPilotPromptId"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/observability/public/components/co_pilot_prompt/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.createObservabilityRuleTypeRegistryMock",
         "type": "Function",
         "tags": [],
@@ -735,6 +821,25 @@
             "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.useCoPilot",
+        "type": "Function",
+        "tags": [],
+        "label": "useCoPilot",
+        "description": [],
+        "signature": [
+          "() => ",
+          "CoPilotService",
+          " | undefined"
+        ],
+        "path": "x-pack/plugins/observability/public/hooks/use_co_pilot.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2547,7 +2652,17 @@
             "signature": [
               "{ navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
-              ") => JSX.Element; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+              ") => JSX.Element; registerSections: (sections$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.NavigationSection",
+                "text": "NavigationSection"
+              },
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "common",
@@ -2555,7 +2670,7 @@
                 "section": "def-common.AppDeepLink",
                 "text": "AppDeepLink"
               },
-              "[]; updater$: ",
+              "<string>[]; updater$: ",
               "Subject",
               "<",
               {
@@ -3632,6 +3747,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.enableLegacyUptimeApp",
+        "type": "string",
+        "tags": [],
+        "label": "enableLegacyUptimeApp",
+        "description": [],
+        "signature": [
+          "\"observability:enableLegacyUptimeApp\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.FetchData",
         "type": "Type",
         "tags": [],
@@ -4059,7 +4189,9 @@
         },
         "<",
         "SloDetailsLocatorParams",
-        ">; }"
+        ">; getCoPilotService: () => ",
+        "CoPilotService",
+        "; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
       "deprecated": false,
@@ -4101,6 +4233,8 @@
         },
         ") => ",
         "LinkProps",
+        "; getCoPilotService: () => ",
+        "CoPilotService",
         "; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -7474,7 +7608,211 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/composite_slos 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "{ \"POST /internal/observability/copilot/prompts/profilingOptimizeFunction\": { endpoint: \"POST /internal/observability/copilot/prompts/profilingOptimizeFunction\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ library: ",
+          "StringC",
+          "; functionName: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { library: string; functionName: string; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/profilingExplainFunction\": { endpoint: \"POST /internal/observability/copilot/prompts/profilingExplainFunction\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ library: ",
+          "StringC",
+          "; functionName: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { library: string; functionName: string; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/apmExplainError\": { endpoint: \"POST /internal/observability/copilot/prompts/apmExplainError\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; languageName: ",
+          "StringC",
+          "; runtimeName: ",
+          "StringC",
+          "; runtimeVersion: ",
+          "StringC",
+          "; transactionName: ",
+          "StringC",
+          "; logStacktrace: ",
+          "StringC",
+          "; exceptionStacktrace: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ spanName: ",
+          "StringC",
+          "; }>]>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { serviceName: string; languageName: string; runtimeName: string; runtimeVersion: string; transactionName: string; logStacktrace: string; exceptionStacktrace: string; } & { spanName?: string | undefined; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/logsExplainMessage\": { endpoint: \"POST /internal/observability/copilot/prompts/logsExplainMessage\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ logEntry: ",
+          "TypeC",
+          "<{ fields: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ field: ",
+          "StringC",
+          "; value: ",
+          "ArrayC",
+          "<",
+          "AnyC",
+          ">; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { logEntry: { fields: { field: string; value: any[]; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/logsFindSimilar\": { endpoint: \"POST /internal/observability/copilot/prompts/logsFindSimilar\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ logEntry: ",
+          "TypeC",
+          "<{ fields: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ field: ",
+          "StringC",
+          "; value: ",
+          "ArrayC",
+          "<",
+          "AnyC",
+          ">; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { logEntry: { fields: { field: string; value: any[]; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/infraExplainProcess\": { endpoint: \"POST /internal/observability/copilot/prompts/infraExplainProcess\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ command: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { command: string; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/explainLogSpike\": { endpoint: \"POST /internal/observability/copilot/prompts/explainLogSpike\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ significantFieldValues: ",
+          "TypeC",
+          "<{ fields: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ field: ",
+          "StringC",
+          "; value: ",
+          "StringC",
+          "; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { significantFieldValues: { fields: { field: string; value: string; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
           "PartialC",
           "<{ query: ",
           "PartialC",
@@ -7508,7 +7846,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"GET /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -7530,7 +7868,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -7552,7 +7890,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"PUT /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"PUT /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -7674,7 +8012,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"POST /api/observability/composite_slos 2023-05-24\": { endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
+          ") | undefined; \"POST /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -7798,7 +8136,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
+          ") | undefined; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -8623,7 +8961,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+          "{ readonly coPilot?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -8638,7 +8976,211 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/composite_slos 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
+          "{ \"POST /internal/observability/copilot/prompts/profilingOptimizeFunction\": { endpoint: \"POST /internal/observability/copilot/prompts/profilingOptimizeFunction\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ library: ",
+          "StringC",
+          "; functionName: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { library: string; functionName: string; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/profilingExplainFunction\": { endpoint: \"POST /internal/observability/copilot/prompts/profilingExplainFunction\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ library: ",
+          "StringC",
+          "; functionName: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { library: string; functionName: string; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/apmExplainError\": { endpoint: \"POST /internal/observability/copilot/prompts/apmExplainError\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; languageName: ",
+          "StringC",
+          "; runtimeName: ",
+          "StringC",
+          "; runtimeVersion: ",
+          "StringC",
+          "; transactionName: ",
+          "StringC",
+          "; logStacktrace: ",
+          "StringC",
+          "; exceptionStacktrace: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ spanName: ",
+          "StringC",
+          "; }>]>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { serviceName: string; languageName: string; runtimeName: string; runtimeVersion: string; transactionName: string; logStacktrace: string; exceptionStacktrace: string; } & { spanName?: string | undefined; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/logsExplainMessage\": { endpoint: \"POST /internal/observability/copilot/prompts/logsExplainMessage\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ logEntry: ",
+          "TypeC",
+          "<{ fields: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ field: ",
+          "StringC",
+          "; value: ",
+          "ArrayC",
+          "<",
+          "AnyC",
+          ">; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { logEntry: { fields: { field: string; value: any[]; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/logsFindSimilar\": { endpoint: \"POST /internal/observability/copilot/prompts/logsFindSimilar\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ logEntry: ",
+          "TypeC",
+          "<{ fields: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ field: ",
+          "StringC",
+          "; value: ",
+          "ArrayC",
+          "<",
+          "AnyC",
+          ">; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { logEntry: { fields: { field: string; value: any[]; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/infraExplainProcess\": { endpoint: \"POST /internal/observability/copilot/prompts/infraExplainProcess\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ command: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { command: string; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /internal/observability/copilot/prompts/explainLogSpike\": { endpoint: \"POST /internal/observability/copilot/prompts/explainLogSpike\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ significantFieldValues: ",
+          "TypeC",
+          "<{ fields: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ field: ",
+          "StringC",
+          "; value: ",
+          "StringC",
+          "; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { significantFieldValues: { fields: { field: string; value: string; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos 2023-05-24\"; params?: ",
           "PartialC",
           "<{ query: ",
           "PartialC",
@@ -8672,7 +9214,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"GET /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"GET /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -8694,7 +9236,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"DELETE /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -8716,7 +9258,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"PUT /api/observability/composite_slos/{id} 2023-05-24\": { endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
+          ") | undefined; \"PUT /api/observability/composite_slos/{id} 2023-05-24\"?: ({ endpoint: \"PUT /api/observability/composite_slos/{id} 2023-05-24\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -8838,7 +9380,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"POST /api/observability/composite_slos 2023-05-24\": { endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
+          ") | undefined; \"POST /api/observability/composite_slos 2023-05-24\"?: ({ endpoint: \"POST /api/observability/composite_slos 2023-05-24\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -8962,7 +9504,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
+          ") | undefined; \"GET /internal/observability/slos/{id}/_diagnosis\": { endpoint: \"GET /internal/observability/slos/{id}/_diagnosis\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -9800,6 +10342,86 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.metricsExplorerViewSavedObjectAttributesRT",
+        "type": "Object",
+        "tags": [],
+        "label": "metricsExplorerViewSavedObjectAttributesRT",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "ExactC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">; }>>, ",
+          "UnknownRecordC",
+          "]>"
+        ],
+        "path": "x-pack/plugins/observability/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.metricsExplorerViewSavedObjectRT",
+        "type": "Object",
+        "tags": [],
+        "label": "metricsExplorerViewSavedObjectRT",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; attributes: ",
+          "IntersectionC",
+          "<[",
+          "ExactC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">; }>>, ",
+          "UnknownRecordC",
+          "]>; }>, ",
+          "PartialC",
+          "<{ version: ",
+          "StringC",
+          "; updated_at: ",
+          "Type",
+          "<number, string, unknown>; }>]>"
+        ],
+        "path": "x-pack/plugins/observability/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-server.uiSettings",
@@ -11873,6 +12495,110 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableLegacyUptimeApp",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableLegacyUptimeApp]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -11916,7 +12642,9 @@
         "GetResponse",
         "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
         "WriteResponseBase",
-        ">; } | undefined>; alertsLocator: ",
+        ">; } | undefined>; getOpenAIClient(): ",
+        "IOpenAIClient",
+        " | undefined; alertsLocator: ",
         {
           "pluginId": "share",
           "scope": "common",
@@ -12687,6 +13415,18 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.CoPilotPromptId",
+        "type": "Enum",
+        "tags": [],
+        "label": "CoPilotPromptId",
+        "description": [],
+        "path": "x-pack/plugins/observability/common/co_pilot.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.ProcessorEvent",
@@ -13502,6 +14242,211 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.coPilotPrompts",
+        "type": "Object",
+        "tags": [],
+        "label": "coPilotPrompts",
+        "description": [],
+        "path": "x-pack/plugins/observability/common/co_pilot.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.coPilotPrompts.CoPilotPromptId.ProfilingOptimizeFunction",
+            "type": "Object",
+            "tags": [],
+            "label": "[CoPilotPromptId.ProfilingOptimizeFunction]",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "TypeC",
+              "<{ library: ",
+              "StringC",
+              "; functionName: ",
+              "StringC",
+              "; }>; messages: (params: { library: string; functionName: string; }) => ",
+              "ChatCompletionRequestMessage",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/observability/common/co_pilot.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.coPilotPrompts.CoPilotPromptId.ProfilingExplainFunction",
+            "type": "Object",
+            "tags": [],
+            "label": "[CoPilotPromptId.ProfilingExplainFunction]",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "TypeC",
+              "<{ library: ",
+              "StringC",
+              "; functionName: ",
+              "StringC",
+              "; }>; messages: (params: { library: string; functionName: string; }) => ",
+              "ChatCompletionRequestMessage",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/observability/common/co_pilot.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.coPilotPrompts.CoPilotPromptId.ApmExplainError",
+            "type": "Object",
+            "tags": [],
+            "label": "[CoPilotPromptId.ApmExplainError]",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "IntersectionC",
+              "<[",
+              "TypeC",
+              "<{ serviceName: ",
+              "StringC",
+              "; languageName: ",
+              "StringC",
+              "; runtimeName: ",
+              "StringC",
+              "; runtimeVersion: ",
+              "StringC",
+              "; transactionName: ",
+              "StringC",
+              "; logStacktrace: ",
+              "StringC",
+              "; exceptionStacktrace: ",
+              "StringC",
+              "; }>, ",
+              "PartialC",
+              "<{ spanName: ",
+              "StringC",
+              "; }>]>; messages: (params: { serviceName: string; languageName: string; runtimeName: string; runtimeVersion: string; transactionName: string; logStacktrace: string; exceptionStacktrace: string; } & { spanName?: string | undefined; }) => ",
+              "ChatCompletionRequestMessage",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/observability/common/co_pilot.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.coPilotPrompts.CoPilotPromptId.LogsExplainMessage",
+            "type": "Object",
+            "tags": [],
+            "label": "[CoPilotPromptId.LogsExplainMessage]",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "TypeC",
+              "<{ logEntry: ",
+              "TypeC",
+              "<{ fields: ",
+              "ArrayC",
+              "<",
+              "TypeC",
+              "<{ field: ",
+              "StringC",
+              "; value: ",
+              "ArrayC",
+              "<",
+              "AnyC",
+              ">; }>>; }>; }>; messages: (params: { logEntry: { fields: { field: string; value: any[]; }[]; }; }) => ",
+              "ChatCompletionRequestMessage",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/observability/common/co_pilot.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.coPilotPrompts.CoPilotPromptId.LogsFindSimilar",
+            "type": "Object",
+            "tags": [],
+            "label": "[CoPilotPromptId.LogsFindSimilar]",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "TypeC",
+              "<{ logEntry: ",
+              "TypeC",
+              "<{ fields: ",
+              "ArrayC",
+              "<",
+              "TypeC",
+              "<{ field: ",
+              "StringC",
+              "; value: ",
+              "ArrayC",
+              "<",
+              "AnyC",
+              ">; }>>; }>; }>; messages: (params: { logEntry: { fields: { field: string; value: any[]; }[]; }; }) => ",
+              "ChatCompletionRequestMessage",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/observability/common/co_pilot.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.coPilotPrompts.CoPilotPromptId.InfraExplainProcess",
+            "type": "Object",
+            "tags": [],
+            "label": "[CoPilotPromptId.InfraExplainProcess]",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "TypeC",
+              "<{ command: ",
+              "StringC",
+              "; }>; messages: (params: { command: string; }) => ",
+              "ChatCompletionRequestMessage",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/observability/common/co_pilot.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.coPilotPrompts.CoPilotPromptId.ExplainLogSpike",
+            "type": "Object",
+            "tags": [],
+            "label": "[CoPilotPromptId.ExplainLogSpike]",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "TypeC",
+              "<{ significantFieldValues: ",
+              "TypeC",
+              "<{ fields: ",
+              "ArrayC",
+              "<",
+              "TypeC",
+              "<{ field: ",
+              "StringC",
+              "; value: ",
+              "StringC",
+              "; }>>; }>; }>; messages: (params: { significantFieldValues: { fields: { field: string; value: string; }[]; }; }) => ",
+              "ChatCompletionRequestMessage",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/observability/common/co_pilot.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

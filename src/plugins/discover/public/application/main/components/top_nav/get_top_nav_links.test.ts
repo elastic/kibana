@@ -16,9 +16,6 @@ const services = {
     discover: {
       save: true,
     },
-    advancedSettings: {
-      save: true,
-    },
   },
 } as unknown as DiscoverServices;
 
@@ -27,22 +24,15 @@ const state = {} as unknown as DiscoverStateContainer;
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     services,
     state,
     isPlainRecord: false,
     adHocDataViews: [],
+    topNavCustomization: undefined,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
       Object {
         "description": "New Search",
         "id": "new",
@@ -87,22 +77,15 @@ test('getTopNavLinks result', () => {
 test('getTopNavLinks result for sql mode', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     services,
     state,
     isPlainRecord: true,
     adHocDataViews: [],
+    topNavCustomization: undefined,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
       Object {
         "description": "New Search",
         "id": "new",

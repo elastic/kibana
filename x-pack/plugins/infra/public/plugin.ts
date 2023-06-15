@@ -35,7 +35,7 @@ import {
   InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
-} from './locators';
+} from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -90,9 +90,6 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core)
-    );
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
     pluginsSetup.observability.dashboard.register({
@@ -116,7 +113,7 @@ export class Plugin implements InfraClientPluginClass {
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-      { label: 'Hosts', isTechnicalPreview: true, app: 'metrics', path: '/hosts' },
+      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
     ];
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
@@ -189,6 +186,10 @@ export class Plugin implements InfraClientPluginClass {
         },
       });
     }
+
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdRuleType(core, logsLocator)
+    );
 
     if (this.appTarget === LOGS_APP_TARGET) {
       core.application.register({
