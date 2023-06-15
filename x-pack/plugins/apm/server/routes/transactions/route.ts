@@ -54,7 +54,7 @@ import {
   TransactionTraceSamplesResponse,
 } from './trace_samples';
 
-interface MergedServiceTransactionGroupsResponse
+export interface MergedServiceTransactionGroupsResponse
   extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {
   transactionGroups: Array<{
     alertsCount: number;
