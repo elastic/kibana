@@ -18,7 +18,6 @@ import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sli
 interface Props {
   value: [number, number];
   onChange: (value?: [number, number]) => void;
-  onClear: () => void;
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;

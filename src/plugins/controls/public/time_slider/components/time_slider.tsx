@@ -77,9 +77,6 @@ export const TimeSlider: FC<Props> = (props: Props) => {
         rangeRef={rangeRef}
         value={[from, to]}
         onChange={props.onChange}
-        onClear={() => {
-          props.onChange();
-        }}
         stepSize={stepSize}
         ticks={ticks}
         timeRangeMin={timeRangeMin}
