@@ -17,7 +17,7 @@ import {
   LOG_ENTRIES_HIGHLIGHTS_PATH,
   logEntriesHighlightsRequestRT,
   logEntriesHighlightsResponseRT,
-} from '@kbn/infra-plugin/common/http_api';
+} from '@kbn/logs-shared-plugin/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
