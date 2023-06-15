@@ -60,22 +60,6 @@ export function createDeleteIndexStream(client: Client, stats: Stats, log: Tooli
           await deleteDataStream(client, dataStream, name);
           stats.deletedDataStream(dataStream, name);
         } else {
-          if (record.type === 'doc') {
-            const index = record.value.index;
-            if (index?.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX)) {
-              if (!kibanaTaskManagerIndexAlreadyCleaned) {
-                await cleanSavedObjectIndices({ client, stats, index, log });
-                kibanaTaskManagerIndexAlreadyCleaned = true;
-                log.debug(`Cleaned saved object index [${index}]`);
-              }
-            } else if (index?.startsWith(MAIN_SAVED_OBJECT_INDEX)) {
-              if (!kibanaIndicesAlreadyCleaned) {
-                await cleanSavedObjectIndices({ client, stats, log });
-                kibanaIndicesAlreadyCleaned = kibanaTaskManagerIndexAlreadyCleaned = true;
-                log.debug(`Cleaned all saved object indices`);
-              }
-            }
-          }
           this.push(record);
         }
         callback();
