@@ -137,14 +137,16 @@ export const getTopVulnerabilities = async (
 
   return queryResult.aggregations.vulnerabilities.buckets.map(
     (vulnerability: VulnerabilityBucket) => ({
+      cve: vulnerability.key,
       packageFixVersion: vulnerability.packageFixVersion?.buckets?.[0]?.key ?? '',
       packageName: vulnerability.packageName?.buckets?.[0]?.key ?? '',
       packageVersion: vulnerability.packageVersion?.buckets?.[0]?.key ?? '',
       severity: vulnerability.severity?.buckets?.[0]?.key ?? '',
-      vulnerabilityCount: vulnerability.doc_count,
-      score: vulnerability.score?.value,
-      version: vulnerability.cveVersion?.buckets?.[0]?.key ?? '',
-      cve: vulnerability.key,
+      resourceCount: vulnerability.doc_count,
+      cvss: {
+        score: vulnerability.score?.value,
+        version: vulnerability.cveVersion?.buckets?.[0]?.key ?? '',
+      },
     })
   );
 };

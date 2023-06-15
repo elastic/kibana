@@ -7,20 +7,14 @@
 
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { VulnerableResourceStat } from '../../../common/types';
+import { AggFieldBucket, VulnerableResourceStat } from '../../../common/types';
 import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 
 interface ResourceBucket {
   key: string | undefined;
   doc_count?: number;
-  top_region: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: Array<{
-      key?: string;
-      doc_count?: string;
-    }>;
-  };
+  resource_name: AggFieldBucket;
+  top_region: AggFieldBucket;
 }
 
 export interface VulnerableResourcesQueryResult {
@@ -36,13 +30,19 @@ const getVulnerabilitiesResourcesQuery = (query: QueryDslQueryContainer): Search
   aggs: {
     vulnerable_resources: {
       terms: {
-        field: 'resource.name',
+        field: 'resource.id',
         order: {
           _count: 'desc',
         },
         size: 10,
       },
       aggs: {
+        resource_name: {
+          terms: {
+            field: 'resource.name',
+            size: 1,
+          },
+        },
         top_region: {
           terms: {
             field: 'cloud.region',
@@ -64,7 +64,10 @@ export const getTopVulnerableResources = async (
   if (!queryResult?.aggregations?.vulnerable_resources) return [];
 
   return queryResult.aggregations.vulnerable_resources.buckets.map((resource: ResourceBucket) => ({
-    resourceName: resource.key,
+    resource: {
+      id: resource.key,
+      name: resource.resource_name?.buckets?.[0]?.key ?? '',
+    },
     resourceCount: resource.doc_count,
     cloudRegion: resource.top_region?.buckets?.[0]?.key ?? '',
   }));

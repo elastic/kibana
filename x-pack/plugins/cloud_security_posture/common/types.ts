@@ -147,16 +147,21 @@ export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
 
 export interface VulnerableResourceStat {
   resourceCount: number | undefined;
-  resourceName: string | undefined;
+  resource: {
+    id: string | undefined;
+    name: string | undefined;
+  };
   cloudRegion: string | undefined;
 }
 
 export interface PatchableVulnerabilityStat {
-  vulnerabilityFixCount: number | undefined;
+  resourceCount: number | undefined;
   packageFixVersion: string | undefined;
   cve: string | undefined;
-  score: number | undefined;
-  version: string | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
 }
 
 export interface VulnerabilityStat {
@@ -164,8 +169,19 @@ export interface VulnerabilityStat {
   packageName: string | undefined;
   packageVersion: string | undefined;
   severity: string | undefined;
-  vulnerabilityCount: number;
-  score: number | undefined;
-  version: string | undefined;
+  resourceCount: number | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
   cve: string | undefined;
+}
+
+export interface AggFieldBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: Array<{
+    key?: string;
+    doc_count?: string;
+  }>;
 }

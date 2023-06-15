@@ -7,31 +7,17 @@
 
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { PatchableVulnerabilityStat } from '../../../common/types';
+import { AggFieldBucket, PatchableVulnerabilityStat } from '../../../common/types';
 import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 
 interface VulnerabilityBucket {
   key: string | undefined;
   doc_count?: number;
-  cve: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: Array<{
-      key?: string;
-      doc_count?: string;
-    }>;
-  };
+  packageFixVersion: AggFieldBucket;
   score: {
     value: number;
   };
-  version: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: Array<{
-      key?: string;
-      doc_count?: string;
-    }>;
-  };
+  version: AggFieldBucket;
 }
 
 export interface PatchableVulnerabilitiesQueryResult {
@@ -47,19 +33,14 @@ const getPatchableVulnerabilitiesQuery = (query: QueryDslQueryContainer): Search
   aggs: {
     patchable_vulnerabilities: {
       terms: {
-        field: 'package.fixed_version',
+        field: 'vulnerability.id',
         order: {
           _count: 'desc',
         },
         size: 10,
       },
+
       aggs: {
-        cve: {
-          terms: {
-            field: 'vulnerability.id',
-            size: 1,
-          },
-        },
         score: {
           max: {
             field: 'vulnerability.score.base',
@@ -68,6 +49,12 @@ const getPatchableVulnerabilitiesQuery = (query: QueryDslQueryContainer): Search
         version: {
           terms: {
             field: 'vulnerability.score.version',
+            size: 1,
+          },
+        },
+        packageFixVersion: {
+          terms: {
+            field: 'package.fixed_version',
             size: 1,
           },
         },
@@ -81,18 +68,34 @@ export const getTopPatchableVulnerabilities = async (
   query: QueryDslQueryContainer
 ): Promise<PatchableVulnerabilityStat[]> => {
   const queryResult = await esClient.search<unknown, PatchableVulnerabilitiesQueryResult>(
-    getPatchableVulnerabilitiesQuery(query)
+    getPatchableVulnerabilitiesQuery({
+      ...query,
+      bool: {
+        ...query.bool,
+        filter: [
+          ...(query.bool?.filter as QueryDslQueryContainer[]),
+          {
+            exists: {
+              field: 'package.fixed_version',
+            },
+          },
+        ],
+      },
+    })
   );
-
   if (!queryResult?.aggregations?.patchable_vulnerabilities) return [];
 
   return queryResult.aggregations.patchable_vulnerabilities.buckets.map(
-    (patchableVulnerability: VulnerabilityBucket) => ({
-      cve: patchableVulnerability.cve?.buckets?.[0]?.key ?? '',
-      score: patchableVulnerability.score?.value,
-      version: patchableVulnerability.version?.buckets?.[0]?.key ?? '',
-      packageFixVersion: patchableVulnerability.key,
-      vulnerabilityFixCount: patchableVulnerability.doc_count,
-    })
+    (vulnerability: VulnerabilityBucket) => {
+      return {
+        cve: vulnerability.key,
+        cvss: {
+          score: vulnerability.score?.value,
+          version: vulnerability.version?.buckets?.[0]?.key ?? '',
+        },
+        packageFixVersion: vulnerability.packageFixVersion?.buckets?.[0]?.key ?? '',
+        resourceCount: vulnerability.doc_count,
+      };
+    }
   );
 };
