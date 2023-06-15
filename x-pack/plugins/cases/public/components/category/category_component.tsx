@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import * as i18n from '../../common/translations';
 import { EuiFlexGroup, EuiFlexItem, EuiComboBox, EuiHighlight } from '@elastic/eui';
 import { useGetCategories } from '../../containers/use_get_categories';
 
@@ -19,6 +20,7 @@ export interface CategoryComponentProps {
 export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
   ({ isLoading, onChange, category }) => {
     const { data: categoriesOptions = [] } = useGetCategories();
+    const [isInvalid, setIsInvalid] = useState<boolean>(false);
 
     const options = useMemo(() => {
       return categoriesOptions.map((label: string) => ({
@@ -32,8 +34,8 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
 
     const onComboChange = useCallback(
       (currentOptions: EuiComboBoxOptionOption[]) => {
-        setSelectedOption([currentOptions[0]]);
-        onChange(currentOptions[0].label);
+        setSelectedOption(currentOptions[0] ? [currentOptions[0]] : []);
+        onChange(currentOptions[0]?.label ?? '');
       },
       [onChange]
     );
@@ -69,31 +71,32 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
       const normalizedSearchValue = searchValue.trim().toLowerCase();
 
       if (!normalizedSearchValue) {
-        return;
+        setIsInvalid(true);
       }
 
       const newOption = {
-        label: searchValue,
+        label: normalizedSearchValue,
       };
 
-      onChange(searchValue);
+      onChange(normalizedSearchValue);
       setSelectedOption([newOption]);
     };
 
     return (
       <EuiComboBox
         fullWidth
+        singleSelection
+        async
         isLoading={isLoading}
+        isInvalid={isInvalid}
         options={options}
-        placeholder="Select a single option"
-        singleSelection={{ asPlainText: true }}
-        data-test-subj="categoriesComboBox"
+        data-test-subj="categories-list"
         selectedOptions={selectedOption}
         onChange={onComboChange}
         renderOption={renderOption}
         onCreateOption={onCreateOption}
-        rowHeight={35}
-        aria-label="category-combo-box"
+        aria-label="categories-list"
+        isClearable
       />
     );
   }
