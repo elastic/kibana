@@ -459,11 +459,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       id: 'syntheticsMontiorConfigIsEnabled',
       label: isEdit
         ? i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
-            defaultMessage: 'Disabled monitors do not run tests.',
+            defaultMessage: `When disabled, the monitor doesn't run any tests. You can enable it again at any time.`,
           })
         : i18n.translate('xpack.synthetics.monitorConfig.create.enabled.label', {
-            defaultMessage:
-              'Disabled monitors do not run tests. You can create a disabled monitor and enable it later.',
+            defaultMessage: `When disabled, the monitor doesn't run any tests. You can create a disabled monitor and enable it later.`,
           }),
       checked: field?.value || false,
       onChange: (event) => {
