@@ -7,13 +7,11 @@
 
 import { ascending, bisector } from 'd3-array';
 import * as rt from 'io-ts';
-import { pick } from 'lodash';
 
 export const minimalTimeKeyRT = rt.type({
   time: rt.number,
   tiebreaker: rt.number,
 });
-export type MinimalTimeKey = rt.TypeOf<typeof minimalTimeKeyRT>;
 
 export const timeKeyRT = rt.intersection([
   minimalTimeKeyRT,
@@ -29,15 +27,6 @@ export interface UniqueTimeKey extends TimeKey {
 }
 
 export type Comparator = (firstValue: any, secondValue: any) => number;
-
-export const isTimeKey = (value: any): value is TimeKey =>
-  value &&
-  typeof value === 'object' &&
-  typeof value.time === 'number' &&
-  typeof value.tiebreaker === 'number';
-
-export const pickTimeKey = <T extends TimeKey>(value: T): TimeKey =>
-  pick(value, ['time', 'tiebreaker']);
 
 export function compareTimeKeys(
   firstKey: TimeKey,
@@ -89,22 +78,3 @@ export const getIndexAtTimeKey = <Value>(
     return index;
   };
 };
-
-export const timeKeyIsBetween = (min: TimeKey, max: TimeKey, operand: TimeKey) =>
-  compareTimeKeys(min, operand) <= 0 && compareTimeKeys(max, operand) >= 0;
-
-export const getPreviousTimeKey = (timeKey: TimeKey) => ({
-  ...timeKey,
-  time: timeKey.time,
-  tiebreaker: timeKey.tiebreaker - 1,
-});
-
-export const getNextTimeKey = (timeKey: TimeKey) => ({
-  ...timeKey,
-  time: timeKey.time,
-  tiebreaker: timeKey.tiebreaker + 1,
-});
-
-export const isSameTimeKey = (firstKey: TimeKey | null, secondKey: TimeKey | null): boolean =>
-  firstKey === secondKey ||
-  (firstKey != null && secondKey != null && compareTimeKeys(firstKey, secondKey) === 0);

@@ -8,14 +8,6 @@
 import faker from 'faker';
 import { LogEntry, LogViewColumnConfiguration } from '@kbn/logs-shared-plugin/common';
 
-export const ENTRIES_EMPTY = {
-  data: {
-    entries: [],
-    topCursor: null,
-    bottomCursor: null,
-  },
-};
-
 export function generateFakeEntries(
   count: number,
   startTimestamp: number,

@@ -6,9 +6,6 @@
  */
 
 import dateMath, { Unit } from '@kbn/datemath';
-import { chain } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
 
 const JS_MAX_DATE = 8640000000000000;
 
@@ -16,19 +13,6 @@ export function isValidDatemath(value: string): boolean {
   const parsedValue = dateMath.parse(value);
   return !!(parsedValue && parsedValue.isValid());
 }
-
-export const datemathStringRT = new rt.Type<string, string, unknown>(
-  'datemath',
-  rt.string.is,
-  (value, context) =>
-    pipe(
-      rt.string.validate(value, context),
-      chain((stringValue) =>
-        isValidDatemath(stringValue) ? rt.success(stringValue) : rt.failure(stringValue, context)
-      )
-    ),
-  String
-);
 
 export function datemathToEpochMillis(
   value: string,
