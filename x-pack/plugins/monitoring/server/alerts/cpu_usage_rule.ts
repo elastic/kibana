@@ -67,13 +67,16 @@ export class CpuUsageRule extends BaseRule {
       ? (JSON.parse(params.filterQuery) as QueryDslQueryContainer)
       : undefined;
 
-    const stats = await fetchCpuUsageNodeStats({
-      esClient,
-      clusterUuids: clusters.map((cluster) => cluster.clusterUuid),
-      startMs,
-      endMs,
-      filterQuery,
-    });
+    const stats = await fetchCpuUsageNodeStats(
+      {
+        esClient,
+        clusterUuids: clusters.map((cluster) => cluster.clusterUuid),
+        startMs,
+        endMs,
+        filterQuery,
+      },
+      Globals.app.config
+    );
 
     return stats.map((stat) => {
       return {

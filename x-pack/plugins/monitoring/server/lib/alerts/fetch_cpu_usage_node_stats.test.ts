@@ -5,282 +5,207 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchCpuUsageNodeStats } from './fetch_cpu_usage_node_stats';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
-      },
-    },
-  },
-}));
-
 describe('fetchCpuUsageNodeStats', () => {
-  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-  const clusters = [
-    {
-      clusterUuid: 'abc123',
-      clusterName: 'test',
-    },
-  ];
-  const startMs = 0;
-  const endMs = 0;
-  const size = 10;
-
-  it('fetch normal stats', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: [
-              {
-                key: clusters[0].clusterUuid,
-                nodes: {
-                  buckets: [
-                    {
-                      key: 'theNodeId',
-                      index: {
-                        buckets: [
-                          {
-                            key: '.monitoring-es-TODAY',
-                          },
-                        ],
-                      },
-                      name: {
-                        buckets: [
-                          {
-                            key: 'theNodeName',
-                          },
-                        ],
-                      },
-                      average_cpu: {
-                        value: 10,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      }
-    );
-    const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
-    expect(result).toEqual([
-      {
-        clusterUuid: clusters[0].clusterUuid,
-        nodeName: 'theNodeName',
-        nodeId: 'theNodeId',
-        cpuUsage: 10,
-        containerUsage: undefined,
-        containerPeriods: undefined,
-        containerQuota: undefined,
-        ccs: null,
-      },
-    ]);
-  });
-
-  it('fetch container stats', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: [
-              {
-                key: clusters[0].clusterUuid,
-                nodes: {
-                  buckets: [
-                    {
-                      key: 'theNodeId',
-                      index: {
-                        buckets: [
-                          {
-                            key: '.monitoring-es-TODAY',
-                          },
-                        ],
-                      },
-                      name: {
-                        buckets: [
-                          {
-                            key: 'theNodeName',
-                          },
-                        ],
-                      },
-                      histo: {
-                        buckets: [
-                          null,
-                          {
-                            usage_deriv: {
-                              normalized_value: 10,
-                            },
-                            periods_deriv: {
-                              normalized_value: 5,
-                            },
-                          },
-                        ],
-                      },
-                      average_quota: {
-                        value: 50,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      }
-    );
-    const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
-    expect(result).toEqual([
-      {
-        clusterUuid: clusters[0].clusterUuid,
-        nodeName: 'theNodeName',
-        nodeId: 'theNodeId',
-        cpuUsage: undefined,
-        containerUsage: 10,
-        containerPeriods: 5,
-        containerQuota: 50,
-        ccs: null,
-      },
-    ]);
-  });
-
-  it('fetch properly return ccs', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: [
-              {
-                key: clusters[0].clusterUuid,
-                nodes: {
-                  buckets: [
-                    {
-                      key: 'theNodeId',
-                      index: {
-                        buckets: [
-                          {
-                            key: 'foo:.monitoring-es-TODAY',
-                          },
-                        ],
-                      },
-                      name: {
-                        buckets: [
-                          {
-                            key: 'theNodeName',
-                          },
-                        ],
-                      },
-                      average_usage: {
-                        value: 10,
-                      },
-                      average_periods: {
-                        value: 5,
-                      },
-                      average_quota: {
-                        value: 50,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      }
-    );
-    const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
-    expect(result[0].ccs).toBe('foo');
-  });
-
-  it('should use consistent params', async () => {
-    let params = null;
-    esClient.search.mockImplementation((...args) => {
-      params = args[0];
-      return Promise.resolve({} as estypes.SearchResponse);
-    });
-    const filterQuery =
-      '{"bool":{"should":[{"exists":{"field":"cluster_uuid"}}],"minimum_should_match":1}}';
-    await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size, filterQuery);
-    expect(params).toStrictEqual({
-      index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
-      filter_path: ['aggregations'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['abc123'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'node_stats' } },
-                    { term: { 'metricset.name': 'node_stats' } },
-                    {
-                      term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
-              {
-                bool: { should: [{ exists: { field: 'cluster_uuid' } }], minimum_should_match: 1 },
-              },
-            ],
-          },
-        },
-        aggs: {
-          clusters: {
-            terms: { field: 'cluster_uuid', size: 10, include: ['abc123'] },
-            aggs: {
+  it('calculates the CPU usage', async () => {
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockResponse({
+      aggregations: {
+        clusters: {
+          buckets: [
+            {
+              key: 'my-test-cluster',
               nodes: {
-                terms: { field: 'node_stats.node_id', size: 10 },
-                aggs: {
-                  index: { terms: { field: '_index', size: 1 } },
-                  average_cpu: { avg: { field: 'node_stats.process.cpu.percent' } },
-                  average_quota: { avg: { field: 'node_stats.os.cgroup.cpu.cfs_quota_micros' } },
-                  name: { terms: { field: 'source_node.name', size: 1 } },
-                  histo: {
-                    date_histogram: { field: 'timestamp', fixed_interval: '0m' },
-                    aggs: {
-                      average_periods: {
-                        max: { field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods' },
-                      },
-                      average_usage: { max: { field: 'node_stats.os.cgroup.cpuacct.usage_nanos' } },
-                      usage_deriv: {
-                        derivative: {
-                          buckets_path: 'average_usage',
-                          gap_policy: 'skip',
-                          unit: '1s',
+                buckets: [
+                  {
+                    key: 'my-test-node',
+                    average_cpu: {
+                      value: 45,
+                    },
+                    name: {
+                      buckets: [
+                        {
+                          key: 'test-node',
                         },
-                      },
-                      periods_deriv: {
-                        derivative: {
-                          buckets_path: 'average_periods',
-                          gap_policy: 'skip',
-                          unit: '1s',
+                      ],
+                    },
+                    index: {
+                      buckets: [
+                        {
+                          key: 'a-local-index',
                         },
-                      },
+                      ],
                     },
                   },
-                },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    } as any);
+
+    const configSlice: any = {
+      ui: {
+        ccs: { enabled: false },
+        container: {
+          elasticsearch: {
+            enabled: false,
+          },
+        },
+        max_bucket_size: 10,
+      },
+    };
+
+    const filterQuery = {
+      bool: {
+        should: [
+          {
+            term: {
+              cluster_uuid: {
+                value: 'my-test-cluster',
               },
             },
           },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+
+    const stats = await fetchCpuUsageNodeStats(
+      {
+        esClient,
+        clusterUuids: ['my-test-cluster'],
+        startMs: 0,
+        endMs: 10,
+        filterQuery,
+      },
+      configSlice
+    );
+
+    expect(stats).toEqual([
+      {
+        clusterUuid: 'my-test-cluster',
+        nodeId: 'my-test-node',
+        nodeName: 'test-node',
+        ccs: undefined,
+        cpuUsage: 45,
+      },
+    ]);
+
+    // If this check fails, it means the query has changed which `might` mean the response shape has changed and
+    // the test data needs to be updated to reflect the new format.
+    expect(esClient.search.mock.calls[0][0]).toMatchSnapshot();
+  });
+
+  it('calculates the containerized CPU usage', async () => {
+    // 45% CPU usage
+    const maxPeriods = 1000;
+    const quotaMicros = 100000;
+    const usageLimitNanos = maxPeriods * quotaMicros * 1000;
+    const maxUsageNanos = 0.45 * usageLimitNanos;
+
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockResponse({
+      aggregations: {
+        clusters: {
+          buckets: [
+            {
+              key: 'my-test-cluster',
+              nodes: {
+                buckets: [
+                  {
+                    key: 'my-test-node',
+                    min_usage_nanos: {
+                      value: 0,
+                    },
+                    max_usage_nanos: {
+                      value: maxUsageNanos,
+                    },
+                    quota_micros: {
+                      value: quotaMicros,
+                    },
+                    max_periods: {
+                      value: maxPeriods,
+                    },
+                    min_periods: {
+                      value: 0,
+                    },
+                    name: {
+                      buckets: [
+                        {
+                          key: 'test-node',
+                        },
+                      ],
+                    },
+                    index: {
+                      buckets: [
+                        {
+                          key: 'a-local-index',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
         },
       },
-    });
+    } as any);
+
+    const configSlice: any = {
+      ui: {
+        ccs: { enabled: false },
+        container: {
+          elasticsearch: {
+            enabled: true,
+          },
+        },
+        max_bucket_size: 10,
+      },
+    };
+
+    const filterQuery = {
+      bool: {
+        should: [
+          {
+            term: {
+              cluster_uuid: {
+                value: 'my-test-cluster',
+              },
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+
+    const stats = await fetchCpuUsageNodeStats(
+      {
+        esClient,
+        clusterUuids: ['my-test-cluster'],
+        startMs: 0,
+        endMs: 10,
+        filterQuery,
+      },
+      configSlice
+    );
+
+    expect(stats).toEqual([
+      {
+        clusterUuid: 'my-test-cluster',
+        nodeId: 'my-test-node',
+        nodeName: 'test-node',
+        ccs: undefined,
+        cpuUsage: 45,
+      },
+    ]);
+
+    // If this check fails, it means the query has changed which `might` mean the response shape has changed and
+    // the test data needs to be updated to reflect the new format.
+    expect(esClient.search.mock.calls[0][0]).toMatchSnapshot();
   });
 });

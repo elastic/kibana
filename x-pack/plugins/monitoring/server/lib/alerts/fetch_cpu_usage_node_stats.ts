@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { InferSearchResponseOf } from '@kbn/es-types';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { AlertCpuUsageNodeStats } from '../../../common/types/alerts';
-import { Globals } from '../../static_globals';
+import { MonitoringConfig } from '../../config';
 import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 
@@ -22,23 +22,23 @@ interface Options {
   filterQuery?: QueryDslQueryContainer;
 }
 
-export async function fetchCpuUsageNodeStats(options: Options): Promise<AlertCpuUsageNodeStats[]> {
-  if (Globals.app.config.ui.container.elasticsearch.enabled) {
-    return fetchContainerStats(options);
+export async function fetchCpuUsageNodeStats(
+  options: Options,
+  config: MonitoringConfig
+): Promise<AlertCpuUsageNodeStats[]> {
+  if (config.ui.container.elasticsearch.enabled) {
+    return fetchContainerStats(options, config);
   }
 
-  return fetchNonContainerStats(options);
+  return fetchNonContainerStats(options, config);
 }
 
-async function fetchNonContainerStats({
-  esClient,
-  startMs,
-  endMs,
-  clusterUuids,
-  filterQuery,
-}: Options) {
+async function fetchContainerStats(
+  { esClient, startMs, endMs, clusterUuids, filterQuery }: Options,
+  config: MonitoringConfig
+) {
   const indexPatterns = getIndexPatterns({
-    config: Globals.app.config,
+    config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
     ccs: CCS_REMOTE_PATTERN,
@@ -73,127 +73,13 @@ async function fetchNonContainerStats({
       clusters: {
         terms: {
           field: 'cluster_uuid',
-          size: Globals.app.config.ui.max_bucket_size,
+          size: config.ui.max_bucket_size,
         },
         aggs: {
           nodes: {
             terms: {
               field: 'node_stats.node_id',
-              size: Globals.app.config.ui.max_bucket_size,
-            },
-            aggs: {
-              name: {
-                terms: {
-                  field: 'source_node.name',
-                  size: 1,
-                },
-              },
-              // Used to check for CCS and get the remote cluster name
-              index: {
-                terms: {
-                  field: '_index',
-                  size: 1,
-                },
-              },
-              average_cpu: {
-                avg: {
-                  field: 'node_stats.process.cpu.percent',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  if (filterQuery) {
-    (params.query!.bool!.filter! as QueryDslQueryContainer[]).push(filterQuery);
-  }
-
-  const response = (await esClient.search<unknown>(params)) as unknown as InferSearchResponseOf<
-    unknown,
-    typeof params
-  >;
-
-  if (!response.aggregations) {
-    throw new Error('Failed to resolve needed aggregations for CPU Usage Rule');
-  }
-
-  return response.aggregations.clusters.buckets.flatMap((cluster) => {
-    return cluster.nodes.buckets.map((node) => {
-      let nodeName;
-      if (node.name.buckets.length) {
-        nodeName = node.name.buckets[0].key as string;
-      }
-
-      let ccs;
-      if (node.index.buckets.length) {
-        const index = node.index.buckets[0].key as string;
-        ccs = index.includes(':') ? index.split(':')[0] : undefined;
-      }
-
-      return {
-        clusterUuid: cluster.key as string,
-        nodeId: node.key as string,
-        cpuUsage: node.average_cpu.value ?? undefined,
-        nodeName,
-        ccs,
-      };
-    });
-  });
-}
-
-async function fetchContainerStats({
-  esClient,
-  startMs,
-  endMs,
-  clusterUuids,
-  filterQuery,
-}: Options) {
-  const indexPatterns = getIndexPatterns({
-    config: Globals.app.config,
-    moduleType: 'elasticsearch',
-    dataset: 'node_stats',
-    ccs: CCS_REMOTE_PATTERN,
-  });
-
-  const params = {
-    index: indexPatterns,
-    filter_path: ['aggregations'],
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-          {
-            terms: {
-              cluster_uuid: clusterUuids,
-            },
-          },
-          {
-            range: {
-              timestamp: {
-                format: 'epoch_millis',
-                gte: startMs,
-                lte: endMs,
-              },
-            },
-          },
-        ],
-      },
-    },
-    aggs: {
-      clusters: {
-        terms: {
-          field: 'cluster_uuid',
-          size: Globals.app.config.ui.max_bucket_size,
-        },
-        aggs: {
-          nodes: {
-            terms: {
-              field: 'node_stats.node_id',
-              size: Globals.app.config.ui.max_bucket_size,
+              size: config.ui.max_bucket_size,
             },
             aggs: {
               name: {
@@ -291,7 +177,118 @@ async function fetchContainerStats({
       return {
         clusterUuid: cluster.key as string,
         nodeId: node.key as string,
-        cpuUsage,
+        cpuUsage: Math.round(cpuUsage * 100) / 100,
+        nodeName,
+        ccs,
+      };
+    });
+  });
+}
+
+async function fetchNonContainerStats(
+  { esClient, startMs, endMs, clusterUuids, filterQuery }: Options,
+  config: MonitoringConfig
+) {
+  const indexPatterns = getIndexPatterns({
+    config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: CCS_REMOTE_PATTERN,
+  });
+
+  const params = {
+    index: indexPatterns,
+    filter_path: ['aggregations'],
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
+          {
+            terms: {
+              cluster_uuid: clusterUuids,
+            },
+          },
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: startMs,
+                lte: endMs,
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          field: 'cluster_uuid',
+          size: config.ui.max_bucket_size,
+        },
+        aggs: {
+          nodes: {
+            terms: {
+              field: 'node_stats.node_id',
+              size: config.ui.max_bucket_size,
+            },
+            aggs: {
+              name: {
+                terms: {
+                  field: 'source_node.name',
+                  size: 1,
+                },
+              },
+              // Used to check for CCS and get the remote cluster name
+              index: {
+                terms: {
+                  field: '_index',
+                  size: 1,
+                },
+              },
+              average_cpu: {
+                avg: {
+                  field: 'node_stats.process.cpu.percent',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  if (filterQuery) {
+    (params.query!.bool!.filter! as QueryDslQueryContainer[]).push(filterQuery);
+  }
+
+  const response = (await esClient.search<unknown>(params)) as unknown as InferSearchResponseOf<
+    unknown,
+    typeof params
+  >;
+
+  if (!response.aggregations) {
+    throw new Error('Failed to resolve needed aggregations for CPU Usage Rule');
+  }
+
+  return response.aggregations.clusters.buckets.flatMap((cluster) => {
+    return cluster.nodes.buckets.map((node) => {
+      let nodeName;
+      if (node.name.buckets.length) {
+        nodeName = node.name.buckets[0].key as string;
+      }
+
+      let ccs;
+      if (node.index.buckets.length) {
+        const index = node.index.buckets[0].key as string;
+        ccs = index.includes(':') ? index.split(':')[0] : undefined;
+      }
+
+      return {
+        clusterUuid: cluster.key as string,
+        nodeId: node.key as string,
+        cpuUsage: node.average_cpu.value ?? undefined,
         nodeName,
         ccs,
       };
