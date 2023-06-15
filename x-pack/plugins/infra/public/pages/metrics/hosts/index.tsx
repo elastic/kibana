@@ -75,7 +75,7 @@ export const HostsPage = () => {
                 <BetaBadge
                   tooltipContent={i18n.translate('xpack.infra.hostsViewPage.betaBadgeDescription', {
                     defaultMessage:
-                      'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or share your feedback via the ‘Tell us what you think!’ feedback button.',
+                      'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or share your feedback via the "Tell us what you think!" feedback button.',
                   })}
                 />
               </div>
