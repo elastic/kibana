@@ -11,10 +11,15 @@ import React from 'react';
 import { LandingPage } from './landing';
 
 jest.mock('../../common/components/landing_page');
+jest.mock('../../common/components/page_wrapper', () => ({
+  SecuritySolutionPageWrapper: jest
+    .fn()
+    .mockImplementation(({ children }) => <div>{children}</div>),
+}));
 
-describe('LandingPage component', () => {
+describe('LandingPage', () => {
   it('renders page properly', () => {
     const { queryByTestId } = render(<LandingPage />);
-    expect(queryByTestId('landing-page-component')).toBeInTheDocument();
+    expect(queryByTestId('siem-landing-page')).toBeInTheDocument();
   });
 });

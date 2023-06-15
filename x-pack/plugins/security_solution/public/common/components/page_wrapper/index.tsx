@@ -58,7 +58,7 @@ const SecuritySolutionPageWrapperComponent: React.FC<
     'securitySolutionWrapper--fullHeight': globalFullScreen,
     'securitySolutionWrapper--padding-l': !noPadding,
   });
-
+  console.log(isAssistantEnabled);
   return (
     <Wrapper className={classes} style={style} {...otherProps}>
       {children}
