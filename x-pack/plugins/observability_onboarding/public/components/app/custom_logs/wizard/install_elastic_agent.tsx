@@ -90,25 +90,32 @@ export function InstallElasticAgent() {
     error,
   } = useFetcher(
     (callApi) => {
-      const { apiKeyEncoded, onboardingId } = getState();
+      const {
+        apiKeyEncoded,
+        onboardingId,
+        datasetName,
+        serviceName,
+        namespace,
+        customConfigurations,
+        logFilePaths,
+      } = getState();
       if (
         CurrentStep === InstallElasticAgent &&
         monitoringRole?.hasPrivileges &&
-        !apiKeyEncoded &&
-        !onboardingId
+        !(apiKeyEncoded && onboardingId)
       ) {
         return callApi(
           'POST /internal/observability_onboarding/custom_logs/save',
           {
             params: {
               body: {
-                name: wizardState.datasetName,
+                name: datasetName,
                 state: {
-                  datasetName: wizardState.datasetName,
-                  serviceName: wizardState.serviceName,
-                  namespace: wizardState.namespace,
-                  customConfigurations: wizardState.customConfigurations,
-                  logFilePaths: wizardState.logFilePaths,
+                  datasetName,
+                  serviceName,
+                  namespace,
+                  customConfigurations,
+                  logFilePaths,
                 },
               },
             },
@@ -118,6 +125,36 @@ export function InstallElasticAgent() {
     },
     [monitoringRole?.hasPrivileges]
   );
+
+  const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
+    const {
+      onboardingId,
+      datasetName,
+      serviceName,
+      namespace,
+      customConfigurations,
+      logFilePaths,
+    } = getState();
+    if (CurrentStep === InstallElasticAgent && onboardingId) {
+      return callApi(
+        'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+        {
+          params: {
+            path: { onboardingId },
+            body: {
+              state: {
+                datasetName,
+                serviceName,
+                namespace,
+                customConfigurations,
+                logFilePaths,
+              },
+            },
+          },
+        }
+      );
+    }
+  }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
 
@@ -137,7 +174,11 @@ export function InstallElasticAgent() {
         );
       }
     },
-    [apiKeyEncoded, onboardingId]
+    [
+      apiKeyEncoded,
+      onboardingId,
+      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
+    ]
   );
 
   useEffect(() => {

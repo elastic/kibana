@@ -103,6 +103,38 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
+const updateOnboardingStateRoute = createObservabilityOnboardingServerRoute({
+  endpoint:
+    'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+  options: { tags: [] },
+  params: t.type({
+    path: t.type({
+      onboardingId: t.string,
+    }),
+    body: t.type({
+      state: t.record(t.string, t.unknown),
+    }),
+  }),
+  async handler(resources): Promise<{ onboardingId: string }> {
+    const {
+      params: {
+        path: { onboardingId },
+        body: { state },
+      },
+      core,
+      request,
+    } = resources;
+    const coreStart = await core.start();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const { id } = await saveObservabilityOnboardingState({
+      savedObjectsClient,
+      savedObjectId: onboardingId,
+      observabilityOnboardingState: { state } as ObservabilityOnboardingState,
+    });
+    return { onboardingId: id };
+  },
+});
+
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint:
     'GET /api/observability_onboarding/custom_logs/{id}/step/{name} 2023-05-24',
@@ -223,6 +255,7 @@ export const customLogsRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createApiKeyRoute,
+  ...updateOnboardingStateRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,
 };
