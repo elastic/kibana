@@ -21,7 +21,6 @@ import {
   waitForPageToBeLoaded,
   waitForWelcomePanelToBeLoaded,
 } from '../../../tasks/common';
-import { esArchiverLoad } from '../../../tasks/es_archiver';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
 import { login, visit } from '../../../tasks/login';
@@ -32,8 +31,6 @@ import { HOSTS_URL } from '../../../urls/navigation';
 
 describe('Row renderers', () => {
   before(() => {
-    esArchiverLoad('auditbeat');
-
     cleanKibana();
   });
 
