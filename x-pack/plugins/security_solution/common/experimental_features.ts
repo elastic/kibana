@@ -47,12 +47,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables the new API and UI for https://github.com/elastic/security-team/issues/1974.
-   * It's a temporary feature flag that will be removed once the feature gets a basic production-ready implementation.
-   */
-  prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: false,
-
-  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
@@ -65,7 +59,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the automated endpoint response action in rule + alerts
    */
-  endpointResponseActionsEnabled: false,
+  endpointResponseActionsEnabled: true,
 
   /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu

@@ -6,86 +6,122 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiFilterButton, EuiSelectable, EuiFilterGroup } from '@elastic/eui';
+import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleTagFilter } from './rule_tag_filter';
 
 const onChangeMock = jest.fn();
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+
+const observe = jest.fn();
+const unobserve = jest.fn();
+const disconnect = jest.fn();
+
+jest.mock('../../../../common/lib/kibana');
+
+const WithProviders = ({ children }: { children: any }) => (
+  <IntlProvider locale="en">
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </IntlProvider>
+);
+
+jest.mock('../../../lib/rule_api/aggregate', () => ({
+  loadRuleTags: jest.fn(),
+}));
+
+const { loadRuleTags } = jest.requireMock('../../../lib/rule_api/aggregate');
+
+const renderWithProviders = (ui: any) => {
+  return render(ui, { wrapper: WithProviders });
+};
 
 const tags = ['a', 'b', 'c', 'd', 'e', 'f'];
 
 describe('rule_tag_filter', () => {
   beforeEach(() => {
-    onChangeMock.mockReset();
-  });
-
-  it('renders correctly', () => {
-    const wrapper = mountWithIntl(
-      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
-    );
-
-    expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
-    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('0');
-  });
-
-  it('can open the popover correctly', () => {
-    const wrapper = mountWithIntl(
-      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
-    );
-
-    expect(wrapper.find('[data-test-subj="ruleTagFilterSelectable"]').exists()).toBeFalsy();
-
-    wrapper.find(EuiFilterButton).simulate('click');
-
-    expect(wrapper.find('[data-test-subj="ruleTagFilterSelectable"]').exists()).toBeTruthy();
-    expect(wrapper.find('li').length).toEqual(tags.length);
-  });
-
-  it('can select tags', () => {
-    const wrapper = mountWithIntl(
-      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
-    );
-
-    wrapper.find(EuiFilterButton).simulate('click');
-
-    wrapper.find('[data-test-subj="ruleTagFilterOption-a"]').at(0).simulate('click');
-    expect(onChangeMock).toHaveBeenCalledWith(['a']);
-
-    wrapper.setProps({
-      selectedTags: ['a'],
+    Object.assign(window, {
+      IntersectionObserver: jest.fn(() => ({
+        observe,
+        unobserve,
+        disconnect,
+      })),
     });
-
-    wrapper.find('[data-test-subj="ruleTagFilterOption-a"]').at(0).simulate('click');
-    expect(onChangeMock).toHaveBeenCalledWith([]);
-
-    wrapper.find('[data-test-subj="ruleTagFilterOption-b"]').at(0).simulate('click');
-    expect(onChangeMock).toHaveBeenCalledWith(['a', 'b']);
+    jest.clearAllMocks();
+    loadRuleTags.mockResolvedValue({
+      data: tags,
+      page: 1,
+      perPage: 50,
+      total: 6,
+    });
   });
 
-  it('renders selected tags even if they get deleted from the tags array', () => {
-    const selectedTags = ['g', 'h'];
-    const wrapper = mountWithIntl(
-      <RuleTagFilter tags={tags} selectedTags={selectedTags} onChange={onChangeMock} />
-    );
+  it('renders correctly', async () => {
+    renderWithProviders(<RuleTagFilter selectedTags={[]} onChange={onChangeMock} />);
+    expect(await screen.findByTestId('ruleTagFilterButton')).toBeInTheDocument();
+    expect(await screen.findByLabelText('0 available filters')).toBeInTheDocument();
+  });
 
-    wrapper.find(EuiFilterButton).simulate('click');
+  it('can open the popover correctly', async () => {
+    renderWithProviders(<RuleTagFilter selectedTags={[]} onChange={onChangeMock} />);
+    expect(screen.queryByTestId('ruleTagFilterSelectable')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiSelectable).props().options.length).toEqual(
-      tags.length + selectedTags.length
-    );
+    // Open popover
+    fireEvent.click(await screen.findByTestId('ruleTagFilterButton'));
+    expect(await screen.findByTestId('ruleTagFilterSelectable')).toBeInTheDocument();
+
+    expect((await screen.findAllByRole('option')).length).toEqual(tags.length);
+
+    // Close popover
+    fireEvent.click(await screen.findByTestId('ruleTagFilterButton'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('ruleTagFilterSelectable'));
+
+    expect(screen.queryByTestId('ruleTagFilterSelectable')).not.toBeInTheDocument();
+  });
+
+  it('can select tags', async () => {
+    renderWithProviders(<RuleTagFilter selectedTags={[]} onChange={onChangeMock} />);
+    // Open popover
+    fireEvent.click(await screen.findByTestId('ruleTagFilterButton'));
+    fireEvent.click(await screen.findByTestId('ruleTagFilterOption-a'));
+
+    expect(onChangeMock).toHaveBeenLastCalledWith(['a']);
+  });
+
+  it('can unselect tags', async () => {
+    renderWithProviders(<RuleTagFilter selectedTags={['a']} onChange={onChangeMock} />);
+    // Open popover
+    fireEvent.click(await screen.findByTestId('ruleTagFilterButton'));
+    fireEvent.click(await screen.findByTestId('ruleTagFilterOption-a'));
+
+    expect(onChangeMock).toHaveBeenLastCalledWith([]);
+  });
+
+  it('renders selected tags even if they get deleted from the tags array', async () => {
+    renderWithProviders(<RuleTagFilter selectedTags={['g', 'h']} onChange={onChangeMock} />);
+    // Open popover
+    fireEvent.click(await screen.findByTestId('ruleTagFilterButton'));
+
+    expect((await screen.findAllByRole('option')).length).toEqual(tags.length + 2);
   });
 
   it('renders the tag filter with a EuiFilterGroup if isGrouped is false', async () => {
-    const wrapper = mountWithIntl(
-      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
+    renderWithProviders(<RuleTagFilter selectedTags={[]} onChange={onChangeMock} />);
+    expect(await screen.findByTestId('ruleTagFilterUngrouped')).toBeInTheDocument();
+  });
+
+  it('renders the tag filter without EuiFilterGroup if isGrouped is true', async () => {
+    renderWithProviders(
+      <RuleTagFilter selectedTags={[]} onChange={onChangeMock} isGrouped={true} />
     );
-
-    expect(wrapper.find(EuiFilterGroup).exists()).toBeTruthy();
-
-    wrapper.setProps({
-      isGrouped: true,
-    });
-
-    expect(wrapper.find(EuiFilterGroup).exists()).toBeFalsy();
+    expect(screen.queryByTestId('ruleTagFilterUngrouped')).not.toBeInTheDocument();
   });
 });

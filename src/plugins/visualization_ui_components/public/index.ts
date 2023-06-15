@@ -28,7 +28,13 @@ export {
   isQueryValid,
   DimensionEditorSection,
   DimensionButton,
+  DimensionTrigger,
+  EmptyDimensionButton,
+  LineStyleSettings,
+  TextDecorationSetting,
 } from './components';
+
+export { isFieldLensCompatible } from './util';
 
 export type {
   DataType,
@@ -36,7 +42,10 @@ export type {
   FieldOption,
   IconSet,
   AccessorConfig,
+  QueryInputServices,
 } from './components';
+
+export type { FormatFactory } from './types';
 
 export function plugin() {
   return new VisualizationUiComponentsPlugin();

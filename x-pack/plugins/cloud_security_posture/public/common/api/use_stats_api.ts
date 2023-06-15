@@ -28,7 +28,7 @@ export const useCspmStatsApi = (
   const { http } = useKibana().services;
   return useQuery(
     getCspmStatsKey,
-    () => http.get<ComplianceDashboardData>(getStatsRoute(CSPM_POLICY_TEMPLATE)),
+    () => http.get<ComplianceDashboardData>(getStatsRoute(CSPM_POLICY_TEMPLATE), { version: '1' }),
     options
   );
 };
@@ -39,7 +39,7 @@ export const useKspmStatsApi = (
   const { http } = useKibana().services;
   return useQuery(
     getKspmStatsKey,
-    () => http.get<ComplianceDashboardData>(getStatsRoute(KSPM_POLICY_TEMPLATE)),
+    () => http.get<ComplianceDashboardData>(getStatsRoute(KSPM_POLICY_TEMPLATE), { version: '1' }),
     options
   );
 };
