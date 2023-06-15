@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import {
@@ -20,7 +20,6 @@ import {
   GEN_AI_CONNECTOR_ID,
   OpenAiProviderType,
 } from '@kbn/stack-connectors-plugin/public/common';
-import { css } from '@emotion/react';
 import { Conversation } from '../../assistant_context/types';
 import { useLoadConnectors } from '../use_load_connectors';
 import { useConversation } from '../../assistant/use_conversation';
@@ -69,17 +68,17 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         value: ADD_NEW_CONNECTOR,
         inputDisplay: i18n.ADD_NEW_CONNECTOR,
         dropdownDisplay: (
-          <React.Fragment key={ADD_NEW_CONNECTOR}>
-            <EuiButtonEmpty
-              iconType="plus"
-              size="xs"
-              css={css`
-                width: 100%;
-              `}
-            >
-              {i18n.ADD_NEW_CONNECTOR}
-            </EuiButtonEmpty>
-          </React.Fragment>
+          <EuiFlexGroup gutterSize="none" key={ADD_NEW_CONNECTOR}>
+            <EuiFlexItem grow={true}>
+              <EuiButtonEmpty iconType="plus" size="xs">
+                {i18n.ADD_NEW_CONNECTOR}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* Right offset to compensate for 'selected' icon of EuiSuperSelect since native footers aren't supported*/}
+              <div style={{ width: '24px' }} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       };
     }, []);
@@ -147,6 +146,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         <EuiSuperSelect
           options={[...connectorOptions, addNewConnectorOption]}
           valueOfSelected={conversation.apiConfig.connectorId ?? ''}
+          hasDividers={true}
           onChange={onChange}
           compressed={true}
           isLoading={isLoading}

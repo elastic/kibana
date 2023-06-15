@@ -9,7 +9,7 @@
 export const PLUGIN_ID = 'expressionXy';
 export const PLUGIN_NAME = 'expressionXy';
 
-export { LayerTypes } from './constants';
+export { LayerTypes, XYCurveTypes } from './constants';
 
 export type {
   AllowedXYOverrides,

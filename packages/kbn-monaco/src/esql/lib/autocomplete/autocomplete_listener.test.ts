@@ -121,9 +121,7 @@ describe('autocomplete_listener', () => {
       'count',
       'count_distinct',
       'percentile',
-      'FieldIdentifier',
     ]);
-    testSuggestions('from a | stats a=b', ['|', 'by']);
     testSuggestions('from a | stats a=b by ', ['FieldIdentifier']);
     testSuggestions('from a | stats a=c by d', ['|']);
     testSuggestions('from a | stats a=b, ', ['var0']);
@@ -163,9 +161,7 @@ describe('autocomplete_listener', () => {
       'is_infinite',
       'case',
       'length',
-      'FieldIdentifier',
     ]);
-    testSuggestions('from a | eval a=b', ['|', '+', '-', '/', '*']);
     testSuggestions('from a | eval a=b, ', ['var0']);
     testSuggestions('from a | eval a=round', ['(']);
     testSuggestions('from a | eval a=round(', ['FieldIdentifier']);

@@ -13,9 +13,10 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   if (splitFroms && splitFroms?.length > 2) {
     esql = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
   }
+  const parsedString = esql?.replaceAll('`', '');
   // case insensitive match for the index pattern
   const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;]+)/, 'i');
-  const matches = esql?.match(regex);
+  const matches = parsedString?.match(regex);
   if (matches) {
     return matches[1];
   }

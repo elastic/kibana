@@ -8,6 +8,7 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { Logger } from '@kbn/logging';
+import { ProfilingConfig } from '../..';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 export interface ProfilingSetupOptions {
@@ -17,4 +18,5 @@ export interface ProfilingSetupOptions {
   logger: Logger;
   spaceId: string;
   isCloudEnabled: boolean;
+  config: ProfilingConfig;
 }
