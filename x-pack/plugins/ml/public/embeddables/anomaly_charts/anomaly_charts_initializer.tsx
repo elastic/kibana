@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyChartsEmbeddableInput } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 
-export const MAX_ANOMALY_CHARTS_ALLOWED = 48;
+export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface AnomalyChartsInitializerProps {
   defaultTitle: string;
   initialInput?: Partial<Pick<AnomalyChartsEmbeddableInput, 'jobIds' | 'maxSeriesToPlot'>>;
