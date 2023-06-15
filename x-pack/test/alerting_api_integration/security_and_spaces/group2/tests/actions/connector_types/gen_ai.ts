@@ -25,10 +25,10 @@ const defaultConfig = { apiProvider: 'OpenAI' };
 // eslint-disable-next-line import/no-default-export
 export default function genAiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
   const retry = getService('retry');
-
   const createConnector = async (apiUrl: string, spaceId?: string) => {
     const { body } = await supertest
       .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
@@ -41,11 +41,15 @@ export default function genAiTest({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
+    objectRemover.add(spaceId ?? 'default', body.id, 'connector', 'actions');
+
     return body.id;
   };
 
   describe('GenAi', () => {
-    const objectRemover = new ObjectRemover(supertest);
+    after(() => {
+      objectRemover.removeAll();
+    });
     describe('action creation', () => {
       const simulator = new GenAiSimulator({
         returnError: false,
@@ -277,9 +281,6 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           });
           describe('gen ai dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
-            after(() => {
-              objectRemover.removeAll();
-            });
 
             it('should not create a dashboard when user does not have kibana event log permissions', async () => {
               const { body } = await supertestWithoutAuth
@@ -355,7 +356,6 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             genAiActionId = await createConnector(apiUrl, 'space1');
           });
           after(() => {
-            objectRemover.removeAll();
             simulator.close();
           });
 
