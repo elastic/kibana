@@ -188,8 +188,6 @@ export default function (providerContext: FtrProviderContext) {
           body.items.forEach((uninstallToken) => {
             const createdAt = new Date(uninstallToken.created_at!).getTime();
             expect(createdAt).to.be.greaterThan(timestampBeforeAddingNewTokens);
-
-            expect(uninstallToken.token).to.contain('latest');
           });
         });
       });

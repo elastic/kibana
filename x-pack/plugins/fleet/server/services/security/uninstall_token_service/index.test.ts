@@ -80,6 +80,9 @@ describe('UninstallTokenService', () => {
               {
                 _id: defaultSO.id,
                 ...defaultSO,
+                _source: {
+                  [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: defaultSO.attributes,
+                },
               },
             ],
           },
@@ -94,6 +97,7 @@ describe('UninstallTokenService', () => {
                 _id: defaultSO2.id,
                 ...defaultSO2,
                 _source: {
+                  [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: defaultSO2.attributes,
                   created_at: defaultSO2.created_at,
                 },
               },
@@ -185,11 +189,13 @@ describe('UninstallTokenService', () => {
     });
 
     describe('get uninstall tokens', () => {
-      it('can correctly getTokensForPolicyId', async () => {
+      it('can correctly getTokenHistoryForPolicy', async () => {
         const so = getDefaultSO(canEncrypt);
         mockCreatePointInTimeFinderAsInternalUser([so]);
 
-        const tokens = await uninstallTokenService.getTokensForPolicyId(so.attributes.policy_id);
+        const tokens = await uninstallTokenService.getTokenHistoryForPolicy(
+          so.attributes.policy_id
+        );
 
         expect(tokens.items).toEqual([
           {
@@ -206,32 +212,11 @@ describe('UninstallTokenService', () => {
         });
       });
 
-      it('can correctly getTokensForPolicyIds', async () => {
+      it('can correctly getRawTokensForAllPolicies', async () => {
         const so = getDefaultSO(canEncrypt);
         const so2 = getDefaultSO2(canEncrypt);
 
-        const tokensMap = await uninstallTokenService.getTokensForPolicyIds([
-          so.attributes.policy_id,
-          so2.attributes.policy_id,
-        ]);
-        expect(tokensMap).toEqual([
-          {
-            policy_id: so.attributes.policy_id,
-            token: getToken(so, canEncrypt),
-          },
-          {
-            policy_id: so2.attributes.policy_id,
-            token: getToken(so2, canEncrypt),
-            created_at: aDayAgo,
-          },
-        ] as UninstallToken[]);
-      });
-
-      it('can correctly getAllTokens', async () => {
-        const so = getDefaultSO(canEncrypt);
-        const so2 = getDefaultSO2(canEncrypt);
-
-        const tokensMap = (await uninstallTokenService.getAllTokens()).items;
+        const tokensMap = (await uninstallTokenService.getRawTokensForAllPolicies()).items;
         expect(tokensMap).toEqual([
           {
             policy_id: so.attributes.policy_id,

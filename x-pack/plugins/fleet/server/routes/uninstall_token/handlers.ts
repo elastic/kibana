@@ -37,9 +37,9 @@ export const getUninstallTokensHandler: FleetRequestHandler<
 
     let body: GetUninstallTokensResponse;
     if (policyId) {
-      body = await uninstallTokenService.findTokensForPartialPolicyId(policyId, page, perPage);
+      body = await uninstallTokenService.searchRawTokens(policyId, page, perPage);
     } else {
-      body = await uninstallTokenService.getAllTokens(page, perPage);
+      body = await uninstallTokenService.getRawTokensForAllPolicies(page, perPage);
     }
 
     return response.ok({ body });
@@ -59,7 +59,7 @@ export const getUninstallTokensForOnePolicyHandler: FleetRequestHandler<
   try {
     const { agentPolicyId } = request.params;
 
-    const tokensForOnePolicy = await uninstallTokenService.getTokensForPolicyId(agentPolicyId);
+    const tokensForOnePolicy = await uninstallTokenService.getTokenHistoryForPolicy(agentPolicyId);
 
     if (tokensForOnePolicy.total === 0) {
       return response.notFound({

@@ -57,8 +57,8 @@ describe('uninstall token handlers', () => {
     appContextService.start(appContextStartContractMock);
 
     const uninstallTokenService = appContextService.getUninstallTokenService()!;
-    getAllTokensMock = uninstallTokenService.getAllTokens as jest.Mock;
-    getTokensForOnePolicyMock = uninstallTokenService.getTokensForPolicyId as jest.Mock;
+    getAllTokensMock = uninstallTokenService.getRawTokensForAllPolicies as jest.Mock;
+    getTokensForOnePolicyMock = uninstallTokenService.getTokenHistoryForPolicy as jest.Mock;
   });
 
   afterEach(async () => {

@@ -18,6 +18,7 @@ import type {
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTopHitsAggregate,
+  SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -53,17 +54,15 @@ interface UninstallTokenSOAggregation {
 }
 
 export interface UninstallTokenServiceInterface {
-  getTokensForPolicyId(policyId: string): Promise<GetUninstallTokensForOnePolicyResponse>;
+  getTokenHistoryForPolicy(policyId: string): Promise<GetUninstallTokensForOnePolicyResponse>;
 
-  getTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]>;
-
-  findTokensForPartialPolicyId(
+  searchRawTokens(
     searchString: string,
     page?: number,
     perPage?: number
   ): Promise<GetUninstallTokensResponse>;
 
-  getAllTokens(page?: number, perPage?: number): Promise<GetUninstallTokensResponse>;
+  getRawTokensForAllPolicies(page?: number, perPage?: number): Promise<GetUninstallTokensResponse>;
 
   getHashedTokenForPolicyId(policyId: string): Promise<string>;
 
@@ -86,12 +85,12 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
   /**
-   * gets uninstall token for given policy id
+   * gets all uninstall tokens for given policy id
    *
    * @param policyId agent policy id
    * @returns uninstall tokens for policyID
    */
-  public async getTokensForPolicyId(
+  public async getTokenHistoryForPolicy(
     policyId: string
   ): Promise<GetUninstallTokensForOnePolicyResponse> {
     const tokensFinder =
@@ -114,7 +113,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const decryptedTokens = decryptedTokenObjects.map(({ created_at: createdAt, attributes }) => ({
       policy_id: attributes.policy_id,
       token: attributes.token || attributes.token_plain,
-      created_at: createdAt,
+      ...(createdAt ? { created_at: createdAt } : {}),
     }));
 
     return {
@@ -124,16 +123,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   /**
-   * gets uninstall tokens for given policy ids
-   *
-   * @param policyIds agent policy ids
-   * @returns array of UninstallToken objects
-   */
-  public async getTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
-    return (await this.getTokensByIncludeFilter({ include: policyIds })).items;
-  }
-  /**
-   * gets uninstall token for given policy id, paginated
+   * searches for un-decrypted uninstall token by policy ID, paginated
    *
    * @param searchString a string for partial matching the policyId
    * @param page
@@ -141,25 +131,33 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * @param policyId agent policy id
    * @returns GetUninstallTokensResponse
    */
-  public async findTokensForPartialPolicyId(
+  public async searchRawTokens(
     searchString: string,
     page: number = 1,
     perPage: number = 20
   ): Promise<GetUninstallTokensResponse> {
-    return await this.getTokensByIncludeFilter({ include: `.*${searchString}.*`, page, perPage });
+    return await this.getRawTokensByIncludeFilter({
+      include: `.*${searchString}.*`,
+      page,
+      perPage,
+    });
   }
 
   /**
-   * gets uninstall tokens for all policies, optionally paginated or returns all tokens
+   * gets un-decrypted uninstall tokens for all policies, optionally paginated or returns all tokens
+   *
    * @param page
    * @param perPage
    * @returns GetUninstallTokensResponse
    */
-  public async getAllTokens(page?: number, perPage?: number): Promise<GetUninstallTokensResponse> {
-    return this.getTokensByIncludeFilter({ perPage, page });
+  public async getRawTokensForAllPolicies(
+    page?: number,
+    perPage?: number
+  ): Promise<GetUninstallTokensResponse> {
+    return this.getRawTokensByIncludeFilter({ perPage, page });
   }
 
-  private async getTokensByIncludeFilter({
+  private async getRawTokensByIncludeFilter({
     page = 1,
     perPage = SO_SEARCH_LIMIT,
     include,
@@ -168,7 +166,67 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     perPage?: number;
     page?: number;
   }): Promise<GetUninstallTokensResponse> {
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(include);
+
+    const items: UninstallToken[] = tokenObjects
+      .slice((page - 1) * perPage, page * perPage)
+      .map((aggResult) => aggResult._source)
+      .map(({ [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: attributes, created_at: createdAt }) => ({
+        policy_id: attributes.policy_id,
+        token: attributes.token || attributes.token_plain,
+        ...(createdAt ? { created_at: createdAt } : {}),
+      }));
+
+    return { items, total: tokenObjects.length, page, perPage };
+  }
+
+  private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
+    const sos = await this.getTokenObjectsByIncludeFilter(policyIds);
+
+    if (sos.length === 0) {
+      return [];
+    }
+
+    const filter: string = sos
+      .map(({ _id }) => {
+        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`;
+      })
+      .join(' or ');
+
+    const tokensFinder =
+      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
+        {
+          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          perPage: SO_SEARCH_LIMIT,
+          filter,
+        }
+      );
+    let tokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+
+    for await (const result of tokensFinder.find()) {
+      tokenObjects = result.saved_objects;
+      break;
+    }
+    tokensFinder.close();
+
+    const uninstallTokens: UninstallToken[] = tokenObjects
+      .filter(
+        ({ attributes }) => attributes.policy_id && (attributes.token || attributes.token_plain)
+      )
+      .map(({ attributes, created_at: createdAt }) => ({
+        policy_id: attributes.policy_id,
+        token: attributes.token || attributes.token_plain,
+        ...(createdAt ? { created_at: createdAt } : {}),
+      }));
+
+    return uninstallTokens;
+  }
+
+  private async getTokenObjectsByIncludeFilter(
+    include?: AggregationsTermsInclude
+  ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
+
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -190,6 +248,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         },
       },
     };
+
     // encrypted saved objects doesn't decrypt aggregation values so we get
     // the ids first from saved objects to use with encrypted saved objects
     const idFinder = this.soClient.createPointInTimeFinder<
@@ -209,56 +268,14 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       break;
     }
 
-    const firstItemsIndexInPage = (page - 1) * perPage;
-    const isCurrentPageEmpty = firstItemsIndexInPage >= aggResults.length;
-    if (isCurrentPageEmpty) {
-      return { items: [], total: aggResults.length, page, perPage };
-    }
-
     const getCreatedAt = (soBucket: UninstallTokenSOAggregationBucket) =>
       new Date(soBucket.latest.hits.hits[0]._source?.created_at ?? Date.now()).getTime();
 
-    // sort buckets by  { created_at: 'desc' }
-    // this is done with `slice()` instead of ES, because
-    // 1) the query below doesn't support pagination, so we need to slice the IDs here,
-    // 2) the query above doesn't support bucket sorting based on sub aggregation, see this:
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#_ordering_by_a_sub_aggregation
+    // sorting and paginating buckets is done here instead of ES,
+    // because SO query doesn't support `bucket_sort`
     aggResults.sort((a, b) => getCreatedAt(b) - getCreatedAt(a));
 
-    const filter: string = aggResults
-      .slice((page - 1) * perPage, page * perPage)
-      .map(({ latest }) => {
-        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${latest.hits.hits[0]._id}"`;
-      })
-      .join(' or ');
-
-    const tokensFinder =
-      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
-        {
-          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-          perPage: SO_SEARCH_LIMIT,
-          filter,
-        }
-      );
-    let tokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
-
-    for await (const result of tokensFinder.find()) {
-      tokenObjects = result.saved_objects;
-      break;
-    }
-    tokensFinder.close();
-
-    const items: UninstallToken[] = tokenObjects
-      .filter(
-        ({ attributes }) => attributes.policy_id && (attributes.token || attributes.token_plain)
-      )
-      .map(({ attributes, created_at: createdAt }) => ({
-        policy_id: attributes.policy_id,
-        token: attributes.token || attributes.token_plain,
-        ...(createdAt ? { created_at: createdAt } : {}),
-      }));
-
-    return { items, total: aggResults.length, page, perPage };
+    return aggResults.map((bucket) => bucket.latest.hits.hits[0]);
   }
 
   /**
@@ -278,7 +295,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * @returns Record<policyId, hashedToken>
    */
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
-    const tokens = await this.getTokensForPolicyIds(policyIds);
+    const tokens = await this.getDecryptedTokensForPolicyIds(policyIds);
     return tokens.reduce((acc, { policy_id: policyId, token }) => {
       if (policyId && token) {
         acc[policyId] = this.hashToken(token);
@@ -329,7 +346,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const existingTokens = force
       ? {}
-      : (await this.getTokensForPolicyIds(policyIds)).reduce(
+      : (await this.getDecryptedTokensForPolicyIds(policyIds)).reduce(
           (acc, { policy_id: policyId, token }) => {
             acc[policyId] = token;
             return acc;
