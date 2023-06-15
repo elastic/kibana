@@ -16,7 +16,7 @@ export const getVulnTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   // large number that should be sufficient for 30 days considering we write to the score index every 5 minutes
   size: 9999,
-  sort: '@timestamp:desc',
+  sort: '@timestamp:asc',
   query: {
     bool: {
       filter: [{ term: { policy_template: VULN_MGMT_POLICY_TEMPLATE } }],
