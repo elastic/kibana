@@ -9,23 +9,50 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { mockSystemPrompt, mockSuperheroSystemPrompt } from '../../../mock/system_prompt';
+import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
+import { BASE_CONVERSATIONS, Conversation } from '../../../..';
+import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
+
+const mockUseAssistantContext = {
+  setConversations: jest.fn(),
+};
+jest.mock('../../../assistant_context', () => {
+  const original = jest.requireActual('../../../assistant_context');
+
+  return {
+    ...original,
+    useAssistantContext: () => mockUseAssistantContext,
+  };
+});
+
+const mockUseConversation = {
+  setApiConfig: jest.fn(),
+};
+jest.mock('../../use_conversation', () => {
+  const original = jest.requireActual('../../use_conversation');
+
+  return {
+    ...original,
+    useConversation: () => mockUseConversation,
+  };
+});
+
+const BASE_CONVERSATION: Conversation = {
+  ...BASE_CONVERSATIONS[DEFAULT_CONVERSATION_TITLE],
+  apiConfig: {
+    defaultSystemPrompt: mockSystemPrompt,
+  },
+};
 
 describe('SystemPrompt', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  describe('when selectedSystemPromptId is null', () => {
-    const selectedSystemPromptId = null;
+  describe('when conversation is undefined', () => {
+    const conversation = undefined;
 
     beforeEach(() => {
-      render(
-        <SystemPrompt
-          selectedSystemPromptId={selectedSystemPromptId}
-          setSelectedSystemPromptId={jest.fn()}
-          systemPrompts={[mockSystemPrompt]}
-        />
-      );
+      render(<SystemPrompt conversation={conversation} />);
     });
 
     it('renders the system prompt select', () => {
@@ -45,17 +72,9 @@ describe('SystemPrompt', () => {
     });
   });
 
-  describe('when selectedSystemPromptId is NOT null', () => {
-    const selectedSystemPromptId = mockSystemPrompt.id;
-
+  describe('when conversation is NOT null', () => {
     beforeEach(() => {
-      render(
-        <SystemPrompt
-          selectedSystemPromptId={selectedSystemPromptId}
-          setSelectedSystemPromptId={jest.fn()}
-          systemPrompts={[mockSystemPrompt]}
-        />
-      );
+      render(<SystemPrompt conversation={BASE_CONVERSATION} />);
     });
 
     it('does NOT render the system prompt select', () => {
@@ -76,13 +95,7 @@ describe('SystemPrompt', () => {
   });
 
   it('shows the system prompt select when the edit button is clicked', () => {
-    render(
-      <SystemPrompt
-        selectedSystemPromptId={mockSystemPrompt.id}
-        setSelectedSystemPromptId={jest.fn()}
-        systemPrompts={[mockSystemPrompt, mockSuperheroSystemPrompt]}
-      />
-    );
+    render(<SystemPrompt conversation={BASE_CONVERSATION} />);
 
     userEvent.click(screen.getByTestId('edit'));
 
@@ -90,29 +103,16 @@ describe('SystemPrompt', () => {
   });
 
   it('clears the selected system prompt when the clear button is clicked', () => {
-    const setSelectedSystemPromptId = jest.fn();
-
-    render(
-      <SystemPrompt
-        selectedSystemPromptId={mockSystemPrompt.id}
-        setSelectedSystemPromptId={setSelectedSystemPromptId}
-        systemPrompts={[mockSystemPrompt, mockSuperheroSystemPrompt]}
-      />
-    );
+    const apiConfig = { apiConfig: { defaultSystemPrompt: undefined }, conversationId: 'Default' };
+    render(<SystemPrompt conversation={BASE_CONVERSATION} />);
 
     userEvent.click(screen.getByTestId('clear'));
 
-    expect(setSelectedSystemPromptId).toHaveBeenCalledWith(null);
+    expect(mockUseConversation.setApiConfig).toHaveBeenCalledWith(apiConfig);
   });
 
   it('shows the system prompt select when system prompt text is clicked', () => {
-    render(
-      <SystemPrompt
-        selectedSystemPromptId={mockSystemPrompt.id}
-        setSelectedSystemPromptId={jest.fn()}
-        systemPrompts={[mockSystemPrompt, mockSuperheroSystemPrompt]}
-      />
-    );
+    render(<SystemPrompt conversation={BASE_CONVERSATION} />);
 
     fireEvent.click(screen.getByTestId('systemPromptText'));
 

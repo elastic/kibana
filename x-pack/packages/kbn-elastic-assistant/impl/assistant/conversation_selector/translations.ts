@@ -21,6 +21,20 @@ export const CONVERSATION_SELECTOR_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const CONVERSATION_SELECTOR_PLACE_HOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSelector.placeholderTitle',
+  {
+    defaultMessage: 'Select or type to create new...',
+  }
+);
+
+export const CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSelector.CustomOptionTextTitle',
+  {
+    defaultMessage: 'Create new conversation:',
+  }
+);
+
 export const PREVIOUS_CONVERSATION_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSelector.previousConversationTitle',
   {
@@ -32,5 +46,12 @@ export const NEXT_CONVERSATION_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSelector.nextConversationTitle',
   {
     defaultMessage: 'Next conversation',
+  }
+);
+
+export const DELETE_CONVERSATION = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSelector.deleteConversationTitle',
+  {
+    defaultMessage: 'Delete conversation',
   }
 );

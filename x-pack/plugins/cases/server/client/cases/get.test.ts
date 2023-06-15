@@ -6,7 +6,7 @@
  */
 
 import { createCasesClientMockArgs } from '../mocks';
-import { getCasesByAlertID, getTags, getReporters } from './get';
+import { getCasesByAlertID, getTags, getReporters, getCategories } from './get';
 
 describe('get', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -40,6 +40,15 @@ describe('get', () => {
     it('throws with excess fields', async () => {
       // @ts-expect-error: excess attribute
       await expect(getReporters({ owner: 'cases', foo: 'bar' }, clientArgs)).rejects.toThrow(
+        'invalid keys "foo"'
+      );
+    });
+  });
+
+  describe('getCategories', () => {
+    it('throws with excess fields', async () => {
+      // @ts-expect-error: excess attribute
+      await expect(getCategories({ owner: 'cases', foo: 'bar' }, clientArgs)).rejects.toThrow(
         'invalid keys "foo"'
       );
     });

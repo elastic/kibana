@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { pick } from 'lodash';
 import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiCallOut } from '@elastic/eui';
 
+import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -27,6 +28,8 @@ import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../../spike_analysis_table/spike_analysis_table_row_provider';
 
+import type { ExplainLogRateSpikesAnalysisResults } from '../explain_log_rate_spikes_analysis';
+
 import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content';
 
 const localStorage = new Storage(window.localStorage);
@@ -39,10 +42,16 @@ export interface ExplainLogRateSpikesContentWrapperProps {
   /** On global timefilter update */
   setGlobalState?: any;
   /** Timestamp for start of initial analysis */
-  initialAnalysisStart?: number;
+  initialAnalysisStart?: number | WindowParameters;
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentWrapperProps> = ({
@@ -52,6 +61,9 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
+  barColorOverride,
+  barHighlightColorOverride,
+  onAnalysisCompleted,
 }) => {
   if (!dataView) return null;
 
@@ -94,6 +106,9 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
+                  barColorOverride={barColorOverride}
+                  barHighlightColorOverride={barHighlightColorOverride}
+                  onAnalysisCompleted={onAnalysisCompleted}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

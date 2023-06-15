@@ -12,7 +12,7 @@ import { Alert } from '../alert/alert';
 import { AlertsClient } from './alerts_client';
 import { AlertRuleData } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
-import { range } from 'lodash';
+import { keys, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 
@@ -47,7 +47,12 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 const mockLegacyAlertsClient = legacyAlertsClientMock.create();
-
+const mockReplaceState = jest.fn();
+const mockScheduleActions = jest
+  .fn()
+  .mockImplementation(() => ({ replaceState: mockReplaceState }));
+const mockCreate = jest.fn().mockImplementation(() => ({ scheduleActions: mockScheduleActions }));
+const mockSetContext = jest.fn();
 const alertRuleData: AlertRuleData = {
   consumer: 'bar',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -68,7 +73,7 @@ describe('Alerts Client', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
   });
 
@@ -290,7 +295,7 @@ describe('Alerts Client', () => {
     });
   });
 
-  describe('test getAlertsToSerialize()', () => {
+  describe('persistAlerts()', () => {
     test('should index new alerts', async () => {
       const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
         logger,
@@ -309,7 +314,7 @@ describe('Alerts Client', () => {
       });
 
       // Report 2 new alerts
-      const alertExecutorService = alertsClient.getExecutorServices();
+      const alertExecutorService = alertsClient.factory();
       alertExecutorService.create('1').scheduleActions('default');
       alertExecutorService.create('2').scheduleActions('default');
 
@@ -322,8 +327,9 @@ describe('Alerts Client', () => {
         maintenanceWindowIds: [],
       });
 
-      const { alertsToReturn } = await alertsClient.getAlertsToSerialize();
+      await alertsClient.persistAlerts();
 
+      const { alertsToReturn } = alertsClient.getAlertsToSerialize();
       const uuid1 = alertsToReturn['1'].meta?.uuid;
       const uuid2 = alertsToReturn['2'].meta?.uuid;
 
@@ -496,7 +502,7 @@ describe('Alerts Client', () => {
       });
 
       // Report 1 new alert and 1 active alert
-      const alertExecutorService = alertsClient.getExecutorServices();
+      const alertExecutorService = alertsClient.factory();
       alertExecutorService.create('1').scheduleActions('default');
       alertExecutorService.create('2').scheduleActions('default');
 
@@ -509,8 +515,9 @@ describe('Alerts Client', () => {
         maintenanceWindowIds: [],
       });
 
-      const { alertsToReturn } = await alertsClient.getAlertsToSerialize();
+      await alertsClient.persistAlerts();
 
+      const { alertsToReturn } = alertsClient.getAlertsToSerialize();
       const uuid2 = alertsToReturn['2'].meta?.uuid;
 
       expect(clusterClient.bulk).toHaveBeenCalledWith({
@@ -738,7 +745,7 @@ describe('Alerts Client', () => {
       });
 
       // Report 1 new alert and 1 active alert, recover 1 alert
-      const alertExecutorService = alertsClient.getExecutorServices();
+      const alertExecutorService = alertsClient.factory();
       alertExecutorService.create('2').scheduleActions('default');
       alertExecutorService.create('3').scheduleActions('default');
 
@@ -751,8 +758,9 @@ describe('Alerts Client', () => {
         maintenanceWindowIds: [],
       });
 
-      const { alertsToReturn } = await alertsClient.getAlertsToSerialize();
+      await alertsClient.persistAlerts();
 
+      const { alertsToReturn } = alertsClient.getAlertsToSerialize();
       const uuid3 = alertsToReturn['3'].meta?.uuid;
 
       expect(clusterClient.bulk).toHaveBeenCalledWith({
@@ -892,6 +900,1004 @@ describe('Alerts Client', () => {
           },
         ],
       });
+    });
+
+    test('should not try to index if no alerts', async () => {
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report no alerts
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      expect(clusterClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test('should log if bulk indexing fails for some alerts', async () => {
+      clusterClient.bulk.mockResponseOnce({
+        took: 1,
+        errors: true,
+        items: [
+          {
+            index: {
+              _index: '.internal.alerts-test.alerts-default-000001',
+              status: 400,
+              error: {
+                type: 'action_request_validation_exception',
+                reason: 'Validation Failed: 1: index is missing;2: type is missing;',
+              },
+            },
+          },
+          {
+            index: {
+              _index: '.internal.alerts-test.alerts-default-000002',
+              _id: '1',
+              _version: 1,
+              result: 'created',
+              _shards: {
+                total: 2,
+                successful: 1,
+                failed: 0,
+              },
+              status: 201,
+              _seq_no: 0,
+              _primary_term: 1,
+            },
+          },
+        ],
+      });
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 2 new alerts
+      const alertExecutorService = alertsClient.factory();
+      alertExecutorService.create('1').scheduleActions('default');
+      alertExecutorService.create('2').scheduleActions('default');
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      expect(clusterClient.bulk).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error writing 1 out of 2 alerts - [{\"type\":\"action_request_validation_exception\",\"reason\":\"Validation Failed: 1: index is missing;2: type is missing;\"}]`
+      );
+    });
+
+    test('should log and swallow error if bulk indexing throws error', async () => {
+      clusterClient.bulk.mockImplementation(() => {
+        throw new Error('fail');
+      });
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 2 new alerts
+      const alertExecutorService = alertsClient.factory();
+      alertExecutorService.create('1').scheduleActions('default');
+      alertExecutorService.create('2').scheduleActions('default');
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      expect(clusterClient.bulk).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error writing 2 alerts to .alerts-test.alerts-default - fail`
+      );
+    });
+  });
+
+  describe('report()', () => {
+    test('should create legacy alert with id, action group', async () => {
+      mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreate }));
+      const spy = jest
+        .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+        .mockImplementation(() => mockLegacyAlertsClient);
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 2 new alerts
+      alertsClient.report({ id: '1', actionGroup: 'default', state: {}, context: {} });
+      alertsClient.report({ id: '2', actionGroup: 'default', state: {}, context: {} });
+
+      expect(mockCreate).toHaveBeenCalledTimes(2);
+      expect(mockCreate).toHaveBeenNthCalledWith(1, '1');
+      expect(mockCreate).toHaveBeenNthCalledWith(2, '2');
+      expect(mockScheduleActions).toHaveBeenCalledTimes(2);
+      expect(mockScheduleActions).toHaveBeenNthCalledWith(1, 'default', {});
+      expect(mockScheduleActions).toHaveBeenNthCalledWith(2, 'default', {});
+
+      expect(mockReplaceState).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    test('should set context if defined', async () => {
+      mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreate }));
+      const spy = jest
+        .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+        .mockImplementation(() => mockLegacyAlertsClient);
+      const alertsClient = new AlertsClient<{}, {}, { foo?: string }, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 2 new alerts
+      alertsClient.report({
+        id: '1',
+        actionGroup: 'default',
+        state: {},
+        context: { foo: 'cheese' },
+      });
+      alertsClient.report({ id: '2', actionGroup: 'default', state: {}, context: {} });
+
+      expect(mockCreate).toHaveBeenCalledTimes(2);
+      expect(mockCreate).toHaveBeenNthCalledWith(1, '1');
+      expect(mockCreate).toHaveBeenNthCalledWith(2, '2');
+      expect(mockScheduleActions).toHaveBeenCalledTimes(2);
+      expect(mockScheduleActions).toHaveBeenNthCalledWith(1, 'default', { foo: 'cheese' });
+      expect(mockScheduleActions).toHaveBeenNthCalledWith(2, 'default', {});
+
+      expect(mockReplaceState).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    test('should set state if defined', async () => {
+      mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreate }));
+      const spy = jest
+        .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+        .mockImplementation(() => mockLegacyAlertsClient);
+      const alertsClient = new AlertsClient<{}, { count: number }, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 2 new alerts
+      alertsClient.report({ id: '1', actionGroup: 'default', state: { count: 1 }, context: {} });
+      alertsClient.report({ id: '2', actionGroup: 'default', state: { count: 2 }, context: {} });
+
+      expect(mockCreate).toHaveBeenCalledTimes(2);
+      expect(mockCreate).toHaveBeenNthCalledWith(1, '1');
+      expect(mockCreate).toHaveBeenNthCalledWith(2, '2');
+      expect(mockScheduleActions).toHaveBeenCalledTimes(2);
+      expect(mockScheduleActions).toHaveBeenNthCalledWith(1, 'default', {});
+      expect(mockScheduleActions).toHaveBeenNthCalledWith(2, 'default', {});
+      expect(mockReplaceState).toHaveBeenCalledTimes(2);
+      expect(mockReplaceState).toHaveBeenNthCalledWith(1, { count: 1 });
+      expect(mockReplaceState).toHaveBeenNthCalledWith(2, { count: 2 });
+      spy.mockRestore();
+    });
+
+    test('should set payload if defined and write out to alert doc', async () => {
+      const alertsClient = new AlertsClient<
+        { count: number; url: string },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 2 new alerts
+      alertsClient.report({
+        id: '1',
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        payload: { count: 1, url: `https://url1` },
+      });
+      alertsClient.report({
+        id: '2',
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        payload: { count: 2, url: `https://url2` },
+      });
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+      const uuid1 = alertsToReturn['1'].meta?.uuid;
+      const uuid2 = alertsToReturn['2'].meta?.uuid;
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test.alerts-default',
+        refresh: 'wait_for',
+        require_alias: true,
+        body: [
+          { index: { _id: uuid1 } },
+          // new alert doc
+          {
+            '@timestamp': date,
+            count: 1,
+            kibana: {
+              alert: {
+                action_group: 'default',
+                duration: {
+                  us: '0',
+                },
+                flapping: false,
+                flapping_history: [true],
+                instance: {
+                  id: '1',
+                },
+                maintenance_window_ids: [],
+                rule: {
+                  category: 'My test rule',
+                  consumer: 'bar',
+                  execution: {
+                    uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                  },
+                  name: 'rule-name',
+                  parameters: {
+                    bar: true,
+                  },
+                  producer: 'alerts',
+                  revision: 0,
+                  rule_type_id: 'test.rule-type',
+                  tags: ['rule-', '-tags'],
+                  uuid: '1',
+                },
+                start: date,
+                status: 'active',
+                uuid: uuid1,
+              },
+              space_ids: ['default'],
+            },
+            url: `https://url1`,
+          },
+          { index: { _id: uuid2 } },
+          // new alert doc
+          {
+            '@timestamp': date,
+            count: 2,
+            kibana: {
+              alert: {
+                action_group: 'default',
+                duration: {
+                  us: '0',
+                },
+                flapping: false,
+                flapping_history: [true],
+                instance: {
+                  id: '2',
+                },
+                maintenance_window_ids: [],
+                rule: {
+                  category: 'My test rule',
+                  consumer: 'bar',
+                  execution: {
+                    uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                  },
+                  name: 'rule-name',
+                  parameters: {
+                    bar: true,
+                  },
+                  producer: 'alerts',
+                  revision: 0,
+                  rule_type_id: 'test.rule-type',
+                  tags: ['rule-', '-tags'],
+                  uuid: '1',
+                },
+                start: date,
+                status: 'active',
+                uuid: uuid2,
+              },
+              space_ids: ['default'],
+            },
+            url: `https://url2`,
+          },
+        ],
+      });
+    });
+  });
+
+  describe('setAlertData()', () => {
+    test('should call setContext on legacy alert', async () => {
+      mockLegacyAlertsClient.getAlert.mockReturnValueOnce({
+        getId: jest.fn().mockReturnValue('1'),
+        setContext: mockSetContext,
+      });
+      mockLegacyAlertsClient.getAlert.mockReturnValueOnce({
+        getId: jest.fn().mockReturnValue('1'),
+        setContext: mockSetContext,
+      });
+      const spy = jest
+        .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+        .mockImplementation(() => mockLegacyAlertsClient);
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {
+          '1': {
+            state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+            meta: {
+              flapping: false,
+              flappingHistory: [true],
+              maintenanceWindowIds: [],
+              lastScheduledActions: { group: 'default', date: new Date() },
+              uuid: 'abc',
+            },
+          },
+          '2': {
+            state: { foo: true, start: '2023-03-28T02:27:28.159Z', duration: '36000000000000' },
+            meta: {
+              flapping: false,
+              flappingHistory: [true, false],
+              maintenanceWindowIds: [],
+              lastScheduledActions: { group: 'default', date: new Date() },
+              uuid: 'def',
+            },
+          },
+        },
+        recoveredAlertsFromState: {},
+      });
+
+      // Set context on 2 recovered alerts
+      alertsClient.setAlertData({ id: '1', context: { foo: 'bar' } });
+      alertsClient.setAlertData({ id: '2' });
+
+      expect(mockSetContext).toHaveBeenCalledTimes(2);
+      expect(mockSetContext).toHaveBeenNthCalledWith(1, { foo: 'bar' });
+      expect(mockSetContext).toHaveBeenNthCalledWith(2, {});
+      spy.mockRestore();
+    });
+
+    test('should throw error if called on unknown alert id', async () => {
+      mockLegacyAlertsClient.getAlert.mockReturnValueOnce(null);
+      const spy = jest
+        .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+        .mockImplementation(() => mockLegacyAlertsClient);
+      const alertsClient = new AlertsClient<{}, {}, { foo?: string }, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {
+          '1': {
+            state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+            meta: {
+              flapping: false,
+              flappingHistory: [true],
+              maintenanceWindowIds: [],
+              lastScheduledActions: { group: 'default', date: new Date() },
+              uuid: 'abc',
+            },
+          },
+          '2': {
+            state: { foo: true, start: '2023-03-28T02:27:28.159Z', duration: '36000000000000' },
+            meta: {
+              flapping: false,
+              flappingHistory: [true, false],
+              maintenanceWindowIds: [],
+              lastScheduledActions: { group: 'default', date: new Date() },
+              uuid: 'def',
+            },
+          },
+        },
+        recoveredAlertsFromState: {},
+      });
+
+      // Set context on 2 recovered alerts
+      expect(() => {
+        alertsClient.setAlertData({ id: '1', context: { foo: 'bar' } });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot set alert data for alert 1 because it has not been reported and it is not recovered."`
+      );
+      spy.mockRestore();
+    });
+
+    test('should successfully update context and payload for new alert', async () => {
+      clusterClient.search.mockResolvedValue({
+        took: 10,
+        timed_out: false,
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+        hits: {
+          total: {
+            relation: 'eq',
+            value: 0,
+          },
+          hits: [],
+        },
+      });
+      const alertsClient = new AlertsClient<
+        { count: number; url: string },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      // Report new alert
+      alertsClient.report({
+        id: '1',
+        actionGroup: 'default',
+        context: { foo: 'bar' },
+        payload: { count: 1, url: `http://localhost:5601` },
+      });
+
+      // Update context and payload on the new alert
+      alertsClient.setAlertData({
+        id: '1',
+        context: { foo: 'notbar' },
+        payload: { count: 100, url: `https://elastic.co` },
+      });
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test.alerts-default',
+        refresh: 'wait_for',
+        require_alias: true,
+        body: [
+          {
+            index: {
+              _id: expect.any(String),
+            },
+          },
+          {
+            '@timestamp': date,
+            count: 100,
+            kibana: {
+              alert: {
+                action_group: 'default',
+                duration: {
+                  us: '0',
+                },
+                flapping: false,
+                flapping_history: [true],
+                instance: {
+                  id: '1',
+                },
+                maintenance_window_ids: [],
+                rule: {
+                  category: 'My test rule',
+                  consumer: 'bar',
+                  execution: {
+                    uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                  },
+                  name: 'rule-name',
+                  parameters: {
+                    bar: true,
+                  },
+                  producer: 'alerts',
+                  revision: 0,
+                  rule_type_id: 'test.rule-type',
+                  tags: ['rule-', '-tags'],
+                  uuid: '1',
+                },
+                start: date,
+                status: 'active',
+                uuid: expect.any(String),
+              },
+              space_ids: ['default'],
+            },
+            url: 'https://elastic.co',
+          },
+        ],
+      });
+    });
+
+    test('should successfully update context and payload for ongoing alert', async () => {
+      clusterClient.search.mockResolvedValue({
+        took: 10,
+        timed_out: false,
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+        hits: {
+          total: {
+            relation: 'eq',
+            value: 1,
+          },
+          hits: [
+            {
+              _id: 'abc',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              _source: {
+                '@timestamp': '2023-03-28T12:27:28.159Z',
+                count: 1,
+                url: 'https://localhost:5601/abc',
+                kibana: {
+                  alert: {
+                    action_group: 'default',
+                    duration: {
+                      us: '0',
+                    },
+                    flapping: false,
+                    flapping_history: [true],
+                    instance: {
+                      id: '1',
+                    },
+                    rule: {
+                      category: 'My test rule',
+                      consumer: 'bar',
+                      execution: {
+                        uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                      },
+                      name: 'rule-name',
+                      parameters: {
+                        bar: true,
+                      },
+                      producer: 'alerts',
+                      revision: 0,
+                      rule_type_id: 'test.rule-type',
+                      tags: ['rule-', '-tags'],
+                      uuid: '1',
+                    },
+                    start: '2023-03-28T12:27:28.159Z',
+                    status: 'active',
+                    uuid: 'abc',
+                  },
+                  space_ids: ['default'],
+                },
+              },
+            },
+          ],
+        },
+      });
+      const alertsClient = new AlertsClient<
+        { count: number; url: string },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {
+          '1': {
+            state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+            meta: {
+              flapping: false,
+              flappingHistory: [true],
+              maintenanceWindowIds: [],
+              lastScheduledActions: { group: 'default', date: new Date() },
+              uuid: 'abc',
+            },
+          },
+        },
+        recoveredAlertsFromState: {},
+      });
+
+      // Report ongoing alert
+      alertsClient.report({
+        id: '1',
+        actionGroup: 'default',
+        context: { foo: 'bar' },
+        payload: { count: 1, url: `http://localhost:5601` },
+      });
+
+      // Update context and payload on the new alert
+      alertsClient.setAlertData({
+        id: '1',
+        context: { foo: 'notbar' },
+        payload: { count: 100, url: `https://elastic.co` },
+      });
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test.alerts-default',
+        refresh: 'wait_for',
+        require_alias: true,
+        body: [
+          {
+            index: {
+              _id: 'abc',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              require_alias: false,
+            },
+          },
+          {
+            '@timestamp': date,
+            count: 100,
+            kibana: {
+              alert: {
+                action_group: 'default',
+                duration: {
+                  us: '36000000000000',
+                },
+                flapping: false,
+                flapping_history: [true, false],
+                instance: {
+                  id: '1',
+                },
+                maintenance_window_ids: [],
+                rule: {
+                  category: 'My test rule',
+                  consumer: 'bar',
+                  execution: {
+                    uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                  },
+                  name: 'rule-name',
+                  parameters: {
+                    bar: true,
+                  },
+                  producer: 'alerts',
+                  revision: 0,
+                  rule_type_id: 'test.rule-type',
+                  tags: ['rule-', '-tags'],
+                  uuid: '1',
+                },
+                start: '2023-03-28T12:27:28.159Z',
+                status: 'active',
+                uuid: 'abc',
+              },
+              space_ids: ['default'],
+            },
+            url: 'https://elastic.co',
+          },
+        ],
+      });
+    });
+
+    test('should successfully update context and payload for recovered alert', async () => {
+      clusterClient.search.mockResolvedValue({
+        took: 10,
+        timed_out: false,
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+        hits: {
+          total: {
+            relation: 'eq',
+            value: 1,
+          },
+          hits: [
+            {
+              _id: 'abc',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              _source: {
+                '@timestamp': '2023-03-28T12:27:28.159Z',
+                count: 1,
+                url: 'https://localhost:5601/abc',
+                kibana: {
+                  alert: {
+                    action_group: 'default',
+                    duration: {
+                      us: '0',
+                    },
+                    flapping: false,
+                    flapping_history: [true],
+                    instance: {
+                      id: '1',
+                    },
+                    rule: {
+                      category: 'My test rule',
+                      consumer: 'bar',
+                      execution: {
+                        uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                      },
+                      name: 'rule-name',
+                      parameters: {
+                        bar: true,
+                      },
+                      producer: 'alerts',
+                      revision: 0,
+                      rule_type_id: 'test.rule-type',
+                      tags: ['rule-', '-tags'],
+                      uuid: '1',
+                    },
+                    start: '2023-03-28T12:27:28.159Z',
+                    status: 'active',
+                    uuid: 'abc',
+                  },
+                  space_ids: ['default'],
+                },
+              },
+            },
+          ],
+        },
+      });
+      const alertsClient = new AlertsClient<
+        { count: number; url: string },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {
+          '1': {
+            state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+            meta: {
+              flapping: false,
+              flappingHistory: [true],
+              maintenanceWindowIds: [],
+              lastScheduledActions: { group: 'default', date: new Date() },
+              uuid: 'abc',
+            },
+          },
+        },
+        recoveredAlertsFromState: {},
+      });
+
+      // Don't report any alerts so existing alert recovers
+
+      // Update context and payload on the new alert
+      alertsClient.setAlertData({
+        id: '1',
+        context: { foo: 'notbar' },
+        payload: { count: 100, url: `https://elastic.co` },
+      });
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        notifyWhen: RuleNotifyWhen.CHANGE,
+        maintenanceWindowIds: [],
+      });
+
+      await alertsClient.persistAlerts();
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test.alerts-default',
+        refresh: 'wait_for',
+        require_alias: true,
+        body: [
+          {
+            index: {
+              _id: 'abc',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              require_alias: false,
+            },
+          },
+          {
+            '@timestamp': date,
+            count: 100,
+            kibana: {
+              alert: {
+                action_group: 'recovered',
+                duration: {
+                  us: '36000000000000',
+                },
+                end: date,
+                flapping: false,
+                flapping_history: [true, true],
+                instance: {
+                  id: '1',
+                },
+                maintenance_window_ids: [],
+                rule: {
+                  category: 'My test rule',
+                  consumer: 'bar',
+                  execution: {
+                    uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                  },
+                  name: 'rule-name',
+                  parameters: {
+                    bar: true,
+                  },
+                  producer: 'alerts',
+                  revision: 0,
+                  rule_type_id: 'test.rule-type',
+                  tags: ['rule-', '-tags'],
+                  uuid: '1',
+                },
+                start: '2023-03-28T12:27:28.159Z',
+                status: 'recovered',
+                uuid: 'abc',
+              },
+              space_ids: ['default'],
+            },
+            url: 'https://elastic.co',
+          },
+        ],
+      });
+    });
+  });
+
+  describe('client()', () => {
+    test('only returns subset of functionality', async () => {
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType,
+        namespace: 'default',
+        rule: alertRuleData,
+      });
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      });
+
+      const publicAlertsClient = alertsClient.client();
+
+      expect(keys(publicAlertsClient)).toEqual([
+        'report',
+        'setAlertData',
+        'getAlertLimitValue',
+        'setAlertLimitReached',
+        'getRecoveredAlerts',
+      ]);
     });
   });
 });
