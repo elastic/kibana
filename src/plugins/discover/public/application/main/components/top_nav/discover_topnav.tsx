@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { addLog } from '../../../../utils/add_log';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
@@ -149,6 +150,7 @@ export const DiscoverTopNav = ({
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState } = stateContainer;
     if (newSavedQueryId) {
+      addLog('[updatedSavedQueryId] updating AppState saved Query', newSavedQueryId);
       appState.update({ savedQuery: newSavedQueryId });
     } else {
       // remove savedQueryId from state
@@ -156,6 +158,7 @@ export const DiscoverTopNav = ({
         ...appState.getState(),
       };
       delete newState.savedQuery;
+      addLog('[updatedSavedQueryId] setting AppState saved Query');
       appState.set(newState);
     }
   };
@@ -199,8 +202,13 @@ export const DiscoverTopNav = ({
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomQueryBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomQueryBar, AggregateQueryTopNavMenu]
+  );
+
   return (
-    <AggregateQueryTopNavMenu
+    <SearchBar
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}

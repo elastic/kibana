@@ -13,7 +13,7 @@ import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from 
 import { ConfigSchema } from '../config';
 import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
-import { createSearchBar } from './search_bar/create_search_bar';
+import { createSearchBar, StatefulSearchBarDeps } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
   UnifiedSearchStartDependencies,
@@ -73,16 +73,32 @@ export class UnifiedSearchPublicPlugin
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
 
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      storage: this.storage,
-      usageCollection: this.usageCollection,
-      isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
-      unifiedSearch: {
-        autocomplete: autocompleteStart,
-      },
-    });
+    // const SearchBar = createSearchBar({
+    //   core,
+    //   data,
+    //   storage: this.storage,
+    //   usageCollection: this.usageCollection,
+    //   isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
+    //   unifiedSearch: {
+    //     autocomplete: autocompleteStart,
+    //   },
+    // });
+
+    // discover-timeline integration
+    const getCustomSearchBar = (deps?: Partial<StatefulSearchBarDeps>) =>
+      createSearchBar({
+        core,
+        data,
+        storage: this.storage,
+        usageCollection: this.usageCollection,
+        isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
+        unifiedSearch: {
+          autocomplete: autocompleteStart,
+        },
+        ...(deps ?? {}),
+      });
+
+    const SearchBar = getCustomSearchBar();
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);
 
@@ -92,6 +108,7 @@ export class UnifiedSearchPublicPlugin
       ui: {
         IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
+        getCustomSearchBar,
         AggregateQuerySearchBar: SearchBar,
         FiltersBuilderLazy,
       },

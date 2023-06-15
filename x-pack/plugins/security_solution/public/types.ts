@@ -145,6 +145,7 @@ export type StartServices = CoreStart &
     upselling: UpsellingService;
     telemetry: TelemetryClientStart;
     discoverFilterManager: FilterManager;
+    discoverDataService: DataPublicPluginStart;
   };
 
 export interface PluginSetup {

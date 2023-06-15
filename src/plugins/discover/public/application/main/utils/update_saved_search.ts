@@ -44,11 +44,11 @@ export function updateSavedSearch(
   if (useFilterAndQueryServices) {
     addLog('[updateSavedSearch] update with FilterQueryServices', {
       query: services.data.query.queryString.getQuery(),
-      filter: services.data.query.filterManager.getFilters(),
+      filter: services.filterManager.getFilters(),
     });
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery())
-      .setField('filter', services.data.query.filterManager.getFilters());
+      .setField('filter', services.filterManager.getFilters());
   } else if (state) {
     addLog('[updateSavedSearch] update with state', state);
     savedSearch.searchSource
@@ -103,5 +103,6 @@ export function updateSavedSearch(
     savedSearch.timeRestore || savedSearch.refreshInterval
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
+
   return savedSearch;
 }

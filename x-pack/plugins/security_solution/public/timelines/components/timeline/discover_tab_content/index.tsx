@@ -5,22 +5,49 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import { useDiscoverCustomizationServiceForSecuritySolution } from '../../../../app/DiscoverCustomizationsProviders';
+import { useDiscoverCustomizationServiceForSecuritySolution } from '../../../../app/discover_customization_provider';
 import { useKibana } from '../../../../common/lib/kibana';
-import { CustomDiscoverQueryBar } from './custom_discover_query_bar';
 
 export const DiscoverTabContent = () => {
   const history = useHistory();
   const {
-    services: { uiSettings, discover, discoverFilterManager },
+    services: {
+      unifiedSearch,
+      navigation: {
+        ui: { createTopNavWithCustomContext },
+      },
+      discoverDataService,
+      discover,
+      discoverFilterManager,
+    },
   } = useKibana();
+
+  const {
+    ui: { getCustomSearchBar },
+  } = unifiedSearch;
+
   const { useDiscoverMainRoute } = discover;
+  const CustomStatefulTopMenu = useMemo(() => {
+    const CustomSearchBar = getCustomSearchBar({
+      data: discoverDataService,
+    });
+
+    return createTopNavWithCustomContext({
+      ...unifiedSearch,
+      ui: {
+        ...unifiedSearch.ui,
+        SearchBar: CustomSearchBar,
+        AggregateQuerySearchBar: CustomSearchBar,
+      },
+    });
+  }, [discoverDataService, getCustomSearchBar, createTopNavWithCustomContext, unifiedSearch]);
   const getDiscoverLayout = useDiscoverMainRoute({
     filterManager: discoverFilterManager,
+    data: discoverDataService,
   });
   const DiscoverLayout = getDiscoverLayout(history);
   const { setDiscoverStateContainer, discoverStateContainer } =
@@ -31,10 +58,10 @@ export const DiscoverTabContent = () => {
       if (!discoverStateContainer) setDiscoverStateContainer(stateContainer);
       customizations.set({
         id: 'search_bar',
-        CustomQueryBar: CustomDiscoverQueryBar,
+        CustomQueryBar: CustomStatefulTopMenu,
       });
     },
-    [setDiscoverStateContainer, discoverStateContainer]
+    [setDiscoverStateContainer, discoverStateContainer, CustomStatefulTopMenu]
   );
 
   return (

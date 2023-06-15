@@ -155,6 +155,7 @@ export const getDiscoverAppStateContainer = ({
   const enhancedAppContainer = {
     ...appStateContainer,
     set: (value: DiscoverAppState | null) => {
+      addLog('[enhancedAppContainer] setting new App State', value);
       if (value) {
         previousState = appStateContainer.getState();
         appStateContainer.set(value);
@@ -216,7 +217,7 @@ export const getDiscoverAppStateContainer = ({
 
     const { start, stop } = startAppStateUrlSync();
     // current state need to be pushed to url
-    replaceUrlState({}).then(() => stop());
+    replaceUrlState({}).then(() => start());
 
     return () => {
       stopSyncingQueryAppStateWithStateContainer();

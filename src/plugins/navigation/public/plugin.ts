@@ -7,12 +7,14 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
   NavigationPluginStartDependencies,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
+import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export class NavigationPublicPlugin
   implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
@@ -36,10 +38,18 @@ export class NavigationPublicPlugin
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
+    const createCustomTopNav = (
+      customUnifiedSearch?: UnifiedSearchPublicPluginStart,
+      customExtensions?: RegisteredTopNavMenuData[]
+    ) => {
+      return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
+    };
+
     return {
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        createTopNavWithCustomContext: createCustomTopNav,
       },
     };
   }

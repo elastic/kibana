@@ -354,8 +354,7 @@ export function getDiscoverStateContainer({
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(
       services.data.query.queryString.getUpdates$(),
-      services.filterManager.getUpdates$(),
-      appStateContainer.state$
+      services.filterManager.getUpdates$()
     ).subscribe(async () => {
       await savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,

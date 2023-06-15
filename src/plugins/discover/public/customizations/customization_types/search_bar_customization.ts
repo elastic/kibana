@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType, FC } from 'react';
-import { DiscoverTopNavProps } from '../../application/main/components/top_nav/discover_topnav';
+import { AggregateQuery } from '@kbn/es-query';
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { ComponentType } from 'react';
 
 export interface SearchBarCustomization {
   id: 'search_bar';
   CustomDataViewPicker?: ComponentType;
-  CustomQueryBar?: FC<DiscoverTopNavProps>;
+  CustomQueryBar?: (
+    props: TopNavMenuProps<AggregateQuery>
+  ) => React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>>;
 }

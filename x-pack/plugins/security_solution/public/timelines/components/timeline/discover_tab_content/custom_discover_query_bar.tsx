@@ -206,7 +206,7 @@ export const CustomDiscoverQueryBar = (props: Props) => {
 
   useEffect(() => {
     discoverStateContainer?.appState.update({ filters });
-  }, [filters, discoverStateContainer?.appState]);
+  }, [discoverStateContainer?.appState, filters]);
 
   if (!internalState || !internalState.dataView || !discoverStateContainer?.appState)
     return <p>{'Nothing'}</p>;

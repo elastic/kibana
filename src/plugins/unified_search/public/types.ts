@@ -20,6 +20,7 @@ import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
+import { StatefulSearchBarDeps } from './search_bar/create_search_bar';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -39,12 +40,15 @@ export interface UnifiedSearchStartDependencies {
   screenshotMode?: ScreenshotModePluginStart;
 }
 
+type SearchBar = (props: StatefulSearchBarProps<Query>) => React.ReactElement;
+
 /**
  * Unified search plugin prewired UI components
  */
 export interface UnifiedSearchPublicPluginStartUi {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  SearchBar: (props: StatefulSearchBarProps<Query>) => React.ReactElement;
+  getCustomSearchBar: (props: Partial<StatefulSearchBarDeps>) => SearchBar;
+  SearchBar: SearchBar;
   AggregateQuerySearchBar: <QT extends Query | AggregateQuery = Query>(
     props: StatefulSearchBarProps<QT>
   ) => React.ReactElement;
