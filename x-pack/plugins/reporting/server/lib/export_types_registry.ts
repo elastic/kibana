@@ -6,14 +6,6 @@
  */
 
 import { isString } from 'lodash';
-// import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_v2';
-// import { getExportType as getTypeCsvFromSavedObjectImmediate } from '../export_types/csv_searchsource_immediate';
-// import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
-// import { getExportType as getTypePng } from '../export_types/png';
-// import { getExportType as getTypePngV2 } from '../export_types/png_v2';
-// import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
-// import { getExportType as getTypePrintablePdfV2 } from '../export_types/printable_pdf_v2';
-
 import { ExportType } from '../export_types/common';
 
 type GetCallbackFn = (item: ExportType) => boolean;
@@ -72,14 +64,4 @@ export class ExportTypesRegistry {
 
     return result;
   }
-}
-
-/*
- * @return ExportTypeRegistry: the ExportTypeRegistry instance that should be
- * used to register async export type definitions
- */
-export function getExportTypesRegistry(): ExportTypesRegistry {
-  const registry = new ExportTypesRegistry();
-  registry.getAll().map((exportType) => registry.register(exportType));
-  return registry;
 }

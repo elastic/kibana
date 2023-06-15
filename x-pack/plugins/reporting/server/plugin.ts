@@ -16,8 +16,7 @@ import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
 import { registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { PdfExportType } from './export_types/printable_pdf_v2';
-import { ExportTypesRegistry, ReportingStore } from './lib';
+import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -37,8 +36,8 @@ export class ReportingPlugin
 {
   private logger: Logger;
   private reportingCore?: ReportingCore;
-  private pdfExport?: PdfExportType;
-  private exportTypesRegistry: ExportTypesRegistry = new ExportTypesRegistry();
+  // // private pdfExport?: PdfExportType;
+  // private exportTypesRegistry: ExportTypesRegistry = new ExportTypesRegistry();
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
     this.logger = initContext.logger.get();
@@ -63,12 +62,14 @@ export class ReportingPlugin
     // Usage counter for reporting telemetry
     const usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
 
-    this.pdfExport = new PdfExportType(
-      core,
-      reportingCore.getConfig(),
-      this.logger,
-      this.initContext
-    );
+    // this.pdfExport = new PdfExportType(
+    //   core,
+    //   reportingCore.getConfig(),
+    //   this.logger,
+    //   this.initContext
+    // );
+
+    // this.exportTypesRegistry.register(this.pdfExport);
 
     reportingCore.pluginSetup({
       logger: this.logger,
@@ -77,8 +78,8 @@ export class ReportingPlugin
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,
-      pdfExport: this.pdfExport,
-      exportTypesRegistry: this.exportTypesRegistry,
+      // pdfExport: this.pdfExport,
+      // exportTypesRegistry: this.exportTypesRegistry,
       ...plugins,
     });
 
@@ -98,8 +99,6 @@ export class ReportingPlugin
       this.logger.error(`Error in Reporting setup, reporting may not function properly`);
       this.logger.error(e);
     });
-
-    this.exportTypesRegistry.register(this.pdfExport);
 
     return reportingCore.getContract();
   }

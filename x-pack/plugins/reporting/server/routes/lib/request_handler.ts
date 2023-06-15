@@ -53,7 +53,7 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const [store] = await Promise.all([reporting.getStore()]);
+    const store = await reporting.getStore();
 
     if (!exportType.createJob) {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
@@ -135,7 +135,6 @@ export class RequestHandler {
       report = await this.enqueueJob(exportTypeId, jobParams);
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
-
       counters.usageCounter();
 
       return this.res.ok({

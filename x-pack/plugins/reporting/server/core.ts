@@ -34,11 +34,11 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, first, map, take } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { createConfig, ReportingConfigType } from './config';
 import { PdfExportType } from './export_types/printable_pdf_v2';
-import { checkLicense, ExportTypesRegistry, getExportTypesRegistry } from './lib';
+import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -55,8 +55,6 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
-  pdfExport: PdfExportType;
-  exportTypesRegistry: ExportTypesRegistry;
 }
 
 export interface ReportingInternalStart {
@@ -101,7 +99,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private pdfExport: PdfExportType;
-  private exportTypesRegistry = getExportTypesRegistry();
+  private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -117,6 +115,7 @@ export class ReportingCore {
     this.config = config;
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    // @ts-ignore
     this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
@@ -178,12 +177,9 @@ export class ReportingCore {
   private async assertKibanaIsAvailable(): Promise<void> {
     const { status } = this.getPluginSetupDeps();
 
-    await status.overall$
-      .pipe(
-        filter((current) => current.level === ServiceStatusLevels.available),
-        first()
-      )
-      .toPromise();
+    await Rx.firstValueFrom(
+      status.overall$.pipe(filter((current) => current.level === ServiceStatusLevels.available))
+    );
   }
 
   /*
@@ -306,7 +302,7 @@ export class ReportingCore {
   }
 
   public getExportTypesRegistry() {
-    return this.getPluginSetupDeps().exportTypesRegistry;
+    return this.exportTypesRegistry;
   }
 
   public async scheduleTask(report: ReportTaskParams) {

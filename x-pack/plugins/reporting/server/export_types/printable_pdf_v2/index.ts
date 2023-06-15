@@ -17,6 +17,7 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
   CoreSetup,
+  HttpServiceSetup,
 } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import {
@@ -40,13 +41,14 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
   PDF_JOB_TYPE_V2,
+  PDF_REPORT_TYPE_V2,
 } from '../../../common/constants';
 import { JobParamsPDFV2 } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
 import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
-import { generatePdfObservable, GetScreenshotsFn } from './lib/generate_pdf';
+import { generatePdfObservable } from './lib/generate_pdf';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 export type {
   JobParamsPDFV2,
@@ -73,7 +75,9 @@ export class PdfExportType
   implements
     ExportType<PdfExportTypeSetupDeps, PdfExportTypeStartDeps, JobParamsPDFV2, TaskPayloadPDFV2>
 {
-  id = 'printablePdfV2';
+  private http: HttpServiceSetup;
+
+  id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
   validLicenses: LicenseType[] = [
     LICENSE_TYPE_TRIAL,
@@ -95,20 +99,19 @@ export class PdfExportType
     private context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.logger = logger.get('pdf-export');
+    this.http = core.http;
   }
 
   setup(setupDeps: PdfExportTypeSetupDeps) {
     this.setupDeps = setupDeps;
-    // console.log('setupDeps', Object.keys(setupDeps));
   }
 
   start(startDeps: PdfExportTypeStartDeps) {
     this.startDeps = startDeps;
-    console.log('startDeps', Object.keys(startDeps));
   }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.setupDeps.spaces?.spacesService;
+    const spacesService = this.setupDeps!.spaces?.spacesService;
     if (spacesService) {
       const spaceId = spacesService?.getSpaceId(request);
 
@@ -123,21 +126,20 @@ export class PdfExportType
 
   private async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = this.startDeps;
-
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
-  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = await this.startDeps;
-    const scopedUiSettingsService = await uiSettingsService.asScopedToClient(savedObjectsClient);
+  public getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+    const { uiSettings: uiSettingsService } = this.startDeps;
+    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
   }
 
   public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
     const spacesService = this.setupDeps.spaces?.spacesService;
-    const spaceId = this.getSpaceId(request, logger);
+    const spaceId = await this.getSpaceId(request, logger);
 
-    if (spacesService !== undefined) {
+    if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
@@ -155,10 +157,12 @@ export class PdfExportType
     };
     const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
-    // const spacesService = this.setupDeps?.spaces?.spacesService;
-    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-      logger.info(`Generating request for space: ${spaceId}`);
-      this.setupDeps?.basePath.set(fakeRequest, `/s/${spaceId}`);
+    const spacesService = this.setupDeps.spaces?.spacesService;
+    if (spacesService) {
+      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Generating request for space: ${spaceId}`);
+        this.setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
+      }
     }
     return fakeRequest;
   }
@@ -167,10 +171,9 @@ export class PdfExportType
    * Returns configurable server info
    */
   public getServerInfo(): ReportingServerInfo {
-    const { http } = this.core;
-    const serverInfo = http.getServerInfo();
+    const serverInfo = this.http.getServerInfo();
     return {
-      basePath: this.core.http.basePath.serverBasePath,
+      basePath: this.http.basePath.serverBasePath,
       hostname: serverInfo.hostname,
       name: serverInfo.name,
       port: serverInfo.port,
@@ -214,8 +217,8 @@ export class PdfExportType
    * @param stream
    */
   async runTask(
-    jobId: string,
     payload: TaskPayloadPDFV2,
+    jobId: string,
     cancellationToken: CancellationToken,
     stream: Writable
   ) {
@@ -228,9 +231,9 @@ export class PdfExportType
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers) => {
-        const fakeRequest = await this.getFakeRequest(headers, payload.spaceId, jobLogger);
-        const uiSettingsClient = await this.getUiSettingsClient(fakeRequest, jobLogger);
-        return getCustomLogo(uiSettingsClient, headers);
+        const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
+        const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
+        return await getCustomLogo(uiSettingsClient, headers);
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
@@ -244,23 +247,22 @@ export class PdfExportType
           locator,
         ]) as unknown as UrlOrUrlWithContext[];
 
-        const screenshotFn: GetScreenshotsFn = () =>
-          this.getScreenshots({
-            format: 'pdf',
-            title,
-            logo,
-            browserTimezone,
-            headers,
-            layout,
-            urls,
-          });
         apmGetAssets?.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
         return generatePdfObservable(
           this.config,
           this.getServerInfo(),
-          screenshotFn,
+          () =>
+            this.getScreenshots({
+              format: 'pdf',
+              title,
+              logo,
+              browserTimezone,
+              headers,
+              layout,
+              urls,
+            }),
           payload,
           locatorParams,
           {
@@ -294,6 +296,6 @@ export class PdfExportType
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
     apmTrans?.end();
-    return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
+    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
   }
 }

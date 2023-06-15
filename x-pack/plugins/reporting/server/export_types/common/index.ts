@@ -22,8 +22,10 @@ export interface TimeRangeParams {
 }
 
 export interface ExportType<
-  SetupDeps extends object = any,
-  StartDeps extends object = any,
+  // SetupDeps extends object = any,
+  // StartDeps extends object = any,
+  SetupDeps = object,
+  StartDeps = object,
   JobParamsType extends object = any,
   TaskPayloadType extends object = any
 > {
@@ -41,5 +43,10 @@ export interface ExportType<
 
   createJob: CreateJobFn<JobParamsType>;
   runTask: RunTaskFn<TaskPayloadType>;
+
+  /*
+   * This is needed for the request handler and
+   * can be specified for each export type rather pulling it from Reporting Core
+   */
   getSpaceId: (req: KibanaRequest, logger: Logger) => string | undefined;
 }

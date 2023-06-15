@@ -46,7 +46,7 @@ const makeManagementFeature = (exportTypes: ExportType[]) => {
       }
 
       const validJobTypes = exportTypes
-        .filter((exportType) => exportType.validLicenses.includes(license.type || ''))
+        .filter((exportType) => exportType.validLicenses.includes(license.type!))
         .map((exportType) => exportType.jobType);
 
       return {

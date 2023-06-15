@@ -61,11 +61,11 @@ export type CreateJobFn<JobParamsType> = (
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest
-) => { isDeprecated: boolean; browserTimezone: any };
+) => JobParamsType & { isDeprecated: boolean; browserTimezone: any };
 
 export type RunTaskFn<TaskPayloadType> = (
-  jobId: string,
   payload: TaskPayloadType,
+  jobId: string,
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;
