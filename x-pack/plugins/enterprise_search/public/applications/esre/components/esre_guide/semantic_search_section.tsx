@@ -15,9 +15,9 @@ import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpEnrichmentIllustration from '../../../../assets/images/nlp.svg';
 import vectorSearchIllustration from '../../../../assets/images/vector.svg';
 
+import { ElserPanel } from './elser_panel';
 import { EsreGuideAccordion } from './esre_guide_accordion';
 import { NlpEnrichmentPanel } from './nlp_enrichment_panel';
-import { ElserPanel } from './elser_panel';
 import { VectorSearchPanel } from './vector_search_panel';
 
 export const SemanticSearchSection: React.FC = () => (

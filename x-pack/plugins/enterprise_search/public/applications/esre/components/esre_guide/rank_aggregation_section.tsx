@@ -15,8 +15,8 @@ import linearCombinationIllustration from '../../../../assets/images/linear.svg'
 import rrfRankingIllustration from '../../../../assets/images/rrf.svg';
 
 import { EsreGuideAccordion } from './esre_guide_accordion';
-import { RrfRankingPanel } from './rrf_ranking_panel';
 import { LinearCombinationPanel } from './linear_combination_panel';
+import { RrfRankingPanel } from './rrf_ranking_panel';
 
 export const RankAggregationSection: React.FC = () => (
   <EuiFlexGroup alignItems="center">

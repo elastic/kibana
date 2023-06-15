@@ -20,8 +20,9 @@ import {
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { docLinks } from '../../../shared/doc_links';
+
 import { ANALYTICS_PLUGIN } from '../../../../../common/constants';
+import { docLinks } from '../../../shared/doc_links';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [

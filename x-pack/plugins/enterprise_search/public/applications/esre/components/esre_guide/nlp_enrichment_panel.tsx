@@ -9,14 +9,26 @@ import React from 'react';
 
 import { generatePath } from 'react-router-dom';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiSteps,
+  EuiText,
+} from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { docLinks } from '../../../shared/doc_links';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { ML_MANAGE_TRAINED_MODELS_PATH, NEW_INDEX_PATH } from '../../../enterprise_search_content/routes';
+import {
+  ML_MANAGE_TRAINED_MODELS_PATH,
+  NEW_INDEX_PATH,
+} from '../../../enterprise_search_content/routes';
+import { docLinks } from '../../../shared/doc_links';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
@@ -31,7 +43,6 @@ const steps: EuiContainedStepProps[] = [
               'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.supportedNlpModelsLinkText',
               { defaultMessage: 'Supported NLP models' }
             )}
-            
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -118,9 +129,12 @@ export const NlpEnrichmentPanel: React.FC = () => (
               values={{
                 supportedMlModels: (
                   <EuiLink target="_blank" href={docLinks.supportedNlpModels} external={false}>
-                    {i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.description.supportedMlModelsLinkText', {
-                      defaultMessage: 'supported ML models',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.description.supportedMlModelsLinkText',
+                      {
+                        defaultMessage: 'supported ML models',
+                      }
+                    )}
                   </EuiLink>
                 ),
               }}

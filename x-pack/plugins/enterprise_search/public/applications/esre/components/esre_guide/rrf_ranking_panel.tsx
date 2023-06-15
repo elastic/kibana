@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { generatePath } from 'react-router-dom';
+
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,13 +18,13 @@ import {
   EuiSteps,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { generatePath } from 'react-router-dom';
-import { docLinks } from '../../../shared/doc_links';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { DEV_TOOLS_CONSOLE_PATH } from '../../../enterprise_search_content/routes';
+import { docLinks } from '../../../shared/doc_links';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {

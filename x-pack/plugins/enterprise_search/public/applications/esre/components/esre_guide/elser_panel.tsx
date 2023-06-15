@@ -20,11 +20,12 @@ import {
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { NEW_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {

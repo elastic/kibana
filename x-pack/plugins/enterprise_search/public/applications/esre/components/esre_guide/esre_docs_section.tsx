@@ -9,9 +9,10 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { docLinks } from '../../../shared/doc_links';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { docLinks } from '../../../shared/doc_links';
 
 export const EsreDocsSection: React.FC = () => (
   <EuiFlexGroup alignItems="center">
