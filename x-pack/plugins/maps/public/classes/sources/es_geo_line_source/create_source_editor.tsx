@@ -9,7 +9,6 @@ import React, { Component } from 'react';
 
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { EuiPanel } from '@elastic/eui';
-import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { GeoFieldSelect } from '../../../components/geo_field_select';
 

@@ -28,7 +28,7 @@ export function GeoLineForm(props: Props) {
   const isTimeseries = useMemo(() => {
     return getIsTimeseries(props.indexPattern);
   }, [props.indexPattern]);
-  
+
   function onSortFieldChange(fieldName: string | undefined) {
     if (fieldName !== undefined) {
       props.onSortFieldChange(fieldName);

@@ -14,7 +14,7 @@ import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
 
 export function getIsTimeseries(dataView: DataView): boolean {
-  return dataView.fields.some(field => {
+  return dataView.fields.some((field) => {
     return field.timeSeriesDimension || field.timeSeriesMetric;
   });
 }
