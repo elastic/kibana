@@ -64,7 +64,7 @@ curl --location --request POST '${esUrl}/_application/search_application/${searc
 const apiRequestSnippet = (searchApplicationName: string, params: unknown) => {
   const body = JSON.stringify({ params }, null, 2);
   return `
-POST /_application/search_application/${searchApplicationName}/_search HTTP/1.1
+POST /_application/search_application/${searchApplicationName}/_search
 ${body}
 `;
 };
