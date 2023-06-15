@@ -76,6 +76,7 @@ class DocLinks {
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
   public connectorsSharepoint: string;
+  public connectorsSharepointOnline: string;
   public connectorsWorkplaceSearch: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
@@ -214,6 +215,7 @@ class DocLinks {
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
     this.connectorsSharepoint = '';
+    this.connectorsSharepointOnline = '';
     this.connectorsWorkplaceSearch = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
@@ -354,6 +356,7 @@ class DocLinks {
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
+    this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
