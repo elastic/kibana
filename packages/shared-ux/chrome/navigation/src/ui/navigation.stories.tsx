@@ -115,7 +115,6 @@ const deepLinks: ChromeNavLink[] = [
 ];
 
 const simpleNavigationDefinition: ProjectNavigationDefinition = {
-  homeRef: 'https://elastic.co',
   projectNavigationTree: [
     {
       id: 'example_projet',
@@ -195,13 +194,8 @@ export const SimpleObjectDefinition = (args: ChromeNavigationViewModel & Navigat
 };
 
 const navigationDefinition: ProjectNavigationDefinition = {
-  homeRef: 'https://elastic.co',
   navigationTree: {
     body: [
-      {
-        type: 'cloudLink',
-        preset: 'deployments',
-      },
       // My custom project
       {
         type: 'navGroup',
@@ -330,9 +324,7 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <Navigation homeRef="/">
-          <Navigation.CloudLink preset="deployments" />
-
+        <Navigation>
           <Navigation.RecentlyAccessed />
 
           <Navigation.Group
@@ -380,9 +372,7 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
   );
 };
 
-export const MinimalUIAndCustomCloudLink = (
-  args: ChromeNavigationViewModel & NavigationServices
-) => {
+export const MinimalUI = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of([...navLinksMock, ...deepLinks]),
@@ -398,13 +388,7 @@ export const MinimalUIAndCustomCloudLink = (
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <Navigation homeRef="/">
-          <Navigation.CloudLink
-            title="Some other cool page"
-            href="https://elastic.co"
-            icon="spaces"
-          />
-
+        <Navigation>
           <Navigation.RecentlyAccessed defaultIsCollapsed />
 
           <Navigation.Group
@@ -466,7 +450,7 @@ export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices)
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <Navigation homeRef="/" unstyled>
+        <Navigation unstyled>
           <EuiFlexGroup direction="column" css={{ backgroundColor: 'pink', height: '100%' }}>
             <EuiFlexItem grow>
               <EuiFlexGroup
@@ -550,8 +534,6 @@ export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices)
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          <Navigation.CloudLink preset="deployments" />
         </Navigation>
       </NavigationProvider>
     </NavigationWrapper>

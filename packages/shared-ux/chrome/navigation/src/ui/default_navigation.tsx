@@ -18,7 +18,6 @@ import type {
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
 } from './types';
-import { CloudLink } from './components/cloud_link';
 import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
@@ -39,10 +38,6 @@ const getDefaultNavigationTree = (
 ): NavigationTreeDefinition => {
   return {
     body: [
-      {
-        type: 'cloudLink',
-        preset: 'deployments',
-      },
       {
         type: 'recentlyAccessed',
       },
@@ -72,7 +67,6 @@ const getDefaultNavigationTree = (
 let idCounter = 0;
 
 export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?: string }> = ({
-  homeRef,
   projectNavigationTree,
   navigationTree,
   dataTestSubj,
@@ -92,14 +86,8 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
     ) => {
       return items.map((item) => {
         const isRootNavigationItem = isRootNavigationItemDefinition(item);
-        if (isRootNavigationItem) {
-          if (item.type === 'cloudLink') {
-            return <CloudLink {...item} key={`cloudLink-${idCounter++}`} />;
-          }
-
-          if (item.type === 'recentlyAccessed') {
-            return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
-          }
+        if (isRootNavigationItem && item.type === 'recentlyAccessed') {
+          return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
         }
 
         if (item.preset) {
@@ -134,7 +122,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
   );
 
   return (
-    <Navigation homeRef={homeRef} dataTestSubj={dataTestSubj}>
+    <Navigation dataTestSubj={dataTestSubj}>
       <>
         {renderItems(navigationDefinition.body)}
         {navigationDefinition.footer && (
