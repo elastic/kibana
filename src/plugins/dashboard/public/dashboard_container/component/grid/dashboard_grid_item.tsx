@@ -89,6 +89,9 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
           <>
             <EmbeddablePanelAsync
               // TODO onPanelStatusChange
+              showBadges={true}
+              showNotifications={true}
+              key={type}
               getEmbeddable={() => container.untilEmbeddableLoaded(id)}
               index={index}
             />

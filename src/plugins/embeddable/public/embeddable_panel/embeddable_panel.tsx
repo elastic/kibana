@@ -13,24 +13,23 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, htmlIdGenerator } from '@elastic/e
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import {
-  ViewMode,
   EditPanelAction,
   RemovePanelAction,
   InspectPanelAction,
   CustomizePanelAction,
-  EmbeddableErrorHandler,
-} from '../lib';
+} from './panel_actions';
 import {
   useSelectFromEmbeddableInput,
   useSelectFromEmbeddableOutput,
 } from './use_select_from_embeddable';
-import { EmbeddablePanelHeader } from './embeddable_panel_header';
-import { EmbeddablePanelProps, PanelUniversalActions } from './types';
+import { ViewMode, EmbeddableErrorHandler } from '../lib';
+import { EmbeddablePanelError } from './embeddable_panel_error';
 import { core, embeddableStart, inspector } from '../kibana_services';
-import { EmbeddablePanelError } from '../lib/panel/embeddable_panel_error';
+import { EmbeddablePanelProps, PanelUniversalActions } from './types';
+import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 
 export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
-  const { hideHeader, showShadow, embeddable, containerContext } = panelProps;
+  const { hideHeader, showShadow, embeddable, containerContext, hideInspector } = panelProps;
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -45,8 +44,7 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
     const dateFormat = core.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
     const stateTransfer = embeddableStart.getStateTransfer();
 
-    return {
-      inspectPanel: new InspectPanelAction(inspector),
+    const actions: PanelUniversalActions = {
       customizePanel: new CustomizePanelAction(
         core.overlays,
         core.theme,
@@ -61,7 +59,9 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
         containerContext?.getCurrentPath
       ),
     };
-  }, [containerContext?.getCurrentPath]);
+    if (!hideInspector) actions.inspectPanel = new InspectPanelAction(inspector);
+    return actions;
+  }, [containerContext?.getCurrentPath, hideInspector]);
 
   /**
    * Select state from the embeddable
@@ -80,7 +80,7 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
       next: (output) => {
         if (output.error) setFatalError(output.error);
       },
-      error: setFatalError,
+      error: (error) => setFatalError,
     });
     return () => {
       embeddable?.destroy();

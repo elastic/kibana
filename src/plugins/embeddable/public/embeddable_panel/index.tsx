@@ -7,62 +7,31 @@
  */
 
 import React from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import { EuiLoadingChart } from '@elastic/eui';
 
-import { IEmbeddable } from '../lib';
 import { EmbeddablePanelProps } from './types';
-import { untilPluginStartServicesReady } from '../kibana_services';
+import { ErrorEmbeddable, IEmbeddable } from '../lib';
+import { useEmbeddablePanel } from './use_embeddable_panel';
+import { EmbeddableLoadingIndicator } from './embeddable_loading_indicator';
 
 /**
- * TODO comment
+ * Loads and renders an embeddable.
  */
-export const EmbeddablePanelNew = (props: EmbeddablePanelProps) => {
+export const EmbeddablePanel = (props: EmbeddablePanelProps) => {
   const result = useEmbeddablePanel({ embeddable: props.embeddable });
   if (!result) return <EmbeddableLoadingIndicator />;
   return <result.Panel {...props} />;
 };
 
 /**
- * TODO comment
+ * Loads and renders an embeddable which can be loaded asynchronously.
  */
 export const EmbeddablePanelAsync = (
   props: Omit<EmbeddablePanelProps, 'embeddable'> & {
-    getEmbeddable: () => Promise<IEmbeddable>;
+    getEmbeddable: () => Promise<IEmbeddable | ErrorEmbeddable>;
   }
 ) => {
   const { getEmbeddable, ...panelProps } = props;
   const result = useEmbeddablePanel({ getEmbeddable });
-  if (!result) return <EmbeddableLoadingIndicator />;
+  if (!result) return <EmbeddableLoadingIndicator showShadow={panelProps.showShadow} />;
   return <result.Panel {...panelProps} embeddable={result.unwrappedEmbeddable} />;
-};
-
-const useEmbeddablePanel = ({
-  embeddable,
-  getEmbeddable,
-}: {
-  embeddable?: IEmbeddable;
-  getEmbeddable?: () => Promise<IEmbeddable>;
-}) => {
-  const { loading, value } = useAsync(() => {
-    const startServicesPromise = untilPluginStartServicesReady();
-    const modulePromise = import('./embeddable_panel');
-    if (!embeddable && !getEmbeddable) {
-      throw new Error(
-        'useEmbeddable must be run with either an embeddable or a getEmbeddable function'
-      );
-    }
-    const embeddablePromise = embeddable ? Promise.resolve(embeddable) : getEmbeddable?.();
-    return Promise.all([startServicesPromise, modulePromise, embeddablePromise]);
-  }, [embeddable, getEmbeddable]);
-
-  const panelModule = value?.[1];
-  const unwrappedEmbeddable = value?.[2];
-
-  if (loading || !panelModule || !unwrappedEmbeddable) return;
-  return { unwrappedEmbeddable, Panel: panelModule.EmbeddablePanel };
-};
-
-const EmbeddableLoadingIndicator = () => {
-  return <EuiLoadingChart />;
 };

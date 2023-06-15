@@ -177,12 +177,11 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
         return [...(extraActions ?? []), ...actions];
       }}
-      inspector={showInspector ? inspector : undefined}
+      hideInspector={!showInspector}
       actionPredicate={actionPredicate}
+      showNotifications={false}
       showShadow={false}
       showBadges={false}
-      showNotifications={false}
-      theme={theme}
     />
   );
 };

@@ -26,26 +26,17 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createEditModeActionDefinition } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
 import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
 import { pluginServices } from '../../services/plugin_services';
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { DashboardContainer } from './dashboard_container';
-
-const theme = coreMock.createStart().theme;
-let application: ApplicationStart | undefined;
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
   .fn()
   .mockReturnValue(embeddableFactory);
-
-beforeEach(() => {
-  application = applicationServiceMock.createStartContract();
-});
 
 test('DashboardContainer initializes embeddables', (done) => {
   const container = buildMockDashboard({
@@ -206,22 +197,9 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     firstName: 'Bob',
   });
 
-  const DashboardServicesProvider = pluginServices.getContextProvider();
-
   const component = mount(
     <I18nProvider>
-      <DashboardServicesProvider>
-        <EmbeddablePanel
-          embeddable={embeddable}
-          getActions={() => Promise.resolve([])}
-          getAllEmbeddableFactories={(() => []) as any}
-          getEmbeddableFactory={(() => null) as any}
-          notifications={{} as any}
-          application={application}
-          SavedObjectFinder={() => null}
-          theme={theme}
-        />
-      </DashboardServicesProvider>
+      <EmbeddablePanel embeddable={embeddable} />
     </I18nProvider>
   );
 

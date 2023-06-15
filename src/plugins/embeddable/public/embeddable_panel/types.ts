@@ -6,16 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { Action, UiActionsService } from '@kbn/ui-actions-plugin/public';
+
 import {
   EditPanelAction,
-  EmbeddableContainerContext,
-  EmbeddableContext,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '..';
-import { CustomizePanelAction, InspectPanelAction, RemovePanelAction } from '../lib';
+  RemovePanelAction,
+  InspectPanelAction,
+  CustomizePanelAction,
+} from './panel_actions';
+import { EmbeddableError } from '../lib/embeddables/i_embeddable';
+import { EmbeddableContext, EmbeddableInput, EmbeddableOutput, IEmbeddable } from '..';
+
+export interface EmbeddableContainerContext {
+  /**
+   * Current app's path including query and hash starting from {appId}
+   */
+  getCurrentPath?: () => string;
+}
+
+/**
+ *   Performance tracking types
+ */
+export type EmbeddablePhase = 'loading' | 'loaded' | 'rendered' | 'error';
+export interface EmbeddablePhaseEvent {
+  id: string;
+  status: EmbeddablePhase;
+  error?: EmbeddableError;
+  timeToEvent: number;
+}
 
 export type EmbeddableBadgeAction = Action<
   EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput>>
@@ -29,10 +47,12 @@ export interface EmbeddablePanelProps {
   showBadges?: boolean;
   showShadow?: boolean;
   hideHeader?: boolean;
+  hideInspector?: boolean;
   embeddable: IEmbeddable;
   showNotifications?: boolean;
   containerContext?: EmbeddableContainerContext;
   actionPredicate?: (actionId: string) => boolean;
+  getActions?: UiActionsService['getTriggerCompatibleActions'];
 
   /**
    * Ordinal number of the embeddable in the container, used as a

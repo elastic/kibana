@@ -6,15 +6,5 @@
  * Side Public License, v 1.
  */
 
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-
-export type DashboardEmbeddableService = Pick<
-  EmbeddableStart,
-  | 'getEmbeddableFactories'
-  | 'getEmbeddableFactory'
-  | 'getAllMigrations'
-  | 'getStateTransfer'
-  | 'telemetry'
-  | 'extract'
-  | 'inject'
->;
+export * from './customize_panel_action';
+export * from './custom_time_range_badge';

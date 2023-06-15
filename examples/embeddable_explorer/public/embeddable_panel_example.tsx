@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { IEmbeddable, EmbeddablePanel } from '@kbn/embeddable-plugin/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
@@ -28,11 +28,10 @@ import {
 } from '@kbn/embeddable-examples-plugin/public';
 
 interface Props {
-  embeddableServices: EmbeddableStart;
   searchListContainerFactory: SearchableListContainerFactory;
 }
 
-export function EmbeddablePanelExample({ embeddableServices, searchListContainerFactory }: Props) {
+export function EmbeddablePanelExample({ searchListContainerFactory }: Props) {
   const searchableInput = {
     id: '1',
     title: 'My searchable todo list',
@@ -135,7 +134,7 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
           </EuiText>
           <EuiPanel data-test-subj="embeddedPanelExample" paddingSize="none" role="figure">
             {embeddable ? (
-              <embeddableServices.EmbeddablePanel embeddable={embeddable} />
+              <EmbeddablePanel embeddable={embeddable} />
             ) : (
               <EuiText>Loading...</EuiText>
             )}

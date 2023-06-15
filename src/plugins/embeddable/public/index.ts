@@ -19,10 +19,7 @@ export type {
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
-  EmbeddableChildPanelProps,
   EmbeddableContext,
-  EmbeddablePhaseEvent,
-  EmbeddablePhase,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
@@ -41,28 +38,20 @@ export type {
   EmbeddableEditorState,
   EmbeddablePackageState,
   EmbeddableRendererProps,
-  EmbeddableContainerContext,
   EmbeddableContainerSettings,
 } from './lib';
 export {
-  ACTION_ADD_PANEL,
-  ACTION_EDIT_PANEL,
-  AddPanelAction,
   isReferenceOrValueEmbeddable,
   Container,
   CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
   defaultEmbeddableFactoryProvider,
-  EditPanelAction,
   Embeddable,
-  EmbeddableChildPanel,
   EmbeddableFactoryNotFoundError,
-  EmbeddablePanel,
   EmbeddableRoot,
   ErrorEmbeddable,
   isEmbeddable,
   isErrorEmbeddable,
-  openAddPanelFlyout,
   PANEL_BADGE_TRIGGER,
   panelBadgeTrigger,
   PANEL_NOTIFICATION_TRIGGER,
@@ -93,7 +82,23 @@ export {
   panelHoverTrigger,
 } from './lib';
 
-export { EmbeddablePanelAsync, EmbeddablePanelNew } from './embeddable_panel';
+export { EmbeddablePanelAsync, EmbeddablePanel } from './embeddable_panel';
+export {
+  InspectPanelAction,
+  ACTION_INSPECT_PANEL,
+  CustomizePanelAction,
+  ACTION_CUSTOMIZE_PANEL,
+  EditPanelAction,
+  ACTION_EDIT_PANEL,
+  RemovePanelAction,
+  REMOVE_PANEL_ACTION,
+} from './embeddable_panel/panel_actions';
+
+export type {
+  EmbeddablePhase,
+  EmbeddablePhaseEvent,
+  EmbeddableContainerContext,
+} from './embeddable_panel/types';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 
@@ -108,5 +113,4 @@ export type {
   EmbeddableStart,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
-  EmbeddablePanelHOC,
 } from './plugin';
