@@ -6,9 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Lifecycle } from '@hapi/hapi';
 import { JsonArray, JsonValue } from '@kbn/utility-types';
-import { RouteConfig, RouteMethod } from '@kbn/core/server';
+import { RouteMethod } from '@kbn/core/server';
 import { VersionedRouteConfig } from '@kbn/core-http-server';
 
 export interface CallWithRequestParams extends estypes.RequestBase {
@@ -24,13 +23,6 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   query?: string | object;
   track_total_hits?: boolean | number;
   body?: any;
-}
-
-export type LogsSharedResponse = Lifecycle.ReturnValue;
-
-export interface LogsSharedFrameworkPluginOptions {
-  register: any;
-  options: any;
 }
 
 export interface LogsSharedDatabaseResponse {
@@ -98,49 +90,6 @@ export interface SortedSearchHit extends SearchHit {
     [field: string]: JsonArray;
   };
 }
-
-export type LogsSharedDateRangeAggregationBucket<NestedAggregation extends object = {}> = {
-  from?: number;
-  to?: number;
-  doc_count: number;
-  key: string;
-} & NestedAggregation;
-
-export interface LogsSharedDateRangeAggregationResponse<NestedAggregation extends object = {}> {
-  buckets: Array<LogsSharedDateRangeAggregationBucket<NestedAggregation>>;
-}
-
-export interface LogsSharedTopHitsAggregationResponse {
-  hits: {
-    hits: [];
-  };
-}
-
-export interface LogsSharedMetadataAggregationBucket {
-  key: string;
-}
-
-export interface LogsSharedMetadataAggregationResponse {
-  buckets: LogsSharedMetadataAggregationBucket[];
-}
-
-export interface LogsSharedFieldsResponse {
-  [name: string]: LogsSharedFieldDef;
-}
-
-export interface LogsSharedFieldDetails {
-  searchable: boolean;
-  aggregatable: boolean;
-  type: string;
-}
-
-export interface LogsSharedFieldDef {
-  [type: string]: LogsSharedFieldDetails;
-}
-
-export type LogsSharedRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
-  method: RouteMethod;
-} & RouteConfig<Params, Query, Body, Method>;
 
 export type LogsSharedVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;

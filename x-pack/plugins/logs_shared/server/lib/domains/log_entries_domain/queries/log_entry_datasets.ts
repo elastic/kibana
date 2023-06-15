@@ -99,5 +99,3 @@ export const logEntryDatasetsResponseRT = rt.intersection([
     }),
   }),
 ]);
-
-export type LogEntryDatasetsResponse = rt.TypeOf<typeof logEntryDatasetsResponseRT>;

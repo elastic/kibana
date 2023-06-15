@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportRequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { CoreSetup, IRouter, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type {
@@ -31,7 +30,6 @@ interface FrozenIndexParams {
 export class KibanaFramework {
   public router: IRouter;
   public plugins: LogsSharedServerPluginSetupDeps;
-  private core: CoreSetup<LogsSharedServerPluginStartDeps>;
 
   constructor(
     core: CoreSetup<LogsSharedServerPluginStartDeps>,
@@ -39,7 +37,6 @@ export class KibanaFramework {
   ) {
     this.router = core.http.createRouter();
     this.plugins = plugins;
-    this.core = core;
   }
 
   public registerVersionedRoute<Method extends RouteMethod = any>(
@@ -178,26 +175,5 @@ export class KibanaFramework {
         break;
     }
     return apiResult ? await apiResult : undefined;
-  }
-
-  public async getIndexPatternsServiceWithRequestContext(
-    requestContext: LogsSharedPluginRequestHandlerContext
-  ) {
-    const { savedObjects, elasticsearch } = await requestContext.core;
-    return await this.createIndexPatternsService(
-      savedObjects.client,
-      elasticsearch.client.asCurrentUser
-    );
-  }
-
-  private async createIndexPatternsService(
-    savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient
-  ) {
-    const [, startPlugins] = await this.core.getStartServices();
-    return startPlugins.data.indexPatterns.dataViewsServiceFactory(
-      savedObjectsClient,
-      elasticsearchClient
-    );
   }
 }

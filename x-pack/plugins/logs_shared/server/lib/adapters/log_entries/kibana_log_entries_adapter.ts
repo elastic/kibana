@@ -318,5 +318,3 @@ const LogSummaryResponseRuntimeType = runtimeTypes.type({
     }),
   }),
 });
-
-export type LogSummaryResponse = runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType>;
