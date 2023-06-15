@@ -28,8 +28,11 @@ import { CATEGORIES } from './categories';
 export const EUI_HEADER_HEIGHT = '93px';
 export const BOTTOM_BAR_HEIGHT = '50px';
 
-const isBottomNavItem = (id: SecurityPageName) =>
-  id === SecurityPageName.landing || id === SecurityPageName.administration;
+const getNavItemPosition = (id: SecurityPageName): SolutionSideNavItemPosition =>
+  id === SecurityPageName.landing || id === SecurityPageName.administration
+    ? SolutionSideNavItemPosition.bottom
+    : SolutionSideNavItemPosition.top;
+
 const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.landing;
 
 /**
@@ -41,11 +44,9 @@ const formatLink = (
 ): SolutionSideNavItem => ({
   id: navLink.id,
   label: navLink.title,
-  iconType: navLink.icon,
-  position: isBottomNavItem(navLink.id)
-    ? SolutionSideNavItemPosition.bottom
-    : SolutionSideNavItemPosition.top,
+  position: getNavItemPosition(navLink.id),
   ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
+  ...(navLink.icon && { iconType: navLink.icon }),
   ...(navLink.categories?.length && { categories: navLink.categories }),
   ...(navLink.links?.length && {
     items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {

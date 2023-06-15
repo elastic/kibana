@@ -12,6 +12,7 @@ import {
   SolutionSideNav as SolutionSideNavComponent,
   type SolutionSideNavProps,
   type SolutionSideNavItem,
+  SolutionSideNavItemPosition,
 } from '..';
 
 const items: SolutionSideNavItem[] = [
@@ -93,14 +94,17 @@ const items: SolutionSideNavItem[] = [
     ],
   },
   { id: 'linkTruncated', href: '#', label: 'I have truncated text because I am too long' },
-  { id: 'linkSmall', href: '#', label: 'I am smaller', labelSize: 'xs' },
-];
-const footerItems: SolutionSideNavItem[] = [
-  { id: 'footerLink', href: '#', label: 'I am a footer link' },
+  {
+    id: 'footerLink',
+    href: '#',
+    label: 'I am a footer link',
+    position: SolutionSideNavItemPosition.bottom,
+  },
   {
     id: 'footerLinkPanel',
     href: '#',
     label: 'I also have panel',
+    position: SolutionSideNavItemPosition.bottom,
     items: [
       {
         id: 'footerLinkPanel1',
@@ -110,8 +114,20 @@ const footerItems: SolutionSideNavItem[] = [
       },
     ],
   },
-  { id: 'footerLinkSeparator', href: '#', label: 'I have a separator', appendSeparator: true },
-  { id: 'footerLinkIcon', href: '#', label: 'I have an icon', iconType: 'heart' },
+  {
+    id: 'footerLinkSeparator',
+    href: '#',
+    label: 'I have a separator',
+    appendSeparator: true,
+    position: SolutionSideNavItemPosition.bottom,
+  },
+  {
+    id: 'footerLinkIcon',
+    href: '#',
+    label: 'I have an icon',
+    iconType: 'heart',
+    position: SolutionSideNavItemPosition.bottom,
+  },
 ];
 
 export default {
@@ -136,9 +152,7 @@ export default {
   ],
 };
 
-type Params = Pick<SolutionSideNavProps, 'selectedId' | 'panelTopOffset' | 'panelBottomOffset'>;
-
-export const SolutionSideNav = (params: Params) => (
+export const SolutionSideNav = (params: SolutionSideNavProps) => (
   <>
     <SolutionNav
       name={'Security'}
@@ -148,8 +162,7 @@ export const SolutionSideNav = (params: Params) => (
       // eslint-disable-next-line react/no-children-prop
       children={
         <SolutionSideNavComponent
-          items={items}
-          footerItems={footerItems}
+          items={params.items}
           selectedId={params.selectedId}
           panelBottomOffset={params.panelBottomOffset || undefined}
           panelTopOffset={params.panelTopOffset || undefined}
@@ -168,8 +181,12 @@ export const SolutionSideNav = (params: Params) => (
 SolutionSideNav.argTypes = {
   selectedId: {
     control: { type: 'radio' },
-    options: [...items, ...footerItems].map(({ id }) => id),
+    options: items.map(({ id }) => id),
     defaultValue: 'simpleLink',
+  },
+  items: {
+    control: 'object',
+    defaultValue: items,
   },
   panelTopOffset: {
     control: 'text',

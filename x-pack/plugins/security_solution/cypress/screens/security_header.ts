@@ -19,7 +19,9 @@ export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
 
 export const EXPLORE = '[data-test-subj="solutionSideNavItemLink-explore"]';
 
-export const MANAGE = '[data-test-subj="solutionSideNavItemLink-administration"]';
+export const RULES_LANDING = '[data-test-subj="solutionSideNavPanelLink-rules-landing"]';
+
+export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
 
 // nested links
 export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
@@ -87,15 +89,18 @@ export const openNavigationPanelFor = (page: string) => {
       panel = EXPLORE;
       break;
     }
+    case RULES:
+    case CSP_BENCHMARKS: {
+      panel = RULES_LANDING;
+      break;
+    }
     case ENDPOINTS:
     case TRUSTED_APPS:
     case EVENT_FILTERS:
-    case RULES:
     case POLICIES:
     case EXCEPTIONS:
-    case BLOCKLIST:
-    case CSP_BENCHMARKS: {
-      panel = MANAGE;
+    case BLOCKLIST: {
+      panel = SETTINGS;
       break;
     }
   }
