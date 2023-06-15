@@ -56,6 +56,10 @@ interface SpikeAnalysisTableProps {
   isExpandedRow?: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
@@ -65,6 +69,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   isExpandedRow,
   searchQuery,
   timeRangeMs,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -161,6 +167,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           chartData={histogram}
           isLoading={loading && histogram === undefined}
           label={`${fieldName}:${fieldValue}`}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       ),
       sortable: false,

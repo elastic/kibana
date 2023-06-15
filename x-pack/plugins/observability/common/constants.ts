@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
-export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.threshold';
+export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.threshold';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 export const ALERT_STATUS_ALL = 'all';
