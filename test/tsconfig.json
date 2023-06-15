@@ -62,7 +62,6 @@
     "@kbn/screenshot-mode-plugin",
     "@kbn/dev-utils",
     "@kbn/analytics-client",
-    "@kbn/safer-lodash-set",
     "@kbn/utility-types",
     "@kbn/dev-proc-runner",
     "@kbn/enterprise-search-plugin",
