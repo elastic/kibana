@@ -21,13 +21,6 @@ export const BACK_TO_RULES = i18n.translate(
   }
 );
 
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
-
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {

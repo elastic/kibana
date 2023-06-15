@@ -16,7 +16,6 @@ import {
   EuiResizableContainer,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { EuiResizableContainerActions } from '@elastic/eui/src/components/resizable_container/types';
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -79,12 +78,11 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { HeaderPage } from '../../../../common/components/header_page';
-import type { HeaderPageProps } from '../../../../common/components/header_page';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { NextStep } from '../../../../detections/components/rules/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
+import { CustomHeaderPageMemo } from '..';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -846,35 +844,3 @@ const CreateRulePageComponent: React.FC = () => {
 export const CreateRulePage = React.memo(CreateRulePageComponent);
 
 const MemoEuiAccordion = memo(EuiAccordion);
-
-const CustomHeaderPage: React.FC<
-  HeaderPageProps & {
-    togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
-    isRulePreviewVisible: boolean;
-    setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
-  }
-> = ({
-  backOptions,
-  isLoading,
-  title,
-  togglePanel,
-  isRulePreviewVisible,
-  setIsRulePreviewVisible,
-}) => (
-  <HeaderPage backOptions={backOptions} isLoading={isLoading} title={title}>
-    <EuiButton
-      data-test-subj="preview-container"
-      isSelected={isRulePreviewVisible}
-      fill={isRulePreviewVisible}
-      iconType="visBarVerticalStacked"
-      onClick={() => {
-        togglePanel?.('preview', { direction: 'left' });
-        setIsRulePreviewVisible((isVisible) => !isVisible);
-      }}
-    >
-      {i18n.RULE_PREVIEW_TITLE}
-    </EuiButton>
-  </HeaderPage>
-);
-
-const CustomHeaderPageMemo = memo(CustomHeaderPage);
