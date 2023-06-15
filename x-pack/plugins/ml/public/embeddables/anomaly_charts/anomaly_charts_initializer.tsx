@@ -95,7 +95,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
               name="selectMaxSeriesToPlot"
               value={maxSeriesToPlot}
               onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
-              min={0}
+              min={1}
               max={MAX_ANOMALY_CHARTS_ALLOWED}
             />
           </EuiFormRow>
