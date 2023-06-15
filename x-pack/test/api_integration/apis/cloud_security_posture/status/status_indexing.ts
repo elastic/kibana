@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import Chance from 'chance';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
@@ -15,6 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { deleteIndex, addIndex, createPackagePolicy } from '../helper';
+import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,
@@ -29,64 +29,6 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const chance = new Chance();
-
-  const findingsMockData = [
-    {
-      resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
-      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
-      rule: {
-        name: 'Upper case rule name',
-        section: 'Upper case section',
-        benchmark: {
-          id: 'cis_k8s',
-          posture_type: 'kspm',
-          name: 'CIS Kubernetes V1.23',
-          version: 'v1.0.0',
-        },
-        type: 'process',
-      },
-      cluster_id: 'Upper case cluster id',
-    },
-    {
-      resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
-      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
-      rule: {
-        name: 'lower case rule name',
-        section: 'Another upper case section',
-        benchmark: {
-          id: 'cis_aws',
-          posture_type: 'cspm',
-          name: 'CIS Kubernetes V1.23',
-          version: 'v1.0.0',
-        },
-        type: 'process',
-      },
-      cluster_id: 'Another Upper case cluster id',
-    },
-  ];
-
-  const vulnerabilityMockData = [
-    {
-      resource: {
-        name: 'NameNama',
-        id: '12345',
-      },
-      vulnerability: {
-        severity: 'MEDIUM',
-        package: {
-          name: 'github.com/aws/aws-sdk-go',
-          version: 'v1.42.30',
-        },
-      },
-      cvss: {
-        redhat: {
-          V3Vector: 'CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N',
-          V3Score: 5.6,
-        },
-      },
-    },
-  ];
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
