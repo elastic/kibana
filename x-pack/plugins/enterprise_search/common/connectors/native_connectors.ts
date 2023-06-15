@@ -952,7 +952,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.siteCollectionsTooltip',
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.textExtractionServiceTooltip',
           {
             defaultMessage:
               'Requires a separate deployment of the Elastic Data Extraction Service. ' +
