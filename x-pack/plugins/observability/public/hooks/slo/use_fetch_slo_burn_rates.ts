@@ -30,7 +30,7 @@ const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 interface UseFetchSloBurnRatesParams {
   sloId: string;
-  windows: Array<{ name: string; duration: { value: number; unit: string } }>;
+  windows: Array<{ name: string; duration: string }>;
   shouldRefetch?: boolean;
 }
 

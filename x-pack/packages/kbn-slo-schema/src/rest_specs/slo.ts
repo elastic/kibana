@@ -24,6 +24,7 @@ import {
   kqlCustomIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   apmTransactionDurationIndicatorSchema,
+  durationType,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -150,10 +151,7 @@ const getSLOBurnRatesParamsSchema = t.type({
     windows: t.array(
       t.type({
         name: t.string,
-        duration: t.type({
-          value: t.number,
-          unit: t.string,
-        }),
+        duration: durationType,
       })
     ),
   }),

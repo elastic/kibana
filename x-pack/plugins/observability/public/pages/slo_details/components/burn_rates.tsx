@@ -27,14 +27,14 @@ const LOW_LONG = 'LOW_LONG';
 const LOW_SHORT = 'LOW_SHORT';
 
 const WINDOWS = [
-  { name: CRITICAL_LONG, duration: { value: 1, unit: 'h' } },
-  { name: CRITICAL_SHORT, duration: { value: 5, unit: 'm' } },
-  { name: HIGH_LONG, duration: { value: 6, unit: 'h' } },
-  { name: HIGH_SHORT, duration: { value: 30, unit: 'm' } },
-  { name: MEDIUM_LONG, duration: { value: 24, unit: 'h' } },
-  { name: MEDIUM_SHORT, duration: { value: 120, unit: 'm' } },
-  { name: LOW_LONG, duration: { value: 72, unit: 'h' } },
-  { name: LOW_SHORT, duration: { value: 360, unit: 'm' } },
+  { name: CRITICAL_LONG, duration: '1h' },
+  { name: CRITICAL_SHORT, duration: '5m' },
+  { name: HIGH_LONG, duration: '6h' },
+  { name: HIGH_SHORT, duration: '30m' },
+  { name: MEDIUM_LONG, duration: '24h' },
+  { name: MEDIUM_SHORT, duration: '120m' },
+  { name: LOW_LONG, duration: '72h' },
+  { name: LOW_SHORT, duration: '360m' },
 ];
 
 function getSliAndBurnRate(name: string, burnRates: GetSLOBurnRatesResponse['burnRates']) {

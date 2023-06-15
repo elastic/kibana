@@ -9,7 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { DefaultSLIClient } from './sli_client';
-import { Duration, toDurationUnit } from '../../domain/models';
+import { Duration } from '../../domain/models';
 import { computeSLI, computeBurnRate } from '../../domain/services';
 
 interface Services {
@@ -19,7 +19,7 @@ interface Services {
 
 interface LookbackWindow {
   name: string;
-  duration: { value: number; unit: string };
+  duration: Duration;
 }
 
 export async function getBurnRates(sloId: string, windows: LookbackWindow[], services: Services) {
@@ -29,12 +29,7 @@ export async function getBurnRates(sloId: string, windows: LookbackWindow[], ser
   const sliClient = new DefaultSLIClient(esClient);
   const slo = await repository.findById(sloId);
 
-  const parsedWindows = windows.map((win) => ({
-    ...win,
-    duration: new Duration(win.duration.value, toDurationUnit(win.duration.unit)),
-  }));
-
-  const sliData = await sliClient.fetchSLIDataFrom(slo, parsedWindows);
+  const sliData = await sliClient.fetchSLIDataFrom(slo, windows);
   return Object.keys(sliData).map((key) => {
     return {
       name: key,
