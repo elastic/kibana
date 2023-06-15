@@ -43,8 +43,10 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
   );
 
   const isPanelTitleValid = panelTitle.length > 0;
+  const isMaxSeriesToPlotValid =
+    maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
+  const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid;
 
-  const isFormValid = isPanelTitleValid && maxSeriesToPlot > 0;
   return (
     <EuiModal
       initialFocus="[name=panelTitle]"
@@ -82,6 +84,15 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
           </EuiFormRow>
 
           <EuiFormRow
+            isInvalid={!isMaxSeriesToPlotValid}
+            error={
+              !isMaxSeriesToPlotValid ? (
+                <FormattedMessage
+                  id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
+                  defaultMessage="Maximum number of series to plot must be greater than 1 and less than 50."
+                />
+              ) : undefined
+            }
             label={
               <FormattedMessage
                 id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotLabel"
