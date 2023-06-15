@@ -38,6 +38,13 @@ export const RISK_SCORE_TITLE = i18n.translate(
   }
 );
 
+export const VIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.viewRuleText',
+  {
+    defaultMessage: 'View rule',
+  }
+);
+
 /* Description section */
 
 export const DESCRIPTION_TITLE = i18n.translate(
