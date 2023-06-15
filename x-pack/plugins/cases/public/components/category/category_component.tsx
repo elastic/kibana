@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import * as i18n from '../../common/translations';
 import { EuiFlexGroup, EuiFlexItem, EuiComboBox, EuiHighlight } from '@elastic/eui';
 import { useGetCategories } from '../../containers/use_get_categories';
 
