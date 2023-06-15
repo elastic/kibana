@@ -75,4 +75,4 @@ export const isUserActionType = (field: string): field is UserActionTypes =>
 
 export const isCategoryUserAction = (userAction: unknown): userAction is CategoryUserAction =>
   (userAction as CategoryUserAction)?.type === ActionTypes.category &&
-  (userAction as CategoryUserAction)?.payload?.category != null;
+  (userAction as CategoryUserAction)?.payload?.category !== undefined;

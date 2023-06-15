@@ -41,9 +41,8 @@ describe('createCategoryUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('category-update-user-action-title')).toBeInTheDocument();
-    expect(screen.getByText('added the category')).toBeInTheDocument();
-    expect(screen.getByText('"fantasy"')).toBeInTheDocument();
+    expect(screen.getByTestId('category-update-user-action')).toBeInTheDocument();
+    expect(screen.getByText('added the category "fantasy"')).toBeInTheDocument();
   });
 
   it('renders correctly when the category is removed', () => {
@@ -62,7 +61,7 @@ describe('createCategoryUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('category-delete-user-action-title')).toBeInTheDocument();
+    expect(screen.getByTestId('category-delete-user-action')).toBeInTheDocument();
     expect(screen.getByText('removed the category')).toBeInTheDocument();
   });
 });

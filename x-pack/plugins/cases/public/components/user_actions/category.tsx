@@ -21,14 +21,11 @@ const getLabelTitle = (userAction: UserActionResponse<CategoryUserAction>) => {
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
-      data-test-subj={`${userAction.id}-user-action-title`}
+      data-test-subj={`${userAction.id}-user-action`}
       responsive={false}
     >
       {userAction.action === Actions.update ? (
-        <>
-          <EuiFlexItem grow={false}>{i18n.ADD_CATEGORY}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{`"${category}"`}</EuiFlexItem>
-        </>
+        <EuiFlexItem grow={false}>{`${i18n.ADD_CATEGORY} "${category}"`}</EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>{i18n.REMOVE_CATEGORY}</EuiFlexItem>
       )}
