@@ -77,6 +77,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
         return;
       }
+      setLoading(true);
 
       let canceled = false;
       (async () => {
@@ -104,12 +105,13 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
           return;
         }
 
+        setLoading(false);
+
         if (isErrorEmbeddable(container)) {
           setFatalError(container);
           return;
         }
 
-        setLoading(false);
         if (dashboardRoot.current) {
           container.render(dashboardRoot.current);
         }
@@ -142,8 +144,9 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
     return (
       <div className={viewportClasses}>
-        {loading && !fatalError ? loadingSpinner : <div ref={dashboardRoot} />}
-        {fatalError ? fatalError.render() : null}
+        {loading && loadingSpinner}
+        {fatalError && fatalError.render()}
+        {!fatalError && !loading && <div ref={dashboardRoot} />}
       </div>
     );
   }
