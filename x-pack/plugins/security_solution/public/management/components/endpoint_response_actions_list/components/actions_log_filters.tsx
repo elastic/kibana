@@ -87,13 +87,6 @@ export const ActionsLogFilters = memo(
               data-test-subj={dataTestSubj}
             />
           )}
-          {/* {responseActionsEnabled && (*/}
-          {/*  <AutomatedActionsFilter*/}
-          {/*    dataTestSubj={dataTestSubj}*/}
-          {/*    onChangeTypeFilter={onChangeTypeFilter}*/}
-          {/*    isFlyout={isFlyout}*/}
-          {/*  />*/}
-          {/* )}*/}
         </>
       );
     }, [
