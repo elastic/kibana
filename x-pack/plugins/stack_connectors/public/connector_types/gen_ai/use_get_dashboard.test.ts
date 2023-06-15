@@ -98,6 +98,15 @@ describe('useGetDashboard_function', () => {
     expect(result.current.dashboardUrl).toBe(null);
   });
 
+  it('handles the case where connectorId is empty string', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard({ connectorId: '' }));
+    await waitForNextUpdate();
+    expect(mockDashboard).not.toHaveBeenCalled();
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.dashboardUrl).toBe(null);
+  });
+
   it('handles the case where the dashboard locator is not available.', async () => {
     mockKibana.mockReturnValue({
       services: { ...mockServices, dashboard: {} },

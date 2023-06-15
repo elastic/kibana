@@ -101,7 +101,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
       }
     };
 
-    if (spaceId != null && !dashboardCheckComplete) {
+    if (spaceId != null && connectorId.length > 0 && !dashboardCheckComplete) {
       abortCtrl.current.abort();
       fetchData(getDashboardId(spaceId));
     }
