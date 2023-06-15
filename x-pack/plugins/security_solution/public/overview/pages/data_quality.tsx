@@ -207,7 +207,6 @@ const DataQualityComponent: React.FC = () => {
   if (isSourcererLoading || isSignalIndexNameLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
   }
-
   return (
     <>
       {indicesExist ? (

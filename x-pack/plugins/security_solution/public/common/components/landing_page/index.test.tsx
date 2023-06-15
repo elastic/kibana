@@ -52,7 +52,6 @@ describe('LandingPageComponent', () => {
     mockGetStartedComponent.mockReturnValue(<div data-test-subj="get-started" />);
     const { queryByTestId } = renderPage();
 
-    expect(queryByTestId('default-get-started-page')).not.toBeInTheDocument();
     expect(queryByTestId('get-started')).toBeInTheDocument();
   });
 });

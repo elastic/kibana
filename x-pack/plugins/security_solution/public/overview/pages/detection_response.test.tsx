@@ -44,6 +44,8 @@ jest.mock('../../common/components/filters_global', () => ({
   FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+jest.mock('../../common/components/landing_page');
+
 const defaultUseSourcererReturn = {
   indicesExist: true,
   loading: false,

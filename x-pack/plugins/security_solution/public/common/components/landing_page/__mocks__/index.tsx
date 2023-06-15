@@ -7,6 +7,4 @@
 
 import React from 'react';
 
-export const LandingPageComponent = jest
-  .fn()
-  .mockImplementation(() => <div data-test-subj="landing-page-component" />);
+export const LandingPageComponent = () => <div data-test-subj="siem-landing-page" />;
