@@ -10,11 +10,21 @@ import type { IRouter } from '@kbn/core-http-server';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 
 export const registerPrebootStatusRoute = ({ router }: { router: IRouter }) => {
-  router.get({ path: '/api/status', validate: false }, async (context, req, res) => {
-    return res.custom({
-      body: { status: ServiceStatusLevels.unavailable.toString() },
-      statusCode: 503,
-      bypassErrorFormat: true,
-    });
-  });
+  router.get(
+    {
+      path: '/api/status',
+      options: {
+        authRequired: false,
+        tags: ['api'],
+      },
+      validate: false,
+    },
+    async (context, req, res) => {
+      return res.custom({
+        body: { status: ServiceStatusLevels.unavailable.toString() },
+        statusCode: 503,
+        bypassErrorFormat: true,
+      });
+    }
+  );
 };
