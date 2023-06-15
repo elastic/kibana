@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
+import { LineStyle } from '@kbn/visualization-ui-components/common/types';
 import { AvailableAnnotationIcons } from './constants';
 import {
   ManualEventAnnotationOutput,
@@ -20,7 +22,6 @@ import {
   QueryPointEventAnnotationOutput,
 } from './query_point_event_annotation/types';
 
-export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type Fill = 'inside' | 'outside' | 'none';
 export type ManualAnnotationType = 'manual';
 export type QueryAnnotationType = 'query';
@@ -85,10 +86,9 @@ export type EventAnnotationConfig =
 export interface EventAnnotationGroupAttributes {
   title: string;
   description: string;
-  tags: string[];
   ignoreGlobalFilters: boolean;
   annotations: EventAnnotationConfig[];
-  dataViewSpec?: DataViewSpec;
+  dataViewSpec?: DataViewSpec | null;
 }
 
 export interface EventAnnotationGroupConfig {
@@ -100,6 +100,10 @@ export interface EventAnnotationGroupConfig {
   tags: string[];
   dataViewSpec?: DataViewSpec;
 }
+
+export type EventAnnotationGroupContent = UserContentCommonSchema & {
+  attributes: { indexPatternId: string; dataViewSpec?: DataViewSpec };
+};
 
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs

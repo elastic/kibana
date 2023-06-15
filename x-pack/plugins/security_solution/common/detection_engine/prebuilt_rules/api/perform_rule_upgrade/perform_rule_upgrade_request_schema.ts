@@ -22,11 +22,11 @@ export const RuleUpgradeSpecifier = t.exact(
       rule_id: t.string,
       /**
        * This parameter is needed for handling race conditions with Optimistic Concurrency Control.
-       * Two or more users can call installation/_review and installation/_perform endpoints concurrently.
+       * Two or more users can call upgrade/_review and upgrade/_perform endpoints concurrently.
        * Also, in general the time between these two calls can be anything.
        * The idea is to only allow the user to install a rule if the user has reviewed the exact version
        * of it that had been returned from the _review endpoint. If the version changed on the BE,
-       * installation/_perform endpoint will return a version mismatch error for this rule.
+       * upgrade/_perform endpoint will return a version mismatch error for this rule.
        */
       revision: t.number,
       /**
@@ -41,6 +41,7 @@ export const RuleUpgradeSpecifier = t.exact(
 );
 export type RuleUpgradeSpecifier = t.TypeOf<typeof RuleUpgradeSpecifier>;
 
+export type UpgradeSpecificRulesRequest = t.TypeOf<typeof UpgradeSpecificRulesRequest>;
 export const UpgradeSpecificRulesRequest = t.exact(
   t.intersection([
     t.type({
