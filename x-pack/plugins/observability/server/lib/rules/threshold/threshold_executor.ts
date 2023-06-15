@@ -442,7 +442,7 @@ const formatAlertResult = <AlertResult>(
     timeUnit: TimeUnitChar;
   } & AlertResult
 ) => {
-  const { metric, currentValue, threshold, comparator, warningComparator } = alertResult;
+  const { metric, currentValue, threshold, comparator } = alertResult;
   const noDataValue = i18n.translate(
     'xpack.observability.threshold.rule.alerting.threshold.noDataFormattedValue',
     { defaultMessage: '[NO DATA]' }
