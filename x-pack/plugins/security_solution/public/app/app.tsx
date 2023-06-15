@@ -36,6 +36,7 @@ import { UserPrivilegesProvider } from '../common/components/user_privileges/use
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { PROMPT_CONTEXTS } from '../assistant/content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts';
+import { BASE_SECURITY_SYSTEM_PROMPTS } from '../assistant/content/prompts/system';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -82,6 +83,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   augmentMessageCodeBlocks={augmentMessageCodeBlocks}
                   basePromptContexts={Object.values(PROMPT_CONTEXTS)}
                   baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
+                  baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS}
                   getInitialConversations={getInitialConversation}
                   getComments={getComments}
                   http={http}

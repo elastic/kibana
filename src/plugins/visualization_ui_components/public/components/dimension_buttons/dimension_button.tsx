@@ -7,7 +7,14 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiFontSize,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -41,12 +48,38 @@ export function DimensionButton({
   message?: Message;
 }) {
   return (
-    <div {...otherProps}>
+    <div
+      {...otherProps}
+      css={css`
+        ${useEuiFontSize('s')}
+        border-radius: ${euiThemeVars.euiBorderRadius};
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        min-height: ${euiThemeVars.euiSizeXL};
+        position: relative;
+
+        &:hover,
+        &:focus {
+          .lnsLayerPanel__dimensionRemove {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+          }
+        }
+      `}
+    >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiToolTip content={message?.content} position="left">
             <EuiLink
               className="lnsLayerPanel__dimensionLink"
+              css={css`
+                width: 100%;
+                &:hover {
+                  text-decoration: none;
+                }
+              `}
               data-test-subj="lnsLayerPanel-dimensionLink"
               onClick={() => onClick(accessorConfig.columnId)}
               aria-label={triggerLinkA11yText(label)}
@@ -82,7 +115,11 @@ export function DimensionButton({
         })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
         css={css`
+          margin-right: ${euiThemeVars.euiSizeS};
+          visibility: hidden;
+          opacity: 0;
           color: ${euiThemeVars.euiTextSubduedColor};
+
           &:hover {
             color: ${euiThemeVars.euiColorDangerText};
           }
