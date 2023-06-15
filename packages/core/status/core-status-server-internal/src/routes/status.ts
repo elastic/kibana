@@ -48,6 +48,10 @@ interface StatusHttpBody extends Omit<StatusResponse, 'status'> {
   status: StatusInfo | LegacyStatusInfo;
 }
 
+interface RedactedStatusHttpBody {
+  status: string;
+}
+
 export const registerStatusRoute = ({
   router,
   config,
@@ -68,7 +72,7 @@ export const registerStatusRoute = ({
     {
       path: '/api/status',
       options: {
-        authRequired: !config.allowAnonymous,
+        authRequired: 'optional',
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {
@@ -88,60 +92,103 @@ export const registerStatusRoute = ({
       },
     },
     async (context, req, res) => {
-      const { version, buildSha, buildNum, buildDate } = config.packageInfo;
-      const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
+      const authRequired = !config.allowAnonymous;
+      const isAuthenticated = req.auth.isAuthenticated;
+      const redactedStatus = authRequired && !isAuthenticated;
       const [overall, coreOverall, core, plugins] = await firstValueFrom(combinedStatus$);
 
-      const { v8format = true, v7format = false } = req.query ?? {};
-
-      let statusInfo: StatusInfo | LegacyStatusInfo;
-      if (!v7format && v8format) {
-        statusInfo = {
-          overall,
-          core,
-          plugins,
-        };
-      } else {
-        incrementUsageCounter({ counterName: 'status_v7format' });
-        statusInfo = calculateLegacyStatus({
-          overall,
-          core,
-          plugins,
-          versionWithoutSnapshot,
-        });
-      }
-
-      const lastMetrics = await firstValueFrom(metrics.getOpsMetrics$());
-
-      const body: StatusHttpBody = {
-        name: config.serverName,
-        uuid: config.uuid,
-        version: {
-          number: versionWithoutSnapshot,
-          build_hash: buildSha,
-          build_number: buildNum,
-          build_snapshot: SNAPSHOT_POSTFIX.test(version),
-          build_date: buildDate.toISOString(),
-        },
-        status: statusInfo,
-        metrics: {
-          last_updated: lastMetrics.collected_at.toISOString(),
-          collection_interval_in_millis: metrics.collectionInterval,
-          os: lastMetrics.os,
-          process: lastMetrics.process,
-          processes: lastMetrics.processes,
-          response_times: lastMetrics.response_times,
-          concurrent_connections: lastMetrics.concurrent_connections,
-          requests: {
-            ...lastMetrics.requests,
-            status_codes: lastMetrics.requests.statusCodes,
-          },
-          elasticsearch_client: lastMetrics.elasticsearch_client,
-        },
-      };
+      const responseBody = redactedStatus
+        ? getRedactedStatusResponse({ coreOverall })
+        : await getFullStatusResponse({
+            incrementUsageCounter,
+            config,
+            query: req.query,
+            metrics,
+            statuses: { overall, core, plugins },
+          });
 
       const statusCode = coreOverall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
-      return res.custom({ body, statusCode, bypassErrorFormat: true });
+      return res.custom({ body: responseBody, statusCode, bypassErrorFormat: true });
     }
   );
+};
+
+const getFullStatusResponse = async ({
+  config,
+  incrementUsageCounter,
+  metrics,
+  statuses: { plugins, overall, core },
+  query: { v7format = false, v8format = true },
+}: {
+  config: Deps['config'];
+  incrementUsageCounter: CoreIncrementUsageCounter;
+  metrics: MetricsServiceSetup;
+  statuses: {
+    overall: ServiceStatus<unknown>;
+    core: CoreStatus;
+    plugins: Record<string, ServiceStatus<unknown>>;
+  };
+  query: { v8format?: boolean; v7format?: boolean };
+}): Promise<StatusHttpBody> => {
+  const { version, buildSha, buildNum, buildDate } = config.packageInfo;
+  const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
+
+  let statusInfo: StatusInfo | LegacyStatusInfo;
+  if (!v7format && v8format) {
+    statusInfo = {
+      overall,
+      core,
+      plugins,
+    };
+  } else {
+    incrementUsageCounter({ counterName: 'status_v7format' });
+    statusInfo = calculateLegacyStatus({
+      overall,
+      core,
+      plugins,
+      versionWithoutSnapshot,
+    });
+  }
+
+  const lastMetrics = await firstValueFrom(metrics.getOpsMetrics$());
+
+  const body: StatusHttpBody = {
+    name: config.serverName,
+    uuid: config.uuid,
+    version: {
+      number: versionWithoutSnapshot,
+      build_hash: buildSha,
+      build_number: buildNum,
+      build_snapshot: SNAPSHOT_POSTFIX.test(version),
+      build_date: buildDate.toISOString(),
+    },
+    status: statusInfo,
+    metrics: {
+      last_updated: lastMetrics.collected_at.toISOString(),
+      collection_interval_in_millis: metrics.collectionInterval,
+      os: lastMetrics.os,
+      process: lastMetrics.process,
+      processes: lastMetrics.processes,
+      response_times: lastMetrics.response_times,
+      concurrent_connections: lastMetrics.concurrent_connections,
+      requests: {
+        ...lastMetrics.requests,
+        status_codes: lastMetrics.requests.statusCodes,
+      },
+      elasticsearch_client: lastMetrics.elasticsearch_client,
+    },
+  };
+
+  return body;
+};
+
+const getRedactedStatusResponse = ({
+  coreOverall,
+}: {
+  coreOverall: ServiceStatus;
+}): RedactedStatusHttpBody => {
+  const body: RedactedStatusHttpBody = {
+    status: coreOverall.level.toString(),
+  };
+  return body;
 };
