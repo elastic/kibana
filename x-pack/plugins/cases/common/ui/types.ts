@@ -145,6 +145,7 @@ export interface FilterOptions {
   assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
+  category: string[];
 }
 export type PartialFilterOptions = Partial<FilterOptions>;
 
@@ -164,6 +165,7 @@ export enum SortFieldCase {
   severity = 'severity',
   status = 'status',
   title = 'title',
+  category = 'category',
 }
 
 export type CaseUser = SnakeToCamelCase<User>;

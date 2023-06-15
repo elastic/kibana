@@ -137,6 +137,14 @@ export const TAGS = i18n.translate('xpack.cases.caseView.tags', {
   defaultMessage: 'Tags',
 });
 
+export const CATEGORY = i18n.translate('xpack.cases.caseView.category', {
+  defaultMessage: 'Category',
+});
+
+export const CATEGORIES = i18n.translate('xpack.cases.caseView.categories', {
+  defaultMessage: 'Categories',
+});
+
 export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
   defaultMessage: 'Solution',
 });
@@ -152,6 +160,13 @@ export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.allCases.noTagsAvai
 export const NO_REPORTERS_AVAILABLE = i18n.translate('xpack.cases.caseView.noReportersAvailable', {
   defaultMessage: 'No reporters available.',
 });
+
+export const NO_CATEGORIES_AVAILABLE = i18n.translate(
+  'xpack.cases.allCases.noCategoriesAvailable',
+  {
+    defaultMessage: 'No categories available',
+  }
+);
 
 export const COMMENTS = i18n.translate('xpack.cases.allCases.comments', {
   defaultMessage: 'Comments',

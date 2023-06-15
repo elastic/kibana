@@ -17,6 +17,7 @@ import {
   SECURITY_SOLUTION_OWNER,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '../../common/constants';
 
 import {
@@ -39,6 +40,7 @@ import {
   getCaseConnectors,
   getCaseUserActionsStats,
   deleteFileAttachments,
+  getCategories,
 } from './api';
 
 import {
@@ -48,6 +50,7 @@ import {
   allCasesSnake,
   basicCaseSnake,
   pushedCaseSnake,
+  categories,
   casesStatus,
   casesSnake,
   cases,
@@ -215,7 +218,7 @@ describe('Cases API', () => {
       });
     });
 
-    it('should applies correct all filters', async () => {
+    it('should apply correctly all filters', async () => {
       await getCases({
         filterOptions: {
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -226,6 +229,7 @@ describe('Cases API', () => {
           severity: CaseSeverity.HIGH,
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
+          category: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -596,6 +600,29 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(tags);
+    });
+  });
+
+  describe('getCategories', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(categories);
+    });
+
+    it('should be called with the correct check url, method, signal', async () => {
+      await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_GET_CASE_CATEGORIES_URL, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+        query: {
+          owner: [SECURITY_SOLUTION_OWNER],
+        },
+      });
+    });
+
+    it('should return the correct response', async () => {
+      const resp = await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      expect(resp).toEqual(categories);
     });
   });
 
