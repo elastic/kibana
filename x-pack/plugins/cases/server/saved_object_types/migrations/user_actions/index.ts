@@ -11,17 +11,8 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationMap,
-  SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 
-import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
-import { omitBy } from 'lodash';
-import lt from 'semver/functions/lt';
-import valid from 'semver/functions/valid';
-import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { ConnectorTypes } from '../../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { SanitizedCaseOwner } from '..';
@@ -32,40 +23,14 @@ import { payloadMigration } from './payload';
 import { addSeverityToCreateUserAction } from './severity';
 import type { UserActions } from './types';
 import { addAssigneesToCreateUserAction } from './assignees';
-import {
-  getLensMigrations,
-  isDeferredMigration,
-  isPersistableStateLensAttachmentUserActionSO,
-  logError,
-} from '../utils';
-import { MIN_USER_ACTIONS_DEFERRED_KIBANA_VERSION } from '../constants';
 
 export interface UserActionsMigrationsDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 export const createUserActionsMigrations = (
   deps: UserActionsMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = getLensMigrations({
-    lensEmbeddableFactory: deps.lensEmbeddableFactory,
-    migratorFactory: lensMigratorFactory,
-  });
-
-  /**
-   * In 8.9 we introduced the lens persistable attachment type.
-   * For that reason we want to migrate only the 8.10+ lens migrations.
-   * The code below, removes all <= 8.9 migrations and keeps the rest.
-   */
-  const embeddableMigrationsToMerge = omitBy(embeddableMigrations, (_, version: string) => {
-    if (!valid(version)) {
-      return true;
-    }
-
-    return lt(version, MIN_USER_ACTIONS_DEFERRED_KIBANA_VERSION);
-  });
-
   const userActionsMigrations = {
     '7.10.0': (
       doc: SavedObjectUnsanitizedDoc<UserActions>
@@ -119,55 +84,5 @@ export const createUserActionsMigrations = (
     '8.5.0': addAssigneesToCreateUserAction,
   };
 
-  return mergeSavedObjectMigrationMaps(userActionsMigrations, embeddableMigrationsToMerge);
-};
-
-export const lensMigratorFactory = (
-  migrate: MigrateFunction,
-  migrationVersion: string
-): SavedObjectMigrationParams<UserActionPersistedAttributes, UserActionPersistedAttributes> => {
-  const deferred = isDeferredMigration(MIN_USER_ACTIONS_DEFERRED_KIBANA_VERSION, migrationVersion);
-
-  return {
-    // @ts-expect-error: remove when core changes the types
-    deferred,
-    transform: (
-      doc: SavedObjectUnsanitizedDoc<UserActionPersistedAttributes>,
-      context: SavedObjectMigrationContext
-    ): SavedObjectSanitizedDoc<UserActionPersistedAttributes> => {
-      try {
-        if (!isPersistableStateLensAttachmentUserActionSO(doc)) {
-          return Object.assign(doc, { references: doc.references ?? [] });
-        }
-
-        const { persistableStateAttachmentState } = doc.attributes.payload.comment;
-
-        const migratedLensState = migrate(persistableStateAttachmentState);
-
-        return {
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            payload: {
-              ...doc.attributes.payload,
-              comment: {
-                ...doc.attributes.payload.comment,
-                persistableStateAttachmentState: migratedLensState,
-              },
-            },
-          },
-          references: doc.references ?? [],
-        };
-      } catch (error) {
-        logError({
-          id: doc.id,
-          context,
-          error,
-          docType: 'user action persistable lens attachment',
-          docKey: 'user-action',
-        });
-        return Object.assign(doc, { references: doc.references ?? [] });
-      }
-    },
-  };
+  return userActionsMigrations;
 };

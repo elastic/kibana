@@ -17,16 +17,9 @@ import { isFunction, mapValues } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { LENS_ATTACHMENT_TYPE } from '../../../common';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
-import { CommentType, ActionTypes } from '../../../common/api';
-import type {
-  AttributesTypePersistableState,
-  AttributesTypeUser,
-  CommentUserAction,
-  CommentRequestPersistableStateType,
-} from '../../../common/api';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import { CommentType } from '../../../common/api';
+import type { AttributesTypePersistableState, AttributesTypeUser } from '../../../common/api';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {
@@ -88,22 +81,6 @@ export const isPersistableStateAttachmentSO = (
   doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
 ): doc is SavedObjectUnsanitizedDoc<AttributesTypePersistableState> => {
   return doc.attributes.type === CommentType.persistableState;
-};
-
-type PersistableStateUserAction = Omit<CommentUserAction, 'payload'> & {
-  payload: { comment: CommentRequestPersistableStateType };
-};
-
-export const isPersistableStateLensAttachmentUserActionSO = (
-  doc: SavedObjectUnsanitizedDoc<UserActionPersistedAttributes>
-): doc is SavedObjectUnsanitizedDoc<PersistableStateUserAction> => {
-  const userAction = doc as SavedObjectUnsanitizedDoc<PersistableStateUserAction>;
-
-  return (
-    doc.attributes.type === ActionTypes.comment &&
-    userAction.attributes.payload.comment.type === CommentType.persistableState &&
-    userAction.attributes.payload.comment.persistableStateAttachmentTypeId === LENS_ATTACHMENT_TYPE
-  );
 };
 
 interface GetLensMigrationsArgs<T> {
