@@ -29,7 +29,6 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
-      "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch"
     ],
