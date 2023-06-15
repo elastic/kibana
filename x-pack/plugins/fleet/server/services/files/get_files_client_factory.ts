@@ -10,8 +10,6 @@ import type { LoggerFactory } from '@kbn/core/server';
 
 import { FILE_STORAGE_INTEGRATION_INDEX_NAMES } from '../../../common/constants';
 
-import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
-
 import { FleetFilesClientError } from '../../errors';
 
 import { FleetToHostFilesClient } from './client_to_host';
@@ -40,8 +38,8 @@ export const getFilesClientFactory = ({
       return new FleetFromHostFilesClient(
         esClient,
         logger.get('fleetFiles', packageName),
-        getFileMetadataIndexName(packageName),
-        getFileDataIndexName(packageName)
+        `.fleet-paul.filedelivery-meta-${packageName}.fromhost`,
+        `.fleet-paul.filedelivery-data-${packageName}.fromhost`
       );
     },
 
@@ -55,8 +53,8 @@ export const getFilesClientFactory = ({
       return new FleetToHostFilesClient(
         esClient,
         logger.get('fleetFiles', packageName),
-        `.fleet-paul.filedelivery-meta-${packageName}`,
-        `.fleet-paul.filedelivery-data-${packageName}`,
+        `.fleet-paul.filedelivery-meta-${packageName}.tohost`,
+        `.fleet-paul.filedelivery-data-${packageName}.tohost`,
         maxFileBytes
       );
     },

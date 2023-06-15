@@ -203,6 +203,7 @@ export const sendEndpointActionResponse = async (
         type: 'file',
       },
       src: 'endpoint',
+      '@timestamp': new Date().toISOString(),
     });
 
     // Index the file's metadata
@@ -211,6 +212,7 @@ export const sendEndpointActionResponse = async (
       id: getFileDownloadId(action, action.agents[0]),
       body: fileMetaDoc,
       refresh: 'wait_for',
+      op_type: 'create',
     });
 
     // Index the file content (just one chunk)
@@ -228,8 +230,10 @@ export const sendEndpointActionResponse = async (
               'UEsDBAoACQAAAFZeRFWpAsDLHwAAABMAAAAMABwAYmFkX2ZpbGUudHh0VVQJAANTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAMOcoyEq/Q4VyG02U9O0LRbGlwP/y5SOCfRKqLz1rsBQSwcIqQLAyx8AAAATAAAAUEsBAh4DCgAJAAAAVl5EVakCwMsfAAAAEwAAAAwAGAAAAAAAAQAAAKSBAAAAAGJhZF9maWxlLnR4dFVUBQADU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFIAAAB1AAAAAAA=',
               'base64'
             ),
+            '@timestamp': new Date().toISOString(),
           }),
           refresh: 'wait_for',
+          op_type: 'create',
         },
         {
           headers: {

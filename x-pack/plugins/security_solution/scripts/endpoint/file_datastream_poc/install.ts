@@ -29,12 +29,19 @@ export const installDataStreams = async (
 
   // Create the actual stream for endpoint
   if (createDs) {
-    const metaCreateDsResponse = await esClient.indices.createDataStream({
-      name: '.fleet-paul.filedelivery-meta-endpoint',
-    });
+    const metaCreateDsResponse = Promise.all([
+      esClient.indices.createDataStream({
+        name: '.fleet-paul.filedelivery-meta-endpoint.tohost',
+      }),
+      esClient.indices.createDataStream({
+        name: '.fleet-paul.filedelivery-meta-endpoint.fromhost',
+      }),
+    ]);
 
     log.indent(4, () => {
-      log.info(`created datastream: '.fleet-paul.filedelivery-meta-endpoint'`);
+      log.info(`created datastream:
+        '.fleet-paul.filedelivery-meta-endpoint.tohost'
+        '.fleet-paul.filedelivery-meta-endpoint.fromhost'`);
     });
     log.verbose(metaCreateDsResponse);
   }
@@ -52,12 +59,19 @@ export const installDataStreams = async (
 
   // Create the actual stream for endpoint
   if (createDs) {
-    const dataCreateDsResponse = await esClient.indices.createDataStream({
-      name: '.fleet-paul.filedelivery-data-endpoint',
-    });
+    const dataCreateDsResponse = Promise.all([
+      esClient.indices.createDataStream({
+        name: '.fleet-paul.filedelivery-data-endpoint.tohost',
+      }),
+      esClient.indices.createDataStream({
+        name: '.fleet-paul.filedelivery-data-endpoint.fromhost',
+      }),
+    ]);
 
     log.indent(4, () => {
-      log.info(`created datastream: '.fleet-paul.filedelivery-data-endpoint'`);
+      log.info(`created datastream:
+        '.fleet-paul.filedelivery-data-endpoint.tohost'
+        '.fleet-paul.filedelivery-data-endpoint.fromhost'`);
     });
     log.verbose(dataCreateDsResponse);
   }
