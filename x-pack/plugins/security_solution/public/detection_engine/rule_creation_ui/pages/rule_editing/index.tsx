@@ -230,6 +230,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   form={defineStepForm}
                   optionsSelected={eqlOptionsSelected}
                   setOptionsSelected={setEqlOptionsSelected}
+                  key="defineStep"
                   indexPattern={indexPattern}
                   isIndexPatternLoading={isIndexPatternLoading}
                   browserFields={browserFields}
