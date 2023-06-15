@@ -184,9 +184,12 @@ export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTags
   defaultMessage: 'A tag must contain at least one non-space character.',
 });
 
-export const CATEGORIES_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldCategoriesEmptyError', {
-  defaultMessage: 'A category must contain at least one non-space character.',
-});
+export const CATEGORIES_EMPTY_ERROR = i18n.translate(
+  'xpack.cases.createCase.fieldCategoriesEmptyError',
+  {
+    defaultMessage: 'A category must contain at least one non-space character.',
+  }
+);
 
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
   defaultMessage: 'No tags are added',
@@ -379,4 +382,5 @@ export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
  */
 export const ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX = ADD_TAG_CUSTOM_OPTION_LABEL('{searchValue}');
 
-export const ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX = ADD_CATEGORY_CUSTOM_OPTION_LABEL('{searchValue}');
+export const ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX =
+  ADD_CATEGORY_CUSTOM_OPTION_LABEL('{searchValue}');
