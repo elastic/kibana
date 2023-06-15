@@ -1,0 +1,102 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiComboBox, EuiHighlight } from '@elastic/eui';
+import { useGetCategories } from '../../containers/use_get_categories';
+
+export interface CategoryComponentProps {
+  isLoading: boolean;
+  onChange: (category: string) => void;
+  category: string | null | undefined;
+}
+
+export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
+  ({ isLoading, onChange, category }) => {
+    const { data: categoriesOptions = [] } = useGetCategories();
+
+    const options = useMemo(() => {
+      return categoriesOptions.map((label: string) => ({
+        label,
+      }));
+    }, [categoriesOptions]);
+
+    const [selectedOption, setSelectedOption] = useState<[{ label: string }] | []>(
+      category ? [{ label: category }] : []
+    );
+
+    const onComboChange = useCallback(
+      (currentOptions: EuiComboBoxOptionOption[]) => {
+        setSelectedOption([currentOptions[0]]);
+        onChange(currentOptions[0].label);
+      },
+      [onChange]
+    );
+
+    const renderOption = useCallback(
+      (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
+        return (
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexStart"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="none"
+              responsive={false}
+            >
+              <EuiFlexItem>
+                <EuiHighlight search={searchValue} className={contentClassName}>
+                  {option.label}
+                </EuiHighlight>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexGroup>
+        );
+      },
+      []
+    );
+
+    const onCreateOption = (searchValue = '') => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+      if (!normalizedSearchValue) {
+        return;
+      }
+
+      const newOption = {
+        label: searchValue,
+      };
+
+      onChange(searchValue);
+      setSelectedOption([newOption]);
+    };
+
+    return (
+      <EuiComboBox
+        fullWidth
+        isLoading={isLoading}
+        options={options}
+        placeholder="Select a single option"
+        singleSelection={{ asPlainText: true }}
+        data-test-subj="categoriesComboBox"
+        selectedOptions={selectedOption}
+        onChange={onComboChange}
+        renderOption={renderOption}
+        onCreateOption={onCreateOption}
+        rowHeight={35}
+        aria-label="category-combo-box"
+      />
+    );
+  }
+);
+
+CategoryComponent.displayName = 'CategoryComponent';
