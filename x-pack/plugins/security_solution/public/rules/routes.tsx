@@ -57,7 +57,7 @@ const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
-    <PluginTemplateWrapper>
+    <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
       <TrackApplicationView viewId={SecurityPageName.rules}>
         <Switch>
           <Route // Redirect to first tab if none specified

@@ -39,12 +39,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   );
 
   const handleResize = useCallback(() => {
-    const gscrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    const scrollbarExists =
-      ref.current != null && ref.current?.scrollHeight > ref.current?.clientHeight;
-    if (scrollbarExists) {
-      setFlyoutPaneWidth(ref.current?.offsetWidth + gscrollbarWidth);
-    }
     setFlyoutPaneWidth(ref.current?.offsetWidth);
   }, []);
 

@@ -26,6 +26,8 @@ import {
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useSyncFlyoutStateWithUrl } from '../../../flyout/url/use_sync_flyout_state_with_url';
 
+const HeaderHeight = 24; // px
+const TimelineBarHeight = 24; // px
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
  * rather than applying them to the timeline bar directly
@@ -36,6 +38,10 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     $addBottomPadding?: boolean;
   }
 >`
+  ${({ $isShowingTimelineOverlay }) =>
+    $isShowingTimelineOverlay
+      ? `overflow: hidden; height: calc(100vh - ${HeaderHeight}px - ${TimelineBarHeight}px);`
+      : ''}
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
     background: ${({ theme }) =>
