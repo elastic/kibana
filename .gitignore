@@ -19,6 +19,8 @@ target
 /build
 .jruby
 .idea
+/.idea/*
+!/.idea/.run
 *.iml
 *.log
 types.eslint.config.js

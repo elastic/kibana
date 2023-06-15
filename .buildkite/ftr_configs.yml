@@ -95,6 +95,10 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
+  # ES Archiver Benchmarking, probably will not be in CI
+  - test/api_integration/apis/local_and_ess_is_es_archiver_slow/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/serverless_is_es_archiver_slow/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -424,3 +428,4 @@ enabled:
   - x-pack/performance/journeys/apm_service_inventory.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
+
