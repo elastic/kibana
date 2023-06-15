@@ -74,8 +74,10 @@ describe('<ControlGeneralViewSelector />', () => {
     onDuplicate.mockClear();
   });
 
-  it('by default has name and operation fields added', () => {
-    const { getByTestId } = render(<WrappedComponent />);
+  it.only('by default has name and operation fields added', () => {
+    const { getByTestId, debug } = render(<WrappedComponent />);
+
+    console.log(debug());
 
     expect(getByTestId('cloud-defend-selectorcondition-name')).toBeTruthy();
     expect(getByTestId('cloud-defend-selectorcondition-operation')).toBeTruthy();

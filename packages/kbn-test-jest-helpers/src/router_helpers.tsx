@@ -8,6 +8,7 @@
 
 import React, { Component, ComponentType } from 'react';
 import { MemoryRouter, withRouter } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { History, LocationDescriptor } from 'history';
 
@@ -37,7 +38,9 @@ export const WithMemoryRouter =
   (props: any) =>
     (
       <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
-        <WrappedComponent {...props} />
+        <CompatRouter>
+          <WrappedComponent {...props} />
+        </CompatRouter>
       </MemoryRouter>
     );
 

@@ -8,8 +8,6 @@
 import { getByTestId, fireEvent, getByText, act } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
@@ -75,16 +73,12 @@ function setup({
 
   return renderWithTheme(
     <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper>
-        <Router history={history}>
-          <CompatRouter>
-            <UrlParamsProvider>
-              <ApmServiceContextProvider>
-                <SearchBar showTransactionTypeSelector />
-              </ApmServiceContextProvider>
-            </UrlParamsProvider>
-          </CompatRouter>
-        </Router>
+      <MockApmPluginContextWrapper history={history}>
+        <UrlParamsProvider>
+          <ApmServiceContextProvider>
+            <SearchBar showTransactionTypeSelector />
+          </ApmServiceContextProvider>
+        </UrlParamsProvider>
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );

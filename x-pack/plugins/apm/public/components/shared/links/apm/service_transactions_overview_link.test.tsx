@@ -9,8 +9,6 @@ import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import {
@@ -22,14 +20,10 @@ const history = createMemoryHistory();
 
 function wrapper({ queryParams }: { queryParams?: Record<string, unknown> }) {
   return ({ children }: { children: React.ReactElement }) => (
-    <MockApmPluginContextWrapper>
-      <Router history={history}>
-        <CompatRouter>
-          <MockUrlParamsContextProvider params={queryParams}>
-            {children}
-          </MockUrlParamsContextProvider>
-        </CompatRouter>
-      </Router>
+    <MockApmPluginContextWrapper history={history}>
+      <MockUrlParamsContextProvider params={queryParams}>
+        {children}
+      </MockUrlParamsContextProvider>
     </MockApmPluginContextWrapper>
   );
 }

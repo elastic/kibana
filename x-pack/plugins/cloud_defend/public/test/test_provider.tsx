@@ -57,15 +57,15 @@ export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>
-        <Router history={params.history}>
-          <CompatRouter>
-            <I18nProvider>
+        <I18nProvider>
+          <Router history={params.history}>
+            <CompatRouter>
               <Switch>
                 <Route path="*" render={() => <>{children}</>} />
               </Switch>
-            </I18nProvider>
-          </CompatRouter>
-        </Router>
+            </CompatRouter>
+          </Router>
+        </I18nProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
   );

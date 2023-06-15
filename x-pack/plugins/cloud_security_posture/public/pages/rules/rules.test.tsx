@@ -12,7 +12,6 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
 import { TestProvider } from '../../test/test_provider';
 import { useCspIntegrationInfo } from './use_csp_integration';
-import { type RouteComponentProps } from 'react-router-dom';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
@@ -54,11 +53,7 @@ const getTestComponent =
     };
     return (
       <TestProvider core={core}>
-        <Rules
-          {...({
-            match: { params },
-          } as RouteComponentProps<PageUrlParams>)}
-        />
+        <Rules />
       </TestProvider>
     );
   };

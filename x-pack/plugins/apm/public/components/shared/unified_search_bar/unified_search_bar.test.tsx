@@ -7,8 +7,7 @@
 
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
-import { Router, useLocation } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { useLocation } from 'react-router-dom';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
@@ -77,12 +76,8 @@ function setup({
 
   const wrapper = mount(
     <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper>
-        <Router history={history}>
-          <CompatRouter>
-            <UnifiedSearchBar />
-          </CompatRouter>
-        </Router>
+      <MockApmPluginContextWrapper history={history}>
+        <UnifiedSearchBar />
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );

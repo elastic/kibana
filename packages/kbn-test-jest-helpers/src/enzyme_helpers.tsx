@@ -108,12 +108,7 @@ export function mountWithIntl<T>(
 ) {
   const options = getOptions(context, childContextTypes, props);
 
-  return mount(
-    <Router history={createMemoryHistory()}>
-      <CompatRouter>{nodeWithIntlProp(node)}</CompatRouter>
-    </Router>,
-    options
-  );
+  return mount(nodeWithIntlProp(node), options);
 }
 
 /**

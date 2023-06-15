@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject, registerTestBed, TestBed, mountWithIntl } from '@kbn/test-jest-helpers';
 import { MemoryRouter } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { chromeServiceMock, applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api.service';
@@ -53,7 +54,9 @@ describe('getting started', () => {
   test('should render getting started component', async () => {
     const component = await shallow(
       <MemoryRouter>
-        <GettingStarted />
+        <CompatRouter>
+          <GettingStarted />
+        </CompatRouter>
       </MemoryRouter>
     );
 

@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -105,9 +106,11 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
 
   return mountWithIntl(
     <MemoryRouter>
-      <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView)}>
-        <DiscoverMainRoute {...props} />
-      </KibanaContextProvider>
+      <CompatRouter>
+        <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView)}>
+          <DiscoverMainRoute {...props} />
+        </KibanaContextProvider>
+      </CompatRouter>
     </MemoryRouter>
   );
 };

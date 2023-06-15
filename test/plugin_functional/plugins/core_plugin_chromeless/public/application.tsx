@@ -9,6 +9,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import {
   EuiPage,
@@ -48,9 +49,11 @@ const Home = () => (
 
 const ChromelessApp = ({ basename }: { basename: string }) => (
   <Router basename={basename}>
-    <EuiPage>
-      <Route path="/" component={Home} />
-    </EuiPage>
+    <CompatRouter>
+      <EuiPage>
+        <Route path="/" component={Home} />
+      </EuiPage>
+    </CompatRouter>
   </Router>
 );
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { useParams } from 'react-router-dom-v5-compat';
+import { CompatRouter, useParams } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -58,19 +58,21 @@ const AlertingExampleApp = ({
 }: AlertingExampleComponentParams) => {
   return (
     <Router basename={basename}>
-      <EuiPage>
-        <Route path={`/`} exact={true}>
-          <Page title={`Home`} isHome={true}>
-            <DocumentationPage triggersActionsUi={triggersActionsUi} />
-          </Page>
-        </Route>
-        <Route path={`/rule/:id`}>
-          <ViewAlertPageRoute http={http} />
-        </Route>
-        <Route path={`/astros/:id`}>
-          <ViewPeopleInSpaceAlertPageRoute http={http} />
-        </Route>
-      </EuiPage>
+      <CompatRouter>
+        <EuiPage>
+          <Route path={`/`} exact={true}>
+            <Page title={`Home`} isHome={true}>
+              <DocumentationPage triggersActionsUi={triggersActionsUi} />
+            </Page>
+          </Route>
+          <Route path={`/rule/:id`}>
+            <ViewAlertPageRoute http={http} />
+          </Route>
+          <Route path={`/astros/:id`}>
+            <ViewPeopleInSpaceAlertPageRoute http={http} />
+          </Route>
+        </EuiPage>
+      </CompatRouter>
     </Router>
   );
 };
