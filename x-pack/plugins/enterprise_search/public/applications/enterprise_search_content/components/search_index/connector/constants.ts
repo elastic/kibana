@@ -90,6 +90,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     docsUrl: docLinks.connectorsSharepoint,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint,
+    platinumOnly: true,
+  },
+  sharepoint_online: {
+    docsUrl: docLinks.connectorsSharepointOnline,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint_online,
     platinumOnly: true,
   },
