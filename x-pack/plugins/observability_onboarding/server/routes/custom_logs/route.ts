@@ -72,7 +72,9 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       state: t.record(t.string, t.unknown),
     }),
   }),
-  async handler(resources): Promise<{ apiKeyEncoded: string; id: string }> {
+  async handler(
+    resources
+  ): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
     const {
       context,
       params: {
@@ -97,7 +99,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       observabilityOnboardingState: { state } as ObservabilityOnboardingState,
     });
 
-    return { apiKeyEncoded, id };
+    return { apiKeyEncoded, onboardingId: id };
   },
 });
 
@@ -161,17 +163,18 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 });
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/observability_onboarding/custom_logs/{id}/progress',
+  endpoint:
+    'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
   options: { tags: [] },
   params: t.type({
     path: t.type({
-      id: t.string,
+      onboardingId: t.string,
     }),
   }),
   async handler(resources): Promise<{ progress: Record<string, string> }> {
     const {
       params: {
-        path: { id },
+        path: { onboardingId },
       },
       core,
       request,
@@ -182,7 +185,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     const savedObservabilityOnboardingState =
       (await getObservabilityOnboardingState({
         savedObjectsClient,
-        savedObjectId: id,
+        savedObjectId: onboardingId,
       })) || null;
     const progress = { ...savedObservabilityOnboardingState?.progress };
 

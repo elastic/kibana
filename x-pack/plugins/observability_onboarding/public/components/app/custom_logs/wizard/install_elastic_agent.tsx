@@ -43,7 +43,6 @@ export function InstallElasticAgent() {
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
-  const [onboardingId, setOnboardingId] = useState('');
 
   function onInspect() {
     goToStep('inspect');
@@ -63,7 +62,12 @@ export function InstallElasticAgent() {
 
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent) {
+      const { apiKeyEncoded, onboardingId } = getState();
+      if (
+        CurrentStep === InstallElasticAgent &&
+        !apiKeyEncoded &&
+        !onboardingId
+      ) {
         return callApi(
           'GET /internal/observability_onboarding/custom_logs/privileges'
         );
@@ -86,9 +90,12 @@ export function InstallElasticAgent() {
     error,
   } = useFetcher(
     (callApi) => {
+      const { apiKeyEncoded, onboardingId } = getState();
       if (
         CurrentStep === InstallElasticAgent &&
-        monitoringRole?.hasPrivileges
+        monitoringRole?.hasPrivileges &&
+        !apiKeyEncoded &&
+        !onboardingId
       ) {
         return callApi(
           'POST /internal/observability_onboarding/custom_logs/save',
@@ -112,34 +119,30 @@ export function InstallElasticAgent() {
     [monitoringRole?.hasPrivileges]
   );
 
+  const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
+
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent) {
-        const options = {
-          headers: {
-            authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
-          },
-          params: {
-            query: { id: installShipperSetup?.id ?? '' },
-          },
-        };
-
+      if (
+        CurrentStep === InstallElasticAgent &&
+        apiKeyEncoded &&
+        onboardingId
+      ) {
         return callApi(
           'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
-          installShipperSetup?.apiKeyEncoded
-            ? options
-            : { params: options.params }
+          {
+            headers: { authorization: `ApiKey ${apiKeyEncoded}` },
+            params: { query: { onboardingId } },
+          }
         );
       }
     },
-    [installShipperSetup?.apiKeyEncoded]
+    [apiKeyEncoded, onboardingId]
   );
 
   useEffect(() => {
-    setOnboardingId(installShipperSetup?.id ?? '');
-  }, [installShipperSetup?.id]);
-
-  const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
+    setState({ ...getState(), onboardingId, apiKeyEncoded });
+  }, [onboardingId, apiKeyEncoded]);
 
   const {
     data: progressData,
@@ -149,8 +152,8 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (CurrentStep === InstallElasticAgent && onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/{id}/progress',
-          { params: { path: { id: onboardingId } } }
+          'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
+          { params: { path: { onboardingId } } }
         );
       }
     },
@@ -272,7 +275,14 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        {monitoringRoleStatus !== FETCH_STATUS.NOT_INITIATED &&
+        {apiKeyEncoded && onboardingId ? (
+          <ApiKeyBanner
+            payload={{ apiKeyEncoded, onboardingId }}
+            hasPrivileges
+            status={FETCH_STATUS.SUCCESS}
+          />
+        ) : (
+          monitoringRoleStatus !== FETCH_STATUS.NOT_INITIATED &&
           monitoringRoleStatus !== FETCH_STATUS.LOADING && (
             <ApiKeyBanner
               payload={installShipperSetup}
@@ -280,7 +290,8 @@ export function InstallElasticAgent() {
               status={installShipperSetupStatus}
               error={error}
             />
-          )}
+          )
+        )}
         <EuiSpacer size="m" />
         <EuiSteps
           steps={[
@@ -367,7 +378,8 @@ export function InstallElasticAgent() {
                     checked={wizardState.autoDownloadConfig}
                     onChange={onAutoDownloadConfig}
                     disabled={
-                      isInstallStarted || !monitoringRole?.hasPrivileges
+                      isInstallStarted ||
+                      (monitoringRole && !monitoringRole?.hasPrivileges)
                     }
                   />
                   {isInstallStarted && (
