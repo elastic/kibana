@@ -81,10 +81,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const pageDeps = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
-    dataViewsService: deps.data.dataViews,
-    config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
-    contentManagement: deps.contentManagement,
   };
 
   const services = useMemo(() => {

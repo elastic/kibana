@@ -37,7 +37,7 @@ export const Page: FC = () => {
     services: { share },
   } = useMlKibana();
 
-  const mlContext = useDataSource();
+  const dataSourceContext = useDataSource();
   const navigateToPath = useNavigateToPath();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
@@ -45,7 +45,7 @@ export const Page: FC = () => {
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { selectedDataView, selectedSavedSearch } = mlContext;
+  const { selectedDataView, selectedSavedSearch } = dataSourceContext;
 
   const isTimeBasedIndex = timeBasedIndexCheck(selectedDataView);
   const hasGeoFields = useMemo(
