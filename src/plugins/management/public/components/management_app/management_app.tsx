@@ -16,6 +16,7 @@ import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/p
 
 import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { CloudChatProviderPluginStart } from '@kbn/cloud-chat-provider-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import {
   ManagementSection,
@@ -38,10 +39,11 @@ export interface ManagementAppDependencies {
   kibanaVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
+  cloudChat?: CloudChatProviderPluginStart;
 }
 
 export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
-  const { setBreadcrumbs, isSidebarEnabled$ } = dependencies;
+  const { setBreadcrumbs, isSidebarEnabled$, cloudChat } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
@@ -114,6 +116,7 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
             dependencies={dependencies}
           />
         </KibanaPageTemplate>
+        {cloudChat?.Chat ? <cloudChat.Chat /> : null}
       </KibanaThemeProvider>
     </I18nProvider>
   );

@@ -107,7 +107,7 @@ export const QuickNav = () => {
     [cnvmMgmtIntegrationLink, cspmMgmtIntegrationLink, kspmMgmtIntegrationLink, history]
   );
 
-  console.log(history.location);
+  // console.log(history.location);
 
   return (
     <EuiPopover

@@ -17,6 +17,7 @@ import {
   IRuleDataClient,
 } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
+import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 import { observabilityFeatureId } from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
@@ -55,7 +56,7 @@ import { ObservabilityConfig } from '../../..';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/threshold_rule/constants';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
-  context: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: false,
