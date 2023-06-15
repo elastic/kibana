@@ -13,6 +13,7 @@ export type SecuritySolutionPluginRouterMock = RouterMock<SecuritySolutionReques
 type AppClientMock = jest.Mocked<AppClient>;
 const createAppClientMock = (): AppClientMock =>
   ({
+    getAlertsIndex: jest.fn(),
     getSignalsIndex: jest.fn(),
     getSourcererDataViewId: jest.fn().mockReturnValue('security-solution'),
   } as unknown as AppClientMock);
