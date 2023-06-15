@@ -113,7 +113,6 @@ describe('set signal status', () => {
               update: {
                 _id: 'somefakeid1',
                 _index: '.alerts-security.alerts-default',
-                _source: true,
               },
             },
             {
@@ -123,7 +122,6 @@ describe('set signal status', () => {
               update: {
                 _id: 'somefakeid2',
                 _index: '.alerts-security.alerts-default',
-                _source: true,
               },
             },
             {

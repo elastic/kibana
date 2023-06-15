@@ -71,7 +71,7 @@ describe('Detections Alerts API', () => {
         status: 'closed',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        body: '{"conflicts":"proceed","status":"closed","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+        body: '{"conflicts":"proceed","status":"closed","query":{"bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -84,7 +84,7 @@ describe('Detections Alerts API', () => {
         status: 'open',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        body: '{"conflicts":"proceed","status":"open","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+        body: '{"conflicts":"proceed","status":"open","query":{"bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
