@@ -6,17 +6,10 @@
  */
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSteps,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const steps: EuiContainedStepProps[] = [
   {

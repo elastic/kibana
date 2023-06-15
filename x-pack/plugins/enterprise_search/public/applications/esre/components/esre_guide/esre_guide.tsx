@@ -7,10 +7,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-
-import { SetEsreChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
 import {
   EuiImage,
   EuiPanel,
@@ -19,15 +15,19 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import analyticsIllustration from '../../../../assets/images/analytics.svg';
 import scalableIllustration from '../../../../assets/images/scalable.svg';
 import simplifyIllustration from '../../../../assets/images/simplify.svg';
-import { SemanticSearchSection } from './semantic_search_section';
-import { RankAggregationSection } from './rank_aggregation_section';
-import { MeasurePerformanceSection } from './measure_performance_section';
+import { SetEsreChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
+
 import { EsreDocsSection } from './esre_docs_section';
+import { MeasurePerformanceSection } from './measure_performance_section';
+import { RankAggregationSection } from './rank_aggregation_section';
+import { SemanticSearchSection } from './semantic_search_section';
 
 export const EsreGuide: React.FC = () => {
   return (

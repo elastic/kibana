@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import { EsreGuideAccordion } from './esre_guide_accordion';
 
-import rrfRankingIllustration from '../../../../assets/images/rrf.svg';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import linearCombinationIllustration from '../../../../assets/images/linear.svg';
+import rrfRankingIllustration from '../../../../assets/images/rrf.svg';
+
+import { EsreGuideAccordion } from './esre_guide_accordion';
 
 export const RankAggregationSection: React.FC = () => (
   <>
@@ -61,23 +58,34 @@ export const RankAggregationSection: React.FC = () => (
                   defaultMessage: 'Intelligently combines rankings without configuration',
                 }
               )}
-              content={<><p>Placeholder</p></>}
+              content={
+                <>
+                  <p>Placeholder</p>
+                </>
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EsreGuideAccordion
               id="linearCombinationAccordion"
               icon={linearCombinationIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.linearCombinationAccordion.title', {
-                defaultMessage: 'Linear combination',
-              })}
+              title={i18n.translate(
+                'xpack.enterpriseSearch.esre.linearCombinationAccordion.title',
+                {
+                  defaultMessage: 'Linear combination',
+                }
+              )}
               description={i18n.translate(
                 'xpack.enterpriseSearch.esre.linearCombinationAccordion.description',
                 {
                   defaultMessage: 'Weighted results from multiple rankings',
                 }
               )}
-              content={<><p>Placeholder</p></>}
+              content={
+                <>
+                  <p>Placeholder</p>
+                </>
+              }
             />
           </EuiFlexItem>
         </EuiFlexGroup>

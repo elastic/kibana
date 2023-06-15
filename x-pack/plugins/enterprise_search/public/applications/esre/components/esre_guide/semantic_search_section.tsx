@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import { EsreGuideAccordion } from './esre_guide_accordion';
+
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpEnrichmentIllustration from '../../../../assets/images/nlp.svg';
 import vectorSearchIllustration from '../../../../assets/images/vector.svg';
+
+import { EsreGuideAccordion } from './esre_guide_accordion';
 
 export const SemanticSearchSection: React.FC = () => (
   <>
@@ -52,7 +49,7 @@ export const SemanticSearchSection: React.FC = () => (
           <EuiFlexItem grow={false}>
             <EsreGuideAccordion
               id="elserAccordion"
-              initialIsOpen={true}
+              initialIsOpen
               icon={elserIllustration}
               title={i18n.translate('xpack.enterpriseSearch.esre.elserAccordion.title', {
                 defaultMessage: 'Elastic Learned Sparse Encoder',
@@ -63,7 +60,11 @@ export const SemanticSearchSection: React.FC = () => (
                   defaultMessage: 'Instant semantic search capabilities',
                 }
               )}
-              content={<><p>Placeholder</p></>}
+              content={
+                <>
+                  <p>Placeholder</p>
+                </>
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -79,7 +80,11 @@ export const SemanticSearchSection: React.FC = () => (
                   defaultMessage: 'Powerful similarity searches for unstructured data',
                 }
               )}
-              content={<><p>Placeholder</p></>}
+              content={
+                <>
+                  <p>Placeholder</p>
+                </>
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -95,7 +100,11 @@ export const SemanticSearchSection: React.FC = () => (
                   defaultMessage: 'Insightful data enrichment with trained ML models',
                 }
               )}
-              content={<><p>Placeholder</p></>}
+              content={
+                <>
+                  <p>Placeholder</p>
+                </>
+              }
             />
           </EuiFlexItem>
         </EuiFlexGroup>
