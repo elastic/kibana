@@ -244,6 +244,40 @@ describe('convertToDateHistogramColumn', () => {
         mockConvertMetricToColumns.mockReturnValue(metricColumns);
       },
     ],
+    [
+      'significant terms column',
+      [
+        aggId,
+        {
+          agg: {
+            aggType: BUCKET_TYPES.SIGNIFICANT_TERMS,
+            aggParams: {
+              field: stubLogstashDataView.fields[0].name,
+              size: 5,
+            },
+          } as SchemaConfig<BUCKET_TYPES.SIGNIFICANT_TERMS>,
+          dataView: stubLogstashDataView,
+          aggs,
+          metricColumns,
+          visType,
+        },
+        '',
+        false,
+      ],
+      {
+        operationType: 'terms',
+        sourceField: stubLogstashDataView.fields[0].name,
+        isBucketed: true,
+        params: {
+          size: 5,
+          include: [],
+          exclude: [],
+          orderBy: { type: 'significant' },
+          orderDirection: 'desc',
+        },
+      },
+      () => {},
+    ],
   ])('should return %s', (_, input, expected, actions) => {
     actions();
     if (expected === null) {
