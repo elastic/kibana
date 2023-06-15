@@ -93,6 +93,48 @@ describe('findActiveNodes', () => {
       '[0][0]': {
         id: 'group1',
         title: 'Group 1',
+        path: ['root', 'group1'],
+      },
+      '[0][0][0]': {
+        id: 'item1',
+        title: 'Item 1',
+        deepLink: getDeepLink('item1', 'item1'),
+        path: ['root', 'group1', 'item1'],
+      },
+    };
+
+    expect(findActiveNodes('/foo/item1', flattendNavTree)).toEqual([
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+        },
+        {
+          id: 'group1',
+          title: 'Group 1',
+          path: ['root', 'group1'],
+        },
+        {
+          id: 'item1',
+          title: 'Item 1',
+          deepLink: getDeepLink('item1', 'item1'),
+          path: ['root', 'group1', 'item1'],
+        },
+      ],
+    ]);
+  });
+
+  test('should find multiple active node that match', () => {
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'root',
+        title: 'Root',
+        path: ['root'],
+      },
+      '[0][0]': {
+        id: 'group1',
+        title: 'Group 1',
         deepLink: getDeepLink('group1', 'group1'),
         path: ['root', 'group1'],
       },
@@ -108,57 +150,19 @@ describe('findActiveNodes', () => {
         path: ['root', 'group1', 'group1A', 'item1'],
       },
       '[0][1]': {
-        id: 'item2',
-        title: 'Item 2',
-        deepLink: getDeepLink('item2', 'item2'),
-        path: ['root', 'item2'],
-      },
-      '[0][2]': {
         id: 'group2',
         title: 'Group 2',
         path: ['root', 'group2'],
       },
-      '[0][2][0]': {
-        id: 'item3',
-        title: 'Item 3',
-        deepLink: getDeepLink('item3', 'item3'),
-        path: ['root', 'group2', 'item3'],
-      },
-      '[0][3]': {
-        id: 'group3',
-        title: 'Group 3',
-        path: ['root', 'group3'],
-      },
-      '[0][3][0]': {
-        id: 'item4',
-        title: 'Item 4',
+      '[0][1][0]': {
+        id: 'item2',
+        title: 'Item 2',
         deepLink: getDeepLink('item1', 'item1'), // Same link as above, should match both
-        path: ['root', 'group3', 'item4'],
+        path: ['root', 'group2', 'item2'],
       },
     };
 
-    expect(findActiveNodes('/foo/item3', flattendNavTree)).toEqual([
-      [
-        {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
-        },
-        {
-          id: 'group2',
-          title: 'Group 2',
-          path: ['root', 'group2'],
-        },
-        {
-          id: 'item3',
-          title: 'Item 3',
-          deepLink: getDeepLink('item3', 'item3'),
-          path: ['root', 'group2', 'item3'],
-        },
-      ],
-    ]);
-
-    // Should match both item1 and item4
+    // Should match both item1 and item2
     expect(findActiveNodes('/foo/item1', flattendNavTree)).toEqual([
       [
         {
@@ -191,17 +195,125 @@ describe('findActiveNodes', () => {
           path: ['root'],
         },
         {
-          id: 'group3',
-          title: 'Group 3',
-          path: ['root', 'group3'],
+          id: 'group2',
+          title: 'Group 2',
+          path: ['root', 'group2'],
         },
         {
-          id: 'item4',
-          title: 'Item 4',
+          id: 'item2',
+          title: 'Item 2',
           deepLink: getDeepLink('item1', 'item1'),
-          path: ['root', 'group3', 'item4'],
+          path: ['root', 'group2', 'item2'],
         },
       ],
     ]);
+  });
+
+  test('should find the active node that contains hash routes', () => {
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'root',
+        title: 'Root',
+        path: ['root'],
+      },
+      '[0][1]': {
+        id: 'item1',
+        title: 'Item 1',
+        deepLink: getDeepLink('item1', `item1#/foo/bar`),
+        path: ['root', 'item1'],
+      },
+    };
+
+    expect(findActiveNodes(`/foo/item1#/foo/bar`, flattendNavTree)).toEqual([
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+        },
+        {
+          id: 'item1',
+          title: 'Item 1',
+          deepLink: getDeepLink('item1', `item1#/foo/bar`),
+          path: ['root', 'item1'],
+        },
+      ],
+    ]);
+  });
+
+  test('should match the longest matching node', () => {
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'root',
+        title: 'Root',
+        path: ['root'],
+      },
+      '[0][1]': {
+        id: 'item1',
+        title: 'Item 1',
+        deepLink: getDeepLink('item1', `item1#/foo`),
+        path: ['root', 'item1'],
+      },
+      '[0][2]': {
+        id: 'item2',
+        title: 'Item 2',
+        deepLink: getDeepLink('item2', `item1#/foo/bar`), // Should match this one
+        path: ['root', 'item2'],
+      },
+    };
+
+    expect(findActiveNodes(`/foo/item1#/foo/bar`, flattendNavTree)).toEqual([
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+        },
+        {
+          id: 'item2',
+          title: 'Item 2',
+          deepLink: getDeepLink('item2', `item1#/foo/bar`),
+          path: ['root', 'item2'],
+        },
+      ],
+    ]);
+  });
+
+  test('should match all the routes under an app root', () => {
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'root',
+        title: 'Root',
+        path: ['root'],
+      },
+      '[0][1]': {
+        id: 'item1',
+        title: 'Item 1',
+        deepLink: getDeepLink('item1', `appRoot`),
+        path: ['root', 'item1'],
+      },
+    };
+
+    const expected = [
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+        },
+        {
+          id: 'item1',
+          title: 'Item 1',
+          deepLink: getDeepLink('item1', `appRoot`),
+          path: ['root', 'item1'],
+        },
+      ],
+    ];
+
+    expect(findActiveNodes(`/foo/appRoot`, flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes(`/foo/appRoot/foo`, flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes(`/foo/appRoot/bar`, flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes(`/foo/appRoot/bar?q=hello`, flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes(`/foo/other`, flattendNavTree)).toEqual([]);
   });
 });

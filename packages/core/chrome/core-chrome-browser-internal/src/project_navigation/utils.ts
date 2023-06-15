@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { matchPath } from 'react-router-dom';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 
 const wrapIdx = (index: number): string => `[${index}]`;
@@ -42,6 +40,27 @@ export const flattenNav = (
     return acc;
   }, {});
 };
+
+function trim(str: string) {
+  return (divider: string) => {
+    const position = str.indexOf(divider);
+
+    if (position !== -1) {
+      str = str.slice(0, position);
+    }
+
+    return str;
+  };
+}
+
+export const stripQueryParams = (url: string) => trim(url)('?');
+
+function serializeDeeplinkUrl(url?: string) {
+  if (!url) {
+    return undefined;
+  }
+  return stripQueryParams(url);
+}
 
 /**
  * Extract the parent paths from a key
@@ -83,15 +102,30 @@ export const findActiveNodes = (
   navTree: Record<string, ChromeProjectNavigationNode>
 ): ChromeProjectNavigationNode[][] => {
   const activeNodes: ChromeProjectNavigationNode[][] = [];
+  const matches: string[][] = [];
 
-  Object.entries(navTree).forEach(([path, node]) => {
-    const nodePath = node.deepLink?.url;
-    const match = matchPath(currentPathname, { path: nodePath });
-    if (match) {
-      const keysWithParents = extractParentPaths(path);
-      activeNodes.push(keysWithParents.map((key) => navTree[key]));
+  Object.entries(navTree).forEach(([key, node]) => {
+    const nodePath = serializeDeeplinkUrl(node.deepLink?.url);
+
+    if (nodePath) {
+      const match = currentPathname.startsWith(nodePath);
+      if (match) {
+        const { length } = nodePath;
+        if (!matches[length]) {
+          matches[length] = [];
+        }
+        matches[length].push(key);
+      }
     }
   });
+
+  if (matches.length > 0) {
+    const longestMatch = matches[matches.length - 1];
+    longestMatch.forEach((key) => {
+      const keysWithParents = extractParentPaths(key);
+      activeNodes.push(keysWithParents.map((k) => navTree[k]));
+    });
+  }
 
   return activeNodes;
 };
