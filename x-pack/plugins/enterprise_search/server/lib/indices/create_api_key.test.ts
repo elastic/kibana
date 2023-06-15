@@ -42,7 +42,7 @@ describe('createApiKey lib function', () => {
           cluster: [],
           index: [
             {
-              names: [indexName],
+              names: [indexName, `.search-acl-filter-my-index`],
               privileges: ['all'],
             },
           ],

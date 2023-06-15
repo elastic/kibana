@@ -17,6 +17,14 @@ export const createApiKey = async (
   indexName: string,
   keyName: string
 ) => {
+  let aclIndexName: string;
+  if (indexName.startsWith('search-')) {
+    const suffix = indexName.replace('search-', '');
+    aclIndexName = `.search-acl-filter-${suffix}`;
+  } else {
+    aclIndexName = `.search-acl-filter-${indexName}`;
+  }
+
   return await security.authc.apiKeys.create(request, {
     name: keyName,
     role_descriptors: {
@@ -24,7 +32,7 @@ export const createApiKey = async (
         cluster: [],
         index: [
           {
-            names: [indexName],
+            names: [indexName, aclIndexName],
             privileges: ['all'],
           },
         ],
