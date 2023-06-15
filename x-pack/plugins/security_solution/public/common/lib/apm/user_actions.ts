@@ -32,17 +32,6 @@ export const RULES_TABLE_ACTIONS = {
   LOAD_PREBUILT: `${APP_UI_ID} rulesTable loadPrebuilt`,
 };
 
-export const ADD_PREBUILT_RULES_TABLE_ACTIONS = {
-  REFRESH: `${APP_UI_ID} addPrebuiltRulesTable refresh`,
-  FILTER: `${APP_UI_ID} addPrebuiltRulesTable filter`,
-  LOAD_PREBUILT: `${APP_UI_ID} addPrebuiltRulesTable loadPrebuilt`,
-};
-
-export const UPGRADE_PREBUILT_RULES_TABLE_ACTIONS = {
-  REFRESH: `${APP_UI_ID} upgradePrebuiltRulesTable refresh`,
-  FILTER: `${APP_UI_ID} upgradePrebuiltRulesTable filter`,
-};
-
 export const TIMELINE_ACTIONS = {
   SAVE: `${APP_UI_ID} timeline save`,
   DUPLICATE: `${APP_UI_ID} timeline duplicate`, // it includes duplicate template, create template from timeline and create timeline from template

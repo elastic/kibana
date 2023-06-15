@@ -9,8 +9,6 @@ import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { UPGRADE_PREBUILT_RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
-import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from './translations';
 import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';
 import { RuleSearchField } from '../rules_table_filters/rule_search_field';
@@ -25,7 +23,6 @@ const FilterWrapper = styled(EuiFlexGroup)`
  * Contains search bar and tag selection
  */
 const UpgradePrebuiltRulesTableFiltersComponent = () => {
-  const { startTransaction } = useStartTransaction();
   const {
     state: { filterOptions, tags },
     actions: { setFilterOptions },
@@ -35,26 +32,24 @@ const UpgradePrebuiltRulesTableFiltersComponent = () => {
 
   const handleOnSearch = useCallback(
     (filterString) => {
-      startTransaction({ name: UPGRADE_PREBUILT_RULES_TABLE_ACTIONS.FILTER });
       setFilterOptions((filters) => ({
         ...filters,
         filter: filterString.trim(),
       }));
     },
-    [setFilterOptions, startTransaction]
+    [setFilterOptions]
   );
 
   const handleSelectedTags = useCallback(
     (newTags: string[]) => {
       if (!isEqual(newTags, selectedTags)) {
-        startTransaction({ name: UPGRADE_PREBUILT_RULES_TABLE_ACTIONS.FILTER });
         setFilterOptions((filters) => ({
           ...filters,
           tags: newTags,
         }));
       }
     },
-    [selectedTags, setFilterOptions, startTransaction]
+    [selectedTags, setFilterOptions]
   );
 
   return (
