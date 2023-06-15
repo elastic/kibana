@@ -28,6 +28,7 @@ const mockServices = {
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
   },
+  // TODO needs theme to provide theme$ observable, the required value here depends on how Discover services are changed
 };
 
 jest.mock('../../hooks/use_discover_services', () => {
