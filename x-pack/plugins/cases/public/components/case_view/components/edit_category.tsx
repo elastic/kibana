@@ -24,7 +24,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 
 export interface EditCategoryProps {
   isLoading: boolean;
-  onSubmit: (category: string) => void;
+  onSubmit: (category: string | null | undefined) => void;
   category: string | null | undefined;
 }
 
