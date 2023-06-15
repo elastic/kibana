@@ -14,7 +14,9 @@ export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmb
 };
 
 export const hasInput = (embeddable: DashboardVisualizationEmbeddable) => {
-  const { attributes, timeRange } = embeddable.getInput();
+  const { timeRange } = embeddable.getInput();
+  const attributes = embeddable.getFullAttributes();
+  console.log('hasInput----', attributes, timeRange);
   return attributes != null && timeRange != null;
 };
 

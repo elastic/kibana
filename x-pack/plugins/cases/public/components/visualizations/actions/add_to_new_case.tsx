@@ -30,7 +30,8 @@ interface Props {
 }
 
 const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
-  const { attributes, timeRange } = embeddable.getInput();
+  const { timeRange } = embeddable.getInput();
+  const attributes = embeddable.getFullAttributes();
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
     onClose,
     onSuccess,
