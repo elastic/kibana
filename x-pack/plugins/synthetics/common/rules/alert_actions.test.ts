@@ -101,6 +101,7 @@ describe('Legacy Alert Actions factory', () => {
           },
           message:
             'Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered',
+          messageHTML: null,
           subject:
             'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} has recovered',
           to: ['test@email.com'],
@@ -118,6 +119,7 @@ describe('Legacy Alert Actions factory', () => {
           },
           message:
             'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}, checked at {{context.checkedAt}}',
+          messageHTML: null,
           subject: 'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} is down',
           to: ['test@email.com'],
         },
@@ -435,6 +437,7 @@ describe('Alert Actions factory', () => {
           },
           message:
             'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          messageHTML: null,
           subject:
             '"{{context.monitorName}}" ({{context.locationName}}) {{context.recoveryStatus}} - Elastic Synthetics',
           to: ['test@email.com'],
@@ -452,6 +455,7 @@ describe('Alert Actions factory', () => {
           },
           message:
             '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          messageHTML: null,
           subject:
             '"{{context.monitorName}}" ({{context.locationName}}) is down - Elastic Synthetics',
           to: ['test@email.com'],

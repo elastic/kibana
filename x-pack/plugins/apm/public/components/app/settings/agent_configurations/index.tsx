@@ -31,7 +31,7 @@ export function AgentConfigurations() {
     status,
   } = useFetcher(
     (callApmApi) =>
-      callApmApi('GET /api/apm/settings/agent-configuration 2023-05-22'),
+      callApmApi('GET /api/apm/settings/agent-configuration 2023-10-31'),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );
