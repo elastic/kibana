@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const EsreDocsSection: React.FC = () => (
-  <EuiFlexGroup direction="row" alignItems="center">
+  <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={4}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>

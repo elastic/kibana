@@ -18,7 +18,7 @@ import vectorSearchIllustration from '../../../../assets/images/vector.svg';
 import { EsreGuideAccordion } from './esre_guide_accordion';
 
 export const SemanticSearchSection: React.FC = () => (
-  <EuiFlexGroup direction="row" alignItems="center">
+  <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={4}>
       <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
         <EuiFlexItem grow={false}>

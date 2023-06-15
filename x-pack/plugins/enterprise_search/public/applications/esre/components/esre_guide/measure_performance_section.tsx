@@ -51,7 +51,7 @@ const steps: EuiContainedStepProps[] = [
 ];
 
 export const MeasurePerformanceSection: React.FC = () => (
-  <EuiFlexGroup direction="row" alignItems="center">
+  <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={4}>
       <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
         <EuiFlexItem grow={false}>

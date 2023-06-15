@@ -39,7 +39,7 @@ export const EsreGuideAccordion = ({
         id={id}
         initialIsOpen={initialIsOpen}
         buttonContent={
-          <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type={icon} size="xxl" />
             </EuiFlexItem>
