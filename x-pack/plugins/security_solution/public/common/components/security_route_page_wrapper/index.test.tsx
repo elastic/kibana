@@ -38,11 +38,9 @@ describe('SecurityRoutePageWrapper', () => {
   it('renders children when authorized', () => {
     mockUseLinkAuthorized.mockReturnValue(true);
     const { getByTestId } = render(
-      <Router history={mockHistory}>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
-          <TestComponent />
-        </SecurityRoutePageWrapper>
-      </Router>,
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
 
       { wrapper: Wrapper }
     );
@@ -56,11 +54,9 @@ describe('SecurityRoutePageWrapper', () => {
     mockUseLinkAuthorized.mockReturnValue(false);
     mockUseUpsellingPage.mockReturnValue(TestUpsellPage);
     const { getByTestId } = render(
-      <Router history={mockHistory}>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
-          <TestComponent />
-        </SecurityRoutePageWrapper>
-      </Router>,
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
 
       { wrapper: Wrapper }
     );
@@ -72,11 +68,9 @@ describe('SecurityRoutePageWrapper', () => {
     mockUseLinkAuthorized.mockReturnValue(false);
     mockUseUpsellingPage.mockReturnValue(undefined);
     const { getByTestId } = render(
-      <Router history={mockHistory}>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
-          <TestComponent />
-        </SecurityRoutePageWrapper>
-      </Router>,
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
 
       { wrapper: Wrapper }
     );

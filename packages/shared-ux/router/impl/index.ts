@@ -7,5 +7,5 @@
  */
 
 export { Route } from './route';
-export { Router } from './router';
+export { HashRouter, BrowserRouter, MemoryRouter, Router } from './router';
 export { Routes } from './routes';

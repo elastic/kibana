@@ -30,7 +30,7 @@ describe('SettingsRouter', () => {
   it('renders', () => {
     const wrapper = shallow(<SettingsRouter />);
 
-    expect(wrapper.find(Switch)).toHaveLength(1);
+    expect(wrapper.find(Routes)).toHaveLength(1);
     expect(wrapper.find(Redirect)).toHaveLength(1);
     expect(wrapper.find(Connectors)).toHaveLength(1);
     expect(wrapper.find(Customize)).toHaveLength(1);

@@ -27,7 +27,7 @@ const PacksComponent = () => {
   }
 
   return (
-    <Routes legacySwitch={false}>
+    <Routes>
       <Route path={`${match.url}/add`}>
         {permissions.writePacks ? <AddPackPage /> : <MissingPrivileges />}
       </Route>
@@ -37,7 +37,7 @@ const PacksComponent = () => {
       <Route path={`${match.url}/:packId`}>
         <PackDetailsPage />
       </Route>
-      <Route path={`${match.url}/`}>
+      <Route path={`${match.url}`}>
         <PacksPage />
       </Route>
     </Routes>

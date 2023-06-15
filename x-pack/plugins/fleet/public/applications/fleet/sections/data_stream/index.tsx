@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { DefaultLayout } from '../../layouts';
@@ -15,17 +14,13 @@ import { DefaultLayout } from '../../layouts';
 import { DataStreamListPage } from './list_page';
 
 export const DataStreamApp: React.FunctionComponent = () => {
-  const history = useHistory();
-
   return (
-    <Router history={history}>
-      <Routes>
-        <Route path={FLEET_ROUTING_PATHS.data_streams}>
-          <DefaultLayout section="data_streams">
-            <DataStreamListPage />
-          </DefaultLayout>
-        </Route>
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path={FLEET_ROUTING_PATHS.data_streams}>
+        <DefaultLayout section="data_streams">
+          <DataStreamListPage />
+        </DefaultLayout>
+      </Route>
+    </Routes>
   );
 };

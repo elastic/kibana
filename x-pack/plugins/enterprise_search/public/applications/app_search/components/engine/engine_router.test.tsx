@@ -107,7 +107,7 @@ describe('EngineRouter', () => {
   it('renders a default engine overview', () => {
     const wrapper = shallow(<EngineRouter />);
 
-    expect(wrapper.find(Switch)).toHaveLength(1);
+    expect(wrapper.find(Routes)).toHaveLength(1);
     expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
