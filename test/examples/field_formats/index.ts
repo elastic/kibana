@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.findAll('example2 sample formatted')
         ).map((wrapper) => wrapper.getVisibleText())
       );
-      expect(formattedValues).to.eql(['US$1,000.00', 'US$100,000.00', 'US$100,000,000.00']);
+      expect(formattedValues).to.eql(['$1,000.00', '$100,000.00', '$100,000,000.00']);
     });
   });
 }
