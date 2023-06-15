@@ -194,7 +194,15 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
+  | 'connector'
+  | 'description'
+  | 'status'
+  | 'tags'
+  | 'title'
+  | 'settings'
+  | 'severity'
+  | 'assignees'
+  | 'category'
 >;
 
 export interface UpdateByKey {
