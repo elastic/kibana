@@ -438,8 +438,7 @@ export const useSourcererDataView = (
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
       sourcererDataView.patternList.join(','),
-      sourcererDataView.fields,
-      false
+      sourcererDataView.fields
     );
     return dataViewBrowserFields;
   }, [sourcererDataView.fields, sourcererDataView.patternList]);
