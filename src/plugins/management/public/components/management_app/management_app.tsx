@@ -43,7 +43,12 @@ export interface ManagementAppDependencies {
   isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
-export const ManagementApp = ({ dependencies, appBasePath, history, theme$ }: ManagementAppProps) => {
+export const ManagementApp = ({
+  dependencies,
+  appBasePath,
+  history,
+  theme$,
+}: ManagementAppProps) => {
   const { setBreadcrumbs, isSidebarEnabled$ } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
