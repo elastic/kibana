@@ -53,7 +53,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkSnooze');
