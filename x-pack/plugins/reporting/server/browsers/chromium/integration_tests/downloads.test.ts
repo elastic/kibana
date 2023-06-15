@@ -7,10 +7,8 @@
 
 import assert from 'assert';
 import axios from 'axios';
-import path from 'path';
 import { createMockLevelLogger } from '../../../test_helpers';
 import { download } from '../../download/download';
-import { extract } from '../../extract';
 import { ChromiumArchivePaths, PackageInfo } from '../paths';
 
 /**
@@ -29,7 +27,6 @@ const mockLogger = createMockLevelLogger();
 
 describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) => {
   // For testing, suffix the unzip folder by cpu + platform so the extracted folders do not overwrite each other in the cache
-  const chromiumPath = path.resolve(__dirname, '../../../../chromium', architecture, platform);
 
   const originalAxios = axios.defaults.adapter;
   beforeAll(async () => {
@@ -56,7 +53,8 @@ describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) 
     const downloadedChecksum = await download(downloadUrl, downloadPath, mockLogger);
     expect(downloadedChecksum).toBe(pkg.archiveChecksum);
 
-    const binaryPath = await extract(downloadPath, downloadPath);
-    expect(binaryPath).toBe(path.join(chromiumPath, pkg.binaryRelativePath));
+    // This piece must be skipped (7.17 only) since `extract` has no return value.
+    // const binaryPath = await extract(downloadPath, archivesPath);
+    // expect(binaryPath).toBe(path.join(chromiumPath, pkg.binaryRelativePath));
   });
 });
